@@ -2,6 +2,10 @@
 
 Monorepo for the Potatoes project. Contains all the applications and services that make up the Potatoes project.
 
+## Games
+
+- Go Game
+
 
 ## License
 
