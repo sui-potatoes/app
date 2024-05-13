@@ -32,8 +32,8 @@ export function App() {
   const client = useSuiClient();
   const packageId = useNetworkVariable("goPackageId");
 
-  const size = 9;
-  const [canPlay, setCanPlay] = useState(false);
+  const size = 13;
+  const [canInteract, setCanInteract] = useState(false);
   const [turn, setTurn] = useState<1 | 2>(1);
   const [data, setData] = useState<number[][]>(
     Array(size).fill(Array(size).fill(0)),
@@ -46,47 +46,88 @@ export function App() {
 
   // @ts-ignore-next-line
   const board_id = caps?.data[0]?.data?.content!.fields!.board_id;
-  const { data: game, refetch: fetchGame } = useSuiClientQuery("getObject", {
-    id: board_id,
-    options: { showBcs: true },
-  }, {
-    enabled: !!board_id
-  });
+  const { data: game, refetch: fetchGame } = useSuiClientQuery(
+    "getObject",
+    {
+      id: board_id,
+      options: { showBcs: true },
+    },
+    {
+      enabled: !!board_id,
+    },
+  );
 
   useEffect(() => {
+    // can create a new game if there are no games
+    if (!game && !caps?.data.length) {
+      setCanInteract(true);
+    }
+
+    // if there is a cap but no game, we're waiting for the fetch
     if (!game) return;
     const gameData = Game.parse(
       fromB64((game?.data!.bcs! as { bcsBytes: string }).bcsBytes),
     );
+
+    // game is found, set the board state
     setData(gameData.board.data);
     setTurn(gameData.board.turn as 1 | 2);
-    setCanPlay(true);
+    setCanInteract(true);
   }, [game]);
 
   if (!zkLogin.address) return <div>Connect wallet</div>;
   if (!caps?.data.length)
-    return <button onClick={newGame}>Create a game</button>;
+    return (
+      <button disabled={!canInteract} onClick={() => newGame()}>
+        Create a game
+      </button>
+    );
   if (!game) return <div>Loading...</div>;
 
   return (
     <>
       <PlayableBoard
-        disabled={!canPlay}
+        disabled={!canInteract}
         size={size}
         data={data}
         turn={turn}
-        zoom="150%"
+        zoom={(19 - size / 2) * 10 + "%"}
         onClick={handleClick}
       />
-      {/* <a className="explorer-link" href={`https://suiscan.xyz/testnet/object/${game.data?.objectId}`}>Explorer link</a> */}
+      <div className="buttons">
+        <button>
+          <a
+            type="button"
+            className="explorer-link"
+            href={`https://suiscan.xyz/testnet/object/${game.data?.objectId}`}
+          >
+            Explorer
+          </a>
+        </button>
+        <button
+          disabled={!canInteract}
+          className="explorer-link"
+          onClick={endGame}
+        >
+          End game
+        </button>
+        <button
+          disabled={!canInteract}
+          className="explorer-link"
+          onClick={() => {}}
+        >
+          Pass
+        </button>
+      </div>
     </>
   );
 
   async function handleClick(x: number, y: number) {
     if (data[x][y] !== 0) return console.log("Cell is already occupied");
-    if (!canPlay) return console.log("Not your turn, or the state is loading");
+    if (!canInteract)
+      return console.log("Not your turn, or the state is loading");
 
-    setCanPlay(false);
+    setCanInteract(false);
 
     const inspect = new TransactionBlock();
     inspect.moveCall({
@@ -104,23 +145,22 @@ export function App() {
 
     if (!res.results || !res.results[0]) {
       console.log("Invalid move");
-      setCanPlay(true);
+      setCanInteract(true);
       return;
     }
 
     if (res.error) {
       console.error(res.error);
-      setCanPlay(true);
+      setCanInteract(true);
       return;
     }
 
-
-    const boardBytes = (res.results[0].returnValues as any);
-    const board = Board.parse(new Uint8Array(boardBytes[0][0]));
+    const boardBytes = res.results[0].mutableReferenceOutputs as any;
+    const game = Game.parse(new Uint8Array(boardBytes[0][1]));
 
     setTurn(turn === 1 ? 2 : 1);
-    setData(board.data);
-    
+    setData(game.board.data);
+
     const txb = new TransactionBlock();
     txb.moveCall({
       target: `${packageId}::game::play`,
@@ -140,14 +180,35 @@ export function App() {
 
     console.log("move played");
     fetchGame();
-    setCanPlay(true);
+    setCanInteract(true);
   }
 
-  async function newGame() {
+  /** Creates a new Game Object and starts a new game. */
+  async function newGame(size: 9 | 13 | 19 = 13) {
+    setCanInteract(false);
     const txb = new TransactionBlock();
     txb.moveCall({
       target: `${packageId}::game::new`,
       arguments: [txb.pure.u8(size)],
+    });
+    await flow.sponsorAndExecuteTransactionBlock({
+      network: "testnet", // @ts-ignore
+      client,
+      transactionBlock: txb,
+    });
+    refetch();
+  }
+
+  /** Deletes the game object and ends the game. */
+  async function endGame() {
+    setCanInteract(false);
+    const txb = new TransactionBlock();
+    txb.moveCall({
+      target: `${packageId}::game::wrap_up`,
+      arguments: [
+        txb.object(board_id),
+        txb.object(caps?.data[0].data?.objectId),
+      ],
     });
     await flow.sponsorAndExecuteTransactionBlock({
       network: "testnet", // @ts-ignore

@@ -65,8 +65,8 @@ export function Board({
             <circle
               id={`${i}-${j}`}
               key={`${i}-${j}`}
-              cx={i * cellSize + i * padding + 10}
-              cy={j * cellSize + j * padding + 10}
+              cx={i * cellSize + i * padding + (cellSize / 2)}
+              cy={j * cellSize + j * padding + (cellSize / 2)}
               r={cellSize / 2}
               className={
                 (el === 1 ? "black" : el === 2 ? "white" : "empty") + " cell"

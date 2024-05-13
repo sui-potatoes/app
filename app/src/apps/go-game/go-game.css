@@ -7,16 +7,6 @@ svg {
     margin-right: auto;
 }
 
-.explorer-link {
-    color: #000;
-    text-align: center;
-    text-decoration: none;
-    text-transform: capitalize;
-    display: block;
-    float: inline-start;
-    padding: 0 10px;
-}
-
 .cell {
     cursor: pointer;
 }
@@ -46,4 +36,30 @@ svg {
 
 svg.disabled {
     cursor: not-allowed !important;
+}
+
+/* Interface */
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.buttons button:hover {
+    color: #000;
+    cursor: pointer;
+    text-decoration: underline !important;
+}
+
+.buttons button:disabled {
+    color: #AAA;
+    cursor: not-allowed;
+    text-decoration: underline !important;
+}
+
+.buttons button {
+    background: none;
+    color: #000;
+    text-decoration: none;
+    text-transform: capitalize;
 }

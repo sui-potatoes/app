@@ -53,9 +53,16 @@ module gogame::game {
         game.board.place(x, y);
     }
 
+    public fun wrap_up(game: Game, cap: PlayerCap, ) {
+        let Game { id: game_id, board } = game;
+        let PlayerCap { id, board_id } = cap;
+        assert!(game_id.to_inner() == board_id, ENotInGame);
+        game_id.delete();
+        id.delete();
+    }
+
     #[allow(unused_function)]
-    fun board_state(game: &mut Game, x: u8, y: u8): Board {
+    fun board_state(game: &mut Game, x: u8, y: u8) {
         game.board.place(x, y);
-        game.board
     }
 }
