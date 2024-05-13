@@ -91,8 +91,8 @@ export function App() {
       ],
     });
     const res = await client.devInspectTransactionBlock({
-      sender: zkLogin.address!,
-      transactionBlock: await inspect.build(),
+      sender: zkLogin.address!, // @ts-ignore
+      transactionBlock: inspect,
     });
 
     // @ts-ignore
