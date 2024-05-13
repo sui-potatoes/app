@@ -107,7 +107,7 @@ export function App() {
     txb.moveCall({
       target: `${packageId}::game::play`,
       arguments: [
-        txb.object(board_id),
+        txb.object(board_id), // @ts-ignore
         txb.object(caps?.data[0].data?.objectId),
         txb.pure.u8(x),
         txb.pure.u8(y),
