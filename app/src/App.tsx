@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Router, Routes } from "react-router-dom";
 import Root from "./Root.tsx";
 import { NavLink } from "react-router-dom";
 import { App as GoGame } from "./apps/go-game/App.tsx";
@@ -27,6 +27,10 @@ export function App() {
               <button
                 className="connect"
                 onClick={async () => {
+                  // Refresh the page to go back to the root path, this is a
+                  // workaround for the issue where google auth doesn't work
+                  // when the app is hosted on a subpath.
+                  history.pushState({}, "", "/");
                   window.location.href = await flow.createAuthorizationURL({
                     provider: "google",
                     clientId:

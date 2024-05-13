@@ -8,20 +8,33 @@ type Matrix = number[][];
 export function Board({
   size,
   data,
+  turn,
   disabled,
   onClick,
+  zoom = "%100",
+  padding = 2,
+  cellSize = 20,
 }: {
   size: 9 | 13 | 19;
   data: Matrix;
+  turn: 1 | 2;
+  zoom?: string;
   disabled: boolean;
+  padding?: number;
+  cellSize?: number;
   onClick: (x: number, y: number) => void;
 }) {
-  const cellSize = 20;
-  const padding = 2;
   const width = size * (cellSize + 1) + size * padding;
 
   return (
-    <svg className={disabled ? 'disabled' : ''} width={width + cellSize} height={width + cellSize}>
+    <svg
+      style={{ zoom, display: "inline-flex" }}
+      className={
+        (disabled ? "disabled " : " ") + (turn == 1 ? "black" : "white")
+      }
+      width={width}
+      height={width}
+    >
       <defs>
         <pattern
           id="grid"
@@ -40,8 +53,8 @@ export function Board({
         </pattern>
       </defs>
       <rect
-        width={width - (cellSize * 1.5)}
-        height={width - (cellSize * 1.5)}
+        width={width - cellSize * 1.5}
+        height={width - cellSize * 1.5}
         x={cellSize / 2}
         y={cellSize / 2}
         fill="url(#grid)"
@@ -54,8 +67,10 @@ export function Board({
               key={`${i}-${j}`}
               cx={i * cellSize + i * padding + 10}
               cy={j * cellSize + j * padding + 10}
-              style={{ cursor: 'pointer' }}
-              className={el === 1 ? "black" : el === 2 ? "white" : "empty"}
+              r={cellSize / 2}
+              className={
+                (el === 1 ? "black" : el === 2 ? "white" : "empty") + " cell"
+              }
               onClick={() => onClick(i, j)}
             />
           ))}

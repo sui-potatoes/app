@@ -1,8 +1,11 @@
-svg circle { stroke: #000; r: 10; }
+svg circle { stroke: #000; }
 svg .black { fill: #000; }
 svg .white { fill: #fff; }
 svg .empty { opacity: 0; }
-svg.disabled { cursor: wait; }
+svg {
+    margin-left: auto;
+    margin-right: auto;
+}
 
 .explorer-link {
     color: #000;
@@ -14,3 +17,33 @@ svg.disabled { cursor: wait; }
     padding: 0 10px;
 }
 
+.cell {
+    cursor: pointer;
+}
+
+/* White player is choosing a Move */
+.white:not(.disabled) .empty:hover {
+    background-color: #fff;
+    fill: #fff;
+    border: #000;
+    opacity: 0.5;
+    box-shadow: 0 0 10px #000;
+}
+
+/* Black player is choosing a Move */
+.black:not(.disabled) .empty:hover {
+    background-color: #fff;
+    fill: #000;
+    border: #000;
+    opacity: 0.5;
+    box-shadow: 0 0 10px #000;
+}
+
+
+.disabled .cell {
+    cursor: not-allowed;
+}
+
+svg.disabled {
+    cursor: not-allowed !important;
+}

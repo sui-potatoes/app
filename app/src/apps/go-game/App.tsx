@@ -34,7 +34,7 @@ export function App() {
 
   const size = 9;
   const [canPlay, setCanPlay] = useState(false);
-  const [turn, setTurn] = useState(1);
+  const [turn, setTurn] = useState<1 | 2>(1);
   const [data, setData] = useState<number[][]>(
     Array(size).fill(Array(size).fill(0)),
   );
@@ -59,7 +59,7 @@ export function App() {
       fromB64((game?.data!.bcs! as { bcsBytes: string }).bcsBytes),
     );
     setData(gameData.board.data);
-    setTurn(gameData.board.turn);
+    setTurn(gameData.board.turn as 1 | 2);
     setCanPlay(true);
   }, [game]);
 
@@ -74,14 +74,19 @@ export function App() {
         disabled={!canPlay}
         size={size}
         data={data}
+        turn={turn}
+        zoom="150%"
         onClick={handleClick}
       />
-      <a className="explorer-link" href={`https://suiscan.xyz/testnet/object/${game.data?.objectId}`}>Explorer link</a>
+      {/* <a className="explorer-link" href={`https://suiscan.xyz/testnet/object/${game.data?.objectId}`}>Explorer link</a> */}
     </>
   );
 
   async function handleClick(x: number, y: number) {
     if (data[x][y] !== 0) return console.log("Cell is already occupied");
+    if (!canPlay) return console.log("Not your turn, or the state is loading");
+
+    setCanPlay(false);
 
     const inspect = new TransactionBlock();
     inspect.moveCall({
@@ -97,14 +102,25 @@ export function App() {
       transactionBlock: inspect,
     });
 
-    // @ts-ignore
-    const boardBytes = res.results[0].returnValues[0][0];
-    const board = Board.parse(new Uint8Array(boardBytes));
+    if (!res.results || !res.results[0]) {
+      console.log("Invalid move");
+      setCanPlay(true);
+      return;
+    }
 
-    setData(board.data);
+    if (res.error) {
+      console.error(res.error);
+      setCanPlay(true);
+      return;
+    }
+
+
+    const boardBytes = (res.results[0].returnValues as any);
+    const board = Board.parse(new Uint8Array(boardBytes[0][0]));
+
     setTurn(turn === 1 ? 2 : 1);
+    setData(board.data);
 
-    setCanPlay(false);
     const txb = new TransactionBlock();
     txb.moveCall({
       target: `${packageId}::game::play`,

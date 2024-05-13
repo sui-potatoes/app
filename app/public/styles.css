@@ -9,11 +9,24 @@ body {
 .container {
   display: flex;
   align-items: center; /* This line will vertically center the children */
+  justify-content: center; /* This line will horizontally center the children */
   height: 100vh; /* This ensures the container takes up the full viewport height */
+
 }
 
 .container p img {
   text-align: center;
+}
+
+
+@media screen and (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    text-align: center;
+  }
 }
 
 .sidebar {
