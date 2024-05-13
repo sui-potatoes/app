@@ -1,8 +1,9 @@
 import { useSuiClient } from "@mysten/dapp-kit";
 import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
+import { useEnokiFlow } from "@mysten/enoki/react";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { PACKAGE_ID } from "../../constants";
+import { RPS_PACKAGE_ID as PACKAGE_ID } from "../../constants";
+import { sendSignedTx } from "../../utils/tx";
 
 type CreateParams = {
   onSuccess: (res: SuiTransactionBlockResponse) => void;
@@ -12,8 +13,6 @@ type CreateParams = {
 export function CreateAccount({ onSuccess, onError }: CreateParams) {
   const client = useSuiClient();
   const flow = useEnokiFlow();
-  const zkLogin = useZkLogin();
-  // const { mutate: signAndExecute } = useSignAndExecuteTransactionBlock();
 
   return (
     <div className="connect">
@@ -22,27 +21,23 @@ export function CreateAccount({ onSuccess, onError }: CreateParams) {
   );
 
   async function createAccount() {
-    // const keypair = await flow.getKeypair({ network: "testnet" });
-    // console.log(keypair);
     const txb = new TransactionBlock();
     txb.moveCall({ target: `${PACKAGE_ID}::game::new_account` });
-    const result = await flow.sponsorAndExecuteTransactionBlock({
+    const result = await flow.sponsorTransactionBlock({
+      client,
+      network: "testnet",
       transactionBlock: txb,
-      network: "testnet", // @ts-ignore
-      client
     });
 
     console.log(result);
 
-    // signAndExecute(
-    //   {
-    //     transactionBlock: txb,
-    //     options: { showObjectChanges: true },
-    //   },
-    //   {
-    //     onSuccess: (res) => onSuccess(res),
-    //     onError: (error) => onError(error),
-    //   },
-    // );
+    sendSignedTx({
+      client,
+      digest: result.digest,
+      txBytes: result.bytes,
+      transactionBlock: txb,
+      onSuccess,
+      onError,
+    });
   }
 }

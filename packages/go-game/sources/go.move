@@ -1,6 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+#[allow(unused_use)]
 /// Implements the game of Go. The game of Go is a board game for two players
 /// that originated in China more than 2,500 years ago. The game is rich in
 /// strategy despite its simple rules. The game is played on a square grid of
@@ -12,6 +13,7 @@
 /// TODO: Implement scoring
 module gogame::go {
     use std::ascii::{Self, String};
+    use sui::bcs;
 
     const EMPTY: u8 = 0;
     const BLACK: u8 = 1;
@@ -44,7 +46,7 @@ module gogame::go {
     public struct Board has store, copy, drop {
         /// The board data. The board is a 2D vector of `u8` values. The values
         /// can be `EMPTY`, `BLACK`, or `WHITE`.
-        data: vector<vector<u8>>,
+        data: vector<vector<Color>>,
         /// The size of the board. The board is a square grid of size `size` by
         /// `size`.
         size: u8,
@@ -60,14 +62,14 @@ module gogame::go {
         /// - the score of the white player
         scores: vector<u64>,
         /// Stores the last two board states to check for the Ko rule.
-        ko_store: vector<vector<vector<u8>>>,
+        ko_store: vector<vector<vector<Color>>>,
     }
 
     /// Create a new board.
     public fun new(size: u8): Board {
         let (mut i, mut row, mut data) = (0, vector[], vector[]);
         while (i < size) {
-            row.push_back(EMPTY);
+            row.push_back(Color(EMPTY));
             i = i + 1;
         };
 
@@ -91,12 +93,11 @@ module gogame::go {
     /// is placed by the current player. The player's turn is then switched.
     public fun place(board: &mut Board, x: u8, y: u8) {
         let point = &mut board.data[x as u64][y as u64];
-        let empty = EMPTY;
         let turn = board.turn;
 
-        assert!(point == empty, EInvalidMove); // #[can't on a non-empty field]
+        assert!(point.is_empty(), EInvalidMove); // #[can't on a non-empty field]
 
-        *point = board.turn;
+        *point = Color(board.turn);
         board.turn = if (board.turn == BLACK) { WHITE } else { BLACK };
         board.moves.push_back(Point(x, y));
 
@@ -157,7 +158,7 @@ module gogame::go {
         let Group (_, mut group) = group;
         let size = group.length();
         while (!group.is_empty()) {
-            *board.get_mut(group.pop_back()) = with;
+            *board.get_mut(group.pop_back()) = Color(with);
         }; // and now we
         size
     }
@@ -203,7 +204,7 @@ module gogame::go {
     /// Public accessor for the scores of the game (captured stones).
     public fun scores(b: &Board): &vector<u64> { &b.scores }
     /// Public accessor for the board data.
-    public fun data(b: &Board): &vector<vector<u8>> { &b.data }
+    public fun data(b: &Board): &vector<vector<Color>> { &b.data }
     /// Public accessor for the x coordinate of a point.
     public fun x(p: &Point): u8 { p.0 }
     /// Public accessor for the y coordinate of a point.
@@ -221,11 +222,11 @@ module gogame::go {
     #[syntax(index)]
     public fun get(b: &Board, p: Point): &Color {
         let Point(x, y) = p;
-        &Color(b.data[x as u64][y as u64])
+        &b.data[x as u64][y as u64]
     }
 
     /// Mutable accessor for the board data.
-    fun get_mut(b: &mut Board, p: Point): &mut u8 {
+    fun get_mut(b: &mut Board, p: Point): &mut Color {
         let Point(x, y) = p;
         &mut b.data[x as u64][y as u64]
     }
@@ -256,40 +257,40 @@ module gogame::go {
 
     // === Testing ===
 
-    #[test_only]
-    /// Prints the game board to the console in a human-readable format.
-    public fun print(b: &Board): String {
-        let mut s = b"\n".to_ascii_string();
-        let mut i = 0;
-        let size = b.size as u64;
-        while (i < size) {
-            let mut j = 0;
-            // + sign in ASCII is 43
-            // - sign in ASCII is 45
-            if (i == 0 && j == 0) s.push_char(ascii::char(43));
-            // add a border on the left
-            while (j < size) {
-                if (j == 0 && i != 0) s.push_char(ascii::char(124)); // pipe
-                s.push_char(ascii::char(
-                    if (b[i][j].is_empty()) { 32 }
-                    else if (b.data[i][j].is_black()) { 88 }
-                    else { 79 }
-                ));
-                if (i == 0 && j == size - 1) s.push_char(ascii::char(43))
-                else if (j == size - 1) s.push_char(ascii::char(124));
-                j = j + 1;
+    // #[test_only]
+    // /// Prints the game board to the console in a human-readable format.
+    // public fun print(b: &Board): String {
+    //     let mut s = b"\n".to_ascii_string();
+    //     let mut i = 0;
+    //     let size = b.size as u64;
+    //     while (i < size) {
+    //         let mut j = 0;
+    //         // + sign in ASCII is 43
+    //         // - sign in ASCII is 45
+    //         if (i == 0 && j == 0) s.push_char(ascii::char(43));
+    //         // add a border on the left
+    //         while (j < size) {
+    //             if (j == 0 && i != 0) s.push_char(ascii::char(124)); // pipe
+    //             s.push_char(ascii::char(
+    //                 if (b[i][j].is_empty()) { 32 }
+    //                 else if (b.data[i][j].is_black()) { 88 }
+    //                 else { 79 }
+    //             ));
+    //             if (i == 0 && j == size - 1) s.push_char(ascii::char(43))
+    //             else if (j == size - 1) s.push_char(ascii::char(124));
+    //             j = j + 1;
 
-            };
-            s.push_char(ascii::char(10));
-            i = i + 1;
-        };
-        s
-    }
+    //         };
+    //         s.push_char(ascii::char(10));
+    //         i = i + 1;
+    //     };
+    //     s
+    // }
 
     #[test_only]
     /// Asserts that the board is in a certain state. Used for testing.
     public fun assert_state(board: &Board, state: vector<vector<u8>>) {
-        assert!(&board.data == &state, 0);
+        assert!(bcs::to_bytes(&board.data) == bcs::to_bytes(&state), 0);
     }
 
     #[test_only]
@@ -302,14 +303,27 @@ module gogame::go {
     // TODO: ignores scores!
     // TODO: lacks validation, used only in tests!
     public fun from_vector(data: vector<vector<u8>>): Board {
-        let size = data.length() as u8;
+        let size = data.length();
+        let mut i = 0;
+        let mut board = vector[];
+        while (i < size) {
+            let mut row = vector[];
+            let mut j = 0;
+            while (j < size) {
+                row.push_back(Color(data[i][j]));
+                j = j + 1;
+            };
+            board.push_back(row);
+            i = i + 1;
+        };
+
         Board {
-            data,
-            size,
+            data: board,
+            size: size as u8,
             turn: BLACK,
             moves: vector[],
             scores: vector[ 0, 0, 0 ],
-            ko_store: vector[ data ],
+            ko_store: vector[ board ],
         }
     }
 }

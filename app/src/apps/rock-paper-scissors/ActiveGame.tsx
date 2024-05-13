@@ -1,12 +1,12 @@
-import { useSignAndExecuteTransactionBlock, useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
+import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
 import { SuiObjectRef } from "@mysten/sui.js/bcs";
 import { fromB64 } from "@mysten/sui.js/utils";
 import { bcs } from "@mysten/sui.js/bcs";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { PACKAGE_ID } from "../../constants";
+import { RPS_PACKAGE_ID as PACKAGE_ID } from "../../constants";
 import blake2b from "blake2b";
 import { useEffect, useState } from "react";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
+import { useEnokiFlow } from "@mysten/enoki/react";
 
 type Params = {
   matchId: string;
@@ -34,19 +34,19 @@ export const Game = bcs.struct("Game", {
 
 export function ActiveGame({ account, matchId }: Params) {
   const client = useSuiClient();
-  // const { mutate: signAndExecute } = useSignAndExecuteTransactionBlock();
-  const [gameData, setGameData] = useState<typeof Game | null>(null);
+  const [gameData, setGameData] = useState<typeof Game | any>(null);
   const [canPlay, setCanPlay] = useState(false);
-  const zkLogin = useZkLogin();
   const flow = useEnokiFlow();
-  const { data: game, error, refetch } = useSuiClientQuery("getObject", {
+  const { data: game, error } = useSuiClientQuery("getObject", {
     id: matchId,
     options: { showBcs: true },
   });
 
   useEffect(() => {
     if (!game) return;
-    const gameData = Game.parse(fromB64((game?.data!.bcs! as { bcsBytes: string }).bcsBytes));
+    const gameData = Game.parse(
+      fromB64((game?.data!.bcs! as { bcsBytes: string }).bcsBytes),
+    );
     setGameData(gameData);
     if (gameData.guest !== null) {
       setCanPlay(true);
@@ -59,7 +59,7 @@ export function ActiveGame({ account, matchId }: Params) {
     console.log(gameData);
 
     if (player?.commitment !== null && player?.nextMove === null) {
-      console.log('should reveal');
+      console.log("should reveal");
       console.log(gameData.id);
       reveal();
     }
@@ -70,7 +70,7 @@ export function ActiveGame({ account, matchId }: Params) {
 
   return (
     <>
-      <div id="gameInterface" className={ canPlay ? '' : 'disabled' }>
+      <div id="gameInterface" className={canPlay ? "" : "disabled"}>
         <img
           src="rock.png"
           id="rock"
@@ -118,7 +118,7 @@ export function ActiveGame({ account, matchId }: Params) {
         txb.object(account.objectId),
         txb.object(matchId),
         txb.pure(bcs.vector(bcs.u8()).serialize(hash)),
-      ]
+      ],
     });
 
     setCanPlay(false);
@@ -126,10 +126,10 @@ export function ActiveGame({ account, matchId }: Params) {
     await flow.sponsorAndExecuteTransactionBlock({
       transactionBlock: txb,
       network: "testnet", // @ts-ignore
-      client
+      client,
     });
 
-    console.log('move committed');
+    console.log("move committed");
   }
 
   async function reveal() {
@@ -143,17 +143,17 @@ export function ActiveGame({ account, matchId }: Params) {
         txb.object(account.objectId),
         txb.object(matchId),
         txb.pure(bcs.u8().serialize(window.localStorage.move)),
-        txb.pure(bcs.vector(bcs.u8()).serialize([1, 2, 3, 4]))
-      ]
+        txb.pure(bcs.vector(bcs.u8()).serialize([1, 2, 3, 4])),
+      ],
     });
 
     await flow.sponsorAndExecuteTransactionBlock({
       transactionBlock: txb,
       network: "testnet", // @ts-ignore
-      client
+      client,
     });
 
-    console.log('move revealed');
+    console.log("move revealed");
 
     setCanPlay(true);
   }

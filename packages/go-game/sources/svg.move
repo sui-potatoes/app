@@ -5,8 +5,8 @@ module gogame::render {
     use std::ascii::String;
     use gogame::go::Board;
 
-    const EMPTY: u8 = 0;
-    const BLACK: u8 = 1;
+    // const EMPTY: u8 = 0;
+    // const BLACK: u8 = 1;
     // const WHITE: u8 = 2;
 
     /// Print the board as an SVG.
@@ -37,14 +37,14 @@ module gogame::render {
         while (i < size) {
             let mut j = 0;
             while (j < size) {
-                if (b.data()[i][j] == EMPTY) {
+                if (b.data()[i][j].is_empty()) {
                     j = j + 1;
                     continue
                 };
 
                 let cx = (i * cell_size) + (i * padding) + 10;
                 let cy = (j * cell_size) + (j * padding) + 10;
-                let class = if (b.data()[i][j] == BLACK) b"b" else b"w";
+                let class = if (b.data()[i][j].is_black()) b"b" else b"w";
 
                 chunks.append(vector[
                     b"<circle cy=\"", num_to_ascii(cy), b"\" cx=\"", num_to_ascii(cx), b"\" class=\"", class, b"\" />"

@@ -1,5 +1,5 @@
 import { getFullnodeUrl } from "@mysten/sui.js/client";
-import { PACKAGE_ID } from "./constants.ts";
+import { RPS_PACKAGE_ID, GOGAME_PACKAGE_ID } from "./constants";
 import { createNetworkConfig } from "@mysten/dapp-kit";
 
 const { networkConfig, useNetworkVariable, useNetworkVariables } =
@@ -7,7 +7,8 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
     testnet: {
       url: getFullnodeUrl("testnet"),
       variables: {
-        packageId: PACKAGE_ID,
+        packageId: RPS_PACKAGE_ID,
+        goPackageId: GOGAME_PACKAGE_ID
       },
     },
   });

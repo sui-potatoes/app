@@ -38,7 +38,11 @@ export function App() {
               >
                 Sign In
               </button>
-            )) || <button onClick={() => flow.logout()} className="connect">Sign Out</button>}
+            )) || (
+              <button onClick={() => flow.logout()} className="connect">
+                Sign Out
+              </button>
+            )}
           </u>
         </p>
         <ul>

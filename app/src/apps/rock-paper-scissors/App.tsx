@@ -1,9 +1,8 @@
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { CreateAccount } from "./CreateAccount";
-import { PACKAGE_ID } from "../../constants";
+import { RPS_PACKAGE_ID as PACKAGE_ID } from "../../constants";
 import { GameInterface } from "./GameInterface";
 import { useZkLogin } from "@mysten/enoki/react";
-// import { useEnokiFlow, useZkLoginSession } from "@mysten/enoki/react";
 
 import "./rock-paper-scissors.css";
 

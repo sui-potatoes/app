@@ -1,7 +1,7 @@
 import { SuiObjectData } from "@mysten/sui.js/client";
 import { bcs } from "@mysten/sui.js/bcs";
 import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
-import { PACKAGE_ID } from "../../constants";
+import { RPS_PACKAGE_ID as PACKAGE_ID } from "../../constants";
 import { fromB58 } from "@mysten/bcs";
 import { Game } from "./ActiveGame";
 import { fromB64 } from "@mysten/sui.js/utils";

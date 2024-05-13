@@ -1,5 +1,5 @@
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { PACKAGE_ID } from "../../constants";
+import { RPS_PACKAGE_ID as PACKAGE_ID } from "../../constants";
 import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
 import { SuiObjectRef } from "@mysten/sui.js/bcs";
 import { useEnokiFlow } from "@mysten/enoki/react";
@@ -18,7 +18,9 @@ export function NewGame({ onSuccess, account }: CreateParams) {
 
   return (
     <div className="connect">
-      <button disabled={pending} onClick={newGame}>new game</button>
+      <button disabled={pending} onClick={newGame}>
+        new game
+      </button>
     </div>
   );
 
@@ -32,7 +34,7 @@ export function NewGame({ onSuccess, account }: CreateParams) {
     const result = await flow.sponsorAndExecuteTransactionBlock({
       transactionBlock: txb,
       network: "testnet", // @ts-ignore
-      client
+      client,
     });
     console.log(result);
     setPending(false);

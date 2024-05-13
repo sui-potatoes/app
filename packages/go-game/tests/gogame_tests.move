@@ -128,7 +128,6 @@ module gogame::gogame_tests {
 
         std::debug::print(&board.print_svg());
 
-
         let board = go::from_vector(vector[
             vector[0, 0, 0, 2, 0, 0, 0, 0, 0],
             vector[1, 1, 0, 2, 2, 0, 2, 0, 0],
@@ -141,6 +140,6 @@ module gogame::gogame_tests {
             vector[0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]);
 
-        std::debug::print(&board.print());
+        std::debug::print(&board.print_svg());
     }
 }

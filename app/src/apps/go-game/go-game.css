@@ -1,0 +1,16 @@
+svg circle { stroke: #000; r: 10; }
+svg .black { fill: #000; }
+svg .white { fill: #fff; }
+svg .empty { opacity: 0; }
+svg.disabled { cursor: wait; }
+
+.explorer-link {
+    color: #000;
+    text-align: center;
+    text-decoration: none;
+    text-transform: capitalize;
+    display: block;
+    float: inline-start;
+    padding: 0 10px;
+}
+
