@@ -54,6 +54,7 @@ export function Board({
               key={`${i}-${j}`}
               cx={i * cellSize + i * padding + 10}
               cy={j * cellSize + j * padding + 10}
+              style={{ cursor: 'pointer' }}
               className={el === 1 ? "black" : el === 2 ? "white" : "empty"}
               onClick={() => onClick(i, j)}
             />
