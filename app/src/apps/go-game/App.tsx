@@ -206,7 +206,7 @@ export function App() {
     txb.moveCall({
       target: `${packageId}::game::wrap_up`,
       arguments: [
-        txb.object(board_id),
+        txb.object(board_id), // @ts-ignore
         txb.object(caps?.data[0].data?.objectId),
       ],
     });
