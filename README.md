@@ -5,6 +5,7 @@ Monorepo for the Potatoes project. Contains all the applications and services th
 ## Games
 
 - Go Game
+- Rock Paper Scissors (in development)
 
 
 ## License
