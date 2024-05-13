@@ -1,4 +1,4 @@
-import { Route, Router, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Root from "./Root.tsx";
 import { NavLink } from "react-router-dom";
 import { App as GoGame } from "./apps/go-game/App.tsx";

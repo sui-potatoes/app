@@ -120,7 +120,7 @@ export function App() {
 
     setTurn(turn === 1 ? 2 : 1);
     setData(board.data);
-
+    
     const txb = new TransactionBlock();
     txb.moveCall({
       target: `${packageId}::game::play`,
