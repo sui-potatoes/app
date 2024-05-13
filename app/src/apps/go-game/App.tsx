@@ -44,6 +44,7 @@ export function App() {
     options: { showContent: true },
   });
 
+  // @ts-ignore
   const board_id = caps?.data[0].data?.content!.fields!.board_id;
   const { data: game, refetch: fetchGame } = useSuiClientQuery("getObject", {
     id: board_id || "",
@@ -91,7 +92,7 @@ export function App() {
     });
     const res = await client.devInspectTransactionBlock({
       sender: zkLogin.address!,
-      transactionBlock: inspect,
+      transactionBlock: await inspect.build(),
     });
 
     // @ts-ignore
@@ -114,7 +115,7 @@ export function App() {
     });
 
     await flow.sponsorAndExecuteTransactionBlock({
-      network: "testnet",
+      network: "testnet", // @ts-ignore
       client,
       transactionBlock: txb,
     });
@@ -131,7 +132,7 @@ export function App() {
       arguments: [txb.pure.u8(size)],
     });
     await flow.sponsorAndExecuteTransactionBlock({
-      network: "testnet",
+      network: "testnet", // @ts-ignore
       client,
       transactionBlock: txb,
     });

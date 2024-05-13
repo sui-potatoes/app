@@ -10,7 +10,7 @@ import { useEnokiFlow } from "@mysten/enoki/react";
 
 type Params = {
   account: SuiObjectData;
-  onJoin: (digest: string) => {};
+  onJoin?: (digest: string) => {};
 };
 
 export const NewGameEvent = bcs.struct("NewGame", {
@@ -67,10 +67,11 @@ export function GameList({ account, onJoin }: Params) {
     const result = await flow.sponsorAndExecuteTransactionBlock({
       transactionBlock: txb,
       network: "testnet",
+      // @ts-ignore
       client,
     });
 
     console.log(result);
-    onJoin(result.digest);
+    onJoin && onJoin(result.digest);
   }
 }

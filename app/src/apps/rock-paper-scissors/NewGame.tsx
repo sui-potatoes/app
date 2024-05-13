@@ -11,7 +11,7 @@ type CreateParams = {
   account: SuiObjectRef;
 };
 
-export function NewGame({ onSuccess, account }: CreateParams) {
+export function NewGame({ account }: CreateParams) {
   const client = useSuiClient();
   const flow = useEnokiFlow();
   const [pending, setPending] = useState(false);

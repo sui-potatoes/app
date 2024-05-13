@@ -28,7 +28,7 @@ export function GameInterface({ account }: Params) {
       ) : (
         <>
           <NewGame account={account} onSuccess={() => {}} />
-          <GameList account={account} onJoin={() => {}} />
+          <GameList account={account} />
         </>
       )}
     </>
