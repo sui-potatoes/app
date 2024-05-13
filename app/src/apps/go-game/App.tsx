@@ -44,11 +44,13 @@ export function App() {
     options: { showContent: true },
   });
 
-  // @ts-ignore
-  const board_id = caps?.data[0].data?.content!.fields!.board_id;
+  // @ts-ignore-next-line
+  const board_id = caps?.data[0]?.data?.content!.fields!.board_id;
   const { data: game, refetch: fetchGame } = useSuiClientQuery("getObject", {
-    id: board_id || "",
+    id: board_id,
     options: { showBcs: true },
+  }, {
+    enabled: !!board_id
   });
 
   useEffect(() => {
