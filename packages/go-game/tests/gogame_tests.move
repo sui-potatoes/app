@@ -140,6 +140,6 @@ module gogame::gogame_tests {
             vector[0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]);
 
-        std::debug::print(&board.print_svg());
+        std::debug::print(&gogame::render::urlencode(&board.print_svg()));
     }
 }

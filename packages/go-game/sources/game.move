@@ -70,7 +70,7 @@ module gogame::game {
             id,
             board: go::new(size),
             players: Players(option::some(acc.id.to_inner()), option::none()),
-            image_blob: render::svg(&board)
+            image_blob: render::urlencode(&render::svg(&board))
         });
     }
 
@@ -140,7 +140,7 @@ module gogame::game {
 
         d.add(
             b"image_url".to_string(),
-            b"data:image/svg+xml; charset=utf8, {image_blob}".to_string()
+            b"data:image/svg+xml;charset=utf8,{image_blob}".to_string()
         );
 
         d.add(

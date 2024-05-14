@@ -20,10 +20,10 @@ module gogame::render {
         let mut i = 0;
         let mut chunks = vector[
             // SVG header
-            b"<svg width=\"", width, b"\" height=\"", width, b"\" xmlns=\"http://www.w3.org/2000/svg\">",
+            b"<svg width='", width, b"' height='", width, b"' xmlns='http://www.w3.org/2000/svg'>",
             b"<defs>",
-            b"<pattern id=\"grid\" width=\"", num_to_ascii(cell_size + padding), b"\" x=\"10\" y=\"10\" height=\"", num_to_ascii(cell_size + padding), b"\" patternUnits=\"userSpaceOnUse\">",
-            b"<path d=\"M 40 0 L 0 0 0 40\" fill=\"none\" stroke=\"gray\" stroke-width=\"0.8\"/>\n",
+            b"<pattern id='grid' width='", num_to_ascii(cell_size + padding), b"' x='10' y='10' height='", num_to_ascii(cell_size + padding), b"' patternUnits='userSpaceOnUse'>",
+            b"<path d='M 40 0 L 0 0 0 40' fill='none' stroke='gray' stroke-width='0.8'/>\n",
             b"</pattern>\n",
             b"<style>",
             b" circle { stroke: #000; r: 10; }",
@@ -31,7 +31,7 @@ module gogame::render {
             b" .w { fill: #fff; }",
             b"</style>",
             b"</defs>",
-            b"<rect width=\"", width, b"\" height=\"", width, b"\" fill=\"url(#grid)\" />",
+            b"<rect width='", width, b"' height='", width, b"' fill='url(#grid)' />",
         ];
 
         while (i < size) {
@@ -47,7 +47,7 @@ module gogame::render {
                 let class = if (b.data()[i][j].is_black()) b"b" else b"w";
 
                 chunks.append(vector[
-                    b"<circle cy=\"", num_to_ascii(cy), b"\" cx=\"", num_to_ascii(cx), b"\" class=\"", class, b"\" />"
+                    b"<circle cy='", num_to_ascii(cy), b"' cx='", num_to_ascii(cx), b"' class='", class, b"' />"
                 ]);
 
                 j = j + 1;
@@ -56,7 +56,7 @@ module gogame::render {
         };
 
         // let mut str = b"".to_ascii_string();
-        chunks.push_back(b"</svg>\n");
+        chunks.push_back(b"</svg>");
         chunks.reverse();
         let mut str = vector[];
         while (!chunks.is_empty()) {
@@ -65,6 +65,25 @@ module gogame::render {
         };
         // str
         str.to_ascii_string()
+    }
+
+    public fun urlencode(s: &String): String {
+        let mut res = vector[];
+        let mut i = 0;
+        while (i < s.length()) {
+            let c = s.as_bytes()[i];
+            if (c == 32) {
+                res.append(b"%20")
+            } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
+                res.push_back(37);
+                res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
+                res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
+            } else {
+                res.push_back(c);
+            };
+            i = i + 1;
+        };
+        res.to_ascii_string()
     }
 
     fun num_to_ascii(mut num: u64): vector<u8> {

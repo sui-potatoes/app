@@ -52,9 +52,7 @@ export function App() {
   const [canInteract, setCanInteract] = useState(false);
   const [turn, setTurn] = useState<1 | 2>(1);
   const [game, setGame] = useState<typeof Game.$inferType | null>(null);
-  const [data, setData] = useState<number[][]>(
-    Array(9).fill(Array(9).fill(0)),
-  );
+  const [data, setData] = useState<number[][]>(Array(9).fill(Array(9).fill(0)));
   const { data: accounts, refetch } = useSuiClientQuery("getOwnedObjects", {
     owner: zkLogin.address!,
     filter: { MoveModule: { package: packageId, module: "game" } },
@@ -119,9 +117,18 @@ export function App() {
   // No account, create one
   if (!account)
     return (
-      <button className="button" onClick={() => newAccount()}>
-        Create account
-      </button>
+      <>
+        <button className="button" onClick={() => newAccount()}>
+          Create account
+        </button>
+        <div
+          className="loader"
+          style={{
+            visibility: canInteract ? "hidden" : "visible",
+            margin: "10px 0px 0px 10px",
+          }}
+        ></div>
+      </>
     );
 
   // No game found
@@ -142,7 +149,7 @@ export function App() {
               </li>
             );
           })}
-          <hr style={{width: '100px'}} />
+          <hr style={{ width: "100px" }} />
           <li style={{ listStyle: "none" }}>
             <button
               disabled={!canInteract}
@@ -215,7 +222,7 @@ export function App() {
           className="loader"
           style={{
             visibility: canInteract ? "hidden" : "visible",
-            margin: "10px 0px 0px 10px;",
+            margin: "10px 0px 0px 10px",
           }}
         ></div>
         <div className="buttons">
