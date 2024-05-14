@@ -7,6 +7,13 @@ svg {
     margin-right: auto;
 }
 
+svg .last-move {
+    /* border: rgb(101, 77, 77) !important; */
+    stroke: blueviolet !important;
+    stroke-width: 2px;
+    /* bor */
+}
+
 .cell {
     cursor: pointer;
 }

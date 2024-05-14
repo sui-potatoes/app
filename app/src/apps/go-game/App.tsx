@@ -152,6 +152,7 @@ export function App() {
   const isMyGame = players.includes(account.id);
   const myColor = game.players.player1 === account.id ? 1 : 2;
   const isMyTurn = isMyGame && turn === myColor;
+  const lastMove = game.board.moves.slice(-1)[0];
 
   return (
     game && (
@@ -160,6 +161,7 @@ export function App() {
           disabled={!canInteract && !isMyTurn}
           size={size}
           data={data}
+          lastMove={lastMove}
           turn={myColor}
           zoom={(19 - size / 2) * 10 + "%"}
           onClick={handleClick}
@@ -171,9 +173,9 @@ export function App() {
             </button>
           )}
         </p>
-        <p>
+        <p style={{padding: '0 10px'}}>
           {players.length == 1 && "Waiting for players"}
-          {}
+          {isMyGame && (isMyTurn ? "Your turn" : "Opponent's turn")}
         </p>
         <div className="buttons">
           {game && (
