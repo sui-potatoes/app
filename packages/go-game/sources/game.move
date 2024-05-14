@@ -82,7 +82,6 @@ module gogame::game {
         assert!(p2.is_none(), EGameFull);
         p2.fill(acc.id.to_inner());
         acc.games.insert(game.id.to_inner());
-        game.image_blob = render::urlencode(&render::svg(&game.board));
     }
 
     ///
@@ -99,6 +98,7 @@ module gogame::game {
         };
 
         game.board.place(x, y);
+        game.image_blob = render::urlencode(&render::svg(&game.board));
     }
 
     public fun quit(game: &mut Game, acc: &mut Account) {
