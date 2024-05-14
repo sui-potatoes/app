@@ -48,13 +48,12 @@ export function App() {
   const packageId = useNetworkVariable("goPackageId");
   const navigate = useNavigate();
 
-  const size = 13;
   const [account, setAccount] = useState<typeof Account | any | null>(null);
   const [canInteract, setCanInteract] = useState(false);
   const [turn, setTurn] = useState<1 | 2>(1);
   const [game, setGame] = useState<typeof Game.$inferType | null>(null);
   const [data, setData] = useState<number[][]>(
-    Array(size).fill(Array(size).fill(0)),
+    Array(9).fill(Array(9).fill(0)),
   );
   const { data: accounts, refetch } = useSuiClientQuery("getOwnedObjects", {
     owner: zkLogin.address!,
@@ -185,6 +184,7 @@ export function App() {
   const myColor = game.players.player1 === account.id ? 1 : 2;
   const isMyTurn = isMyGame && turn === myColor;
   const lastMove = game.board.moves.slice(-1)[0];
+  const size = game.board.size as 9 | 13 | 19;
 
   return (
     game && (
