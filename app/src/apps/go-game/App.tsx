@@ -195,16 +195,16 @@ export function App() {
           >
             Quit / End game
           </button>
-          <button>
+          {/* <button>
             <a
               type="button"
               className="explorer-link"
               href={`https://suiscan.xyz/testnet/account/${players[0]}`}
             >
               P{myColor == 1 ? 2 : 1}:{" "}
-              {formatAddress(players[(myColor == 1 ? 2 : 1) - 1])}
+              {{formatAddress(players[(myColor == 1 ? 2 : 1) - 1])}}
             </a>
-          </button>
+          </button> */}
         </div>
       </>
     )
