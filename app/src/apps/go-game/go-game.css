@@ -1,119 +1,144 @@
-svg circle { stroke: #000; }
-svg .black { fill: #000; }
-svg .white { fill: #fff; }
-svg .empty { opacity: 0; }
+svg circle {
+  stroke: #000;
+}
+svg .black {
+  fill: #000;
+}
+svg .white {
+  fill: #fff;
+}
+svg .empty {
+  opacity: 0;
+}
 svg {
-    margin-left: auto;
-    margin-right: auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 svg .last-move {
-    /* border: rgb(101, 77, 77) !important; */
-    stroke: blueviolet !important;
-    stroke-width: 2px;
-    /* bor */
+  /* border: rgb(101, 77, 77) !important; */
+  stroke: blueviolet !important;
+  stroke-width: 2px;
+  /* bor */
+}
+
+/* Taken from this webpage: https://css-loaders.com/dots/ */
+
+.loader {
+  width: 100px;
+  height: 15px;
+  -webkit-mask: radial-gradient(circle closest-side, #000 94%, #0000) left / 20% 100%;
+  background: linear-gradient(#000 0 0) left/0% 100% no-repeat #ddd;
+  animation: l17 2s infinite steps(6);
+}
+@keyframes l17 {
+  100% {
+    background-size: 120% 100%;
+  }
 }
 
 .cell {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 /* White player is choosing a Move */
 .white:not(.disabled) .empty:hover {
-    background-color: #fff;
-    fill: #fff;
-    border: #000;
-    opacity: 0.5;
-    box-shadow: 0 0 10px #000;
+  background-color: #fff;
+  fill: #fff;
+  border: #000;
+  opacity: 0.5;
+  box-shadow: 0 0 10px #000;
 }
 
 /* Black player is choosing a Move */
 .black:not(.disabled) .empty:hover {
-    background-color: #fff;
-    fill: #000;
-    border: #000;
-    opacity: 0.5;
-    box-shadow: 0 0 10px #000;
+  background-color: #fff;
+  fill: #000;
+  border: #000;
+  opacity: 0.5;
+  box-shadow: 0 0 10px #000;
 }
 
 .disabled .cell {
-    cursor: not-allowed;
+  cursor: not-allowed;
 }
 
 svg.disabled {
-    cursor: not-allowed !important;
+  cursor: not-allowed !important;
 }
 
 .list-title {
-    text-decoration: none !important;
-    cursor: default !important;
+  text-decoration: none !important;
+  cursor: default !important;
 }
 
 .button {
-    color: #000;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-transform: capitalize;
+  color: #000;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-transform: capitalize;
 }
 
 .button:hover {
-    color: #000;
-    text-decoration: underline;
+  color: #000;
+  text-decoration: underline;
 }
 
 /* Interface */
 .buttons {
-    /* display: flex; */
-    justify-content: space-between;
-    margin-bottom: 20px;
-    color: black;
+  /* display: flex; */
+  justify-content: space-between;
+  margin-bottom: 20px;
+  color: black;
 }
 
 .buttons button:hover {
-    color: #000;
-    cursor: pointer;
-    text-decoration: underline !important;
+  color: #000;
+  cursor: pointer;
+  text-decoration: underline !important;
 }
 
 .buttons button:disabled {
-    color: #AAA;
-    cursor: not-allowed;
-    text-decoration: underline !important;
+  color: #aaa;
+  cursor: not-allowed;
+  text-decoration: underline !important;
 }
 
-.buttons button, .buttons a {
-    background: none;
-    color: #000;
-    text-decoration: none;
-    text-transform: capitalize;
+.buttons button,
+.buttons a {
+  background: none;
+  color: #000;
+  text-decoration: none;
+  text-transform: capitalize;
 }
 
 .my-games {
-    list-style: square;
-    padding: 0 10px;
+  list-style: square;
+  padding: 0 10px;
 }
 
-.my-games li, .my-games li a {
-    margin: 10px 0;
-    text-decoration: none;
-    color: #000;
+.my-games li,
+.my-games li a {
+  margin: 10px 0;
+  text-decoration: none;
+  color: #000;
 }
 
 .my-games li:hover {
-    cursor: pointer;
-    text-decoration: underline;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .my-games button {
-    background: none;
-    border: none;
-    padding: 0;
-    color: #000;
-    cursor: pointer;
-    text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #000;
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .my-games button:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

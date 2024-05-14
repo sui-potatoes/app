@@ -54,7 +54,8 @@ export function App() {
             <NavLink to="/go">go game</NavLink>
           </li>
           <li>
-            <NavLink to="/rps">rock paper scissors</NavLink>
+            {/* <NavLink  to="/">rock paper scissors (disabled)</NavLink> */}
+            <p style={{cursor: 'default'}}>rock paper scissors (disabled)</p>
           </li>
         </ul>
       </div>

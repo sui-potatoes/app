@@ -82,6 +82,7 @@ export function App() {
     if (accounts?.data.length) {
       // @ts-ignore
       setAccount(Account.parse(fromB64(accounts?.data[0].data?.bcs?.bcsBytes)));
+      setCanInteract(true);
     }
 
     // if there is a cap but no game, we're waiting for the fetch
@@ -95,8 +96,8 @@ export function App() {
     // game is found, set the board state
     setData(game.board.data);
     setTurn(game.board.turn as 1 | 2);
-    setGame(game);
     setCanInteract(true);
+    setGame(game);
   }, [gameData, accounts, urlGameId]);
 
   useEffect(() => {
@@ -118,7 +119,11 @@ export function App() {
 
   // No account, create one
   if (!account)
-    return <button className="button" onClick={() => newAccount()}>Create account</button>;
+    return (
+      <button className="button" onClick={() => newAccount()}>
+        Create account
+      </button>
+    );
 
   // No game found
   if (urlGameId && !game) return <div>Loading...</div>;
@@ -128,7 +133,9 @@ export function App() {
     return (
       <>
         <ul className="my-games">
-          <li className="list-title" style={{listStyle: 'none'}}>My Games</li>
+          <li className="list-title" style={{ listStyle: "none" }}>
+            My Games
+          </li>
           {(account.games as string[]).map((game, i) => {
             return (
               <li key={`game-${i}`}>
@@ -136,9 +143,34 @@ export function App() {
               </li>
             );
           })}
-          <button disabled={!canInteract} onClick={() => newGame()}>
-            New game
-          </button>
+          <hr style={{width: '100px'}} />
+          <li style={{ listStyle: "none" }}>
+            <button
+              disabled={!canInteract}
+              onClick={() => newGame(9)}
+              style={{ listStyle: "none" }}
+            >
+              New 9x9
+            </button>
+          </li>
+          <li style={{ listStyle: "none" }}>
+            <button
+              disabled={!canInteract}
+              onClick={() => newGame(13)}
+              style={{ listStyle: "none" }}
+            >
+              New 13x13
+            </button>
+          </li>
+          <li style={{ listStyle: "none" }}>
+            <button disabled={!canInteract} onClick={() => newGame(19)}>
+              New 19x19
+            </button>
+          </li>
+          <li
+            className="loader"
+            style={{ visibility: canInteract ? "hidden" : "visible" }}
+          ></li>
         </ul>
       </>
     );
@@ -175,8 +207,17 @@ export function App() {
         </p>
         <p style={{ padding: "0 10px" }}>
           {players.length == 1 && "Waiting for players"}
+        </p>
+        <p style={{ padding: "0 10px" }}>
           {isMyGame && (isMyTurn ? "Your turn" : "Opponent's turn")}
         </p>
+        <div
+          className="loader"
+          style={{
+            visibility: canInteract ? "hidden" : "visible",
+            margin: "10px 0px 0px 10px;",
+          }}
+        ></div>
         <div className="buttons">
           {game && (
             <button>
@@ -276,7 +317,7 @@ export function App() {
       client,
       transactionBlock: txb,
     });
-    refetch();
+    await refetch();
     setAccount(null);
   }
 
@@ -295,7 +336,8 @@ export function App() {
       client,
       transactionBlock: txb,
     });
-    refetch();
+    console.log("created");
+    await refetch();
     navigate(`/go`);
   }
 
@@ -314,7 +356,7 @@ export function App() {
       client,
       transactionBlock: txb,
     });
-    refetch();
+    await refetch();
   }
 
   /** Deletes the game object and ends the game. */
@@ -337,6 +379,6 @@ export function App() {
       client,
       transactionBlock: txb,
     });
-    refetch();
+    navigate(`/go`);
   }
 }
