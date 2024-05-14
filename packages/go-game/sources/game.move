@@ -82,6 +82,7 @@ module gogame::game {
         assert!(p2.is_none(), EGameFull);
         p2.fill(acc.id.to_inner());
         acc.games.insert(game.id.to_inner());
+        game.image_blob = render::urlencode(&render::svg(&game.board));
     }
 
     ///
