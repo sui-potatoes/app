@@ -62,6 +62,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<Root />} />
           <Route path="/go" element={<GoGame />} />
+          <Route path="/go/:id" element={<GoGame />} />
           <Route path="/rps" element={<RockPaperScissors />} />
         </Routes>
       </div>

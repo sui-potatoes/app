@@ -29,7 +29,6 @@ svg {
     box-shadow: 0 0 10px #000;
 }
 
-
 .disabled .cell {
     cursor: not-allowed;
 }
@@ -38,11 +37,25 @@ svg.disabled {
     cursor: not-allowed !important;
 }
 
+button {
+    color: #000;
+    background-color: none;
+    border: none;
+    cursor: pointer;
+    text-transform: capitalize;
+}
+
+button:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
 /* Interface */
 .buttons {
-    display: flex;
+    /* display: flex; */
     justify-content: space-between;
     margin-bottom: 20px;
+    color: black;
 }
 
 .buttons button:hover {
@@ -57,9 +70,38 @@ svg.disabled {
     text-decoration: underline !important;
 }
 
-.buttons button {
+.buttons button, .buttons a {
     background: none;
     color: #000;
     text-decoration: none;
     text-transform: capitalize;
+}
+
+.my-games {
+    list-style: square;
+    padding: 0 10px;
+}
+
+.my-games li, .my-games li a {
+    margin: 10px 0;
+    text-decoration: none;
+    color: #000;
+}
+
+.my-games li:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.my-games button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #000;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.my-games button:hover {
+    text-decoration: underline;
 }
