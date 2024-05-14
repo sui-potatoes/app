@@ -118,7 +118,7 @@ export function App() {
 
   // No account, create one
   if (!account)
-    return <button onClick={() => newAccount()}>Create account</button>;
+    return <button className="button" onClick={() => newAccount()}>Create account</button>;
 
   // No game found
   if (urlGameId && !game) return <div>Loading...</div>;
@@ -128,7 +128,7 @@ export function App() {
     return (
       <>
         <ul className="my-games">
-          My Games
+          <li className="list-title" style={{listStyle: 'none'}}>My Games</li>
           {(account.games as string[]).map((game, i) => {
             return (
               <li key={`game-${i}`}>
@@ -173,7 +173,7 @@ export function App() {
             </button>
           )}
         </p>
-        <p style={{padding: '0 10px'}}>
+        <p style={{ padding: "0 10px" }}>
           {players.length == 1 && "Waiting for players"}
           {isMyGame && (isMyTurn ? "Your turn" : "Opponent's turn")}
         </p>
@@ -197,16 +197,6 @@ export function App() {
           >
             Quit / End game
           </button>
-          {/* <button>
-            <a
-              type="button"
-              className="explorer-link"
-              href={`https://suiscan.xyz/testnet/account/${players[0]}`}
-            >
-              P{myColor == 1 ? 2 : 1}:{" "}
-              {{formatAddress(players[(myColor == 1 ? 2 : 1) - 1])}}
-            </a>
-          </button> */}
         </div>
       </>
     )
@@ -331,6 +321,7 @@ export function App() {
   async function endGame() {
     setCanInteract(false);
     if (!game) return console.log("No game found");
+    if (!account) return console.log("Account not found");
     if (!isMyGame) return console.log("Not your game");
 
     const action =
@@ -339,10 +330,7 @@ export function App() {
     const txb = new TransactionBlock();
     txb.moveCall({
       target: `${packageId}::game::${action}`,
-      arguments: [
-        txb.object(game.id), // @ts-ignore
-        txb.object(account.id),
-      ],
+      arguments: [txb.object(game.id), txb.object(account.id)],
     });
     await flow.sponsorAndExecuteTransactionBlock({
       network: "testnet", // @ts-ignore

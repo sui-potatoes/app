@@ -44,15 +44,20 @@ svg.disabled {
     cursor: not-allowed !important;
 }
 
-button {
+.list-title {
+    text-decoration: none !important;
+    cursor: default !important;
+}
+
+.button {
     color: #000;
-    background-color: none;
+    background: none;
     border: none;
     cursor: pointer;
     text-transform: capitalize;
 }
 
-button:hover {
+.button:hover {
     color: #000;
     text-decoration: underline;
 }

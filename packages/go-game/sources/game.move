@@ -104,13 +104,13 @@ module gogame::game {
         let Players(p1, p2) = &mut game.players;
 
         if (p2.is_some() && p2.borrow() == acc.id.as_inner()) {
-            let id = p2.extract();
-            acc.games.remove(&id);
+            let _id = p2.extract();
+            acc.games.remove(game.id.as_inner());
         };
 
         if (p1.is_some() && p1.borrow() == acc.id.as_inner()) {
-            let id = p1.extract();
-            acc.games.remove(&id);
+            let _id = p1.extract();
+            acc.games.remove(game.id.as_inner());
         };
     }
 
