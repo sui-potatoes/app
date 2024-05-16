@@ -3,11 +3,7 @@
 
 module gogame::render {
     use std::ascii::String;
-    use gogame::go::Board;
-
-    // const EMPTY: u8 = 0;
-    // const BLACK: u8 = 1;
-    // const WHITE: u8 = 2;
+    use gogame::go::{Self,Board};
 
     /// Print the board as an SVG.
     public fun svg(b: &Board): String {
@@ -23,10 +19,10 @@ module gogame::render {
             b"<svg width='", width, b"' height='", width, b"' xmlns='http://www.w3.org/2000/svg'>",
             b"<defs>",
             b"<pattern id='grid' width='", num_to_ascii(cell_size + padding), b"' x='10' y='10' height='", num_to_ascii(cell_size + padding), b"' patternUnits='userSpaceOnUse'>",
-            b"<path d='M 40 0 L 0 0 0 40' fill='none' stroke='gray' stroke-width='0.8'/>\n",
-            b"</pattern>\n",
+            b"<path d='M 40 0 L 0 0 0 40' fill='none' stroke='gray' stroke-width='0.8'/>",
+            b"</pattern>",
             b"<style>",
-            b" circle { stroke: #000; r: 10; }",
+            b" circle { stroke: #000; }",
             b" .b { fill: #000; }",
             b" .w { fill: #fff; }",
             b"</style>",
@@ -47,7 +43,7 @@ module gogame::render {
                 let class = if (b.data()[i][j].is_black()) b"b" else b"w";
 
                 chunks.append(vector[
-                    b"<circle cy='", num_to_ascii(cy), b"' cx='", num_to_ascii(cx), b"' class='", class, b"' />"
+                    b"<circle r='10' cy='", num_to_ascii(cy), b"' cx='", num_to_ascii(cx), b"' class='", class, b"' />"
                 ]);
 
                 j = j + 1;
@@ -72,7 +68,7 @@ module gogame::render {
         let mut i = 0;
         while (i < s.length()) {
             let c = s.as_bytes()[i];
-            if (c == 32) {
+            if (c == 32) { // whitespace " "
                 res.append(b"%20")
             } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
                 res.push_back(37);
@@ -95,5 +91,29 @@ module gogame::render {
             res.insert(digit + 48, 0);
         };
         res //
+    }
+
+    #[test]
+    fun test_rendering_safari() {
+        let board = go::from_vector(vector[
+            vector[0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vector[0, 0, 2, 0, 0, 0, 0, 1, 0],
+            vector[0, 1, 2, 1, 1, 1, 1, 0, 0],
+            vector[0, 1, 1, 2, 2, 2, 2, 1, 0],
+            vector[0, 1, 2, 2, 0, 2, 0, 1, 0],
+            vector[0, 0, 1, 2, 2, 2, 2, 0, 0],
+            vector[0, 1, 1, 1, 1, 2, 0, 2, 2],
+            vector[0, 1, 0, 1, 2, 0, 2, 0, 0],
+            vector[1, 0, 1, 2, 2, 2, 0, 0, 0],
+        ]);
+
+
+        let res = urlencode(&svg(&board));
+        let mut data_url = b"data:image/svg+xml;charset=utf8,";
+        data_url.append(res.into_bytes());
+
+        std::debug::print(&data_url.to_ascii_string());
+        std::debug::print(&data_url.length());
+
     }
 }

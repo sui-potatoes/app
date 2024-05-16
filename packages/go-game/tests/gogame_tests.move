@@ -140,6 +140,34 @@ module gogame::gogame_tests {
             vector[0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]);
 
-        std::debug::print(&gogame::render::urlencode(&board.print_svg()));
+        let board = go::from_vector(vector[
+            vector[ 2, 0, 0, 0, 0, 0, 0, 0, 2 ],
+        ]);
+
+        // std::debug::print(
+        //     &gogame::render::urlencode(
+        //         &board.print_svg()
+        //     )
+        // );
+    }
+
+    #[test]
+    // This test uses the legendary Ashok vs Damir match - the first match ever
+    // finished in this application.
+    fun test_score_calculation() {
+        let board = go::from_vector(vector[
+            vector[0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vector[0, 0, 2, 0, 0, 0, 0, 1, 0],
+            vector[0, 1, 2, 1, 1, 1, 1, 0, 0],
+            vector[0, 1, 1, 2, 2, 2, 2, 1, 0],
+            vector[0, 1, 2, 2, 0, 2, 0, 1, 0],
+            vector[0, 0, 1, 2, 2, 2, 2, 0, 0],
+            vector[0, 1, 1, 1, 1, 2, 0, 2, 2],
+            vector[0, 1, 0, 1, 2, 0, 2, 0, 0],
+            vector[1, 0, 1, 2, 2, 2, 0, 0, 0],
+        ]);
+
+        // std::debug::print(&board.print_svg());
+
     }
 }

@@ -67,7 +67,7 @@ export function App() {
     },
     {
       enabled: !!urlGameId,
-    },
+    }, 
   );
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export function App() {
   }, [turn]);
 
   // Not logged in
-  if (!zkLogin.address) return <div>Connect wallet</div>;
+  if (!zkLogin.address) return <div>Sign in to use the app</div>;
 
   // No account, create one
   if (!account)
