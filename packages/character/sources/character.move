@@ -57,6 +57,10 @@ module character::character {
     /// The builder for the image of a Character, can use available shapes and
     /// colours from the game object.
     public struct Props has store, drop {
+        /// Body type.
+        body_type: String,
+        /// Hair type.
+        hair_type: String,
         /// Urlencoded Body parts.
         body: String,
         /// Urlencoded Hair parts.
@@ -84,8 +88,8 @@ module character::character {
     /// Create a new character.
     public fun new(
         b: &mut Builder,
-        body: String,
-        hair: String,
+        body_type: String,
+        hair_type: String,
         eyes_colour: String,
         hair_colour: String,
         pants_colour: String,
@@ -94,8 +98,8 @@ module character::character {
         accent_colour: String,
         ctx: &mut TxContext
     ): Character {
-        assert!(b.body.contains(&body), EWrongBody);
-        assert!(b.hair.contains(&hair), EWrongHair);
+        assert!(b.body.contains(&body_type), EWrongBody);
+        assert!(b.hair.contains(&hair_type), EWrongHair);
         assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
         assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongEyesColour);
         assert!(b.colours.contains(pants_colour.as_bytes()), EWrongPantsColour);
@@ -104,8 +108,10 @@ module character::character {
         assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
         let image = Props {
-            body: render::urlencode(&render_part(b.body[&body])),
-            hair: render::urlencode(&render_part(b.hair[&hair])),
+            body: render::urlencode(&render_part(b.body[&body_type])),
+            hair: render::urlencode(&render_part(b.hair[&hair_type])),
+            body_type,
+            hair_type,
             eyes_colour,
             hair_colour,
             pants_colour,
@@ -115,6 +121,41 @@ module character::character {
         };
 
         Character { id: object::new(ctx), image }
+    }
+
+    /// Edit the character.
+    public fun edit(
+        b: &mut Builder,
+        c: &mut Character,
+        body_type: String,
+        hair_type: String,
+        eyes_colour: String,
+        hair_colour: String,
+        pants_colour: String,
+        skin_colour: String,
+        base_colour: String,
+        accent_colour: String,
+        _ctx: &mut TxContext
+    ) {
+        assert!(b.body.contains(&body_type), EWrongBody);
+        assert!(b.hair.contains(&hair_type), EWrongHair);
+        assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
+        assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongEyesColour);
+        assert!(b.colours.contains(pants_colour.as_bytes()), EWrongPantsColour);
+        assert!(b.colours.contains(skin_colour.as_bytes()), EWrongSkinColour);
+        assert!(b.colours.contains(base_colour.as_bytes()), EWrongBaseColour);
+        assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
+
+        c.image.body = render::urlencode(&render_part(b.body[&body_type]));
+        c.image.hair = render::urlencode(&render_part(b.hair[&hair_type]));
+        c.image.body_type = body_type;
+        c.image.hair_type = hair_type;
+        c.image.eyes_colour = eyes_colour;
+        c.image.hair_colour = hair_colour;
+        c.image.pants_colour = pants_colour;
+        c.image.skin_colour = skin_colour;
+        c.image.base_colour = base_colour;
+        c.image.accent_colour = accent_colour;
     }
 
     /// Create Display for the Character type.
@@ -216,7 +257,7 @@ module character::character {
         image_url.append(build_character_base());
 
         d.add(b"image_url".to_string(), image_url);
-        d.add(b"name".to_string(), b"Go Game Board {id}".to_string());
+        d.add(b"name".to_string(), b"Brave Character!".to_string());
         d.add(b"description".to_string(), b"How wild can you go?".to_string());
         d.add(b"link".to_string(), b"https://potatoes.app/character/{id}".to_string());
         d.add(b"project_url".to_string(), b"https://potatoes.app/".to_string());

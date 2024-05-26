@@ -2,7 +2,7 @@
 
 [move]
 version = 2
-manifest_digest = "F540F20F999761633236E76FA40D5D581585AB84E4C359226E1E5F121AE60692"
+manifest_digest = "9C26909552AD23CDF7F5A892FA288BC2760DB5DD2D1E3698E8D4F30C7BFA1A82"
 deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 dependencies = [
   { name = "GoGame" },
@@ -38,6 +38,6 @@ flavor = "sui"
 
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0x2abb8460a38e00a34ad59477526e10996b2106004da443d5f7c81b4caee4f455"
-latest-published-id = "0x2abb8460a38e00a34ad59477526e10996b2106004da443d5f7c81b4caee4f455"
+original-published-id = "0xfe50fd35667c48ec3342c5182a262aeb8b367188f71524ac8a3ea3e20141e78e"
+latest-published-id = "0xfe50fd35667c48ec3342c5182a262aeb8b367188f71524ac8a3ea3e20141e78e"
 published-version = "1"

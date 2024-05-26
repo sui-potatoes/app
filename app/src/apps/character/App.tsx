@@ -1,6 +1,6 @@
 import "./character.css";
 import { useEffect, useState } from "react";
-// import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
+import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "../../networkConfig";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
@@ -12,6 +12,8 @@ import { Param } from "./Param";
 import { normalizeSuiAddress } from "@mysten/sui.js/utils";
 
 const image = bcs.struct("Props", {
+    body_type: bcs.String,
+    hair_type: bcs.String,
     body: bcs.String,
     hair: bcs.String,
     hairColour: bcs.String,
@@ -28,8 +30,8 @@ const CharBCS = bcs.struct("Character", {
 });
 
 export type Character = {
-    body: string;
-    hair: string;
+    body_type: string;
+    hair_type: string;
     hairColour: string;
     eyesColour: string;
     skinColour: string;
@@ -74,16 +76,30 @@ export const COLOURS = [
 ];
 
 export function App() {
-    const { id: characterId } = useParams();
-    // const flow = useEnokiFlow();
-    // const zkLogin = useZkLogin();
+    const { id: urlId } = useParams();
+    const flow = useEnokiFlow();
+    const zkLogin = useZkLogin();
     const client = useSuiClient();
     const packageId = useNetworkVariable("characterPackageId");
     const builderId = useNetworkVariable("characterBuilderId");
-    // const navigate = useNavigate();
+    const [characterId, setCharacterId] = useState(urlId);
+    const [canInteract, setCanInteract] = useState(false);
+    const {
+        data: characters,
+        refetch,
+        isPending,
+    } = useSuiClientQuery(
+        "getOwnedObjects",
+        {
+            owner: zkLogin?.address!,
+            options: { showBcs: true },
+            filter: { StructType: `${packageId}::character::Character` },
+        },
+        { enabled: !!zkLogin },
+    );
     const [char, setChar] = useState<Character>({
-        body: "office",
-        hair: "wind",
+        hair_type: "wind",
+        body_type: "office",
         hairColour: "0099db",
         eyesColour: "e43b44",
         skinColour: "c0cbdc",
@@ -92,25 +108,54 @@ export function App() {
         accentColour: "ead4aa",
     });
 
-    const [extra, setExtra] = useState("");
-    const [canInteract, setCanInteract] = useState(true);
-    const { data: character } = useSuiClientQuery("getObject", {
-        id: characterId || "",
-        options: { showBcs: true },
-    });
-
     useEffect(() => {
-        if (!character?.data) return;
-        setChar(() => ({
+        if (!characters) return;
+        if (!characters.data.length) {
+            setCanInteract(true);
+            return;
+        }
+
+        const data = characters.data[0].data!;
+        const { image } = CharBCS.parse(
             // @ts-ignore
-            ...CharBCS.parse(fromB64(character.data.bcs.bcsBytes)).image,
-        }));
-    }, [character]);
+            new Uint8Array(fromB64(data.bcs.bcsBytes)),
+        );
+
+        setCanInteract(true);
+        setCharacterId(data.objectId);
+        setChar({ ...image });
+    }, [characters]);
+
+    if (isPending) return <div>Loading...</div>;
+    if (!zkLogin.address && !characterId)
+        return <div>Sign in to use the app</div>;
+
+    // use for fetching the character
+    // useEffect(() => {
+    //     if (!character?.data) return;
+    //     setChar(() => ({
+    //         // @ts-ignore
+    //         ...CharBCS.parse(fromB64(character.data.bcs.bcsBytes)).image,
+    //     }));
+    // }, [character]);
 
     return (
         <div className="columns">
             <div className="character-select column">
-                <Char {...char} extra={extra} />
+                <Char {...char} />
+            </div>
+            <div className="param sm-show">
+                <button
+                    disabled={!zkLogin.address || !canInteract}
+                    onClick={() => {
+                        characterId
+                            ? updateCharacter(char)
+                            : createCharacter(char);
+                    }}
+                >
+                    {characterId ? "Update" : "Create"} Character{" "}
+                    {!zkLogin.address && " (Login required)"}
+                </button>
             </div>
             <div
                 className="column"
@@ -121,34 +166,31 @@ export function App() {
                 }}
             >
                 <Param
-                    name="hair"
-                    defaultValue="wind"
+                    name="hair type"
+                    defaultValue={char.hair_type}
                     disabled={!canInteract}
                     values={["wind", "flat", "bang", "punk"]}
-                    onChange={(hair) => setChar({ ...char, hair })}
+                    onChange={(hair_type) => setChar({ ...char, hair_type })}
                 />
                 <Param
-                    name="body"
-                    defaultValue="office"
+                    name="body type"
+                    defaultValue={char.body_type}
                     disabled={!canInteract}
                     values={["office", "blazer", "tshirt"]}
-                    onChange={(body) => setChar({ ...char, body })}
+                    onChange={(body_type) => setChar({ ...char, body_type })}
                 />
                 <Param
                     isColour
                     name="hair"
-                    defaultValue="0099db"
+                    defaultValue={char.hairColour}
                     disabled={!canInteract}
                     values={COLOURS}
-                    onChange={(hairColour) => {
-                        console.log('change hair', hairColour);
-                        setChar({ ...char, hairColour })
-                    }}
+                    onChange={(hairColour) => setChar({ ...char, hairColour })}
                 />
                 <Param
                     isColour
                     name="eyes"
-                    defaultValue="e43b44"
+                    defaultValue={char.eyesColour}
                     disabled={!canInteract}
                     values={COLOURS}
                     onChange={(eyesColour) => setChar({ ...char, eyesColour })}
@@ -156,7 +198,7 @@ export function App() {
                 <Param
                     isColour
                     name="skin"
-                    defaultValue="c0cbdc"
+                    defaultValue={char.skinColour}
                     disabled={!canInteract}
                     values={COLOURS}
                     onChange={(skinColour) => setChar({ ...char, skinColour })}
@@ -164,7 +206,7 @@ export function App() {
                 <Param
                     isColour
                     name="base"
-                    defaultValue="3a4466"
+                    defaultValue={char.baseColour}
                     disabled={!canInteract}
                     values={COLOURS}
                     onChange={(baseColour) => setChar({ ...char, baseColour })}
@@ -172,7 +214,7 @@ export function App() {
                 <Param
                     isColour
                     name="pants"
-                    defaultValue="262b44"
+                    defaultValue={char.pantsColour}
                     disabled={!canInteract}
                     values={COLOURS}
                     onChange={(pantsColour) =>
@@ -182,16 +224,110 @@ export function App() {
                 <Param
                     isColour
                     name="accent"
-                    defaultValue="ead4aa"
+                    defaultValue={char.accentColour}
                     disabled={!canInteract}
                     values={COLOURS}
                     onChange={(accentColour) =>
                         setChar({ ...char, accentColour })
                     }
                 />
+                <div className="md-show param">
+                    <button
+                        style={{ padding: "20px 0" }}
+                        disabled={!zkLogin.address || !canInteract}
+                        onClick={() => {
+                            createCharacter(char);
+                        }}
+                    >
+                        {characterId ? "Update" : "Create"} Character{" "}
+                        {!zkLogin.address && " (Login required)"}
+                    </button>
+                </div>
+                <div
+                    className="param"
+                    style={{ display: "block", margin: "10px 0" }}
+                >
+                    <a
+                        href={`https://suiscan.xyz/testnet/object/${characterId}`}
+                        target="_blank"
+                    >
+                        View on SuiScan
+                    </a>
+                </div>
             </div>
         </div>
     );
+
+    /**
+     * Send the `new` command to the `character` module.
+     */
+    async function createCharacter(data: Character) {
+        if (!flow || !zkLogin) return;
+        if (!canInteract) return;
+        setCanInteract(false);
+
+        const txb = new TransactionBlock();
+        const char = txb.moveCall({
+            target: `${packageId}::character::new`,
+            arguments: [
+                txb.object(builderId),
+                txb.pure.string(data.body_type),
+                txb.pure.string(data.hair_type),
+                txb.pure.string(data.hairColour),
+                txb.pure.string(data.eyesColour),
+                txb.pure.string(data.pantsColour),
+                txb.pure.string(data.skinColour),
+                txb.pure.string(data.baseColour),
+                txb.pure.string(data.accentColour),
+            ],
+        });
+
+        txb.transferObjects([char], zkLogin.address!);
+
+        const { digest } = await flow.sponsorAndExecuteTransactionBlock({
+            network: "testnet", // @ts-ignore
+            client,
+            transactionBlock: txb,
+        });
+
+        console.log("Transaction sent", digest);
+        setInterval(() => refetch(), 1000);
+    }
+
+    /**
+     * Send the `update` command to the `character` module.
+     */
+    async function updateCharacter(data: Character) {
+        if (!flow || !zkLogin) return;
+        if (!canInteract) return;
+        setCanInteract(false);
+
+        const txb = new TransactionBlock();
+        txb.moveCall({
+            target: `${packageId}::character::edit`,
+            arguments: [
+                txb.object(builderId),
+                txb.object(characterId),
+                txb.pure.string(data.body_type),
+                txb.pure.string(data.hair_type),
+                txb.pure.string(data.hairColour),
+                txb.pure.string(data.eyesColour),
+                txb.pure.string(data.pantsColour),
+                txb.pure.string(data.skinColour),
+                txb.pure.string(data.baseColour),
+                txb.pure.string(data.accentColour),
+            ],
+        });
+
+        const { digest } = await flow.sponsorAndExecuteTransactionBlock({
+            network: "testnet", // @ts-ignore
+            client,
+            transactionBlock: txb,
+        });
+
+        console.log("Transaction sent", digest);
+        setInterval(() => refetch(), 1000);
+    }
 
     /**
      * Get the character image from the builder Move module.
@@ -207,8 +343,8 @@ export function App() {
             target: `${packageId}::character::new`,
             arguments: [
                 inspect.object(builderId),
-                inspect.pure.string(data.body),
-                inspect.pure.string(data.hair),
+                inspect.pure.string(data.body_type),
+                inspect.pure.string(data.hair_type),
                 inspect.pure.string(data.hairColour),
                 inspect.pure.string(data.eyesColour),
                 inspect.pure.string(data.pantsColour),
@@ -219,7 +355,7 @@ export function App() {
         });
 
         const { results, error } = await client.devInspectTransactionBlock({
-            sender: normalizeSuiAddress('0xa11ce'), // @ts-ignore
+            sender: normalizeSuiAddress("0xa11ce"), // @ts-ignore
             transactionBlock: inspect,
         });
 
@@ -229,11 +365,11 @@ export function App() {
             return;
         }
 
-        const [bcsBytes, _type] = results[0].returnValues[0];
-        const { body, hair } = CharBCS.parse(new Uint8Array(bcsBytes)).image;
+        // const [bcsBytes, _type] = results[0].returnValues[0];
+        // const { body, hair } = CharBCS.parse(new Uint8Array(bcsBytes)).image;
 
         setChar(data);
-        setExtra(body + hair); // both urlencoded!
+        // setExtra(body + hair); // both urlencoded!
         setCanInteract(true);
     }
 }

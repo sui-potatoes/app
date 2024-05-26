@@ -20,7 +20,8 @@ GoGame = { local = "../go-game" }
 # Override = { local = "../conflicting/version", override = true }
 
 [addresses]
-character = "0x2abb8460a38e00a34ad59477526e10996b2106004da443d5f7c81b4caee4f455"
+character = "0xfe50fd35667c48ec3342c5182a262aeb8b367188f71524ac8a3ea3e20141e78e"
+builder = "0x4574eaf3f1313b584d5004144cd6d6d57d516379d011d6d8e3248c54cfcf90a0"
 
 # Named addresses will be accessible in Move as `@name`. They're also exported:
 # for example, `std = "0x1"` is exported by the Standard Library.

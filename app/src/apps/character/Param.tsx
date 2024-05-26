@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export type ParamOptions = {
     name: string;
     values: string[];
-    defaultValue?: string;
+    value?: string;
+    defaultValue: string;
     isColour?: boolean;
     disabled?: boolean;
     onChange?: (value: string) => void;
@@ -24,7 +25,10 @@ export function Param({
     isColour,
     onChange,
 }: ParamOptions) {
-    const [idx, setIdx] = useState(defaultValue && values.indexOf(defaultValue) || 0);
+    const [idx, setIdx] = useState(0);
+
+    // must be here to re-render when defaultValue changes
+    useEffect(() => setIdx(values.indexOf(defaultValue)), [defaultValue]);
 
     return (
         <div className="param">
@@ -33,7 +37,7 @@ export function Param({
                 <button
                     onClick={() => {
                         if (disabled) return;
-                        const newIdx = idx === 0 ? (values.length - 1) : (idx - 1);
+                        const newIdx = idx === 0 ? values.length - 1 : idx - 1;
                         setIdx(newIdx);
                         onChange && onChange(values[newIdx]);
                     }}
@@ -51,7 +55,7 @@ export function Param({
                 <button
                     onClick={() => {
                         if (disabled) return;
-                        const newIdx = idx === values.length - 1 ? 0 : (idx + 1);
+                        const newIdx = idx === values.length - 1 ? 0 : idx + 1;
                         setIdx(newIdx);
                         onChange && onChange(values[newIdx]);
                     }}
