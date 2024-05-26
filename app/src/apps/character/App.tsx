@@ -300,6 +300,7 @@ export function App() {
     async function updateCharacter(data: Character) {
         if (!flow || !zkLogin) return;
         if (!canInteract) return;
+        if (!characterId) return;
         setCanInteract(false);
 
         const txb = new TransactionBlock();
@@ -321,8 +322,7 @@ export function App() {
 
         const { digest } = await flow.sponsorAndExecuteTransactionBlock({
             network: "testnet", // @ts-ignore
-            client,
-            transactionBlock: txb,
+            client, transactionBlock: txb,
         });
 
         console.log("Transaction sent", digest);

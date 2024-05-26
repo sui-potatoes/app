@@ -228,7 +228,7 @@ module character::character {
         ]);
         builder.hair.insert(b"wind".to_ascii_string(), vector[
             Rect(60, 20, 20, 60, b"h".to_ascii_string()),
-            Rect(70, 20, 80, 20, b"h".to_ascii_string()),
+            Rect(80, 20, 80, 20, b"h".to_ascii_string()),
             Rect(140, 40, 40, 40, b"h".to_ascii_string()),
             Rect(180, 40, 20, 20, b"h".to_ascii_string()),
         ]);
