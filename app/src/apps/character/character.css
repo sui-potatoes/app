@@ -1,0 +1,95 @@
+.colours {
+  position: relative;
+  top: 10px;
+  /* width: 200px; */
+  /* height: 200px; */
+  max-width: 200px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.colour {
+  width: 60px;
+  height: 30px;
+  cursor: pointer;
+  display: block;
+  color: black;
+  background: none;
+  text-decoration: none;
+  border: none;
+}
+
+.controls {
+  min-width: 50px;
+}
+
+/* columns, layout */
+
+.character-select {
+  width: 300px;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+  /* flex-wrap: wrap; */
+}
+
+.column {
+  flex: 2;
+  padding: 10px;
+}
+
+/* Params */
+
+.params {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.param {
+  display: flex;
+}
+
+.param-name {
+  flex: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.param-value {
+  flex: 6;
+  text-transform: uppercase;
+}
+
+.param-colour {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+}
+
+.param .disabled {
+  color: grey;
+  cursor: not-allowed;
+}
+
+
+/* Recenter on smaller screens */
+@media screen and (max-width: 768px) {
+  /* .params {
+    justify-content: center;
+  } */
+  .columns {
+    flex-direction: column;
+  }
+  .param {
+    text-align: center;
+  }
+  .param-name {
+    flex: 4;
+  }
+  .param-value {
+    justify-content: end;
+    flex: 4;
+  }
+}
