@@ -113,3 +113,19 @@ body {
   cursor: pointer;
   font-weight: bold;
 }
+
+
+/* Global button styles */
+
+button {
+  color: #000;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+button:hover {
+  color: #000;
+  text-decoration: underline;
+}

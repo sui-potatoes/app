@@ -1,12 +1,12 @@
 [package]
-name = "GoGame"
+name = "character"
 edition = "2024.beta" # edition = "legacy" to use legacy (pre-2024) Move
-published-at = "0xf6accdd834915e5972640e40dd865a0f8902ac555060d01349080cb04d1e4c15"
 # license = ""           # e.g., "MIT", "GPL", "Apache 2.0"
 # authors = ["..."]      # e.g., ["Joe Smith (joesmith@noemail.com)", "John Snow (johnsnow@noemail.com)"]
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+GoGame = { local = "../go-game" }
 
 # For remote import, use the `{ git = "...", subdir = "...", rev = "..." }`.
 # Revision can be a branch, a tag, and a commit hash.
@@ -20,7 +20,7 @@ Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-fram
 # Override = { local = "../conflicting/version", override = true }
 
 [addresses]
-gogame = "0xf6accdd834915e5972640e40dd865a0f8902ac555060d01349080cb04d1e4c15"
+character = "0x2abb8460a38e00a34ad59477526e10996b2106004da443d5f7c81b4caee4f455"
 
 # Named addresses will be accessible in Move as `@name`. They're also exported:
 # for example, `std = "0x1"` is exported by the Standard Library.
@@ -35,3 +35,13 @@ gogame = "0xf6accdd834915e5972640e40dd865a0f8902ac555060d01349080cb04d1e4c15"
 # The dev-addresses section allows overwriting named addresses for the `--test`
 # and `--dev` modes.
 # alice = "0xB0B"
+
+# it's alive!
+# export PKG=0x2abb8460a38e00a34ad59477526e10996b2106004da443d5f7c81b4caee4f455
+# export BUILDER=0x0bbdf7a33564b908f5704f2c0e526aa41b62a66eec557a3b1ef36e1ac3793b9d
+# sui client ptb \
+# --move-call "$PKG::character::new" \
+# "@$BUILDER" "'blazer'" "'bang'" "'181425'" "'d77643'" "'ead4aa'" "'ff0044'" "'733e39'" "'68386c'" \
+# --assign x \
+# --transfer-objects "[x]" "@$(sui client active-address)" \
+# --json
