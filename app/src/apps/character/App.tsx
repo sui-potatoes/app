@@ -243,17 +243,19 @@ export function App() {
                         {!zkLogin.address && " (Login required)"}
                     </button>
                 </div>
-                <div
-                    className="param"
-                    style={{ display: "block", margin: "10px 0" }}
-                >
-                    <a
-                        href={`https://suiscan.xyz/testnet/object/${characterId}`}
-                        target="_blank"
+                {characterId && (
+                    <div
+                        className="param"
+                        style={{ display: "block", margin: "10px 0" }}
                     >
-                        View on SuiScan
-                    </a>
-                </div>
+                        <a
+                            href={`https://suiscan.xyz/testnet/object/${characterId}`}
+                            target="_blank"
+                        >
+                            View on SuiScan
+                        </a>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -322,7 +324,8 @@ export function App() {
 
         const { digest } = await flow.sponsorAndExecuteTransactionBlock({
             network: "testnet", // @ts-ignore
-            client, transactionBlock: txb,
+            client,
+            transactionBlock: txb,
         });
 
         console.log("Transaction sent", digest);
