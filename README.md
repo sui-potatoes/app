@@ -2,9 +2,10 @@
 
 Monorepo for the Potatoes project. Contains all the applications and services that make up the Potatoes project.
 
-## Games
+## Demos
 
 - Go Game
+- Character builder
 - Rock Paper Scissors (in development)
 
 
