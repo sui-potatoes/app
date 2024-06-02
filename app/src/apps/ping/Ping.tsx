@@ -32,6 +32,7 @@ export default function Ping({ remoteDescription, onHostClick }: PingProps) {
                 onHostClick &&
                 onHostClick(JSON.parse(response.localDescription));
             setInterval(() => response.sendMessage("ping"), 1000);
+            setSendMessage((e: string) => sendMessage(e));
         });
     }, [remoteDescription]);
 
