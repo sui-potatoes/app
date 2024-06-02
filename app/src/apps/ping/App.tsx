@@ -2,9 +2,7 @@ import { useState } from "react";
 import Ping from "./Ping";
 
 export function App({ slave }: { slave: boolean }) {
-    const [remote, setRemote] = useState<RTCSessionDescriptionInit | null>(
-        null,
-    );
+    const [remote, setRemote] = useState<string | null>(null);
 
     return (
         <div className="columns">
@@ -12,27 +10,26 @@ export function App({ slave }: { slave: boolean }) {
                 {slave && (
                     <>
                         <p>Enter the SDP from the host</p>
-                        <input
-                            onChange={(e) =>
-                                setRemote(JSON.parse(e.target.value))
-                            }
-                        />
-                        {remote && <Ping
-                            slave={slave}
-                            remoteDescription={remote}
-                        />}
+                        <input onChange={(e) => setRemote(e.target.value)} />
+                        {remote && (
+                            <Ping slave={slave} remoteDescription={remote} />
+                        )}
                     </>
                 )}
                 {!slave && (
                     <>
-                        <Ping onHostClick={(remote) => setRemote(remote)} />
-                        <input disabled={true} value={JSON.stringify(remote)} />
+                        <Ping
+                            onHostClick={(remote) => {
+                                console.log(remote);
+                                setRemote(remote);
+                            }}
+                        />
+                        <input disabled={true} value={remote ? remote : ""} />
                         <button
                             onClick={() => {
+                                if (!remote) return;
                                 console.log("copied");
-                                navigator.clipboard.writeText(
-                                    JSON.stringify(remote),
-                                );
+                                navigator.clipboard.writeText(remote);
                             }}
                         >
                             Copy

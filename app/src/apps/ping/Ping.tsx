@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { createPeerConnection } from "./lib";
 
 export type PingProps = {
-    remoteDescription?: RTCSessionDescriptionInit | null;
+    remoteDescription?: string | null;
     onMessageReceived?: (message: string) => void;
     onChannelOpen?: () => void;
-    onHostClick?: (remote: RTCSessionDescriptionInit) => void;
+    onHostClick?: (remote: string) => void;
     slave?: boolean;
 };
 
@@ -16,8 +16,9 @@ export default function Ping({ remoteDescription, onHostClick }: PingProps) {
 
     useEffect(() => {
         createPeerConnection({
+            iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
             remoteDescription: remoteDescription
-                ? JSON.stringify(remoteDescription)
+                ? atob(remoteDescription)
                 : undefined,
             onChannelOpen: () => {
                 console.log("channel open");
@@ -26,11 +27,9 @@ export default function Ping({ remoteDescription, onHostClick }: PingProps) {
                 console.log("message received", message);
             },
         }).then((response) => {
-            console.log(response);
-            //
             !remoteDescription &&
                 onHostClick &&
-                onHostClick(JSON.parse(response.localDescription));
+                onHostClick(btoa(response.localDescription));
             setInterval(() => response.sendMessage("ping"), 1000);
             setSendMessage((e: string) => sendMessage(e));
         });
