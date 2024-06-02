@@ -6,6 +6,7 @@ export type PingProps = {
     onMessageReceived?: (message: string) => void;
     onChannelOpen?: () => void;
     onHostClick?: (remote: RTCSessionDescriptionInit) => void;
+    slave?: boolean;
 };
 
 export default function Ping({ remoteDescription, onHostClick }: PingProps) {

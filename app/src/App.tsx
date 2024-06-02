@@ -62,6 +62,9 @@ export function App() {
             <NavLink to="/ping">ping</NavLink>
           </li>
           <li>
+            <NavLink to="/pong">pong</NavLink>
+          </li>
+          <li>
             {/* <NavLink  to="/">rock paper scissors (disabled)</NavLink> */}
             <p style={{cursor: 'default'}}>rock paper scissors (disabled)</p>
           </li>
@@ -75,7 +78,8 @@ export function App() {
           <Route path="/char" element={<Character />} />
           <Route path="/char/:id" element={<Character />} />
           <Route path="/rps" element={<RockPaperScissors />} />
-          <Route path="/ping" element={<Ping />} />
+          <Route path="/ping" element={<Ping slave={false} />} />
+          <Route path="/pong" element={<Ping slave={true} />} />
         </Routes>
       </div>
     </div>
