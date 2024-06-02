@@ -53,10 +53,9 @@ export default function Ping({ remoteDescription, onHostClick }: PingProps) {
     return (
         <>
             <p>
-                <button>
-                    {remoteDescription ? "create answer" : "create offer"}
+                <button onClick={() => sendMessage && sendMessage("ping")}>
+                    ping
                 </button>
-                <button onClick={() => sendMessage && sendMessage('ping')}>ping</button>
             </p>
         </>
     );
