@@ -9,8 +9,6 @@ export type PingProps = {
 };
 
 export default function Ping({ remoteDescription, onHostClick }: PingProps) {
-    const [conn, setConn] = useState<RTCPeerConnection | null>(null);
-    const [channel, setChannel] = useState<RTCDataChannel | null>(null);
     const [sendMessage, setSendMessage] = useState<(message: string) => void>(
         () => () => {},
     );
