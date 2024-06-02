@@ -1,42 +1,42 @@
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import { RPS_PACKAGE_ID as PACKAGE_ID } from "../../constants";
-import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
-import { SuiObjectRef } from "@mysten/sui.js/bcs";
+import { SuiTransactionBlockResponse } from "@mysten/sui/client";
+import type { Inputs } from "@mysten/sui/transactions";
 import { useEnokiFlow } from "@mysten/enoki/react";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { useState } from "react";
 
 type CreateParams = {
-  onSuccess: (res: SuiTransactionBlockResponse) => void;
-  account: SuiObjectRef;
+    onSuccess: (res: SuiTransactionBlockResponse) => void;
+    account: Parameters<(typeof Inputs)["ObjectRef"]>[0];
 };
 
 export function NewGame({ account }: CreateParams) {
-  const client = useSuiClient();
-  const flow = useEnokiFlow();
-  const [pending, setPending] = useState(false);
+    const client = useSuiClient();
+    const flow = useEnokiFlow();
+    const [pending, setPending] = useState(false);
 
-  return (
-    <div className="connect">
-      <button disabled={pending} onClick={newGame}>
-        new game
-      </button>
-    </div>
-  );
+    return (
+        <div className="connect">
+            <button disabled={pending} onClick={newGame}>
+                new game
+            </button>
+        </div>
+    );
 
-  async function newGame() {
-    const txb = new TransactionBlock();
-    txb.moveCall({
-      target: `${PACKAGE_ID}::game::new_game`,
-      arguments: [txb.objectRef(account), txb.pure.u8(3)],
-    });
-    setPending(true);
-    const result = await flow.sponsorAndExecuteTransactionBlock({
-      transactionBlock: txb,
-      network: "testnet", // @ts-ignore
-      client,
-    });
-    console.log(result);
-    setPending(false);
-  }
+    async function newGame() {
+        const tx = new Transaction();
+        tx.moveCall({
+            target: `${PACKAGE_ID}::game::new_game`,
+            arguments: [tx.objectRef(account), tx.pure.u8(3)],
+        });
+        setPending(true);
+        const result = await flow.sponsorAndExecuteTransaction({
+            transaction: tx,
+            network: "testnet", // @ts-ignore
+            client,
+        });
+        console.log(result);
+        setPending(false);
+    }
 }

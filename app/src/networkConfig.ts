@@ -1,4 +1,4 @@
-import { getFullnodeUrl } from "@mysten/sui.js/client";
+import {getFullnodeUrl} from '@mysten/sui/client'
 import { RPS_PACKAGE_ID, GOGAME_PACKAGE_ID, CHARACTER_PACKAGE_ID, CHARACTER_BUILDER_ID } from "./constants";
 import { createNetworkConfig } from "@mysten/dapp-kit";
 
