@@ -8,91 +8,91 @@
 } */
 
 @keyframes move-up {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    box-shadow: 0 10px 5px rgba(0, 0, 0, 0.4);
-    transform: translateY(-10px);
-  }
-  100% {
-    box-shadow: 0 10px 5px rgba(0, 0, 0, 0.5);
-    transform: translateY(-10px);
-  }
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        box-shadow: 0 10px 5px rgba(0, 0, 0, 0.4);
+        transform: translateY(-10px);
+    }
+    100% {
+        box-shadow: 0 10px 5px rgba(0, 0, 0, 0.5);
+        transform: translateY(-10px);
+    }
 }
 
 /* I want elements to be in the middle of the page both vertically and horizontally */
 #gameInterface {
-  /* border: 2px solid black; */
-  padding: 20px;
-  text-align: center;
+    /* border: 2px solid black; */
+    padding: 20px;
+    text-align: center;
 
-  /* Centering */
-  /* position: absolute; */
-  /* top: 20%; */
-  /* left: 50%; */
-  /* transform: translate(-50%, -50%); */
+    /* Centering */
+    /* position: absolute; */
+    /* top: 20%; */
+    /* left: 50%; */
+    /* transform: translate(-50%, -50%); */
 
-  width: auto;
-  margin: auto;
-  /* background-image: url("background_pattern.png"); Add your background pattern */
+    width: auto;
+    margin: auto;
+    /* background-image: url("background_pattern.png"); Add your background pattern */
 }
 
 @keyframes waiting-loading {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-  100% {
-    opacity: 1;
-  }
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 #gameInterface.disabled .choice {
-  cursor: not-allowed;
-  opacity: 0.5;
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 #gameInterface.disabled :first-child {
-  animation: waiting-loading 2s infinite linear;
+    animation: waiting-loading 2s infinite linear;
 }
 
 #gameInterface.disabled :nth-child(2) {
-  /* intentionally breaking the animation rhythm */
-  animation: waiting-loading 1.8s infinite linear;
-  animation-delay: 0.5s;
+    /* intentionally breaking the animation rhythm */
+    animation: waiting-loading 1.8s infinite linear;
+    animation-delay: 0.5s;
 }
 
 #gameInterface.disabled :last-child {
-  animation: waiting-loading 2s infinite linear;
-  animation-delay: 1s;
+    animation: waiting-loading 2s infinite linear;
+    animation-delay: 1s;
 }
 
 #gameInterface.disabled > .active {
-  animation: none;
-  opacity: 1;
+    animation: none;
+    opacity: 1;
 }
 
 .choice {
-  /* border: 1px solid black; */
-  /* padding: 10px; */
-  margin: 10px;
-  max-height: 200px;
-  max-width: 10%;
-  cursor: pointer;
-  display: inline-block;
+    /* border: 1px solid black; */
+    /* padding: 10px; */
+    margin: 10px;
+    max-height: 200px;
+    max-width: 10%;
+    cursor: pointer;
+    display: inline-block;
 
-  /* background-size: contain; */
-  /* background-repeat: no-repeat; */
+    /* background-size: contain; */
+    /* background-repeat: no-repeat; */
 }
 /* I want border shadow */
 .choice:hover {
-  box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.1);
 }
 #results {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 /* .connect button,

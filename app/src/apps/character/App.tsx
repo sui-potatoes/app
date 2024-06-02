@@ -250,7 +250,8 @@ export function App() {
                     >
                         <a
                             href={`https://suiscan.xyz/testnet/object/${characterId}`}
-                            target="_blank" rel="noreferrer"
+                            target="_blank"
+                            rel="noreferrer"
                         >
                             View on SuiScan
                         </a>
