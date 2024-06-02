@@ -1,0 +1,64 @@
+import { useEffect, useState } from "react";
+import { createPeerConnection } from "./lib";
+
+export type PingProps = {
+    remoteDescription?: RTCSessionDescriptionInit | null;
+    onMessageReceived?: (message: string) => void;
+    onChannelOpen?: () => void;
+    onHostClick?: (remote: RTCSessionDescriptionInit) => void;
+};
+
+export default function Ping({ remoteDescription, onHostClick }: PingProps) {
+    const [conn, setConn] = useState<RTCPeerConnection | null>(null);
+    const [channel, setChannel] = useState<RTCDataChannel | null>(null);
+    const [sendMessage, setSendMessage] = useState<(message: string) => void>(
+        () => () => {},
+    );
+
+    useEffect(() => {
+        createPeerConnection({
+            remoteDescription: remoteDescription
+                ? JSON.stringify(remoteDescription)
+                : undefined,
+            onChannelOpen: () => {
+                console.log("channel open");
+            },
+            onMessageReceived: (message) => {
+                console.log("message received", message);
+            },
+        }).then((response) => {
+            //
+            !remoteDescription &&
+                onHostClick &&
+                onHostClick(JSON.parse(response.localDescription));
+            !sendMessage && setSendMessage(response.sendMessage);
+        });
+    }, [remoteDescription]);
+
+    // To establish the connection, host needs to provide the offer. The offer
+    // contains the remote description and the ice candidates.
+    //
+    // If the slave has the offer, it can create an answer. The answer contains
+    // the local description and the ice candidates.
+    //
+    // Once the connection is established, the host and the slave can send
+    // messages to each other.
+    //
+    // The messages are sent via Channel, not the connection itself.
+    // The channel can be both a message channel and a data channel.
+    //
+    // The slave expects the datachannel event to be fired, while the host
+    // creates the data channel. The slave receives it from the event, and
+    // then uses to send messages.
+
+    return (
+        <>
+            <p>
+                <button>
+                    {remoteDescription ? "create answer" : "create offer"}
+                </button>
+                <button onClick={() => sendMessage && sendMessage('ping')}>ping</button>
+            </p>
+        </>
+    );
+}

@@ -130,15 +130,6 @@ export function App() {
     if (!zkLogin.address && !characterId)
         return <div>Sign in to use the app</div>;
 
-    // use for fetching the character
-    // useEffect(() => {
-    //     if (!character?.data) return;
-    //     setChar(() => ({
-    //         // @ts-ignore
-    //         ...CharBCS.parse(fromB64(character.data.bcs.bcsBytes)).image,
-    //     }));
-    // }, [character]);
-
     return (
         <div className="columns">
             <div className="character-select column">
@@ -294,11 +285,7 @@ export function App() {
         });
 
         console.log("Transaction sent", digest);
-        await client.waitForTransaction({
-            digest,
-            timeout: 10000,
-            pollInterval: 500,
-        });
+        await client.waitForTransactionBlock({ digest, timeout: 10000, pollInterval: 500 });
         refetch();
     }
 
@@ -335,11 +322,7 @@ export function App() {
         });
 
         console.log("Transaction sent", digest);
-        await client.waitForTransaction({
-            digest,
-            timeout: 10000,
-            pollInterval: 500,
-        });
+        await client.waitForTransactionBlock({ digest, timeout: 10000, pollInterval: 500 });
         refetch();
     }
 
