@@ -52,8 +52,8 @@ export function ActiveGame({ account, matchId }: Params) {
             setCanPlay(true);
         }
 
-        let isHost = gameData.host.id === account.objectId;
-        let player = isHost ? gameData.host : gameData.guest;
+        const isHost = gameData.host.id === account.objectId;
+        const player = isHost ? gameData.host : gameData.guest;
 
         console.log(player);
         console.log(gameData);
