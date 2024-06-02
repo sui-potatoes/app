@@ -26,6 +26,7 @@ export default function Ping({ remoteDescription, onHostClick }: PingProps) {
                 console.log("message received", message);
             },
         }).then((response) => {
+            console.log(response);
             //
             !remoteDescription &&
                 onHostClick &&
