@@ -236,7 +236,9 @@ export function App() {
                         style={{ padding: "20px 0" }}
                         disabled={!zkLogin.address || !canInteract}
                         onClick={() => {
-                            createCharacter(char);
+                            characterId
+                                ? updateCharacter(char)
+                                : createCharacter(char);
                         }}
                     >
                         {characterId ? "Update" : "Create"} Character{" "}
