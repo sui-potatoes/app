@@ -138,7 +138,7 @@ export function App() {
     //         ...CharBCS.parse(fromB64(character.data.bcs.bcsBytes)).image,
     //     }));
     // }, [character]);
-
+    
     return (
         <div className="columns">
             <div className="character-select column">
@@ -236,7 +236,9 @@ export function App() {
                         style={{ padding: "20px 0" }}
                         disabled={!zkLogin.address || !canInteract}
                         onClick={() => {
-                            createCharacter(char);
+                            characterId
+                                ? updateCharacter(char)
+                                : createCharacter(char);
                         }}
                     >
                         {characterId ? "Update" : "Create"} Character{" "}
