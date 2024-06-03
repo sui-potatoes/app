@@ -1,99 +1,98 @@
 .colours {
-  position: relative;
-  top: 10px;
-  /* width: 200px; */
-  /* height: 200px; */
-  max-width: 200px;
-  display: flex;
-  flex-wrap: wrap;
+    position: relative;
+    top: 10px;
+    /* width: 200px; */
+    /* height: 200px; */
+    max-width: 200px;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .colour {
-  width: 60px;
-  height: 30px;
-  cursor: pointer;
-  display: block;
-  color: black;
-  background: none;
-  text-decoration: none;
-  border: none;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
+    display: block;
+    color: black;
+    background: none;
+    text-decoration: none;
+    border: none;
 }
 
 .controls {
-  min-width: 50px;
+    min-width: 50px;
 }
 
 /* columns, layout */
 
 .character-select {
-  width: 300px;
+    width: 300px;
 }
 
 .columns {
-  display: flex;
-  flex-direction: row;
-  /* flex-wrap: wrap; */
+    display: flex;
+    flex-direction: row;
+    /* flex-wrap: wrap; */
 }
 
 .column {
-  flex: 2;
-  padding: 10px;
+    flex: 2;
+    padding: 10px;
 }
 
 /* Params */
 
 .params {
-  display: flex;
-  flex-wrap: wrap;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .param {
-  display: flex;
+    display: flex;
 }
 
 .param-name {
-  flex: 1;
-  text-decoration: none;
-  text-transform: uppercase;
+    flex: 1;
+    text-decoration: none;
+    text-transform: uppercase;
 }
 
 .param-value {
-  flex: 6;
-  text-transform: uppercase;
+    flex: 6;
+    text-transform: uppercase;
 }
 
 .param-colour {
-  width: 12px;
-  height: 12px;
-  display: inline-block;
+    width: 12px;
+    height: 12px;
+    display: inline-block;
 }
 
 .param .disabled {
-  color: grey;
-  cursor: not-allowed;
+    color: grey;
+    cursor: not-allowed;
 }
-
 
 /* Recenter on smaller screens */
 @media screen and (max-width: 768px) {
-  /* .params {
+    /* .params {
     justify-content: center;
   } */
-  .columns {
-    flex-direction: column;
-  }
-  .param {
-    text-align: center;
-  }
-  .param-name {
-    flex: 4;
-  }
-  .param-value {
-    justify-content: end;
-    flex: 4;
-  }
+    .columns {
+        flex-direction: column;
+    }
+    .param {
+        text-align: center;
+    }
+    .param-name {
+        flex: 4;
+    }
+    .param-value {
+        justify-content: end;
+        flex: 4;
+    }
 }
 
 .explorer {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }

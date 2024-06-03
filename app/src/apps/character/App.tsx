@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "../../networkConfig";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import { fromB64 } from "@mysten/bcs";
 import { useParams } from "react-router-dom";
 import { Char } from "./Char";
-import { bcs } from "@mysten/sui.js/bcs";
+import { bcs } from "@mysten/sui/bcs";
 import { Param } from "./Param";
-import { normalizeSuiAddress } from "@mysten/sui.js/utils";
+import { normalizeSuiAddress } from "@mysten/sui/utils";
 
 const image = bcs.struct("Props", {
     body_type: bcs.String,
@@ -251,6 +251,7 @@ export function App() {
                         <a
                             href={`https://suiscan.xyz/testnet/object/${characterId}`}
                             target="_blank"
+                            rel="noreferrer"
                         >
                             View on SuiScan
                         </a>
@@ -268,32 +269,36 @@ export function App() {
         if (!canInteract) return;
         setCanInteract(false);
 
-        const txb = new TransactionBlock();
-        const char = txb.moveCall({
+        const tx = new Transaction();
+        const char = tx.moveCall({
             target: `${packageId}::character::new`,
             arguments: [
-                txb.object(builderId),
-                txb.pure.string(data.body_type),
-                txb.pure.string(data.hair_type),
-                txb.pure.string(data.hairColour),
-                txb.pure.string(data.eyesColour),
-                txb.pure.string(data.pantsColour),
-                txb.pure.string(data.skinColour),
-                txb.pure.string(data.baseColour),
-                txb.pure.string(data.accentColour),
+                tx.object(builderId),
+                tx.pure.string(data.body_type),
+                tx.pure.string(data.hair_type),
+                tx.pure.string(data.hairColour),
+                tx.pure.string(data.eyesColour),
+                tx.pure.string(data.pantsColour),
+                tx.pure.string(data.skinColour),
+                tx.pure.string(data.baseColour),
+                tx.pure.string(data.accentColour),
             ],
         });
 
-        txb.transferObjects([char], zkLogin.address!);
+        tx.transferObjects([char], zkLogin.address!);
 
-        const { digest } = await flow.sponsorAndExecuteTransactionBlock({
-            network: "testnet", // @ts-ignore
+        const { digest } = await flow.sponsorAndExecuteTransaction({
+            network: "testnet",
             client,
-            transactionBlock: txb,
+            transaction: tx,
         });
 
         console.log("Transaction sent", digest);
-        await client.waitForTransactionBlock({ digest, timeout: 10000, pollInterval: 500 });
+        await client.waitForTransaction({
+            digest,
+            timeout: 10000,
+            pollInterval: 500,
+        });
         refetch();
     }
 
@@ -306,31 +311,35 @@ export function App() {
         if (!characterId) return;
         setCanInteract(false);
 
-        const txb = new TransactionBlock();
-        txb.moveCall({
+        const tx = new Transaction();
+        tx.moveCall({
             target: `${packageId}::character::edit`,
             arguments: [
-                txb.object(builderId),
-                txb.object(characterId),
-                txb.pure.string(data.body_type),
-                txb.pure.string(data.hair_type),
-                txb.pure.string(data.hairColour),
-                txb.pure.string(data.eyesColour),
-                txb.pure.string(data.pantsColour),
-                txb.pure.string(data.skinColour),
-                txb.pure.string(data.baseColour),
-                txb.pure.string(data.accentColour),
+                tx.object(builderId),
+                tx.object(characterId),
+                tx.pure.string(data.body_type),
+                tx.pure.string(data.hair_type),
+                tx.pure.string(data.hairColour),
+                tx.pure.string(data.eyesColour),
+                tx.pure.string(data.pantsColour),
+                tx.pure.string(data.skinColour),
+                tx.pure.string(data.baseColour),
+                tx.pure.string(data.accentColour),
             ],
         });
 
-        const { digest } = await flow.sponsorAndExecuteTransactionBlock({
-            network: "testnet", // @ts-ignore
+        const { digest } = await flow.sponsorAndExecuteTransaction({
+            network: "testnet",
             client,
-            transactionBlock: txb,
+            transaction: tx,
         });
 
         console.log("Transaction sent", digest);
-        await client.waitForTransactionBlock({ digest, timeout: 10000, pollInterval: 500 });
+        await client.waitForTransaction({
+            digest,
+            timeout: 10000,
+            pollInterval: 500,
+        });
         refetch();
     }
 
@@ -343,7 +352,7 @@ export function App() {
     // @ts-ignore
     async function getCharacter(data: Character) {
         setCanInteract(false);
-        const inspect = new TransactionBlock();
+        const inspect = new Transaction();
         inspect.moveCall({
             target: `${packageId}::character::new`,
             arguments: [
@@ -360,7 +369,7 @@ export function App() {
         });
 
         const { results, error } = await client.devInspectTransactionBlock({
-            sender: normalizeSuiAddress("0xa11ce"), // @ts-ignore
+            sender: normalizeSuiAddress("0xa11ce"),
             transactionBlock: inspect,
         });
 
