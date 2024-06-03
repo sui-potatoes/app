@@ -1,4 +1,15 @@
 node_modules
 dist
+
+# dotenv environment variables file
+.env
+.env.test
+.env.local
+.env*
+
+# IDE
 .idea
 .vscode
+
+# other
+.DS_Store
