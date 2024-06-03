@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "@mysten/dapp-kit/dist/index.css";
 import "@radix-ui/themes/styles.css";
 
-import { SuiClientProvider } from "@mysten/dapp-kit";
+import { SuiClientProvider, WalletProvider } from "@mysten/dapp-kit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { networkConfig } from "./networkConfig.ts";
 
@@ -17,15 +17,14 @@ const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
         <QueryClientProvider client={queryClient}>
-            <SuiClientProvider
-                networks={networkConfig}
-                defaultNetwork="testnet"
-            >
-                <EnokiFlowProvider apiKey={enokiApi}>
-                    <BrowserRouter>
-                        <App />
-                    </BrowserRouter>
-                </EnokiFlowProvider>
+            <SuiClientProvider networks={networkConfig} defaultNetwork="devnet">
+                <WalletProvider theme={null}>
+                    <EnokiFlowProvider apiKey={enokiApi}>
+                        <BrowserRouter>
+                            <App />
+                        </BrowserRouter>
+                    </EnokiFlowProvider>
+                </WalletProvider>
             </SuiClientProvider>
         </QueryClientProvider>
     </React.StrictMode>,

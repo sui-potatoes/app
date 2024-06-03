@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createPeerConnection } from "./lib";
+import { createPeerConnection } from "./_lib";
 
 export type PingProps = {
     remoteDescription?: string | null;
@@ -30,8 +30,8 @@ export default function Ping({ remoteDescription, onHostClick }: PingProps) {
             !remoteDescription &&
                 onHostClick &&
                 onHostClick(btoa(response.localDescription));
-            setInterval(() => response.sendMessage("ping"), 1000);
-            setSendMessage((e: string) => sendMessage(e));
+            // setInterval(() => response.sendMessage("ping"), 1000);
+            // setSendMessage((e: string) => sendMessage(e));
         });
     }, [remoteDescription]);
 

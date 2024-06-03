@@ -285,7 +285,11 @@ export function App() {
         });
 
         console.log("Transaction sent", digest);
-        await client.waitForTransactionBlock({ digest, timeout: 10000, pollInterval: 500 });
+        await client.waitForTransaction({
+            digest,
+            timeout: 10000,
+            pollInterval: 500,
+        });
         refetch();
     }
 
@@ -322,7 +326,11 @@ export function App() {
         });
 
         console.log("Transaction sent", digest);
-        await client.waitForTransactionBlock({ digest, timeout: 10000, pollInterval: 500 });
+        await client.waitForTransactionBlock({
+            digest,
+            timeout: 10000,
+            pollInterval: 500,
+        });
         refetch();
     }
 
