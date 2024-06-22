@@ -3,7 +3,7 @@
 
 module gogame::render {
     use std::ascii::String;
-    use gogame::go::{Self,Board};
+    use gogame::go::Board;
 
     /// Print the board as an SVG.
     public fun svg(b: &Board): String {

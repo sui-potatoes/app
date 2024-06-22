@@ -48,10 +48,10 @@ export function App() {
     const packageId = useNetworkVariable("goPackageId");
     const navigate = useNavigate();
 
-    const [account, setAccount] = useState<typeof Account | any | null>(null);
+    const [account, setAccount] = useState<typeof Account | any>();
     const [canInteract, setCanInteract] = useState(false);
     const [turn, setTurn] = useState<1 | 2>(1);
-    const [game, setGame] = useState<typeof Game.$inferType | null>(null);
+    const [game, setGame] = useState<typeof Game.$inferType>();
     const [data, setData] = useState<number[][]>(
         Array(9).fill(Array(9).fill(0)),
     );
@@ -115,46 +115,27 @@ export function App() {
         game?.players.player2 && players.push(game.players.player2);
     }, [turn]);
 
-    // Not logged in
-    if (!zkLogin.address) return <div>Sign in to use the app</div>;
-
-    // No account, create one
-    if (!account)
-        return (
-            <>
-                <button className="button" onClick={() => newAccount()}>
-                    Create account
-                </button>
-                <div
-                    className="loader"
-                    style={{
-                        visibility: canInteract ? "hidden" : "visible",
-                        margin: "10px 0px 0px 10px",
-                    }}
-                ></div>
-            </>
-        );
-
     // No game found
     if (urlGameId && !game) return <div>Loading...</div>;
 
     // Account exists
-    if (!urlGameId && account)
+    if (!urlGameId)
         return (
             <>
                 <ul className="my-games">
                     <li className="list-title" style={{ listStyle: "none" }}>
                         My Games
                     </li>
-                    {(account.games as string[]).map((game, i) => {
-                        return (
-                            <li key={`game-${i}`}>
-                                <Link to={`/go/${game}`}>
-                                    {formatAddress(game)}
-                                </Link>
-                            </li>
-                        );
-                    })}
+                    {account &&
+                        (account.games as string[]).map((game, i) => {
+                            return (
+                                <li key={`game-${i}`}>
+                                    <Link to={`/go/${game}`}>
+                                        {formatAddress(game)}
+                                    </Link>
+                                </li>
+                            );
+                        })}
                     <hr style={{ width: "100px" }} />
                     <li style={{ listStyle: "none" }}>
                         <button
@@ -195,11 +176,11 @@ export function App() {
     if (!game) return <div>Loading...</div>;
 
     const players = [];
-    game?.players.player1 && players.push(game.players.player1);
-    game?.players.player2 && players.push(game.players.player2);
+    game.players.player1 && players.push(game.players.player1);
+    game.players.player2 && players.push(game.players.player2);
 
-    const isMyGame = players.includes(account.id);
-    const myColor = game.players.player1 === account.id ? 1 : 2;
+    const isMyGame = players.includes(account?.id);
+    const myColor = game.players.player1 === account?.id ? 1 : 2;
     const isMyTurn = isMyGame && turn === myColor;
     const lastMove = game.board.moves.slice(-1)[0];
     const size = game.board.size as 9 | 13 | 19;
@@ -217,12 +198,12 @@ export function App() {
                     onClick={handleClick}
                 />
                 <p>
-                    {!players.includes(account.id) && players.length == 1 && (
+                    {!players.includes(account?.id) && players.length == 1 && (
                         <button
-                            disabled={!canInteract}
+                            disabled={!canInteract || !account}
                             onClick={() => joinGame()}
                         >
-                            Join?
+                            Join? {!account ? "(You have to sign in first)" : ""}
                         </button>
                     )}
                 </p>
@@ -318,65 +299,105 @@ export function App() {
             ],
         });
 
-        await flow.sponsorAndExecuteTransaction({
+        const { digest } = await flow.sponsorAndExecuteTransaction({
             network: "testnet", // @ts-ignore
             client,
             transaction: tx,
         });
 
         console.log("move played");
-        fetchGame();
-        setCanInteract(true);
-    }
 
-    async function newAccount() {
-        setCanInteract(false);
-        const tx = new Transaction();
-        tx.moveCall({ target: `${packageId}::game::new_account` });
-        await flow.sponsorAndExecuteTransaction({
-            network: "testnet", // @ts-ignore
-            client,
-            transaction: tx,
-        });
-        await refetch();
-        setAccount(null);
+        await client.waitForTransaction({ digest });
+        await fetchGame();
+        setCanInteract(true);
     }
 
     /** Creates a new Game Object and starts a new game. */
     async function newGame(size: 9 | 13 | 19 = 13) {
-        if (!account) return console.log("Account not found");
         setCanInteract(false);
         console.log("Creating new game");
         const tx = new Transaction();
+        const accArg = account
+            ? tx.object(account.id)
+            : tx.moveCall({
+                  target: `${packageId}::game::new_account`,
+              });
+
         tx.moveCall({
             target: `${packageId}::game::new`,
-            arguments: [tx.object(account.id), tx.pure.u8(size)],
+            arguments: [accArg, tx.pure.u8(size)],
         });
-        await flow.sponsorAndExecuteTransaction({
+
+        // if there wasn't an account, we need to create one
+        if (!account) {
+            tx.moveCall({
+                target: `${packageId}::game::keep`,
+                arguments: [accArg],
+            });
+        }
+
+        const { digest } = await flow.sponsorAndExecuteTransaction({
             network: "testnet", // @ts-ignore
             client,
             transaction: tx,
         });
-        console.log("created");
-        await refetch();
-        navigate(`/go`);
+
+        const { objectChanges } = await client.waitForTransaction({
+            digest,
+            timeout: 10000,
+            pollInterval: 500,
+            options: { showObjectChanges: true },
+        });
+
+        if (!objectChanges) {
+            console.log("No object changes");
+            return navigate(`/go`);
+        }
+
+        const change = objectChanges.find(
+            (c) =>
+                c.type === "created" &&
+                c.objectType === `${packageId}::game::Game`,
+        );
+
+        if (change?.type !== "created") {
+            console.log("No game created");
+            return navigate(`/go`);
+        }
+
+        return navigate(`/go/${change.objectId}`);
     }
 
     async function joinGame() {
         setCanInteract(false);
-        if (!account) return console.log("Account not found");
         if (!game) return console.log("Game not found");
 
         const tx = new Transaction();
+        const accArg = account
+            ? tx.object(account.id)
+            : tx.moveCall({
+                  target: `${packageId}::game::new_account`,
+              });
+
         tx.moveCall({
             target: `${packageId}::game::join`,
             arguments: [tx.object(game.id), tx.object(account.id)],
         });
-        await flow.sponsorAndExecuteTransaction({
+
+        if (!account) {
+            tx.moveCall({
+                target: `${packageId}::game::keep`,
+                arguments: [accArg],
+            });
+        }
+
+        const { digest } = await flow.sponsorAndExecuteTransaction({
             network: "testnet", // @ts-ignore
             client,
             transaction: tx,
         });
+
+        await client.waitForTransaction({ digest });
         await refetch();
     }
 
@@ -395,11 +416,13 @@ export function App() {
             target: `${packageId}::game::${action}`,
             arguments: [tx.object(game.id), tx.object(account.id)],
         });
-        await flow.sponsorAndExecuteTransaction({
+        const { digest } = await flow.sponsorAndExecuteTransaction({
             network: "testnet", // @ts-ignore
             client,
             transaction: tx,
         });
+
+        await client.waitForTransaction({ digest });
         navigate(`/go`);
     }
 }

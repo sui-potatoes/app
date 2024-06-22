@@ -50,11 +50,16 @@ module gogame::game {
     }
 
     /// Create a new account and send it to the sender.
-    public fun new_account(ctx: &mut TxContext) {
-        transfer::transfer(Account {
+    public fun new_account(ctx: &mut TxContext): Account {
+        Account {
             id: object::new(ctx),
             games: vec_set::empty()
-        }, ctx.sender());
+        }
+    }
+
+    /// Keep the Account at the sender's address.
+    public fun keep(acc: Account, ctx: &TxContext) {
+        transfer::transfer(acc, ctx.sender());
     }
 
     /// Start a new Game.
