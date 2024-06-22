@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #[test_only]
-module gogame::gogame_tests {
+module gogame::go_tests {
     use gogame::go;
 
     #[test, expected_failure(abort_code = go::ESuicideMove)]
@@ -168,6 +168,5 @@ module gogame::gogame_tests {
         ]);
 
         // std::debug::print(&board.print_svg());
-
     }
 }

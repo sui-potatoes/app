@@ -7,6 +7,8 @@ import { App as Character } from "./apps/character/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
 
+const GOBACK_KEY = "go_back";
+
 export function App() {
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
@@ -15,7 +17,11 @@ export function App() {
         if (window.location.hash)
             flow.handleAuthCallback().then(() => {
                 // @ts-ignore
-                window.location = window.location.href.split("#")[0];
+                window.location = localStorage.getItem(GOBACK_KEY)
+                    ? localStorage.getItem(GOBACK_KEY)
+                    : window.location.href.split("#")[0];
+
+                localStorage.removeItem(GOBACK_KEY);
             });
     }, []);
 
@@ -28,6 +34,11 @@ export function App() {
                             <button
                                 className="connect"
                                 onClick={async () => {
+                                    localStorage.setItem(
+                                        GOBACK_KEY,
+                                        window.location.href,
+                                    );
+
                                     // Refresh the page to go back to the root path, this is a
                                     // workaround for the issue where google auth doesn't work
                                     // when the app is hosted on a subpath.

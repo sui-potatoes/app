@@ -3,7 +3,7 @@
 
 module gogame::render {
     use std::ascii::String;
-    use gogame::go::{Self,Board};
+    use gogame::go::Board;
 
     /// Print the board as an SVG.
     public fun svg(b: &Board): String {
@@ -95,7 +95,7 @@ module gogame::render {
 
     #[test]
     fun test_rendering_safari() {
-        let board = go::from_vector(vector[
+        let board = gogame::go::from_vector(vector[
             vector[0, 0, 0, 0, 0, 0, 0, 0, 0],
             vector[0, 0, 2, 0, 0, 0, 0, 1, 0],
             vector[0, 1, 2, 1, 1, 1, 1, 0, 0],
