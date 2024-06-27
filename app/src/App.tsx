@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import Root from "./Root.tsx";
 import { NavLink } from "react-router-dom";
 import { App as GoGame } from "./apps/go-game/App.tsx";
-import { App as RockPaperScissors } from "./apps/rock-paper-scissors/App.tsx";
+// import { App as RockPaperScissors } from "./apps/rock-paper-scissors/App.tsx";
 import { App as Character } from "./apps/character/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
