@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import Root from "./Root.tsx";
 import { NavLink } from "react-router-dom";
 import { App as GoGame } from "./apps/go-game/App.tsx";
-import { App as RockPaperScissors } from "./apps/rock-paper-scissors/App.tsx";
+// import { App as RockPaperScissors } from "./apps/rock-paper-scissors/App.tsx";
 import { App as Character } from "./apps/character/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
@@ -76,10 +76,11 @@ export function App() {
                         <NavLink to="/char">character</NavLink>
                     </li>
                     <li>
+                        <a href="https://github.com/sui-potatoes/app">Source Code</a>
                         {/* <NavLink  to="/">rock paper scissors (disabled)</NavLink> */}
-                        <p style={{ cursor: "default" }}>
+                        {/* <p style={{ cursor: "default" }}>
                             rock paper scissors (disabled)
-                        </p>
+                        </p> */}
                     </li>
                 </ul>
             </div>
@@ -90,7 +91,7 @@ export function App() {
                     <Route path="/go/:id" element={<GoGame />} />
                     <Route path="/char" element={<Character />} />
                     <Route path="/char/:id" element={<Character />} />
-                    <Route path="/rps" element={<RockPaperScissors />} />
+                    {/* <Route path="/rps" element={<RockPaperScissors />} /> */}
                 </Routes>
             </div>
         </div>

@@ -24,6 +24,10 @@ body {
     display: none !important;
 }
 
+.sidebar ul > li::before {
+    content: "> ";
+}
+
 @media screen and (max-width: 768px) {
     .container {
         flex-direction: column;
@@ -38,6 +42,10 @@ body {
 
     .sidebar {
         text-align: center;
+    }
+
+    .sidebar ul > li::before {
+        content: "";
     }
 }
 
