@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark-theme" style="color-scheme: dark">
+<html lang="en" class="" style="color-scheme: dark">
     <head>
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -15,5 +15,20 @@
     <body>
         <div id="root"></div>
         <script type="module" src="/src/main.tsx"></script>
+        <div class="switch" onclick="toggleTheme()"></div>
+        <script>
+            const html = document.documentElement;
+            const theme = window.localStorage.getItem("theme");
+            if (theme && getTheme() !== theme) toggleTheme();
+
+            function getTheme() {
+                return html.classList.contains("dark-theme") ? "dark" : "light";
+            }
+
+            function toggleTheme() {
+                html.classList.toggle("dark-theme");
+                window.localStorage.setItem("theme", getTheme());
+            }
+        </script>
     </body>
 </html>

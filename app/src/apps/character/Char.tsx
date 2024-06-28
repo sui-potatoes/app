@@ -14,7 +14,7 @@ export function Char({
 }: CharOptions) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 240">
-            <style>{`.s  {fill: #${skinColour} } .e { fill: #${eyesColour} } .h { fill: #${hairColour} } .l { fill: #${pantsColour} } .b { fill: #${baseColour} } .a { fill: #${accentColour} }`}</style>
+            <style>{`* { stroke: none; } .s  {fill: #${skinColour} } .e { fill: #${eyesColour} } .h { fill: #${hairColour} } .l { fill: #${pantsColour} } .b { fill: #${baseColour} } .a { fill: #${accentColour} }`}</style>
             <rect x="80" y="100" width="60" height="60" className="b" />{" "}
             {/* body */}
             <rect x="80" y="40" width="60" height="60" className="s" />{" "}
@@ -23,16 +23,18 @@ export function Char({
             {/* left eye */}
             <rect x="120" y="60" width="20" height="20" className="e" />{" "}
             {/* right eye */}
-            <rect x="80" y="160" width="60" height="60" className="l" />{" "}
+            <rect x="80" y="160" width="20" height="60" className="l" />{" "}
+            <rect x="120" y="160" width="20" height="60" className="l" />{" "}
+            <rect x="99" y="160" width="22" height="20" className="l" />{" "}
             {/* legs */}
-            <rect
+            {/* <rect
                 x="100"
                 y="180"
                 width="20"
                 height="40"
                 className="gap"
                 fill="#fff"
-            />{" "}
+            />{" "} */}
             {/* gap */}
             <rect x="60" y="100" width="20" height="60" className="s" />{" "}
             {/* left arm */}

@@ -1,6 +1,16 @@
+/**
+ * Imports variables from `styles.css` and applies them to the Go Game components.
+ */
+
 svg circle {
     stroke: #000;
 }
+
+.dark-theme svg .black {
+    stroke: #fff;
+    stroke-width: 1px;
+}
+
 svg .black {
     fill: #000;
 }
@@ -27,11 +37,13 @@ svg .last-move {
 .loader {
     width: 100px;
     height: 15px;
+    mask: radial-gradient(circle closest-side, #000 94%, #0000) left / 20% 100%;
     -webkit-mask: radial-gradient(circle closest-side, #000 94%, #0000) left /
         20% 100%;
     background: linear-gradient(#000 0 0) left/0% 100% no-repeat #ddd;
     animation: l17 2s infinite steps(6);
 }
+
 @keyframes l17 {
     100% {
         background-size: 120% 100%;
@@ -42,11 +54,15 @@ svg .last-move {
     cursor: pointer;
 }
 
+.dark-theme .black:not(.disabled) .empty:hover {
+    stroke: #fff;
+    stroke-width: 1px;
+}
+
 /* White player is choosing a Move */
 .white:not(.disabled) .empty:hover {
     background-color: #fff;
     fill: #fff;
-    border: #000;
     opacity: 0.5;
     box-shadow: 0 0 10px #000;
 }
@@ -74,7 +90,7 @@ svg.disabled {
 }
 
 .button {
-    color: #000;
+    color: var(--text-color);
     background: none;
     border: none;
     cursor: pointer;
@@ -82,7 +98,7 @@ svg.disabled {
 }
 
 .button:hover {
-    color: #000;
+    color: var(--text-color);
     text-decoration: underline;
 }
 
@@ -91,17 +107,17 @@ svg.disabled {
     /* display: flex; */
     justify-content: space-between;
     margin-bottom: 20px;
-    color: black;
+    color: var(--text-color);
 }
 
 .buttons button:hover {
-    color: #000;
+    color: var(--text-color);
     cursor: pointer;
     text-decoration: underline !important;
 }
 
 .buttons button:disabled {
-    color: #aaa;
+    color: var(--disabled-color);
     cursor: not-allowed;
     text-decoration: underline !important;
 }
@@ -109,7 +125,7 @@ svg.disabled {
 .buttons button,
 .buttons a {
     background: none;
-    color: #000;
+    color: var(--text-color);
     text-decoration: none;
     text-transform: capitalize;
 }
@@ -123,7 +139,7 @@ svg.disabled {
 .my-games li a {
     margin: 10px 0;
     text-decoration: none;
-    color: #000;
+    color: var(--text-color);
 }
 
 .my-games li:hover {
@@ -135,7 +151,7 @@ svg.disabled {
     background: none;
     border: none;
     padding: 0;
-    color: #000;
+    color: var(--text-color);
     cursor: pointer;
     text-decoration: none;
 }
