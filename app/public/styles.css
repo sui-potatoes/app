@@ -1,9 +1,38 @@
+/* I want to create variables for colours, text color, navbar colour and so on */
+/* I want to create a global style for the body */
+:root {
+    --text-color: #000;
+    --background-color: #fff;
+    --button-color: #eee;
+    --disabled-color: #aaa;
+}
+
+.dark-theme * {
+    --text-color: #fff;
+    --background-color: #000;
+    --button-color: #333;
+    --disabled-color: #666;
+}
+
 body {
     font-family: "Rubik", sans-serif;
-    background-color: #fff;
-    color: black;
+    background-color: var(--background-color);
+    color: var(--text-color);
     margin: 0;
     padding: 0;
+}
+
+.switch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--button-color);
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
 }
 
 .container {
@@ -62,7 +91,7 @@ body {
 
 .sidebar ul li,
 .sidebar ul li a {
-    color: black;
+    color: var(--text-color);
     padding: 0px;
     margin-bottom: 20px;
     font-weight: normal;
@@ -97,7 +126,7 @@ body {
 }
 
 .buttons button {
-    background-color: #eee;
+    background-color: var(--button-color);
     border: none;
     padding: 10px;
     cursor: pointer;
@@ -110,7 +139,7 @@ body {
 }
 
 .connect {
-    color: black;
+    color: var(--text-color);
     text-decoration: underline;
     text-transform: uppercase;
 }
@@ -124,7 +153,7 @@ body {
     text-align: left !important;
     text-transform: uppercase !important;
     box-shadow: none !important;
-    color: black !important;
+    color: var(--text-color) !important;
     text-decoration: underline !important;
     font-size: 16px;
 }
@@ -138,7 +167,7 @@ body {
 
 a,
 button {
-    color: #000;
+    color: var(--text-color);
     background: none;
     border: none;
     cursor: pointer;
@@ -148,12 +177,12 @@ button {
 
 a:hover,
 button:hover {
-    color: #000;
+    color: var(--text-color);
     text-decoration: underline;
 }
 
 button:disabled {
-    color: #aaa;
+    color: var(--disabled-color);
     cursor: not-allowed;
     /* text-decoration: underline !important; */
 }
