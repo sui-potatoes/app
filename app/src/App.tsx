@@ -6,6 +6,7 @@ import { App as GoGame } from "./apps/go-game/App.tsx";
 import { App as Character } from "./apps/character/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 
 const GOBACK_KEY = "go_back";
 
@@ -26,7 +27,7 @@ export function App() {
     }, []);
 
     return (
-        <div className="container">
+        <div className="md:flex flex-wrap gap-5 items-center min-h-[100vh]">
             <div className="sidebar">
                 <p className="wallet connect">
                     <u>
@@ -94,6 +95,8 @@ export function App() {
                     {/* <Route path="/rps" element={<RockPaperScissors />} /> */}
                 </Routes>
             </div>
+
+            <Toaster position={"bottom-center"} />
         </div>
     );
 }
