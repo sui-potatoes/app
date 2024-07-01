@@ -141,15 +141,16 @@ export function App() {
                     })}
                 </ul>
 
-                <div className="flex flex-wrap gap-5 pt-3 list-none">
+                <div className="pt-3">
+                    <div className="w-[200px] h-[1px] bg-gray-300 mb-4" />
                     {
                         BOARD_SIZES.map((size: number) => (
                             <button
                                 disabled={!canInteract}
                                 onClick={() => newGame(size)}
-                                style={{ listStyle: "none" }}
+                                className="block"
                             >
-                                New {size}x{size}
+                                New {size} x {size} board
                             </button>
                         ))
                     }
