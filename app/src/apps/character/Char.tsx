@@ -13,7 +13,7 @@ export function Char({
     accentColour,
 }: CharOptions) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 240">
+        <svg className="max-md:max-w-[240px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 240">
             <style>{`* { stroke: none; } .s  {fill: #${skinColour} } .e { fill: #${eyesColour} } .h { fill: #${hairColour} } .l { fill: #${pantsColour} } .b { fill: #${baseColour} } .a { fill: #${accentColour} }`}</style>
             <rect x="80" y="100" width="60" height="60" className="b" />{" "}
             {/* body */}
