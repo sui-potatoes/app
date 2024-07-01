@@ -113,7 +113,7 @@ export function App() {
                     </li>
                 </ul>
             </div>
-            <div className="content">
+            <div className="content py-[10px] px-[20px] md:py-[20px]">
                 <Routes>
                     <Route path="/" element={<Root />} />
                     <Route path="/go" element={<GoGame />} />
