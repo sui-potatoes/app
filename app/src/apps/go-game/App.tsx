@@ -146,6 +146,7 @@ export function App() {
                     {
                         BOARD_SIZES.map((size: number) => (
                             <button
+                                key={size}
                                 disabled={!canInteract}
                                 onClick={() => newGame(size)}
                                 className="block"
