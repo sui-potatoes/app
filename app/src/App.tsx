@@ -13,6 +13,7 @@ import {
     SUI_TYPE_ARG,
 } from "@mysten/sui/utils";
 import { requestSuiFromFaucetV1, getFaucetHost } from "@mysten/sui/faucet";
+import { Toaster } from "react-hot-toast";
 
 const GOBACK_KEY = "go_back";
 
@@ -52,7 +53,7 @@ export function App() {
     }, [zkLogin.address]);
 
     return (
-        <div className="container">
+        <div className="md:flex flex-wrap gap-5 items-center min-h-[100vh]">
             <div className="sidebar">
                 <p className="wallet connect">
                     <u>
@@ -122,6 +123,8 @@ export function App() {
                     {/* <Route path="/rps" element={<RockPaperScissors />} /> */}
                 </Routes>
             </div>
+
+            <Toaster position={"bottom-center"} />
         </div>
     );
 }

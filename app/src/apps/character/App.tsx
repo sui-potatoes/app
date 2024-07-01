@@ -10,6 +10,7 @@ import { Char } from "./Char";
 import { bcs } from "@mysten/sui/bcs";
 import { Param } from "./Param";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
+import { toast } from "react-hot-toast";
 
 const image = bcs.struct("Props", {
     body_type: bcs.String,
@@ -108,6 +109,8 @@ export function App() {
         accentColour: "ead4aa",
     });
 
+    const [initialCharacter, setInitialCharacter] = useState<string | null>(null);
+
     useEffect(() => {
         if (!characters) return;
         if (!characters.data.length) {
@@ -124,6 +127,7 @@ export function App() {
         setCanInteract(true);
         setCharacterId(data.objectId);
         setChar({ ...image });
+        setInitialCharacter(JSON.stringify({...image}));
     }, [characters]);
 
     if (isPending) return <div>Loading...</div>;
@@ -140,13 +144,13 @@ export function App() {
     // }, [character]);
 
     return (
-        <div className="columns">
-            <div className="character-select column">
+        <div className="grid md:grid-cols-2 gap-5">
+            <div className="">
                 <Char {...char} />
             </div>
-            <div className="param sm-show">
+            <div className=" text-center sm-show">
                 <button
-                    disabled={!zkLogin.address || !canInteract}
+                    disabled={!zkLogin.address || !canInteract || JSON.stringify(char) === initialCharacter}
                     onClick={() => {
                         characterId
                             ? updateCharacter(char)
@@ -158,12 +162,7 @@ export function App() {
                 </button>
             </div>
             <div
-                className="column"
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                }}
+                className="flex flex-col gap-3 justify-center"
             >
                 <Param
                     name="hair type"
@@ -234,7 +233,7 @@ export function App() {
                 <div className="md-show param">
                     <button
                         style={{ padding: "20px 0" }}
-                        disabled={!zkLogin.address || !canInteract}
+                        disabled={!zkLogin.address || !canInteract || JSON.stringify(char) === initialCharacter}
                         onClick={() => {
                             characterId
                                 ? updateCharacter(char)
@@ -300,6 +299,7 @@ export function App() {
             timeout: 10000,
             pollInterval: 500,
         });
+        toast.success("Character created successfully!");
         refetch();
     }
 
@@ -340,6 +340,8 @@ export function App() {
             timeout: 10000,
             pollInterval: 500,
         });
+        toast.success("Character updated successfully!");
+
         refetch();
     }
 

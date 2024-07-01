@@ -9,6 +9,9 @@ import { bcs } from "@mysten/sui/bcs";
 import { fromB64 } from "@mysten/bcs";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatAddress } from "@mysten/sui/utils";
+import { toast } from "react-hot-toast";
+
+const BOARD_SIZES = [9, 13, 19];
 
 const Move = bcs.struct("Move", {
     x: bcs.u8(),
@@ -122,54 +125,36 @@ export function App() {
     if (!urlGameId)
         return (
             <>
-                <ul className="my-games">
-                    <li className="list-title" style={{ listStyle: "none" }}>
-                        My Games
-                    </li>
+                <div>
+                    My Games
+                </div>
+                <ul className="my-games px-6">
                     {account &&
                         (account.games as string[]).map((game, i) => {
                             return (
-                                <li key={`game-${i}`}>
+                                <li key={`game-${i}`} className="list-disc">
                                     <Link to={`/go/${game}`}>
                                         {formatAddress(game)}
                                     </Link>
                                 </li>
                             );
-                        })}
-                    <hr style={{ width: "100px" }} />
-                    <li style={{ listStyle: "none" }}>
-                        <button
-                            disabled={!canInteract}
-                            onClick={() => newGame(9)}
-                            style={{ listStyle: "none" }}
-                        >
-                            New 9x9
-                        </button>
-                    </li>
-                    <li style={{ listStyle: "none" }}>
-                        <button
-                            disabled={!canInteract}
-                            onClick={() => newGame(13)}
-                            style={{ listStyle: "none" }}
-                        >
-                            New 13x13
-                        </button>
-                    </li>
-                    <li style={{ listStyle: "none" }}>
-                        <button
-                            disabled={!canInteract}
-                            onClick={() => newGame(19)}
-                        >
-                            New 19x19
-                        </button>
-                    </li>
-                    <li
-                        className="loader"
-                        style={{
-                            visibility: canInteract ? "hidden" : "visible",
-                        }}
-                    ></li>
+                    })}
                 </ul>
+
+                <div className="flex flex-wrap gap-5 pt-3 list-none">
+                    {
+                        BOARD_SIZES.map((size: number) => (
+                            <button
+                                disabled={!canInteract}
+                                onClick={() => newGame(size)}
+                                style={{ listStyle: "none" }}
+                            >
+                                New {size}x{size}
+                            </button>
+                        ))
+                    }
+                </div>
+                <div className={`loader ${canInteract ? 'hidden' : ''}`} />
             </>
         );
 
@@ -187,7 +172,7 @@ export function App() {
 
     return (
         game && (
-            <>
+            <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
                 <PlayableBoard
                     disabled={!canInteract && !isMyTurn}
                     size={size}
@@ -228,6 +213,7 @@ export function App() {
                                 type="button"
                                 className="explorer-link"
                                 href={`https://suiscan.xyz/testnet/object/${game.id}`}
+                                target="_blank"
                             >
                                 Game (Explorer)
                             </a>
@@ -242,7 +228,7 @@ export function App() {
                         Quit / End game
                     </button>
                 </div>
-            </>
+            </div>
         )
     );
 
@@ -313,7 +299,9 @@ export function App() {
     }
 
     /** Creates a new Game Object and starts a new game. */
-    async function newGame(size: 9 | 13 | 19 = 13) {
+    async function newGame(size: number = 13) {
+        if (!BOARD_SIZES.includes(size)) throw new Error("Invalid board size");
+    
         setCanInteract(false);
         console.log("Creating new game");
         const tx = new Transaction();
@@ -363,6 +351,8 @@ export function App() {
             console.log("No game created");
             return navigate(`/go`);
         }
+
+        await toast.success("Game created successfully!");
 
         return navigate(`/go/${change.objectId}`);
     }
