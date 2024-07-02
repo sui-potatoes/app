@@ -123,10 +123,9 @@ export function ActiveGame({ account, matchId }: Params) {
 
         setCanPlay(false);
 
-        await flow.sponsorAndExecuteTransaction({
+        await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
-            network: "testnet", // @ts-ignore
-            client,
         });
 
         console.log("move committed");
@@ -147,10 +146,9 @@ export function ActiveGame({ account, matchId }: Params) {
             ],
         });
 
-        await flow.sponsorAndExecuteTransaction({
+        await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
-            network: "testnet", // @ts-ignore
-            client,
         });
 
         console.log("move revealed");

@@ -289,15 +289,14 @@ export function App() {
 
         tx.transferObjects([char], zkLogin.address!);
 
-        const { digest } = await flow.sponsorAndExecuteTransaction({
-            network: "testnet",
-            client,
+        const result = await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
         });
 
-        console.log("Transaction sent", digest);
+        console.log("Transaction sent", result.digest);
         await client.waitForTransaction({
-            digest,
+            digest: result.digest,
             timeout: 10000,
             pollInterval: 500,
         });
@@ -330,15 +329,14 @@ export function App() {
             ],
         });
 
-        const { digest } = await flow.sponsorAndExecuteTransaction({
-            network: "testnet",
-            client,
+        const result = await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
         });
 
-        console.log("Transaction sent", digest);
+        console.log("Transaction sent", result.digest);
         await client.waitForTransaction({
-            digest,
+            digest: result.digest,
             timeout: 10000,
             pollInterval: 500,
         });
