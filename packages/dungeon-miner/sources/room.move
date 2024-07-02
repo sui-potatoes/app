@@ -5,7 +5,7 @@
 
 module mine_dungeon::room {
     use std::string::{Self, String};
-    use mine_dungeon::point::Point;
+    use mine_dungeon::point::{Self, Point};
 
     // === Structs ===
     
@@ -20,7 +20,14 @@ module mine_dungeon::room {
 
     // === Public functions ===
 
-    // public fun new(): Room {
+    public fun new(size: u64): Room {
+        Room {
+            exit: point::new(size / 2, size),
+            lifes: vector::empty(),
+        }
+    }
 
-    // }
+    public fun is_exit(room: Room, point: Point): bool {
+        room.exit == point
+    }
 }
