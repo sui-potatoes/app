@@ -31,9 +31,9 @@ export function Param({
     useEffect(() => setIdx(values.indexOf(defaultValue)), [defaultValue]);
 
     return (
-        <div className="param">
-            <div className="param-name">{name}</div>
-            <div className="param-value">
+        <div className="flex md:grid grid-cols-2 max-md:justify-between md:max-w-[400px]">
+            <div className="md:flex-1 decoration-none uppercase mr-5 text-left">{name}</div>
+            <div className="uppercase flex flex-wrap items-center gap-3">
                 <button
                     onClick={() => {
                         if (disabled) return;
@@ -41,12 +41,14 @@ export function Param({
                         setIdx(newIdx);
                         onChange && onChange(values[newIdx]);
                     }}
+                    className="disabled:opacity-70"
+                    disabled={disabled}
                 >
-                    {"<"}
+                    {"‹"}
                 </button>
                 {isColour ? (
                     <div
-                        className="param-colour"
+                        className="h-5 w-5"
                         style={{ backgroundColor: "#" + values[idx] }}
                     />
                 ) : (
@@ -59,8 +61,10 @@ export function Param({
                         setIdx(newIdx);
                         onChange && onChange(values[newIdx]);
                     }}
+                    className="disabled:opacity-70"
+                    disabled={disabled}
                 >
-                    {">"}
+                    {"›"}
                 </button>
             </div>
         </div>
