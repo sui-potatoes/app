@@ -97,9 +97,15 @@ body {
     cursor: pointer;
 }
 
-.sidebar ul li.active {
+.sidebar ul li .active {
+    color: var(--text-color);
     font-weight: bold;
 }
+
+.sidebar ul li .active:hover {
+    cursor: default;
+}
+
 
 .content {
     flex: 7;
