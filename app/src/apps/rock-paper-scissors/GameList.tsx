@@ -66,11 +66,10 @@ export function GameList({ account, onJoin }: Params) {
             target: `${PACKAGE_ID}::game::join_game`,
             arguments: [tx.objectRef(account), tx.object(vacant[0].id)],
         });
-        const result = await flow.sponsorAndExecuteTransaction({
+
+        const result = await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
-            network: "testnet",
-            // @ts-ignore
-            client,
         });
 
         console.log(result);

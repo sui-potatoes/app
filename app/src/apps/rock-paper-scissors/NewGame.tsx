@@ -31,11 +31,11 @@ export function NewGame({ account }: CreateParams) {
             arguments: [tx.objectRef(account), tx.pure.u8(3)],
         });
         setPending(true);
-        const result = await flow.sponsorAndExecuteTransaction({
+        const result = await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
-            network: "testnet", // @ts-ignore
-            client,
         });
+
         console.log(result);
         setPending(false);
     }
