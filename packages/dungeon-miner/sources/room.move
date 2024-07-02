@@ -3,7 +3,7 @@
 
 /// Rooms are the levels the players need to navigate through and escape from.
 
-module dungeon_miner::room {
+module mine_dungeon::room {
 
     // === Structs ===
 

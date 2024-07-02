@@ -2,5 +2,5 @@
 // SPDX-License-Identifier: MIT
 
 /// The game module contains the main game logic.
-module dungeon_miner::game {
+module mine_dungeon::game {
 }
