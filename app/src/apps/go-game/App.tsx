@@ -203,7 +203,8 @@ export function App() {
                             disabled={!canInteract || !account}
                             onClick={() => joinGame()}
                         >
-                            Join? {!account ? "(You have to sign in first)" : ""}
+                            Join?{" "}
+                            {!account ? "(You have to sign in first)" : ""}
                         </button>
                     )}
                 </p>
@@ -299,15 +300,14 @@ export function App() {
             ],
         });
 
-        const { digest } = await flow.sponsorAndExecuteTransaction({
-            network: "testnet", // @ts-ignore
-            client,
+        const result = await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
         });
 
         console.log("move played");
 
-        await client.waitForTransaction({ digest });
+        await client.waitForTransaction({ digest: result.digest });
         await fetchGame();
         setCanInteract(true);
     }
@@ -336,14 +336,13 @@ export function App() {
             });
         }
 
-        const { digest } = await flow.sponsorAndExecuteTransaction({
-            network: "testnet", // @ts-ignore
-            client,
+        const result = await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
         });
 
         const { objectChanges } = await client.waitForTransaction({
-            digest,
+            digest: result.digest,
             timeout: 10000,
             pollInterval: 500,
             options: { showObjectChanges: true },
@@ -391,13 +390,12 @@ export function App() {
             });
         }
 
-        const { digest } = await flow.sponsorAndExecuteTransaction({
-            network: "testnet", // @ts-ignore
-            client,
+        const result = await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
         });
 
-        await client.waitForTransaction({ digest });
+        await client.waitForTransaction({ digest: result.digest });
         await refetch();
     }
 
@@ -416,13 +414,12 @@ export function App() {
             target: `${packageId}::game::${action}`,
             arguments: [tx.object(game.id), tx.object(account.id)],
         });
-        const { digest } = await flow.sponsorAndExecuteTransaction({
-            network: "testnet", // @ts-ignore
-            client,
+        const result = await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
         });
 
-        await client.waitForTransaction({ digest });
+        await client.waitForTransaction({ digest: result.digest });
         navigate(`/go`);
     }
 }

@@ -22,10 +22,9 @@ export function CreateAccount({ onSuccess, onError }: CreateParams) {
     async function createAccount() {
         const tx = new Transaction();
         tx.moveCall({ target: `${PACKAGE_ID}::game::new_account` });
-        const result = await flow.sponsorTransaction({
-            // @ts-ignore
-            client,
-            network: "testnet",
+
+        const result = await client.signAndExecuteTransaction({
+            signer: await flow.getKeypair({ network: "testnet" }),
             transaction: tx,
         });
 

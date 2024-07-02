@@ -6,12 +6,21 @@ import { App as GoGame } from "./apps/go-game/App.tsx";
 import { App as Character } from "./apps/character/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
+import { useSuiClient } from "@mysten/dapp-kit";
+import {
+    normalizeSuiAddress,
+    normalizeStructTag,
+    SUI_TYPE_ARG,
+} from "@mysten/sui/utils";
+import { requestSuiFromFaucetV1, getFaucetHost } from "@mysten/sui/faucet";
 
 const GOBACK_KEY = "go_back";
 
 export function App() {
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
+
+    const suiClient = useSuiClient();
 
     useEffect(() => {
         if (window.location.hash)
@@ -24,6 +33,23 @@ export function App() {
                 localStorage.removeItem(GOBACK_KEY);
             });
     }, []);
+
+    useEffect(() => {
+        (async () => {
+            if (!zkLogin.address) return;
+
+            const balance = await suiClient.getBalance({
+                owner: normalizeSuiAddress(zkLogin.address),
+                coinType: normalizeStructTag(SUI_TYPE_ARG),
+            });
+
+            if (BigInt(balance.totalBalance) === 0n)
+                requestSuiFromFaucetV1({
+                    host: getFaucetHost("testnet"),
+                    recipient: normalizeSuiAddress(zkLogin.address),
+                });
+        })();
+    }, [zkLogin.address]);
 
     return (
         <div className="container">
@@ -76,7 +102,9 @@ export function App() {
                         <NavLink to="/char">character</NavLink>
                     </li>
                     <li>
-                        <a href="https://github.com/sui-potatoes/app">Source Code</a>
+                        <a href="https://github.com/sui-potatoes/app">
+                            Source Code
+                        </a>
                         {/* <NavLink  to="/">rock paper scissors (disabled)</NavLink> */}
                         {/* <p style={{ cursor: "default" }}>
                             rock paper scissors (disabled)
