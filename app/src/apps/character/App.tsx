@@ -146,11 +146,11 @@ export function App() {
     // }, [character]);
 
     return (
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-5 items-center">
             <div className="">
                 <Char {...char} />
             </div>
-            <div className=" text-center sm-show">
+            <div className="text-center sm-show">
                 <button
                     disabled={
                         !zkLogin.address ||
