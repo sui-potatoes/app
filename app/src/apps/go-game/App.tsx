@@ -124,7 +124,7 @@ export function App() {
     // Account exists
     if (!urlGameId)
         return (
-            <>
+            <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
                 <div>
                     My Games
                 </div>
@@ -151,13 +151,13 @@ export function App() {
                                 onClick={() => newGame(size)}
                                 className="block"
                             >
-                                New {size} x {size} board
+                                New {size}x{size}
                             </button>
                         ))
                     }
                 </div>
                 <div className={`loader ${canInteract ? 'hidden' : ''}`} />
-            </>
+            </div>
         );
 
     if (!game) return <div>Loading...</div>;
@@ -303,7 +303,7 @@ export function App() {
     /** Creates a new Game Object and starts a new game. */
     async function newGame(size: number = 13) {
         if (!BOARD_SIZES.includes(size)) throw new Error("Invalid board size");
-    
+
         setCanInteract(false);
         console.log("Creating new game");
         const tx = new Transaction();

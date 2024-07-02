@@ -48,7 +48,7 @@ export function Param({
                 </button>
                 {isColour ? (
                     <div
-                        className="rounded-full h-5 w-5"
+                        className="h-5 w-5"
                         style={{ backgroundColor: "#" + values[idx] }}
                     />
                 ) : (
