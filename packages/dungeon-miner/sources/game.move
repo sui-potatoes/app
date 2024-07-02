@@ -4,8 +4,10 @@
 /// The game module contains the main game logic.
 module mine_dungeon::game;
 
-use sui::{table::{Self, Table}};
-
+use sui::{
+    table::{Self, Table},
+    random::{Self, Random},
+};
 use mine_dungeon::{
     game_master::GameMaster,
     player::{Self, Player},
@@ -59,7 +61,7 @@ public fun new(registry: &mut Registry, size: u64, ctx: &mut TxContext) {
     transfer::transfer(
         Game { 
             id: object::new(ctx), 
-            level: 0, 
+            level: 1, 
             difficulty_scalar: registry.difficulty_scalar,
             room: room::new(size),
             player: player::new(size),
@@ -68,7 +70,7 @@ public fun new(registry: &mut Registry, size: u64, ctx: &mut TxContext) {
     )
 }
 
-public fun make_move(game: &mut Game, dir: u64) {
+entry fun make_move(game: &mut Game, random: &Random, dir: u64, ctx: &mut TxContext) {
     match (dir) {
         UP => {
             assert!(game.player.position().y() < game.room.size(), EWrongMove);
@@ -91,6 +93,12 @@ public fun make_move(game: &mut Game, dir: u64) {
 
     if (game.room.is_exit(game.player.position())) {
         game.win()
+    } else { // if empty cell, we randomly generate a mine or not
+        let mut gen = random.new_generator(ctx);
+        let number = gen.generate_u64_in_range(0, MAX_DIFFICULTY_SCALAR);
+        if (number < game.difficulty_scalar) {
+            game.lose();
+        }
     }
 }
 
@@ -115,5 +123,9 @@ public(package) fun difficulty_scalar(self: &Game): u64 {
 public(package) fun win(self: &mut Game) {
     self.level = self.level + 1;
     self.room = room::new(self.room.size() + 1);
+}
+
+public(package) fun lose(self: &mut Game) {
+    self.level = 0;
 }
 
