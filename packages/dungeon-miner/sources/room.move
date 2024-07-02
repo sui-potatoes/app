@@ -3,31 +3,40 @@
 
 /// Rooms are the levels the players need to navigate through and escape from.
 
-module mine_dungeon::room {
-    use std::string::{Self, String};
-    use mine_dungeon::point::{Self, Point};
+module mine_dungeon::room;
 
-    // === Structs ===
-    
-    /// A layout with the elements for the room, empty/mine cells are the ones left 
-    public struct Room has store, drop {
-        // unique exit position
-        exit: Point,
-        // extra lifes positions
-        lifes: vector<Point>,
-        // could have more elements
-    }
+use std::string::{Self, String};
+use mine_dungeon::point::{Self, Point};
 
-    // === Public functions ===
+// === Structs ===
 
-    public fun new(size: u64): Room {
-        Room {
-            exit: point::new(size / 2, size),
-            lifes: vector::empty(),
-        }
-    }
+/// A layout with the elements for the room, empty/mine cells are the ones left 
+public struct Room has store, drop {
+    size: u64,
+    // unique exit position
+    exit: Point,
+    // extra lifes positions
+    lifes: vector<Point>,
+    // could have more elements
+}
 
-    public fun is_exit(room: Room, point: Point): bool {
-        room.exit == point
+// === Public functions ===
+
+public fun new(size: u64): Room {
+    Room {
+        size,
+        exit: point::new(size / 2, size),
+        lifes: vector::empty(),
     }
 }
+
+public fun is_exit(room: &Room, point: Point): bool {
+    room.exit == point
+}
+
+// === Public view functions ===
+
+public fun size(room: &Room): u64 {
+    room.size
+}
+
