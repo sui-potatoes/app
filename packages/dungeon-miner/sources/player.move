@@ -47,6 +47,10 @@ public fun position(player: &Player): Point {
 
 // === Package functions ===
 
+public(package) fun reposition(player: &mut Player, size: u64) {
+    player.position = point::new(size / 2, 0);
+}
+
 public(package) fun move_up(player: &mut Player) {
     player.position = point::new(player.position.x(), player.position.y() + 1);
     player.moves.push_back(UP);
@@ -66,4 +70,3 @@ public(package) fun move_left(player: &mut Player) {
     player.position = point::new(player.position.x() - 1, player.position.y());
     player.moves.push_back(LEFT);
 }
-

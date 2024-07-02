@@ -12,3 +12,8 @@ public struct GameMaster has key {
 fun init(ctx: &mut TxContext) {
     transfer::transfer(GameMaster { id: object::new(ctx) }, ctx.sender());
 }
+
+#[test_only]
+public fun init_for_testing(ctx: &mut TxContext) {
+    init(ctx);
+}

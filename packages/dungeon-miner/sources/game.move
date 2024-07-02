@@ -6,7 +6,7 @@ module mine_dungeon::game;
 
 use sui::{
     table::{Self, Table},
-    random::{Self, Random},
+    random::{Self, Random, RandomGenerator},
 };
 use mine_dungeon::{
     game_master::GameMaster,
@@ -19,6 +19,7 @@ use mine_dungeon::{
 const EOneGamePerPlayer: u64 = 0;
 const EInvalidDifficultyScalar: u64 = 1;
 const EWrongMove: u64 = 2;
+const EGameNotOver: u64 = 3;
 
 // === Constants ===
 
@@ -58,9 +59,12 @@ fun init(ctx: &mut TxContext) {
 public fun new(registry: &mut Registry, size: u64, ctx: &mut TxContext) {
     assert!(!registry.users.contains(ctx.sender()), EOneGamePerPlayer);
 
+    let id = object::new(ctx);
+    registry.users.add(ctx.sender(), id.to_address());
+
     transfer::transfer(
         Game { 
-            id: object::new(ctx), 
+            id, 
             level: 1, 
             difficulty_scalar: registry.difficulty_scalar,
             room: room::new(size),
@@ -70,7 +74,12 @@ public fun new(registry: &mut Registry, size: u64, ctx: &mut TxContext) {
     )
 }
 
-entry fun make_move(game: &mut Game, random: &Random, dir: u64, ctx: &mut TxContext) {
+entry fun `move`(game: &mut Game, random: &Random, dir: u64, ctx: &mut TxContext) {
+    let mut gen = random.new_generator(ctx);
+    game.make_move(&mut gen, dir, ctx);
+}
+
+public fun make_move(game: &mut Game, gen: &mut RandomGenerator, dir: u64, ctx: &mut TxContext) {
     match (dir) {
         UP => {
             assert!(game.player.position().y() < game.room.size(), EWrongMove);
@@ -94,12 +103,17 @@ entry fun make_move(game: &mut Game, random: &Random, dir: u64, ctx: &mut TxCont
     if (game.room.is_exit(game.player.position())) {
         game.win()
     } else { // if empty cell, we randomly generate a mine or not
-        let mut gen = random.new_generator(ctx);
         let number = gen.generate_u64_in_range(0, MAX_DIFFICULTY_SCALAR);
         if (number < game.difficulty_scalar) {
             game.lose();
         }
     }
+}
+
+public fun destroy(game: Game) {
+    let Game { id, level, .. } = game;
+    assert!(level == 0, EGameNotOver);
+    id.delete();
 }
 
 // === Admin Only Function ===
@@ -120,12 +134,22 @@ public(package) fun difficulty_scalar(self: &Game): u64 {
     self.difficulty_scalar
 }
 
-public(package) fun win(self: &mut Game) {
+// === Private functions ===
+
+fun win(self: &mut Game) {
     self.level = self.level + 1;
     self.room = room::new(self.room.size() + 1);
+    self.player.reposition(self.room.size());
 }
 
-public(package) fun lose(self: &mut Game) {
+fun lose(self: &mut Game) {
     self.level = 0;
+}
+
+// === Test functions ===
+
+#[test_only]
+public fun init_for_testing(ctx: &mut TxContext) {
+    init(ctx);
 }
 
