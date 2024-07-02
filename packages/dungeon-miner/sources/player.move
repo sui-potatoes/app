@@ -23,12 +23,11 @@ module mine_dungeon::player {
     /// The inventory of the player
     public struct Inventory has store, drop {
         lifes: u8,
-        // can add more bonuses here
     }
 
     /// The player's state
     public struct Player has store, drop {
-        // current player's position 
+        // current player's position
         position: Point,
         // moves the players did
         moves: vector<u64>,
