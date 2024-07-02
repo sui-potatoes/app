@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+button{
+    @apply disabled:opacity-30 disabled:!cursor-not-allowed;
+}

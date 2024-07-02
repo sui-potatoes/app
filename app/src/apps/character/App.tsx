@@ -10,6 +10,7 @@ import { Char } from "./Char";
 import { bcs } from "@mysten/sui/bcs";
 import { Param } from "./Param";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
+import { toast } from "react-hot-toast";
 
 const image = bcs.struct("Props", {
     body_type: bcs.String,
@@ -108,6 +109,10 @@ export function App() {
         accentColour: "ead4aa",
     });
 
+    const [initialCharacter, setInitialCharacter] = useState<string | null>(
+        null,
+    );
+
     useEffect(() => {
         if (!characters) return;
         if (!characters.data.length) {
@@ -124,6 +129,7 @@ export function App() {
         setCanInteract(true);
         setCharacterId(data.objectId);
         setChar({ ...image });
+        setInitialCharacter(JSON.stringify({ ...image }));
     }, [characters]);
 
     if (isPending) return <div>Loading...</div>;
@@ -140,13 +146,17 @@ export function App() {
     // }, [character]);
 
     return (
-        <div className="columns">
-            <div className="character-select column">
+        <div className="grid md:grid-cols-2 gap-5">
+            <div className="">
                 <Char {...char} />
             </div>
-            <div className="param sm-show">
+            <div className=" text-center sm-show">
                 <button
-                    disabled={!zkLogin.address || !canInteract}
+                    disabled={
+                        !zkLogin.address ||
+                        !canInteract ||
+                        JSON.stringify(char) === initialCharacter
+                    }
                     onClick={() => {
                         characterId
                             ? updateCharacter(char)
@@ -157,108 +167,119 @@ export function App() {
                     {!zkLogin.address && " (Login required)"}
                 </button>
             </div>
-            <div
-                className="column"
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                }}
-            >
-                <Param
-                    name="hair type"
-                    defaultValue={char.hair_type}
-                    disabled={!canInteract}
-                    values={["wind", "flat", "bang", "punk"]}
-                    onChange={(hair_type) => setChar({ ...char, hair_type })}
-                />
-                <Param
-                    name="body type"
-                    defaultValue={char.body_type}
-                    disabled={!canInteract}
-                    values={["office", "blazer", "tshirt"]}
-                    onChange={(body_type) => setChar({ ...char, body_type })}
-                />
-                <Param
-                    isColour
-                    name="hair"
-                    defaultValue={char.hairColour}
-                    disabled={!canInteract}
-                    values={COLOURS}
-                    onChange={(hairColour) => setChar({ ...char, hairColour })}
-                />
-                <Param
-                    isColour
-                    name="eyes"
-                    defaultValue={char.eyesColour}
-                    disabled={!canInteract}
-                    values={COLOURS}
-                    onChange={(eyesColour) => setChar({ ...char, eyesColour })}
-                />
-                <Param
-                    isColour
-                    name="skin"
-                    defaultValue={char.skinColour}
-                    disabled={!canInteract}
-                    values={COLOURS}
-                    onChange={(skinColour) => setChar({ ...char, skinColour })}
-                />
-                <Param
-                    isColour
-                    name="base"
-                    defaultValue={char.baseColour}
-                    disabled={!canInteract}
-                    values={COLOURS}
-                    onChange={(baseColour) => setChar({ ...char, baseColour })}
-                />
-                <Param
-                    isColour
-                    name="pants"
-                    defaultValue={char.pantsColour}
-                    disabled={!canInteract}
-                    values={COLOURS}
-                    onChange={(pantsColour) =>
-                        setChar({ ...char, pantsColour })
-                    }
-                />
-                <Param
-                    isColour
-                    name="accent"
-                    defaultValue={char.accentColour}
-                    disabled={!canInteract}
-                    values={COLOURS}
-                    onChange={(accentColour) =>
-                        setChar({ ...char, accentColour })
-                    }
-                />
-                <div className="md-show param">
-                    <button
-                        style={{ padding: "20px 0" }}
-                        disabled={!zkLogin.address || !canInteract}
-                        onClick={() => {
-                            characterId
-                                ? updateCharacter(char)
-                                : createCharacter(char);
-                        }}
-                    >
-                        {characterId ? "Update" : "Create"} Character{" "}
-                        {!zkLogin.address && " (Login required)"}
-                    </button>
-                </div>
-                {characterId && (
-                    <div
-                        className="param"
-                        style={{ display: "block", margin: "10px 0" }}
-                    >
-                        <a
-                            href={`https://suiscan.xyz/testnet/object/${characterId}`}
-                            target="_blank"
-                            rel="noreferrer"
+            <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
+                <div className="flex flex-col gap-3 justify-center">
+                    <Param
+                        name="hair type"
+                        defaultValue={char.hair_type}
+                        disabled={!canInteract}
+                        values={["wind", "flat", "bang", "punk"]}
+                        onChange={(hair_type) =>
+                            setChar({ ...char, hair_type })
+                        }
+                    />
+                    <Param
+                        name="body type"
+                        defaultValue={char.body_type}
+                        disabled={!canInteract}
+                        values={["office", "blazer", "tshirt"]}
+                        onChange={(body_type) =>
+                            setChar({ ...char, body_type })
+                        }
+                    />
+                    <Param
+                        isColour
+                        name="hair"
+                        defaultValue={char.hairColour}
+                        disabled={!canInteract}
+                        values={COLOURS}
+                        onChange={(hairColour) =>
+                            setChar({ ...char, hairColour })
+                        }
+                    />
+                    <Param
+                        isColour
+                        name="eyes"
+                        defaultValue={char.eyesColour}
+                        disabled={!canInteract}
+                        values={COLOURS}
+                        onChange={(eyesColour) =>
+                            setChar({ ...char, eyesColour })
+                        }
+                    />
+                    <Param
+                        isColour
+                        name="skin"
+                        defaultValue={char.skinColour}
+                        disabled={!canInteract}
+                        values={COLOURS}
+                        onChange={(skinColour) =>
+                            setChar({ ...char, skinColour })
+                        }
+                    />
+                    <Param
+                        isColour
+                        name="base"
+                        defaultValue={char.baseColour}
+                        disabled={!canInteract}
+                        values={COLOURS}
+                        onChange={(baseColour) =>
+                            setChar({ ...char, baseColour })
+                        }
+                    />
+                    <Param
+                        isColour
+                        name="pants"
+                        defaultValue={char.pantsColour}
+                        disabled={!canInteract}
+                        values={COLOURS}
+                        onChange={(pantsColour) =>
+                            setChar({ ...char, pantsColour })
+                        }
+                    />
+                    <Param
+                        isColour
+                        name="accent"
+                        defaultValue={char.accentColour}
+                        disabled={!canInteract}
+                        values={COLOURS}
+                        onChange={(accentColour) =>
+                            setChar({ ...char, accentColour })
+                        }
+                    />
+                    <div className="md-show param">
+                        <button
+                            style={{ padding: "20px 0" }}
+                            disabled={
+                                !zkLogin.address ||
+                                !canInteract ||
+                                JSON.stringify(char) === initialCharacter
+                            }
+                            onClick={() => {
+                                characterId
+                                    ? updateCharacter(char)
+                                    : createCharacter(char);
+                            }}
                         >
-                            View on SuiScan
-                        </a>
+                            {characterId ? "Update" : "Create"} Character{" "}
+                            {!zkLogin.address && " (Login required)"}
+                        </button>
                     </div>
-                )}
+                    {characterId && (
+                        <div
+                            className="param"
+                            style={{ display: "block", margin: "10px 0" }}
+                        >
+                            <a
+                                href={`https://suiscan.xyz/testnet/object/${characterId}`}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                View on SuiScan
+                            </a>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -300,6 +321,7 @@ export function App() {
             timeout: 10000,
             pollInterval: 500,
         });
+        toast.success("Character created successfully!");
         refetch();
     }
 
@@ -340,6 +362,8 @@ export function App() {
             timeout: 10000,
             pollInterval: 500,
         });
+        toast.success("Character updated successfully!");
+
         refetch();
     }
 
