@@ -5,6 +5,7 @@ import {
     CHARACTER_PACKAGE_ID,
     CHARACTER_BUILDER_ID,
 } from "./constants";
+import { PACKAGE_ID as dungeonPackageId } from "../../app/src/apps/dungeon/.gen/dungeon/index";
 import { createNetworkConfig } from "@mysten/dapp-kit";
 
 const { networkConfig, useNetworkVariable, useNetworkVariables } =
@@ -17,6 +18,7 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
                 characterPackageId: CHARACTER_PACKAGE_ID,
                 /** The ID of the Builder object from `character` package */
                 characterBuilderId: CHARACTER_BUILDER_ID,
+                dungeonPackageId,
             },
         },
     });

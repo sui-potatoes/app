@@ -17,3 +17,4 @@ To add a new application, follow these steps:
 1. Create a new directory in the [apps](./src/apps/) directory.
 2. Update the [App.tsx](./src/App.tsx) file to include the link in the sidebar and the route.
 3. Add all necessary variables into the [constants.tsx](./src/constants.tsx) and [networkConfig.tsx](./src/networkConfig.tsx) files.
+4. Or use [sui-client-gen](https://github.com/kunalabs-io/sui-client-gen) to generate Move types and functions and import the package id from there. 

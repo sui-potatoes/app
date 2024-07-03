@@ -1,0 +1,7 @@
+[config]
+# will be set to mainnet by default if omitted
+rpc = "https://fullnode.testnet.sui.io:443"
+
+[packages]
+# Dungeon = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/dungeon", rev = "main" }
+Dungeon = { local = "../../../../../packages/dungeon/" }
