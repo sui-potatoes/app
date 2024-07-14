@@ -8,10 +8,6 @@ module battle::stats {
     /// The level can only be in [0; 100] range.
     const EIncorrectLevel: u64 = 0;
 
-    /// Default scaling used in calculations. Needs to be tuned to not overflow
-    /// Attempt to use 10^9 resulted in an overflow, so decreasing it by an order
-    const SCALING_FACTOR: u64 = 1_000_000_00;
-
     /// The Stats of a Pokemon (basically, a structured collection of u8 values)
     /// Can be created using the `new` function.
     public struct Stats has copy, store, drop {
@@ -52,7 +48,7 @@ module battle::stats {
         assert!(level <= 100, EIncorrectLevel);
 
         Stats {
-            hp: (hp as u64) * SCALING_FACTOR,
+            hp: (hp as u64) * 1 << 32,
             attack,
             defense,
             special_attack,
@@ -64,9 +60,6 @@ module battle::stats {
     }
 
     // === Getters ===
-
-    /// Return the scaling factor used for damage calculation.
-    public fun scaling(): u64 { SCALING_FACTOR }
 
     /// Return the HP stat of the given Pokemon.
     public fun hp(stat: &Stats): u64 { stat.hp }

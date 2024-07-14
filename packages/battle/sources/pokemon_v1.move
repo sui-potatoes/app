@@ -46,7 +46,6 @@ module battle::damage_v1 {
             (stats::defense(defender) as u64),
             (move_power as u64),
             (random as u64),
-            stats::scaling(),
         )
     }
 
@@ -61,7 +60,6 @@ module battle::damage_v1 {
             (stats::special_defense(defender) as u64),
             (move_power as u64),
             (random as u64),
-            stats::scaling(),
         )
     }
 
@@ -78,14 +76,7 @@ module battle::damage_v1 {
     /// Resolution on todos:
     /// the types are application specific, and the move information too, so we
     /// can't really implement them here.
-    fun damage(
-        level: u64,
-        attack: u64,
-        defence: u64,
-        move_power: u64,
-        random: u64,
-        _scaling: u64,
-    ): u64 {
+    fun damage(level: u64, attack: u64, defence: u64, move_power: u64, random: u64): u64 {
         formula::new()
             .add(2)
             .mul(level)
@@ -99,8 +90,7 @@ module battle::damage_v1 {
             .add(2)
             .mul(random)
             .div(255)
-            // .mul(eff) // effectiveness
-            .calc_u64(0)
+            .calc_u64(0) // // .mul(eff) // effectiveness
     }
 
     // === Tests ===

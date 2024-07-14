@@ -8,7 +8,7 @@ module character::character {
     use sui::display::{Self, Display};
     use sui::vec_map::{Self, VecMap};
     use sui::package;
-    use gogame::render;
+    use utils::urlencode;
 
     const EWrongBody: u64 = 1;
     const EWrongHair: u64 = 2;
@@ -108,8 +108,8 @@ module character::character {
         assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
         let image = Props {
-            body: render::urlencode(&render_part(b.body[&body_type])),
-            hair: render::urlencode(&render_part(b.hair[&hair_type])),
+            body: urlencode::urlencode(&render_part(b.body[&body_type])),
+            hair: urlencode::urlencode(&render_part(b.hair[&hair_type])),
             body_type,
             hair_type,
             eyes_colour,
@@ -146,8 +146,8 @@ module character::character {
         assert!(b.colours.contains(base_colour.as_bytes()), EWrongBaseColour);
         assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
-        c.image.body = render::urlencode(&render_part(b.body[&body_type]));
-        c.image.hair = render::urlencode(&render_part(b.hair[&hair_type]));
+        c.image.body = urlencode::urlencode(&render_part(b.body[&body_type]));
+        c.image.hair = urlencode::urlencode(&render_part(b.hair[&hair_type]));
         c.image.body_type = body_type;
         c.image.hair_type = hair_type;
         c.image.eyes_colour = eyes_colour;
@@ -304,7 +304,7 @@ module character::character {
     /// Builds the base character SVG template, used in the `Display` in the
     /// `init` (`set_display`) function.
     fun build_character_base(): string::String {
-        let template = gogame::render::urlencode(&build_pure_svg()).to_string();
+        let template = urlencode::urlencode(&build_pure_svg()).to_string();
 
         // std::debug::print(&url_encode);
 
@@ -333,8 +333,8 @@ module character::character {
     fun replace(str: string::String, from: string::String, to: string::String): string::String {
         let pos = str.index_of(&from);
         let str = {
-            let mut lhs = str.sub_string(0, pos);
-            let rhs = str.sub_string(pos + from.length(), str.length());
+            let mut lhs = str.substring(0, pos);
+            let rhs = str.substring(pos + from.length(), str.length());
             lhs.append(to);
             lhs.append(rhs);
             lhs

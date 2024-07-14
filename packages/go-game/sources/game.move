@@ -11,6 +11,7 @@ module gogame::game {
 
     use gogame::go::{Self, Board};
     use gogame::render;
+    use utils::urlencode;
 
     /// The size of the board is invalid (not 9, 13, or 19)
     const EInvalidSize: u64 = 0;
@@ -72,7 +73,7 @@ module gogame::game {
             id,
             board: go::new(size),
             players: Players(option::some(acc.id.to_inner()), option::none()),
-            image_blob: render::urlencode(&render::svg(&board)),
+            image_blob: urlencode::urlencode(&render::svg(&board)),
         });
     }
 
@@ -107,7 +108,7 @@ module gogame::game {
         };
 
         game.board.place(x, y);
-        game.image_blob = render::urlencode(&render::svg(&game.board));
+        game.image_blob = urlencode::urlencode(&render::svg(&game.board));
     }
 
     public fun quit(game: &mut Game, acc: &mut Account) {
