@@ -46,15 +46,12 @@ module gogame::game {
         /// The players in the game.
         /// The SVG representation of the board.
         /// Updated on every move. Purely for demonstration purposes!
-        image_blob: String
+        image_blob: String,
     }
 
     /// Create a new account and send it to the sender.
     public fun new_account(ctx: &mut TxContext): Account {
-        Account {
-            id: object::new(ctx),
-            games: vec_set::empty()
-        }
+        Account { id: object::new(ctx), games: vec_set::empty() }
     }
 
     /// Keep the Account at the sender's address.
@@ -75,7 +72,7 @@ module gogame::game {
             id,
             board: go::new(size),
             players: Players(option::some(acc.id.to_inner()), option::none()),
-            image_blob: render::urlencode(&render::svg(&board))
+            image_blob: render::urlencode(&render::svg(&board)),
         });
     }
 
@@ -90,7 +87,14 @@ module gogame::game {
     }
 
     ///
-    public fun play(game: &mut Game, cap: &Account, x: u8, y: u8, clock: &Clock, ctx: &mut TxContext) {
+    public fun play(
+        game: &mut Game,
+        cap: &Account,
+        x: u8,
+        y: u8,
+        clock: &Clock,
+        ctx: &mut TxContext,
+    ) {
         assert!(cap.games.contains(game.id.as_inner()), ENotInGame);
         let Players(p1, p2) = &game.players;
         let is_p1 = p1.borrow() == cap.id.as_inner();
@@ -146,7 +150,7 @@ module gogame::game {
 
         d.add(
             b"image_url".to_string(),
-            b"data:image/svg+xml;charset=utf8,{image_blob}".to_string()
+            b"data:image/svg+xml;charset=utf8,{image_blob}".to_string(),
         );
 
         d.add(
