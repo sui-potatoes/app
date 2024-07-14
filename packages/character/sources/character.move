@@ -108,8 +108,8 @@ module character::character {
         assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
         let image = Props {
-            body: urlencode::urlencode(&render_part(b.body[&body_type])),
-            hair: urlencode::urlencode(&render_part(b.hair[&hair_type])),
+            body: urlencode::encode(&render_part(b.body[&body_type])),
+            hair: urlencode::encode(&render_part(b.hair[&hair_type])),
             body_type,
             hair_type,
             eyes_colour,
@@ -146,8 +146,8 @@ module character::character {
         assert!(b.colours.contains(base_colour.as_bytes()), EWrongBaseColour);
         assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
-        c.image.body = urlencode::urlencode(&render_part(b.body[&body_type]));
-        c.image.hair = urlencode::urlencode(&render_part(b.hair[&hair_type]));
+        c.image.body = urlencode::encode(&render_part(b.body[&body_type]));
+        c.image.hair = urlencode::encode(&render_part(b.hair[&hair_type]));
         c.image.body_type = body_type;
         c.image.hair_type = hair_type;
         c.image.eyes_colour = eyes_colour;
@@ -304,7 +304,7 @@ module character::character {
     /// Builds the base character SVG template, used in the `Display` in the
     /// `init` (`set_display`) function.
     fun build_character_base(): string::String {
-        let template = urlencode::urlencode(&build_pure_svg()).to_string();
+        let template = urlencode::encode(&build_pure_svg()).to_string();
 
         // std::debug::print(&url_encode);
 

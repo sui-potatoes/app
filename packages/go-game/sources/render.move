@@ -90,7 +90,7 @@ module gogame::render {
         ]);
 
 
-        let res = urlencode::urlencode(&svg(&board));
+        let res = urlencode::encode(&svg(&board));
         let mut data_url = b"data:image/svg+xml;charset=utf8,";
         data_url.append(res.into_bytes());
 
