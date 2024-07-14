@@ -13,11 +13,21 @@ module utils::formula {
     const U16_MAX: u16 = 65535;
     const U8_MAX: u8 = 255;
 
+    /// Represents an expression in the formula. A single operation may have
+    /// multiple or no arguments. The operation is represented as a byte string.
     public struct Expr<T> has copy, drop {
         op: vector<u8>,
         args: vector<T>,
     }
 
+    /// Represents a formula with a list of expressions and an optional scaling factor.
+    /// Formula remains untyped until the `calc_*` function is called.
+    ///
+    /// Usage:
+    /// ```move
+    /// let formula = new().add(10u8).mul(100).div(10).sub(5).calc_u8(5);
+    /// ```
+    /// The above example will calculate the formula for `u8` type with the value `5`.
     public struct Formula<T> has copy, drop {
         expressions: vector<Expr<T>>,
         scaling: Option<T>,

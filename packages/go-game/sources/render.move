@@ -4,6 +4,7 @@
 module gogame::render {
     use std::ascii::String;
     use gogame::go::Board;
+    use utils::urlencode;
 
     /// Print the board as an SVG.
     public fun svg(b: &Board): String {
@@ -63,25 +64,6 @@ module gogame::render {
         str.to_ascii_string()
     }
 
-    public fun urlencode(s: &String): String {
-        let mut res = vector[];
-        let mut i = 0;
-        while (i < s.length()) {
-            let c = s.as_bytes()[i];
-            if (c == 32) { // whitespace " "
-                res.append(b"%20")
-            } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
-                res.push_back(37);
-                res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
-                res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
-            } else {
-                res.push_back(c);
-            };
-            i = i + 1;
-        };
-        res.to_ascii_string()
-    }
-
     fun num_to_ascii(mut num: u64): vector<u8> {
         let mut res = vector[];
         if (num == 0) return vector[ 48 ];
@@ -108,7 +90,7 @@ module gogame::render {
         ]);
 
 
-        let res = urlencode(&svg(&board));
+        let res = urlencode::urlencode(&svg(&board));
         let mut data_url = b"data:image/svg+xml;charset=utf8,";
         data_url.append(res.into_bytes());
 
