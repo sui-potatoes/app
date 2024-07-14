@@ -73,7 +73,7 @@ module gogame::game {
             id,
             board: go::new(size),
             players: Players(option::some(acc.id.to_inner()), option::none()),
-            image_blob: urlencode::urlencode(&render::svg(&board)),
+            image_blob: urlencode::encode(&render::svg(&board)),
         });
     }
 
@@ -108,7 +108,7 @@ module gogame::game {
         };
 
         game.board.place(x, y);
-        game.image_blob = urlencode::urlencode(&render::svg(&game.board));
+        game.image_blob = urlencode::encode(&render::svg(&game.board));
     }
 
     public fun quit(game: &mut Game, acc: &mut Account) {

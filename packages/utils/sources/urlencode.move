@@ -6,7 +6,7 @@ module utils::urlencode {
     use std::ascii::String;
 
     /// Encode a string to URL format.
-    public fun urlencode(string: &String): String {
+    public fun encode(string: &String): String {
         let mut res = vector[];
         let mut i = 0;
         let bytes = string.as_bytes();
@@ -25,7 +25,7 @@ module utils::urlencode {
     }
 
     /// Decode a URL-encoded string.
-    public fun urldecode(s: &String): String {
+    public fun decode(s: &String): String {
         let mut res = vector[];
         let mut i = 0;
         while (i < s.length()) {
@@ -51,11 +51,11 @@ module utils::urlencode {
         use sui::test_utils::assert_eq;
 
         assert_eq(
-            urlencode(&b"Hello, World!".to_ascii_string()),
+            encode(&b"Hello, World!".to_ascii_string()),
             b"Hello%2C%20World%21".to_ascii_string(),
         );
 
         let str = b"Hello, World!?<>aa:;".to_ascii_string();
-        assert_eq(urldecode(&urlencode(&str)), str);
+        assert_eq(decode(&encode(&str)), str);
     }
 }
