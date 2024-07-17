@@ -18,9 +18,7 @@ module svg::shapes {
     }
 
     /// Create a new circle shape.
-    public fun circle(cx: u64, cy: u64, r: u64): Shape {
-        Shape::Circle(cx, cy, r)
-    }
+    public fun circle(cx: u64, cy: u64, r: u64): Shape { Shape::Circle(cx, cy, r) }
 
     /// Create a new ellipse shape.
     public fun ellipse(cx: u64, cy: u64, rx: u64, ry: u64): Shape { Shape::Ellipse(cx, cy, rx, ry) }
@@ -53,52 +51,74 @@ module svg::shapes {
         }
     }
 
-    public fun print(shape: Shape): String {
+    public fun print(shape: &Shape): String {
         let mut map = vec_map::empty();
         let name = match (shape) {
             Shape::Circle(cx, cy, r) => {
-                map.insert(b"cx".to_string(), print::num_to_string(cx));
-                map.insert(b"cy".to_string(), print::num_to_string(cy));
-                map.insert(b"r".to_string(), print::num_to_string(r));
+                map.insert(b"cx".to_string(), print::num_to_string(*cx));
+                map.insert(b"cy".to_string(), print::num_to_string(*cy));
+                map.insert(b"r".to_string(), print::num_to_string(*r));
                 b"circle"
             },
             Shape::Ellipse(cx, cy, rx, ry) => {
-                map.insert(b"cx".to_string(), print::num_to_string(cx));
-                map.insert(b"cy".to_string(), print::num_to_string(cy));
-                map.insert(b"rx".to_string(), print::num_to_string(rx));
-                map.insert(b"ry".to_string(), print::num_to_string(ry));
+                map.insert(b"cx".to_string(), print::num_to_string(*cx));
+                map.insert(b"cy".to_string(), print::num_to_string(*cy));
+                map.insert(b"rx".to_string(), print::num_to_string(*rx));
+                map.insert(b"ry".to_string(), print::num_to_string(*ry));
                 b"ellipse"
             },
             Shape::Line(x1, y1, x2, y2) => {
-                map.insert(b"x1".to_string(), print::num_to_string(x1));
-                map.insert(b"y1".to_string(), print::num_to_string(y1));
-                map.insert(b"x2".to_string(), print::num_to_string(x2));
-                map.insert(b"y2".to_string(), print::num_to_string(y2));
+                map.insert(b"x1".to_string(), print::num_to_string(*x1));
+                map.insert(b"y1".to_string(), print::num_to_string(*y1));
+                map.insert(b"x2".to_string(), print::num_to_string(*x2));
+                map.insert(b"y2".to_string(), print::num_to_string(*y2));
                 b"line"
             },
             Shape::Polygon(x1, y1, x2, y2) => {
-                map.insert(b"x1".to_string(), print::num_to_string(x1));
-                map.insert(b"y1".to_string(), print::num_to_string(y1));
-                map.insert(b"x2".to_string(), print::num_to_string(x2));
-                map.insert(b"y2".to_string(), print::num_to_string(y2));
+                map.insert(b"x1".to_string(), print::num_to_string(*x1));
+                map.insert(b"y1".to_string(), print::num_to_string(*y1));
+                map.insert(b"x2".to_string(), print::num_to_string(*x2));
+                map.insert(b"y2".to_string(), print::num_to_string(*y2));
                 b"polygon"
             },
             Shape::Polyline(x1, y1, x2, y2) => {
-                map.insert(b"x1".to_string(), print::num_to_string(x1));
-                map.insert(b"y1".to_string(), print::num_to_string(y1));
-                map.insert(b"x2".to_string(), print::num_to_string(x2));
-                map.insert(b"y2".to_string(), print::num_to_string(y2));
+                map.insert(b"x1".to_string(), print::num_to_string(*x1));
+                map.insert(b"y1".to_string(), print::num_to_string(*y1));
+                map.insert(b"x2".to_string(), print::num_to_string(*x2));
+                map.insert(b"y2".to_string(), print::num_to_string(*y2));
                 b"polyline"
             },
             Shape::Rect(x, y, width, height) => {
-                map.insert(b"x".to_string(), print::num_to_string(x));
-                map.insert(b"y".to_string(), print::num_to_string(y));
-                map.insert(b"width".to_string(), print::num_to_string(width));
-                map.insert(b"height".to_string(), print::num_to_string(height));
+                map.insert(b"x".to_string(), print::num_to_string(*x));
+                map.insert(b"y".to_string(), print::num_to_string(*y));
+                map.insert(b"width".to_string(), print::num_to_string(*width));
+                map.insert(b"height".to_string(), print::num_to_string(*height));
                 b"rect"
             },
         };
 
         print::print(name.to_string(), map, option::none())
+    }
+
+    #[test]
+    // prettier-ignore
+    fun test_shapes() {
+        assert!(circle(10, 10, 5).print() == b"<circle cx=\"10\" cy=\"10\" r=\"5\" />".to_string());
+        assert!(ellipse(10, 10, 5, 5).print() == b"<ellipse cx=\"10\" cy=\"10\" rx=\"5\" ry=\"5\" />".to_string());
+        assert!(line(10, 10, 20, 20).print() == b"<line x1=\"10\" y1=\"10\" x2=\"20\" y2=\"20\" />".to_string());
+        assert!(polygon(10, 10, 20, 20).print() == b"<polygon x1=\"10\" y1=\"10\" x2=\"20\" y2=\"20\" />".to_string());
+        assert!(polyline(10, 10, 20, 20).print() == b"<polyline x1=\"10\" y1=\"10\" x2=\"20\" y2=\"20\" />".to_string());
+        assert!(rect(10, 10, 20, 20).print() == b"<rect x=\"10\" y=\"10\" width=\"20\" height=\"20\" />".to_string());
+    }
+
+    #[test]
+    // prettier-ignore
+    fun test_move() {
+        assert!(circle(10, 10, 5).move_to(5, 5).print() == b"<circle cx=\"15\" cy=\"15\" r=\"5\" />".to_string());
+        assert!(ellipse(10, 10, 5, 5).move_to(5, 5).print() == b"<ellipse cx=\"15\" cy=\"15\" rx=\"5\" ry=\"5\" />".to_string());
+        assert!(line(10, 10, 20, 20).move_to(5, 5).print() == b"<line x1=\"15\" y1=\"15\" x2=\"25\" y2=\"25\" />".to_string());
+        assert!(polygon(10, 10, 20, 20).move_to(5, 5).print() == b"<polygon x1=\"15\" y1=\"15\" x2=\"25\" y2=\"25\" />".to_string());
+        assert!(polyline(10, 10, 20, 20).move_to(5, 5).print() == b"<polyline x1=\"15\" y1=\"15\" x2=\"25\" y2=\"25\" />".to_string());
+        assert!(rect(10, 10, 20, 20).move_to(5, 5).print() == b"<rect x=\"15\" y=\"15\" width=\"20\" height=\"20\" />".to_string());
     }
 }
