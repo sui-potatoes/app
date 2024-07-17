@@ -101,10 +101,9 @@ module gogame::game {
         let is_p1 = p1.borrow() == cap.id.as_inner();
         let is_p2 = p2.borrow() == cap.id.as_inner();
 
-        if (game.board.moves().length() % 2 == 0) {
-            assert!(is_p1, ENotYourTurn);
-        } else {
-            assert!(is_p2, ENotYourTurn);
+        match (game.board.moves().length() % 2 == 0) {
+            true => assert!(is_p1, ENotYourTurn),
+            false => assert!(is_p2, ENotYourTurn),
         };
 
         game.board.place(x, y);
