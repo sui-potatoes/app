@@ -6,6 +6,7 @@ module svg::print {
     use std::string::String;
     use sui::vec_map::VecMap;
 
+    /// Prints a generic SVG element, with attributes and elements.
     public fun print(
         name: String,
         attributes: VecMap<String, String>,
@@ -39,7 +40,8 @@ module svg::print {
         svg
     }
 
-    public fun num_to_string(mut num: u64): String {
+    /// Converts a number to a string, uses u16 for the digits.
+    public fun num_to_string(mut num: u16): String {
         let mut chars = vector[];
 
         if (num == 0) {

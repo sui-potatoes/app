@@ -6,19 +6,19 @@ module svg::svg {
     use std::string::String;
     use sui::vec_map;
     use svg::container::{Self, Container};
-    use svg::shape::{Self, Shape};
+    use svg::shape::Shape;
     use svg::print;
 
     /// The base SVG element.
     public struct Svg has store, copy, drop {
-        width: u64,
-        height: u64,
-        view_box: vector<u64>,
+        width: u16,
+        height: u16,
+        view_box: vector<u16>,
         elements: vector<Container>,
     }
 
     /// Create a new SVG element.
-    public fun svg(width: u64, height: u64, view_box: vector<u64>): Svg {
+    public fun svg(width: u16, height: u16, view_box: vector<u16>): Svg {
         assert!(view_box.length() == 4 || view_box.length() == 0);
 
         Svg {
@@ -73,8 +73,10 @@ module svg::svg {
 
     #[test]
     fun test_svg() {
+        use svg::shape;
+
         let mut svg = svg(100, 100, vector[0, 0, 100, 100]);
-        let text = svg
+        let _text = svg
             .root(vector[
                 shape::circle(50, 50, 40),
                 shape::rect(10, 10, 80, 80),
@@ -85,6 +87,6 @@ module svg::svg {
             ])
             .to_string();
 
-        std::debug::print(&text)
+        // std::debug::print(&text)
     }
 }
