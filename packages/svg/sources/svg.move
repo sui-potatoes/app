@@ -29,8 +29,15 @@ module svg::svg {
         }
     }
 
+    /// Add a root container to the SVG.
     public fun root(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
         svg.add(container::root(shapes));
+        svg
+    }
+
+    /// Add a group container to the SVG.
+    public fun g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
+        svg.add(container::g(shapes));
         svg
     }
 
