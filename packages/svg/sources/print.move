@@ -13,24 +13,25 @@ module svg::print {
     ): String {
         let mut svg = b"<".to_string();
         svg.append(name);
-        svg.append(b" ".to_string());
         let (keys, values) = attributes.into_keys_values();
-        keys
-            .length()
-            .do!(
-                |i| {
-                    svg.append(keys[i]);
-                    svg.append(b"=\"".to_string());
-                    svg.append(values[i]);
-                    svg.append(b"\" ".to_string());
-                },
-            );
+        let length = keys.length();
+        if (length > 0) svg.append(b" ".to_string());
+        length.do!(
+            |i| {
+                svg.append(keys[i]);
+                svg.append(b"='".to_string());
+                svg.append(values[i]);
+                if (i < length - 1) svg.append(b"' ".to_string())
+                else svg.append(b"'".to_string())
+            },
+        );
 
         if (elements.is_none()) {
             svg.append(b"/>".to_string());
             return svg
         };
 
+        svg.append(b">".to_string());
         elements.do!(|vec| vec.do!(|el| svg.append(el)));
         svg.append(b"</".to_string());
         svg.append(name);
@@ -40,6 +41,12 @@ module svg::print {
 
     public fun num_to_string(mut num: u64): String {
         let mut chars = vector[];
+
+        if (num == 0) {
+            chars.push_back(48);
+            return chars.to_string()
+        };
+
         while (num > 0) {
             let digit = num % 10;
             num = num / 10;
