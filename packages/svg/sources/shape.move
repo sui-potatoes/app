@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 /// Module: shapes
-module svg::shapes {
+module svg::shape {
     use std::string::String;
     use sui::vec_map;
     use svg::print;
@@ -42,16 +42,17 @@ module svg::shapes {
     /// Move a shape.
     public fun move_to(shape: Shape, x: u64, y: u64): Shape {
         match (shape) {
-            Shape::Circle(cx, cy, r) => Shape::Circle(cx + x, cy + y, r),
-            Shape::Ellipse(cx, cy, rx, ry) => Shape::Ellipse(cx + x, cy + y, rx, ry),
-            Shape::Line(x1, y1, x2, y2) => Shape::Line(x1 + x, y1 + y, x2 + x, y2 + y),
-            Shape::Polygon(x1, y1, x2, y2) => Shape::Polygon(x1 + x, y1 + y, x2 + x, y2 + y),
-            Shape::Polyline(x1, y1, x2, y2) => Shape::Polyline(x1 + x, y1 + y, x2 + x, y2 + y),
-            Shape::Rect(x, y, width, height) => Shape::Rect(x + x, y + y, width, height),
+            Shape::Circle(_, _, r) => Shape::Circle(x, y, r),
+            Shape::Ellipse(_, _, rx, ry) => Shape::Ellipse(x, y, rx, ry),
+            Shape::Line(x1, y1, x2, y2) => Shape::Line(x, y, x2 - x1 + x, y2 - y1 + y),
+            Shape::Polygon(x1, y1, x2, y2) => Shape::Polygon(x, y, x2 - x1 + x, y2 - y1 + y),
+            Shape::Polyline(x1, y1, x2, y2) => Shape::Polyline(x, y, x2 - x1 + x, y2 - y1 + y),
+            Shape::Rect(_, _, width, height) => Shape::Rect(x, y, width, height),
         }
     }
 
-    public fun print(shape: &Shape): String {
+    /// Print the shape as an `SVG` element.
+    public fun to_string(shape: &Shape): String {
         let mut map = vec_map::empty();
         let name = match (shape) {
             Shape::Circle(cx, cy, r) => {
@@ -103,22 +104,24 @@ module svg::shapes {
     #[test]
     // prettier-ignore
     fun test_shapes() {
-        assert!(circle(10, 10, 5).print() == b"<circle cx=\"10\" cy=\"10\" r=\"5\" />".to_string());
-        assert!(ellipse(10, 10, 5, 5).print() == b"<ellipse cx=\"10\" cy=\"10\" rx=\"5\" ry=\"5\" />".to_string());
-        assert!(line(10, 10, 20, 20).print() == b"<line x1=\"10\" y1=\"10\" x2=\"20\" y2=\"20\" />".to_string());
-        assert!(polygon(10, 10, 20, 20).print() == b"<polygon x1=\"10\" y1=\"10\" x2=\"20\" y2=\"20\" />".to_string());
-        assert!(polyline(10, 10, 20, 20).print() == b"<polyline x1=\"10\" y1=\"10\" x2=\"20\" y2=\"20\" />".to_string());
-        assert!(rect(10, 10, 20, 20).print() == b"<rect x=\"10\" y=\"10\" width=\"20\" height=\"20\" />".to_string());
+        assert!(circle(10, 10, 5).to_string() == b"<circle cx='10' cy='10' r='5'/>".to_string());
+        assert!(ellipse(10, 10, 5, 5).to_string() == b"<ellipse cx='10' cy='10' rx='5' ry='5'/>".to_string());
+        assert!(line(10, 10, 20, 20).to_string() == b"<line x1='10' y1='10' x2='20' y2='20'/>".to_string());
+        assert!(polygon(10, 10, 20, 20).to_string() == b"<polygon x1='10' y1='10' x2='20' y2='20'/>".to_string());
+        assert!(polyline(10, 10, 20, 20).to_string() == b"<polyline x1='10' y1='10' x2='20' y2='20'/>".to_string());
+        assert!(rect(10, 10, 20, 20).to_string() == b"<rect x='10' y='10' width='20' height='20'/>".to_string());
     }
 
     #[test]
     // prettier-ignore
-    fun test_move() {
-        assert!(circle(10, 10, 5).move_to(5, 5).print() == b"<circle cx=\"15\" cy=\"15\" r=\"5\" />".to_string());
-        assert!(ellipse(10, 10, 5, 5).move_to(5, 5).print() == b"<ellipse cx=\"15\" cy=\"15\" rx=\"5\" ry=\"5\" />".to_string());
-        assert!(line(10, 10, 20, 20).move_to(5, 5).print() == b"<line x1=\"15\" y1=\"15\" x2=\"25\" y2=\"25\" />".to_string());
-        assert!(polygon(10, 10, 20, 20).move_to(5, 5).print() == b"<polygon x1=\"15\" y1=\"15\" x2=\"25\" y2=\"25\" />".to_string());
-        assert!(polyline(10, 10, 20, 20).move_to(5, 5).print() == b"<polyline x1=\"15\" y1=\"15\" x2=\"25\" y2=\"25\" />".to_string());
-        assert!(rect(10, 10, 20, 20).move_to(5, 5).print() == b"<rect x=\"15\" y=\"15\" width=\"20\" height=\"20\" />".to_string());
+    fun test_move_to() {
+        use sui::test_utils::assert_eq;
+
+        assert_eq(circle(10, 10, 5).move_to(5, 5).to_string(), b"<circle cx='5' cy='5' r='5'/>".to_string());
+        assert_eq(ellipse(10, 10, 5, 5).move_to(5, 5).to_string(), b"<ellipse cx='5' cy='5' rx='5' ry='5'/>".to_string());
+        assert_eq(line(10, 10, 20, 20).move_to(5, 5).to_string(), b"<line x1='5' y1='5' x2='15' y2='15'/>".to_string());
+        assert_eq(polygon(10, 10, 20, 20).move_to(5, 5).to_string(), b"<polygon x1='5' y1='5' x2='15' y2='15'/>".to_string());
+        assert_eq(polyline(10, 10, 20, 20).move_to(5, 5).to_string(), b"<polyline x1='5' y1='5' x2='15' y2='15'/>".to_string());
+        assert_eq(rect(10, 10, 20, 20).move_to(5, 5).to_string(), b"<rect x='5' y='5' width='20' height='20'/>".to_string());
     }
 }
