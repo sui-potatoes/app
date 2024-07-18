@@ -40,7 +40,7 @@ module svg::container {
     public fun marker(_shapes: vector<Shape>): Container { abort ENotImplemented }
 
     /// Move a container, keep the interface consistent with shapes.
-    public fun move_to(container: Container, _x: u64, _y: u64): Container { container }
+    public fun move_to(container: Container, _x: u16, _y: u16): Container { container }
 
     /// Print the container as an `SVG` element.
     public fun to_string(container: &Container): String {
