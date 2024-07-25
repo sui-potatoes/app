@@ -11,40 +11,46 @@ module svg::svg {
 
     /// The base SVG element.
     public struct Svg has store, copy, drop {
-        width: u16,
-        height: u16,
+        width: Option<u16>,
+        height: Option<u16>,
         view_box: vector<u16>,
         elements: vector<Container>,
     }
 
     /// Create a new SVG element.
-    public fun svg(width: u16, height: u16, view_box: vector<u16>): Svg {
+    public fun svg(view_box: vector<u16>): Svg {
         assert!(view_box.length() == 4 || view_box.length() == 0);
+        Svg { width: option::none(), height: option::none(), view_box, elements: vector[] }
+    }
 
-        Svg {
-            width,
-            height,
-            view_box,
-            elements: vector[],
-        }
+    /// Adds any element to the SVG.
+    public fun add(svg: &mut Svg, element: Container): &mut Svg {
+        svg.elements.push_back(element);
+        svg
     }
 
     /// Add a root container to the SVG.
     public fun root(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
-        svg.add(container::root(shapes));
-        svg
+        svg.add(container::root(shapes))
     }
 
     /// Add a group container to the SVG.
     public fun g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
-        svg.add(container::g(shapes));
-        svg
+        svg.add(container::g(shapes))
     }
 
+    /// Print the SVG element as a `String`.
     public fun to_string(svg: &Svg): String {
         let mut attributes = vec_map::empty();
-        attributes.insert(b"width".to_string(), print::num_to_string(svg.width));
-        attributes.insert(b"height".to_string(), print::num_to_string(svg.height));
+        svg
+            .width
+            .do_ref!(|value| attributes.insert(b"width".to_string(), print::num_to_string(*value)));
+
+        svg
+            .height
+            .do_ref!(
+                |value| attributes.insert(b"height".to_string(), print::num_to_string(*value)),
+            );
 
         if (svg.view_box.length() == 4) {
             let mut view_box = b"".to_string();
@@ -66,27 +72,34 @@ module svg::svg {
         )
     }
 
-    /// Internal function to add an element to the SVG.
-    fun add(svg: &mut Svg, element: Container) {
-        svg.elements.push_back(element);
+    #[test_only]
+    public fun debug(svg: &Svg) {
+        std::debug::print(&to_string(svg));
     }
 
     #[test]
     fun test_svg() {
         use svg::shape;
 
-        let mut svg = svg(100, 100, vector[0, 0, 100, 100]);
-        let _text = svg
-            .root(vector[
-                shape::circle(50, 50, 40),
-                shape::rect(10, 10, 80, 80),
-            ])
-            .root(vector[
-                shape::ellipse(50, 50, 40, 20),
-                shape::line(10, 10, 90, 90),
-            ])
-            .to_string();
+        let mut svg = svg(vector[0, 0, 200, 200]);
 
-        // std::debug::print(&text)
+        svg.root(vector[
+            shape::text(b"You won't believe this!".to_string(), 100, 50).map_attributes!(
+                |attrs| {
+                    attrs.insert(b"fill".to_string(), b"black".to_string());
+                    attrs.insert(b"font-size".to_string(), b"20".to_string());
+                },
+            ),
+            shape::circle(10, 10, 5),
+            shape::rect(10, 10, 20, 20).map_attributes!(
+                |attrs| {
+                    attrs.insert(b"fill".to_string(), b"red".to_string());
+                    attrs.insert(b"stroke".to_string(), b"black".to_string());
+                },
+            ),
+            shape::ellipse(30, 30, 10, 5),
+        ]);
+
+        svg.debug();
     }
 }
