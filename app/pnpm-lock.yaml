@@ -35,6 +35,9 @@ importers:
       blake2b:
         specifier: ^2.1.4
         version: 2.1.4
+      pixi.js:
+        specifier: ^8.2.5
+        version: 8.2.5
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -441,6 +444,9 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
+
+  '@pixi/colord@2.9.6':
+    resolution: {integrity: sha512-nezytU2pw587fQstUu1AsJZDVEynjskwOL+kibwcdxsMBFqPsFFNA7xl0ii/gXuDi6M0xj3mfRJj8pBSc2jCfA==}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -1098,6 +1104,12 @@ packages:
   '@types/blake2b@2.1.3':
     resolution: {integrity: sha512-MFCdX0MNxFBP/xEILO5Td0kv6nI7+Q2iRWZbTL/yzH2/eDVZS5Wd1LHdsmXClvsCyzqaZfHFzZaN6BUeUCfSDA==}
 
+  '@types/css-font-loading-module@0.0.12':
+    resolution: {integrity: sha512-x2tZZYkSxXqWvTDgveSynfjq/T2HyiZHXb00j/+gy19yp70PHCizM48XFdjBCWH7eHBD0R5i/pw9yMBP/BH5uA==}
+
+  '@types/earcut@2.1.4':
+    resolution: {integrity: sha512-qp3m9PPz4gULB9MhjGID7wpo3gJ4bTGXm7ltNDsmOvsPduTeHp8wSW9YckBj3mljeOh4F0m2z/0JKAALRKbmLQ==}
+
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
 
@@ -1296,6 +1308,13 @@ packages:
   '@wallet-standard/wallet@1.0.1':
     resolution: {integrity: sha512-qkhJeuQU2afQTZ02yMZE5SFc91Fo3hyFjFkpQglHudENNyiSG0oUKcIjky8X32xVSaumgTZSQUAzpXnCTWHzKQ==}
     engines: {node: '>=16'}
+
+  '@webgpu/types@0.1.44':
+    resolution: {integrity: sha512-JDpYJN5E/asw84LTYhKyvPpxGnD+bAKPtpW9Ilurf7cZpxaTbxkQcGwOd7jgB9BPBrTYQ+32ufo4HiuomTjHNQ==}
+
+  '@xmldom/xmldom@0.8.10':
+    resolution: {integrity: sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==}
+    engines: {node: '>=10.0.0'}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -1574,6 +1593,9 @@ packages:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
 
+  earcut@2.2.4:
+    resolution: {integrity: sha512-/pjZsA1b4RPHbeWZQn66SWS8nZZWLQQ23oE3Eam7aroEFGEvwKAsJfZ9ytiEMycfzXWpca4FA9QIOehf7PocBQ==}
+
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
@@ -1689,6 +1711,9 @@ packages:
   esutils@2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
+
+  eventemitter3@5.0.1:
+    resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
@@ -1990,6 +2015,9 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
+  ismobilejs@1.1.1:
+    resolution: {integrity: sha512-VaFW53yt8QO61k2WJui0dHf4SlL8lxBofUuUmwBo0ljPk0Drz2TiuDW4jo3wDcv41qy/SxrJ+VAzJ/qYqsmzRw==}
+
   iterator.prototype@1.1.2:
     resolution: {integrity: sha512-DR33HMMr8EzwuRL8Y9D3u2BMj8+RqSE850jfGu59kS7tbmPLzGkZmVSfyCFSDxuZiEY6Rzt3T2NA/qU+NwVj1w==}
 
@@ -2212,6 +2240,9 @@ packages:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
 
+  parse-svg-path@0.1.2:
+    resolution: {integrity: sha512-JyPSBnkTJ0AI8GGJLfMXvKq42cj5c006fnLz6fXy6zfoVjJizi8BNTpu8on8ziI1cKy9d9DGNuY17Ce7wuejpQ==}
+
   pascal-case@3.1.2:
     resolution: {integrity: sha512-uWlGT3YSnK9x3BQJaOdcZwrnV6hPpd8jFH1/ucpiLRPh/2zCVJKS19E4GvYHvaCcACn3foXZ0cLB9Wrx1KGe5g==}
 
@@ -2261,6 +2292,9 @@ packages:
   pirates@4.0.6:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
     engines: {node: '>= 6'}
+
+  pixi.js@8.2.5:
+    resolution: {integrity: sha512-cpN4f4Duj2mDPQeDQJQ33LXA8wIGMpWbhld1SklEwESRULYPUsY84zXC8B+Cyl+zojcXH7eY1OMEdbbIPMb+rA==}
 
   poseidon-lite@0.2.0:
     resolution: {integrity: sha512-vivDZnGmz8W4G/GzVA72PXkfYStjilu83rjjUfpL4PueKcC8nfX6hCPh2XhoC5FBgC6y0TA3YuUeUo5YCcNoig==}
@@ -3102,6 +3136,8 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.17.1
 
+  '@pixi/colord@2.9.6': {}
+
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
@@ -3824,6 +3860,10 @@ snapshots:
 
   '@types/blake2b@2.1.3': {}
 
+  '@types/css-font-loading-module@0.0.12': {}
+
+  '@types/earcut@2.1.4': {}
+
   '@types/estree@1.0.5': {}
 
   '@types/json-schema@7.0.15': {}
@@ -4096,6 +4136,10 @@ snapshots:
   '@wallet-standard/wallet@1.0.1':
     dependencies:
       '@wallet-standard/base': 1.0.1
+
+  '@webgpu/types@0.1.44': {}
+
+  '@xmldom/xmldom@0.8.10': {}
 
   acorn-jsx@5.3.2(acorn@8.11.3):
     dependencies:
@@ -4402,6 +4446,8 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
+  earcut@2.2.4: {}
+
   eastasianwidth@0.2.0: {}
 
   electron-to-chromium@1.4.815: {}
@@ -4636,6 +4682,8 @@ snapshots:
       '@types/estree': 1.0.5
 
   esutils@2.0.3: {}
+
+  eventemitter3@5.0.1: {}
 
   fast-deep-equal@3.1.3: {}
 
@@ -4942,6 +4990,8 @@ snapshots:
 
   isexe@2.0.0: {}
 
+  ismobilejs@1.1.1: {}
+
   iterator.prototype@1.1.2:
     dependencies:
       define-properties: 1.2.1
@@ -5153,6 +5203,8 @@ snapshots:
     dependencies:
       callsites: 3.1.0
 
+  parse-svg-path@0.1.2: {}
+
   pascal-case@3.1.2:
     dependencies:
       no-case: 3.0.4
@@ -5190,6 +5242,18 @@ snapshots:
   pify@2.3.0: {}
 
   pirates@4.0.6: {}
+
+  pixi.js@8.2.5:
+    dependencies:
+      '@pixi/colord': 2.9.6
+      '@types/css-font-loading-module': 0.0.12
+      '@types/earcut': 2.1.4
+      '@webgpu/types': 0.1.44
+      '@xmldom/xmldom': 0.8.10
+      earcut: 2.2.4
+      eventemitter3: 5.0.1
+      ismobilejs: 1.1.1
+      parse-svg-path: 0.1.2
 
   poseidon-lite@0.2.0: {}
 
