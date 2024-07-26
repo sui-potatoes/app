@@ -27,9 +27,7 @@ Finn wasn't good at math, and nor am I. Especially when it comes to sensitive op
 precision, minimizing rounding - well, typical math on chain. This library is intended for folks who
 want to avoid being overwhelmed by simple calculations.
 
-<img src="https://cdn-media.threadless.com/submissions_wm/702990-bb9f43867dce73e18e244adaaf1fef47.jpg" width="400">
-
-_Image is by [S3NTRYdesigns](https://www.threadless.com/profile/3557493/s3ntrydesigns), [link to the resource](https://www.threadless.com/designs/mathematical-adventure-time)_
+![](https://i.imgur.com/6IQBsBU.gif)
 
 ## Installing
 
