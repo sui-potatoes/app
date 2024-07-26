@@ -21,14 +21,15 @@
 /// let field: AppData = &character[ApplicationKey {}];
 /// ```
 module character::character {
-    use std::ascii::String;
+    use std::string::{Self, String};
     use std::type_name;
     use sui::display::{Self, Display};
     use sui::vec_map::{Self, VecMap};
     use sui::dynamic_field as df;
     use sui::package;
 
-    use utils::urlencode;
+    use potatoes_utils::urlencode;
+    use svg::{svg, shape, container::{Self, Container}, macros::add_class};
 
     const EWrongBody: u64 = 1;
     const EWrongHair: u64 = 2;
@@ -41,6 +42,15 @@ module character::character {
 
     /// Trying to add a dynamic field with a primitive type to the character.
     const EIncorrectDynamicField: u64 = 9;
+
+    // === Constants ===
+
+    const HAIR: vector<u8> = b"h";
+    const BODY: vector<u8> = b"b";
+    const EYES: vector<u8> = b"e";
+    const LEGS: vector<u8> = b"l";
+    const SKIN: vector<u8> = b"s";
+    const ACCENT: vector<u8> = b"a";
 
     // prettier-ignore
     /// EDG 32 palette. Classic 32 colour palette.
@@ -68,18 +78,13 @@ module character::character {
     /// fields.
     public struct Builder has key {
         id: UID,
-        body: VecMap<String, vector<Rect>>,
-        hair: VecMap<String, vector<Rect>>,
+        body: VecMap<String, Container>,
+        hair: VecMap<String, Container>,
         colours: vector<vector<u8>>,
     }
 
     /// The OTW for the application.
     public struct CHARACTER has drop {}
-
-    /// Single rectangle shape in the SVG. The first four values are the
-    /// x and y coordinates, then the width and height. The last parameter is
-    /// the class of the shape.
-    public struct Rect(u8, u8, u8, u8, String) has store, copy, drop;
 
     /// The builder for the image of a Character, can use available shapes and
     /// colours from the game object.
@@ -135,8 +140,8 @@ module character::character {
         assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
         let image = Props {
-            body: urlencode::encode(&render_part(b.body[&body_type])),
-            hair: urlencode::encode(&render_part(b.hair[&hair_type])),
+            body: urlencode::encode(b.body[&body_type].to_string()),
+            hair: urlencode::encode(b.hair[&hair_type].to_string()),
             body_type,
             hair_type,
             eyes_colour,
@@ -173,8 +178,8 @@ module character::character {
         assert!(b.colours.contains(base_colour.as_bytes()), EWrongBaseColour);
         assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
-        c.image.body = urlencode::encode(&render_part(b.body[&body_type]));
-        c.image.hair = urlencode::encode(&render_part(b.hair[&hair_type]));
+        c.image.body = urlencode::encode(b.body[&body_type].to_string());
+        c.image.hair = urlencode::encode(b.hair[&hair_type].to_string());
         c.image.body_type = body_type;
         c.image.hair_type = hair_type;
         c.image.eyes_colour = eyes_colour;
@@ -265,105 +270,67 @@ module character::character {
         transfer::share_object(builder);
     }
 
-    fun rect_to_svg_bytes(rect: Rect): vector<u8> {
-        let Rect(x, y, w, h, class) = rect;
-        let mut res = vector[];
-        let data = vector[
-            b"<rect x='", num_to_ascii(x), b"' y='", num_to_ascii(y), b"' width='", num_to_ascii(w), b"' height='", num_to_ascii(h), b"' class='", class.into_bytes(), b"'/>"
-        ];
-
-        data.do!(|part| res.append(part));
-        res
-    }
-
-    fun render_part(part: vector<Rect>): String {
-        let mut res = vector[];
-        part.destroy!(|rect| res.append(rect_to_svg_bytes(rect)));
-        res.to_ascii_string()
-    }
-
-    fun num_to_ascii(mut num: u8): vector<u8> {
-        let mut res = vector[];
-        if (num == 0) return vector[48];
-        while (num > 0) {
-            let digit = (num % 10) as u8;
-            num = num / 10;
-            res.insert(digit + 48, 0);
-        };
-        res //
-    }
-
     /// Set the initial assets for the character.
     fun set_initial_assets(builder: &mut Builder) {
-        builder
-            .hair
-            .insert(
-                b"punk".to_ascii_string(),
-                vector[
-                    Rect(80, 20, 60, 20, b"h".to_ascii_string()),
-                    Rect(80, 0, 40, 20, b"h".to_ascii_string()),
-                ],
-            );
-        builder
-            .hair
-            .insert(
-                b"flat".to_ascii_string(),
-                vector[
-                    Rect(80, 20, 60, 20, b"h".to_ascii_string()),
-                ],
-            );
-        builder
-            .hair
-            .insert(
-                b"bang".to_ascii_string(),
-                vector[
-                    Rect(80, 20, 60, 20, b"h".to_ascii_string()),
-                    Rect(120, 40, 20, 20, b"h".to_ascii_string()),
-                ],
-            );
-        builder
-            .hair
-            .insert(
-                b"wind".to_ascii_string(),
-                vector[
-                    Rect(60, 20, 20, 60, b"h".to_ascii_string()),
-                    Rect(80, 20, 80, 20, b"h".to_ascii_string()),
-                    Rect(140, 40, 40, 40, b"h".to_ascii_string()),
-                    Rect(180, 40, 20, 20, b"h".to_ascii_string()),
-                ],
-            );
+        // hair: punk
+        let mut punk = container::g(vector[
+            shape::rect(80, 20, 60, 20),
+            shape::rect(80, 0, 40, 20),
+        ]);
 
-        builder
-            .body
-            .insert(
-                b"blazer".to_ascii_string(),
-                vector[
-                    Rect(80, 100, 20, 20, b"b".to_ascii_string()),
-                    Rect(120, 100, 20, 20, b"b".to_ascii_string()),
-                    Rect(100, 120, 20, 20, b"b".to_ascii_string()),
-                    Rect(60, 100, 20, 20, b"a".to_ascii_string()),
-                    Rect(140, 100, 20, 20, b"a".to_ascii_string()),
-                ],
-            );
-        builder
-            .body
-            .insert(
-                b"office".to_ascii_string(),
-                vector[
-                    Rect(60, 100, 20, 40, b"a".to_ascii_string()),
-                    Rect(100, 100, 20, 40, b"a".to_ascii_string()),
-                    Rect(140, 100, 20, 40, b"a".to_ascii_string()),
-                ],
-            );
-        builder
-            .body
-            .insert(
-                b"tshirt".to_ascii_string(),
-                vector[
-                    Rect(60, 100, 20, 20, b"b".to_ascii_string()),
-                    Rect(140, 100, 20, 20, b"b".to_ascii_string()),
-                ],
-            );
+        add_class!(&mut punk, HAIR);
+        builder.hair.insert(b"punk".to_string(), punk);
+
+        // hair: flat
+        let mut flat = shape::rect(80, 20, 60, 20);
+        add_class!(&mut flat, HAIR);
+        builder.hair.insert(b"flat".to_string(), container::root(vector[flat]));
+
+        // hair: bang
+        let mut bang = container::g(vector[
+            shape::rect(80, 20, 60, 20),
+            shape::rect(120, 40, 20, 20),
+        ]);
+        add_class!(&mut bang, HAIR);
+        builder.hair.insert(b"bang".to_string(), bang);
+
+        // hair: wind
+        let mut wind = container::g(vector[
+            shape::rect(60, 20, 20, 60),
+            shape::rect(80, 20, 80, 20),
+            shape::rect(140, 40, 40, 40),
+            shape::rect(180, 40, 20, 20),
+        ]);
+        add_class!(&mut wind, HAIR);
+        builder.hair.insert(b"wind".to_string(), wind);
+
+        // body: blazer
+        let mut blazer = container::g(vector[
+            shape::rect(80, 100, 20, 20),
+            shape::rect(120, 100, 20, 20),
+            shape::rect(100, 120, 20, 20),
+            shape::rect(60, 100, 20, 20),
+            shape::rect(140, 100, 20, 20),
+        ]);
+        add_class!(&mut blazer, BODY);
+        builder.body.insert(b"blazer".to_string(), blazer);
+
+        // body: office
+        let mut office = container::g(vector[
+            shape::rect(60, 100, 20, 40),
+            shape::rect(100, 100, 20, 40),
+            shape::rect(140, 100, 20, 40),
+        ]);
+        add_class!(&mut office, ACCENT);
+        builder.body.insert(b"office".to_string(), office);
+
+        // body: tshirt
+        let mut tshirt = container::g(vector[
+            shape::rect(60, 100, 20, 20),
+            shape::rect(140, 100, 20, 20),
+        ]);
+        add_class!(&mut tshirt, BODY);
+        builder.body.insert(b"tshirt".to_string(), tshirt);
     }
 
     /// Display setup
@@ -380,50 +347,48 @@ module character::character {
         d.update_version();
     }
 
-    // classes, short:
-    // b - body
-    // h - hair
-    // e - eyes
-    // l - legs
-    // s - skin
-    // a - accent
-    // p - pants
-    // empty - empty space
-
     fun build_pure_svg(): String {
-        let body = Rect(80, 100, 60, 60, b"b".to_ascii_string());
-        let head = Rect(80, 40, 60, 60, b"s".to_ascii_string());
-        let l_eye = Rect(80, 60, 20, 20, b"e".to_ascii_string());
-        let r_eye = Rect(120, 60, 20, 20, b"e".to_ascii_string());
-        let legs = Rect(80, 160, 60, 60, b"l".to_ascii_string());
-        let legs_space = Rect(100, 180, 20, 40, b"empty".to_ascii_string());
-        let l_hand = Rect(60, 100, 20, 60, b"s".to_ascii_string());
-        let r_hand = Rect(140, 100, 20, 60, b"s".to_ascii_string());
+        let mut body = shape::rect(80, 100, 60, 60);
+        add_class!(&mut body, BODY);
 
-        let mut svg = vector[];
-        svg.append(b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 240'>");
-        svg.append(
-            b"<style>.empty{fill:#fff} .s{fill:#SKIN} .e{fill:#EYES} .h{fill:#HAIR} .l{fill:#PANTS} .b{fill:#BODY} .a{fill:#ACCENT}</style>",
-        );
-        svg.append(rect_to_svg_bytes(body));
-        svg.append(rect_to_svg_bytes(head));
-        svg.append(rect_to_svg_bytes(l_eye));
-        svg.append(rect_to_svg_bytes(r_eye));
-        svg.append(rect_to_svg_bytes(legs));
-        svg.append(rect_to_svg_bytes(legs_space));
-        svg.append(rect_to_svg_bytes(l_hand));
-        svg.append(rect_to_svg_bytes(r_hand));
-        svg.append(b"TEMPLATE");
-        svg.append(b"</svg>");
-        svg.to_ascii_string()
+        let mut head = shape::rect(80, 40, 60, 60);
+        add_class!(&mut head, SKIN);
+
+        let mut eyes = container::g(vector[
+            shape::rect(80, 60, 20, 20),
+            shape::rect(120, 60, 20, 20),
+        ]);
+        add_class!(&mut eyes, EYES);
+
+        let mut legs = container::g(vector[
+            shape::rect(80, 160, 20, 60),
+            shape::rect(100, 160, 20, 20),
+            shape::rect(120, 160, 20, 60),
+        ]);
+        add_class!(&mut legs, LEGS);
+
+        let mut hands = container::g(vector[
+            shape::rect(60, 100, 20, 60),
+            shape::rect(140, 100, 20, 60),
+        ]);
+        add_class!(&mut hands, SKIN);
+
+        // New SVG with the viewbox.
+        let mut svg = svg::svg(vector[0, 0, 220, 240]);
+        let styles = shape::custom(b"<style>.s{fill:#SKIN} .e{fill:#EYES} .h{fill:#HAIR} .l{fill:#PANTS} .b{fill:#BODY} .a{fill:#ACCENT}</style>".to_string());
+
+        svg.root(vector[styles, body, head]);
+        svg.add(eyes);
+        svg.add(legs);
+        svg.add(hands);
+        svg.root(vector[shape::custom(b"TEMPLATE".to_string())]); // template
+        svg.to_string()
     }
 
     /// Builds the base character SVG template, used in the `Display` in the
     /// `init` (`set_display`) function.
     fun build_character_base(): string::String {
-        let template = urlencode::encode(&build_pure_svg()).to_string();
-
-        // std::debug::print(&url_encode);
+        let template = build_pure_svg();
 
         // then run replacement script with the following values
         // HAIR -> {image.hair_colour}
@@ -453,9 +418,7 @@ module character::character {
         template
     }
 
-    use std::string;
-
-    fun replace(str: string::String, from: string::String, to: string::String): string::String {
+    fun replace(str: String, from: String, to: String): String {
         let pos = str.index_of(&from);
         let str = {
             let mut lhs = str.substring(0, pos);
@@ -465,5 +428,12 @@ module character::character {
             lhs
         };
         str
+    }
+
+    #[test]
+    fun test_preview_character_build() {
+        let mut image_url = b"data:image/svg+xml;charset=utf8,".to_string();
+        image_url.append(urlencode::encode(build_character_base()));
+        std::debug::print(&image_url);
     }
 }
