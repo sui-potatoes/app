@@ -238,13 +238,6 @@ module svg::shape {
         shape.attributes = attrs;
     }
 
-    /// Map over the attributes of a shape.
-    public macro fun map_attributes($shape: Shape, $f: |&mut VecMap<String, String>|): Shape {
-        let mut shape = $shape;
-        $f(shape.attributes_mut());
-        shape
-    }
-
     #[test]
     // prettier-ignore
     fun test_shapes() {

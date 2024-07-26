@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 /// Implements
-module utils::formula {
+module potatoes_utils::formula {
     const EOverflow: u64 = 0;
     const EUnderflow: u64 = 1;
     const EDivideByZero: u64 = 2;
@@ -13,11 +13,13 @@ module utils::formula {
     const U16_MAX: u16 = 65535;
     const U8_MAX: u8 = 255;
 
-    /// Represents an expression in the formula. A single operation may have
-    /// multiple or no arguments. The operation is represented as a byte string.
-    public struct Expr<T> has copy, drop {
-        op: vector<u8>,
-        args: vector<T>,
+    /// Represents an expression in a formula.
+    public enum Op<T> has copy, drop {
+        Div(T),
+        Mul(T),
+        Add(T),
+        Sub(T),
+        Sqrt,
     }
 
     /// Represents a formula with a list of expressions and an optional scaling factor.
@@ -29,7 +31,7 @@ module utils::formula {
     /// ```
     /// The above example will calculate the formula for `u8` type with the value `5`.
     public struct Formula<T> has copy, drop {
-        expressions: vector<Expr<T>>,
+        expressions: vector<Op<T>>,
         scaling: Option<T>,
     }
 
@@ -48,32 +50,32 @@ module utils::formula {
     // === Operations ===
 
     /// Register a division operation to be executed in the `calc_*` functions.
-    public fun div<T>(mut self: Formula<T>, other: T): Formula<T> {
-        self.expressions.push_back(Expr { op: b"div", args: vector[other] });
+    public fun div<T>(mut self: Formula<T>, arg: T): Formula<T> {
+        self.expressions.push_back(Op::Div(arg));
         self
     }
 
     /// Register a multiplication operation to be executed in the `calc_*` functions.
-    public fun mul<T>(mut self: Formula<T>, other: T): Formula<T> {
-        self.expressions.push_back(Expr { op: b"mul", args: vector[other] });
+    public fun mul<T>(mut self: Formula<T>, arg: T): Formula<T> {
+        self.expressions.push_back(Op::Mul(arg));
         self
     }
 
     /// Register an addition operation to be executed in the `calc_*` functions.
-    public fun add<T>(mut self: Formula<T>, other: T): Formula<T> {
-        self.expressions.push_back(Expr { op: b"add", args: vector[other] });
+    public fun add<T>(mut self: Formula<T>, arg: T): Formula<T> {
+        self.expressions.push_back(Op::Add(arg));
         self
     }
 
     /// Register a subtraction operation to be executed in the `calc_*` functions.
-    public fun sub<T>(mut self: Formula<T>, other: T): Formula<T> {
-        self.expressions.push_back(Expr { op: b"sub", args: vector[other] });
+    public fun sub<T>(mut self: Formula<T>, arg: T): Formula<T> {
+        self.expressions.push_back(Op::Sub(arg));
         self
     }
 
     /// Register a square root operation to be executed in the `calc_*` functions.
     public fun sqrt<T>(mut self: Formula<T>): Formula<T> {
-        self.expressions.push_back(Expr { op: b"sqrt", args: vector[] });
+        self.expressions.push_back(Op::Sqrt);
         self
     }
 
@@ -120,36 +122,39 @@ module utils::formula {
         let mut value = expressions.fold!(
             $value as $U,
             |res, expr| {
-                let Expr { op, args } = expr;
-                if (op == b"div") {
-                    assert!(args[0] != 0, EDivideByZero);
-                    if (is_scaled) {
-                        (res) / (args[0] as $U)
-                    } else {
-                        is_scaled = true;
-                        (res * scaling) / (args[0] as $U)
-                    }
-                } else if (op == b"mul") {
-                    res * (args[0] as $U)
-                } else if (op == b"add") {
-                    if (is_scaled) res + (args[0] as $U * scaling)
-                    else res + (args[0] as $U)
-                } else if (op == b"sub") {
-                    if (is_scaled) {
-                        assert!(res >= (args[0] as $U * scaling), EUnderflow);
-                        res - (args[0] as $U * scaling)
-                    } else {
-                        assert!(res >= (args[0] as $U), EUnderflow);
-                        res - (args[0] as $U)
-                    }
-                } else if (op == b"sqrt") {
-                    if (is_scaled) {
-                        $sqrt(res * scaling)
-                    } else {
-                        is_scaled = true;
-                        $sqrt(res * scaling * scaling)
-                    }
-                } else abort 0
+                match (expr) {
+                    Op::Div(arg) => {
+                        assert!(arg != 0, EDivideByZero);
+                        if (is_scaled) {
+                            res / (arg as $U)
+                        } else {
+                            is_scaled = true;
+                            res * scaling / (arg as $U)
+                        }
+                    },
+                    Op::Mul(arg) => res * (arg as $U),
+                    Op::Add(arg) => {
+                        if (is_scaled) res + ((arg as $U) * scaling)
+                        else res + (arg as $U)
+                    },
+                    Op::Sub(arg) => {
+                        if (is_scaled) {
+                            assert!(res >= ((arg as $U) * scaling), EUnderflow);
+                            res - ((arg as $U) * scaling)
+                        } else {
+                            assert!(res >= (arg as $U), EUnderflow);
+                            res - (arg as $U)
+                        }
+                    },
+                    Op::Sqrt => {
+                        if (is_scaled) {
+                            $sqrt(res * scaling)
+                        } else {
+                            is_scaled = true;
+                            $sqrt(res * scaling * scaling)
+                        }
+                    },
+                }
             },
         );
 

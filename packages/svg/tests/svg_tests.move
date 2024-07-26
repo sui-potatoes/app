@@ -6,6 +6,7 @@ module svg::svg_tests {
     use svg::svg;
     use svg::shape;
     use svg::container;
+    use svg::macros::{add_class, add_attribute};
 
     const ENotImplemented: u64 = 0;
 
@@ -15,14 +16,14 @@ module svg::svg_tests {
         let mut svg = svg::svg(vector[0, 0, 9, 13]);
 
         // head
-        let head = shape::rect(3, 3, 3, 3).map_attributes!(
-            |attrs| attrs.insert(b"fill".to_string(), b"orange".to_string()),
-        );
+        let mut head = shape::rect(3, 3, 3, 3);
+        add_class!(&mut head, b"head");
+        add_attribute!(&mut head, b"fill", b"orange");
 
         // body
-        let body = shape::rect(3, 6, 3, 3).map_attributes!(
-            |attrs| attrs.insert(b"fill".to_string(), b"black".to_string()),
-        );
+        let mut body = shape::rect(3, 6, 3, 3);
+        add_class!(&mut body, b"body");
+        add_attribute!(&mut body, b"fill", b"blue");
 
         // hands (a container already!)
         let mut hands = container::g(vector[
@@ -30,7 +31,8 @@ module svg::svg_tests {
             shape::rect(6, 6, 1, 3), // right hand
         ]);
 
-        hands.attributes_mut().insert(b"fill".to_string(), b"black".to_string());
+        add_class!(&mut hands, b"hand");
+        add_attribute!(&mut hands, b"fill", b"black");
 
         // legs
         let mut legs = container::g(vector[
@@ -39,7 +41,7 @@ module svg::svg_tests {
             shape::rect(5, 9, 1, 3), // right leg
         ]);
 
-        legs.attributes_mut().insert(b"fill".to_string(), b"black".to_string());
+        add_attribute!(&mut legs, b"fill", b"black");
 
         svg.root(vector[head, body]).add(hands).add(legs);
         std::debug::print(&svg.to_string().as_bytes().length());
