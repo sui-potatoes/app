@@ -3,7 +3,7 @@
 This library implements chains of operations with automatic safe scaling factor and maintaining
 precision. Packed into a simple chain-able API. See for yourself!
 
-```move
+```rust
 use mathematical::formula;
 
 // build the formula
@@ -21,7 +21,15 @@ std::debug::print(&result1);
 std::debug::print(&result2);
 ```
 
-![](https://www.clipartmax.com/png/middle/247-2478891_adventure-time-mathematical-adventure-time-math-stickers.png)
+## Background
+
+Finn wasn't good at math, and nor am I. Especially when it comes to sensitive operations, maintaining
+precision, minimizing rounding - well, typical math on chain. This library is intended for folks who
+want to avoid being overwhelmed by simple calculations.
+
+<img src="https://cdn-media.threadless.com/submissions_wm/702990-bb9f43867dce73e18e244adaaf1fef47.jpg" width="400">
+
+_Image is by [S3NTRYdesigns](https://www.threadless.com/profile/3557493/s3ntrydesigns), [link to the resource](https://www.threadless.com/designs/mathematical-adventure-time)_
 
 ## Installing
 
@@ -39,7 +47,7 @@ Mathematical = { git = "https://github.com/sui-potatoes/app.git", subdir = "pack
 Formula is constructed using the `new` function and can remain untyped until the result is calculated.
 An instance of `Formula` supports following methods: `add`, `sub`, `mul`, `div` and `sqrt`.
 
-```move
+```rust
 use mathematical::formula;
 
 assert!(formula::new().add(1).sub(10).mul(10).div(10).calc_u8(0) == 1);
