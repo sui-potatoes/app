@@ -4,7 +4,6 @@ import { NavLink } from "react-router-dom";
 import { App as GoGame } from "./apps/go-game/App.tsx";
 // import { App as RockPaperScissors } from "./apps/rock-paper-scissors/App.tsx";
 import { App as Character } from "./apps/character/App.tsx";
-import { App as Dungeon } from "./apps/dungeon/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
 import { useSuiClient } from "@mysten/dapp-kit";
@@ -118,7 +117,6 @@ export function App() {
                     <Route path="/go" element={<GoGame />} />
                     <Route path="/go/:id" element={<GoGame />} />
                     <Route path="/char" element={<Character />} />
-                    <Route path="/dungeon" element={<Dungeon />} />
                     {/* <Route path="/rps" element={<RockPaperScissors />} /> */}
                 </Routes>
             </div>
