@@ -1,8 +1,13 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Implements
-module potatoes_utils::formula {
+/// Implements a formula calculation module. This module is designed for simple linear formulas
+/// with all basic operations like addition, subtraction, multiplication, division, and square root.
+///
+/// - Works on any type in the integer range from `u8` to `u128`.
+/// - The formula remains untyped until the `calc_*` function is called.
+/// - The formula can be scaled with a custom scaling factor.
+module mathematical::formula {
     const EOverflow: u64 = 0;
     const EUnderflow: u64 = 1;
     const EDivideByZero: u64 = 2;
@@ -175,12 +180,12 @@ module potatoes_utils::formula {
         assert!((*&form).calc_u8(5) == 145, 0);
         assert!((*&form).calc_u8(10) == 195, 0);
 
-        let formula = new<u128>()
-            .scale(2 << 64)
-            .div(10000)
-            .add(1)
-            .sqrt()
-            .mul(412481737123559485879);
+let formula = new<u128>()
+    .scale(2 << 64)
+    .div(10000)
+    .add(1)
+    .sqrt()
+    .mul(412481737123559485879);
 
         let res = formula.calc_u128(100);
         let test_scaling = new().div(1).div(1).div(1).div(1).calc_u128(1);
