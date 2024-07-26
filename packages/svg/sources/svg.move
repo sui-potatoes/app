@@ -5,7 +5,6 @@
 module svg::svg {
     use std::string::String;
     use sui::vec_map::{Self, VecMap};
-    use potatoes_utils::urlencode;
     use svg::container::{Self, Container};
     use svg::shape::Shape;
     use svg::print;
@@ -47,6 +46,7 @@ module svg::svg {
     /// Print the SVG element as a `String`.
     public fun to_string(svg: &Svg): String {
         let mut attributes = vec_map::empty();
+        attributes.insert(b"xmlns".to_string(), b"http://www.w3.org/2000/svg".to_string());
         if (svg.view_box.length() == 4) {
             let mut view_box = b"".to_string();
             svg
@@ -78,12 +78,13 @@ module svg::svg {
         use svg::shape;
         use svg::macros::add_attribute;
 
-        let mut svg = svg(vector[0, 0, 200, 200]);
-        let mut str = x"";
+        let mut svg = svg(vector[0, 0, 200, 200]); // elephant emoji HEX is 01F418
+        let mut str = x"F09F9098";
+        str.append(b"You won't believe this!");
 
         svg.root(vector[
             {
-                let mut shape = shape::text(b"You won't believe this!".to_string(), 100, 50);
+                let mut shape = shape::text(str.to_string(), 100, 50);
                 add_attribute!(&mut shape, b"fill", b"black");
                 add_attribute!(&mut shape, b"font-size", b"20");
                 shape
@@ -98,6 +99,13 @@ module svg::svg {
             shape::ellipse(30, 30, 10, 5),
         ]);
 
-        svg.debug();
+        let mut prefix = b"data:image/svg+xml;charset=utf8,".to_string();
+        // let mut prefix = b"data:image/svg+xml;base64,".to_string();
+        let str = svg.to_string();
+        let str = potatoes_utils::urlencode::encode(str);
+        // let str = potatoes_utils::base64::encode(str);
+        prefix.append(str);
+        std::debug::print(&prefix.length());
+        std::debug::print(&prefix);
     }
 }
