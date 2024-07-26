@@ -1,6 +1,6 @@
 /*
 #[test_only]
-module utils::utils_tests {
+module potatoes_utils::utils_tests {
     // uncomment this line to import the module
     // use utils::utils;
 

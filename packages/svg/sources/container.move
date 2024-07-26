@@ -61,8 +61,28 @@ module svg::container {
             Container::Root(shapes) => shapes.push_back(shape),
             Container::Defs(shapes) => shapes.push_back(shape),
             Container::G(shapes, _) => shapes.push_back(shape),
-            Container::A(_, _) => abort 0,
-            _ => abort ENotImplemented,
+            _ => abort 0,
+        }
+    }
+
+    /// Get a mutable reference to the attributes of a container.
+    public fun attributes_mut(container: &mut Container): &mut VecMap<String, String> {
+        match (container) {
+            Container::A(_, attributes) => attributes,
+            Container::G(_, attributes) => attributes,
+            _ => abort 0,
+        }
+    }
+
+    /// Simplification to not create functions for each container invariant.
+    public fun name(container: &Container): String {
+        match (container) {
+            Container::Desc(..) => b"desc".to_string(),
+            Container::Root(..) => b"root".to_string(),
+            Container::A(..) => b"a".to_string(),
+            Container::G(..) => b"g".to_string(),
+            Container::Defs(..) => b"defs".to_string(),
+            _ => abort 0,
         }
     }
 
@@ -71,15 +91,17 @@ module svg::container {
         let (name, attributes, elements) = match (container) {
             // Desc is a special case, it's just a list of descriptions.
             Container::Desc(tags) => {
-                let mut svg = b"".to_string();
-                tags.do_ref!(|tag| svg.append(tag.to_string()));
-                return svg
+                return (*tags).fold!(b"".to_string(), |mut svg, tag| {
+                    svg.append(tag.to_string());
+                    svg
+                })
             },
-            // Root is a special case, it's just a list of shapes.
+            // Root is a special case, we append all elements directly.
             Container::Root(shapes) => {
-                let mut svg = b"".to_string();
-                shapes.do_ref!(|shape| svg.append(shape.to_string()));
-                return svg
+                return (*shapes).fold!(b"".to_string(), |mut svg, shape| {
+                    svg.append(shape.to_string());
+                    svg
+                })
             },
             Container::Defs(shapes) => (
                 b"defs",
@@ -96,28 +118,5 @@ module svg::container {
         };
 
         print::print(name.to_string(), attributes, option::some(elements))
-    }
-
-    /// Simplification to not create functions for each container invariant.
-    public fun name(container: &Container): String {
-        match (container) {
-            Container::Desc(_) => b"desc".to_string(),
-            Container::Root(_) => b"root".to_string(),
-            Container::A(_, _) => b"a".to_string(),
-            Container::G(_, _) => b"g".to_string(),
-            Container::Defs(_) => b"defs".to_string(),
-            _ => abort ENotImplemented,
-        }
-    }
-
-    /// Get a mutable reference to the attributes of a container.
-    public fun attributes_mut(container: &mut Container): &mut VecMap<String, String> {
-        match (container) {
-            Container::Root(_) => abort 0,
-            Container::Defs(_) => abort 0,
-            Container::A(_, attributes) => attributes,
-            Container::G(_, attributes) => attributes,
-            _ => abort ENotImplemented,
-        }
     }
 }
