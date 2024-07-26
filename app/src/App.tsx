@@ -104,9 +104,6 @@ export function App() {
                         <NavLink to="/char">character</NavLink>
                     </li>
                     <li>
-                        <NavLink to="/dungeon">dungeon</NavLink>
-                    </li>
-                    <li>
                         <a href="https://github.com/sui-potatoes/app" target="_blank">Source Code</a>
                         {/* <NavLink  to="/">rock paper scissors (disabled)</NavLink> */}
                         {/* <p style={{ cursor: "default" }}>
