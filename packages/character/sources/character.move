@@ -336,7 +336,7 @@ module character::character {
     /// Display setup
     fun set_display(d: &mut Display<Character>) {
         let mut image_url = b"data:image/svg+xml;charset=utf8,".to_string();
-        image_url.append(build_character_base());
+        image_url.append(urlencode::encode(build_character_base()));
 
         d.add(b"image_url".to_string(), image_url);
         d.add(b"name".to_string(), b"Brave Character!".to_string());
