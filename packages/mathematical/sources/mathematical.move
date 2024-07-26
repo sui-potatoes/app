@@ -24,6 +24,7 @@ module mathematical::formula {
         Mul(T),
         Add(T),
         Sub(T),
+        Pow(u8),
         Sqrt,
     }
 
@@ -84,6 +85,15 @@ module mathematical::formula {
         self
     }
 
+    /// Register a power operation to be executed in the `calc_*` functions.
+    ///
+    /// Important: the power operation downscales the formula to the base scaling
+    ///  factor, hence it's recommended to use it as the last operation.
+    public fun pow<T>(mut self: Formula<T>, arg: u8): Formula<T> {
+        self.expressions.push_back(Op::Pow(arg));
+        self
+    }
+
     // === Calculation ===
 
     /// Calculate formula for `u8` type.
@@ -128,27 +138,36 @@ module mathematical::formula {
             $value as $U,
             |res, expr| {
                 match (expr) {
-                    Op::Div(arg) => {
-                        assert!(arg != 0, EDivideByZero);
+                    Op::Div(divisor) => {
+                        assert!(divisor != 0, EDivideByZero);
                         if (is_scaled) {
-                            res / (arg as $U)
+                            res / (divisor as $U)
                         } else {
                             is_scaled = true;
-                            res * scaling / (arg as $U)
+                            res * scaling / (divisor as $U)
                         }
                     },
-                    Op::Mul(arg) => res * (arg as $U),
-                    Op::Add(arg) => {
-                        if (is_scaled) res + ((arg as $U) * scaling)
-                        else res + (arg as $U)
+                    Op::Mul(multiplier) => res * (multiplier as $U),
+                    Op::Add(addend) => {
+                        if (is_scaled) res + ((addend as $U) * scaling)
+                        else res + (addend as $U)
                     },
-                    Op::Sub(arg) => {
+                    Op::Sub(subtrahend) => {
                         if (is_scaled) {
-                            assert!(res >= ((arg as $U) * scaling), EUnderflow);
-                            res - ((arg as $U) * scaling)
+                            assert!(res >= ((subtrahend as $U) * scaling), EUnderflow);
+                            res - ((subtrahend as $U) * scaling)
                         } else {
-                            assert!(res >= (arg as $U), EUnderflow);
-                            res - (arg as $U)
+                            assert!(res >= (subtrahend as $U), EUnderflow);
+                            res - (subtrahend as $U)
+                        }
+                    },
+                    Op::Pow(exponent) => {
+                        // may overflow quite easily, get back to me!
+                        if (is_scaled && exponent > 1) {
+                            is_scaled = false;
+                            (res / scaling).pow(exponent)
+                        } else {
+                            res.pow(exponent)
                         }
                     },
                     Op::Sqrt => {
@@ -172,6 +191,14 @@ module mathematical::formula {
     }
 
     #[test]
+    fun test_pow_scaled() {
+        use sui::test_utils::assert_eq;
+
+        let formula = new<u32>().div(10).pow(2).calc_u32(100);
+        assert_eq(formula, 100);
+    }
+
+    #[test]
     fun test_formula() {
         use sui::test_utils::assert_eq;
 
@@ -180,12 +207,12 @@ module mathematical::formula {
         assert!((*&form).calc_u8(5) == 145, 0);
         assert!((*&form).calc_u8(10) == 195, 0);
 
-let formula = new<u128>()
-    .scale(2 << 64)
-    .div(10000)
-    .add(1)
-    .sqrt()
-    .mul(412481737123559485879);
+        let formula = new<u128>()
+            .scale(2 << 64)
+            .div(10000)
+            .add(1)
+            .sqrt()
+            .mul(412481737123559485879);
 
         let res = formula.calc_u128(100);
         let test_scaling = new().div(1).div(1).div(1).div(1).calc_u128(1);
