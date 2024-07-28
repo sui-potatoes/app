@@ -81,5 +81,8 @@ module potatoes_utils::urlencode {
 
         let str = b"Hello, World!?<>aa:;".to_string();
         assert_eq(decode(encode(str)), str);
+
+        let str = b"    ".to_string();
+        assert_eq(decode(encode(str)), str);
     }
 }
