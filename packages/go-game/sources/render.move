@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 module gogame::render {
-    use std::ascii::String;
+    use std::string::String;
     use gogame::go::Board;
+    use codec::urlencode;
 
     /// Print the board as an SVG.
     public fun svg(b: &Board): String {
@@ -16,9 +17,17 @@ module gogame::render {
         let mut i = 0;
         let mut chunks = vector[
             // SVG header
-            b"<svg width='", width, b"' height='", width, b"' xmlns='http://www.w3.org/2000/svg'>",
+            b"<svg width='",
+            width,
+            b"' height='",
+            width,
+            b"' xmlns='http://www.w3.org/2000/svg'>",
             b"<defs>",
-            b"<pattern id='grid' width='", num_to_ascii(cell_size + padding), b"' x='10' y='10' height='", num_to_ascii(cell_size + padding), b"' patternUnits='userSpaceOnUse'>",
+            b"<pattern id='grid' width='",
+            num_to_ascii(cell_size + padding),
+            b"' x='10' y='10' height='",
+            num_to_ascii(cell_size + padding),
+            b"' patternUnits='userSpaceOnUse'>",
             b"<path d='M 40 0 L 0 0 0 40' fill='none' stroke='gray' stroke-width='0.8'/>",
             b"</pattern>",
             b"<style>",
@@ -27,7 +36,11 @@ module gogame::render {
             b" .w { fill: #fff; }",
             b"</style>",
             b"</defs>",
-            b"<rect width='", width, b"' height='", width, b"' fill='url(#grid)' />",
+            b"<rect width='",
+            width,
+            b"' height='",
+            width,
+            b"' fill='url(#grid)' />",
         ];
 
         while (i < size) {
@@ -43,7 +56,13 @@ module gogame::render {
                 let class = if (b.data()[i][j].is_black()) b"b" else b"w";
 
                 chunks.append(vector[
-                    b"<circle r='10' cy='", num_to_ascii(cy), b"' cx='", num_to_ascii(cx), b"' class='", class, b"' />"
+                    b"<circle r='10' cy='",
+                    num_to_ascii(cy),
+                    b"' cx='",
+                    num_to_ascii(cx),
+                    b"' class='",
+                    class,
+                    b"' />",
                 ]);
 
                 j = j + 1;
@@ -60,31 +79,12 @@ module gogame::render {
             str.append(chunk);
         };
         // str
-        str.to_ascii_string()
-    }
-
-    public fun urlencode(s: &String): String {
-        let mut res = vector[];
-        let mut i = 0;
-        while (i < s.length()) {
-            let c = s.as_bytes()[i];
-            if (c == 32) { // whitespace " "
-                res.append(b"%20")
-            } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
-                res.push_back(37);
-                res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
-                res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
-            } else {
-                res.push_back(c);
-            };
-            i = i + 1;
-        };
-        res.to_ascii_string()
+        str.to_string()
     }
 
     fun num_to_ascii(mut num: u64): vector<u8> {
         let mut res = vector[];
-        if (num == 0) return vector[ 48 ];
+        if (num == 0) return vector[48];
         while (num > 0) {
             let digit = (num % 10) as u8;
             num = num / 10;
@@ -107,13 +107,11 @@ module gogame::render {
             vector[1, 0, 1, 2, 2, 2, 0, 0, 0],
         ]);
 
-
-        let res = urlencode(&svg(&board));
+        let res = urlencode::encode(svg(&board).into_bytes());
         let mut data_url = b"data:image/svg+xml;charset=utf8,";
         data_url.append(res.into_bytes());
 
         std::debug::print(&data_url.to_ascii_string());
         std::debug::print(&data_url.length());
-
     }
 }

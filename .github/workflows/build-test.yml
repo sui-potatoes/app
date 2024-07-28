@@ -15,7 +15,6 @@ jobs:
           platform: ubuntu
           version: testnet
           cache: enable
-      # Run the tests in every directory using the latest mainnet binary
-      - run: 'sui move test --path packages/character'
-      - run: 'sui move test --path packages/go-game'
-      # - run: 'sui move test --path packages/rock-paper-scissors'
+      # List all directories in the packages folder, and run sui move test on
+      # each of them
+      - run: ls -d packages/*/ | xargs -I {} bash -c "sui move test --path '{}'"
