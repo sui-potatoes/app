@@ -67,6 +67,11 @@ module potatoes_utils::base64 {
         assert_eq(encode(b"world".to_string()), b"d29ybGQ=".to_string());
         assert_eq(encode(b"hello world".to_string()), b"aGVsbG8gd29ybGQ=".to_string());
         assert_eq(encode(b"sui potatoes".to_string()), b"c3VpIHBvdGF0b2Vz".to_string());
+
+        // need to create tricky use case for encode - padding
+        assert_eq(encode(b"/".to_string()), b"Lw==".to_string());
+        assert_eq(encode(b"//".to_string()), b"Ly8=".to_string());
+        assert_eq(encode(b"///".to_string()), b"Ly8v".to_string());
     }
 
     #[test]
@@ -77,5 +82,11 @@ module potatoes_utils::base64 {
         assert_eq(decode(b"d29ybGQ=".to_string()), b"world".to_string());
         assert_eq(decode(b"aGVsbG8gd29ybGQ=".to_string()), b"hello world".to_string());
         assert_eq(decode(b"c3VpIHBvdGF0b2Vz".to_string()), b"sui potatoes".to_string());
+    }
+
+    #[test, expected_failure]
+    fun test_decode_failure() {
+        // count of characters is not multiple of 4
+        decode(b"aGVsbG8".to_string());
     }
 }
