@@ -3,7 +3,7 @@
 
 /// Implements URL encoding and decoding.
 /// Can operate on UTF8 strings, encoding only ASCII characters.
-module encoding::urlencode {
+module codec::urlencode {
     use std::string::String;
 
     /// Encode a string into URL format. Supports non-printable characters, takes

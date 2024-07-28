@@ -3,7 +3,7 @@
 
 /// Proxies Base16 encoding library from the Sui Framework, but does it for
 /// strings instead of bytes.
-module encoding::hex {
+module codec::hex {
     use std::string::String;
     use sui::hex;
 

@@ -21,14 +21,14 @@
 /// let field: AppData = &character[ApplicationKey {}];
 /// ```
 module character::character {
-    use std::string::{Self, String};
+    use std::string::String;
     use std::type_name;
     use sui::display::{Self, Display};
     use sui::vec_map::{Self, VecMap};
     use sui::dynamic_field as df;
     use sui::package;
 
-    use potatoes_utils::urlencode;
+    use codec::urlencode;
     use svg::{svg, shape, container::{Self, Container}, macros::add_class};
 
     const EWrongBody: u64 = 1;
@@ -140,8 +140,8 @@ module character::character {
         assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
         let image = Props {
-            body: urlencode::encode(b.body[&body_type].to_string()),
-            hair: urlencode::encode(b.hair[&hair_type].to_string()),
+            body: urlencode::encode(b.body[&body_type].to_string().into_bytes()),
+            hair: urlencode::encode(b.hair[&hair_type].to_string().into_bytes()),
             body_type,
             hair_type,
             eyes_colour,
@@ -178,8 +178,8 @@ module character::character {
         assert!(b.colours.contains(base_colour.as_bytes()), EWrongBaseColour);
         assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
-        c.image.body = urlencode::encode(b.body[&body_type].to_string());
-        c.image.hair = urlencode::encode(b.hair[&hair_type].to_string());
+        c.image.body = urlencode::encode(b.body[&body_type].to_string().into_bytes());
+        c.image.hair = urlencode::encode(b.hair[&hair_type].to_string().into_bytes());
         c.image.body_type = body_type;
         c.image.hair_type = hair_type;
         c.image.eyes_colour = eyes_colour;
@@ -336,7 +336,7 @@ module character::character {
     /// Display setup
     fun set_display(d: &mut Display<Character>) {
         let mut image_url = b"data:image/svg+xml;charset=utf8,".to_string();
-        image_url.append(urlencode::encode(build_character_base()));
+        image_url.append(urlencode::encode(build_character_base().into_bytes()));
 
         d.add(b"image_url".to_string(), image_url);
         d.add(b"name".to_string(), b"Brave Character!".to_string());
@@ -387,7 +387,7 @@ module character::character {
 
     /// Builds the base character SVG template, used in the `Display` in the
     /// `init` (`set_display`) function.
-    fun build_character_base(): string::String {
+    fun build_character_base(): String {
         let template = build_pure_svg();
 
         // then run replacement script with the following values
@@ -433,7 +433,7 @@ module character::character {
     #[test]
     fun test_preview_character_build() {
         let mut image_url = b"data:image/svg+xml;charset=utf8,".to_string();
-        image_url.append(urlencode::encode(build_character_base()));
+        image_url.append(urlencode::encode(build_character_base().into_bytes()));
         std::debug::print(&image_url);
     }
 }

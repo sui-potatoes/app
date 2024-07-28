@@ -1,11 +1,13 @@
-# Encoding
+# Codec
 
 This library implements 3 most popular encoding schemes: HEX (Base16), Base64,
-and Urlencode. The latter is extremely useful in building [Data URLs](https://datatracker.ietf.org/doc/html/rfc2397) with the [%-encoding scheme](https://datatracker.ietf.org/doc/html/rfc3986).
+and Urlencode. The latter is extremely useful in building
+[Data URLs](https://datatracker.ietf.org/doc/html/rfc2397) with the
+[%-encoding scheme](https://datatracker.ietf.org/doc/html/rfc3986).
 
-And it adds a `potatoes` encoding scheme which is based on the standard HEX
-encoding but replaces the `ABCDEF` symbols with `POTAES` (all unique letters in
-"potato").
+Additionally, it implements a `potatoes` encoding scheme which is based on the
+standard HEX encoding but replaces the `ABCDEF` symbols with `POTAES` (all unique
+letters in "potatoes").
 
 ## Installing
 
@@ -14,7 +16,7 @@ To add this library to your project, add this to your `Move.toml` file under
 
 ```toml
 [dependencies]
-Encoding = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/encoding", rev = "main" }
+Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/encoding", rev = "main" }
 ```
 
 Exported address of this package is:
@@ -27,7 +29,7 @@ In your code, import and use the package as:
 
 ```move
 module my::awesome_project {
-    use encoding::hex;
+    use codec::hex;
 
     public fun do() {
         let _ = hex::encode(b"hey y'all");
@@ -51,14 +53,14 @@ let encoded: String = hex::encode(b"hello, potato!"); // takes vector<u8>
 let decoded: vector<u8> = hex::decode(b"DEADBEEF".to_string()); // takes String
 ```
 
-## Available Encodings
+## Available Codecs
 
 Each encoding is placed into a separate module, here is a full list:
 
-- `encoding::hex` - implements Base16 or HEX
-- `encoding::base64` - implements Base64
-- `encoding::urlencode` - implements URL encoding
-- `encoding::potatoes` - implements the POTATOES encoding scheme
+- `codec::hex` - implements Base16 or HEX
+- `codec::base64` - implements Base64
+- `codec::urlencode` - implements URL encoding
+- `codec::potatoes` - implements the POTATOES encoding scheme
 
 ## License
 

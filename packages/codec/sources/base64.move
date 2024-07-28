@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 /// Module: base64
-module encoding::base64 {
+module codec::base64 {
     use std::string::String;
 
     /// Base64 keys.

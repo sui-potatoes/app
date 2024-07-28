@@ -100,10 +100,7 @@ module svg::svg {
         ]);
 
         let mut prefix = b"data:image/svg+xml;charset=utf8,".to_string();
-        // let mut prefix = b"data:image/svg+xml;base64,".to_string();
-        let str = svg.to_string();
-        let str = potatoes_utils::urlencode::encode(str);
-        // let str = potatoes_utils::base64::encode(str);
+        let str = codec::urlencode::encode(svg.to_string().into_bytes());
         prefix.append(str);
         std::debug::print(&prefix.length());
         std::debug::print(&prefix);
