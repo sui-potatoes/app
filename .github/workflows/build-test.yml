@@ -16,10 +16,12 @@ jobs:
           version: testnet
           cache: enable
       # Run the tests in every directory using the latest mainnet binary
-      - run: 'sui move test --path packages/battle'
-      - run: 'sui move test --path packages/character'
-      - run: 'sui move test --path packages/go-game'
-      - run: 'sui move test --path packages/mathematical'
-      - run: 'sui move test --path packages/svg'
-      - run: 'sui move test --path packages/utils'
+      - run: ls -d */ | xargs -I {} bash -c "sui move test --path '{}'"
+
+      # - run: 'sui move test --path packages/battle'
+      # - run: 'sui move test --path packages/character'
+      # - run: 'sui move test --path packages/go-game'
+      # - run: 'sui move test --path packages/mathematical'
+      # - run: 'sui move test --path packages/svg'
+      # - run: 'sui move test --path packages/utils'
       # - run: 'sui move test --path packages/rock-paper-scissors'
