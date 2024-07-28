@@ -60,7 +60,3 @@ when a "dangerous" operation happens: division or sqrt.
 ## License
 
 Licensed as MIT.
-
-## Authors
-
-Sui Potatoes
