@@ -2,35 +2,31 @@
 // SPDX-License-Identifier: MIT
 
 /// Implements URL encoding and decoding.
-///
-/// Can operate on UTF8 strings preseving the encoding.
-module potatoes_utils::urlencode {
+/// Can operate on UTF8 strings, encoding only ASCII characters.
+module encoding::urlencode {
     use std::string::String;
 
-    /// Encode a string to URL format.
-    public fun encode(string: String): String {
+    /// Encode a string into URL format. Supports non-printable characters, takes
+    /// a vector of bytes as input. This function is safe to use with UTF8 strings.
+    public fun encode(string: vector<u8>): String {
         let mut res = vector[];
-        string
-            .into_bytes()
-            .do!(
-                |c| if (!is_ascii(c)) {
-                    res.push_back(c);
-                } else if (c == 32) {
-                    res.append(b"%20");
-                } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
-                    res.push_back(37);
-                    res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
-                    res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
-                } else {
-                    res.push_back(c);
-                },
-            );
+        string.do!(
+            |c| if (c == 32) {
+                res.append(b"%20");
+            } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
+                res.push_back(37);
+                res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
+                res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
+            } else {
+                res.push_back(c);
+            },
+        );
 
         res.to_string()
     }
 
     /// Decode a URL-encoded string.
-    public fun decode(s: String): String {
+    public fun decode(s: String): vector<u8> {
         let mut res = vector[];
         let mut bytes = s.into_bytes();
         bytes.reverse();
@@ -49,7 +45,7 @@ module potatoes_utils::urlencode {
             };
         };
 
-        res.to_string()
+        res
     }
 
     /// Check if this byte (from potentially a UTF8 string) is an ASCII character.
@@ -75,14 +71,23 @@ module potatoes_utils::urlencode {
         use sui::test_utils::assert_eq;
 
         assert_eq(
-            encode(b"Hello, World!".to_string()),
+            encode(b"Hello, World!"),
             b"Hello%2C%20World%21".to_string(),
         );
 
-        let str = b"Hello, World!?<>aa:;".to_string();
+        let str = b"Hello, World!?<>aa:;";
         assert_eq(decode(encode(str)), str);
 
-        let str = b"    ".to_string();
+        let str = b"    ";
+        assert_eq(decode(encode(str)), str);
+
+        let str = x"00FF00";
+        assert_eq(decode(encode(str)), str);
+
+        let str = x"FF00FF";
+        assert_eq(decode(encode(str)), str);
+
+        let str = b"🦄🦄🦄🦄🦄";
         assert_eq(decode(encode(str)), str);
     }
 }

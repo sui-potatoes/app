@@ -2,17 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 /// Module: base64
-module potatoes_utils::base64 {
+module encoding::base64 {
     use std::string::String;
 
     /// Base64 keys.
     const KEYS: vector<u8> = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
     /// Encode the `str` to base64.
-    public fun encode(str: String): String {
+    public fun encode(mut bytes: vector<u8>): String {
         let keys = KEYS;
         let mut res = vector[];
-        let mut bytes = str.into_bytes();
         bytes.reverse();
 
         while (bytes.length() > 0) {
@@ -32,7 +31,7 @@ module potatoes_utils::base64 {
     }
 
     /// Decode the base64 `str`.
-    public fun decode(str: String): String {
+    public fun decode(str: String): vector<u8> {
         let keys = KEYS;
         let mut res = vector[];
         let mut bytes = str.into_bytes();
@@ -56,32 +55,32 @@ module potatoes_utils::base64 {
             if (b4 != 64) res.push_back(c3 as u8);
         };
 
-        res.to_string()
+        res
     }
 
     #[test]
     fun test_encode() {
         use sui::test_utils::assert_eq;
 
-        assert_eq(encode(b"hello".to_string()), b"aGVsbG8=".to_string());
-        assert_eq(encode(b"world".to_string()), b"d29ybGQ=".to_string());
-        assert_eq(encode(b"hello world".to_string()), b"aGVsbG8gd29ybGQ=".to_string());
-        assert_eq(encode(b"sui potatoes".to_string()), b"c3VpIHBvdGF0b2Vz".to_string());
+        assert_eq(encode(b"hello"), b"aGVsbG8=".to_string());
+        assert_eq(encode(b"world"), b"d29ybGQ=".to_string());
+        assert_eq(encode(b"hello world"), b"aGVsbG8gd29ybGQ=".to_string());
+        assert_eq(encode(b"sui potatoes"), b"c3VpIHBvdGF0b2Vz".to_string());
 
         // need to create tricky use case for encode - padding
-        assert_eq(encode(b"/".to_string()), b"Lw==".to_string());
-        assert_eq(encode(b"//".to_string()), b"Ly8=".to_string());
-        assert_eq(encode(b"///".to_string()), b"Ly8v".to_string());
+        assert_eq(encode(b"/"), b"Lw==".to_string());
+        assert_eq(encode(b"//"), b"Ly8=".to_string());
+        assert_eq(encode(b"///"), b"Ly8v".to_string());
     }
 
     #[test]
     fun test_decode() {
         use sui::test_utils::assert_eq;
 
-        assert_eq(decode(b"aGVsbG8=".to_string()), b"hello".to_string());
-        assert_eq(decode(b"d29ybGQ=".to_string()), b"world".to_string());
-        assert_eq(decode(b"aGVsbG8gd29ybGQ=".to_string()), b"hello world".to_string());
-        assert_eq(decode(b"c3VpIHBvdGF0b2Vz".to_string()), b"sui potatoes".to_string());
+        assert_eq(decode(b"aGVsbG8=".to_string()), b"hello");
+        assert_eq(decode(b"d29ybGQ=".to_string()), b"world");
+        assert_eq(decode(b"aGVsbG8gd29ybGQ=".to_string()), b"hello world");
+        assert_eq(decode(b"c3VpIHBvdGF0b2Vz".to_string()), b"sui potatoes");
     }
 
     #[test, expected_failure]
