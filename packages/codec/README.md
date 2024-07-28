@@ -15,7 +15,11 @@ To add this library to your project, add this to your `Move.toml` file under
 `[dependencies]` section:
 
 ```toml
+<<<<<<< HEAD
 # goes into [dependencies] section
+=======
+[dependencies]
+>>>>>>> a03cc41 (rename to codec)
 Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/encoding", rev = "main" }
 ```
 
