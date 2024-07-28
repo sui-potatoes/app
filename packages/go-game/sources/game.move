@@ -3,7 +3,7 @@
 
 #[allow(unused_const, unused_variable)]
 module gogame::game {
-    use std::ascii::String;
+    use std::string::String;
     use sui::clock::Clock;
     use sui::display;
     use sui::package;
@@ -11,7 +11,7 @@ module gogame::game {
 
     use gogame::go::{Self, Board};
     use gogame::render;
-    use utils::urlencode;
+    use codec::urlencode;
 
     /// The size of the board is invalid (not 9, 13, or 19)
     const EInvalidSize: u64 = 0;
@@ -73,7 +73,7 @@ module gogame::game {
             id,
             board: go::new(size),
             players: Players(option::some(acc.id.to_inner()), option::none()),
-            image_blob: urlencode::encode(&render::svg(&board)),
+            image_blob: urlencode::encode(render::svg(&board).into_bytes()),
         });
     }
 
@@ -107,7 +107,7 @@ module gogame::game {
         };
 
         game.board.place(x, y);
-        game.image_blob = urlencode::encode(&render::svg(&game.board));
+        game.image_blob = urlencode::encode(render::svg(&game.board).into_bytes());
     }
 
     public fun quit(game: &mut Game, acc: &mut Account) {

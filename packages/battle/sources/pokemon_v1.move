@@ -21,7 +21,7 @@
 /// as a dynamic field and the `drop` makes the cleanup easier.
 module battle::damage_v1 {
     use battle::stats::{Self, Stats};
-    use utils::formula;
+    use mathematical::formula;
 
     /// The RANDOM parameter must be between 217 and 255 (inclusive).
     const EIncorrectRandomValue: u64 = 0;
