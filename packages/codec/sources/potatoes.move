@@ -9,14 +9,13 @@
 /// use codec::potatoes;
 /// assert!(b"potatoes".to_string() == potatoes::encode(x"0xabcdcbef"));
 /// ```
-module codec::potatoes;
+module codec::potatoes {
+    use std::string::String;
 
-use std::string::String;
-
-// prettier-ignore
-/// Each byte is encoded to one of these sub-characters.
-/// Similar to the HEX encoding, but uses the word "POTAES" instead of "ABCDEF".
-const CHARACTER_SET: vector<vector<u8>> = vector[
+    // prettier-ignore
+    /// Each byte is encoded to one of these sub-characters.
+    /// Similar to the HEX encoding, but uses the word "POTAES" instead of "ABCDEF".
+    const CHARACTER_SET: vector<vector<u8>> = vector[
     b"00", b"01", b"02", b"03", b"04", b"05", b"06", b"07", b"08", b"09", b"0p", b"0o", b"0t", b"0a", b"0e", b"0s",
     b"10", b"11", b"12", b"13", b"14", b"15", b"16", b"17", b"18", b"19", b"1p", b"1o", b"1t", b"1a", b"1e", b"1s",
     b"20", b"21", b"22", b"23", b"24", b"25", b"26", b"27", b"28", b"29", b"2p", b"2o", b"2t", b"2a", b"2e", b"2s",
@@ -35,60 +34,61 @@ const CHARACTER_SET: vector<vector<u8>> = vector[
     b"s0", b"s1", b"s2", b"s3", b"s4", b"s5", b"s6", b"s7", b"s8", b"s9", b"sp", b"so", b"st", b"sa", b"se", b"ss",
 ];
 
-/// Now let's play with the encoding and decoding functions.
-public fun encode(bytes: vector<u8>): String {
-    let chars = CHARACTER_SET;
-    let result = bytes.fold!(
-        vector[],
-        |mut acc, b| {
-            acc.append(chars[b as u64]);
-            acc
-        },
-    );
+    /// Now let's play with the encoding and decoding functions.
+    public fun encode(bytes: vector<u8>): String {
+        let chars = CHARACTER_SET;
+        let result = bytes.fold!(
+            vector[],
+            |mut acc, b| {
+                acc.append(chars[b as u64]);
+                acc
+            },
+        );
 
-    result.to_string()
-}
+        result.to_string()
+    }
 
-/// Decode a potato-encoded string.
-/// A,B,C,D,E,F is encoded as P,O,T,A,E,S
-public fun decode(str: String): vector<u8> {
-    let bytes = str.into_bytes();
-    let (mut i, mut r, l) = (0, vector[], bytes.length());
-    assert!(l % 2 == 0);
-    while (i < l) {
-        let decimal = decode_byte(bytes[i]) * 16 + decode_byte(bytes[i + 1]);
-        r.push_back(decimal);
-        i = i + 2;
-    };
-    r
-}
+    /// Decode a potato-encoded string.
+    /// A,B,C,D,E,F is encoded as P,O,T,A,E,S
+    public fun decode(str: String): vector<u8> {
+        let bytes = str.into_bytes();
+        let (mut i, mut r, l) = (0, vector[], bytes.length());
+        assert!(l % 2 == 0);
+        while (i < l) {
+            let decimal = decode_byte(bytes[i]) * 16 + decode_byte(bytes[i + 1]);
+            r.push_back(decimal);
+            i = i + 2;
+        };
+        r
+    }
 
-// allowed characters are (in ASCII)
-// 0 .. 9
-// p, o, t, a, e, s
-// Codes for them are: 48 .. 57, 80, 79, 84, 65, 112, 111, 116, 97
-// Codes for A,B,C,D,E,F are: 65, 66, 67, 68, 69, 70, which are 10, 11, 12, 13, 14, 15
-fun decode_byte(byte: u8): u8 {
-    if (48 <= byte && byte < 58) byte - 48 // 0 .. 9
-    else if (byte == 112 || byte == 80) 10 // p or P
-    else if (byte == 111 || byte == 79) 11 // o or O
-    else if (byte == 116 || byte == 84) 12 // t or T
-    else if (byte == 97 || byte == 65) 13 // a or A
-    else if (byte == 101 || byte == 69) 14 // e or E
-    else if (byte == 115 || byte == 83) 15 // s or S
-    else abort 1
-}
+    // allowed characters are (in ASCII)
+    // 0 .. 9
+    // p, o, t, a, e, s
+    // Codes for them are: 48 .. 57, 80, 79, 84, 65, 112, 111, 116, 97
+    // Codes for A,B,C,D,E,F are: 65, 66, 67, 68, 69, 70, which are 10, 11, 12, 13, 14, 15
+    fun decode_byte(byte: u8): u8 {
+        if (48 <= byte && byte < 58) byte - 48 // 0 .. 9
+        else if (byte == 112 || byte == 80) 10 // p or P
+        else if (byte == 111 || byte == 79) 11 // o or O
+        else if (byte == 116 || byte == 84) 12 // t or T
+        else if (byte == 97 || byte == 65) 13 // a or A
+        else if (byte == 101 || byte == 69) 14 // e or E
+        else if (byte == 115 || byte == 83) 15 // s or S
+        else abort 1
+    }
 
-#[test]
-fun check_character_set_length() {
-    let set = CHARACTER_SET;
-    assert!(set.length() == 256);
-}
+    #[test]
+    fun check_character_set_length() {
+        let set = CHARACTER_SET;
+        assert!(set.length() == 256);
+    }
 
-#[test]
-fun test_encode() {
-    assert!(encode(vector[0, 1, 2, 3]) == b"00010203".to_string());
-    assert!(encode(decode(b"potatoes".to_string())) == b"potatoes".to_string());
-    assert!(encode(decode(b"potato4tea".to_string())) == b"potato4tea".to_string());
-    std::debug::print(&decode(b"potatoes".to_string()));
+    #[test]
+    fun test_encode() {
+        assert!(encode(vector[0, 1, 2, 3]) == b"00010203".to_string());
+        assert!(encode(decode(b"potatoes".to_string())) == b"potatoes".to_string());
+        assert!(encode(decode(b"potato4tea".to_string())) == b"potato4tea".to_string());
+        std::debug::print(&decode(b"potatoes".to_string()));
+    }
 }
