@@ -43,6 +43,6 @@ jobs:
         for dir in packages/*; do
           if [ -d "$dir" ]; then
             echo "Checking addresses in $dir/Move.toml"
-            toml get $dir/Move.toml addresses.$(basename $dir)
+            toml get $dir/Move.toml addresses | jq 'first(.[])'
           fi
         done
