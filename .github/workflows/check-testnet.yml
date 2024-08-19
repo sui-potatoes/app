@@ -1,0 +1,44 @@
+name: Check testnet packages
+
+on:
+  pull_request:
+    # branches:
+    #   - main
+
+jobs:
+  testnet_packages:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Download Sui
+      uses: jaxxstorm/action-install-gh-release@v1.12.0
+      with:
+        repo: MystenLabs/sui
+        platform: ubuntu
+        version: testnet
+        cache: enable
+
+    - name: Download toml-cli
+      uses: jaxxstorm/action-install-gh-release@v1.12.0
+      with:
+        repo: gnprice/toml-cli
+        cache: enable
+
+    - name: Print versions
+      run: |
+        echo "Sui version: $(sui --version)"
+        echo "toml-cli version: $(toml-cli --version)"
+
+    # walk directories in packages and check addresses in Move files
+    # print addresses in Move.toml file of each package
+    - name: Print Move.toml addresses
+      run: |
+        for dir in packages/*; do
+          if [ -d "$dir" ]; then
+            echo "Checking addresses in $dir/Move.toml"
+            toml-cli get $dir/Move.toml addresses.$(basename $dir)
+          fi
+        done
