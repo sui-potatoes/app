@@ -18,19 +18,23 @@ jobs:
       with:
         repo: MystenLabs/sui
         platform: ubuntu
-        version: testnet
+        tag: testnet
         cache: enable
 
-    - name: Download toml-cli
-      uses: jaxxstorm/action-install-gh-release@v1.12.0
+    # need to install rust first
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
       with:
-        repo: gnprice/toml-cli
-        cache: enable
+        profile: minimal
+        toolchain: stable
+
+    - name: Install toml-cli
+      run: cargo install toml-cli
 
     - name: Print versions
       run: |
         echo "Sui version: $(sui --version)"
-        echo "toml-cli version: $(toml-cli --version)"
+        echo "toml-cli version: $(toml --version)"
 
     # walk directories in packages and check addresses in Move files
     # print addresses in Move.toml file of each package
@@ -39,6 +43,6 @@ jobs:
         for dir in packages/*; do
           if [ -d "$dir" ]; then
             echo "Checking addresses in $dir/Move.toml"
-            toml-cli get $dir/Move.toml addresses.$(basename $dir)
+            toml get $dir/Move.toml addresses.$(basename $dir)
           fi
         done
