@@ -36,7 +36,7 @@ jobs:
       run: sui keytool import ${{ secrets.TESTNET_KEY }} ed25519
 
     - name: Print active-address
-      run: sui client active-address
+      run: yes | sui client active-address
 
     # walk directories in packages and check addresses in Move files
     # print addresses in Move.toml file of each package
