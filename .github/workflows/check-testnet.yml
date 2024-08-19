@@ -31,10 +31,13 @@ jobs:
     - name: Install toml-cli
       run: cargo install toml-cli
 
-    - name: Print versions
-      run: |
-        echo "Sui version: $(sui --version)"
-        echo "toml-cli version: $(toml --version)"
+
+    # import secret key for testnet
+    - name: Import secret key
+      run: sui client import ${{ secrets.TESTNET_KEY }} ed25519
+
+    - name: Print active-address
+      run: sui client active-address
 
     # walk directories in packages and check addresses in Move files
     # print addresses in Move.toml file of each package
