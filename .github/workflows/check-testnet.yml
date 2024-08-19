@@ -1,0 +1,54 @@
+name: Check testnet packages
+
+on:
+  pull_request:
+    # branches:
+    #   - main
+
+jobs:
+  testnet_packages:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Download Sui
+      uses: jaxxstorm/action-install-gh-release@v1.12.0
+      with:
+        repo: MystenLabs/sui
+        platform: ubuntu
+        version: testnet
+        cache: enable
+
+    # need to install rust first
+    # - name: Install Rust
+    #   uses: actions-rs/toolchain@v1
+    #   with:
+    #     profile: minimal
+    #     toolchain: stable
+
+    # - name: Install toml-cli
+    #   run: cargo install toml-cli
+
+    # import secret key for testnet
+    - name: Import secret key
+      run: |
+        sui keytool import ${{ secrets.TESTNET_KEY }} ed25519 --alias testnet --yes
+        sui client switch --address testnet --yes
+        sui client new-env --alias testnet --rpc https://fullnode.testnet.sui.io:443 --yes
+        sui client switch --env testnet --yes
+
+    - name: Print active-address
+      run: yes | sui client active-address
+
+    # walk directories in packages and check addresses in Move files
+    # print addresses in Move.toml file of each package
+    - name: Print Move.toml addresses
+      run: |
+        for dir in packages/*; do
+          if [ -d "$dir" ]; then
+            echo "Checking addresses in $dir/Move.toml"
+            toml get $dir/Move.toml addresses | jq 'first(.[])'
+          fi
+        done
