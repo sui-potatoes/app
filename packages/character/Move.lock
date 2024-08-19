@@ -2,16 +2,17 @@
 
 [move]
 version = 2
-manifest_digest = "9C26909552AD23CDF7F5A892FA288BC2760DB5DD2D1E3698E8D4F30C7BFA1A82"
-deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
+manifest_digest = "57A6E1E2137FFA04A50FEBD3A72B069C3BD7A4A27F189FF9CF5BCDF31D68AA8A"
+deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 dependencies = [
-  { name = "GoGame" },
+  { name = "Codec" },
+  { name = "SVG" },
   { name = "Sui" },
 ]
 
 [[move.package]]
-name = "GoGame"
-source = { local = "../go-game" }
+name = "Codec"
+source = { local = "../codec" }
 
 dependencies = [
   { name = "Sui" },
@@ -19,18 +20,30 @@ dependencies = [
 
 [[move.package]]
 name = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/move-stdlib" }
+
+[[move.package]]
+name = "SVG"
+source = { local = "../svg" }
+
+dependencies = [
+  { name = "Sui" },
+]
+
+dev-dependencies = [
+  { name = "Codec" },
+]
 
 [[move.package]]
 name = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
 ]
 
 [move.toolchain-version]
-compiler-version = "1.26.0"
+compiler-version = "1.30.3"
 edition = "2024.beta"
 flavor = "sui"
 
