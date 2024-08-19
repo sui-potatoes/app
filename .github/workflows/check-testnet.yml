@@ -22,19 +22,18 @@ jobs:
         cache: enable
 
     # need to install rust first
-    - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
+    # - name: Install Rust
+    #   uses: actions-rs/toolchain@v1
+    #   with:
+    #     profile: minimal
+    #     toolchain: stable
 
-    - name: Install toml-cli
-      run: cargo install toml-cli
-
+    # - name: Install toml-cli
+    #   run: cargo install toml-cli
 
     # import secret key for testnet
     - name: Import secret key
-      run: sui client import ${{ secrets.TESTNET_KEY }} ed25519
+      run: sui keytool import ${{ secrets.TESTNET_KEY }} ed25519
 
     - name: Print active-address
       run: sui client active-address
