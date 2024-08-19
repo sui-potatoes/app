@@ -34,10 +34,10 @@ jobs:
     # import secret key for testnet
     - name: Import secret key
       run: |
-        sui client new-env --alias testnet --rpc https://fullnode.testnet.sui.io:443
-        sui client switch --env testnet
         sui keytool import ${{ secrets.TESTNET_KEY }} ed25519 --alias testnet
         sui client switch --address testnet
+        sui client new-env --alias testnet --rpc https://fullnode.testnet.sui.io:443 --yes
+        sui client switch --env testnet
 
     - name: Print active-address
       run: yes | sui client active-address
