@@ -18,6 +18,7 @@ jobs:
       with:
         repo: MystenLabs/sui
         platform: ubuntu
+        version: testnet
         cache: enable
 
     # need to install rust first
