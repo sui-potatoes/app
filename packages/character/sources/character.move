@@ -20,420 +20,478 @@
 /// ```move
 /// let field: AppData = &character[ApplicationKey {}];
 /// ```
-module character::character {
-    use std::string::String;
-    use std::type_name;
-    use sui::display::{Self, Display};
-    use sui::vec_map::{Self, VecMap};
-    use sui::dynamic_field as df;
-    use sui::package;
+module character::character;
 
-    use codec::urlencode;
-    use svg::{svg, shape, container::{Self, Container}, macros::add_class};
+use codec::urlencode;
+use std::{string::String, type_name};
+use sui::{display::{Self, Display}, dynamic_field as df, package, vec_map::{Self, VecMap}};
+use svg::{container::{Self, Container}, macros::add_class, shape, svg};
 
-    const EWrongBody: u64 = 1;
-    const EWrongHair: u64 = 2;
-    const EWrongEyesColour: u64 = 3;
-    const EWrongPantsColour: u64 = 4;
-    const EWrongSkinColour: u64 = 5;
-    const EWrongBaseColour: u64 = 6;
-    const EWrongAccentColour: u64 = 7;
-    const EWrongHairColour: u64 = 8;
+#[error]
+const EWrongBody: vector<u8> = b"The body type is not found in the `Builder`";
+#[error]
+const EWrongHair: vector<u8> = b"The hair type is not found in the `Builder`";
+#[error]
+const EWrongEyesColour: vector<u8> = b"Eyes colour must be in the allowed palette";
+#[error]
+const EWrongTrousersColour: vector<u8> = b"Trousers colour must be in the allowed palette";
+#[error]
+const EWrongSkinColour: vector<u8> = b"Skin colour must be in the allowed palette";
+#[error]
+const EWrongBaseColour: vector<u8> = b"Base colour must be in the allowed palette";
+#[error]
+const EWrongAccentColour: vector<u8> = b"Accent colour must be in the allowed palette";
+#[error]
+const EWrongHairColour: vector<u8> = b"Hair colour must be in the allowed palette";
+#[error]
+const EIncorrectDynamicField: vector<u8> = b"Application key cannot be a primitive type";
 
-    /// Trying to add a dynamic field with a primitive type to the character.
-    const EIncorrectDynamicField: u64 = 9;
+// === Constants ===
 
-    // === Constants ===
+const HAIR: vector<u8> = b"h";
+const BODY: vector<u8> = b"b";
+const EYES: vector<u8> = b"e";
+const LEGS: vector<u8> = b"l";
+const SKIN: vector<u8> = b"s";
+const ACCENT: vector<u8> = b"a";
 
-    const HAIR: vector<u8> = b"h";
-    const BODY: vector<u8> = b"b";
-    const EYES: vector<u8> = b"e";
-    const LEGS: vector<u8> = b"l";
-    const SKIN: vector<u8> = b"s";
-    const ACCENT: vector<u8> = b"a";
+// prettier-ignore
+/// EDG 32 palette. Classic 32 colour palette.
+const PALETTE: vector<vector<u8>> = vector[
+    b"be4a2f", b"d77643", b"ead4aa",
+    b"e4a672", b"b86f50", b"733e39",
+    b"3e2731", b"a22633", b"e43b44",
+    b"f77622", b"feae34", b"fee761",
+    b"63c74d", b"3e8948", b"265c42",
+    b"193c3e", b"124e89", b"0099db",
+    b"2ce8f5", b"ffffff", b"c0cbdc",
+    b"8b9bb4", b"5a6988", b"3a4466",
+    b"262b44", b"181425", b"ff0044",
+    b"68386c", b"b55088", b"f6757a",
+    b"e8b796", b"c28569",
+];
 
-    // prettier-ignore
-    /// EDG 32 palette. Classic 32 colour palette.
-    const PALETTE: vector<vector<u8>> = vector[
-        b"be4a2f", b"d77643", b"ead4aa",
-        b"e4a672", b"b86f50", b"733e39",
-        b"3e2731", b"a22633", b"e43b44",
-        b"f77622", b"feae34", b"fee761",
-        b"63c74d", b"3e8948", b"265c42",
-        b"193c3e", b"124e89", b"0099db",
-        b"2ce8f5", b"ffffff", b"c0cbdc",
-        b"8b9bb4", b"5a6988", b"3a4466",
-        b"262b44", b"181425", b"ff0044",
-        b"68386c", b"b55088", b"f6757a",
-        b"e8b796", b"c28569",
-    ];
+/// The Builder object which stores configurations under names.
+/// Intentionally avoids using dynamic fields to keep the implementation
+/// minimal.
+///
+/// Please, note that by using static fields of the struct, the implementation
+/// is limited to the max object size (256KB). If you need to store more data,
+/// you should reimplement it to use a `Bag` and store body parts as dynamic
+/// fields.
+public struct Builder has key {
+    id: UID,
+    body: VecMap<String, Container>,
+    hair: VecMap<String, Container>,
+    colours: vector<vector<u8>>,
+}
 
-    /// The Builder object which stores configurations under names.
-    /// Intentionally avoids using dynamic fields to keep the implementation
-    /// minimal.
-    ///
-    /// Please, note that by using static fields of the struct, the implementation
-    /// is limited to the max object size (256KB). If you need to store more data,
-    /// you should reimplement it to use a `Bag` and store body parts as dynamic
-    /// fields.
-    public struct Builder has key {
-        id: UID,
-        body: VecMap<String, Container>,
-        hair: VecMap<String, Container>,
-        colours: vector<vector<u8>>,
-    }
+/// The OTW for the application.
+public struct CHARACTER has drop {}
 
-    /// The OTW for the application.
-    public struct CHARACTER has drop {}
+/// The builder for the image of a Character, can use available shapes and
+/// colours from the game object.
+public struct Props has store, drop {
+    /// Body type.
+    body_type: String,
+    /// Hair type.
+    hair_type: String,
+    /// Urlencoded Body parts.
+    body: String,
+    /// Urlencoded Hair parts.
+    hair: String,
+    /// Hair colour, a HEX string.
+    hair_colour: String,
+    /// Eyes colour, a HEX string.
+    eyes_colour: String,
+    /// Trousers colour, a HEX string.
+    trousers_colour: String,
+    /// Skin colour, a HEX string.
+    skin_colour: String,
+    /// Base colour, a HEX string.
+    base_colour: String,
+    /// Accent colour, a HEX string.
+    accent_colour: String,
+}
 
-    /// The builder for the image of a Character, can use available shapes and
-    /// colours from the game object.
-    public struct Props has store, drop {
-        /// Body type.
-        body_type: String,
-        /// Hair type.
-        hair_type: String,
-        /// Urlencoded Body parts.
-        body: String,
-        /// Urlencoded Hair parts.
-        hair: String,
-        /// Hair colour, a HEX string.
-        hair_colour: String,
-        /// Eyes colour, a HEX string.
-        eyes_colour: String,
-        /// Pants colour, a HEX string.
-        pants_colour: String,
-        /// Skin colour, a HEX string.
-        skin_colour: String,
-        /// Base colour, a HEX string.
-        base_colour: String,
-        /// Accent colour, a HEX string.
-        accent_colour: String,
-    }
+/// A character in the game.
+public struct Character has key, store {
+    id: UID,
+    image: Props,
+}
 
-    /// A character in the game.
-    public struct Character has key, store {
-        id: UID,
-        image: Props,
-    }
+/// Create a new character.
+public fun new(
+    b: &mut Builder,
+    body_type: String,
+    hair_type: String,
+    eyes_colour: String,
+    hair_colour: String,
+    trousers_colour: String,
+    skin_colour: String,
+    base_colour: String,
+    accent_colour: String,
+    ctx: &mut TxContext,
+): Character {
+    assert!(b.body.contains(&body_type), EWrongBody);
+    assert!(b.hair.contains(&hair_type), EWrongHair);
+    assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
+    assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongEyesColour);
+    assert!(b.colours.contains(trousers_colour.as_bytes()), EWrongTrousersColour);
+    assert!(b.colours.contains(skin_colour.as_bytes()), EWrongSkinColour);
+    assert!(b.colours.contains(base_colour.as_bytes()), EWrongBaseColour);
+    assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
 
-    /// Create a new character.
-    public fun new(
-        b: &mut Builder,
-        body_type: String,
-        hair_type: String,
-        eyes_colour: String,
-        hair_colour: String,
-        pants_colour: String,
-        skin_colour: String,
-        base_colour: String,
-        accent_colour: String,
-        ctx: &mut TxContext,
-    ): Character {
-        assert!(b.body.contains(&body_type), EWrongBody);
-        assert!(b.hair.contains(&hair_type), EWrongHair);
-        assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
-        assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongEyesColour);
-        assert!(b.colours.contains(pants_colour.as_bytes()), EWrongPantsColour);
-        assert!(b.colours.contains(skin_colour.as_bytes()), EWrongSkinColour);
-        assert!(b.colours.contains(base_colour.as_bytes()), EWrongBaseColour);
-        assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
+    let image = Props {
+        body: urlencode::encode(b.body[&body_type].to_string().into_bytes()),
+        hair: urlencode::encode(b.hair[&hair_type].to_string().into_bytes()),
+        body_type,
+        hair_type,
+        eyes_colour,
+        hair_colour,
+        trousers_colour,
+        skin_colour,
+        base_colour,
+        accent_colour,
+    };
 
-        let image = Props {
-            body: urlencode::encode(b.body[&body_type].to_string().into_bytes()),
-            hair: urlencode::encode(b.hair[&hair_type].to_string().into_bytes()),
-            body_type,
-            hair_type,
-            eyes_colour,
-            hair_colour,
-            pants_colour,
-            skin_colour,
-            base_colour,
-            accent_colour,
-        };
+    Character { id: object::new(ctx), image }
+}
 
-        Character { id: object::new(ctx), image }
-    }
+/// Edit the character.
+public fun update_image(
+    b: &mut Builder,
+    c: &mut Character,
+    body_type: Option<String>,
+    hair_type: Option<String>,
+    eyes_colour: Option<String>,
+    hair_colour: Option<String>,
+    trousers_colour: Option<String>,
+    skin_colour: Option<String>,
+    base_colour: Option<String>,
+    accent_colour: Option<String>,
+    _ctx: &mut TxContext,
+) {
+    body_type.do!(
+        |body_type| {
+            assert!(b.body.contains(&body_type), EWrongBody);
+            c.image.body = urlencode::encode(b.body[&body_type].to_string().into_bytes());
+            c.image.body_type = body_type;
+        },
+    );
 
-    /// Edit the character.
-    public fun edit(
-        b: &mut Builder,
-        c: &mut Character,
-        body_type: String,
-        hair_type: String,
-        eyes_colour: String,
-        hair_colour: String,
-        pants_colour: String,
-        skin_colour: String,
-        base_colour: String,
-        accent_colour: String,
-        _ctx: &mut TxContext,
-    ) {
-        assert!(b.body.contains(&body_type), EWrongBody);
-        assert!(b.hair.contains(&hair_type), EWrongHair);
-        assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
-        assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongEyesColour);
-        assert!(b.colours.contains(pants_colour.as_bytes()), EWrongPantsColour);
-        assert!(b.colours.contains(skin_colour.as_bytes()), EWrongSkinColour);
-        assert!(b.colours.contains(base_colour.as_bytes()), EWrongBaseColour);
-        assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
+    hair_type.do!(
+        |hair_type| {
+            assert!(b.hair.contains(&hair_type), EWrongHair);
+            c.image.hair = urlencode::encode(b.hair[&hair_type].to_string().into_bytes());
+            c.image.hair_type = hair_type;
+        },
+    );
 
-        c.image.body = urlencode::encode(b.body[&body_type].to_string().into_bytes());
-        c.image.hair = urlencode::encode(b.hair[&hair_type].to_string().into_bytes());
-        c.image.body_type = body_type;
-        c.image.hair_type = hair_type;
-        c.image.eyes_colour = eyes_colour;
-        c.image.hair_colour = hair_colour;
-        c.image.pants_colour = pants_colour;
-        c.image.skin_colour = skin_colour;
-        c.image.base_colour = base_colour;
-        c.image.accent_colour = accent_colour;
-    }
+    hair_colour.do!(
+        |hair_colour| {
+            assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
+            c.image.hair_colour = hair_colour;
+        },
+    );
 
-    // === Usability ===
+    eyes_colour.do!(
+        |eyes_colour| {
+            assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongHairColour);
+            c.image.eyes_colour = eyes_colour;
+        },
+    );
 
-    /// Add a dynamic field to the character.
-    ///
-    /// We make sure that the Key is not a primitive type to enforce the usage of custom
-    /// types for dynamic fields. This is a necessary step in preventing misimplementation
-    /// of the dynamic fields in this setting.
-    ///
-    /// TODO: a stricter check would be to check against the `0x1` and `0x2` origin
-    ///      of the type, but we can leave it for now.
-    public fun add<K: store + copy + drop, V: store>(c: &mut Character, key: K, value: V) {
-        assert!(!type_name::get<K>().is_primitive(), EIncorrectDynamicField);
-        df::add(&mut c.id, key, value)
-    }
+    trousers_colour.do!(
+        |trousers_colour| {
+            assert!(b.colours.contains(trousers_colour.as_bytes()), EWrongHairColour);
+            c.image.trousers_colour = trousers_colour;
+        },
+    );
 
-    /// Borrow a dynamic field of the `Character`
-    #[syntax(index)]
-    public fun borrow<K: store + copy + drop, V: store>(c: &Character, key: K): &V {
-        df::borrow(&c.id, key)
-    }
+    skin_colour.do!(
+        |skin_colour| {
+            assert!(b.colours.contains(skin_colour.as_bytes()), EWrongHairColour);
+            c.image.skin_colour = skin_colour;
+        },
+    );
 
-    /// Borrow a dynamic field of the `Character` mutably
-    #[syntax(index)]
-    public fun borrow_mut<K: store + copy + drop, V: store>(c: &mut Character, key: K): &mut V {
-        df::borrow_mut(&mut c.id, key)
-    }
+    base_colour.do!(
+        |base_colour| {
+            assert!(b.colours.contains(base_colour.as_bytes()), EWrongHairColour);
+            c.image.base_colour = base_colour;
+        },
+    );
 
-    /// Remove a dynamic field from the character.
-    public fun remove<K: store + copy + drop, V: store>(c: &mut Character, key: K): V {
-        df::remove(&mut c.id, key)
-    }
+    accent_colour.do!(
+        |accent_colour| {
+            assert!(b.colours.contains(accent_colour.as_bytes()), EWrongHairColour);
+            c.image.accent_colour = accent_colour;
+        },
+    );
+}
 
-    // === Accessors ===
+// === Usability ===
 
-    /// Get the body type of the character.
-    public fun body_type(c: &Character): String { c.image.body_type }
+/// Add a dynamic field to the character.
+///
+/// We make sure that the Key is not a primitive type to enforce the usage of custom
+/// types for dynamic fields. This is a necessary step in preventing misimplementation
+/// of the dynamic fields in this setting.
+///
+/// TODO: a stricter check would be to check against the `0x1` and `0x2` origin
+///      of the type, but we can leave it for now.
+public fun add<K: store + copy + drop, V: store>(c: &mut Character, key: K, value: V) {
+    assert!(!type_name::get<K>().is_primitive(), EIncorrectDynamicField);
+    df::add(&mut c.id, key, value)
+}
 
-    /// Get the hair type of the character.
-    public fun hair_type(c: &Character): String { c.image.hair_type }
+/// Borrow a dynamic field of the `Character`
+#[syntax(index)]
+public fun borrow<K: store + copy + drop, V: store>(c: &Character, key: K): &V {
+    df::borrow(&c.id, key)
+}
 
-    /// Get the eyes colour of the character.
-    public fun eyes_colour(c: &Character): String { c.image.eyes_colour }
+/// Borrow a dynamic field of the `Character` mutably
+#[syntax(index)]
+public fun borrow_mut<K: store + copy + drop, V: store>(c: &mut Character, key: K): &mut V {
+    df::borrow_mut(&mut c.id, key)
+}
 
-    /// Get the hair colour of the character.
-    public fun hair_colour(c: &Character): String { c.image.hair_colour }
+/// Remove a dynamic field from the character.
+public fun remove<K: store + copy + drop, V: store>(c: &mut Character, key: K): V {
+    df::remove(&mut c.id, key)
+}
 
-    /// Get the pants colour of the character.
-    public fun pants_colour(c: &Character): String { c.image.pants_colour }
+// === Accessors ===
 
-    /// Get the skin colour of the character.
-    public fun skin_colour(c: &Character): String { c.image.skin_colour }
+/// Get the body type of the character.
+public fun body_type(c: &Character): String { c.image.body_type }
 
-    /// Get the base colour of the character.
-    public fun base_colour(c: &Character): String { c.image.base_colour }
+/// Get the hair type of the character.
+public fun hair_type(c: &Character): String { c.image.hair_type }
 
-    /// Get the accent colour of the character.
-    public fun accent_colour(c: &Character): String { c.image.accent_colour }
+/// Get the eyes colour of the character.
+public fun eyes_colour(c: &Character): String { c.image.eyes_colour }
 
-    // === Display & Rendering ===
+/// Get the hair colour of the character.
+public fun hair_colour(c: &Character): String { c.image.hair_colour }
 
-    /// Create Display for the Character type.
-    fun init(otw: CHARACTER, ctx: &mut TxContext) {
-        let publisher = package::claim(otw, ctx);
-        let mut display = display::new<Character>(&publisher, ctx);
+/// Get the pants colour of the character.
+public fun trousers_colour(c: &Character): String { c.image.trousers_colour }
 
-        let mut builder = Builder {
-            id: object::new(ctx),
-            body: vec_map::empty(),
-            hair: vec_map::empty(),
-            colours: PALETTE,
-        };
+/// Get the skin colour of the character.
+public fun skin_colour(c: &Character): String { c.image.skin_colour }
 
-        set_initial_assets(&mut builder);
-        set_display(&mut display);
+/// Get the base colour of the character.
+public fun base_colour(c: &Character): String { c.image.base_colour }
 
-        transfer::public_transfer(display, ctx.sender());
-        transfer::public_transfer(publisher, ctx.sender());
-        transfer::share_object(builder);
-    }
+/// Get the accent colour of the character.
+public fun accent_colour(c: &Character): String { c.image.accent_colour }
 
-    /// Set the initial assets for the character.
-    fun set_initial_assets(builder: &mut Builder) {
-        // hair: punk
-        let mut punk = container::g(vector[
-            shape::rect(80, 20, 60, 20),
-            shape::rect(80, 0, 40, 20),
-        ]);
+// === Static Read ===
 
-        add_class!(&mut punk, HAIR);
-        builder.hair.insert(b"punk".to_string(), punk);
+/// Returns vector of available colours for the application.
+public fun palette(): vector<vector<u8>> { PALETTE }
 
-        // hair: flat
-        let mut flat = shape::rect(80, 20, 60, 20);
-        add_class!(&mut flat, HAIR);
-        builder.hair.insert(b"flat".to_string(), container::root(vector[flat]));
+// === Display & Rendering ===
 
-        // hair: bang
-        let mut bang = container::g(vector[
-            shape::rect(80, 20, 60, 20),
-            shape::rect(120, 40, 20, 20),
-        ]);
-        add_class!(&mut bang, HAIR);
-        builder.hair.insert(b"bang".to_string(), bang);
+/// Create Display for the Character type.
+fun init(otw: CHARACTER, ctx: &mut TxContext) {
+    let publisher = package::claim(otw, ctx);
+    let mut display = display::new<Character>(&publisher, ctx);
 
-        // hair: wind
-        let mut wind = container::g(vector[
-            shape::rect(60, 20, 20, 60),
-            shape::rect(80, 20, 80, 20),
-            shape::rect(140, 40, 40, 40),
-            shape::rect(180, 40, 20, 20),
-        ]);
-        add_class!(&mut wind, HAIR);
-        builder.hair.insert(b"wind".to_string(), wind);
+    let mut builder = Builder {
+        id: object::new(ctx),
+        body: vec_map::empty(),
+        hair: vec_map::empty(),
+        colours: PALETTE,
+    };
 
-        // body: blazer
-        let mut blazer = container::g(vector[
-            shape::rect(80, 100, 20, 20),
-            shape::rect(120, 100, 20, 20),
-            shape::rect(100, 120, 20, 20),
-            shape::rect(60, 100, 20, 20),
-            shape::rect(140, 100, 20, 20),
-        ]);
-        add_class!(&mut blazer, BODY);
-        builder.body.insert(b"blazer".to_string(), blazer);
+    builder.set_initial_assets();
+    set_display(&mut display);
 
-        // body: office
-        let mut office = container::g(vector[
-            shape::rect(60, 100, 20, 40),
-            shape::rect(100, 100, 20, 40),
-            shape::rect(140, 100, 20, 40),
-        ]);
-        add_class!(&mut office, ACCENT);
-        builder.body.insert(b"office".to_string(), office);
+    transfer::public_transfer(display, ctx.sender());
+    transfer::public_transfer(publisher, ctx.sender());
+    transfer::share_object(builder);
+}
 
-        // body: tshirt
-        let mut tshirt = container::g(vector[
-            shape::rect(60, 100, 20, 20),
-            shape::rect(140, 100, 20, 20),
-        ]);
-        add_class!(&mut tshirt, BODY);
-        builder.body.insert(b"tshirt".to_string(), tshirt);
-    }
+/// Set the initial assets for the character.
+fun set_initial_assets(builder: &mut Builder) {
+    // hair: punk
+    let mut punk = container::g(vector[
+        shape::rect(80, 20, 60, 20),
+        shape::rect(80, 0, 40, 20),
+    ]);
 
-    /// Display setup
-    fun set_display(d: &mut Display<Character>) {
-        let mut image_url = b"data:image/svg+xml;charset=utf8,".to_string();
-        image_url.append(urlencode::encode(build_character_base().into_bytes()));
+    add_class!(&mut punk, HAIR);
+    builder.hair.insert(b"punk".to_string(), punk);
 
-        d.add(b"image_url".to_string(), image_url);
-        d.add(b"name".to_string(), b"Brave Character!".to_string());
-        d.add(b"description".to_string(), b"How wild can you go?".to_string());
-        d.add(b"link".to_string(), b"https://potatoes.app/character/{id}".to_string());
-        d.add(b"project_url".to_string(), b"https://potatoes.app/".to_string());
-        d.add(b"creator".to_string(), b"Sui Potatoes (c)".to_string());
-        d.update_version();
-    }
+    // hair: flat
+    let mut flat = shape::rect(80, 20, 60, 20);
+    add_class!(&mut flat, HAIR);
+    builder.hair.insert(b"flat".to_string(), container::root(vector[flat]));
 
-    fun build_pure_svg(): String {
-        let mut body = shape::rect(80, 100, 60, 60);
-        add_class!(&mut body, BODY);
+    // hair: bang
+    let mut bang = container::g(vector[
+        shape::rect(80, 20, 60, 20),
+        shape::rect(120, 40, 20, 20),
+    ]);
+    add_class!(&mut bang, HAIR);
+    builder.hair.insert(b"bang".to_string(), bang);
 
-        let mut head = shape::rect(80, 40, 60, 60);
-        add_class!(&mut head, SKIN);
+    // hair: wind
+    let mut wind = container::g(vector[
+        shape::rect(60, 20, 20, 60),
+        shape::rect(80, 20, 80, 20),
+        shape::rect(140, 40, 40, 40),
+        shape::rect(180, 40, 20, 20),
+    ]);
+    add_class!(&mut wind, HAIR);
+    builder.hair.insert(b"wind".to_string(), wind);
 
-        let mut eyes = container::g(vector[
-            shape::rect(80, 60, 20, 20),
-            shape::rect(120, 60, 20, 20),
-        ]);
-        add_class!(&mut eyes, EYES);
+    // body: blazer
+    let mut blazer = container::g(vector[
+        shape::rect(80, 100, 20, 20),
+        shape::rect(120, 100, 20, 20),
+        shape::rect(100, 120, 20, 20),
+        shape::rect(60, 100, 20, 20),
+        shape::rect(140, 100, 20, 20),
+    ]);
+    add_class!(&mut blazer, BODY);
+    builder.body.insert(b"blazer".to_string(), blazer);
 
-        let mut legs = container::g(vector[
-            shape::rect(80, 160, 20, 60),
-            shape::rect(100, 160, 20, 20),
-            shape::rect(120, 160, 20, 60),
-        ]);
-        add_class!(&mut legs, LEGS);
+    // body: office
+    let mut office = container::g(vector[
+        shape::rect(60, 100, 20, 40),
+        shape::rect(100, 100, 20, 40),
+        shape::rect(140, 100, 20, 40),
+    ]);
+    add_class!(&mut office, ACCENT);
+    builder.body.insert(b"office".to_string(), office);
 
-        let mut hands = container::g(vector[
-            shape::rect(60, 100, 20, 60),
-            shape::rect(140, 100, 20, 60),
-        ]);
-        add_class!(&mut hands, SKIN);
+    // body: tshirt
+    let mut tshirt = container::g(vector[
+        shape::rect(60, 100, 20, 20),
+        shape::rect(140, 100, 20, 20),
+    ]);
+    add_class!(&mut tshirt, BODY);
+    builder.body.insert(b"tshirt".to_string(), tshirt);
+}
 
-        // New SVG with the viewbox.
-        let mut svg = svg::svg(vector[0, 0, 220, 240]);
-        let styles = shape::custom(b"<style>.s{fill:#SKIN} .e{fill:#EYES} .h{fill:#HAIR} .l{fill:#PANTS} .b{fill:#BODY} .a{fill:#ACCENT}</style>".to_string());
+/// Display setup
+fun set_display(d: &mut Display<Character>) {
+    let mut image_url = b"data:image/svg+xml;charset=utf8,".to_string();
+    image_url.append(urlencode::encode(build_character_base().into_bytes()));
 
-        svg.root(vector[styles, body, head]);
-        svg.add(eyes);
-        svg.add(legs);
-        svg.add(hands);
-        svg.root(vector[shape::custom(b"TEMPLATE".to_string())]); // template
-        svg.to_string()
-    }
+    d.add(b"image_url".to_string(), image_url);
+    d.add(b"name".to_string(), b"Brave Character!".to_string());
+    d.add(b"description".to_string(), b"How wild can you go?".to_string());
+    d.add(b"link".to_string(), b"https://potatoes.app/character/{id}".to_string());
+    d.add(b"project_url".to_string(), b"https://potatoes.app/".to_string());
+    d.add(b"creator".to_string(), b"Sui Potatoes (c)".to_string());
+    d.update_version();
+}
 
-    /// Builds the base character SVG template, used in the `Display` in the
-    /// `init` (`set_display`) function.
-    fun build_character_base(): String {
-        let template = build_pure_svg();
+fun build_pure_svg(): String {
+    let mut body = shape::rect(80, 100, 60, 60);
+    add_class!(&mut body, BODY);
 
-        // then run replacement script with the following values
-        // HAIR -> {image.hair_colour}
-        // EYES -> {image.eyes_colour}
-        // PANTS -> {image.pants_colour}
-        // SKIN -> {image.skin_colour}
-        // BODY -> {image.base_colour}
-        // ACCENT -> {image.accent_colour}
+    let mut head = shape::rect(80, 40, 60, 60);
+    add_class!(&mut head, SKIN);
 
-        // ideally let's just write the template with Move...
-        let template = replace(template, b"HAIR".to_string(), b"{image.hair_colour}".to_string());
-        let template = replace(template, b"EYES".to_string(), b"{image.eyes_colour}".to_string());
-        let template = replace(template, b"PANTS".to_string(), b"{image.pants_colour}".to_string());
-        let template = replace(template, b"SKIN".to_string(), b"{image.skin_colour}".to_string());
-        let template = replace(template, b"BODY".to_string(), b"{image.base_colour}".to_string());
-        let template = replace(
-            template,
-            b"ACCENT".to_string(),
-            b"{image.accent_colour}".to_string(),
-        );
-        let template = replace(
-            template,
-            b"TEMPLATE".to_string(),
-            b"{image.hair}{image.body}".to_string(),
-        );
+    let mut eyes = container::g(vector[
+        shape::rect(80, 60, 20, 20),
+        shape::rect(120, 60, 20, 20),
+    ]);
+    add_class!(&mut eyes, EYES);
 
-        template
-    }
+    let mut legs = container::g(vector[
+        shape::rect(80, 160, 20, 60),
+        shape::rect(100, 160, 20, 20),
+        shape::rect(120, 160, 20, 60),
+    ]);
+    add_class!(&mut legs, LEGS);
 
-    fun replace(str: String, from: String, to: String): String {
-        let pos = str.index_of(&from);
-        let str = {
-            let mut lhs = str.substring(0, pos);
-            let rhs = str.substring(pos + from.length(), str.length());
-            lhs.append(to);
-            lhs.append(rhs);
-            lhs
-        };
-        str
-    }
+    let mut hands = container::g(vector[
+        shape::rect(60, 100, 20, 60),
+        shape::rect(140, 100, 20, 60),
+    ]);
+    add_class!(&mut hands, SKIN);
 
-    #[test]
-    fun test_preview_character_build() {
-        let mut image_url = b"data:image/svg+xml;charset=utf8,".to_string();
-        image_url.append(urlencode::encode(build_character_base().into_bytes()));
-        std::debug::print(&image_url);
-    }
+    // New SVG with the viewbox.
+    let mut svg = svg::svg(vector[0, 0, 220, 240]);
+    let styles = shape::custom(b"<style>.s{fill:#SKIN} .e{fill:#EYES} .h{fill:#HAIR} .l{fill:#PANTS} .b{fill:#BODY} .a{fill:#ACCENT}</style>".to_string());
+
+    svg.root(vector[styles, body, head]);
+    svg.add(eyes);
+    svg.add(legs);
+    svg.add(hands);
+    svg.root(vector[shape::custom(b"TEMPLATE".to_string())]); // template
+    svg.to_string()
+}
+
+/// Builds the base character SVG template, used in the `Display` in the
+/// `init` (`set_display`) function.
+fun build_character_base(): String {
+    let template = build_pure_svg();
+
+    // then run replacement script with the following values
+    // HAIR -> {image.hair_colour}
+    // EYES -> {image.eyes_colour}w
+    // PANTS -> {image.pants_colour}
+    // SKIN -> {image.skin_colour}
+    // BODY -> {image.base_colour}
+    // ACCENT -> {image.accent_colour}
+
+    // ideally let's just write the template with Move...
+    let template = replace(template, b"HAIR".to_string(), b"{image.hair_colour}".to_string());
+    let template = replace(template, b"EYES".to_string(), b"{image.eyes_colour}".to_string());
+    let template = replace(template, b"PANTS".to_string(), b"{image.pants_colour}".to_string());
+    let template = replace(template, b"SKIN".to_string(), b"{image.skin_colour}".to_string());
+    let template = replace(template, b"BODY".to_string(), b"{image.base_colour}".to_string());
+    let template = replace(
+        template,
+        b"ACCENT".to_string(),
+        b"{image.accent_colour}".to_string(),
+    );
+    let template = replace(
+        template,
+        b"TEMPLATE".to_string(),
+        b"{image.hair}{image.body}".to_string(),
+    );
+
+    template
+}
+
+fun replace(str: String, from: String, to: String): String {
+    let pos = str.index_of(&from);
+    let str = {
+        let mut lhs = str.substring(0, pos);
+        let rhs = str.substring(pos + from.length(), str.length());
+        lhs.append(to);
+        lhs.append(rhs);
+        lhs
+    };
+    str
+}
+
+#[test_only]
+public fun new_builder_for_testing(ctx: &mut TxContext): Builder {
+    let mut builder = Builder {
+        id: object::new(ctx),
+        body: vec_map::empty(),
+        hair: vec_map::empty(),
+        colours: PALETTE,
+    };
+
+    builder.set_initial_assets();
+    builder
+}
+
+#[test]
+fun test_preview_character_build() {
+    let mut image_url = b"data:image/svg+xml;charset=utf8,".to_string();
+    image_url.append(urlencode::encode(build_character_base().into_bytes()));
+    // std::debug::print(&image_url);
 }
