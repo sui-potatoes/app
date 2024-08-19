@@ -48,6 +48,7 @@ module codec::urlencode {
         res
     }
 
+    #[test_only]
     /// Check if this byte (from potentially a UTF8 string) is an ASCII character.
     fun is_ascii(byte: u8): bool {
         byte < 128
