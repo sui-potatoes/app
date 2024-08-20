@@ -27,6 +27,7 @@ public fun encode(string: vector<u8>): String {
 }
 
 /// Decode a URL-encoded string.
+/// Supports legacy `+` encoding for spaces.
 public fun decode(s: String): vector<u8> {
     let mut res = vector[];
     let mut bytes = s.into_bytes();
@@ -34,7 +35,10 @@ public fun decode(s: String): vector<u8> {
 
     while (bytes.length() > 0) {
         let c = bytes.pop_back();
-        if (c == 37) {
+        if (c == 43) {
+            // plus "+"
+            res.push_back(32);
+        } else if (c == 37) {
             // percent "%"
             let a = bytes.pop_back();
             let b = bytes.pop_back();
@@ -71,6 +75,11 @@ fun test_is_ascii_character() {
 #[test]
 fun test_urlencode() {
     use sui::test_utils::assert_eq;
+
+    assert_eq(
+        decode(b"hello+world".to_string()),
+        b"hello world",
+    );
 
     assert_eq(
         encode(b"Hello, World!"),

@@ -7,4 +7,5 @@ authors = ["Sui Potatoes"]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
 
 [addresses]
-codec = "0x0"
+codec = "0x1aafdbe8c6233b3a1e4e40edc027f42c72d90c0afc5daf5e6df64aa3532ab14b"
+codec_upgrade_cap = "0x9d39ae387050527798b3b13bfdd8b3d10402f4c108bbad067c788e7abdbc94a7"
