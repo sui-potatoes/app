@@ -4,10 +4,13 @@ Monorepo for the Potatoes project. Contains all the applications and services th
 
 ## Demos
 
-- Go Game
-- Character builder
-- Rock Paper Scissors (in development)
+- [Go Game](https://potatoes.app/go)
+- [Character builder](https://potatoes.app/character)
+- More to come!
 
+## Packages
+
+- [Codec](/packages/codec) - ultimate encoding solution for Sui
 
 ## License
 
