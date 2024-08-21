@@ -44,7 +44,7 @@ intuitive to use. Every module consists of two public functions: `encode` and
 `decode`, both stay the same in every scheme implementation. The `String` type
 is always `std::string::String`.
 
-```move
+```rust
 use std::string::String;
 use potatoes::hex;
 
@@ -60,7 +60,7 @@ Each encoding is placed into a separate module, here is a full list:
 ### HEX
 
 Implements the Base16 encoding scheme. The module is called `hex`.
-```move
+```rust
 use codec::hex;
 
 let encoded: String = hex::encode(b"hello, potato!");
@@ -70,7 +70,7 @@ let decoded: vector<u8> = hex::decode(b"DEADBEEF".to_string());
 ### Base64
 
 Implements the Base64 encoding scheme. The module is called `base64`.
-```move
+```rust
 use codec::base64;
 
 let encoded: String = base64::encode(b"hello, potato!");
@@ -80,7 +80,7 @@ let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE=".to_string());
 ### URL Encoding
 
 Implements the URL encoding scheme. The module is called `urlencode`.
-```move
+```rust
 use codec::urlencode;
 
 let encoded: String = urlencode::encode(b"hello, potato!");
@@ -90,7 +90,7 @@ let decoded: vector<u8> = urlencode::decode(b"hello%2C%20potato%21".to_string())
 ### Potatoes
 
 Implements the POTAES encoding scheme. The module is called `potatoes`.
-```move
+```rust
 use codec::potatoes;
 
 let encoded: String = potatoes::encode(b"hello, potato!");
