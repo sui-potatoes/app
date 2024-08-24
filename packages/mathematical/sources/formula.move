@@ -46,8 +46,8 @@ public fun new<T>(): Formula<T> {
 /// Set the scaling factor for the formula. When not set, the default
 /// scaling is `1 << type / 2`, where `type` is the number of bits in the
 /// integer type.
-public fun scale<T>(mut self: Formula<T>, scaling: T): Formula<T> {
-    self.scaling.fill(scaling);
+public fun scale<T: drop>(mut self: Formula<T>, scaling: T): Formula<T> {
+    self.scaling = option::some(scaling);
     self
 }
 
@@ -139,7 +139,7 @@ macro fun calc<$N, $U>(
     $scale: u8,
 ): $N {
     let Formula { mut expressions, scaling } = $self;
-    let scaling = scaling.destroy_with_default(1 << $scale) as $U;
+    let scaling = scaling.destroy_or!(1 << $scale) as $U;
     let mut is_scaled = false;
 
     // if there's a `div` followed by `mul`, swap them

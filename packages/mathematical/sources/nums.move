@@ -30,7 +30,7 @@ public fun u256_max(): u256 {
 public macro fun to_string<$T>($num: $T): String {
     let mut num = $num;
     let mut res = vector[];
-    if (num == 0) return vector[48].to_string();
+    if (num == 0) return b"0".to_string();
     while (num > 0) {
         let digit = (num % 10) as u8;
         num = num / 10;
