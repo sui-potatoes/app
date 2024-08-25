@@ -333,8 +333,8 @@ module character::character {
     fun replace(str: string::String, from: string::String, to: string::String): string::String {
         let pos = str.index_of(&from);
         let str = {
-            let mut lhs = str.sub_string(0, pos);
-            let rhs = str.sub_string(pos + from.length(), str.length());
+            let mut lhs = str.substring(0, pos);
+            let rhs = str.substring(pos + from.length(), str.length());
             lhs.append(to);
             lhs.append(rhs);
             lhs
