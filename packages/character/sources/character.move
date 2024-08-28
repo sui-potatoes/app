@@ -172,63 +172,47 @@ public fun update_image(
     accent_colour: Option<String>,
     _ctx: &mut TxContext,
 ) {
-    body_type.do!(
-        |body_type| {
-            assert!(b.body.contains(&body_type), EWrongBody);
-            c.image.body = urlencode::encode(b.body[&body_type].to_string().into_bytes());
-            c.image.body_type = body_type;
-        },
-    );
+    body_type.do!(|body_type| {
+        assert!(b.body.contains(&body_type), EWrongBody);
+        c.image.body = urlencode::encode(b.body[&body_type].to_string().into_bytes());
+        c.image.body_type = body_type;
+    });
 
-    hair_type.do!(
-        |hair_type| {
-            assert!(b.hair.contains(&hair_type), EWrongHair);
-            c.image.hair = urlencode::encode(b.hair[&hair_type].to_string().into_bytes());
-            c.image.hair_type = hair_type;
-        },
-    );
+    hair_type.do!(|hair_type| {
+        assert!(b.hair.contains(&hair_type), EWrongHair);
+        c.image.hair = urlencode::encode(b.hair[&hair_type].to_string().into_bytes());
+        c.image.hair_type = hair_type;
+    });
 
-    hair_colour.do!(
-        |hair_colour| {
-            assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
-            c.image.hair_colour = hair_colour;
-        },
-    );
+    hair_colour.do!(|hair_colour| {
+        assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
+        c.image.hair_colour = hair_colour;
+    });
 
-    eyes_colour.do!(
-        |eyes_colour| {
-            assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongHairColour);
-            c.image.eyes_colour = eyes_colour;
-        },
-    );
+    eyes_colour.do!(|eyes_colour| {
+        assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongHairColour);
+        c.image.eyes_colour = eyes_colour;
+    });
 
-    trousers_colour.do!(
-        |trousers_colour| {
-            assert!(b.colours.contains(trousers_colour.as_bytes()), EWrongHairColour);
-            c.image.trousers_colour = trousers_colour;
-        },
-    );
+    trousers_colour.do!(|trousers_colour| {
+        assert!(b.colours.contains(trousers_colour.as_bytes()), EWrongHairColour);
+        c.image.trousers_colour = trousers_colour;
+    });
 
-    skin_colour.do!(
-        |skin_colour| {
-            assert!(b.colours.contains(skin_colour.as_bytes()), EWrongHairColour);
-            c.image.skin_colour = skin_colour;
-        },
-    );
+    skin_colour.do!(|skin_colour| {
+        assert!(b.colours.contains(skin_colour.as_bytes()), EWrongHairColour);
+        c.image.skin_colour = skin_colour;
+    });
 
-    base_colour.do!(
-        |base_colour| {
-            assert!(b.colours.contains(base_colour.as_bytes()), EWrongHairColour);
-            c.image.base_colour = base_colour;
-        },
-    );
+    base_colour.do!(|base_colour| {
+        assert!(b.colours.contains(base_colour.as_bytes()), EWrongHairColour);
+        c.image.base_colour = base_colour;
+    });
 
-    accent_colour.do!(
-        |accent_colour| {
-            assert!(b.colours.contains(accent_colour.as_bytes()), EWrongHairColour);
-            c.image.accent_colour = accent_colour;
-        },
-    );
+    accent_colour.do!(|accent_colour| {
+        assert!(b.colours.contains(accent_colour.as_bytes()), EWrongHairColour);
+        c.image.accent_colour = accent_colour;
+    });
 }
 
 // === Usability ===
@@ -445,10 +429,10 @@ fun build_character_base(): String {
     // ACCENT -> {image.accent_colour}
 
     // ideally let's just write the template with Move...
-    let template = replace(template, b"HAIR".to_string(), b"{image.hair_colour}".to_string());
-    let template = replace(template, b"EYES".to_string(), b"{image.eyes_colour}".to_string());
-    let template = replace(template, b"PANTS".to_string(), b"{image.pants_colour}".to_string());
     let template = replace(template, b"SKIN".to_string(), b"{image.skin_colour}".to_string());
+    let template = replace(template, b"EYES".to_string(), b"{image.eyes_colour}".to_string());
+    let template = replace(template, b"HAIR".to_string(), b"{image.hair_colour}".to_string());
+    let template = replace(template, b"PANTS".to_string(), b"{image.pants_colour}".to_string());
     let template = replace(template, b"BODY".to_string(), b"{image.base_colour}".to_string());
     let template = replace(
         template,
@@ -494,4 +478,10 @@ fun test_preview_character_build() {
     let mut image_url = b"data:image/svg+xml;charset=utf8,".to_string();
     image_url.append(urlencode::encode(build_character_base().into_bytes()));
     // std::debug::print(&image_url);
+}
+
+#[test]
+fun test_init() {
+    let ctx = &mut tx_context::dummy();
+    init(CHARACTER {}, ctx);
 }

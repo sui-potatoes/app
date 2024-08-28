@@ -2,7 +2,7 @@
 
 [move]
 version = 2
-manifest_digest = "57A6E1E2137FFA04A50FEBD3A72B069C3BD7A4A27F189FF9CF5BCDF31D68AA8A"
+manifest_digest = "3ADD528B537A1DE05F55BCACD3C74B1D5DD3997E5C8D46589B8676CF7CFFB020"
 deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 dependencies = [
   { name = "Codec" },
@@ -20,7 +20,7 @@ dependencies = [
 
 [[move.package]]
 name = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
 name = "SVG"
@@ -36,14 +36,14 @@ dev-dependencies = [
 
 [[move.package]]
 name = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
 ]
 
 [move.toolchain-version]
-compiler-version = "1.30.3"
+compiler-version = "1.32.0"
 edition = "2024.beta"
 flavor = "sui"
 

@@ -2,7 +2,7 @@
 
 [move]
 version = 2
-manifest_digest = "8BCA3EA5BCF6EB58550D0556697F89ACB55F07812BDAC82A8892E9D6319DD13A"
+manifest_digest = "5754295D1A3EF2D1FF99B9B13B7994C3EF43FD8DBA844DE971EF3F4CA8C0EEC4"
 deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 dependencies = [
   { name = "Codec" },
@@ -51,6 +51,6 @@ flavor = "sui"
 
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0x1375ebfa8247b3f96728d994979e221d8cf720a636ac184ba7eed6d4008610e7"
-latest-published-id = "0x1375ebfa8247b3f96728d994979e221d8cf720a636ac184ba7eed6d4008610e7"
+original-published-id = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
+latest-published-id = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
 published-version = "1"

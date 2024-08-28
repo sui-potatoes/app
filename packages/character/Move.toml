@@ -4,10 +4,9 @@ edition = "2024.beta"
 authors = ["Sui Potatoes"]
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet", override = true }
 SVG = { local = "../svg" }
 Codec = { local = "../codec" }
 
 [addresses]
-character = "0xfe50fd35667c48ec3342c5182a262aeb8b367188f71524ac8a3ea3e20141e78e"
-builder = "0x4574eaf3f1313b584d5004144cd6d6d57d516379d011d6d8e3248c54cfcf90a0"
+character = "0x0"
