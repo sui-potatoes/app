@@ -3,13 +3,12 @@
 
 module gogame::render;
 
-use codec::urlencode;
 use gogame::go::Board;
 use std::string::String;
 use svg::{container, shape, svg};
 
 /// Print the board as an SVG.
-public fun svg(b: &Board): String {
+public(package) fun svg(b: &Board): String {
     let padding = 1;
     let cell_size = 20;
     let size = b.size() as u64;
@@ -53,10 +52,11 @@ public fun svg(b: &Board): String {
             let cx = (i * cell_size) + (i * padding) + 10;
             let cy = (j * cell_size) + (j * padding) + 10;
 
-            let mut stone = match (e.is_black()) {
-                true => shape::use_(b"#b".to_string()),
-                false => shape::use_(b"#w".to_string()),
-            };
+            let mut stone =
+                match (e.is_black()) {
+                    true => shape::use_(b"#b".to_string()),
+                    false => shape::use_(b"#w".to_string()),
+                };
 
             stone.move_to(cx as u16, cy as u16);
             elements.push_back(stone);
@@ -66,6 +66,9 @@ public fun svg(b: &Board): String {
     svg.root(elements);
     svg.to_string()
 }
+
+#[test_only]
+use codec::urlencode;
 
 #[test]
 fun test_rendering_safari() {
@@ -80,7 +83,6 @@ fun test_rendering_safari() {
         vector[0, 1, 0, 1, 2, 0, 2, 0, 0],
         vector[1, 0, 1, 2, 2, 2, 0, 0, 0],
     ]);
-
 
     let res = urlencode::encode(svg(&board).into_bytes());
     let mut data_url = b"data:image/svg+xml;charset=utf8,";

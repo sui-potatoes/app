@@ -2,26 +2,48 @@
 
 [move]
 version = 2
-manifest_digest = "B60D39FFBA98F5779049AF6D4C641FBEA86A49D27685D8A5FAF47FD771738A86"
-deps_digest = "F8BBB0CCB2491CA29A3DF03D6F92277A4F3574266507ACD77214D37ECA3F3082"
+manifest_digest = "8BCA3EA5BCF6EB58550D0556697F89ACB55F07812BDAC82A8892E9D6319DD13A"
+deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
+dependencies = [
+  { name = "Codec" },
+  { name = "SVG" },
+  { name = "Sui" },
+]
+
+[[move.package]]
+name = "Codec"
+source = { local = "../codec" }
+
 dependencies = [
   { name = "Sui" },
 ]
 
 [[move.package]]
 name = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/move-stdlib" }
+
+[[move.package]]
+name = "SVG"
+source = { local = "../svg" }
+
+dependencies = [
+  { name = "Sui" },
+]
+
+dev-dependencies = [
+  { name = "Codec" },
+]
 
 [[move.package]]
 name = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
 ]
 
 [move.toolchain-version]
-compiler-version = "1.29.0"
+compiler-version = "1.32.0"
 edition = "2024.beta"
 flavor = "sui"
 
