@@ -13,6 +13,11 @@ import { toast } from "react-hot-toast";
 
 const BOARD_SIZES = [9, 13, 19];
 
+const Turn = bcs.enum("Turn", {
+    Black: null,
+    White: null,
+});
+
 const Move = bcs.struct("Move", {
     x: bcs.u8(),
     y: bcs.u8(),
@@ -31,7 +36,7 @@ const Players = bcs.struct("Players", {
 const Board = bcs.struct("Board", {
     data: bcs.vector(bcs.vector(bcs.u8())),
     size: bcs.u8(),
-    turn: bcs.u8(),
+    turn: Turn,
     moves: bcs.vector(Move),
     scores: bcs.vector(bcs.u64()),
     ko_store: bcs.vector(bcs.vector(bcs.u8())),
@@ -53,7 +58,7 @@ export function App() {
 
     const [account, setAccount] = useState<typeof Account | any>();
     const [canInteract, setCanInteract] = useState(false);
-    const [turn, setTurn] = useState<1 | 2>(1);
+    const [turn, setTurn] = useState<typeof Turn.$inferInput>({ Black: true });
     const [game, setGame] = useState<typeof Game.$inferType>();
     const [data, setData] = useState<number[][]>(
         Array(9).fill(Array(9).fill(0)),
@@ -99,7 +104,7 @@ export function App() {
 
         // game is found, set the board state
         setData(game.board.data);
-        setTurn(game.board.turn as 1 | 2);
+        setTurn(game.board.turn);
         setCanInteract(true);
         setGame(game);
     }, [gameData, accounts, urlGameId]);
@@ -138,7 +143,7 @@ export function App() {
                                     </Link>
                                 </li>
                             );
-                    })}
+                        })}
                 </ul>
 
                 <div className="pt-3">
@@ -167,8 +172,10 @@ export function App() {
     game.players.player2 && players.push(game.players.player2);
 
     const isMyGame = players.includes(account?.id);
-    const myColor = game.players.player1 === account?.id ? 1 : 2;
-    const isMyTurn = isMyGame && turn === myColor;
+    const myColour = game.players.player1 === account?.id ? 'Black' : 'White';
+    const myClrId = 'Black' === myColour ? 1 : 2;
+
+    const isMyTurn = isMyGame && myColour in turn;
     const lastMove = game.board.moves.slice(-1)[0];
     const size = game.board.size as 9 | 13 | 19;
 
@@ -180,14 +187,14 @@ export function App() {
                     size={size}
                     data={data}
                     lastMove={lastMove}
-                    turn={myColor}
+                    turn={myClrId}
                     zoom={(19 - size / 2) * 10 + "%"}
                     onClick={handleClick}
                 />
                 <p>
                     {!players.includes(account?.id) && players.length == 1 && (
                         <button
-                            disabled={!canInteract || !account}
+                            disabled={!canInteract}
                             onClick={() => joinGame()}
                         >
                             Join?{" "}
@@ -273,7 +280,7 @@ export function App() {
         const boardBytes = res.results[0].mutableReferenceOutputs as any;
         const updatedGame = Game.parse(new Uint8Array(boardBytes[0][1]));
 
-        setTurn(updatedGame.board.turn as 1 | 2);
+        setTurn(updatedGame.board.turn);
         setData(updatedGame.board.data);
 
         const tx = new Transaction();
@@ -310,8 +317,8 @@ export function App() {
         const accArg = account
             ? tx.object(account.id)
             : tx.moveCall({
-                  target: `${packageId}::game::new_account`,
-              });
+                target: `${packageId}::game::new_account`,
+            });
 
         tx.moveCall({
             target: `${packageId}::game::new`,
@@ -367,8 +374,8 @@ export function App() {
         const accArg = account
             ? tx.object(account.id)
             : tx.moveCall({
-                  target: `${packageId}::game::new_account`,
-              });
+                target: `${packageId}::game::new_account`,
+            });
 
         tx.moveCall({
             target: `${packageId}::game::join`,
