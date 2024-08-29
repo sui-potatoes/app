@@ -52,11 +52,10 @@ public(package) fun svg(b: &Board): String {
             let cx = (i * cell_size) + (i * padding) + 10;
             let cy = (j * cell_size) + (j * padding) + 10;
 
-            let mut stone =
-                match (e.is_black()) {
-                    true => shape::use_(b"#b".to_string()),
-                    false => shape::use_(b"#w".to_string()),
-                };
+            let mut stone = match (e.is_black()) {
+                true => shape::use_(b"#b".to_string()),
+                false => shape::use_(b"#w".to_string()),
+            };
 
             stone.move_to(cx as u16, cy as u16);
             elements.push_back(stone);

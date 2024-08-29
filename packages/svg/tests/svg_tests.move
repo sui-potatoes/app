@@ -2,54 +2,51 @@
 // SPDX-License-Identifier: MIT
 
 #[test_only]
-module svg::svg_tests {
-    use svg::svg;
-    use svg::shape;
-    use svg::container;
-    use svg::macros::{add_class, add_attribute};
+module svg::svg_tests;
 
-    const ENotImplemented: u64 = 0;
+use svg::{container, macros::{add_class, add_attribute}, shape, svg};
 
-    #[test]
-    // character is a 9x13 rectangle with head, body, hands, and legs
-    fun test_character() {
-        let mut svg = svg::svg(vector[0, 0, 9, 13]);
+const ENotImplemented: u64 = 0;
 
-        // head
-        let mut head = shape::rect(3, 3, 3, 3);
-        add_class!(&mut head, b"head");
-        add_attribute!(&mut head, b"fill", b"orange");
+#[test]
+// character is a 9x13 rectangle with head, body, hands, and legs
+fun test_character() {
+    let mut svg = svg::svg(vector[0, 0, 9, 13]);
 
-        // body
-        let mut body = shape::rect(3, 6, 3, 3);
-        add_class!(&mut body, b"body");
-        add_attribute!(&mut body, b"fill", b"blue");
+    // head
+    let mut head = shape::rect(3, 3, 3, 3);
+    add_class!(&mut head, b"head");
+    add_attribute!(&mut head, b"fill", b"orange");
 
-        // hands (a container already!)
-        let mut hands = container::g(vector[
-            shape::rect(2, 6, 1, 3), // left hand
-            shape::rect(6, 6, 1, 3), // right hand
-        ]);
+    // body
+    let mut body = shape::rect(3, 6, 3, 3);
+    add_class!(&mut body, b"body");
+    add_attribute!(&mut body, b"fill", b"blue");
 
-        add_class!(&mut hands, b"hand");
-        add_attribute!(&mut hands, b"fill", b"black");
+    // hands (a container already!)
+    let mut hands = container::g(vector[
+        shape::rect(2, 6, 1, 3), // left hand
+        shape::rect(6, 6, 1, 3), // right hand
+    ]);
 
-        // legs
-        let mut legs = container::g(vector[
-            shape::rect(3, 9, 1, 3), // left leg
-            shape::rect(4, 9, 1, 1), // middle
-            shape::rect(5, 9, 1, 3), // right leg
-        ]);
+    add_class!(&mut hands, b"hand");
+    add_attribute!(&mut hands, b"fill", b"black");
 
-        add_attribute!(&mut legs, b"fill", b"black");
+    // legs
+    let mut legs = container::g(vector[
+        shape::rect(3, 9, 1, 3), // left leg
+        shape::rect(4, 9, 1, 1), // middle
+        shape::rect(5, 9, 1, 3), // right leg
+    ]);
 
-        svg.root(vector[head, body]).add(hands).add(legs);
-        std::debug::print(&svg.to_string().as_bytes().length());
-        svg.debug()
-    }
+    add_attribute!(&mut legs, b"fill", b"black");
 
-    #[test, expected_failure(abort_code = ::svg::svg_tests::ENotImplemented)]
-    fun test_svg_fail() {
-        abort ENotImplemented
-    }
+    svg.root(vector[head, body]).add(hands).add(legs);
+    std::debug::print(&svg.to_string().as_bytes().length());
+    svg.debug()
+}
+
+#[test, expected_failure(abort_code = ::svg::svg_tests::ENotImplemented)]
+fun test_svg_fail() {
+    abort ENotImplemented
 }

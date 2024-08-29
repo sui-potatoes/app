@@ -148,79 +148,78 @@ public fun move_to(shape: &mut Shape, x: u16, y: u16) {
 /// Print the shape as an `SVG` element.
 public fun to_string(shape: &Shape): String {
     let Shape { shape, attributes: attrs } = shape;
-    let (name, attributes, contents) =
-        match (shape) {
-            Type::Circle(cx, cy, r) => {
-                let mut map = *attrs;
-                map.insert(b"cx".to_string(), print::num_to_string(*cx));
-                map.insert(b"cy".to_string(), print::num_to_string(*cy));
-                map.insert(b"r".to_string(), print::num_to_string(*r));
-                (b"circle", map, option::none())
-            },
-            Type::Ellipse(cx, cy, rx, ry) => {
-                let mut map = *attrs;
-                map.insert(b"cx".to_string(), print::num_to_string(*cx));
-                map.insert(b"cy".to_string(), print::num_to_string(*cy));
-                map.insert(b"rx".to_string(), print::num_to_string(*rx));
-                map.insert(b"ry".to_string(), print::num_to_string(*ry));
-                (b"ellipse", map, option::none())
-            },
-            Type::Line(x1, y1, x2, y2) => {
-                let mut map = *attrs;
-                map.insert(b"x1".to_string(), print::num_to_string(*x1));
-                map.insert(b"y1".to_string(), print::num_to_string(*y1));
-                map.insert(b"x2".to_string(), print::num_to_string(*x2));
-                map.insert(b"y2".to_string(), print::num_to_string(*y2));
-                (b"line", map, option::none())
-            },
-            Type::Polygon(x1, y1, x2, y2) => {
-                let mut map = *attrs;
-                map.insert(b"x1".to_string(), print::num_to_string(*x1));
-                map.insert(b"y1".to_string(), print::num_to_string(*y1));
-                map.insert(b"x2".to_string(), print::num_to_string(*x2));
-                map.insert(b"y2".to_string(), print::num_to_string(*y2));
-                (b"polygon", map, option::none())
-            },
-            Type::Polyline(x1, y1, x2, y2) => {
-                let mut map = *attrs;
-                map.insert(b"x1".to_string(), print::num_to_string(*x1));
-                map.insert(b"y1".to_string(), print::num_to_string(*y1));
-                map.insert(b"x2".to_string(), print::num_to_string(*x2));
-                map.insert(b"y2".to_string(), print::num_to_string(*y2));
-                (b"polyline", map, option::none())
-            },
-            Type::Rect(x, y, width, height) => {
-                let mut map = *attrs;
-                map.insert(b"x".to_string(), print::num_to_string(*x));
-                map.insert(b"y".to_string(), print::num_to_string(*y));
-                map.insert(b"width".to_string(), print::num_to_string(*width));
-                map.insert(b"height".to_string(), print::num_to_string(*height));
-                (b"rect", map, option::none())
-            },
-            Type::Text(text, x, y) => {
-                let mut map = *attrs;
-                map.insert(b"x".to_string(), print::num_to_string(*x));
-                map.insert(b"y".to_string(), print::num_to_string(*y));
-                (b"text", map, option::some(vector[*text]))
-            },
-            Type::Use(href) => {
-                let mut map = *attrs;
-                map.insert(b"href".to_string(), *href);
-                (b"use", map, option::none())
-            },
-            Type::Path(path, length) => {
-                let mut map = *attrs;
-                map.insert(b"d".to_string(), *path);
-                length.do_ref!(
-                    |value| map.insert(
-                        b"length".to_string(),
-                        print::num_to_string(*value),
-                    ),
-                );
-                (b"path", map, option::none())
-            },
-            Type::Custom(text) => return *text,
-        };
+    let (name, attributes, contents) = match (shape) {
+        Type::Circle(cx, cy, r) => {
+            let mut map = *attrs;
+            map.insert(b"cx".to_string(), print::num_to_string(*cx));
+            map.insert(b"cy".to_string(), print::num_to_string(*cy));
+            map.insert(b"r".to_string(), print::num_to_string(*r));
+            (b"circle", map, option::none())
+        },
+        Type::Ellipse(cx, cy, rx, ry) => {
+            let mut map = *attrs;
+            map.insert(b"cx".to_string(), print::num_to_string(*cx));
+            map.insert(b"cy".to_string(), print::num_to_string(*cy));
+            map.insert(b"rx".to_string(), print::num_to_string(*rx));
+            map.insert(b"ry".to_string(), print::num_to_string(*ry));
+            (b"ellipse", map, option::none())
+        },
+        Type::Line(x1, y1, x2, y2) => {
+            let mut map = *attrs;
+            map.insert(b"x1".to_string(), print::num_to_string(*x1));
+            map.insert(b"y1".to_string(), print::num_to_string(*y1));
+            map.insert(b"x2".to_string(), print::num_to_string(*x2));
+            map.insert(b"y2".to_string(), print::num_to_string(*y2));
+            (b"line", map, option::none())
+        },
+        Type::Polygon(x1, y1, x2, y2) => {
+            let mut map = *attrs;
+            map.insert(b"x1".to_string(), print::num_to_string(*x1));
+            map.insert(b"y1".to_string(), print::num_to_string(*y1));
+            map.insert(b"x2".to_string(), print::num_to_string(*x2));
+            map.insert(b"y2".to_string(), print::num_to_string(*y2));
+            (b"polygon", map, option::none())
+        },
+        Type::Polyline(x1, y1, x2, y2) => {
+            let mut map = *attrs;
+            map.insert(b"x1".to_string(), print::num_to_string(*x1));
+            map.insert(b"y1".to_string(), print::num_to_string(*y1));
+            map.insert(b"x2".to_string(), print::num_to_string(*x2));
+            map.insert(b"y2".to_string(), print::num_to_string(*y2));
+            (b"polyline", map, option::none())
+        },
+        Type::Rect(x, y, width, height) => {
+            let mut map = *attrs;
+            map.insert(b"x".to_string(), print::num_to_string(*x));
+            map.insert(b"y".to_string(), print::num_to_string(*y));
+            map.insert(b"width".to_string(), print::num_to_string(*width));
+            map.insert(b"height".to_string(), print::num_to_string(*height));
+            (b"rect", map, option::none())
+        },
+        Type::Text(text, x, y) => {
+            let mut map = *attrs;
+            map.insert(b"x".to_string(), print::num_to_string(*x));
+            map.insert(b"y".to_string(), print::num_to_string(*y));
+            (b"text", map, option::some(vector[*text]))
+        },
+        Type::Use(href) => {
+            let mut map = *attrs;
+            map.insert(b"href".to_string(), *href);
+            (b"use", map, option::none())
+        },
+        Type::Path(path, length) => {
+            let mut map = *attrs;
+            map.insert(b"d".to_string(), *path);
+            length.do_ref!(
+                |value| map.insert(
+                    b"length".to_string(),
+                    print::num_to_string(*value),
+                ),
+            );
+            (b"path", map, option::none())
+        },
+        Type::Custom(text) => return *text,
+    };
 
     print::print(name.to_string(), attributes, contents)
 }

@@ -29,12 +29,11 @@ public fun move_to(shape: Desc, _x: u64, _y: u64): Desc { shape }
 
 /// Print the shape as an `SVG` element.
 public fun to_string(shape: &Desc): String {
-    let (name, content) =
-        match (shape) {
-            Desc::Desc(str) => (b"desc", vector[*str]),
-            Desc::Metadata => (b"metadata", vector[]),
-            Desc::Title(str) => (b"title", vector[*str]),
-        };
+    let (name, content) = match (shape) {
+        Desc::Desc(str) => (b"desc", vector[*str]),
+        Desc::Metadata => (b"metadata", vector[]),
+        Desc::Title(str) => (b"title", vector[*str]),
+    };
 
     print::print(name.to_string(), vec_map::empty(), option::some(content))
 }

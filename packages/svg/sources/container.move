@@ -87,35 +87,34 @@ public fun name(container: &Container): String {
 
 /// Print the container as an `SVG` element.
 public fun to_string(container: &Container): String {
-    let (name, attributes, elements) =
-        match (container) {
-            // Desc is a special case, it's just a list of descriptions.
-            Container::Desc(tags) => {
-                return (*tags).fold!(b"".to_string(), |mut svg, tag| {
-                        svg.append(tag.to_string());
-                        svg
-                    })
-            },
-            // Root is a special case, we append all elements directly.
-            Container::Root(shapes) => {
-                return (*shapes).fold!(b"".to_string(), |mut svg, shape| {
-                        svg.append(shape.to_string());
-                        svg
-                    })
-            },
-            Container::Defs(shapes) => (
-                b"defs",
-                vec_map::empty(),
-                shapes.map_ref!(|shape| shape.to_string()),
-            ),
-            Container::A(_href, attrs) => (b"a", *attrs, vector[]),
-            Container::G(shapes, attrs) => (
-                b"g",
-                *attrs,
-                shapes.map_ref!(|shape| shape.to_string()),
-            ),
-            _ => abort ENotImplemented,
-        };
+    let (name, attributes, elements) = match (container) {
+        // Desc is a special case, it's just a list of descriptions.
+        Container::Desc(tags) => {
+            return (*tags).fold!(b"".to_string(), |mut svg, tag| {
+                    svg.append(tag.to_string());
+                    svg
+                })
+        },
+        // Root is a special case, we append all elements directly.
+        Container::Root(shapes) => {
+            return (*shapes).fold!(b"".to_string(), |mut svg, shape| {
+                    svg.append(shape.to_string());
+                    svg
+                })
+        },
+        Container::Defs(shapes) => (
+            b"defs",
+            vec_map::empty(),
+            shapes.map_ref!(|shape| shape.to_string()),
+        ),
+        Container::A(_href, attrs) => (b"a", *attrs, vector[]),
+        Container::G(shapes, attrs) => (
+            b"g",
+            *attrs,
+            shapes.map_ref!(|shape| shape.to_string()),
+        ),
+        _ => abort ENotImplemented,
+    };
 
     print::print(name.to_string(), attributes, option::some(elements))
 }
