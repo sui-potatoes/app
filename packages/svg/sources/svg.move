@@ -77,22 +77,17 @@ fun test_svg() {
     let mut str = x"F09F9098";
     str.append(b"You won't believe this!");
 
-    svg.root(vector[
-        {
+    svg.root(vector[{
             let mut shape = shape::text(str.to_string(), 100, 50);
             add_attribute!(&mut shape, b"fill", b"black");
             add_attribute!(&mut shape, b"font-size", b"20");
             shape
-        },
-        shape::circle(10, 10, 5),
-        {
+        }, shape::circle(10, 10, 5), {
             let mut rect = shape::rect(10, 10, 20, 20);
             add_attribute!(&mut rect, b"fill", b"red");
             add_attribute!(&mut rect, b"stroke", b"black");
             rect
-        },
-        shape::ellipse(30, 30, 10, 5),
-    ]);
+        }, shape::ellipse(30, 30, 10, 5)]);
 
     let mut prefix = b"data:image/svg+xml;charset=utf8,".to_string();
     let str = codec::urlencode::encode(svg.to_string().into_bytes());

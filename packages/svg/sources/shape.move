@@ -112,37 +112,49 @@ public fun custom(text: String): Shape {
 /// Move a shape.
 public fun move_to(shape: &mut Shape, x: u16, y: u16) {
     let shape_type = &mut shape.shape;
-    match (shape_type) {Type::Circle(cx, cy, _) => {
+    match (shape_type) {
+        Type::Circle(cx, cy, _) => {
             *cx = x;
             *cy = y;
-        }, Type::Ellipse(cx, cy, _, _) => {
+        },
+        Type::Ellipse(cx, cy, _, _) => {
             *cx = x;
             *cy = y;
-        }, Type::Line(x1, y1, x2, y2) => {
+        },
+        Type::Line(x1, y1, x2, y2) => {
             *x2 = *x2 - *x1 + x;
             *y2 = *y2 - *y1 + y;
             *x1 = x;
             *y1 = y;
-        }, Type::Polygon(x1, y1, x2, y2) => {
+        },
+        Type::Polygon(x1, y1, x2, y2) => {
             *x2 = *x2 - *x1 + x;
             *y2 = *y2 - *y1 + y;
             *x1 = x;
             *y1 = y;
-        }, Type::Polyline(x1, y1, x2, y2) => {
+        },
+        Type::Polyline(x1, y1, x2, y2) => {
             *x2 = *x2 - *x1 + x;
             *y2 = *y2 - *y1 + y;
             *x1 = x;
             *y1 = y;
-        }, Type::Rect(ox, oy, _, _) => {
+        },
+        Type::Rect(ox, oy, _, _) => {
             *ox = x;
             *oy = y;
-        }, Type::Text(_, ox, oy) => {
+        },
+        Type::Text(_, ox, oy) => {
             *ox = x;
             *oy = y;
-        }, Type::Use(_) => {
+        },
+        Type::Use(_) => {
             shape.attributes.insert(b"x".to_string(), print::num_to_string(x));
             shape.attributes.insert(b"y".to_string(), print::num_to_string(y));
-        }, Type::Custom(_) => {}, Type::Path(_, _) => {}, _ => abort 0};
+        },
+        Type::Custom(_) => {},
+        Type::Path(_, _) => {},
+        _ => abort 0,
+    };
 }
 
 /// Print the shape as an `SVG` element.
