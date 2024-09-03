@@ -148,11 +148,13 @@ export function App() {
 
                 <div className="pt-3">
                     <div className="w-[200px] h-[1px] bg-gray-300 mb-4" />
+                    {!zkLogin.address && <p className="mb-2">Sign in to start playing</p>}
+                    <p>
                     {
                         BOARD_SIZES.map((size: number) => (
                             <button
                                 key={size}
-                                disabled={!canInteract}
+                                disabled={!canInteract || !zkLogin.address}
                                 onClick={() => newGame(size)}
                                 className="block"
                             >
@@ -160,6 +162,7 @@ export function App() {
                             </button>
                         ))
                     }
+                    </p>
                 </div>
                 <div className={`loader ${canInteract ? 'hidden' : ''}`} />
             </div>
