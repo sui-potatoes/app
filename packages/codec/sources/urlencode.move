@@ -11,17 +11,15 @@ use std::string::String;
 /// a vector of bytes as input. This function is safe to use with UTF8 strings.
 public fun encode(string: vector<u8>): String {
     let mut res = vector[];
-    string.do!(
-        |c| if (c == 32) {
-            res.append(b"%20");
-        } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
-            res.push_back(37);
-            res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
-            res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
-        } else {
-            res.push_back(c);
-        },
-    );
+    string.do!(|c| if (c == 32) {
+        res.append(b"%20");
+    } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
+        res.push_back(37);
+        res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
+        res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
+    } else {
+        res.push_back(c);
+    });
 
     res.to_string()
 }

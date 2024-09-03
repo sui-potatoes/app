@@ -117,7 +117,6 @@ export function App() {
                     <Route path="/go" element={<GoGame />} />
                     <Route path="/go/:id" element={<GoGame />} />
                     <Route path="/char" element={<Character />} />
-                    <Route path="/char/:id" element={<Character />} />
                     {/* <Route path="/rps" element={<RockPaperScissors />} /> */}
                 </Routes>
             </div>

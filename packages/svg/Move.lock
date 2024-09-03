@@ -2,12 +2,13 @@
 
 [move]
 version = 2
-manifest_digest = "5754295D1A3EF2D1FF99B9B13B7994C3EF43FD8DBA844DE971EF3F4CA8C0EEC4"
-deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
+manifest_digest = "B5234D458E8BDCC365E881E713962DD3667FC0426A2ECCD2DEE5B47F547270DE"
+deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 dependencies = [
-  { name = "Codec" },
-  { name = "SVG" },
   { name = "Sui" },
+]
+dev-dependencies = [
+  { name = "Codec" },
 ]
 
 [[move.package]]
@@ -21,18 +22,6 @@ dependencies = [
 [[move.package]]
 name = "MoveStdlib"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/move-stdlib" }
-
-[[move.package]]
-name = "SVG"
-source = { local = "../svg" }
-
-dependencies = [
-  { name = "Sui" },
-]
-
-dev-dependencies = [
-  { name = "Codec" },
-]
 
 [[move.package]]
 name = "Sui"
@@ -51,6 +40,6 @@ flavor = "sui"
 
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
-latest-published-id = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
+original-published-id = "0x6c034a79647c9a2d3ca320b74c6ca59d1f5648aae0a0b96c0dfc8c4866814cdb"
+latest-published-id = "0x6c034a79647c9a2d3ca320b74c6ca59d1f5648aae0a0b96c0dfc8c4866814cdb"
 published-version = "1"

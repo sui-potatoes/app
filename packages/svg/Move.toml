@@ -1,13 +1,15 @@
 [package]
-name = "GoGame"
+name = "SVG"
 edition = "2024.beta"
+license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet", override = true }
-SVG = { local = "../svg" }
-Codec = { local = "../codec" }
 
 [addresses]
-gogame = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
-gogame_upgrade_cap = "0xe9751f947ea92998fe0500417db9ba2297e7eb394ac82bd69f02abcfa425108e"
+svg = "0x6c034a79647c9a2d3ca320b74c6ca59d1f5648aae0a0b96c0dfc8c4866814cdb"
+svg_upgrade_cap = "0xb95646cee9735b853a38117f2b5c1cf3b718780c136526cb3d995a8accd5eb6b"
+
+[dev-dependencies]
+Codec = { local = "../codec" }

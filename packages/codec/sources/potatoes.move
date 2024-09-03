@@ -38,13 +38,10 @@ const CHARACTER_SET: vector<vector<u8>> = vector[
 /// Now let's play with the encoding and decoding functions.
 public fun encode(bytes: vector<u8>): String {
     let chars = CHARACTER_SET;
-    let result = bytes.fold!(
-        vector[],
-        |mut acc, b| {
-            acc.append(chars[b as u64]);
-            acc
-        },
-    );
+    let result = bytes.fold!(vector[], |mut acc, b| {
+        acc.append(chars[b as u64]);
+        acc
+    });
 
     result.to_string()
 }
