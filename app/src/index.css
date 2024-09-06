@@ -13,6 +13,7 @@ button {
     --background-color: #fff;
     --button-color: #eee;
     --disabled-color: #aaa;
+    --code-color: #eee;
 }
 
 .dark-theme * {
@@ -20,6 +21,7 @@ button {
     --background-color: #000;
     --button-color: #333;
     --disabled-color: #666;
+    --code-color: #212121;
 }
 
 body {
@@ -104,8 +106,10 @@ body {
     cursor: pointer;
 }
 
-.sidebar ul li.active {
-    font-weight: bold;
+.sidebar ul a.active {
+    /* font-weight: bold; */
+    cursor: none;
+    text-decoration: underline;
 }
 
 .content {

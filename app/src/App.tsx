@@ -5,7 +5,7 @@ import { Route, Routes } from "react-router-dom";
 import Root from "./Root.tsx";
 import { NavLink } from "react-router-dom";
 import GoGame from "./apps/go-game/App.tsx";
-import Packages from "./apps/packages/App.tsx";
+import Libraries from "./apps/libraries/App.tsx";
 import Character from "./apps/character/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
@@ -103,7 +103,10 @@ export function App() {
                         <NavLink to="/go">go game</NavLink>
                     </li>
                     <li>
-                        <NavLink to="/char">character</NavLink>
+                        <NavLink to="/character">character</NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/libraries">libraries (for devs)</NavLink>
                     </li>
                     <li>
                         <a href="https://github.com/sui-potatoes/app" target="_blank">Source Code</a>
@@ -119,8 +122,8 @@ export function App() {
                     <Route path="/" element={<Root />} />
                     <Route path="/go" element={<GoGame />} />
                     <Route path="/go/:id" element={<GoGame />} />
-                    <Route path="/char" element={<Character />} />
-                    <Route path="/packages" element={<Packages />} />
+                    <Route path="/character" element={<Character />} />
+                    <Route path="/libraries" element={<Libraries />} />
                     {/* <Route path="/rps" element={<RockPaperScissors />} /> */}
                 </Routes>
             </div>
