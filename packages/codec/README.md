@@ -30,7 +30,7 @@ Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/co
 Exported address of this package is:
 
 ```toml
-encoding = "0x..."
+codec = "0x..."
 ```
 
 In your code, import and use the package as:
