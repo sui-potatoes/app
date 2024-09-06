@@ -54,7 +54,7 @@ is always `std::string::String`.
 
 ```rust
 use std::string::String;
-use potatoes::hex;
+use codec::hex;
 
 // while the type annotation is not necessary, we've added it to be explicit
 let encoded: String = hex::encode(b"hello, potato!"); // takes vector<u8>
