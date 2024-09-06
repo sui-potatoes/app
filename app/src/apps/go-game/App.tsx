@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import "./go-game.css";
-import { Board as PlayableBoard } from "./Board";
+import { PlayableBoard } from "./Board";
 import { useEffect, useState } from "react";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
@@ -36,19 +36,20 @@ const Players = bcs.struct("Players", {
     player2: bcs.option(bcs.Address),
 });
 
-const Board = bcs.struct("Board", {
+export const Board = bcs.struct("Board", {
     data: bcs.vector(bcs.vector(bcs.u8())),
     size: bcs.u8(),
     turn: Turn,
     moves: bcs.vector(Move),
     scores: bcs.vector(bcs.u64()),
-    ko_store: bcs.vector(bcs.vector(bcs.u8())),
+    ko_store: bcs.vector(bcs.vector(bcs.vector(bcs.u8()))),
 });
-const Game = bcs.struct("Game", {
+
+export const Game = bcs.struct("Game", {
     id: bcs.Address,
     players: Players,
-    // Board is incomplete parsing, so must go last!
     board: Board,
+    image_blob: bcs.string(),
 });
 
 export default function App() {
@@ -189,6 +190,7 @@ export default function App() {
         game && (
             <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
                 <PlayableBoard
+                    imageBlob={game.image_blob}
                     disabled={!canInteract && !isMyTurn}
                     size={size}
                     data={data}
