@@ -16,13 +16,21 @@ To add this library to your project, add this to your `Move.toml` file under
 
 ```toml
 # goes into [dependencies] section
-Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "main" }
+Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@testnet-v1" }
 ```
+
+If you need a **mainnet** version of this package, use the `mainnet-v1` tag instead:
+
+```toml
+# goes into [dependencies] section
+Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@mainnet-v1" }
+```
+
 
 Exported address of this package is:
 
 ```toml
-encoding = "0x..."
+codec = "0x..."
 ```
 
 In your code, import and use the package as:
@@ -46,7 +54,7 @@ is always `std::string::String`.
 
 ```rust
 use std::string::String;
-use potatoes::hex;
+use codec::hex;
 
 // while the type annotation is not necessary, we've added it to be explicit
 let encoded: String = hex::encode(b"hello, potato!"); // takes vector<u8>
