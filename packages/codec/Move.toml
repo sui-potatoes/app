@@ -9,3 +9,4 @@ Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-fram
 [addresses]
 codec = "0x0"
 codec_testnet_upgrade_cap = "0xb3356ec1937e93fbe3ce9f5408d34abbc6ee2ad06cbeb4aa917bd80d8954bcb7"
+codec_mainnet_upgrade_cap = "0x9656fad9500d5b2df614f10e14f07b421c566079c852eb094269c0326e4bc212"
