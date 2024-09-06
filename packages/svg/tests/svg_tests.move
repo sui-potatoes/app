@@ -1,7 +1,6 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-#[test_only]
 module svg::svg_tests;
 
 use svg::{container, macros::{add_class, add_attribute}, shape, svg};

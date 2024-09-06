@@ -26,7 +26,7 @@ public enum Container has store, copy, drop {
     // dictionary of shapes.
     Defs(vector<Shape>),
     // Hyperlink container, `<a>`.
-    A(String, VecMap<String, String>),
+    A(String, vector<Shape>, VecMap<String, String>),
     // Group container, `<g>`, to group shapes and apply transformations.
     G(vector<Shape>, VecMap<String, String>),
     // Marker container, `<marker>`, to define a marker symbol.
@@ -40,7 +40,9 @@ public fun desc(tags: vector<Desc>): Container { Container::Desc(tags) }
 public fun root(shapes: vector<Shape>): Container { Container::Root(shapes) }
 
 /// Create a new hyperlink container.
-public fun a(href: String): Container { Container::A(href, vec_map::empty()) }
+public fun a(href: String, shapes: vector<Shape>): Container {
+    Container::A(href, shapes, vec_map::empty())
+}
 
 /// Create a new `Defs` container.
 public fun defs(shapes: vector<Shape>): Container { Container::Defs(shapes) }
@@ -67,7 +69,7 @@ public fun add(container: &mut Container, shape: Shape) {
 /// Get a mutable reference to the attributes of a container.
 public fun attributes_mut(container: &mut Container): &mut VecMap<String, String> {
     match (container) {
-        Container::A(_, attributes) => attributes,
+        Container::A(_, _, attributes) => attributes,
         Container::G(_, attributes) => attributes,
         _ => abort 0,
     }
@@ -107,7 +109,11 @@ public fun to_string(container: &Container): String {
             vec_map::empty(),
             shapes.map_ref!(|shape| shape.to_string()),
         ),
-        Container::A(_href, attrs) => (b"a", *attrs, vector[]),
+        Container::A(href, shapes, attrs) => {
+            let mut attrs = *attrs;
+            attrs.insert(b"href".to_string(), *href);
+            (b"a", attrs, shapes.map_ref!(|shape| shape.to_string()))
+        },
         Container::G(shapes, attrs) => (b"g", *attrs, shapes.map_ref!(|shape| shape.to_string())),
         _ => abort ENotImplemented,
     };

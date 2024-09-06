@@ -8,8 +8,7 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet", override = true }
 
 [addresses]
-svg = "0x6c034a79647c9a2d3ca320b74c6ca59d1f5648aae0a0b96c0dfc8c4866814cdb"
-svg_upgrade_cap = "0xb95646cee9735b853a38117f2b5c1cf3b718780c136526cb3d995a8accd5eb6b"
+svg = "0x0"
 
 [dev-dependencies]
 Codec = { local = "../codec" }
