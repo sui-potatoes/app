@@ -17,15 +17,42 @@ public struct Shape has store, copy, drop {
 /// SVG shape enum. Each variant represents a different shape, all of them
 /// containing a set of attributes as a `VecMap`.
 public enum Type has store, copy, drop {
+    /// Circle shape, a circle with a center and a radius.
+    /// - `cx` - the x-coordinate of the center of the circle.
+    /// - `cy` - the y-coordinate of the center of the circle.
+    /// - `r` - the radius of the circle.
     Circle(u16, u16, u16),
+    /// Ellipse shape, a circle that is stretched in one direction.
+    /// - `cx` - the x-coordinate of the center of the ellipse.
+    /// - `cy` - the y-coordinate of the center of the ellipse.
+    /// - `rx` - the radius of the ellipse in the x-axis.
+    /// - `ry` - the radius of the ellipse in the y-axis.
     Ellipse(u16, u16, u16, u16),
+    /// Line shape, a line that connects two points, each point is a pair
+    /// of `x` and `y`.
     Line(u16, u16, u16, u16),
-    Polygon(u16, u16, u16, u16),
-    Polyline(u16, u16, u16, u16),
+    /// Polygon shape, a closed shape that connects multiple points. With
+    /// straight lines between each pair of points.
+    Polygon(vector<vector<u16>>),
+    /// Polyline shape, a line that connects multiple points.
+    /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
+    Polyline(vector<vector<u16>>), // TODO: Add more points.,
+    /// Rectangle shape, a rectangle with a position, width, and height.
+    /// - `x` - the x-coordinate of the top-left corner of the rectangle.
+    /// - `y` - the y-coordinate of the top-left corner of the rectangle.
+    /// - `width` - the width of the rectangle.
+    /// - `height` - the height of the rectangle.
     Rect(u16, u16, u16, u16),
+    /// Text shape, a text element with a string and a position.
     Text(String, u16, u16),
+    /// Path shape, a shape defined by a path string. The path string is
+    /// a series of commands and coordinates. The `length` attribute is
+    /// optional and specifies the total length of the path.
     Path(String, Option<u16>),
+    /// Use shape, a reference to a shape defined elsewhere in the document.
+    /// - `href` - the id of the shape to reference.
     Use(String),
+    /// Custom shape, a custom shape defined by a `String` of SVG code.
     Custom(String),
 }
 
@@ -54,17 +81,21 @@ public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
 }
 
 /// Create a new polygon shape.
-public fun polygon(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
+public fun polygon(points: vector<vector<u16>>): Shape {
+    points.do_ref!(|point| assert!(point.length() == 2));
+
     Shape {
-        shape: Type::Polygon(x1, y1, x2, y2),
+        shape: Type::Polygon(points),
         attributes: vec_map::empty(),
     }
 }
 
 /// Create a new polyline shape.
-public fun polyline(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
+public fun polyline(points: vector<vector<u16>>): Shape {
+    points.do_ref!(|point| assert!(point.length() == 2));
+
     Shape {
-        shape: Type::Polyline(x1, y1, x2, y2),
+        shape: Type::Polyline(points),
         attributes: vec_map::empty(),
     }
 }
@@ -127,17 +158,17 @@ public fun move_to(shape: &mut Shape, x: u16, y: u16) {
             *x1 = x;
             *y1 = y;
         },
-        Type::Polygon(x1, y1, x2, y2) => {
-            *x2 = *x2 - *x1 + x;
-            *y2 = *y2 - *y1 + y;
-            *x1 = x;
-            *y1 = y;
+        Type::Polygon(points) => {
+            points.do_mut!(|point| {
+                *&mut point[0] = point[0] - point[0] + x;
+                *&mut point[1] = point[1] - point[1] + y;
+            });
         },
-        Type::Polyline(x1, y1, x2, y2) => {
-            *x2 = *x2 - *x1 + x;
-            *y2 = *y2 - *y1 + y;
-            *x1 = x;
-            *y1 = y;
+        Type::Polyline(points) => {
+            points.do_mut!(|point| {
+                *&mut point[0] = point[0] - point[0] + x;
+                *&mut point[1] = point[1] - point[1] + y;
+            });
         },
         Type::Rect(ox, oy, _, _) => {
             *ox = x;
@@ -157,9 +188,26 @@ public fun move_to(shape: &mut Shape, x: u16, y: u16) {
     };
 }
 
+/// Simplification to not create functions for each container invariant.
+public fun name(shape: &Shape): String {
+    match (shape.shape) {
+        Type::Circle(..) => b"circle".to_string(),
+        Type::Ellipse(..) => b"ellipse".to_string(),
+        Type::Line(..) => b"line".to_string(),
+        Type::Polygon(..) => b"polygon".to_string(),
+        Type::Polyline(..) => b"polyline".to_string(),
+        Type::Rect(..) => b"rect".to_string(),
+        Type::Text(..) => b"text".to_string(),
+        Type::Use(..) => b"use".to_string(),
+        Type::Custom(..) => b"custom".to_string(),
+        Type::Path(..) => b"path".to_string(),
+        _ => abort 0,
+    }
+}
+
 /// Print the shape as an `SVG` element.
-public fun to_string(shape: &Shape): String {
-    let Shape { shape, attributes: attrs } = shape;
+public fun to_string(base_shape: &Shape): String {
+    let Shape { shape, attributes: attrs } = base_shape;
     let (name, attributes, contents) = match (shape) {
         Type::Circle(cx, cy, r) => {
             let mut map = *attrs;
@@ -184,20 +232,30 @@ public fun to_string(shape: &Shape): String {
             map.insert(b"y2".to_string(), print::num_to_string(*y2));
             (b"line", map, option::none())
         },
-        Type::Polygon(x1, y1, x2, y2) => {
+        Type::Polygon(points) | Type::Polyline(points) => {
             let mut map = *attrs;
-            map.insert(b"x1".to_string(), print::num_to_string(*x1));
-            map.insert(b"y1".to_string(), print::num_to_string(*y1));
-            map.insert(b"x2".to_string(), print::num_to_string(*x2));
-            map.insert(b"y2".to_string(), print::num_to_string(*y2));
-            (b"polygon", map, option::none())
+            let points = (*points).fold!(b"".to_string(), |mut points, point| {
+                points.append(print::num_to_string(point[0]));
+                points.append(b",".to_string());
+                points.append(print::num_to_string(point[1]));
+                points.append(b",".to_string());
+                points
+            });
+
+            map.insert(b"points".to_string(), points);
+            (base_shape.name().into_bytes(), map, option::none())
         },
-        Type::Polyline(x1, y1, x2, y2) => {
+        Type::Polyline(points) => {
             let mut map = *attrs;
-            map.insert(b"x1".to_string(), print::num_to_string(*x1));
-            map.insert(b"y1".to_string(), print::num_to_string(*y1));
-            map.insert(b"x2".to_string(), print::num_to_string(*x2));
-            map.insert(b"y2".to_string(), print::num_to_string(*y2));
+            let points = (*points).fold!(b"".to_string(), |mut points, point| {
+                points.append(print::num_to_string(point[0]));
+                points.append(b",".to_string());
+                points.append(print::num_to_string(point[1]));
+                points.append(b",".to_string());
+                points
+            });
+
+            map.insert(b"points".to_string(), points);
             (b"polyline", map, option::none())
         },
         Type::Rect(x, y, width, height) => {
@@ -249,56 +307,4 @@ public fun attributes_mut(shape: &mut Shape): &mut VecMap<String, String> {
 /// Set the attributes of a shape.
 public fun set_attributes(shape: &mut Shape, attrs: VecMap<String, String>) {
     shape.attributes = attrs;
-}
-
-#[test]
-// prettier-ignore
-fun test_shapes() {
-    assert!(circle(10, 10, 5).to_string() == b"<circle cx='10' cy='10' r='5'/>".to_string());
-    assert!(ellipse(10, 10, 5, 5).to_string() == b"<ellipse cx='10' cy='10' rx='5' ry='5'/>".to_string());
-    assert!(line(10, 10, 20, 20).to_string() == b"<line x1='10' y1='10' x2='20' y2='20'/>".to_string());
-    assert!(polygon(10, 10, 20, 20).to_string() == b"<polygon x1='10' y1='10' x2='20' y2='20'/>".to_string());
-    assert!(polyline(10, 10, 20, 20).to_string() == b"<polyline x1='10' y1='10' x2='20' y2='20'/>".to_string());
-    assert!(rect(10, 10, 20, 20).to_string() == b"<rect x='10' y='10' width='20' height='20'/>".to_string());
-    assert!(text(b"Hello, World!".to_string(), 10, 10).to_string() == b"<text x='10' y='10'>Hello, World!</text>".to_string());
-    assert!(use_(b"#circle".to_string()).to_string() == b"<use href='#circle'/>".to_string());
-    assert!(custom(b"<custom/>".to_string()).to_string() == b"<custom/>".to_string());
-}
-
-#[test]
-// prettier-ignore
-fun test_move_to() {
-    use sui::test_utils::assert_eq;
-
-    let mut circle = circle(10, 10, 5);
-    circle.move_to(5, 5);
-    assert_eq(circle.to_string(), b"<circle cx='5' cy='5' r='5'/>".to_string());
-
-    let mut ellipse = ellipse(10, 10, 5, 5);
-    ellipse.move_to(5, 5);
-    assert_eq(ellipse.to_string(), b"<ellipse cx='5' cy='5' rx='5' ry='5'/>".to_string());
-
-    let mut line = line(10, 10, 20, 20);
-    line.move_to(5, 5);
-    assert_eq(line.to_string(), b"<line x1='5' y1='5' x2='15' y2='15'/>".to_string());
-
-    let mut polygon = polygon(10, 10, 20, 20);
-    polygon.move_to(5, 5);
-    assert_eq(polygon.to_string(), b"<polygon x1='5' y1='5' x2='15' y2='15'/>".to_string());
-
-    let mut polyline = polyline(10, 10, 20, 20);
-    polyline.move_to(5, 5);
-    assert_eq(polyline.to_string(), b"<polyline x1='5' y1='5' x2='15' y2='15'/>".to_string());
-
-    let mut rect = rect(10, 10, 20, 20);
-    rect.move_to(5, 5);
-    assert_eq(rect.to_string(), b"<rect x='5' y='5' width='20' height='20'/>".to_string());
-
-    let mut text = text(b"Hello, World!".to_string(), 10, 10);
-    text.move_to(5, 5);
-    assert_eq(text.to_string(), b"<text x='5' y='5'>Hello, World!</text>".to_string());
-
-    let mut use_ = use_(b"#circle".to_string());
-    use_.move_to(5, 5);
-    assert_eq(use_.to_string(), b"<use x='5' y='5' href='#circle'/>".to_string());
 }

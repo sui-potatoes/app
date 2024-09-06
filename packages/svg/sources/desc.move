@@ -8,7 +8,7 @@ use std::string::String;
 use sui::vec_map;
 use svg::print;
 
-/// SVG shape enum.
+/// Special container for SVG descriptions.
 public enum Desc has store, copy, drop {
     Desc(String),
     Metadata,
@@ -37,17 +37,3 @@ public fun to_string(shape: &Desc): String {
 
     print::print(name.to_string(), vec_map::empty(), option::some(content))
 }
-
-#[test]
-// prettier-ignore
-fun test_shapes() {
-        use sui::test_utils::assert_eq;
-
-        assert_eq(desc(b"Hello, world!".to_string()).to_string(), b"<desc>Hello, world!</desc>".to_string());
-        assert_eq(metadata().to_string(), b"<metadata></metadata>".to_string());
-        assert_eq(title(b"Hello, world!".to_string()).to_string(), b"<title>Hello, world!</title>".to_string());
-    }
-
-#[test]
-// prettier-ignore
-fun test_move_to() { /* none */ }

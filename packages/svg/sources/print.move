@@ -18,15 +18,13 @@ public fun print(
     let (keys, values) = attributes.into_keys_values();
     let length = keys.length();
     if (length > 0) svg.append(b" ".to_string());
-    length.do!(
-        |i| {
-            svg.append(keys[i]);
-            svg.append(b"='".to_string());
-            svg.append(values[i]);
-            if (i < length - 1) svg.append(b"' ".to_string())
-            else svg.append(b"'".to_string())
-        },
-    );
+    length.do!(|i| {
+        svg.append(keys[i]);
+        svg.append(b"='".to_string());
+        svg.append(values[i]);
+        if (i < length - 1) svg.append(b"' ".to_string())
+        else svg.append(b"'".to_string())
+    });
 
     if (elements.is_none()) {
         svg.append(b"/>".to_string());
