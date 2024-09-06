@@ -1,3 +1,6 @@
+// Copyright (c) Sui Potatoes
+// SPDX-License-Identifier: MIT
+
 import "./character.css";
 import { useEffect, useState } from "react";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
@@ -76,7 +79,7 @@ export const COLOURS = [
     "c28569",
 ];
 
-export function App() {
+export default function App() {
     const { id: urlId } = useParams();
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();

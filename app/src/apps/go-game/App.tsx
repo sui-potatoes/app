@@ -1,3 +1,6 @@
+// Copyright (c) Sui Potatoes
+// SPDX-License-Identifier: MIT
+
 import "./go-game.css";
 import { Board as PlayableBoard } from "./Board";
 import { useEffect, useState } from "react";
@@ -48,7 +51,7 @@ const Game = bcs.struct("Game", {
     board: Board,
 });
 
-export function App() {
+export default function App() {
     const { id: urlGameId } = useParams();
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();

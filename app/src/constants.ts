@@ -1,3 +1,6 @@
+// Copyright (c) Sui Potatoes
+// SPDX-License-Identifier: MIT
+
 export const NETWORK = "testnet";
 export const GOGAME_PACKAGE_ID =
     "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e";
