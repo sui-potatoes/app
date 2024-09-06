@@ -1,0 +1,39 @@
+/* I want to use tailwind values like text-lg for elements */
+
+.markdown h1 {
+    @apply text-2xl;
+    @apply mb-10;
+}
+
+.markdown h2 {
+    @apply text-xl;
+    @apply mt-10 mb-5;
+}
+
+.markdown p {
+    @apply text-base;
+    @apply my-5;
+}
+
+.markdown a {
+    @apply text-blue-500;
+    @apply hover:underline;
+    @apply normal-case;
+}
+
+.markdown ul {
+    @apply list-inside;
+    @apply ml-5;
+}
+
+.markdown ul p {
+    @apply my-0;
+}
+
+.markdown pre {
+    background: var(--code-color);
+    @apply p-5;
+    @apply rounded-md;
+    @apply my-5;
+    @apply overflow-x-auto;
+}

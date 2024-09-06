@@ -1,4 +1,5 @@
-//
+// Copyright (c) Sui Potatoes
+// SPDX-License-Identifier: MIT
 
 type Matrix = number[][];
 

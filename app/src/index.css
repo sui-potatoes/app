@@ -2,7 +2,191 @@
 @tailwind components;
 @tailwind utilities;
 
-
-button{
+button {
     @apply disabled:opacity-30 disabled:!cursor-not-allowed;
+}
+
+/* I want to create variables for colours, text color, navbar colour and so on */
+/* I want to create a global style for the body */
+:root {
+    --text-color: #000;
+    --background-color: #fff;
+    --button-color: #eee;
+    --disabled-color: #aaa;
+    --code-color: #eee;
+}
+
+.dark-theme * {
+    --text-color: #fff;
+    --background-color: #000;
+    --button-color: #333;
+    --disabled-color: #666;
+    --code-color: #212121;
+}
+
+body {
+    font-family: "Rubik", sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+.switch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--button-color);
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.container p img {
+    text-align: center;
+}
+
+.md-show {
+    display: block !important;
+}
+.sm-show {
+    display: none !important;
+}
+
+.sidebar ul > li::before {
+    content: "> ";
+}
+
+@media screen and (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .md-show {
+        display: none !important;
+    }
+    .sm-show {
+        display: block !important;
+    }
+
+    .sidebar {
+        text-align: center;
+    }
+
+    .sidebar ul > li::before {
+        content: "";
+    }
+}
+
+.sidebar {
+    align-items: center;
+    padding: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li,
+.sidebar ul li a {
+    color: var(--text-color);
+    padding: 0px;
+    margin-bottom: 20px;
+    font-weight: normal;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.sidebar ul li a:hover {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.sidebar ul a.active {
+    /* font-weight: bold; */
+    cursor: none;
+    text-decoration: underline;
+}
+
+.content {
+    flex: 7;
+    padding: 20px;
+}
+
+.controls,
+.advanced {
+    margin-bottom: 20px;
+}
+
+.control-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.buttons button {
+    background-color: var(--button-color);
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.wallet {
+    font-weight: normal;
+    /* padding: 5px; */
+    margin-bottom: 20px;
+}
+
+.connect {
+    color: var(--text-color);
+    text-decoration: underline;
+    text-transform: uppercase;
+}
+.connect button,
+.connect button * {
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    text-align: left !important;
+    text-transform: uppercase !important;
+    box-shadow: none !important;
+    color: var(--text-color) !important;
+    text-decoration: underline !important;
+    font-size: 16px;
+}
+
+.connect:hover {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Global button styles */
+
+a,
+button {
+    color: var(--text-color);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-transform: capitalize;
+    text-decoration: none;
+}
+
+a:hover,
+button:hover {
+    color: var(--text-color);
+    text-decoration: underline;
+}
+
+button:disabled {
+    color: var(--disabled-color);
+    cursor: not-allowed;
+    /* text-decoration: underline !important; */
 }

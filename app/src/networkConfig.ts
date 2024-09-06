@@ -1,3 +1,6 @@
+// Copyright (c) Sui Potatoes
+// SPDX-License-Identifier: MIT
+
 import { getFullnodeUrl } from "@mysten/sui/client";
 import {
     GOGAME_PACKAGE_ID,
