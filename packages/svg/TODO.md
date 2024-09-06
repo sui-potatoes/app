@@ -1,0 +1,68 @@
+# TODO
+
+
+## Attributes
+
+- [x] A
+- [ ] Animate
+- [ ] AnimateMotion
+- [ ] AnimateTransform
+- [x] Circle
+- [ ] ClipPath
+- [x] Defs
+- [x] Desc
+- [x] Ellipse
+- [ ] FeBlend
+- [ ] FeColorMatrix
+- [ ] FeComponentTransfer
+- [ ] FeComposite
+- [ ] FeConvolveMatrix
+- [ ] FeDiffuseLighting
+- [ ] FeDisplacementMap
+- [ ] FeDistantLight
+- [ ] FeDropShadow
+- [ ] FeFlood
+- [ ] FeFuncA
+- [ ] FeFuncB
+- [ ] FeFuncG
+- [ ] FeFuncR
+- [ ] FeGaussianBlur
+- [ ] FeImage
+- [ ] FeMerge
+- [ ] FeMergeNode
+- [ ] FeMorphology
+- [ ] FeOffset
+- [ ] FePointLight
+- [ ] FeSpecularLighting
+- [ ] FeSpotLight
+- [ ] FeTile
+- [ ] FeTurbulence
+- [ ] Filter
+- [ ] ForeignObject
+- [x] G
+- [ ] Image
+- [ ] Line
+- [ ] LinearGradient
+- [ ] Marker
+- [ ] Mask
+- [ ] Metadata
+- [ ] Mpath
+- [x] Path
+- [ ] Pattern
+- [ ] Polygon
+- [ ] Polyline
+- [ ] RadialGradient
+- [x] Rect
+- [ ] Script
+- [ ] Set
+- [ ] Stop
+- [ ] Style
+- [ ] Svg
+- [ ] Switch
+- [ ] Symbol
+- [ ] Text
+- [ ] TextPath
+- [ ] Title
+- [ ] Tspan
+- [ ] Use
+- [ ] View

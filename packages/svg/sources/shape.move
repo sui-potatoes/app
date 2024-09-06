@@ -8,6 +8,9 @@ use std::string::String;
 use sui::vec_map::{Self, VecMap};
 use svg::print;
 
+#[error]
+const ENotImplemented: vector<u8> = b"This shape is not implemented yet.";
+
 /// SVG shape struct, contains a shape type and a set of attributes.
 public struct Shape has store, copy, drop {
     shape: Type,
@@ -36,12 +39,15 @@ public enum Type has store, copy, drop {
     Polygon(vector<vector<u16>>),
     /// Polyline shape, a line that connects multiple points.
     /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
-    Polyline(vector<vector<u16>>), // TODO: Add more points.,
+    Polyline(vector<vector<u16>>),
     /// Rectangle shape, a rectangle with a position, width, and height.
     /// - `x` - the x-coordinate of the top-left corner of the rectangle.
     /// - `y` - the y-coordinate of the top-left corner of the rectangle.
     /// - `width` - the width of the rectangle.
     /// - `height` - the height of the rectangle.
+    /// - `rx` - the radius of the rectangle in the x-axis.
+    /// - `ry` - the radius of the rectangle in the y-axis.
+    /// - `pathLength` - the total length of the path.
     Rect(u16, u16, u16, u16),
     /// Text shape, a text element with a string and a position.
     Text(String, u16, u16),
@@ -81,23 +87,13 @@ public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
 }
 
 /// Create a new polygon shape.
-public fun polygon(points: vector<vector<u16>>): Shape {
-    points.do_ref!(|point| assert!(point.length() == 2));
-
-    Shape {
-        shape: Type::Polygon(points),
-        attributes: vec_map::empty(),
-    }
+public fun polygon(_points: vector<vector<u16>>): Shape {
+    abort ENotImplemented
 }
 
 /// Create a new polyline shape.
-public fun polyline(points: vector<vector<u16>>): Shape {
-    points.do_ref!(|point| assert!(point.length() == 2));
-
-    Shape {
-        shape: Type::Polyline(points),
-        attributes: vec_map::empty(),
-    }
+public fun polyline(_points: vector<vector<u16>>): Shape {
+    abort ENotImplemented
 }
 
 /// Create a new rectangle shape.
@@ -158,18 +154,8 @@ public fun move_to(shape: &mut Shape, x: u16, y: u16) {
             *x1 = x;
             *y1 = y;
         },
-        Type::Polygon(points) => {
-            points.do_mut!(|point| {
-                *&mut point[0] = point[0] - point[0] + x;
-                *&mut point[1] = point[1] - point[1] + y;
-            });
-        },
-        Type::Polyline(points) => {
-            points.do_mut!(|point| {
-                *&mut point[0] = point[0] - point[0] + x;
-                *&mut point[1] = point[1] - point[1] + y;
-            });
-        },
+        Type::Polygon(_points) => abort ENotImplemented,
+        Type::Polyline(_points) => abort ENotImplemented,
         Type::Rect(ox, oy, _, _) => {
             *ox = x;
             *oy = y;
@@ -194,8 +180,8 @@ public fun name(shape: &Shape): String {
         Type::Circle(..) => b"circle".to_string(),
         Type::Ellipse(..) => b"ellipse".to_string(),
         Type::Line(..) => b"line".to_string(),
-        Type::Polygon(..) => b"polygon".to_string(),
-        Type::Polyline(..) => b"polyline".to_string(),
+        Type::Polygon(..) => abort ENotImplemented,
+        Type::Polyline(..) => abort ENotImplemented,
         Type::Rect(..) => b"rect".to_string(),
         Type::Text(..) => b"text".to_string(),
         Type::Use(..) => b"use".to_string(),
@@ -232,31 +218,11 @@ public fun to_string(base_shape: &Shape): String {
             map.insert(b"y2".to_string(), print::num_to_string(*y2));
             (b"line", map, option::none())
         },
-        Type::Polygon(points) | Type::Polyline(points) => {
-            let mut map = *attrs;
-            let points = (*points).fold!(b"".to_string(), |mut points, point| {
-                points.append(print::num_to_string(point[0]));
-                points.append(b",".to_string());
-                points.append(print::num_to_string(point[1]));
-                points.append(b",".to_string());
-                points
-            });
-
-            map.insert(b"points".to_string(), points);
-            (base_shape.name().into_bytes(), map, option::none())
+        Type::Polygon(_points) => {
+            abort ENotImplemented
         },
-        Type::Polyline(points) => {
-            let mut map = *attrs;
-            let points = (*points).fold!(b"".to_string(), |mut points, point| {
-                points.append(print::num_to_string(point[0]));
-                points.append(b",".to_string());
-                points.append(print::num_to_string(point[1]));
-                points.append(b",".to_string());
-                points
-            });
-
-            map.insert(b"points".to_string(), points);
-            (b"polyline", map, option::none())
+        Type::Polyline(_points) => {
+            abort ENotImplemented
         },
         Type::Rect(x, y, width, height) => {
             let mut map = *attrs;
