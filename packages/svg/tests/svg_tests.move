@@ -5,8 +5,6 @@ module svg::svg_tests;
 
 use svg::{container, macros::{add_class, add_attribute}, shape, svg};
 
-const ENotImplemented: u64 = 0;
-
 #[test]
 // character is a 9x13 rectangle with head, body, hands, and legs
 fun test_character() {
@@ -45,9 +43,4 @@ fun test_character() {
     svg.root(vector[head, body]).add(hands).add(legs);
     std::debug::print(&svg.to_string().as_bytes().length());
     svg.debug()
-}
-
-#[test, expected_failure(abort_code = ::svg::svg_tests::ENotImplemented)]
-fun test_svg_fail() {
-    abort ENotImplemented
 }

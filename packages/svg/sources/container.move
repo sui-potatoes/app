@@ -75,6 +75,24 @@ public fun attributes_mut(container: &mut Container): &mut VecMap<String, String
     }
 }
 
+/// Map attributes of the `Container`.
+///
+/// ```rust
+/// let mut container = container::g(vector[
+///    shape::circle(5).move_to(10, 10),
+///    shape::ellipse(30, 30, 10, 5),
+/// ]).map_attributes!(|attrs| {
+///    attrs.insert(b"fill".to_string(), b"red".to_string());
+///    attrs.insert(b"stroke".to_string(), b"black".to_string());
+/// });
+/// ```
+public macro fun map_attributes($self: Container, $f: |&mut VecMap<String, String>|): Container {
+    let mut self = $self;
+    let attributes = self.attributes_mut();
+    $f(attributes);
+    self
+}
+
 /// Simplification to not create functions for each container invariant.
 public fun name(container: &Container): String {
     match (container) {
@@ -120,3 +138,7 @@ public fun to_string(container: &Container): String {
 
     print::print(name.to_string(), attributes, option::some(elements))
 }
+
+#[test_only]
+/// Print the `Container` as a string to console in tests.
+public fun debug(self: &Container) { std::debug::print(&to_string(self)); }

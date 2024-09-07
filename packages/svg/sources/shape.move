@@ -13,9 +13,13 @@ const ENotImplemented: vector<u8> = b"This shape is not implemented yet.";
 
 /// SVG shape struct, contains a shape type and a set of attributes.
 public struct Shape has store, copy, drop {
+    /// The shape type, such as a circle, rectangle, or path.
     shape: ShapeType,
+    /// A set of attributes for the shape.
     attributes: VecMap<String, String>,
+    /// An optional animation to apply to the shape.
     animation: Option<Animation>,
+    /// An optional position for the shape, changed in the `move_to` function.
     position: Option<Point>,
 }
 
@@ -24,14 +28,16 @@ public struct Shape has store, copy, drop {
 public enum ShapeType has store, copy, drop {
     /// Circle shape, a circle with a center and a radius.
     ///
-    /// Owned properties:
+    /// **Element:** `<circle>`
+    ///
+    /// **Own properties:**
     /// - `r` - the radius of the circle.
     ///
-    /// Inherited properties:
+    /// **Inherited properties:**
     /// - `cx` - the x-coordinate of the circle.
     /// - `cy` - the y-coordinate of the circle.
     ///
-    /// Extended properties:
+    /// **Extended properties:**
     /// - `pathLength` - the total length of the path.
     /// - `transform` - a transformation to apply to the circle.
     ///
@@ -39,16 +45,18 @@ public enum ShapeType has store, copy, drop {
     Circle(u16),
     /// Ellipse shape, a circle that is stretched in one direction.
     ///
-    /// Owned properties:
+    /// **Element:** `<ellipse>`
+    ///
+    /// **Own properties:**
     /// - `pc` - the point of the center of the ellipse.
     /// - `rx` - the radius of the ellipse in the x-axis.
     /// - `ry` - the radius of the ellipse in the y-axis.
     ///
-    /// Inherited properties:
+    /// **Inherited properties:**
     /// - `x` - the x-coordinate of the ellipse.
     /// - `y` - the y-coordinate of the ellipse.
     ///
-    /// Extended properties:
+    /// **Extended properties:**
     /// - `pathLength` - the total length of the path.
     /// - `transform` - a transformation to apply to the ellipse.
     ///
@@ -57,33 +65,49 @@ public enum ShapeType has store, copy, drop {
     /// Line shape, a line that connects two points, each point is a pair
     /// of `x` and `y`.
     ///
-    /// Owned properties:
+    /// **Element:** `<line>`
+    ///
+    /// **Own properties:**
     /// - p0 - the first point.
     /// - p1 - the second point.
     ///
-    /// Extended properties:
+    /// **Extended properties:**
     /// - `pathLength` - the total length of the path.
     ///
     /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
     Line(Point, Point),
     /// Polygon shape, a closed shape that connects multiple points. With
     /// straight lines between each pair of points.
-    Polygon(vector<vector<u16>>),
-    /// Polyline shape, a line that connects multiple points.
     ///
-    /// Owned properties:
+    /// **Element:** `<polygon>`
+    ///
+    /// **Own properties:**
     /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
     ///
-    /// Extended properties:
+    /// **Inherited properties:**
+    /// - `x` - the x-coordinate of the polygon.
+    /// - `y` - the y-coordinate of the polygon.
+    ///
+    /// **Extended properties:**
+    /// - `pathLength` - the total length of the path.
+    Polygon(vector<Point>),
+    /// Polyline shape, a line that connects multiple points.
+    ///
+    /// **Own properties:**
+    /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
+    ///
+    /// **Extended properties:**
     /// - `pathLength` - the total length of the path.
     Polyline(vector<Point>),
     /// Rectangle shape, a rectangle with a position, width, and height.
     ///
-    /// Owned properties:
+    /// **Element:** `<rect>`
+    ///
+    /// **Own properties:**
     /// - `width` - the width of the rectangle.
     /// - `height` - the height of the rectangle.
     ///
-    /// Extended properties:
+    /// **Extended properties:**
     /// - `rx` - the radius of the rectangle in the x-axis.
     /// - `ry` - the radius of the rectangle in the y-axis.
     /// - `pathLength` - the total length of the path.
@@ -92,29 +116,60 @@ public enum ShapeType has store, copy, drop {
     Rect(u16, u16),
     /// Text shape, a text element with a string and a position.
     ///
-    /// Owned properties:
-    /// - `text` - the text to display.
+    /// **Element:** `<text>`
     ///
-    /// Inherited properties:
+    /// **Own properties:**
+    /// - `text` - the text to display.
+    /// - `path` - an optional `TextPath` element.
+    ///
+    /// **Inherited properties:**
     /// - `x` - the x-coordinate of the text.
     /// - `y` - the y-coordinate of the text.
     ///
-    /// Extended properties:
+    /// **Extended properties:**
     /// - `dx` - the x-offset of the text.
     /// - `dy` - the y-offset of the text.
     ///
     /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
     Text(String),
+    /// Text with text path shape, a text element with a string and a path.
+    ///
+    /// **Element:** `<text><textPath>` (group)
+    ///
+    /// **Own properties:**
+    /// - `text` - the text to display.
+    /// - `path` - the path to follow.
+    ///
+    /// **Inherited properties:**
+    /// - `x` - the x-coordinate of the text.
+    /// - `y` - the y-coordinate of the text.
+    ///
+    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/textPath
+    TextWithTextPath { text: String, href: String },
     /// Path shape, a shape defined by a path string. The path string is
     /// a series of commands and coordinates. The `length` attribute is
     /// optional and specifies the total length of the path.
+    ///
+    /// **Element:** `<path>`
+    ///
+    /// **Own properties:**
+    /// - `path` - the path string.
+    /// - `length` - the total length of the path.
+    ///
+    /// **Inherited properties:**
+    /// - `x` - the x-coordinate of the path.
+    /// - `y` - the y-coordinate of the path.
+    ///
+    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
     Path(String, Option<u16>),
     /// Use shape, a reference to a shape defined elsewhere in the document.
     ///
-    /// Owned properties:
+    /// **Element:** `<use>`
+    ///
+    /// **Own properties:**
     /// - `href` - the id of the shape to reference.
     ///
-    /// Inherited properties:
+    /// **Inherited properties:**
     /// - `x` - the x-coordinate of the shape.
     /// - `y` - the y-coordinate of the shape.
     ///
@@ -122,9 +177,9 @@ public enum ShapeType has store, copy, drop {
     Use(String),
     /// Custom string, allows for custom expressions passed as a string.
     ///
-    /// Owned properties: none
-    /// Inherited properties: none
-    /// Extended properties: none
+    /// ** Ownedproperties: none**
+    /// **Inherited properties:** none
+    /// **Extended properties: none**
     Custom(String),
 }
 
@@ -307,6 +362,21 @@ public fun to_string(base_shape: &Shape): String {
             (b"rect", option::none())
         },
         ShapeType::Text(text) => (b"text", option::some(vector[*text])),
+        ShapeType::TextWithTextPath { text, href } => {
+            attributes.insert(b"href".to_string(), *href);
+
+            // print the textPath element as a string
+            let text_path = print::print(
+                b"textPath".to_string(),
+                attributes,
+                option::some(vector[*text]),
+            );
+
+            // unset all attributes for the text element
+            attributes = vec_map::empty();
+
+            (b"text", option::some(vector[text_path]))
+        },
         ShapeType::Use(href) => {
             attributes.insert(b"href".to_string(), *href);
             (b"use", option::none())
@@ -353,3 +423,7 @@ public fun set_attributes(shape: &mut Shape, attrs: VecMap<String, String>) {
 public fun add_animation(shape: &mut Shape, animation: Animation) {
     shape.animation = option::some(animation);
 }
+
+#[test_only]
+/// Print the `Shape` as a string to console in tests.
+public fun debug(self: &Shape) { std::debug::print(&to_string(self)); }

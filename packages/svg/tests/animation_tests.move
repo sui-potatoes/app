@@ -153,3 +153,19 @@ fun test_set() {
     );
 
 }
+
+#[test]
+// Test custom animation shape.
+fun test_custom() {
+    let animation = animation::custom(b"<custom />".to_string());
+    let mut rect = shape::rect(10, 10);
+    rect.add_animation(animation);
+
+    let mut svg = svg::svg(vector[0, 0, 10, 10]);
+    svg.root(vector[rect]);
+
+    assert_eq!(
+        svg.to_string(),
+        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10'><custom /></rect></svg>".to_string()
+    );
+}
