@@ -175,6 +175,43 @@ public enum ShapeType has store, copy, drop {
     ///
     /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/use
     Use(String),
+    /// Part of the `defs` container, a shape that is not a standard SVG shape.
+    ///
+    /// **Element:** `<linearGradient>`
+    ///
+    /// **Own properties:**
+    /// - `stops` - a list of stop elements.
+    ///
+    /// **Inherited properties:** none
+    ///
+    /// **Extended properties:**
+    /// - `x1` - the x-coordinate of the start of the gradient.
+    /// - `y1` - the y-coordinate of the start of the gradient.
+    /// - `x2` - the x-coordinate of the end of the gradient.
+    /// - `y2` - the y-coordinate of the end of the gradient.
+    ///
+    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/linearGradient
+    LinearGradient {
+        stops: vector<Stop>,
+    },
+    /// Part of the `defs` container, a shape that is not a standard SVG shape.
+    /// A radial gradient is a gradient that starts from a center point and
+    /// spreads out in all directions.
+    ///
+    /// **Element:** `<radialGradient>`
+    ///
+    /// **Inherited properties:** none
+    ///
+    /// **Own properties:**
+    /// - `stops` - a list of stop elements.
+    ///
+    /// **Extended properties:**
+    /// - `cx` - the x-coordinate of the center of the gradient.
+    /// - `cy` - the y-coordinate of the center of the gradient.
+    /// - `r` - the radius of the gradient.
+    RadialGradient {
+        stops: vector<Stop>,
+    },
     /// Custom string, allows for custom expressions passed as a string.
     ///
     /// ** Ownedproperties: none**
@@ -182,6 +219,9 @@ public enum ShapeType has store, copy, drop {
     /// **Extended properties: none**
     Custom(String),
 }
+
+/// A stop element for a gradient nodes (`linearGradient`, `radialGradient`).
+public struct Stop has store, copy, drop { offset: String, color: String }
 
 /// Create a new circle shape.
 public fun circle(r: u16): Shape {
@@ -263,6 +303,26 @@ public fun use_(href: String): Shape {
     }
 }
 
+/// Create a new `<linearGradient>` shape.
+public fun linear_gradient(stops: vector<Stop>): Shape {
+    Shape {
+        shape: ShapeType::LinearGradient { stops },
+        attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
+    }
+}
+
+/// Create a new `<radialGradient>` shape.
+public fun radial_gradient(stops: vector<Stop>): Shape {
+    Shape {
+        shape: ShapeType::RadialGradient { stops },
+        attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
+    }
+}
+
 /// Create a new custom shape.
 public fun custom(text: String): Shape {
     Shape {
@@ -271,6 +331,22 @@ public fun custom(text: String): Shape {
         animation: option::none(),
         position: option::none(),
     }
+}
+
+/// Create a new `<stop>` element for a gradient node (`linearGradient`, `radialGradient`).
+public fun stop(offset: vector<u8>, color: vector<u8>): Stop {
+    Stop { offset: offset.to_string(), color: color.to_string() }
+}
+
+/// Adds a `<stop>` element to a gradient.
+public fun add_stop(gradient: &mut Shape, offset: String, color: String) {
+    let stops = match (&mut gradient.shape) {
+        ShapeType::LinearGradient { stops } => stops,
+        ShapeType::RadialGradient { stops } => stops,
+        _ => abort 0,
+    };
+
+    stops.push_back(Stop { offset, color });
 }
 
 /// Move a shape.
@@ -391,6 +467,26 @@ public fun to_string(base_shape: &Shape): String {
             );
             (b"path", option::none())
         },
+        ShapeType::LinearGradient { stops } => {
+            let stops = stops.map_ref!(|stop| {
+                let mut attributes = vec_map::empty();
+                attributes.insert(b"offset".to_string(), stop.offset);
+                attributes.insert(b"stop-color".to_string(), stop.color);
+                print::print(b"stop".to_string(), attributes, option::none())
+            });
+
+            (b"linearGradient", option::some(stops))
+        },
+        ShapeType::RadialGradient { stops } => {
+            let stops = stops.map_ref!(|stop| {
+                let mut attributes = vec_map::empty();
+                attributes.insert(b"offset".to_string(), stop.offset);
+                attributes.insert(b"stop-color".to_string(), stop.color);
+                print::print(b"stop".to_string(), attributes, option::none())
+            });
+
+            (b"radialGradient", option::some(stops))
+        },
         ShapeType::Custom(text) => return *text,
     };
 
@@ -422,6 +518,21 @@ public fun set_attributes(shape: &mut Shape, attrs: VecMap<String, String>) {
 /// Add an animation to a shape.
 public fun add_animation(shape: &mut Shape, animation: Animation) {
     shape.animation = option::some(animation);
+}
+
+/// Map over the attributes of the animation.
+///
+/// ```rust
+/// let mut animation = shape::circle(10).move_to(20, 20).map_attributes!(|attrs| {
+///    attrs.insert(b"fill".to_string(), b"red".to_string());
+///    attrs.insert(b"stroke".to_string(), b"black".to_string());
+/// });
+/// ```
+public macro fun map_attributes($self: Shape, $f: |&mut VecMap<String, String>|): Shape {
+    let mut self = $self;
+    let attributes = self.attributes_mut();
+    $f(attributes);
+    self
 }
 
 #[test_only]
