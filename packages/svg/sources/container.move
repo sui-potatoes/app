@@ -30,7 +30,7 @@ public enum Container has store, copy, drop {
     // Group container, `<g>`, to group shapes and apply transformations.
     G(vector<Shape>, VecMap<String, String>),
     // Marker container, `<marker>`, to define a marker symbol.
-    _Marker(vector<Shape>),
+    Marker(vector<Shape>),
 }
 
 /// Create a new description container, only contains metadata.
@@ -96,11 +96,13 @@ public macro fun map_attributes($self: Container, $f: |&mut VecMap<String, Strin
 /// Simplification to not create functions for each container invariant.
 public fun name(container: &Container): String {
     match (container) {
-        Container::Desc(..) => b"desc".to_string(),
-        Container::Root(..) => b"root".to_string(),
+        Container::Desc(..) => b"".to_string(),
+        Container::Root(..) => b"".to_string(),
         Container::A(..) => b"a".to_string(),
         Container::G(..) => b"g".to_string(),
         Container::Defs(..) => b"defs".to_string(),
+        Container::Marker(..) => b"marker".to_string(),
+        // Container::Symbol(..) => b"symbol".to_string(),
         _ => abort 0,
     }
 }
@@ -129,7 +131,10 @@ public fun to_string(container: &Container): String {
         ),
         Container::A(href, shapes, attrs) => {
             let mut attrs = *attrs;
-            attrs.insert(b"href".to_string(), *href);
+            if (href.length() > 0) {
+                attrs.insert(b"href".to_string(), *href);
+            };
+
             (b"a", attrs, shapes.map_ref!(|shape| shape.to_string()))
         },
         Container::G(shapes, attrs) => (b"g", *attrs, shapes.map_ref!(|shape| shape.to_string())),

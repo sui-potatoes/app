@@ -74,6 +74,23 @@ public fun g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
     svg.add(container::g(shapes))
 }
 
+/// Create a `<defs>` container and place `Shape`s in it.
+///
+/// ```rust
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// svg.defs(vector[
+///     shape::linear_gradient(vector[
+///         shape::stop(b"10%", b"gold"),
+///         shape::stop(b"90%", b"red"),
+///     ]).map_attributes!(|attrs| {
+///        attrs.insert(b"id".to_string(), b"grad1".to_string());
+///     }),
+/// ]);
+/// svg.to_string();
+public fun defs(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
+    svg.add(container::defs(shapes))
+}
+
 /// Get mutable access to the attributes of the SVG. This is useful for adding
 /// custom attributes directly to the `<svg>` element.
 ///
