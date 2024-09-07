@@ -6,83 +6,155 @@ module svg::shape;
 
 use std::string::String;
 use sui::vec_map::{Self, VecMap};
-use svg::print;
+use svg::{animation::Animation, point::{Self, Point}, print};
 
 #[error]
 const ENotImplemented: vector<u8> = b"This shape is not implemented yet.";
 
 /// SVG shape struct, contains a shape type and a set of attributes.
 public struct Shape has store, copy, drop {
-    shape: Type,
+    shape: ShapeType,
     attributes: VecMap<String, String>,
+    animation: Option<Animation>,
+    position: Option<Point>,
 }
 
 /// SVG shape enum. Each variant represents a different shape, all of them
 /// containing a set of attributes as a `VecMap`.
-public enum Type has store, copy, drop {
+public enum ShapeType has store, copy, drop {
     /// Circle shape, a circle with a center and a radius.
-    /// - `cx` - the x-coordinate of the center of the circle.
-    /// - `cy` - the y-coordinate of the center of the circle.
+    ///
+    /// Owned properties:
     /// - `r` - the radius of the circle.
-    Circle(u16, u16, u16),
+    ///
+    /// Inherited properties:
+    /// - `cx` - the x-coordinate of the circle.
+    /// - `cy` - the y-coordinate of the circle.
+    ///
+    /// Extended properties:
+    /// - `pathLength` - the total length of the path.
+    /// - `transform` - a transformation to apply to the circle.
+    ///
+    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle
+    Circle(u16),
     /// Ellipse shape, a circle that is stretched in one direction.
-    /// - `cx` - the x-coordinate of the center of the ellipse.
-    /// - `cy` - the y-coordinate of the center of the ellipse.
+    ///
+    /// Owned properties:
+    /// - `pc` - the point of the center of the ellipse.
     /// - `rx` - the radius of the ellipse in the x-axis.
     /// - `ry` - the radius of the ellipse in the y-axis.
-    Ellipse(u16, u16, u16, u16),
+    ///
+    /// Inherited properties:
+    /// - `x` - the x-coordinate of the ellipse.
+    /// - `y` - the y-coordinate of the ellipse.
+    ///
+    /// Extended properties:
+    /// - `pathLength` - the total length of the path.
+    /// - `transform` - a transformation to apply to the ellipse.
+    ///
+    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/ellipse
+    Ellipse(Point, u16, u16),
     /// Line shape, a line that connects two points, each point is a pair
     /// of `x` and `y`.
-    Line(u16, u16, u16, u16),
+    ///
+    /// Owned properties:
+    /// - p0 - the first point.
+    /// - p1 - the second point.
+    ///
+    /// Extended properties:
+    /// - `pathLength` - the total length of the path.
+    ///
+    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
+    Line(Point, Point),
     /// Polygon shape, a closed shape that connects multiple points. With
     /// straight lines between each pair of points.
     Polygon(vector<vector<u16>>),
     /// Polyline shape, a line that connects multiple points.
+    ///
+    /// Owned properties:
     /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
-    Polyline(vector<vector<u16>>),
+    ///
+    /// Extended properties:
+    /// - `pathLength` - the total length of the path.
+    Polyline(vector<Point>),
     /// Rectangle shape, a rectangle with a position, width, and height.
-    /// - `x` - the x-coordinate of the top-left corner of the rectangle.
-    /// - `y` - the y-coordinate of the top-left corner of the rectangle.
+    ///
+    /// Owned properties:
     /// - `width` - the width of the rectangle.
     /// - `height` - the height of the rectangle.
+    ///
+    /// Extended properties:
     /// - `rx` - the radius of the rectangle in the x-axis.
     /// - `ry` - the radius of the rectangle in the y-axis.
     /// - `pathLength` - the total length of the path.
-    Rect(u16, u16, u16, u16),
+    ///
+    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/rect
+    Rect(u16, u16),
     /// Text shape, a text element with a string and a position.
-    Text(String, u16, u16),
+    ///
+    /// Owned properties:
+    /// - `text` - the text to display.
+    ///
+    /// Inherited properties:
+    /// - `x` - the x-coordinate of the text.
+    /// - `y` - the y-coordinate of the text.
+    ///
+    /// Extended properties:
+    /// - `dx` - the x-offset of the text.
+    /// - `dy` - the y-offset of the text.
+    ///
+    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
+    Text(String),
     /// Path shape, a shape defined by a path string. The path string is
     /// a series of commands and coordinates. The `length` attribute is
     /// optional and specifies the total length of the path.
     Path(String, Option<u16>),
     /// Use shape, a reference to a shape defined elsewhere in the document.
+    ///
+    /// Owned properties:
     /// - `href` - the id of the shape to reference.
+    ///
+    /// Inherited properties:
+    /// - `x` - the x-coordinate of the shape.
+    /// - `y` - the y-coordinate of the shape.
+    ///
+    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/use
     Use(String),
-    /// Custom shape, a custom shape defined by a `String` of SVG code.
+    /// Custom string, allows for custom expressions passed as a string.
+    ///
+    /// Owned properties: none
+    /// Inherited properties: none
+    /// Extended properties: none
     Custom(String),
 }
 
 /// Create a new circle shape.
-public fun circle(cx: u16, cy: u16, r: u16): Shape {
+public fun circle(r: u16): Shape {
     Shape {
-        shape: Type::Circle(cx, cy, r),
+        shape: ShapeType::Circle(r),
         attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
     }
 }
 
 /// Create a new ellipse shape.
 public fun ellipse(cx: u16, cy: u16, rx: u16, ry: u16): Shape {
     Shape {
-        shape: Type::Ellipse(cx, cy, rx, ry),
+        shape: ShapeType::Ellipse(point::point(cx, cy), rx, ry),
         attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
     }
 }
 
 /// Create a new line shape.
 public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
     Shape {
-        shape: Type::Line(x1, y1, x2, y2),
+        shape: ShapeType::Line(point::point(x1, y1), point::point(x2, y2)),
         attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
     }
 }
 
@@ -97,165 +169,167 @@ public fun polyline(_points: vector<vector<u16>>): Shape {
 }
 
 /// Create a new rectangle shape.
-public fun rect(x: u16, y: u16, width: u16, height: u16): Shape {
+public fun rect(width: u16, height: u16): Shape {
     Shape {
-        shape: Type::Rect(x, y, width, height),
+        shape: ShapeType::Rect(width, height),
         attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
     }
 }
 
 /// Create a new `<text>` shape.
-public fun text(text: String, x: u16, y: u16): Shape {
+public fun text(text: String): Shape {
     Shape {
-        shape: Type::Text(text, x, y),
+        shape: ShapeType::Text(text),
         attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
     }
 }
 
 /// Create a new `<path>` shape.
 public fun path(path: String, length: Option<u16>): Shape {
     Shape {
-        shape: Type::Path(path, length),
+        shape: ShapeType::Path(path, length),
         attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
     }
 }
 
 /// Create a new `<use>` shape.
 public fun use_(href: String): Shape {
     Shape {
-        shape: Type::Use(href),
+        shape: ShapeType::Use(href),
         attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
     }
 }
 
 /// Create a new custom shape.
 public fun custom(text: String): Shape {
     Shape {
-        shape: Type::Custom(text),
+        shape: ShapeType::Custom(text),
         attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
     }
 }
 
 /// Move a shape.
-public fun move_to(shape: &mut Shape, x: u16, y: u16) {
+public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
     let shape_type = &mut shape.shape;
+
+    shape.position = option::some(point::point(x, y));
+
     match (shape_type) {
-        Type::Circle(cx, cy, _) => {
-            *cx = x;
-            *cy = y;
+        ShapeType::Circle(_) => {
+            let (cx, cy) = shape.position.extract().to_values();
+            shape.attributes.insert(b"cx".to_string(), print::num_to_string(cx));
+            shape.attributes.insert(b"cy".to_string(), print::num_to_string(cy));
         },
-        Type::Ellipse(cx, cy, _, _) => {
-            *cx = x;
-            *cy = y;
+        ShapeType::Line(p0, p1) => {
+            let (x1, y1) = p0.to_values();
+            let (x2, y2) = p1.to_values();
+
+            *p0 = point::point(x, y);
+            *p1 = point::point(x + x2 - x1, y + y2 - y1);
         },
-        Type::Line(x1, y1, x2, y2) => {
-            *x2 = *x2 - *x1 + x;
-            *y2 = *y2 - *y1 + y;
-            *x1 = x;
-            *y1 = y;
-        },
-        Type::Polygon(_points) => abort ENotImplemented,
-        Type::Polyline(_points) => abort ENotImplemented,
-        Type::Rect(ox, oy, _, _) => {
-            *ox = x;
-            *oy = y;
-        },
-        Type::Text(_, ox, oy) => {
-            *ox = x;
-            *oy = y;
-        },
-        Type::Use(_) => {
-            shape.attributes.insert(b"x".to_string(), print::num_to_string(x));
-            shape.attributes.insert(b"y".to_string(), print::num_to_string(y));
-        },
-        Type::Custom(_) => {},
-        Type::Path(_, _) => {},
-        _ => abort 0,
+        ShapeType::Polygon(_points) => abort ENotImplemented,
+        ShapeType::Polyline(_points) => abort ENotImplemented,
+        _ => {},
     };
+
+    shape
 }
 
 /// Simplification to not create functions for each container invariant.
 public fun name(shape: &Shape): String {
     match (shape.shape) {
-        Type::Circle(..) => b"circle".to_string(),
-        Type::Ellipse(..) => b"ellipse".to_string(),
-        Type::Line(..) => b"line".to_string(),
-        Type::Polygon(..) => abort ENotImplemented,
-        Type::Polyline(..) => abort ENotImplemented,
-        Type::Rect(..) => b"rect".to_string(),
-        Type::Text(..) => b"text".to_string(),
-        Type::Use(..) => b"use".to_string(),
-        Type::Custom(..) => b"custom".to_string(),
-        Type::Path(..) => b"path".to_string(),
+        ShapeType::Circle(..) => b"circle".to_string(),
+        ShapeType::Ellipse(..) => b"ellipse".to_string(),
+        ShapeType::Line(..) => b"line".to_string(),
+        ShapeType::Polygon(..) => abort ENotImplemented,
+        ShapeType::Polyline(..) => abort ENotImplemented,
+        ShapeType::Rect(..) => b"rect".to_string(),
+        ShapeType::Text(..) => b"text".to_string(),
+        ShapeType::Use(..) => b"use".to_string(),
+        ShapeType::Custom(..) => b"custom".to_string(),
+        ShapeType::Path(..) => b"path".to_string(),
         _ => abort 0,
     }
 }
 
 /// Print the shape as an `SVG` element.
 public fun to_string(base_shape: &Shape): String {
-    let Shape { shape, attributes: attrs } = base_shape;
-    let (name, attributes, contents) = match (shape) {
-        Type::Circle(cx, cy, r) => {
-            let mut map = *attrs;
-            map.insert(b"cx".to_string(), print::num_to_string(*cx));
-            map.insert(b"cy".to_string(), print::num_to_string(*cy));
-            map.insert(b"r".to_string(), print::num_to_string(*r));
-            (b"circle", map, option::none())
+    let Shape { shape, position, attributes, animation } = base_shape;
+    let mut attributes = *attributes;
+
+    position.do_ref!(|point| {
+        let (x, y) = point.to_values();
+        attributes.insert(b"x".to_string(), print::num_to_string(x));
+        attributes.insert(b"y".to_string(), print::num_to_string(y));
+    });
+
+    let (name, mut contents) = match (shape) {
+        ShapeType::Circle(r) => {
+            attributes.insert(b"r".to_string(), print::num_to_string(*r));
+            (b"circle", option::none())
         },
-        Type::Ellipse(cx, cy, rx, ry) => {
-            let mut map = *attrs;
-            map.insert(b"cx".to_string(), print::num_to_string(*cx));
-            map.insert(b"cy".to_string(), print::num_to_string(*cy));
-            map.insert(b"rx".to_string(), print::num_to_string(*rx));
-            map.insert(b"ry".to_string(), print::num_to_string(*ry));
-            (b"ellipse", map, option::none())
+        ShapeType::Ellipse(center, rx, ry) => {
+            let (cx, cy) = center.to_values();
+            attributes.insert(b"cx".to_string(), print::num_to_string(cx));
+            attributes.insert(b"cy".to_string(), print::num_to_string(cy));
+            attributes.insert(b"rx".to_string(), print::num_to_string(*rx));
+            attributes.insert(b"ry".to_string(), print::num_to_string(*ry));
+            (b"ellipse", option::none())
         },
-        Type::Line(x1, y1, x2, y2) => {
-            let mut map = *attrs;
-            map.insert(b"x1".to_string(), print::num_to_string(*x1));
-            map.insert(b"y1".to_string(), print::num_to_string(*y1));
-            map.insert(b"x2".to_string(), print::num_to_string(*x2));
-            map.insert(b"y2".to_string(), print::num_to_string(*y2));
-            (b"line", map, option::none())
+        ShapeType::Line(p0, p1) => {
+            let (x1, y1) = p0.to_values();
+            let (x2, y2) = p1.to_values();
+            attributes.insert(b"x1".to_string(), print::num_to_string(x1));
+            attributes.insert(b"y1".to_string(), print::num_to_string(y1));
+            attributes.insert(b"x2".to_string(), print::num_to_string(x2));
+            attributes.insert(b"y2".to_string(), print::num_to_string(y2));
+            (b"line", option::none())
         },
-        Type::Polygon(_points) => {
+        ShapeType::Polygon(_points) => {
             abort ENotImplemented
         },
-        Type::Polyline(_points) => {
+        ShapeType::Polyline(_points) => {
             abort ENotImplemented
         },
-        Type::Rect(x, y, width, height) => {
-            let mut map = *attrs;
-            map.insert(b"x".to_string(), print::num_to_string(*x));
-            map.insert(b"y".to_string(), print::num_to_string(*y));
-            map.insert(b"width".to_string(), print::num_to_string(*width));
-            map.insert(b"height".to_string(), print::num_to_string(*height));
-            (b"rect", map, option::none())
+        ShapeType::Rect(width, height) => {
+            attributes.insert(b"width".to_string(), print::num_to_string(*width));
+            attributes.insert(b"height".to_string(), print::num_to_string(*height));
+            (b"rect", option::none())
         },
-        Type::Text(text, x, y) => {
-            let mut map = *attrs;
-            map.insert(b"x".to_string(), print::num_to_string(*x));
-            map.insert(b"y".to_string(), print::num_to_string(*y));
-            (b"text", map, option::some(vector[*text]))
+        ShapeType::Text(text) => (b"text", option::some(vector[*text])),
+        ShapeType::Use(href) => {
+            attributes.insert(b"href".to_string(), *href);
+            (b"use", option::none())
         },
-        Type::Use(href) => {
-            let mut map = *attrs;
-            map.insert(b"href".to_string(), *href);
-            (b"use", map, option::none())
-        },
-        Type::Path(path, length) => {
-            let mut map = *attrs;
-            map.insert(b"d".to_string(), *path);
+        ShapeType::Path(path, length) => {
+            attributes.insert(b"d".to_string(), *path);
             length.do_ref!(
-                |value| map.insert(
+                |value| attributes.insert(
                     b"length".to_string(),
                     print::num_to_string(*value),
                 ),
             );
-            (b"path", map, option::none())
+            (b"path", option::none())
         },
-        Type::Custom(text) => return *text,
+        ShapeType::Custom(text) => return *text,
     };
+
+    animation.do_ref!(|el| {
+        contents = contents.map!(|mut contents| {
+                contents.push_back(el.to_string());
+                contents
+            }).or!(option::some(vector[el.to_string()]));
+    });
 
     print::print(name.to_string(), attributes, contents)
 }
@@ -273,4 +347,9 @@ public fun attributes_mut(shape: &mut Shape): &mut VecMap<String, String> {
 /// Set the attributes of a shape.
 public fun set_attributes(shape: &mut Shape, attrs: VecMap<String, String>) {
     shape.attributes = attrs;
+}
+
+/// Add an animation to a shape.
+public fun add_animation(shape: &mut Shape, animation: Animation) {
+    shape.animation = option::some(animation);
 }

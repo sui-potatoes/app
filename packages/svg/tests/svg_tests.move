@@ -13,19 +13,21 @@ fun test_character() {
     let mut svg = svg::svg(vector[0, 0, 9, 13]);
 
     // head
-    let mut head = shape::rect(3, 3, 3, 3);
+    let mut head = shape::rect(3, 3);
+    head.move_to(3, 3);
     add_class!(&mut head, b"head");
     add_attribute!(&mut head, b"fill", b"orange");
 
     // body
-    let mut body = shape::rect(3, 6, 3, 3);
+    let mut body = shape::rect(3, 3);
+    head.move_to(3, 6);
     add_class!(&mut body, b"body");
     add_attribute!(&mut body, b"fill", b"blue");
 
     // hands (a container already!)
     let mut hands = container::g(vector[
-        shape::rect(2, 6, 1, 3), // left hand
-        shape::rect(6, 6, 1, 3), // right hand
+        shape::rect(1, 3).move_to(2, 6), // left hand
+        shape::rect(1, 3).move_to(6, 6), // right hand
     ]);
 
     add_class!(&mut hands, b"hand");
@@ -33,9 +35,9 @@ fun test_character() {
 
     // legs
     let mut legs = container::g(vector[
-        shape::rect(3, 9, 1, 3), // left leg
-        shape::rect(4, 9, 1, 1), // middle
-        shape::rect(5, 9, 1, 3), // right leg
+        shape::rect(1, 3).move_to(3, 9), // left leg
+        shape::rect(1, 1).move_to(4, 9), // middle
+        shape::rect(1, 3).move_to(5, 9), // right leg
     ]);
 
     add_attribute!(&mut legs, b"fill", b"black");
