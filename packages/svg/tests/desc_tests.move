@@ -13,7 +13,7 @@ fun test_shapes() {
         desc::desc(b"Hello, world!".to_string()).to_string(),
         b"<desc>Hello, world!</desc>".to_string(),
     );
-    assert_eq(desc::metadata().to_string(), b"<metadata></metadata>".to_string());
+    assert_eq(desc::metadata(b"".to_string()).to_string(), b"<metadata></metadata>".to_string());
     assert_eq(
         desc::title(b"Hello, world!".to_string()).to_string(),
         b"<title>Hello, world!</title>".to_string(),

@@ -3,15 +3,51 @@
 
 ## Attributes
 
-- [x] A
-- [ ] Animate
-- [ ] AnimateMotion
-- [ ] AnimateTransform
-- [x] Circle
-- [ ] ClipPath
-- [x] Defs
+### Core
+
+- [ ] Svg
+- [ ] Script
+- [ ] Style
+
+### Animation
+
+- [x] Animate
+- [x] AnimateMotion
+- [x] AnimateTransform
+- [x] Mpath
+- [x] Set
+
+### Descriptive
+
 - [x] Desc
+- [x] Metadata
+- [x] Title
+
+// allow passing Desc to any other element, ...as text?
+
+### Containers
+
+- [x] Desc
+- [x] Defs
+- [x] A
+- [ ] G
+- [ ] Marker
+- [ ] Symbol
+
+### Shapes
+
+- [x] Circle
 - [x] Ellipse
+- [x] Rect
+- [x] Path
+- [x] Line
+- [x] Text
+- [ ] TextPath
+- [ ] Polygon
+- [ ] Polyline
+
+### FE
+
 - [ ] FeBlend
 - [ ] FeColorMatrix
 - [ ] FeComponentTransfer
@@ -37,32 +73,18 @@
 - [ ] FeSpotLight
 - [ ] FeTile
 - [ ] FeTurbulence
+
+### Other
+
+- [ ] ClipPath
 - [ ] Filter
 - [ ] ForeignObject
-- [x] G
 - [ ] Image
-- [ ] Line
 - [ ] LinearGradient
-- [ ] Marker
 - [ ] Mask
-- [ ] Metadata
-- [ ] Mpath
-- [x] Path
 - [ ] Pattern
-- [ ] Polygon
-- [ ] Polyline
 - [ ] RadialGradient
-- [x] Rect
-- [ ] Script
-- [ ] Set
 - [ ] Stop
-- [ ] Style
-- [ ] Svg
 - [ ] Switch
-- [ ] Symbol
-- [ ] Text
-- [ ] TextPath
-- [ ] Title
 - [ ] Tspan
-- [ ] Use
 - [ ] View

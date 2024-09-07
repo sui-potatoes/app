@@ -15,34 +15,86 @@ public struct Svg has store, copy, drop {
     attributes: VecMap<String, String>,
 }
 
-/// Create a new SVG element.
+/// Create a new `<svg>` element with the given view box. View box is optional,
+/// but if provided, it must have 4 elements.
+///
+/// ```rust
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
+/// svg.root(vector[ shape::circle(5).move_to(10, 10) ]);
+/// svg.to_string(); // to print as a string
+/// svg.debug(); // to print in the console in tests
+/// ```
 public fun svg(view_box: vector<u16>): Svg {
     assert!(view_box.length() == 4 || view_box.length() == 0);
     Svg { view_box, elements: vector[], attributes: vec_map::empty() }
 }
 
-/// Adds any element to the SVG.
+/// Adds any `Container` to the `Svg`, if container is created manually. Alternatively,
+/// to add a group container or place elements in the "root", use `root` or `g` functions.
+///
+/// ```rust
+/// let container = container::g(vector[
+///    shape::circle(5).move_to(10, 10),
+///    shape::ellipse(30, 30, 10, 5),
+/// ]);
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// svg.add(container);
+/// svg.to_string();
+/// ```
 public fun add(svg: &mut Svg, element: Container): &mut Svg {
     svg.elements.push_back(element);
     svg
 }
 
-/// Add a root container to the SVG.
+/// Place `Shape`s directly in the root of the SVG.
+///
+/// ```rust
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// svg.root(vector[
+///   shape::circle(5).move_to(10, 10),
+///   shape::square(30, 30).move_to(20, 20),
+/// ]);
+/// svg.to_string();
+/// ```
 public fun root(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
     svg.add(container::root(shapes))
 }
 
-/// Add a group container to the SVG.
+/// Create a `<g>` (group) container and place `Shape`s in it.
+///
+/// ```rust
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// svg.g(vector[
+///  shape::circle(5).move_to(10, 10),
+///  shape::ellipse(30, 30, 10, 5),
+/// ]);
+/// svg.to_string();
+/// ```
 public fun g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
     svg.add(container::g(shapes))
 }
 
-/// Get mutable access to the attributes of the SVG.
+/// Get mutable access to the attributes of the SVG. This is useful for adding
+/// custom attributes directly to the `<svg>` element.
+///
+/// ```rust
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// svg.attributes_mut().insert(
+///     b"width".to_string(),
+///     b"10000".to_string()
+/// );
+/// ```
 public fun attributes_mut(svg: &mut Svg): &mut VecMap<String, String> {
     &mut svg.attributes
 }
 
 /// Print the SVG element as a `String`.
+///
+/// ```rust
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// svg.root(vector[ shape::circle(5).move_to(10, 10) ]);
+/// let printed = svg.to_string();
+/// ```
 public fun to_string(svg: &Svg): String {
     let mut attributes = vec_map::empty();
     attributes.insert(b"xmlns".to_string(), b"http://www.w3.org/2000/svg".to_string());
@@ -65,37 +117,5 @@ public fun to_string(svg: &Svg): String {
 }
 
 #[test_only]
-public fun debug(svg: &Svg) {
-    std::debug::print(&to_string(svg));
-}
-
-#[test]
-fun test_svg() {
-    use svg::shape;
-    use svg::macros::add_attribute;
-
-    let mut svg = svg(vector[0, 0, 200, 200]); // elephant emoji HEX is 01F418
-    let mut str = x"F09F9098";
-    str.append(b"You won't believe this!");
-
-    svg.root(vector[
-        {
-            let mut shape = shape::text(str.to_string()).move_to(100, 50);
-            add_attribute!(&mut shape, b"fill", b"black");
-            add_attribute!(&mut shape, b"font-size", b"20");
-            shape
-        },
-        shape::circle(5).move_to(10, 10),
-        {
-            let mut rect = shape::rect(10, 10).move_to(20, 20);
-            add_attribute!(&mut rect, b"fill", b"red");
-            add_attribute!(&mut rect, b"stroke", b"black");
-            rect
-        },
-        shape::ellipse(30, 30, 10, 5),
-    ]);
-
-    let mut prefix = b"data:image/svg+xml;charset=utf8,".to_string();
-    let str = codec::urlencode::encode(svg.to_string().into_bytes());
-    prefix.append(str);
-}
+/// Print the SVG element in the console, only for tests.
+public fun debug(svg: &Svg) { std::debug::print(&to_string(svg)); }

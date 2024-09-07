@@ -4,14 +4,14 @@
 module svg::container_tests;
 
 use std::unit_test;
-use svg::{container, desc, shape};
+use svg::{container, desc};
 
 #[test]
 fun test_container() {
     let desc = container::desc(vector[
         desc::title(b"Title".to_string()),
         desc::desc(b"Description".to_string()),
-        desc::metadata(),
+        desc::metadata(b"".to_string()),
     ]);
 
     unit_test::assert_eq!(
