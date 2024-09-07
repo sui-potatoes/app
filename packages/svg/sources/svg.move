@@ -46,13 +46,14 @@ public fun attributes_mut(svg: &mut Svg): &mut VecMap<String, String> {
 public fun to_string(svg: &Svg): String {
     let mut attributes = vec_map::empty();
     attributes.insert(b"xmlns".to_string(), b"http://www.w3.org/2000/svg".to_string());
-    if (svg.view_box.length() == 4) {
-        let mut view_box = b"".to_string();
-        svg.view_box.do_ref!(|value| {
-            view_box.append(print::num_to_string(*value));
-            view_box.append(b" ".to_string());
-        });
 
+    let length = svg.view_box.length();
+    if (length == 4) {
+        let mut view_box = b"".to_string();
+        length.do!(|index| {
+            view_box.append(print::num_to_string(svg.view_box[index]));
+            if (index < 3) view_box.append(b" ".to_string());
+        });
         attributes.insert(b"viewBox".to_string(), view_box);
     };
 
@@ -79,14 +80,14 @@ fun test_svg() {
 
     svg.root(vector[
         {
-            let mut shape = shape::text(str.to_string(), 100, 50);
+            let mut shape = shape::text(str.to_string()).move_to(100, 50);
             add_attribute!(&mut shape, b"fill", b"black");
             add_attribute!(&mut shape, b"font-size", b"20");
             shape
         },
-        shape::circle(10, 10, 5),
+        shape::circle(5).move_to(10, 10),
         {
-            let mut rect = shape::rect(10, 10, 20, 20);
+            let mut rect = shape::rect(10, 10).move_to(20, 20);
             add_attribute!(&mut rect, b"fill", b"red");
             add_attribute!(&mut rect, b"stroke", b"black");
             rect
