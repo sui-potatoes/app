@@ -40,7 +40,9 @@ public fun print(
 }
 
 /// Converts a number to a string, uses u16 for the digits.
-public fun num_to_string(mut num: u16): String {
+///
+/// TODO: remove once `.to_string()` is implemented in the standard library.
+public(package) fun num_to_string(mut num: u16): String {
     let mut chars = vector[];
 
     if (num == 0) {

@@ -11,68 +11,133 @@ use svg::{desc::Desc, print, shape::Shape};
 /// Code for the `NotImplemented` error.
 const ENotImplemented: u64 = 0;
 
+/// Represents an SVG container, which contains shapes. All of the containers
+/// support `Shape`s placed inside them, and most of them support attributes,
+/// which will be rendered as XML attributes in the SVG output.
+public struct Container has store, copy, drop {
+    container: ContainerType,
+    shapes: vector<Shape>,
+    attributes: VecMap<String, String>,
+}
+
 /// SVG container enum, which contains shapes.
 /// - using `None` - no container, just a list of shapes.
 /// - hyperlink container, `<a>`.
 /// - definition container, `<defs>`, to be used for reusable shapes.
 /// - group container, `<g>`, to group shapes.
-public enum Container has store, copy, drop {
-    // A root-level container for `Desc` elements, only contains metadata
-    // like `<title>`, `<desc>`, and `<metadata>`.
-    Desc(vector<Desc>),
-    // A root-level container for shapes, no container, just a list of shapes.
-    Root(vector<Shape>),
+public enum ContainerType has store, copy, drop {
+    /// A root-level container for `Desc` elements, only contains metadata
+    /// like `<title>`, `<desc>`, and `<metadata>`.
+    /// Desc(vector<Desc>),
+    //
+    /// A root container, used to proxy shapes directly to the SVG root.
+    Root,
     // A `<defs> container, to be used for reusable shapes. It's like a
     // dictionary of shapes.
-    Defs(vector<Shape>),
-    // Hyperlink container, `<a>`.
-    A(String, vector<Shape>, VecMap<String, String>),
-    // Group container, `<g>`, to group shapes and apply transformations.
-    G(vector<Shape>, VecMap<String, String>),
-    // Marker container, `<marker>`, to define a marker symbol.
-    Marker(vector<Shape>),
+    ///
+    /// **Element:** `<defs>`.
+    ///
+    /// **Own properties:** None.
+    ///
+    /// **Extended properties:** None.
+    ///
+    /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/defs).
+    Defs,
+    /// Hyperlink container, `<a>`. Must be initialized with an `href`.
+    ///
+    /// **Element:** `<a>`.
+    ///
+    /// **Own properties:** `href`.
+    ///
+    /// **Extended properties:** None.
+    ///
+    /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/a).
+    A,
+    /// Group container, `<g>`, to group shapes and apply transformations.
+    ///
+    /// **Element:** `<g>`.
+    ///
+    /// **Own properties:** None.
+    ///
+    /// **Extended properties:** None.
+    ///
+    /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g).
+    G,
+    /// Marker container, `<marker>`, to define a marker symbol.
+    ///
+    /// **Element:** `<marker>`.
+    ///
+    /// **Own properties:** None.
+    ///
+    /// **Extended properties:** None.
+    ///
+    /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/marker).
+    Marker,
 }
 
 /// Create a new description container, only contains metadata.
-public fun desc(tags: vector<Desc>): Container { Container::Desc(tags) }
+// public fun desc(): Container { Container::Desc(tags) }
 
 /// Create a new root container, no container, just a list of shapes.
-public fun root(shapes: vector<Shape>): Container { Container::Root(shapes) }
+public fun root(shapes: vector<Shape>): Container {
+    Container {
+        container: ContainerType::Root,
+        shapes,
+        attributes: vec_map::empty(),
+    }
+}
 
 /// Create a new hyperlink container.
 public fun a(href: String, shapes: vector<Shape>): Container {
-    Container::A(href, shapes, vec_map::empty())
+    let mut attributes = vec_map::empty();
+    if (href.length() > 0) {
+        attributes.insert(b"href".to_string(), href);
+    };
+
+    Container {
+        container: ContainerType::A,
+        shapes,
+        attributes,
+    }
 }
 
 /// Create a new `Defs` container.
-public fun defs(shapes: vector<Shape>): Container { Container::Defs(shapes) }
+public fun defs(shapes: vector<Shape>): Container {
+    Container {
+        container: ContainerType::Defs,
+        shapes,
+        attributes: vec_map::empty(),
+    }
+}
 
 /// Create a new `G` container.
-public fun g(shapes: vector<Shape>): Container { Container::G(shapes, vec_map::empty()) }
+public fun g(shapes: vector<Shape>): Container {
+    Container {
+        container: ContainerType::G,
+        shapes,
+        attributes: vec_map::empty(),
+    }
+}
 
 /// Create a new `_Marker` container.
 public fun marker(_shapes: vector<Shape>): Container { abort ENotImplemented }
 
 /// Move a container, keep the interface consistent with shapes.
-public fun move_to(container: Container, _x: u16, _y: u16): Container { container }
+public fun move_to(container: Container, x: u16, y: u16): Container {
+    container.map_attributes!(|attributes| {
+        attributes.insert(b"x".to_string(), print::num_to_string(x));
+        attributes.insert(b"y".to_string(), print::num_to_string(y));
+    })
+}
 
 /// Add a shape to a container.
 public fun add(container: &mut Container, shape: Shape) {
-    match (container) {
-        Container::Root(shapes) => shapes.push_back(shape),
-        Container::Defs(shapes) => shapes.push_back(shape),
-        Container::G(shapes, _) => shapes.push_back(shape),
-        _ => abort 0,
-    }
+    container.shapes.push_back(shape);
 }
 
 /// Get a mutable reference to the attributes of a container.
 public fun attributes_mut(container: &mut Container): &mut VecMap<String, String> {
-    match (container) {
-        Container::A(_, _, attributes) => attributes,
-        Container::G(_, attributes) => attributes,
-        _ => abort 0,
-    }
+    &mut container.attributes
 }
 
 /// Map attributes of the `Container`.
@@ -95,13 +160,13 @@ public macro fun map_attributes($self: Container, $f: |&mut VecMap<String, Strin
 
 /// Simplification to not create functions for each container invariant.
 public fun name(container: &Container): String {
-    match (container) {
-        Container::Desc(..) => b"".to_string(),
-        Container::Root(..) => b"".to_string(),
-        Container::A(..) => b"a".to_string(),
-        Container::G(..) => b"g".to_string(),
-        Container::Defs(..) => b"defs".to_string(),
-        Container::Marker(..) => b"marker".to_string(),
+    match (&container.container) {
+        // ContainerType::Desc(..) => b"".to_string(),
+        ContainerType::Root => b"".to_string(),
+        ContainerType::A => b"a".to_string(),
+        ContainerType::G => b"g".to_string(),
+        ContainerType::Defs => b"defs".to_string(),
+        ContainerType::Marker => b"marker".to_string(),
         // Container::Symbol(..) => b"symbol".to_string(),
         _ => abort 0,
     }
@@ -109,39 +174,18 @@ public fun name(container: &Container): String {
 
 /// Print the container as an `SVG` element.
 public fun to_string(container: &Container): String {
-    let (name, attributes, elements) = match (container) {
-        // Desc is a special case, it's just a list of descriptions.
-        Container::Desc(tags) => {
-            return (*tags).fold!(b"".to_string(), |mut svg, tag| {
-                svg.append(tag.to_string());
-                svg
-            })
-        },
-        // Root is a special case, we append all elements directly.
-        Container::Root(shapes) => {
-            return (*shapes).fold!(b"".to_string(), |mut svg, shape| {
-                svg.append(shape.to_string());
-                svg
-            })
-        },
-        Container::Defs(shapes) => (
-            b"defs",
-            vec_map::empty(),
-            shapes.map_ref!(|shape| shape.to_string()),
-        ),
-        Container::A(href, shapes, attrs) => {
-            let mut attrs = *attrs;
-            if (href.length() > 0) {
-                attrs.insert(b"href".to_string(), *href);
-            };
-
-            (b"a", attrs, shapes.map_ref!(|shape| shape.to_string()))
-        },
-        Container::G(shapes, attrs) => (b"g", *attrs, shapes.map_ref!(|shape| shape.to_string())),
-        _ => abort ENotImplemented,
+    if (container.container == ContainerType::Root) {
+        return container.shapes.fold!(b"".to_string(), |mut acc, shape| {
+            acc.append(shape.to_string());
+            acc
+        });
     };
 
-    print::print(name.to_string(), attributes, option::some(elements))
+    print::print(
+        container.name(),
+        container.attributes,
+        option::some(container.shapes.map!(|shape| shape.to_string())),
+    )
 }
 
 #[test_only]
