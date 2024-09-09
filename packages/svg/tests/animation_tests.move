@@ -9,7 +9,7 @@ use svg::{animation, shape, svg};
 #[test]
 // From MDN Web Docs: https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animate
 //
-// ```
+// ```move
 // <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
 // <rect width="10" height="10">
 //    <animate
