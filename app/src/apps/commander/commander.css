@@ -2,6 +2,12 @@
     --cell-size: 60px;
 }
 
+.commander select, .commander option {
+    border: none;
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
 .selected {
     box-shadow: 0 0 0 2px #0078d4;
 }

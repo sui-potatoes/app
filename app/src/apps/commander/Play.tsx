@@ -28,34 +28,36 @@ export function Play({ game, refetch, setGame }: Props) {
 
     return (
         <div className="grid grid-cols-6">
-            <div className={`${wait ? "disabled" : ""} col-span-4 gap-1`}>
-                <Map
-                    grid={game.map}
-                    onSelect={(unit, x, y) =>
-                        unit === null ? setUnit(null) : setUnit({ unit, x, y })
-                    }
-                    onPoint={(unit, x, y) => {
-                        performSelectedAction(unit, x, y).then(() =>
-                            setWait(false),
-                        );
-                    }}
-                />
-                <p className="mt-4">
+            <div className="col-span-4">
+                <div className={`${wait ? "disabled" : ""}`}>
+                    <Map
+                        grid={game.map}
+                        onSelect={(unit, x, y) =>
+                            unit === null
+                                ? setUnit(null)
+                                : setUnit({ unit, x, y })
+                        }
+                        onPoint={(unit, x, y) => {
+                            performSelectedAction(unit, x, y).then(() =>
+                                setWait(false),
+                            );
+                        }}
+                    />
+                </div>
+            </div>
+            <div className="col-span-1">
+                <p className="mb-4">
                     <button
-                        className="mx-2"
                         onClick={() => destroy().then(() => setWait(false))}
                     >
                         Destroy Game
                     </button>
                     <button
-                        className="mx-2"
                         onClick={() => nextTurn().then(() => setWait(false))}
                     >
                         Next Turn ({game.turn + 1})
                     </button>
                 </p>
-            </div>
-            <div className="col-span-1">
                 <UnitStats
                     game={game}
                     unit={unit?.unit || null}
@@ -80,6 +82,12 @@ export function Play({ game, refetch, setGame }: Props) {
 
         setWait(true);
 
+        if (game.turn > unit.unit.turn) {
+            unit.unit.turn = game.turn;
+            unit.unit.ap.value = unit.unit.ap.maxValue;
+            setUnit({ ...unit });
+        }
+
         // very silly check for now
         if (action.action.inner.$kind === "Move") {
             const maxRange = unit.unit.ap.value / action.action.cost;
@@ -87,6 +95,8 @@ export function Play({ game, refetch, setGame }: Props) {
 
             if (game.map.grid[x][y].$kind !== "Empty")
                 return console.log("not empty");
+
+            console.log(range, maxRange);
 
             if (range > maxRange) return console.log("out of range");
 
@@ -128,10 +138,12 @@ export function Play({ game, refetch, setGame }: Props) {
 
                 game.map.grid[prev.x][prev.y] = { Empty: true, $kind: "Empty" };
                 const { x, y } = parsedPath.shift()!;
+                unitData.Unit!.unit.ap.value -= action.action.cost;
+                setUnit({ ...unit, x, y, unit: { ...unit.unit } });
                 game.map.grid[x][y] = unitData;
                 setGame(() => ({ ...game }));
                 prev = { x, y };
-            }, 300);
+            }, 200);
         }
 
         if (action.action.inner.$kind === "Attack") {
@@ -199,7 +211,8 @@ export function Play({ game, refetch, setGame }: Props) {
             options: { showObjectChanges: true },
         });
 
-        await refetch();
+        setGame(null);
+        refetch();
     }
 
     async function nextTurn() {

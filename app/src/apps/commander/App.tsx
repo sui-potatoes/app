@@ -11,11 +11,13 @@ import { fromB64 } from "@mysten/bcs";
 import { Play } from "./Play";
 
 import "./commander.css";
+import { Editor } from "./Editor";
 
 export default function Commander() {
     const zkLogin = useZkLogin();
     const flow = useEnokiFlow();
     const client = useSuiClient();
+    const [mode, setMode] = useState<"play" | "edit">("edit");
     const [game, setGame] = useState<typeof Game.$inferType | null>(null);
 
     const packageId = useNetworkVariable("commanderPackageId");
@@ -67,8 +69,38 @@ export default function Commander() {
         );
 
     return (
-        // I want tailwind columns, so that the map is 2/3 of the screen and the unit stats are 1/3
-        <Play game={game} refetch={() => refetch()} setGame={(value) => setGame(value)} />
+        <div className="commander">
+            <h1>Commander</h1>
+            <p className="my-5">
+                <button
+                    onClick={() => setMode("play")}
+                    className={mode == "play" ? "underline" : ""}
+                >
+                    Play
+                </button>
+                {" | "}
+                <button
+                    onClick={() => setMode("edit")}
+                    className={mode == "edit" ? "underline" : ""}
+                >
+                    Edit
+                </button>
+            </p>
+            {mode == "play" && (
+                <Play
+                    game={game}
+                    refetch={() => refetch()}
+                    setGame={(value) => setGame(value)}
+                />
+            )}
+            {mode == "edit" && (
+                <Editor
+                    game={game}
+                    refetch={() => refetch()}
+                    setGame={(value) => setGame(value)}
+                />
+            )}
+        </div>
     );
 
     async function newPreset() {
