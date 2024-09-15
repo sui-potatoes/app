@@ -315,7 +315,7 @@ export default function App() {
 
         const result = await client.signAndExecuteTransaction({
             signer: await flow.getKeypair({ network: "testnet" }),
-            transaction: tx,
+            transaction: tx as any,
         });
 
         console.log("Transaction sent", result.digest);
@@ -356,7 +356,7 @@ export default function App() {
 
         const result = await client.signAndExecuteTransaction({
             signer: await flow.getKeypair({ network: "testnet" }),
-            transaction: tx,
+            transaction: tx as any,
         });
 
         console.log("Transaction sent", result.digest);
@@ -397,7 +397,7 @@ export default function App() {
 
         const { results, error } = await client.devInspectTransactionBlock({
             sender: normalizeSuiAddress("0xa11ce"),
-            transactionBlock: inspect,
+            transactionBlock: inspect as any,
         });
 
         if (!results || !results[0] || !results[0].returnValues) {

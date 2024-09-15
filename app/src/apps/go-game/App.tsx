@@ -133,9 +133,7 @@ export default function App() {
     if (!urlGameId)
         return (
             <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
-                <div>
-                    My Games
-                </div>
+                <div>My Games</div>
                 <ul className="my-games px-6">
                     {account &&
                         (account.games as string[]).map((game, i) => {
@@ -151,10 +149,11 @@ export default function App() {
 
                 <div className="pt-3">
                     <div className="w-[200px] h-[1px] bg-gray-300 mb-4" />
-                    {!zkLogin.address && <p className="mb-2">Sign in to start playing</p>}
+                    {!zkLogin.address && (
+                        <p className="mb-2">Sign in to start playing</p>
+                    )}
                     <p>
-                    {
-                        BOARD_SIZES.map((size: number) => (
+                        {BOARD_SIZES.map((size: number) => (
                             <button
                                 key={size}
                                 disabled={!canInteract || !zkLogin.address}
@@ -163,11 +162,10 @@ export default function App() {
                             >
                                 New {size}x{size}
                             </button>
-                        ))
-                    }
+                        ))}
                     </p>
                 </div>
-                <div className={`loader ${canInteract ? 'hidden' : ''}`} />
+                <div className={`loader ${canInteract ? "hidden" : ""}`} />
             </div>
         );
 
@@ -178,8 +176,8 @@ export default function App() {
     game.players.player2 && players.push(game.players.player2);
 
     const isMyGame = players.includes(account?.id);
-    const myColour = game.players.player1 === account?.id ? 'Black' : 'White';
-    const myClrId = 'Black' === myColour ? 1 : 2;
+    const myColour = game.players.player1 === account?.id ? "Black" : "White";
+    const myClrId = "Black" === myColour ? 1 : 2;
 
     const isMyTurn = isMyGame && myColour in turn;
     const lastMove = game.board.moves.slice(-1)[0];
@@ -266,9 +264,10 @@ export default function App() {
                 inspect.pure.u8(y),
             ],
         });
+
         const res = await client.devInspectTransactionBlock({
-            sender: zkLogin.address!, // @ts-ignore
-            transactionBlock: inspect,
+            sender: zkLogin.address!,
+            transactionBlock: inspect as any,
         });
 
         if (!res.results || !res.results[0]) {
@@ -303,7 +302,7 @@ export default function App() {
 
         const result = await client.signAndExecuteTransaction({
             signer: await flow.getKeypair({ network: "testnet" }),
-            transaction: tx,
+            transaction: tx as any,
         });
 
         console.log("move played");
@@ -323,8 +322,8 @@ export default function App() {
         const accArg = account
             ? tx.object(account.id)
             : tx.moveCall({
-                target: `${packageId}::game::new_account`,
-            });
+                  target: `${packageId}::game::new_account`,
+              });
 
         tx.moveCall({
             target: `${packageId}::game::new`,
@@ -380,8 +379,8 @@ export default function App() {
         const accArg = account
             ? tx.object(account.id)
             : tx.moveCall({
-                target: `${packageId}::game::new_account`,
-            });
+                  target: `${packageId}::game::new_account`,
+              });
 
         tx.moveCall({
             target: `${packageId}::game::join`,
@@ -397,7 +396,7 @@ export default function App() {
 
         const result = await client.signAndExecuteTransaction({
             signer: await flow.getKeypair({ network: "testnet" }),
-            transaction: tx,
+            transaction: tx as any,
         });
 
         await client.waitForTransaction({ digest: result.digest });

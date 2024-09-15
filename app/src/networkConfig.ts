@@ -6,6 +6,7 @@ import {
     GOGAME_PACKAGE_ID,
     CHARACTER_PACKAGE_ID,
     CHARACTER_BUILDER_ID,
+    COMMANDER_PACKAGE_ID,
 } from "./constants";
 import { createNetworkConfig } from "@mysten/dapp-kit";
 
@@ -18,6 +19,7 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
                 characterPackageId: CHARACTER_PACKAGE_ID,
                 /** The ID of the Builder object from `character` package */
                 characterBuilderId: CHARACTER_BUILDER_ID,
+                commanderPackageId: COMMANDER_PACKAGE_ID,
             },
         },
     });
