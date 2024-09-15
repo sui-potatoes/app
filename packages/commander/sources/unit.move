@@ -37,25 +37,25 @@ public fun new(symbol: String, name: String, actions: vector<Action>, health: u1
 /// can move a short distance. They have low health and high action points.
 ///
 /// Stats:
-/// - Health: 60
+/// - Health: 6
 /// - Action Points: 10
 /// - Actions:
-///     * Move (1 AP)
-///     * Shoot (100 DMG, 5 RNG, 5 AP)
+///     * Move (2 AP)
+///     * Shoot (8 DMG, 5 RNG, 5 AP)
 ///     * Wait (10 AP)
 public fun sniper(): Unit {
     Unit {
         symbol: b"L".to_string(),
         name: b"Sniper".to_string(),
         actions: vector[
-            // Move action, 1 AP per step
-            action::new_move(b"Move".to_string(), 1),
-            // Attack action, 5 AP, 5 max range, 10 damage
-            action::new_attack(b"Shoot".to_string(), 5, 6, 100),
+            // Move action, 2 AP per step
+            action::new_move(b"Move".to_string(), 2),
+            // Attack action, 5 AP, 5 max range, 8 damage
+            action::new_attack(b"Shoot".to_string(), 5, 6, 8),
             // Wait action, MAX AP
             action::new_skip(b"Wait".to_string(), 1),
         ],
-        health: param::new(60),
+        health: param::new(6),
         ap: param::new(10),
         current_turn: 0,
     }
@@ -65,12 +65,12 @@ public fun sniper(): Unit {
 /// move a medium distance. They have medium health and action points.
 ///
 /// Stats:
-/// - Health: 100
-/// - Action Points: 10
+/// - Health: 10
+/// - Action Points: 6
 /// - Actions:
 ///     * Move (1 AP)
-///     * Shoot (5 DMG, 3 RNG, 2 AP)
-///     * Melee (10 DMG, 1 RNG, 3 AP)
+///     * Shoot (4 DMG, 4 RNG, 2 AP)
+///     * Melee (5 DMG, 1 RNG, 3 AP)
 ///     * Wait (10 AP)
 public fun soldier(): Unit {
     Unit {
@@ -79,15 +79,46 @@ public fun soldier(): Unit {
         actions: vector[
             // Move action, 1 AP per step
             action::new_move(b"Move".to_string(), 1),
-            // Attack action, 2 AP, 3 max range, 5 damage
-            action::new_attack(b"Shoot".to_string(), 2, 3, 5),
+            // Attack action, 2 AP, 4 max range, 4 damage
+            action::new_attack(b"Shoot".to_string(), 2, 4, 4),
+            // Melee attack action, 3 AP, 1 max range, 10 damage
+            action::new_attack(b"Melee".to_string(), 3, 1, 5),
+            // Wait action, MAX AP
+            action::new_skip(b"Wait".to_string(), 1),
+        ],
+        health: param::new(10),
+        ap: param::new(6),
+        current_turn: 0,
+    }
+}
+
+/// Create a new "Heavy" `Unit`. Heavies have a powerful short-range attack and
+/// can move a short distance. They have high health and high cost of movement.
+///
+/// Stats:
+/// - Health: 20
+/// - Action Points: 6
+/// - Actions:
+///     * Move (2 AP)
+///     * Shoot (8 DMG, 3 RNG, 2 AP)
+///     * Melee (10 DMG, 1 RNG, 3 AP)
+///     * Wait (10 AP)
+public fun heavy(): Unit {
+    Unit {
+        symbol: b"H".to_string(),
+        name: b"Heavy".to_string(),
+        actions: vector[
+            // Move action, 2 AP per step
+            action::new_move(b"Move".to_string(), 2),
+            // Attack action, 2 AP, 3 max range, 8 damage
+            action::new_attack(b"Shoot".to_string(), 2, 3, 8),
             // Melee attack action, 3 AP, 1 max range, 10 damage
             action::new_attack(b"Melee".to_string(), 3, 1, 10),
             // Wait action, MAX AP
             action::new_skip(b"Wait".to_string(), 1),
         ],
-        health: param::new(100),
-        ap: param::new(10),
+        health: param::new(20),
+        ap: param::new(6),
         current_turn: 0,
     }
 }

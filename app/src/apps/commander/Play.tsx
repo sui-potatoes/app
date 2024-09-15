@@ -27,8 +27,8 @@ export function Play({ game, refetch, setGame }: Props) {
     const [wait, setWait] = useState(false);
 
     return (
-        <div className="grid grid-cols-6">
-            <div className="col-span-4">
+        <div className="grid md:grid-cols-2 gap-5 items-center">
+            <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
                 <div className={`${wait ? "disabled" : ""}`}>
                     <Map
                         grid={game.map}
@@ -45,13 +45,16 @@ export function Play({ game, refetch, setGame }: Props) {
                     />
                 </div>
             </div>
-            <div className="col-span-1">
-                <p className="mb-4">
+            <div className="flex flex-col justify-center">
+                <h2 className="my-2 text-xl">Game</h2>
+                <p className="">
                     <button
                         onClick={() => destroy().then(() => setWait(false))}
                     >
                         Destroy Game
                     </button>
+                </p>
+                <p className="mb-4">
                     <button
                         onClick={() => nextTurn().then(() => setWait(false))}
                     >
@@ -68,7 +71,7 @@ export function Play({ game, refetch, setGame }: Props) {
     );
 
     async function performSelectedAction(
-        _unit: typeof Unit.$inferType,
+        _unit: typeof Unit.$inferType | null,
         x: number,
         y: number,
     ) {

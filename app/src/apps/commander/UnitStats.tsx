@@ -26,14 +26,14 @@ export function UnitStats({ onSelect, game, unit }: Props) {
 
     return (
         <>
-            <h2>{unit.name}</h2>
+            <h2 className="my-2 text-xl">{unit.name}</h2>
             <p>
                 Health: {unit.health.value}/{unit.health.maxValue}
             </p>
             <p>
                 AP: {unitAp}/{unit.ap.maxValue}
             </p>
-            <h3>Actions</h3>
+            <h2 className="my-2 text-xl">Actions</h2>
             <ul className="unit-actions">
                 {unit.actions.map((action, i) => (
                     <li

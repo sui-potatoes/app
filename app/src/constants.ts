@@ -9,4 +9,4 @@ export const CHARACTER_PACKAGE_ID =
 export const CHARACTER_BUILDER_ID =
     "0x4574eaf3f1313b584d5004144cd6d6d57d516379d011d6d8e3248c54cfcf90a0";
 export const COMMANDER_PACKAGE_ID =
-    "0x47e36d9c0339b04f6c72d52f46c4d4b1f3b0ecbdeac45d9f5bff5891d818cadc";
+    "0xa80c26342d0d6bdc7f13c5b96cf500849ea3fe385de9bcfee36828ddbd70a711";

@@ -44,6 +44,14 @@
     overflow: hidden;
 }
 
+.unit-heavy {
+    background-image: url(./images/unit-heavy.png);
+    background-size: 100%;
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 .unit-soldier {
     background-image: url(./images/unit-soldier.png);
     background-size: 100%;

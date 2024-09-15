@@ -17,7 +17,7 @@ export default function Commander() {
     const zkLogin = useZkLogin();
     const flow = useEnokiFlow();
     const client = useSuiClient();
-    const [mode, setMode] = useState<"play" | "edit">("edit");
+    const [mode, setMode] = useState<"play" | "edit">("play");
     const [game, setGame] = useState<typeof Game.$inferType | null>(null);
 
     const packageId = useNetworkVariable("commanderPackageId");
@@ -47,8 +47,24 @@ export default function Commander() {
     if (game === null)
         return (
             <>
-                <h1>Commander</h1>
-                <p>Package ID: {packageId}</p>
+                <h1 className="text-2xl mb-2">
+                    Commander (
+                    <a href={`https://suiscan.xyz/testnet/object/${packageId}`}>
+                        Explorer
+                    </a>
+                    )
+                </h1>
+                <p className="w-1/2 word-break mb-2">
+                    Commander is a simple sandbox implementation of a turn-based
+                    tactical game. Currently, a solo experience, where you can
+                    try moving units around, perform attacks on targets, and try
+                    your creativity in the "Editor" mode.
+                </p>
+                <p className="w-1/2 word-break mb-10">
+                    If you're just starting, try the "Preset", if you want to
+                    experince a custom map building experience, "Custom" option
+                    is your choice.
+                </p>
                 <p>
                     <button
                         disabled={!zkLogin.address}
@@ -106,6 +122,8 @@ export default function Commander() {
     async function newPreset() {
         if (!zkLogin.address) return;
 
+        setMode("play");
+
         const tx = new Transaction();
         const game = tx.moveCall({ target: `${packageId}::commander::preset` });
         tx.transferObjects([game], zkLogin.address!);
@@ -121,6 +139,8 @@ export default function Commander() {
 
     async function newGame() {
         if (!zkLogin.address) return;
+
+        setMode("edit");
 
         const tx = new Transaction();
         const game = tx.moveCall({

@@ -7,7 +7,7 @@ import { Grid, Unit } from "./types";
 export type MapProps = {
     grid: typeof Grid.$inferType;
     /** Callback when Unit is commanded to perform an action at X, Y */
-    onPoint: (unit: typeof Unit.$inferType, x: number, y: number) => void;
+    onPoint: (unit: typeof Unit.$inferType | null, x: number, y: number) => void;
     onSelect: (unit: typeof Unit.$inferType | null, x: number, y: number) => void;
 };
 
@@ -15,7 +15,6 @@ export type MapProps = {
 export function Map({ grid, onPoint, onSelect }: MapProps) {
     const [selected, setSelected] = useState<HTMLDivElement>();
     const [selectedUnit, setSelectedUnit] = useState<typeof Unit.$inferType | null>(null);
-
 
     // now the same thing but with divs
     return (
@@ -42,7 +41,7 @@ export function Map({ grid, onPoint, onSelect }: MapProps) {
                                 }}
                                 onContextMenu={(e) => {
                                     e.preventDefault();
-                                    selectedUnit && onPoint(selectedUnit, x, y);
+                                    onPoint(selectedUnit || null, x, y);
                                 }}
                                 onClick={(e) => {
                                     setSelected(e.currentTarget);
@@ -65,7 +64,7 @@ export function Map({ grid, onPoint, onSelect }: MapProps) {
                                 }}
                                 onContextMenu={(e) => {
                                     e.preventDefault();
-                                    selectedUnit && onPoint(selectedUnit, x, y);
+                                    onPoint(selectedUnit, x, y);
                                 }}
                                 onClick={(e) => {
                                     e.preventDefault();
