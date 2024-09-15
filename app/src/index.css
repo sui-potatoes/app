@@ -95,6 +95,7 @@ body {
 .sidebar ul li a {
     color: var(--text-color);
     padding: 0px;
+    margin-bottom: 20px;
     font-weight: normal;
     text-transform: uppercase;
     text-decoration: none;
