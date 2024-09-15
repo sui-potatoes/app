@@ -9,6 +9,17 @@
 
 import { bcs } from "@mysten/sui/bcs";
 
+export type SelectedAction = {
+    idx: number;
+    action: typeof Action.$inferType;
+};
+
+export type SelectedUnit = {
+    unit: typeof Unit.$inferType;
+    x: number;
+    y: number;
+};
+
 export const TracedPath = bcs.option(bcs.vector(bcs.struct("Point", {
     x: bcs.u16(),
     y: bcs.u16(),
