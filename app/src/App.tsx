@@ -7,6 +7,7 @@ import { NavLink } from "react-router-dom";
 import GoGame from "./apps/go-game/App.tsx";
 import Libraries from "./apps/libraries/App.tsx";
 import Character from "./apps/character/App.tsx";
+import Commander from "./apps/commander/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
 import { useSuiClient } from "@mysten/dapp-kit";
@@ -106,14 +107,13 @@ export function App() {
                         <NavLink to="/character">character</NavLink>
                     </li>
                     <li>
+                        <NavLink to="/commander">commander</NavLink>
+                    </li>
+                    <li>
                         <NavLink to="/libraries">libraries (for devs)</NavLink>
                     </li>
                     <li>
                         <a href="https://github.com/sui-potatoes/app" target="_blank">Source Code</a>
-                        {/* <NavLink  to="/">rock paper scissors (disabled)</NavLink> */}
-                        {/* <p style={{ cursor: "default" }}>
-                            rock paper scissors (disabled)
-                        </p> */}
                     </li>
                 </ul>
             </div>
@@ -123,8 +123,8 @@ export function App() {
                     <Route path="/go" element={<GoGame />} />
                     <Route path="/go/:id" element={<GoGame />} />
                     <Route path="/character" element={<Character />} />
+                    <Route path="/commander" element={<Commander />} />
                     <Route path="/libraries" element={<Libraries />} />
-                    {/* <Route path="/rps" element={<RockPaperScissors />} /> */}
                 </Routes>
             </div>
 
