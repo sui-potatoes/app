@@ -16,6 +16,9 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 0px;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
 }
 
 .game-grid div {
@@ -37,7 +40,7 @@
 }
 
 .unit-sniper {
-    background-image: url(./images/unit-sniper.png);
+    background-image: url(/images/unit-sniper.png);
     background-size: 100%;
     text-indent: 100%;
     white-space: nowrap;
@@ -45,7 +48,7 @@
 }
 
 .unit-heavy {
-    background-image: url(./images/unit-heavy.png);
+    background-image: url(/images/unit-heavy.png);
     background-size: 100%;
     text-indent: 100%;
     white-space: nowrap;
@@ -53,7 +56,7 @@
 }
 
 .unit-soldier {
-    background-image: url(./images/unit-soldier.png);
+    background-image: url(/images/unit-soldier.png);
     background-size: 100%;
     text-indent: 100%;
     white-space: nowrap;
@@ -61,7 +64,7 @@
 }
 
 .unit-barricade {
-    background-image: url(./images/unit-barricade.png);
+    background-image: url(/images/unit-barricade.png);
     background-size: 100%;
     text-indent: 100%;
     white-space: nowrap;
