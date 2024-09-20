@@ -5,7 +5,7 @@ license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet", override = true }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet", override = true }
 
 [addresses]
 svg = "0x0"
