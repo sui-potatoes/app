@@ -42,6 +42,7 @@ export default function Commander() {
         setGame(game);
     }, [data]);
 
+    if (!zkLogin.address) return <p>Please sign to play.</p>;
     if (isPending) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
     if (game === null)

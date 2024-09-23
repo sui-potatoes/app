@@ -40,11 +40,8 @@ export function Editor({ game, refetch }: Props) {
     const [wait, setWait] = useState(false);
 
     const isEmpty = tile && game.map.grid[tile?.x][tile?.y].$kind === "Empty";
-    const kind = tile && game.map.grid[tile?.x][tile?.y].$kind || "None";
+    const kind = (tile && game.map.grid[tile?.x][tile?.y].$kind) || "None";
     const unitOptions = ["sniper", "soldier", "heavy", "barricade"];
-
-    /// Active tools, each tool has a different action
-    // const tools = ["place", "remove"];
 
     return (
         <div className="grid md:grid-cols-2 gap-5 items-center">
@@ -62,7 +59,10 @@ export function Editor({ game, refetch }: Props) {
                     <h2 className="text-lg my-2">Selected Tile</h2>
                     <p>Type: {!isEmpty ? kind : "None"}</p>
                     <h2 className="text-xl my-2">Tools</h2>
-                    <p>After selecting a tool, right click where you want to apply it</p>
+                    <p>
+                        After selecting a tool, right click where you want to
+                        apply it
+                    </p>
                     <ul className="mt-2">
                         {unitOptions.map((unitOpt) => {
                             const isActive =
@@ -122,11 +122,7 @@ export function Editor({ game, refetch }: Props) {
         const tx = new Transaction();
         tx.moveCall({
             target: `${packageId}::commander::remove_unit`,
-            arguments: [
-                tx.object(game.id),
-                tx.pure.u16(x),
-                tx.pure.u16(y),
-            ],
+            arguments: [tx.object(game.id), tx.pure.u16(x), tx.pure.u16(y)],
         });
 
         await client.signAndExecuteTransaction({

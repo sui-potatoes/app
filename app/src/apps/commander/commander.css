@@ -1,5 +1,6 @@
 :root {
     --cell-size: 60px;
+    --border-width: 1px;
 }
 
 .commander select, .commander option {
@@ -9,21 +10,57 @@
 }
 
 .selected {
-    box-shadow: 0 0 0 2px #0078d4;
+    box-shadow: 0 0 0 2px #a24444;
 }
 
 .game-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 0px;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
 }
 
-.game-grid div {
-    /* background-color: #f0f0f0; */
-    border-bottom: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
+.row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-grid .cell {
+    border: 0;
+    /* border-bottom: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0; */
     text-align: center;
-    /* line-height: var(--cell-size); */
+}
+
+.cell {
+    position: relative;
+}
+
+.cell::before {
+    content: "";
+    position: absolute;
+    width: var(--cell-size);
+    height: var(--cell-size);
+    /* background-position: 0 0; */
+    top: 0;
+    left: 0;
+    z-index: -1;
+    background: url(/images/texture-sand.png) 0 0 repeat;
+    background-size: var(--cell-size);
+    transform: rotate(90deg);
+}
+
+.row:nth-child(2n).cell:nth-child(1n)::before {
+    transform: rotate(0deg);
+}
+
+.row:nth-child(3n).cell:nth-child(1n)::before {
+    transform: rotate(0deg);
+}
+
+.cell:nth-child(2n).cell:nth-child(1n)::before {
+    transform: rotate(180deg);
 }
 
 .cell:hover {
@@ -37,15 +74,15 @@
 }
 
 .unit-sniper {
-    background-image: url(./images/unit-sniper.png);
-    background-size: 100%;
-    text-indent: 100%;
+    background-image: url(/images/unit-sniper.png);
+    background-size: var(--cell-size);
+    text-indent: var(--cell-size);
     white-space: nowrap;
     overflow: hidden;
 }
 
 .unit-heavy {
-    background-image: url(./images/unit-heavy.png);
+    background-image: url(/images/unit-heavy.png);
     background-size: 100%;
     text-indent: 100%;
     white-space: nowrap;
@@ -53,7 +90,7 @@
 }
 
 .unit-soldier {
-    background-image: url(./images/unit-soldier.png);
+    background-image: url(/images/unit-soldier.png);
     background-size: 100%;
     text-indent: 100%;
     white-space: nowrap;
@@ -61,7 +98,15 @@
 }
 
 .unit-barricade {
-    background-image: url(./images/unit-barricade.png);
+    background-image: url(/images/unit-barricade.png);
+    background-size: 100%;
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.unit-scarecrow {
+    background-image: url(/images/unit-scarecrow.png);
     background-size: 100%;
     text-indent: 100%;
     white-space: nowrap;
