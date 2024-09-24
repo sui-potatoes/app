@@ -102,6 +102,10 @@
     box-shadow: 0 0 0 2px #d63333b2;
 }
 
+.cell-unit {
+    background-repeat: no-repeat;
+}
+
 .unit-sniper {
     background-image: url(/images/unit-sniper.png);
     background-size: var(--cell-size);
