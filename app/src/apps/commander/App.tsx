@@ -12,6 +12,7 @@ import { Play } from "./Play";
 
 import "./commander.css";
 import { Editor } from "./Editor";
+import { useTransactionExecutor } from "./useTransactionExecutor";
 
 export default function Commander() {
     const zkLogin = useZkLogin();
@@ -21,12 +22,13 @@ export default function Commander() {
     const [game, setGame] = useState<typeof Game.$inferType | null>(null);
 
     const packageId = useNetworkVariable("commanderPackageId");
+    const { executor, executeTransaction } = useTransactionExecutor({ client, signer: () => flow.getKeypair(), enabled: !!zkLogin.address });
     const { data, isPending, refetch, error } = useSuiClientQuery(
         "getOwnedObjects",
         {
             owner: zkLogin.address || "",
             filter: { StructType: `${packageId}::commander::Game` },
-            options: { showBcs: true },
+            options: { showBcs: true, showOwner: true },
         },
         { enabled: !!zkLogin.address },
     );
@@ -36,9 +38,10 @@ export default function Commander() {
         if (!data.data[0]) return;
         if (!data.data[0].data) return;
 
-        const { bcsBytes } = data.data[0].data.bcs as { bcsBytes: string };
-
+        const object = data.data[0].data!;
+        const { bcsBytes } = object.bcs as { bcsBytes: string };
         const game = Game.parse(fromB64(bcsBytes));
+
         setGame(game);
     }, [data]);
 
@@ -50,35 +53,24 @@ export default function Commander() {
             <>
                 <h1 className="text-2xl mb-2">
                     Commander (
-                    <a href={`https://suiscan.xyz/testnet/object/${packageId}`}>
-                        Explorer
-                    </a>
-                    )
+                    <a href={`https://suiscan.xyz/testnet/object/${packageId}`}>Explorer</a>)
                 </h1>
                 <p className="w-1/2 word-break mb-2">
-                    Commander is a simple sandbox implementation of a turn-based
-                    tactical game. Currently, a solo experience, where you can
-                    try moving units around, perform attacks on targets, and try
-                    your creativity in the "Editor" mode.
+                    Commander is a simple sandbox implementation of a turn-based tactical game.
+                    Currently, a solo experience, where you can try moving units around, perform
+                    attacks on targets, and try your creativity in the "Editor" mode.
                 </p>
                 <p className="w-1/2 word-break mb-10">
-                    If you're just starting, try the "Preset", if you want to
-                    experince a custom map building experience, "Custom" option
-                    is your choice.
+                    If you're just starting, try the "Preset", if you want to experince a custom map
+                    building experience, "Custom" option is your choice.
                 </p>
                 <p>
-                    <button
-                        disabled={!zkLogin.address}
-                        onClick={() => newPreset()}
-                    >
+                    <button disabled={!zkLogin.address} onClick={() => newPreset()}>
                         New Game (Preset)
                     </button>
                 </p>
                 <p>
-                    <button
-                        disabled={!zkLogin.address}
-                        onClick={() => newGame()}
-                    >
+                    <button disabled={!zkLogin.address} onClick={() => newGame()}>
                         New Game (Custom)
                     </button>
                 </p>
@@ -104,24 +96,17 @@ export default function Commander() {
                 </button>
             </p>
             {mode == "play" && (
-                <Play
-                    game={game}
-                    refetch={() => refetch()}
-                    setGame={(value) => setGame(value)}
-                />
+                <Play game={game} refetch={() => refetch()} setGame={(value) => setGame(value)} />
             )}
             {mode == "edit" && (
-                <Editor
-                    game={game}
-                    refetch={() => refetch()}
-                    setGame={(value) => setGame(value)}
-                />
+                <Editor game={game} refetch={() => refetch()} setGame={(value) => setGame(value)} />
             )}
         </div>
     );
 
     async function newPreset() {
         if (!zkLogin.address) return;
+        if (!executor) return;
 
         setMode("play");
 
@@ -129,17 +114,13 @@ export default function Commander() {
         const game = tx.moveCall({ target: `${packageId}::commander::preset` });
         tx.transferObjects([game], zkLogin.address!);
 
-        await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
-            requestType: "WaitForLocalExecution",
-            transaction: tx as any,
-        });
-
-        await refetch();
+        await executeTransaction(tx);
+        refetch();
     }
 
     async function newGame() {
         if (!zkLogin.address) return;
+        if (!executor) return;
 
         setMode("edit");
 
@@ -151,12 +132,7 @@ export default function Commander() {
 
         tx.transferObjects([game], zkLogin.address!);
 
-        await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
-            requestType: "WaitForLocalExecution",
-            transaction: tx as any,
-        });
-
-        await refetch();
+        await executeTransaction(tx);
+        refetch();
     }
 }

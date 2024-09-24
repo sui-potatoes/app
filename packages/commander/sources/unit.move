@@ -30,7 +30,14 @@ public struct Unit has copy, store, drop {
 
 /// Create a new `Unit` with the given parameters.
 public fun new(symbol: String, name: String, actions: vector<Action>, health: u16, ap: u16): Unit {
-    Unit { symbol, name, actions, health: param::new(health), ap: param::new(ap), current_turn: 0 }
+    Unit {
+        symbol,
+        name,
+        actions,
+        health: param::new(health),
+        ap: param::new(ap),
+        current_turn: 0,
+    }
 }
 
 /// Create a new "Sniper" `Unit`. Snipers have a powerful long-range attack and
@@ -142,6 +149,29 @@ public fun barricade(): Unit {
     }
 }
 
+
+/// Create a new "Scarecrow" `Unit`. Scarecrows are stationary units that can't
+/// move or attack. They have medium health and no action points.
+///
+/// Stats:
+/// - Health: 10
+/// - Action Points: 0
+/// - Actions: None
+/// - Symbol: "C"
+public fun scarecrow(): Unit {
+    Unit {
+        symbol: b"C".to_string(),
+        name: b"Scarecrow".to_string(),
+        actions: vector[
+            // Wait action, MAX AP
+            action::new_skip(b"Wait".to_string(), 1),
+        ],
+        health: param::new(10),
+        ap: param::new(1),
+        current_turn: 0,
+    }
+}
+
 // === BCS ===
 
 /// Deserialize a `Unit` from a byte array.
@@ -160,9 +190,7 @@ public fun from_bytes(bytes: vector<u8>): Unit {
 // === Turn System ===
 
 /// Bump the turn counter.
-public fun next_turn(unit: &mut Unit) {
-    unit.current_turn = unit.current_turn + 1;
-}
+public fun set_turn(unit: &mut Unit, current_turn: u16) { unit.current_turn = current_turn; }
 
 /// Get the current turn of the unit.
 public fun current_turn(unit: &Unit): u16 { unit.current_turn }

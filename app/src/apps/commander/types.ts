@@ -20,10 +20,14 @@ export type SelectedUnit = {
     y: number;
 };
 
-export const TracedPath = bcs.option(bcs.vector(bcs.struct("Point", {
-    x: bcs.u16(),
-    y: bcs.u16(),
-})));
+export const TracedPath = bcs.option(
+    bcs.vector(
+        bcs.struct("Point", {
+            x: bcs.u16(),
+            y: bcs.u16(),
+        }),
+    ),
+);
 
 export const AttackType = bcs.struct("AttackType", {
     maxRange: bcs.u16(),
@@ -39,7 +43,7 @@ export const ActionType = bcs.enum("ActionType", {
 export const Action = bcs.struct("Action", {
     name: bcs.string(),
     cost: bcs.u16(),
-    inner: ActionType
+    inner: ActionType,
 });
 
 export const Param = bcs.struct("Param", {
@@ -65,12 +69,12 @@ export const Tile = bcs.enum("Tile", {
 });
 
 export const Grid = bcs.struct("Grid", {
-    grid: bcs.vector(bcs.vector(Tile))
+    grid: bcs.vector(bcs.vector(Tile)),
 });
 
 export const Game = bcs.struct("Game", {
     id: bcs.Address,
     team: bcs.u8(),
     turn: bcs.u16(),
-    map: Grid
+    map: Grid,
 });

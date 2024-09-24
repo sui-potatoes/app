@@ -113,7 +113,7 @@ public fun perform_action(game: &mut Game, x0: u16, y0: u16, action_idx: u16, x1
     // if the unit has already performed an action this turn, reset its AP
     if (unit.current_turn() < game.current_turn) {
         unit.ap_mut().reset();
-        unit.next_turn();
+        unit.set_turn(game.current_turn);
     };
 
     let unit_ap = unit.ap().value();
@@ -139,7 +139,7 @@ public fun perform_action(game: &mut Game, x0: u16, y0: u16, action_idx: u16, x1
 
         let mut tile = game.map.swap(x0, y0, Tile::Empty);
         let (unit, _) = tile.unit_mut();
-        unit.ap_mut().decrease(length as u16);
+        unit.ap_mut().decrease((length as u16) * action.cost());
         let _ = game.map.swap(x1, y1, tile);
         return
     };

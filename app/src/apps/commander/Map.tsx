@@ -5,39 +5,42 @@ import { useState } from "react";
 import { Grid, Unit } from "./types";
 
 export type MapProps = {
+    disabled?: boolean;
     grid: typeof Grid.$inferType;
+    highlight: { x: number; y: number }[];
+    texture: "grass" | "sand";
     /** Callback when Unit is commanded to perform an action at X, Y */
-    onPoint: (
-        unit: typeof Unit.$inferType | null,
-        x: number,
-        y: number,
-    ) => void;
-    onSelect: (
-        unit: typeof Unit.$inferType | null,
-        x: number,
-        y: number,
-    ) => void;
+    onPoint: (unit: typeof Unit.$inferType | null, x: number, y: number) => void;
+    onSelect: (unit: typeof Unit.$inferType | null, x: number, y: number) => void;
 };
 
 // I want to add a class to the selected div and remove it from the previous one
-export function Map({ grid, onPoint, onSelect }: MapProps) {
+export function Map({ grid, disabled, texture, highlight, onPoint, onSelect }: MapProps) {
     const [selected, setSelected] = useState<HTMLDivElement>();
-    const [selectedUnit, setSelectedUnit] = useState<
-        typeof Unit.$inferType | null
-    >(null);
+    const [selectedUnit, setSelectedUnit] = useState<typeof Unit.$inferType | null>(null);
 
     // now the same thing but with divs
     return (
-        <div className="game-grid w-full">
+        <div className={`game-grid w-full ${disabled ? 'disabled' : ''} ${texture}`}>
             {grid.grid.map((row, x) => {
                 return (
-                    <div className="row">
+                    <div className="row" key={`row-${x}`}>
                         {row.map((tile, y) => {
                             if (tile.$kind === "Empty") {
+                                const highlightClass = highlight.some((e) => e.x == x && e.y == y)
+                                    ? "highlight"
+                                    : "";
+                                const className = [
+                                    "flex",
+                                    "cell",
+                                    "cell-empty",
+                                    highlightClass,
+                                ].join(" ");
+
                                 return (
                                     <div
                                         key={`${x}-${y}`}
-                                        className="flex cell cell-empty"
+                                        className={className}
                                         ref={(el) => {
                                             if (el && el == selected) {
                                                 el.classList.add("selected");
@@ -58,9 +61,20 @@ export function Map({ grid, onPoint, onSelect }: MapProps) {
                             }
 
                             if (tile.$kind === "Unit") {
+                                const highlightClass = highlight.some((e) => e.x == x && e.y == y)
+                                    ? "highlight"
+                                    : "";
+                                const unitClass = `unit-${tile.Unit.unit.name.toLowerCase()}`;
+                                const className = [
+                                    "cell",
+                                    "cell-unit",
+                                    unitClass,
+                                    highlightClass,
+                                ].join(" ");
+
                                 return (
                                     <div
-                                        className={`unit-${tile.Unit.unit.name.toLowerCase()} cell cell-empty`}
+                                        className={className}
                                         ref={(el) => {
                                             if (el && el == selected) {
                                                 el.classList.add("selected");

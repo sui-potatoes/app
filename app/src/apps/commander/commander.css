@@ -1,16 +1,23 @@
 :root {
     --cell-size: 60px;
     --border-width: 1px;
+
+    --selected-color: #b9b9b98e;
+    --highlight-color: rgba(97, 69, 69, 0.5);
+    --highlight-unit-color: #f0f0f0;
+    --highlight-target-color: #69303040;
 }
 
-.commander select, .commander option {
+.commander select,
+.commander option {
     border: none;
     background: var(--background-color);
     color: var(--text-color);
 }
 
 .selected {
-    box-shadow: 0 0 0 2px #a24444;
+    background-color: var(--selected-color) !important;
+    /* box-shadow: 0 0 0 2px #a24444; */
 }
 
 .game-grid {
@@ -46,9 +53,18 @@
     top: 0;
     left: 0;
     z-index: -1;
-    background: url(/images/texture-sand.png) 0 0 repeat;
     background-size: var(--cell-size);
     transform: rotate(90deg);
+}
+
+.grass .cell::before {
+    background: url(/images/texture-grass.png);
+    background-size: var(--cell-size);
+}
+
+.sand .cell::before {
+    background: url(/images/texture-sand.png);
+    background-size: var(--cell-size);
 }
 
 .row:nth-child(2n).cell:nth-child(1n)::before {
@@ -63,14 +79,27 @@
     transform: rotate(180deg);
 }
 
-.cell:hover {
+.cell.highlight:hover {
     background-color: rgba(185, 185, 185, 0.5);
+}
+
+.cell.highlight {
+    background-color: var(--highlight-color);
+}
+
+.cell:hover {
+    background-color: rgba(79, 76, 76, 0.5);
 }
 
 .cell {
     width: var(--cell-size);
     height: var(--cell-size);
     padding: 0;
+}
+
+.cell.cell-unit.highlight:hover {
+    background-color: var(--highlight-target-color) !important;
+    box-shadow: 0 0 0 2px #d63333b2;
 }
 
 .unit-sniper {
@@ -107,6 +136,14 @@
 
 .unit-scarecrow {
     background-image: url(/images/unit-scarecrow.png);
+    background-size: 100%;
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.unit-crate {
+    background-image: url(/images/unit-crate.png);
     background-size: 100%;
     text-indent: 100%;
     white-space: nowrap;

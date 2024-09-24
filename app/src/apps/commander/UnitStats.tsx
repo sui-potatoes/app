@@ -36,10 +36,7 @@ export function UnitStats({ onSelect, game, unit }: Props) {
             <h2 className="my-2 text-xl">Actions</h2>
             <ul className="unit-actions">
                 {unit.actions.map((action, i) => (
-                    <li
-                        key={i}
-                        className={i == selectedAction ? "selected-action" : ""}
-                    >
+                    <li key={i} className={i == selectedAction ? "selected-action" : ""}>
                         <a
                             onClick={() => {
                                 setSelectedAction(i);
