@@ -65,12 +65,15 @@ export function Map({ grid, disabled, texture, highlight, onPoint, onSelect }: M
                                     ? "highlight"
                                     : "";
                                 const unitClass = `unit-${tile.Unit.unit.name.toLowerCase()}`;
+                                const ap = tile.Unit.unit.ap.value;
                                 const className = [
                                     "cell",
                                     "cell-unit",
                                     unitClass,
                                     highlightClass,
                                 ].join(" ");
+
+                                const apBar = <div className="ap-bar">{Array.from({ length: ap }, (_, i) => i).map(() => <div className="ap-pt"></div>)}</div>;
 
                                 return (
                                     <div
@@ -94,6 +97,7 @@ export function Map({ grid, disabled, texture, highlight, onPoint, onSelect }: M
                                         }}
                                         key={`${x}-${y}`}
                                     >
+                                        {apBar}
                                         {tile.Unit.unit.symbol}
                                     </div>
                                 );

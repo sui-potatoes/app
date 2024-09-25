@@ -11,6 +11,13 @@ export class GridState {
     }
 }
 
+/**
+ * 
+ *
+ * @param unit
+ * @param action
+ * @returns
+ */
 export function actionRange(unit: typeof Unit.$inferType, action: typeof Action.$inferType) {
     if (!action) return 0;
 
@@ -19,6 +26,7 @@ export function actionRange(unit: typeof Unit.$inferType, action: typeof Action.
     }
 
     if (action.inner.$kind === "Attack") {
+        if (action.cost > unit.ap.value) return 0;
         return action.inner.Attack.maxRange;
     }
 
