@@ -4,7 +4,7 @@
 /// Defines the `Unit` component and its methods.
 module commander::unit;
 
-use commander::{action::{Self, Action}, param::{Self, Param}};
+use commander::{action::{Self, Action}, armor::{Self, Armor}, param::{Self, Param}};
 use std::string::String;
 use sui::bcs;
 
@@ -16,6 +16,8 @@ public struct Unit has copy, store, drop {
     symbol: String,
     /// The name of the unit. Purely cosmetic.
     name: String,
+    /// The armor of the unit. If the unit has no armor, this field is `None`.
+    armor: Option<Armor>,
     /// The actions the unit can perform.
     actions: vector<Action>,
     /// The health parameter.
@@ -29,10 +31,18 @@ public struct Unit has copy, store, drop {
 }
 
 /// Create a new `Unit` with the given parameters.
-public fun new(symbol: String, name: String, actions: vector<Action>, health: u16, ap: u16): Unit {
+public fun new(
+    symbol: String,
+    name: String,
+    actions: vector<Action>,
+    armor: Option<Armor>,
+    health: u16,
+    ap: u16,
+): Unit {
     Unit {
         symbol,
         name,
+        armor,
         actions,
         health: param::new(health),
         ap: param::new(ap),
@@ -54,6 +64,7 @@ public fun sniper(): Unit {
     Unit {
         symbol: b"L".to_string(),
         name: b"Sniper".to_string(),
+        armor: option::none(),
         actions: vector[
             // Move action, 2 AP per step
             action::new_move(b"Move".to_string(), 2),
@@ -83,6 +94,7 @@ public fun soldier(): Unit {
     Unit {
         symbol: b"S".to_string(),
         name: b"Soldier".to_string(),
+        armor: option::none(),
         actions: vector[
             // Move action, 1 AP per step
             action::new_move(b"Move".to_string(), 1),
@@ -114,6 +126,7 @@ public fun heavy(): Unit {
     Unit {
         symbol: b"H".to_string(),
         name: b"Heavy".to_string(),
+        armor: option::none(),
         actions: vector[
             // Move action, 2 AP per step
             action::new_move(b"Move".to_string(), 2),
@@ -142,13 +155,13 @@ public fun barricade(): Unit {
     Unit {
         symbol: b"B".to_string(),
         name: b"Barricade".to_string(),
+        armor: option::none(),
         actions: vector[],
         health: param::new(100),
         ap: param::new(0),
         current_turn: 0,
     }
 }
-
 
 /// Create a new "Scarecrow" `Unit`. Scarecrows are stationary units that can't
 /// move or attack. They have medium health and no action points.
@@ -162,6 +175,7 @@ public fun scarecrow(): Unit {
     Unit {
         symbol: b"C".to_string(),
         name: b"Scarecrow".to_string(),
+        armor: option::none(),
         actions: vector[
             // Wait action, MAX AP
             action::new_skip(b"Wait".to_string(), 1),
@@ -179,12 +193,13 @@ public fun from_bytes(bytes: vector<u8>): Unit {
     let mut bcs = bcs::new(bytes);
     let symbol = bcs.peel_vec!(|e| e.peel_u8()).to_string();
     let name = bcs.peel_vec!(|e| e.peel_u8()).to_string();
+    let armor = bcs.peel_option!(|e| armor::from_bcs(e));
     let actions = bcs.peel_vec!(|bcs| action::from_bcs(bcs));
     let health = param::from_bcs(&mut bcs);
     let ap = param::from_bcs(&mut bcs);
     let current_turn = bcs.peel_u16();
 
-    Unit { symbol, name, actions, health, ap, current_turn }
+    Unit { symbol, name, armor, actions, health, ap, current_turn }
 }
 
 // === Turn System ===

@@ -3,7 +3,7 @@
 
 module commander::effect;
 
-use commander::unit::{Self, Unit};
+use commander::unit;
 
 public struct Effect has copy, drop, store {
     /// The type of the effect.
