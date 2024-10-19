@@ -34,6 +34,7 @@ export function Editor({ game, refetch }: Props) {
     const client = useSuiClient();
     const packageId = useNetworkVariable("commanderPackageId");
     const { executor, executeTransaction } = useTransactionExecutor({
+        // @ts-ignore
         client,
         signer: () => flow.getKeypair(),
         enabled: !!zkLogin.address,
@@ -42,12 +43,7 @@ export function Editor({ game, refetch }: Props) {
     const [tile, setTile] = useState<SelectedTile | null>(null);
     const [inventory, setInventory] = useState<string>();
     const [tool, setTool] = useState<"place" | "remove">("place");
-    const [texture, setTexture] = useState<"grass" | "sand">(sessionStorage.getItem("texture") as "grass" | "sand" || "grass");
     const [wait, setWait] = useState(false);
-
-    useEffect(() => {
-        sessionStorage.setItem("texture", texture || "grass");
-    }, [texture]);
 
     const isEmpty = tile && game.map.grid[tile?.x][tile?.y].$kind === "Empty";
     const kind = (tile && game.map.grid[tile?.x][tile?.y].$kind) || "None";
@@ -60,17 +56,15 @@ export function Editor({ game, refetch }: Props) {
                     <EditorMap
                         highlight={[]}
                         grid={game.map}
-                        texture={texture}
                         onSelect={(tile, x, y) => setTile({ tile, x, y })}
-                        onPoint={(x, y) => performAction(x, y)}
+                        onTarget={(x, y) => performAction(x, y)}
                     />
                 </div>
             </div>
             <div className="flex flex-col justify-center">
                 <div>
                     <h2 className="text-lg my-2">Texture</h2>
-                    <p>{"> "}<button onClick={() => setTexture("grass")}>Grass</button></p>
-                    <p>{"> "}<button onClick={() => setTexture("sand")}>Sand</button></p>
+                    <p>{"> "}<button>Sand</button></p>
                     <h2 className="text-lg my-2">Selected Tile</h2>
                     <p>Type: {!isEmpty ? kind : "None"}</p>
                     <h2 className="text-xl my-2">Tools</h2>

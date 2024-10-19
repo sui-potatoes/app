@@ -23,6 +23,7 @@ export default function Commander() {
 
     const packageId = useNetworkVariable("commanderPackageId");
     const { executor, executeTransaction } = useTransactionExecutor({
+        // @ts-ignore
         client,
         signer: () => flow.getKeypair({ network: "testnet" }),
         enabled: !!zkLogin.address,
