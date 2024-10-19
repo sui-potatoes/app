@@ -62,7 +62,7 @@ export function Editor({ game, refetch }: Props) {
                         grid={game.map}
                         texture={texture}
                         onSelect={(tile, x, y) => setTile({ tile, x, y })}
-                        onPoint={(x, y) => performAction(x, y)}
+                        onPoint={(unit, x, y) => performAction(unit, x, y)}
                     />
                 </div>
             </div>
@@ -108,7 +108,7 @@ export function Editor({ game, refetch }: Props) {
         </div>
     );
 
-    async function performAction(x: number, y: number) {
+    async function performAction(_unit: typeof Unit.$inferType | null, x: number, y: number) {
         if (tool === "place" && inventory) {
             return placeFromInventory(x, y).then(() => setWait(false));
         }

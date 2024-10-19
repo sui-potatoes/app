@@ -3,8 +3,8 @@
 
 import { useEffect, useState } from "react";
 import { UnitStats } from "./UnitStats";
-import { Map } from "./three/Map";
-import { SelectedAction, SelectedUnit, Game, TracedPath } from "./types";
+import { Map } from "./Map";
+import { SelectedAction, SelectedUnit, Game, TracedPath, Unit } from "./types";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiObjectId } from "@mysten/sui/utils";
@@ -30,59 +30,46 @@ export function Play({ game, refetch, setGame }: Props) {
         enabled: !!zkLogin.address,
     });
     const [action, selectAction] = useState<SelectedAction | null>(null);
-    const [selectedUnit, setSelectedUnit] = useState<SelectedUnit | null>(null);
+    const [unit, setUnit] = useState<SelectedUnit | null>(null);
     const [wait, setWait] = useState(false);
 
     const canBypass = !!action && action.action?.inner.$kind === "Attack";
     const highlight =
-        selectedUnit && action
+        unit && action
             ? markInRange(
                   game.map,
-                  selectedUnit.x,
-                  selectedUnit.y,
-                  actionRange(selectedUnit.unit, action.action),
+                  unit.x,
+                  unit.y,
+                  actionRange(unit.unit, action.action),
                   canBypass,
               )
             : [];
 
     useEffect(() => {
-        if (!selectedUnit) return;
+        if (!unit) return;
         if (!game) return;
 
-        if (game.turn > selectedUnit.unit.turn) {
-            setSelectedUnit((unit) => {
-                if (!unit) return null;
-                unit.unit.turn = game.turn;
-                unit.unit.ap.value = selectedUnit.unit.ap.maxValue;
-                return { ...unit };
-            });
+        if (game.turn > unit.unit.turn) {
+            unit.unit.turn = game.turn;
+            unit.unit.ap.value = unit.unit.ap.maxValue;
+            setUnit({ ...unit });
         }
-    }, [game, selectedUnit]);
-
-    console.log("Reloaded, unit:", selectedUnit);
+    }, [game, unit]);
 
     return (
-        <div
-            className="items-center flex"
-            onContextMenu={(e) => {
-                e.preventDefault();
-            }}
-        >
-            <div className="max-md:flex max-md:flex-col max-md:justify-center max-md:items-center">
+        <div className="grid md:grid-cols-2 gap-5 items-center">
+            <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
                 <div className={`${wait ? "disabled" : ""}`}>
-                <button onContextMenu={(e) => {
-                    performSelectedAction(0, 0);
-                }}>HAHAHA</button>
                     <Map
+                        texture={sessionStorage.getItem("texture") as "grass" | "sand" || "grass"}
                         disabled={wait}
                         highlight={highlight}
                         grid={game.map}
                         onSelect={(unit, x, y) =>
-                            unit === null ? setSelectedUnit(null) : setSelectedUnit({ unit, x, y })
+                            unit === null ? setUnit(null) : setUnit({ unit, x, y })
                         }
-                        onTarget={(unit, x, y) => {
-                            console.log('ontarget', unit);
-                            performSelectedAction(x, y).then(() => setWait(false));
+                        onPoint={(unit, x, y) => {
+                            performSelectedAction(unit, x, y).then(() => setWait(false));
                         }}
                     />
                 </div>
@@ -101,22 +88,21 @@ export function Play({ game, refetch, setGame }: Props) {
                 </p>
                 <UnitStats
                     game={game}
-                    unit={selectedUnit?.unit || null}
-                    onSelect={(idx, action) => {
-                        selectAction({ idx, action });
-                        console.log("selected action", action);
-                    }}
+                    unit={unit?.unit || null}
+                    onSelect={(idx, action) => selectAction({ idx, action })}
                 />
             </div>
         </div>
     );
 
-    async function performSelectedAction(x: number, y: number) {
-        console.log("performing action", selectedUnit, action);
-
+    async function performSelectedAction(
+        _unit: typeof Unit.$inferType | null,
+        x: number,
+        y: number,
+    ) {
         if (!zkLogin.address) return;
         if (!action) return;
-        if (!selectedUnit) return;
+        if (!unit) return;
         if (!game) return;
         if (wait) return;
 
@@ -126,8 +112,8 @@ export function Play({ game, refetch, setGame }: Props) {
 
         // very silly check for now
         if (action.action.inner.$kind === "Move") {
-            const maxRange = selectedUnit.unit.ap.value / action.action.cost;
-            const range = Math.abs(selectedUnit.x - x) + Math.abs(selectedUnit.y - y);
+            const maxRange = unit.unit.ap.value / action.action.cost;
+            const range = Math.abs(unit.x - x) + Math.abs(unit.y - y);
 
             if (game.map.grid[x][y].$kind !== "Empty") return console.log("not empty");
             if (range > maxRange) return console.log("out of range");
@@ -138,8 +124,8 @@ export function Play({ game, refetch, setGame }: Props) {
                 arguments: [
                     inspect.object(normalizeSuiObjectId(game.id)),
                     inspect.pure.u16(maxRange),
-                    inspect.pure.u16(selectedUnit.x),
-                    inspect.pure.u16(selectedUnit.y),
+                    inspect.pure.u16(unit.x),
+                    inspect.pure.u16(unit.y),
                     inspect.pure.u16(x),
                     inspect.pure.u16(y),
                 ],
@@ -160,19 +146,18 @@ export function Play({ game, refetch, setGame }: Props) {
 
             if (!parsedPath) return console.log("no path");
 
-            // await moveObject(unit.x, unit.y, parsedPath);
-
-            const unitData = { ...game.map.grid[selectedUnit.x][selectedUnit.y] };
-            let prev = { x: selectedUnit.x, y: selectedUnit.y };
+            const unitData = { ...game.map.grid[unit.x][unit.y] };
+            let prev = { x: unit.x, y: unit.y };
             timer = setInterval(() => {
                 if (parsedPath.length === 0) {
-                    return clearInterval(timer);
+                    clearInterval(timer);
+                    return;
                 }
 
                 game.map.grid[prev.x][prev.y] = { Empty: true, $kind: "Empty" };
                 const { x, y } = parsedPath.shift()!;
                 unitData.Unit!.unit.ap.value -= action.action.cost;
-                setSelectedUnit({ ...selectedUnit, x, y, unit: { ...selectedUnit.unit } });
+                setUnit({ ...unit, x, y, unit: { ...unit.unit } });
                 game.map.grid[x][y] = unitData;
                 setGame(() => ({ ...game }));
                 prev = { x, y };
@@ -185,7 +170,7 @@ export function Play({ game, refetch, setGame }: Props) {
             const target = game.map.grid[x][y].Unit!.unit;
             const { damage, maxRange } = action.action.inner.Attack;
 
-            if (Math.abs(selectedUnit.x - x) + Math.abs(selectedUnit.y - y) > maxRange) {
+            if (Math.abs(unit.x - x) + Math.abs(unit.y - y) > maxRange) {
                 return console.log("out of range");
             }
 
@@ -205,8 +190,8 @@ export function Play({ game, refetch, setGame }: Props) {
             target: `${packageId}::commander::perform_action`,
             arguments: [
                 tx.object(normalizeSuiObjectId(game.id)),
-                tx.pure.u16(selectedUnit.x),
-                tx.pure.u16(selectedUnit.y),
+                tx.pure.u16(unit.x),
+                tx.pure.u16(unit.y),
                 tx.pure.u16(action.idx),
                 tx.pure.u16(x),
                 tx.pure.u16(y),

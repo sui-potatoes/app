@@ -1,7 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { Map, MapProps } from "./_Map";
+import { Map, MapProps } from "./Map";
 
 type Props = MapProps & {};
 

@@ -8,11 +8,6 @@
     --highlight-target-color: #69303040;
 }
 
-#three {
-    min-width: 1024px;
-    min-height: 768px;
-}
-
 .commander select,
 .commander option {
     border: none;

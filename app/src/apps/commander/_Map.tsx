@@ -4,16 +4,6 @@
 import { useState } from "react";
 import { Grid, Unit } from "./types";
 
-export type MapProps = {
-    disabled?: boolean;
-    grid: typeof Grid.$inferType;
-    highlight: { x: number; y: number }[];
-    texture: "grass" | "sand";
-    /** Callback when Unit is commanded to perform an action at X, Y */
-    onPoint: (unit: typeof Unit.$inferType | null, x: number, y: number) => void;
-    onSelect: (unit: typeof Unit.$inferType | null, x: number, y: number) => void;
-};
-
 // I want to add a class to the selected div and remove it from the previous one
 export function Map({ grid, disabled, texture, highlight, onPoint, onSelect }: MapProps) {
     const [selected, setSelected] = useState<HTMLDivElement>();
@@ -39,7 +29,7 @@ export function Map({ grid, disabled, texture, highlight, onPoint, onSelect }: M
 
                                 return (
                                     <div
-                                        key={`${x}-${y}`}
+                                        key={`cell-${x}-${y}`}
                                         className={className}
                                         ref={(el) => {
                                             if (el && el == selected) {
@@ -73,7 +63,7 @@ export function Map({ grid, disabled, texture, highlight, onPoint, onSelect }: M
                                     highlightClass,
                                 ].join(" ");
 
-                                const apBar = <div className="ap-bar">{Array.from({ length: ap }, (_, i) => i).map(() => <div className="ap-pt"></div>)}</div>;
+                                const apBar = <div className="ap-bar">{Array.from({ length: ap }, (_, i) => i).map((i) => <div key={i} className="ap-pt"></div>)}</div>;
 
                                 return (
                                     <div
@@ -87,7 +77,7 @@ export function Map({ grid, disabled, texture, highlight, onPoint, onSelect }: M
                                         }}
                                         onContextMenu={(e) => {
                                             e.preventDefault();
-                                            onPoint(selectedUnit, x, y);
+                                            onPoint(x, y);
                                         }}
                                         onClick={(e) => {
                                             e.preventDefault();
@@ -95,7 +85,7 @@ export function Map({ grid, disabled, texture, highlight, onPoint, onSelect }: M
                                             setSelectedUnit(tile.Unit.unit);
                                             onSelect(tile.Unit.unit, x, y);
                                         }}
-                                        key={`${x}-${y}`}
+                                        key={`cell-${x}-${y}`}
                                     >
                                         {apBar}
                                         {tile.Unit.unit.symbol}
