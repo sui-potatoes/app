@@ -7,9 +7,7 @@ import { newScene } from "./scene";
 import { AnimatedUnit } from "./AnimatedUnit";
 import { Grid } from "./Grid";
 import { Crate } from "./Crate";
-
 import { Grid as GridType, Unit as UnitType } from "../types";
-import { Suspense } from "react";
 
 /**
  * The ID of the root element for the ThreeJS scene.
@@ -40,7 +38,7 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
     useEffect(() => {
         if (!scene) return;
         console.log('highlight', highlight);
-        scene.grid.highlightCells(highlight);
+        scene.grid.highlightCells(highlight.map(({ x, y, d }) => ({ x: y, y: x, d })));
     }, [highlight]);
 
     useEffect(() => {
@@ -54,6 +52,12 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
         // add initial game objects as loaded from the `gameGrid`
         initialize(_scene.grid);
 
+        // EventDispatcher implementation in Three.js stores the initial context
+        // of the `onSelect` and `onTarget` callbacks. This is somewhat tricky
+        // since we can't use it to trigger any state changes. A temporary
+        // workaround is to use a `useRef` for values used in the callback.
+        //
+        // However, there's more to it than just active Unit and Action.
         _scene.grid.addEventListener("selectCell", onSelectCell);
         _scene.grid.addEventListener("pointCell", onPointCell);
     }, []);
@@ -61,8 +65,8 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
     return <div id={ROOT} onContextMenu={(e) => e.preventDefault()} />;
 
     function initialize(grid: Grid) {
-        gameGrid.grid.forEach((row, x) => {
-            row.forEach((tile, y) => {
+        gameGrid.grid.forEach((row, y) => {
+            row.forEach((tile, x) => {
                 if (tile.$kind === "Empty" || !tile.Unit) {
                     return;
                 }
@@ -83,7 +87,7 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
      * @param param0
      */
     function onSelectCell({ point }: { point: THREE.Vector2 }) {
-        let { x, y } = point.addScalar(-1); // adjust for 1-indexed grid
+        let { x: y, y: x } = point.addScalar(-1); // adjust for 1-indexed grid
         if (gameGrid.grid[x][y].$kind === "Empty") {
             onSelect(null, x, y);
         } else {
@@ -96,6 +100,7 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
      * @param param0
      */
     function onPointCell({ point }: { point: THREE.Vector2 }) {
-        onTarget(point.x, point.y);
+        let { x: y, y: x } = point.addScalar(-1); // adjust for 1-indexed grid
+        onTarget(x, y);
     }
 }

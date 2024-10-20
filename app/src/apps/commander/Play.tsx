@@ -37,7 +37,10 @@ export function Play({ game, refetch, setGame }: Props) {
         enabled: !!zkLogin.address,
     });
     const [action, selectAction] = useState<SelectedAction | null>(null);
-    const selectedUnit = useRef<SelectedUnit | null>(null);
+    const unitRef = useRef<SelectedUnit | null>(null);
+    // const actionRef = useRef<SelectedAction | null>(null);
+    const [target, setTarget] = useState<{ x: number; y: number } | null>(null);
+
     const [wait, setWait] = useState(false);
     const [highlight, setHighlight] = useState<{ x: number; y: number; d: number }[]>([]);
     const canBypass = !!action && action.action?.inner.$kind === "Attack";
@@ -45,19 +48,24 @@ export function Play({ game, refetch, setGame }: Props) {
     // triggers re-render when the selected unit changes
     // (via the auto action selection)
     useEffect(() => {
-        if (!selectedUnit.current) return;
+        if (!unitRef.current) return;
         if (action) {
             setHighlight(markInRange(
                 game.map,
-                selectedUnit.current.x,
-                selectedUnit.current.y,
-                actionRange(selectedUnit.current.unit, action.action),
+                unitRef.current.x,
+                unitRef.current.y,
+                actionRange(unitRef.current.unit, action.action),
                 canBypass,
             ))
         } else {
             setHighlight([])
         }
     }, [action]);
+
+    useEffect(() => {
+        if (!target) return;
+        performSelectedAction(target.x, target.y).then(() => setWait(false));
+    }, [target]);
 
     return (
         <div
@@ -76,8 +84,9 @@ export function Play({ game, refetch, setGame }: Props) {
                             setSelectedUnit(unit === null ? null : { unit, x, y })
                         }
                         onTarget={(x, y) => {
-                            console.log("ontarget", selectedUnit.current);
-                            performSelectedAction(x, y).then(() => setWait(false));
+                            console.log("ontarget", unitRef.current);
+                            setTarget({ x, y });
+                            // performSelectedAction(x, y).then(() => setWait(false));
                         }}
                     />
                 </div>
@@ -96,9 +105,11 @@ export function Play({ game, refetch, setGame }: Props) {
                 </p>
                 <UnitStats
                     game={game}
-                    unit={selectedUnit.current?.unit || null}
+                    unit={unitRef.current?.unit || null}
                     onSelect={(idx, action) => {
                         selectAction({ idx, action });
+                        // action = { idx, action };
+                        // setCounter((c) => c + 1);
                         console.log("selected action", action);
                     }}
                 />
@@ -107,17 +118,15 @@ export function Play({ game, refetch, setGame }: Props) {
     );
 
     async function performSelectedAction(x: number, y: number) {
-        console.log("performing action", selectedUnit.current, action);
-
         if (!zkLogin.address) return;
         if (!action) return;
-        if (!selectedUnit.current) return;
+        if (!unitRef.current) return;
         if (!game) return;
         if (wait) return;
 
         let timer: any;
 
-        const unit = selectedUnit.current;
+        const unit = unitRef.current;
 
         setWait(true);
 
@@ -167,7 +176,7 @@ export function Play({ game, refetch, setGame }: Props) {
                 }
 
                 game.map.grid[prev.x][prev.y] = { Empty: true, $kind: "Empty" };
-                const { x, y } = parsedPath.shift()!;
+                const { x, y } = parsedPath.shift()!; // @ts-ignore
                 unitData.Unit!.unit.ap.value -= action.action.cost;
 
                 unit.x = x;
@@ -213,8 +222,11 @@ export function Play({ game, refetch, setGame }: Props) {
             ],
         });
 
-        const { digest } = await executeTransaction(tx)!;
-        await client.waitForTransaction({ digest });
+        const txResult = await executeTransaction(tx)!;
+        // const { digest } = await executeTransaction(tx)!;
+        // await client.waitForTransaction({ digest });
+
+        console.log(txResult);
 
         clearInterval(timer);
         refetch();
@@ -257,24 +269,25 @@ export function Play({ game, refetch, setGame }: Props) {
     function setSelectedUnit(unit: SelectedUnit | null) {
         if (!game) return;
 
-        selectedUnit.current = unit;
+        unitRef.current = unit;
+        setTarget(null);
 
-        if (!unit || !selectedUnit.current) {
+        if (!unit || !unitRef.current) {
             setHighlight([])
             return;
         }
 
-        if (game.turn > selectedUnit.current.unit.turn) {
-            selectedUnit.current.unit.turn = game.turn;
-            selectedUnit.current.unit.ap.value = selectedUnit.current.unit.ap.maxValue;
+        if (game.turn > unitRef.current.unit.turn) {
+            unitRef.current.unit.turn = game.turn;
+            unitRef.current.unit.ap.value = unitRef.current.unit.ap.maxValue;
         }
 
         if (action) {
             setHighlight(markInRange(
                 game.map,
-                selectedUnit.current.x,
-                selectedUnit.current.y,
-                actionRange(selectedUnit.current.unit, action.action),
+                unitRef.current.x,
+                unitRef.current.y,
+                actionRange(unitRef.current.unit, action.action),
                 canBypass,
             ))
         } else {
