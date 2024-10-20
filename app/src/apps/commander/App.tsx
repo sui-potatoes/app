@@ -119,7 +119,8 @@ export default function Commander() {
         const game = tx.moveCall({ target: `${packageId}::commander::preset` });
         tx.transferObjects([game], zkLogin.address!);
 
-        await executeTransaction(tx);
+        const { digest } = await executeTransaction(tx);
+        await client.waitForTransaction({ digest });
         refetch();
     }
 
@@ -137,7 +138,8 @@ export default function Commander() {
 
         tx.transferObjects([game], zkLogin.address!);
 
-        await executeTransaction(tx);
+        const { digest } = await executeTransaction(tx);
+        await client.waitForTransaction({ digest });
         refetch();
     }
 }

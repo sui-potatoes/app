@@ -46,7 +46,8 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
     useEffect(() => {
         if (scene) return;
 
-        const _scene = newScene(ROOT);
+        const grid = gameGrid.grid;
+        const _scene = newScene(ROOT, grid[0].length, grid.length);
         if (!_scene) return;
 
         setScene(_scene);
@@ -115,6 +116,8 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
      * @param param0
      */
     function onSelectCell({ point }: { point: THREE.Vector2 }) {
+        console.log("onSelectCell", point, gameGrid.grid[point.x][point.y]);
+
         let { x: y, y: x } = point;
         if (gameGrid.grid[x][y].$kind === "Empty") {
             onSelect(null, x, y);

@@ -146,7 +146,7 @@ public fun perform_action(game: &mut Game, x0: u16, y0: u16, action_idx: u16, x1
 
     // if the action is attack, check if the target is within range
     if (action.is_attack()) {
-        let (max_range, damage) = action.attack_params();
+        let (max_range, mut damage) = action.attack_params();
 
         assert!(grid::range(x0, y0, x1, y1) <= max_range);
         assert!(game.is_unit(x1, y1));
@@ -156,7 +156,9 @@ public fun perform_action(game: &mut Game, x0: u16, y0: u16, action_idx: u16, x1
         attacker.ap_mut().decrease(action.cost());
 
         // decrease HP of the target. if health is 0, remove unit from the map
+        // apply armor reduction before dealing damage
         let (target, _) = game.map[x1, y1].unit_mut();
+        target.armor().do_ref!(|armor| damage = armor.reduce(damage));
         target.health_mut().decrease(damage);
 
         // remove the unit from the map if it's dead

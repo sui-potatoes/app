@@ -69,23 +69,22 @@ export class Grid extends GameObject<GridEvents> {
     protected highlight: THREE.Group;
 
     /** Construct the Grid using dimensions and divisions */
-    constructor(public size: number) {
-        const geometry = new THREE.PlaneGeometry(size, size);
+    constructor(public width: number, public height: number) {
+        const geometry = new THREE.PlaneGeometry(width, height);
         const material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
 
         super(geometry, material);
 
         this.position.y = -0.001;
-        this.position.x = Math.ceil(size / 2) - 1;
-        this.position.z = Math.ceil(size / 2) - 1;
+        this.position.x = Math.ceil(width / 2) - 1;
+        this.position.z = Math.ceil(height / 2) - 1;
         this.rotation.x = Math.PI / 2;
 
         // Create the grid helper
-        this.gridHelper = new THREE.GridHelper(size, size, 0xaa5555, 0xffffff);
+        this.gridHelper = new THREE.GridHelper(Math.max(width, height), Math.max(width, height), 0xaa5555, 0xffffff);
         this.gridHelper.position.y = 0;
-        this.gridHelper.position.x = Math.ceil(size / 2) - 1;
-        this.gridHelper.position.z = Math.ceil(size / 2) - 1;
-        this.size = size;
+        this.gridHelper.position.x = Math.ceil(width / 2) - 1;
+        this.gridHelper.position.z = Math.ceil(height / 2) - 1;
 
         // Create the cursor
         this.cursor = this.newCursor();
@@ -98,13 +97,13 @@ export class Grid extends GameObject<GridEvents> {
         this.pathTracer = new THREE.Group();
         this.highlight = new THREE.Group();
         this.units = new THREE.Group();
-        this.innerGrid = Array.from({ length: size }, () =>
-            Array.from({ length: size }, () => null),
+        this.innerGrid = Array.from({ length: width }, () =>
+            Array.from({ length: height }, () => null),
         );
     }
 
     get center() {
-        return new THREE.Vector3(Math.ceil(this.size / 2), 0, Math.ceil(this.size / 2));
+        return new THREE.Vector3(Math.ceil(this.width / 2), 0, Math.ceil(this.height / 2));
     }
 
     get cellOffset() {
@@ -155,6 +154,8 @@ export class Grid extends GameObject<GridEvents> {
             object.movement.start();
         }
 
+        this.selectedCell = null;
+
         // move the object to the first point
         const transitions = path.map((point) => {
             let hasTurned = false;
@@ -179,16 +180,17 @@ export class Grid extends GameObject<GridEvents> {
         });
 
         return transitions
-            .reduce((prev, current) => {
-                return prev.then(() => {
-                    current.start();
-                    return current.promise;
-                });
+            .reduce(async (prev, current) => {
+                await prev;
+                current.start();
+                return current.promise;
             }, Promise.resolve())
             .then(() => {
                 if (object instanceof AnimatedUnit) {
                     object.movement.stop();
                 }
+
+                this.selectCell(path[path.length - 1]);
             });
     }
 
@@ -223,9 +225,12 @@ export class Grid extends GameObject<GridEvents> {
      * @param point Intersection point of a Raycaster.
      */
     gridCell(point: THREE.Vector3) {
+        const x = +(point.x / this.scale.x + OFFSET).toFixed(0);
+        const y = +(point.z / this.scale.z + OFFSET).toFixed(0);
+
         return new THREE.Vector2(
-            +(point.x / this.scale.x + OFFSET).toFixed(0),
-            +(point.z / this.scale.z + OFFSET).toFixed(0),
+            Math.max(0, Math.min(this.width - 1, x)),
+            Math.max(0, Math.min(this.height - 1, y)),
         );
     }
 
@@ -286,9 +291,9 @@ export class Grid extends GameObject<GridEvents> {
     ) {
         if (
             position.x < 0 ||
-            position.x >= this.size ||
+            position.x >= this.width ||
             position.y < 0 ||
-            position.y >= this.size
+            position.y >= this.height
         ) {
             throw new Error("Position out of bounds");
         }

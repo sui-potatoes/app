@@ -47,7 +47,7 @@ export function Play({ game, refetch, setGame }: Props) {
         },
         onTarget(x, y) {
             console.log("ontarget", unitRef.current);
-            setTarget({ x, y });
+            setTarget(() => ({ x, y }));
         },
     });
 
@@ -69,7 +69,10 @@ export function Play({ game, refetch, setGame }: Props) {
     // in a missing state / undefined values.
     useEffect(() => {
         if (!target) return;
-        performSelectedAction(target.x, target.y).then(() => setWait(false));
+        performSelectedAction(target.x, target.y).then(() => {
+            updateHighlight();
+            setWait(false);
+        });
     }, [target]);
 
     return (
@@ -106,8 +109,11 @@ export function Play({ game, refetch, setGame }: Props) {
     );
 
     async function performSelectedAction(x: number, y: number) {
+        console.log("performSelectedAction", x, y);
+        console.log("values are: %s, %s, %s, %s, %s", !!zkLogin.address, !!action, !!unitRef.current, !!game, !wait);
+
         if (!zkLogin.address) return;
-        if (!action) return;
+        if (!action?.action) return;
         if (!unitRef.current) return;
         if (!game) return;
         if (wait) return;
@@ -144,16 +150,16 @@ export function Play({ game, refetch, setGame }: Props) {
             });
 
             // kill me
-            if (!result) return console.log("no result");
-            if (!result.results) return console.log("no results");
-            if (!result.results[0]) return console.log("no result 0");
+            if (!result || !result.results || !result.results[0]) {
+                return console.log("no result");
+            }
 
             const [path] = result.results[0].returnValues as any[];
             const parsedPath = TracedPath.parse(new Uint8Array(path[0]));
 
             if (!parsedPath) return console.log("no path");
 
-            // very cheap trick to highlight unit's path before and during movement
+            // very cheap trick to highlight urnit's path before and during movement
             const start = { x: unit.x, y: unit.y, d: 1 };
             setHighlight([start].concat(parsedPath.map(({ x, y }, d) => ({ x, y, d: d + 1 }))));
 
@@ -164,7 +170,7 @@ export function Play({ game, refetch, setGame }: Props) {
             unitRef.current = { ...unit, x, y };
             unitRef.current.unit.ap.value -= action.action.cost * parsedPath.length;
 
-            const unitData = { ...game.map.grid[unit.x][unit.y] };
+            const unitData = { ...game.map.grid[start.x][start.y] };
 
             if (unitData.Unit) {
                 unitData.Unit.unit = unitRef.current.unit;
@@ -172,6 +178,7 @@ export function Play({ game, refetch, setGame }: Props) {
                 game.map.grid[x][y] = unitData;
             }
 
+            setSelectedUnit(unitRef.current);
             setGame(() => ({ ...game }));
         }
 
@@ -181,19 +188,30 @@ export function Play({ game, refetch, setGame }: Props) {
             const target = game.map.grid[x][y].Unit!.unit;
             const { damage, maxRange } = action.action.inner.Attack;
 
+            if (!game.map.grid[x][y].Unit) {
+                return console.log("no unit");
+            }
+
             if (Math.abs(unit.x - x) + Math.abs(unit.y - y) > maxRange) {
                 return console.log("out of range");
             }
 
             await performAttack({ x: unit.x, y: unit.y }, { x, y });
 
+            unitRef.current.unit.ap.value -= action.action.cost;
+
             if (target.health.value <= damage) {
                 await killUnit({ x, y });
                 game.map.grid[x][y] = { Empty: true, $kind: "Empty" };
+            } else {
+                game.map.grid[x][y].Unit!.unit.health.value -= damage;
             }
+
+            setGame(() => ({ ...game }));
         }
 
         if (action.action.inner.$kind === "Skip") {
+            unitRef.current.unit.ap.value -= action.action.cost;
             x = 0;
             y = 0;
         }
@@ -237,6 +255,8 @@ export function Play({ game, refetch, setGame }: Props) {
     }
 
     async function nextTurn() {
+        console.log("Next turn: address %s, game %o, wait %s", zkLogin.address, game, wait);
+
         if (!zkLogin.address) return;
         if (!game) return;
         if (wait) return;
@@ -247,8 +267,10 @@ export function Play({ game, refetch, setGame }: Props) {
             arguments: [tx.object(normalizeSuiObjectId(game.id))],
         });
 
+        setGame({ ...game, turn: game.turn + 1 });
         const { digest } = await executeTransaction(tx)!;
         await client.waitForTransaction({ digest });
+        selectAction(action);
         refetch();
     }
 
@@ -256,14 +278,14 @@ export function Play({ game, refetch, setGame }: Props) {
         if (!game) return;
 
         unitRef.current = unit;
-        updateHighlight();
-        setTarget(null);
 
         if (!unit) return;
         if (unitRef.current && game.turn > unit.unit.turn) {
             unitRef.current.unit.turn = game.turn;
             unitRef.current.unit.ap.value = unitRef.current.unit.ap.maxValue;
         }
+
+        updateHighlight();
     }
 
     function updateHighlight() {

@@ -5,7 +5,7 @@ import { useSuiClient } from "@mysten/dapp-kit";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useNetworkVariable } from "../../networkConfig";
 import { Game, Unit } from "./types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { EditorMap } from "./EditorMap";
 import { Transaction } from "@mysten/sui/transactions";
 import { useTransactionExecutor } from "./useTransactionExecutor";
@@ -21,12 +21,6 @@ type SelectedTile = {
     x: number;
     y: number;
 };
-
-// type Change = {
-//     kind: string;
-//     x: number;
-//     y: number;
-// };
 
 export function Editor({ game, refetch }: Props) {
     const zkLogin = useZkLogin();
@@ -167,7 +161,6 @@ export function Editor({ game, refetch }: Props) {
         }
 
         if (inventory == "crate") {
-            console.log('placing crate');
             unit = tx.moveCall({
                 target: `${packageId}::unit::new`,
                 arguments: [

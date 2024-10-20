@@ -15,6 +15,8 @@ import JEASINGS from "jeasings";
  */
 export function newScene(
     element: string,
+    gridWidth: number,
+    gridHeight: number,
 ): { scene: THREE.Scene; camera: ControllableCamera; grid: Grid } | null {
     // get the root element, skip if it already has children (i.e. ThreeJS is already running)
     const root = document.getElementById(element);
@@ -30,11 +32,11 @@ export function newScene(
 
     // create scene
     const scene = new THREE.Scene();
-    const grid = new Grid(10); // And first there was a grid
+    const grid = new Grid(gridWidth, gridHeight); // And first there was a grid
     const camera = new ControllableCamera(width / height);
 
-    camera.position.add(grid.center);
     camera.lookAt(grid.center);
+    camera.setDefaults(grid.center);
 
     // create renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });

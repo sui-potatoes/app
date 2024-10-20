@@ -219,6 +219,9 @@ public fun action(unit: &Unit, action_index: u16): Action {
     unit.actions[idx]
 }
 
+/// Get the number of actions the unit can perform.
+public fun armor(unit: &Unit): &Option<Armor> { &unit.armor }
+
 /// Get the action points (AP) of the unit.
 public fun ap(unit: &Unit): &Param { &unit.ap }
 

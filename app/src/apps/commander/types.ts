@@ -40,6 +40,11 @@ export const ActionType = bcs.enum("ActionType", {
     Skip: null,
 });
 
+export const Armor = bcs.struct("Armor", {
+    name: bcs.string(),
+    value: bcs.u16(),
+});
+
 export const Action = bcs.struct("Action", {
     name: bcs.string(),
     cost: bcs.u16(),
@@ -54,6 +59,7 @@ export const Param = bcs.struct("Param", {
 export const Unit = bcs.struct("Unit", {
     symbol: bcs.string(),
     name: bcs.string(),
+    armor: bcs.vector(Armor),
     actions: bcs.vector(Action),
     health: Param,
     ap: Param,

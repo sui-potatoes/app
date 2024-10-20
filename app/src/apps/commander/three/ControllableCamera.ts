@@ -14,12 +14,14 @@ export class ControllableCamera extends THREE.PerspectiveCamera implements Compo
     protected shiftPressed = false;
     protected wheelPressed = false;
     protected reverse: boolean = false;
+    protected center: THREE.Vector3;
+    protected defaultPosition: THREE.Vector3;
 
     constructor(aspect: number) {
         super(45, aspect, 1, 5000);
-
-        this.position.z = 10;
-        this.position.y = 10;
+        this.center = new THREE.Vector3(0, 0, 0);
+        this.defaultPosition = new THREE.Vector3(0, 10, 0);
+        this.position.set(0, 10, 0);
     }
 
     initialize(scene: THREE.Scene) {
@@ -32,16 +34,21 @@ export class ControllableCamera extends THREE.PerspectiveCamera implements Compo
     _deselect(): void {}
     _process(_delta: number): void {}
 
+    setDefaults(center: THREE.Vector3) {
+        this.center = center;
+        this.position.add(center).multiply(new THREE.Vector3(1, 1, 3));
+        this.defaultPosition = this.position.clone();
+        this.lookAt(center);
+    }
+
     async moveToUnit(point: THREE.Vector2, lookAt: THREE.Vector2) {
         return new Promise((resolve) => {
             new JEASINGS.JEasing(this.position)
                 .to({ x: point.x, y: 1, z: point.y }, 1000)
                 .easing(JEASINGS.Sinusoidal.In)
-                .onUpdate(() => this.lookAt(new THREE.Vector3(lookAt.x, 1, lookAt.y)))
+                .onUpdate(() => this.lookAt(new THREE.Vector3(lookAt.x, 0, lookAt.y)))
                 .start()
                 .onComplete(() => {
-                    console.log(this.getWorldDirection(new THREE.Vector3()));
-                    this.translateX(CLOSEUP.x);
                     resolve(null);
                 });
         });
@@ -50,13 +57,13 @@ export class ControllableCamera extends THREE.PerspectiveCamera implements Compo
     async moveBack() {
         return new Promise((resolve) => {
             const { x, y, z } = !this.reverse
-                ? new THREE.Vector3(5, 10, 5)
-                : new THREE.Vector3(5, 10, -8);
+                ? this.defaultPosition.clone()
+                : this.defaultPosition.clone().multiply(new THREE.Vector3(1, 1, -1));
 
             new JEASINGS.JEasing(this.position)
                 .to({ x, y, z }, 1000)
                 .easing(JEASINGS.Sinusoidal.In)
-                .onUpdate(() => this.lookAt(new THREE.Vector3(5, 0, 5)))
+                .onUpdate(() => this.lookAt(this.center.clone()))
                 .start()
                 .onComplete(() => resolve(null));
         });
@@ -83,10 +90,12 @@ export class ControllableCamera extends THREE.PerspectiveCamera implements Compo
 
                     // on space, animate the camera
                     if (event.key === " " || event.key == "Spacebar") {
+                        const newPosition = this.defaultPosition.clone();
+                        const { x, y, z } = !this.reverse ? newPosition.multiply(new THREE.Vector3(1, 1, -1)) : newPosition;
                         new JEASINGS.JEasing(this.position)
-                            .to({ z: this.reverse ? 15 : -8 }, 1000)
+                            .to({ z, y, x }, 1000)
                             .easing(JEASINGS.Sinusoidal.In)
-                            .onUpdate(() => this.lookAt(5, 0, 5))
+                            .onUpdate(() => this.lookAt(this.center))
                             .onComplete(() => {
                                 this.reverse = !this.reverse;
                             })
