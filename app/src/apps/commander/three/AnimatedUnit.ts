@@ -10,13 +10,13 @@ const loader = new GLTFLoader();
 const IDLE = "Idle";
 const STATIC = "Static";
 const RUN = "Run";
-const MELEE = "Melee";
-const SHOOTING = "Shooting";
+// const MELEE = "Melee";
+// const SHOOTING = "Shooting";
 const SNIPERSHOT = "Snipershot";
 const DEATH = "Death";
 const DAMAGE = "Damage";
-const CROUCH_DEATH = "CrouchDeath";
-const CROUCH_DAMAGE = "CrouchDamage";
+// const CROUCH_DEATH = "CrouchDeath";
+// const CROUCH_DAMAGE = "CrouchDamage";
 
 /**
  * Simple `Unit` object which has a texture.

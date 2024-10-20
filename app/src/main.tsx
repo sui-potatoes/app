@@ -19,7 +19,7 @@ const enokiApi = import.meta.env.VITE_ENOKI_API_KEY;
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-    // <React.StrictMode>
+    <React.StrictMode>
         <QueryClientProvider client={queryClient}>
             <SuiClientProvider
                 networks={networkConfig}
@@ -32,5 +32,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 </EnokiFlowProvider>
             </SuiClientProvider>
         </QueryClientProvider>
-    // </React.StrictMode>,
+    </React.StrictMode>,
 );

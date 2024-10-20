@@ -339,7 +339,7 @@ export default function App() {
         }
 
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
+            signer: await flow.getKeypair({ network: "testnet" }), // @ts-ignore
             transaction: tx,
         });
 
@@ -420,6 +420,7 @@ export default function App() {
         });
         const result = await client.signAndExecuteTransaction({
             signer: await flow.getKeypair({ network: "testnet" }),
+            // @ts-ignore
             transaction: tx,
         });
 

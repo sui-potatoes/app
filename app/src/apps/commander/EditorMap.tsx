@@ -2,12 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "react";
-import { Unit } from "./types";
 import { MapProps } from "./three/Map";
 
 export function EditorMap({ grid, disabled, highlight, onTarget, onSelect }: MapProps) {
     const [selected, setSelected] = useState<HTMLDivElement>();
-    const [selectedUnit, setSelectedUnit] = useState<typeof Unit.$inferType | null>(null);
 
     // now the same thing but with divs
     return (
@@ -82,7 +80,6 @@ export function EditorMap({ grid, disabled, highlight, onTarget, onSelect }: Map
                                         onClick={(e) => {
                                             e.preventDefault();
                                             setSelected(e.currentTarget);
-                                            setSelectedUnit(tile.Unit.unit);
                                             onSelect(tile.Unit.unit, x, y);
                                         }}
                                         key={`cell-${x}-${y}`}

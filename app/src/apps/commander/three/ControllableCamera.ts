@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { Component } from "./GameObject";
 import JEASINGS from "jeasings";
 
-const CLOSEUP = new THREE.Vector3(-0.2, -0.2, -0.3);
+// const CLOSEUP = new THREE.Vector3(-0.2, -0.2, -0.3);
 
 /**
  * A camera that can be controlled by the player.
