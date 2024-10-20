@@ -83,7 +83,59 @@ public macro fun tabulate<$T>($width: u16, $height: u16, $f: |u16, u16| -> $T): 
     from_vector_unchecked(grid)
 }
 
+/// Finds a group of cells that satisfy the predicate `f`. The function receives
+/// the cell at the current position, and returns whether the cell is part of the
+/// group.
+///
+/// ```move
+/// // finds a group of cells with value 1
+/// grid.find_group!(0, 2, |el| *el == 1);
+/// ```
+public macro fun find_group<$T>(
+    $map: &Grid<$T>,
+    $x: u16,
+    $y: u16,
+    $f: |&$T| -> bool,
+): vector<Point> {
+    let (x, y) = ($x, $y);
+    let map = $map;
+    let (width, height) = (map.width(), map.height());
+    let mut group = vector[];
+    let mut visited = tabulate!(width, height, |_, _| false);
+
+    if (!$f(&map[x, y])) return group;
+
+    group.push_back(point::new(x, y));
+    *&mut visited[x, y] = true;
+
+    let mut queue = vector[point::new(x, y)];
+
+    while (!queue.is_empty()) {
+        let point = queue.pop_back();
+        map.von_neumann(point).do!(|point| {
+            let (x, y) = point.into_values();
+
+            if (x >= width || y >= height || visited[x, y]) return;
+
+            if ($f(&map[x, y])) {
+                *&mut visited[x, y] = true;
+                group.push_back(point);
+                queue.push_back(point);
+            }
+        });
+    };
+
+    group
+}
+
 /// Use Wave Algorithm to find the shortest path between two points.
+///
+/// ```move
+/// // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
+/// grid.trace!(0, 0, 1, 4, 6, |cell| cell == 0);
+/// ```
+///
+/// TODO: consider using a A* algorithm for better performance.
 public macro fun trace<$T>(
     $map: &Grid<$T>,
     $x0: u16,
@@ -233,4 +285,20 @@ fun test_path_tracing() {
     let path = trace!(&grid, 0, 1, 3, 0, 10, |cell| cell == &0);
 
     assert!(path.is_some());
+}
+
+#[test]
+fun test_find_group() {
+    let grid = Grid {
+        grid: vector[
+            vector[0, 0, 1, 0, 0],
+            vector[0, 0, 1, 0, 2],
+            vector[0, 0, 1, 0, 0],
+            vector[1, 0, 1, 0, 0],
+            vector[0, 1, 1, 0, 0],
+        ],
+    };
+
+    let group = grid.find_group!(0, 2, |el| *el == 1);
+    assert!(group.length() == 6);
 }

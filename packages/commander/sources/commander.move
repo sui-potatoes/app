@@ -113,7 +113,7 @@ public fun perform_action(game: &mut Game, x0: u16, y0: u16, action_idx: u16, x1
     // if the unit has already performed an action this turn, reset its AP
     if (unit.current_turn() < game.current_turn) {
         unit.ap_mut().reset();
-        unit.next_turn();
+        unit.set_turn(game.current_turn);
     };
 
     let unit_ap = unit.ap().value();
@@ -139,14 +139,14 @@ public fun perform_action(game: &mut Game, x0: u16, y0: u16, action_idx: u16, x1
 
         let mut tile = game.map.swap(x0, y0, Tile::Empty);
         let (unit, _) = tile.unit_mut();
-        unit.ap_mut().decrease(length as u16);
+        unit.ap_mut().decrease((length as u16) * action.cost());
         let _ = game.map.swap(x1, y1, tile);
         return
     };
 
     // if the action is attack, check if the target is within range
     if (action.is_attack()) {
-        let (max_range, damage) = action.attack_params();
+        let (max_range, mut damage) = action.attack_params();
 
         assert!(grid::range(x0, y0, x1, y1) <= max_range);
         assert!(game.is_unit(x1, y1));
@@ -156,7 +156,9 @@ public fun perform_action(game: &mut Game, x0: u16, y0: u16, action_idx: u16, x1
         attacker.ap_mut().decrease(action.cost());
 
         // decrease HP of the target. if health is 0, remove unit from the map
+        // apply armor reduction before dealing damage
         let (target, _) = game.map[x1, y1].unit_mut();
+        target.armor().do_ref!(|armor| damage = armor.reduce(damage));
         target.health_mut().decrease(damage);
 
         // remove the unit from the map if it's dead

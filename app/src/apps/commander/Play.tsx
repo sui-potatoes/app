@@ -1,15 +1,17 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UnitStats } from "./UnitStats";
-import { Map } from "./Map";
-import { SelectedAction, SelectedUnit, Game, TracedPath, Unit } from "./types";
+import { Map } from "./three/Map";
+import { SelectedAction, SelectedUnit, Game, TracedPath } from "./types";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiObjectId } from "@mysten/sui/utils";
 import { Transaction } from "@mysten/sui/transactions";
 import { useNetworkVariable } from "../../networkConfig";
+import { actionRange, markInRange } from "./state";
+import { useTransactionExecutor } from "./useTransactionExecutor";
 
 type Props = {
     game: typeof Game.$inferType;
@@ -22,85 +24,112 @@ export function Play({ game, refetch, setGame }: Props) {
     const flow = useEnokiFlow();
     const client = useSuiClient();
     const packageId = useNetworkVariable("commanderPackageId");
-    const [action, selectAction] = useState<SelectedAction | null>(null);
-    const [unit, setUnit] = useState<SelectedUnit | null>(null);
+    const { executeTransaction } = useTransactionExecutor({
+        // @ts-ignore
+        client,
+        signer: () => flow.getKeypair(),
+        enabled: !!zkLogin.address,
+    });
+    const unitRef = useRef<SelectedUnit | null>(null);
     const [wait, setWait] = useState(false);
+    const [action, selectAction] = useState<SelectedAction | null>(null);
+    const [target, setTarget] = useState<{ x: number; y: number } | null>(null);
+    const [highlight, setHighlight] = useState<{ x: number; y: number; d: number }[]>([]);
+    const canBypass = !!action && action.action?.inner.$kind === "Attack";
+
+    // import the `Map` component and initialize the game map
+    const { mapElement, moveObject, performAttack, killUnit } = Map({
+        disabled: wait,
+        highlight,
+        grid: game.map,
+        onSelect(unit, x, y) {
+            setSelectedUnit(unit === null ? null : { unit, x, y });
+        },
+        onTarget(x, y) {
+            console.log("ontarget", unitRef.current);
+            setTarget(() => ({ x, y }));
+        },
+    });
+
+    // triggers re-render when the selected unit changes
+    // (via the auto action selection)
+    useEffect(() => {
+        if (!unitRef.current) return;
+        updateHighlight();
+    }, [action]);
+
+    // Due to EventDispatcher implementation in `Three.js`, we avoid using
+    // `useEffect` directly in the `onTarget` and `onSelect` callbacks. Instead,
+    // we use a `useRef` for core values, and trigger a re-render by setting
+    // the `highlight` state.
+    //
+    // This specific state dependency triggers `performSelectedAction` in the
+    // current state scope, allowing us to perform the action. Attempt to call
+    // `performSelectedAction` directly in the `onTarget` callback will result
+    // in a missing state / undefined values.
+    useEffect(() => {
+        if (!target) return;
+        performSelectedAction(target.x, target.y).then(() => {
+            updateHighlight();
+            setWait(false);
+        });
+    }, [target]);
 
     return (
-        <div className="grid md:grid-cols-2 gap-5 items-center">
-            <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
-                <div className={`${wait ? "disabled" : ""}`}>
-                    <Map
-                        grid={game.map}
-                        onSelect={(unit, x, y) =>
-                            unit === null
-                                ? setUnit(null)
-                                : setUnit({ unit, x, y })
-                        }
-                        onPoint={(unit, x, y) => {
-                            performSelectedAction(unit, x, y).then(() =>
-                                setWait(false),
-                            );
-                        }}
-                    />
-                </div>
+        <div
+            className="items-center flex"
+            onContextMenu={(e) => {
+                e.preventDefault();
+            }}
+        >
+            <div className="max-md:flex max-md:flex-col max-md:justify-center max-md:items-center">
+                <div className={`${wait ? "disabled" : ""}`}>{mapElement}</div>
             </div>
             <div className="flex flex-col justify-center">
                 <h2 className="my-2 text-xl">Game</h2>
                 <p className="">
-                    <button
-                        onClick={() => destroy().then(() => setWait(false))}
-                    >
+                    <button onClick={() => destroy().then(() => setWait(false))}>
                         Destroy Game
                     </button>
                 </p>
                 <p className="mb-4">
-                    <button
-                        onClick={() => nextTurn().then(() => setWait(false))}
-                    >
+                    <button onClick={() => nextTurn().then(() => setWait(false))}>
                         Next Turn ({game.turn + 1})
                     </button>
                 </p>
                 <UnitStats
                     game={game}
-                    unit={unit?.unit || null}
-                    onSelect={(idx, action) => selectAction({ idx, action })}
+                    unit={unitRef.current?.unit || null}
+                    onSelect={(idx, action) => {
+                        selectAction({ idx, action });
+                    }}
                 />
             </div>
         </div>
     );
 
-    async function performSelectedAction(
-        _unit: typeof Unit.$inferType | null,
-        x: number,
-        y: number,
-    ) {
+    async function performSelectedAction(x: number, y: number) {
+        console.log("performSelectedAction", x, y);
+        console.log("values are: %s, %s, %s, %s, %s", !!zkLogin.address, !!action, !!unitRef.current, !!game, !wait);
+
         if (!zkLogin.address) return;
-        if (!action) return;
-        if (!unit) return;
+        if (!action?.action) return;
+        if (!unitRef.current) return;
         if (!game) return;
         if (wait) return;
 
         let timer: any;
 
-        setWait(true);
+        const unit = unitRef.current;
 
-        if (game.turn > unit.unit.turn) {
-            unit.unit.turn = game.turn;
-            unit.unit.ap.value = unit.unit.ap.maxValue;
-            setUnit({ ...unit });
-        }
+        setWait(true);
 
         // very silly check for now
         if (action.action.inner.$kind === "Move") {
             const maxRange = unit.unit.ap.value / action.action.cost;
             const range = Math.abs(unit.x - x) + Math.abs(unit.y - y);
 
-            if (game.map.grid[x][y].$kind !== "Empty")
-                return console.log("not empty");
-
-            console.log(range, maxRange);
-
+            if (game.map.grid[x][y].$kind !== "Empty") return console.log("not empty");
             if (range > maxRange) return console.log("out of range");
 
             const inspect = new Transaction();
@@ -115,58 +144,74 @@ export function Play({ game, refetch, setGame }: Props) {
                     inspect.pure.u16(y),
                 ],
             });
-
             const result = await client.devInspectTransactionBlock({
                 sender: zkLogin.address!,
                 transactionBlock: inspect as any,
             });
 
             // kill me
-            if (!result) return console.log("no result");
-            if (!result.results) return console.log("no results");
-            if (!result.results[0]) return console.log("no result 0");
+            if (!result || !result.results || !result.results[0]) {
+                return console.log("no result");
+            }
 
             const [path] = result.results[0].returnValues as any[];
             const parsedPath = TracedPath.parse(new Uint8Array(path[0]));
 
             if (!parsedPath) return console.log("no path");
 
-            const unitData = { ...game.map.grid[unit.x][unit.y] };
-            let prev = { x: unit.x, y: unit.y };
-            timer = setInterval(() => {
-                if (parsedPath.length === 0) {
-                    clearInterval(timer);
-                    return;
-                }
+            // very cheap trick to highlight urnit's path before and during movement
+            const start = { x: unit.x, y: unit.y, d: 1 };
+            setHighlight([start].concat(parsedPath.map(({ x, y }, d) => ({ x, y, d: d + 1 }))));
 
-                game.map.grid[prev.x][prev.y] = { Empty: true, $kind: "Empty" };
-                const { x, y } = parsedPath.shift()!;
-                unitData.Unit!.unit.ap.value -= action.action.cost;
-                setUnit({ ...unit, x, y, unit: { ...unit.unit } });
+            // play the move animation, then reset the highlight
+            await moveObject({ ...unit }, parsedPath);
+            setHighlight([]);
+
+            unitRef.current = { ...unit, x, y };
+            unitRef.current.unit.ap.value -= action.action.cost * parsedPath.length;
+
+            const unitData = { ...game.map.grid[start.x][start.y] };
+
+            if (unitData.Unit) {
+                unitData.Unit.unit = unitRef.current.unit;
+                game.map.grid[unit.x][unit.y] = { Empty: true, $kind: "Empty" };
                 game.map.grid[x][y] = unitData;
-                setGame(() => ({ ...game }));
-                prev = { x, y };
-            }, 200);
+            }
+
+            setSelectedUnit(unitRef.current);
+            setGame(() => ({ ...game }));
         }
 
         if (action.action.inner.$kind === "Attack") {
-            if (game.map.grid[x][y].$kind !== "Unit")
-                return console.log("no unit");
+            if (game.map.grid[x][y].$kind !== "Unit") return console.log("no unit");
 
             const target = game.map.grid[x][y].Unit!.unit;
             const { damage, maxRange } = action.action.inner.Attack;
+
+            if (!game.map.grid[x][y].Unit) {
+                return console.log("no unit");
+            }
 
             if (Math.abs(unit.x - x) + Math.abs(unit.y - y) > maxRange) {
                 return console.log("out of range");
             }
 
+            await performAttack({ x: unit.x, y: unit.y }, { x, y });
+
+            unitRef.current.unit.ap.value -= action.action.cost;
+
             if (target.health.value <= damage) {
-                alert("You killed the enemy!");
+                await killUnit({ x, y });
                 game.map.grid[x][y] = { Empty: true, $kind: "Empty" };
+            } else {
+                game.map.grid[x][y].Unit!.unit.health.value -= damage;
             }
+
+            setGame(() => ({ ...game }));
         }
 
         if (action.action.inner.$kind === "Skip") {
+            unitRef.current.unit.ap.value -= action.action.cost;
             x = 0;
             y = 0;
         }
@@ -184,15 +229,10 @@ export function Play({ game, refetch, setGame }: Props) {
             ],
         });
 
-        const effects = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
-            requestType: "WaitForLocalExecution",
-            transaction: tx as any,
-            options: { showObjectChanges: true, showRawEffects: true },
-        });
+        const { digest } = await executeTransaction(tx)!;
+        await client.waitForTransaction({ digest });
 
         clearInterval(timer);
-        console.log(effects);
         refetch();
     }
 
@@ -207,18 +247,16 @@ export function Play({ game, refetch, setGame }: Props) {
             arguments: [tx.object(normalizeSuiObjectId(game.id))],
         });
 
-        await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
-            requestType: "WaitForLocalExecution",
-            transaction: tx as any,
-            options: { showObjectChanges: true },
-        });
+        const { digest } = await executeTransaction(tx)!;
+        await client.waitForTransaction({ digest });
 
         setGame(null);
         refetch();
     }
 
     async function nextTurn() {
+        console.log("Next turn: address %s, game %o, wait %s", zkLogin.address, game, wait);
+
         if (!zkLogin.address) return;
         if (!game) return;
         if (wait) return;
@@ -229,13 +267,57 @@ export function Play({ game, refetch, setGame }: Props) {
             arguments: [tx.object(normalizeSuiObjectId(game.id))],
         });
 
-        await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
-            requestType: "WaitForLocalExecution",
-            transaction: tx as any,
-            options: { showObjectChanges: true },
-        });
+        setGame({ ...game, turn: game.turn + 1 });
+        const { digest } = await executeTransaction(tx)!;
+        await client.waitForTransaction({ digest });
+        selectAction(action);
+        refetch();
+    }
 
-        await refetch();
+    function setSelectedUnit(unit: SelectedUnit | null) {
+        if (!game) return;
+
+        unitRef.current = unit;
+
+        if (!unit) return;
+        if (unitRef.current && game.turn > unit.unit.turn) {
+            unitRef.current.unit.turn = game.turn;
+            unitRef.current.unit.ap.value = unitRef.current.unit.ap.maxValue;
+        }
+
+        updateHighlight();
+    }
+
+    function updateHighlight() {
+        if (!game) return;
+        if (!unitRef.current) {
+            setHighlight([]);
+            return;
+        }
+
+        if (action && unitRef.current.unit.actions.length > 0) {
+            const inRange = markInRange(
+                game.map,
+                unitRef.current.x,
+                unitRef.current.y,
+                actionRange(unitRef.current.unit, action.action),
+                canBypass,
+            );
+
+            switch (action.action.inner.$kind) {
+                case "Attack":
+                    return setHighlight(
+                        inRange
+                            .filter(({ x, y }) => game.map.grid[x][y].$kind === "Unit")
+                            .map((e) => ({ ...e, d: 1 })),
+                    );
+                case "Move":
+                    return setHighlight(inRange);
+                case "Skip":
+                    return setHighlight([]);
+            }
+        }
+
+        setHighlight([]);
     }
 }
