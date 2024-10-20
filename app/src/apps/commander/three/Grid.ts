@@ -6,12 +6,32 @@ import { GameObject } from "./GameObject";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
+import JEASINGS from "jeasings";
+import { AnimatedUnit } from "./AnimatedUnit";
 
 export interface GridEvents extends THREE.Object3DEventMap {
     selectCell: { point: THREE.Vector2 };
     deselectCell: {};
     pointCell: { point: THREE.Vector2 };
+    moveObject: { from: THREE.Vector2; to: THREE.Vector2 };
+
+    moveObjectStart: { from: THREE.Vector2; to: THREE.Vector2; id: string };
+    moveObjectEnd: { id: string };
 }
+
+/**
+ * Scale of models in the game. Each is expected to be 1x1x1.
+ */
+const SCALE = 1;
+/**
+ * Offset of the model in the grid. Used to center the model in the grid.
+ */
+const OFFSET = SCALE / 2;
+
+/**
+ * The time it takes to move from one cell to another.
+ */
+const CELL_TRANSITION = 500;
 
 /**
  * Implements a 2D grid in the 3D world.
@@ -20,6 +40,9 @@ export interface GridEvents extends THREE.Object3DEventMap {
 export class Grid extends GameObject<GridEvents> {
     /** Name of the Object. */
     public name = "Grid";
+
+    /** Whether the selected object should look at the cursor. */
+    protected followCursor = false;
 
     /** Internal grid helper to render the grid. */
     protected gridHelper: THREE.GridHelper;
@@ -53,15 +76,15 @@ export class Grid extends GameObject<GridEvents> {
         super(geometry, material);
 
         this.position.y = -0.001;
-        this.position.x = Math.ceil(size / 2);
-        this.position.z = Math.ceil(size / 2);
+        this.position.x = Math.ceil(size / 2) - 1;
+        this.position.z = Math.ceil(size / 2) - 1;
         this.rotation.x = Math.PI / 2;
 
         // Create the grid helper
         this.gridHelper = new THREE.GridHelper(size, size, 0xaa5555, 0xffffff);
         this.gridHelper.position.y = 0;
-        this.gridHelper.position.x = Math.ceil(size / 2);
-        this.gridHelper.position.z = Math.ceil(size / 2);
+        this.gridHelper.position.x = Math.ceil(size / 2) - 1;
+        this.gridHelper.position.z = Math.ceil(size / 2) - 1;
         this.size = size;
 
         // Create the cursor
@@ -85,7 +108,7 @@ export class Grid extends GameObject<GridEvents> {
     }
 
     get cellOffset() {
-        return this.scale.multiplyScalar(0.5);
+        return this.scale.multiplyScalar(OFFSET);
     }
 
     /** Adds the plane + gridHelper to the scene */
@@ -97,12 +120,6 @@ export class Grid extends GameObject<GridEvents> {
         scene.add(this.units);
         scene.add(this.highlight);
         this._ready();
-    }
-
-    _hover(intersect: THREE.Intersection) {
-        const cell = this.gridCell(intersect.point);
-        this.cursor.position.set(cell.x - 0.5, 0, cell.y - 0.5);
-        this.redrawPath(this.selectedCell || cell, this.cursor.position);
     }
 
     highlightCells(cells: { x: number; y: number; d: number }[]) {
@@ -121,9 +138,84 @@ export class Grid extends GameObject<GridEvents> {
             );
 
             plane.rotation.x = Math.PI / 2;
-            plane.position.set(x + 0.5, 0.01, y + 0.5);
+            plane.position.set(x - OFFSET, 0.01, y - OFFSET);
             this.highlight.add(plane);
         }
+    }
+
+    /**
+     * Moves an object from one cell to another. If object in `from` is
+     * `AnimatedUnit`, call its `followPath` method.
+     */
+    async unitFollowPath(from: THREE.Vector2, path: THREE.Vector2[]) {
+        const object = this.innerGrid[from.x][from.y];
+
+        if (object === null || path.length == 0) return;
+        if (object instanceof AnimatedUnit) {
+            object.movement.start();
+        }
+
+        // move the object to the first point
+        const transitions = path.map((point) => {
+            let hasTurned = false;
+            const easing = new JEASINGS.JEasing(object.position).to(
+                { x: point.x - OFFSET, z: point.y - OFFSET },
+                CELL_TRANSITION,
+            );
+
+            return {
+                promise: new Promise<void>((resolve) => {
+                    easing
+                        .onUpdate(() => {
+                            if (!hasTurned) {
+                                object.lookAt(this.gridWorld(point));
+                                hasTurned = true;
+                            }
+                        })
+                        .onComplete(() => resolve());
+                }),
+                start: () => easing.start(),
+            };
+        });
+
+        return transitions
+            .reduce((prev, current) => {
+                return prev.then(() => {
+                    current.start();
+                    return current.promise;
+                });
+            }, Promise.resolve())
+            .then(() => {
+                if (object instanceof AnimatedUnit) {
+                    object.movement.stop();
+                }
+            });
+    }
+
+    async unitPerformRangedAttack(from: THREE.Vector2, to: THREE.Vector2) {
+        const object = this.innerGrid[from.x][from.y];
+        const target = this.innerGrid[to.x][to.y];
+
+        if (object === null || target === null) return;
+        if (object instanceof AnimatedUnit) {
+            object.lookAt(this.gridWorld(to));
+            target.lookAt(this.gridWorld(from));
+            return Promise.all([
+                object.attack.prepare(),
+                target instanceof AnimatedUnit && target.attack.receive()
+            ]);
+        }
+    }
+
+    async unitDeath(at: THREE.Vector2) {
+        const object = this.innerGrid[at.x][at.y];
+
+        if (object === null) return;
+        if (object instanceof AnimatedUnit) {
+            await object.attack.death();
+        }
+
+        this.removeGameObject(at);
     }
 
     /**
@@ -132,13 +224,19 @@ export class Grid extends GameObject<GridEvents> {
      */
     gridCell(point: THREE.Vector3) {
         return new THREE.Vector2(
-            +(point.x / this.scale.x + 0.5).toFixed(0),
-            +(point.z / this.scale.z + 0.5).toFixed(0),
+            +(point.x / this.scale.x + OFFSET).toFixed(0),
+            +(point.z / this.scale.z + OFFSET).toFixed(0),
         );
     }
 
     gridWorld(point: THREE.Vector2) {
-        return new THREE.Vector3(point.x - 0.5, 0, point.y - 0.5);
+        return new THREE.Vector3(point.x - OFFSET, 0, point.y - OFFSET);
+    }
+
+    _hover(intersect: THREE.Intersection) {
+        const cell = this.gridCell(intersect.point);
+        this.cursor.position.set(cell.x - OFFSET, 0, cell.y - OFFSET);
+        this.redrawPath(this.selectedCell || cell, this.cursor.position);
     }
 
     _process(delta: number): void {
@@ -195,7 +293,7 @@ export class Grid extends GameObject<GridEvents> {
             throw new Error("Position out of bounds");
         }
 
-        gameObject.position.set(position.x + 0.5, 0.0, position.y + 0.5);
+        gameObject.position.set(position.x - OFFSET, 0.0, position.y - OFFSET);
         gameObject.scale.set(0.9, 0.9, 0.9);
         this.units.add(gameObject);
         this.innerGrid[position.x][position.y] = gameObject;
@@ -211,18 +309,6 @@ export class Grid extends GameObject<GridEvents> {
         }
 
         return gameObject;
-    }
-
-    async objectFollowGridPath(from: THREE.Vector2, path: THREE.Vector2[]) {
-        // if (this.selectedObject === null) { return; }
-        // this.selectedObject.followPath(path);
-
-        const object = this.innerGrid[from.x][from.y];
-        if (object === null) {
-            return;
-        }
-
-        console.log(path);
     }
 
     private deselectCell() {
@@ -270,16 +356,17 @@ export class Grid extends GameObject<GridEvents> {
             return;
         }
 
+        // don't turn units when moving cursor
         if (this.selectedObject) {
-            this.selectedObject.lookAt(to);
+            // this.selectedObject.lookAt(to);
         }
 
-        const start = new THREE.Vector3(from.x + 0.5, 0.1, from.y + 0.5);
+        const start = new THREE.Vector3(from.x - OFFSET, 0.1, from.y - OFFSET);
         const end = new THREE.Vector3(to.x, 0.1, to.z);
 
         const mid = new THREE.Vector3()
             .addVectors(start, end)
-            .multiplyScalar(0.5)
+            .multiplyScalar(OFFSET)
             .add(new THREE.Vector3(0, 3, 0));
 
         const curve = new THREE.QuadraticBezierCurve3(start, mid, end);

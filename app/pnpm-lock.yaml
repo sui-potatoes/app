@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@mobilabs/easing':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@mysten/bcs':
         specifier: ^1.1.0
         version: 1.1.0
@@ -516,6 +519,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
+
+  '@mobilabs/easing@1.0.2':
+    resolution: {integrity: sha512-j8FxTPC4jepjUa8p8P/T1CdsLW71A065ZvUOLdFcQ2DSjLrOvGTQh2zJrSGCipazhJS1scpkDCnLp/ZosrJh7w==}
 
   '@mysten/bcs@1.0.4':
     resolution: {integrity: sha512-6JoQi59GN/dVEBCNq8Rj4uOR0niDrJqDx/2gNQWXANwJakHIGH0AMniHrXP41B2dF+mZ3HVmh9Hi3otiEVQTrQ==}
@@ -3414,6 +3420,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@mobilabs/easing@1.0.2': {}
 
   '@mysten/bcs@1.0.4':
     dependencies:

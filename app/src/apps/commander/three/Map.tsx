@@ -1,13 +1,14 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import * as THREE from "three";
 import { newScene } from "./scene";
 import { AnimatedUnit } from "./AnimatedUnit";
 import { Grid } from "./Grid";
 import { Crate } from "./Crate";
 import { Grid as GridType, Unit as UnitType } from "../types";
+import { ControllableCamera } from "./ControllableCamera";
 
 /**
  * The ID of the root element for the ThreeJS scene.
@@ -31,13 +32,14 @@ export type MapProps = {
  *
  * Acts as a bridge between the `Map` component and the ThreeJS scene.
  * Returns the `mapElement` and a `moveObject` function to move objects on the grid.
+ *
+ * Flips the X and Y coordinates to match the ThreeJS scene.
  */
 export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps) {
-    const [scene, setScene] = useState<{ grid: Grid } | null>(null);
+    const [scene, setScene] = useState<{ grid: Grid, camera: ControllableCamera } | null>(null);
 
     useEffect(() => {
         if (!scene) return;
-        console.log('highlight', highlight);
         scene.grid.highlightCells(highlight.map(({ x, y, d }) => ({ x: y, y: x, d })));
     }, [highlight]);
 
@@ -62,7 +64,33 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
         _scene.grid.addEventListener("pointCell", onPointCell);
     }, []);
 
-    return <div id={ROOT} onContextMenu={(e) => e.preventDefault()} />;
+    return {
+        mapElement: <div id={ROOT} onContextMenu={(e) => e.preventDefault()} />,
+        async moveObject(from: { x: number; y: number }, path: { x: number; y: number }[]) {
+            if (!scene) return;
+
+            return scene.grid.unitFollowPath(
+                new THREE.Vector2(from.y, from.x),
+                path.map(({ x, y }) => new THREE.Vector2(y, x)),
+            );
+        },
+        async performAttack(from: { x: number; y: number }, to: { x: number; y: number }) {
+            if (!scene) return;
+
+            await scene.camera.moveToUnit(new THREE.Vector2(from.y, from.x), new THREE.Vector2(to.y, to.x));
+            await scene.grid.unitPerformRangedAttack(
+                new THREE.Vector2(from.y, from.x),
+                new THREE.Vector2(to.y, to.x),
+            );
+
+            return scene.camera.moveBack();
+        },
+        async killUnit(at: { x: number; y: number }) {
+            if (!scene) return;
+
+            return scene.grid.unitDeath(new THREE.Vector2(at.y, at.x));
+        }
+    };
 
     function initialize(grid: Grid) {
         gameGrid.grid.forEach((row, y) => {
@@ -87,7 +115,7 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
      * @param param0
      */
     function onSelectCell({ point }: { point: THREE.Vector2 }) {
-        let { x: y, y: x } = point.addScalar(-1); // adjust for 1-indexed grid
+        let { x: y, y: x } = point;
         if (gameGrid.grid[x][y].$kind === "Empty") {
             onSelect(null, x, y);
         } else {
@@ -100,7 +128,7 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
      * @param param0
      */
     function onPointCell({ point }: { point: THREE.Vector2 }) {
-        let { x: y, y: x } = point.addScalar(-1); // adjust for 1-indexed grid
+        let { x: y, y: x } = point;
         onTarget(x, y);
     }
 }

@@ -29,6 +29,7 @@ export class AnimatedUnit extends GameObject<THREE.Object3DEventMap> {
     protected mixer: THREE.AnimationMixer | null;
     protected model: THREE.Object3D | null;
     protected _isReady: boolean = false;
+    protected isDead: boolean = false;
 
     constructor() {
         const geometry = new THREE.PlaneGeometry(0, 0);
@@ -54,6 +55,28 @@ export class AnimatedUnit extends GameObject<THREE.Object3DEventMap> {
         return this._isReady;
     }
 
+    /**
+     * Movement controls for the unit.
+     */
+    get movement() {
+        return {
+            start: () => this.playAnimation(RUN),
+            stop: () => this.playAnimation(IDLE),
+        };
+    }
+
+    get attack() {
+        return {
+            prepare: () => this.playAnimation(SNIPERSHOT, true),
+            stop: () => this.playAnimation(IDLE),
+            receive: () => this.playAnimation(DAMAGE, true),
+            death: () => {
+                this.isDead = true;
+                return this.playAnimation(DEATH, true);
+            },
+        };
+    }
+
     _process(_delta: number): void {
         if (this.mixer) {
             this.mixer.update(0.01);
@@ -61,10 +84,12 @@ export class AnimatedUnit extends GameObject<THREE.Object3DEventMap> {
     }
 
     _select() {
+        if (this.isDead) return;
         this.playAnimation(IDLE);
     }
 
     _deselect(): void {
+        if (this.isDead) return;
         this.playAnimation(STATIC);
     }
 
@@ -77,12 +102,29 @@ export class AnimatedUnit extends GameObject<THREE.Object3DEventMap> {
         }
     }
 
-    private playAnimation(name: string) {
-        if (this.mixer && this.model && this.animations) {
-            this.mixer.stopAllAction();
-            const clip = THREE.AnimationClip.findByName(this.animations, name);
-            const action = this.mixer.clipAction(clip);
-            action.play();
+    private async playAnimation(name: string, once: boolean = false) {
+        if (this.mixer == null || this.model == null) {
+            return Promise.resolve();
         }
+
+        return new Promise((resolve) => {
+            const mixer = this.mixer!;
+            const unit = this;
+
+            const clip = THREE.AnimationClip.findByName(this.animations, name);
+            const action = this.mixer!.clipAction(clip, undefined, THREE.NormalAnimationBlendMode);
+            mixer.stopAllAction();
+            action.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, 10);
+            action.play();
+
+            mixer.addEventListener("finished", onFinished);
+
+            function onFinished() {
+                action.stop();
+                unit.playAnimation(IDLE);
+                mixer.removeEventListener("finished", onFinished);
+                resolve(null);
+            }
+        });
     }
 }

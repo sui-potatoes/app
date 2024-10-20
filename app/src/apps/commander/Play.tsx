@@ -1,12 +1,6 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-// NOTE:
-// Due to EventDispatcher implementation in `Three.js`, we avoid using
-// `useEffect` to track the selected unit. Instead, we use a `useRef`. And it's
-// crucial to use specifically `useRef` instead of `useState` to allow value to
-// persist between renders (and in the callback scope).
-
 import { useEffect, useRef, useState } from "react";
 import { UnitStats } from "./UnitStats";
 import { Map } from "./three/Map";
@@ -36,32 +30,43 @@ export function Play({ game, refetch, setGame }: Props) {
         signer: () => flow.getKeypair(),
         enabled: !!zkLogin.address,
     });
-    const [action, selectAction] = useState<SelectedAction | null>(null);
     const unitRef = useRef<SelectedUnit | null>(null);
-    // const actionRef = useRef<SelectedAction | null>(null);
-    const [target, setTarget] = useState<{ x: number; y: number } | null>(null);
-
     const [wait, setWait] = useState(false);
+    const [action, selectAction] = useState<SelectedAction | null>(null);
+    const [target, setTarget] = useState<{ x: number; y: number } | null>(null);
     const [highlight, setHighlight] = useState<{ x: number; y: number; d: number }[]>([]);
     const canBypass = !!action && action.action?.inner.$kind === "Attack";
+
+    // import the `Map` component and initialize the game map
+    const { mapElement, moveObject, performAttack, killUnit } = Map({
+        disabled: wait,
+        highlight,
+        grid: game.map,
+        onSelect(unit, x, y) {
+            setSelectedUnit(unit === null ? null : { unit, x, y });
+        },
+        onTarget(x, y) {
+            console.log("ontarget", unitRef.current);
+            setTarget({ x, y });
+        },
+    });
 
     // triggers re-render when the selected unit changes
     // (via the auto action selection)
     useEffect(() => {
         if (!unitRef.current) return;
-        if (action) {
-            setHighlight(markInRange(
-                game.map,
-                unitRef.current.x,
-                unitRef.current.y,
-                actionRange(unitRef.current.unit, action.action),
-                canBypass,
-            ))
-        } else {
-            setHighlight([])
-        }
+        updateHighlight();
     }, [action]);
 
+    // Due to EventDispatcher implementation in `Three.js`, we avoid using
+    // `useEffect` directly in the `onTarget` and `onSelect` callbacks. Instead,
+    // we use a `useRef` for core values, and trigger a re-render by setting
+    // the `highlight` state.
+    //
+    // This specific state dependency triggers `performSelectedAction` in the
+    // current state scope, allowing us to perform the action. Attempt to call
+    // `performSelectedAction` directly in the `onTarget` callback will result
+    // in a missing state / undefined values.
     useEffect(() => {
         if (!target) return;
         performSelectedAction(target.x, target.y).then(() => setWait(false));
@@ -75,21 +80,7 @@ export function Play({ game, refetch, setGame }: Props) {
             }}
         >
             <div className="max-md:flex max-md:flex-col max-md:justify-center max-md:items-center">
-                <div className={`${wait ? "disabled" : ""}`}>
-                    <Map
-                        disabled={wait}
-                        highlight={highlight}
-                        grid={game.map}
-                        onSelect={(unit, x, y) =>
-                            setSelectedUnit(unit === null ? null : { unit, x, y })
-                        }
-                        onTarget={(x, y) => {
-                            console.log("ontarget", unitRef.current);
-                            setTarget({ x, y });
-                            // performSelectedAction(x, y).then(() => setWait(false));
-                        }}
-                    />
-                </div>
+                <div className={`${wait ? "disabled" : ""}`}>{mapElement}</div>
             </div>
             <div className="flex flex-col justify-center">
                 <h2 className="my-2 text-xl">Game</h2>
@@ -108,9 +99,6 @@ export function Play({ game, refetch, setGame }: Props) {
                     unit={unitRef.current?.unit || null}
                     onSelect={(idx, action) => {
                         selectAction({ idx, action });
-                        // action = { idx, action };
-                        // setCounter((c) => c + 1);
-                        console.log("selected action", action);
                     }}
                 />
             </div>
@@ -150,7 +138,6 @@ export function Play({ game, refetch, setGame }: Props) {
                     inspect.pure.u16(y),
                 ],
             });
-
             const result = await client.devInspectTransactionBlock({
                 sender: zkLogin.address!,
                 transactionBlock: inspect as any,
@@ -166,26 +153,26 @@ export function Play({ game, refetch, setGame }: Props) {
 
             if (!parsedPath) return console.log("no path");
 
-            // await moveObject(unit.x, unit.y, parsedPath);
+            // very cheap trick to highlight unit's path before and during movement
+            const start = { x: unit.x, y: unit.y, d: 1 };
+            setHighlight([start].concat(parsedPath.map(({ x, y }, d) => ({ x, y, d: d + 1 }))));
+
+            // play the move animation, then reset the highlight
+            await moveObject({ ...unit }, parsedPath);
+            setHighlight([]);
+
+            unitRef.current = { ...unit, x, y };
+            unitRef.current.unit.ap.value -= action.action.cost * parsedPath.length;
 
             const unitData = { ...game.map.grid[unit.x][unit.y] };
-            let prev = { x: unit.x, y: unit.y };
-            timer = setInterval(() => {
-                if (parsedPath.length === 0) {
-                    return clearInterval(timer);
-                }
 
-                game.map.grid[prev.x][prev.y] = { Empty: true, $kind: "Empty" };
-                const { x, y } = parsedPath.shift()!; // @ts-ignore
-                unitData.Unit!.unit.ap.value -= action.action.cost;
-
-                unit.x = x;
-                unit.y = y;
-
+            if (unitData.Unit) {
+                unitData.Unit.unit = unitRef.current.unit;
+                game.map.grid[unit.x][unit.y] = { Empty: true, $kind: "Empty" };
                 game.map.grid[x][y] = unitData;
-                setGame(() => ({ ...game }));
-                prev = { x, y };
-            }, 200);
+            }
+
+            setGame(() => ({ ...game }));
         }
 
         if (action.action.inner.$kind === "Attack") {
@@ -198,8 +185,10 @@ export function Play({ game, refetch, setGame }: Props) {
                 return console.log("out of range");
             }
 
+            await performAttack({ x: unit.x, y: unit.y }, { x, y });
+
             if (target.health.value <= damage) {
-                alert("You killed the enemy!");
+                await killUnit({ x, y });
                 game.map.grid[x][y] = { Empty: true, $kind: "Empty" };
             }
         }
@@ -222,11 +211,8 @@ export function Play({ game, refetch, setGame }: Props) {
             ],
         });
 
-        const txResult = await executeTransaction(tx)!;
-        // const { digest } = await executeTransaction(tx)!;
-        // await client.waitForTransaction({ digest });
-
-        console.log(txResult);
+        const { digest } = await executeTransaction(tx)!;
+        await client.waitForTransaction({ digest });
 
         clearInterval(timer);
         refetch();
@@ -270,28 +256,46 @@ export function Play({ game, refetch, setGame }: Props) {
         if (!game) return;
 
         unitRef.current = unit;
+        updateHighlight();
         setTarget(null);
 
-        if (!unit || !unitRef.current) {
-            setHighlight([])
-            return;
-        }
-
-        if (game.turn > unitRef.current.unit.turn) {
+        if (!unit) return;
+        if (unitRef.current && game.turn > unit.unit.turn) {
             unitRef.current.unit.turn = game.turn;
             unitRef.current.unit.ap.value = unitRef.current.unit.ap.maxValue;
         }
+    }
 
-        if (action) {
-            setHighlight(markInRange(
+    function updateHighlight() {
+        if (!game) return;
+        if (!unitRef.current) {
+            setHighlight([]);
+            return;
+        }
+
+        if (action && unitRef.current.unit.actions.length > 0) {
+            const inRange = markInRange(
                 game.map,
                 unitRef.current.x,
                 unitRef.current.y,
                 actionRange(unitRef.current.unit, action.action),
                 canBypass,
-            ))
-        } else {
-            setHighlight([])
+            );
+
+            switch (action.action.inner.$kind) {
+                case "Attack":
+                    return setHighlight(
+                        inRange
+                            .filter(({ x, y }) => game.map.grid[x][y].$kind === "Unit")
+                            .map((e) => ({ ...e, d: 1 })),
+                    );
+                case "Move":
+                    return setHighlight(inRange);
+                case "Skip":
+                    return setHighlight([]);
+            }
         }
+
+        setHighlight([]);
     }
 }
