@@ -42,5 +42,6 @@ fun test_character() {
 
     svg.root(vector[head, body]).add(hands).add(legs);
     std::debug::print(&svg.to_string().as_bytes().length());
-    svg.debug()
+
+    // svg.debug()
 }

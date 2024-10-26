@@ -6,9 +6,10 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet", override = true }
+Codec = { local = "../codec" }
 
 [addresses]
 svg = "0x0"
 
 [dev-dependencies]
-Codec = { local = "../codec" }
+Suifrens = { git = "https://github.com/MystenLabs/apps.git", subdir = "suifrens/suifrens", rev = "main" }

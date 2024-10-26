@@ -4,17 +4,23 @@
 /// Implements SVG animations. Animations can be applied to SVG elements to create
 /// interactive and dynamic content.
 ///
+/// ### Usage
+///
 /// Animation can be added to any `Shape` element by calling `add_animation` on the
 /// element. The `add_animation` method takes an `Animation` struct as an argument.
 ///
 /// ```rust
+/// // prepare animation
 /// let animation = animation::animate_transform(b"rotate", b"0 5 5", b"360 5 5")
 ///     .attribute_name(b"transform")
 ///     .duration(b"10s")
 ///     .repeat_count(b"indefinite");
 ///
+/// // add animation to the shape
 /// let mut rect = shape::rect(10, 10);
 /// rect.add_animation(animation);
+///
+/// // add the shape to the SVG container and print it
 /// let mut svg = svg::svg(vector[0, 0, 120, 120]);
 /// svg.root(vector[rect]);
 /// svg.to_string();
@@ -26,10 +32,10 @@
 ///
 /// ```rust
 /// let animation = animation::animate()
-///    .attribute_name(b"rx")
-///    .values(b"0;5;0")
-///    .duration(b"10s")
-///    .repeat_count(b"indefinite");
+///     .attribute_name(b"rx")
+///     .values(b"0;5;0")
+///     .duration(b"10s")
+///     .repeat_count(b"indefinite");
 ///
 /// animation.to_string();
 /// ```
@@ -168,6 +174,15 @@ public enum AnimationType has copy, store, drop {
 }
 
 /// Create a new `<animate>` element.
+///
+/// ```rust
+/// let animation = animation::animate()
+///     .attribute_name(b"rx")
+///     .values(b"0;5;0")
+///     .duration(b"10s");
+///
+/// animation.to_string();
+/// ```
 public fun animate(): Animation {
     Animation {
         animation: AnimationType::Animate,
@@ -184,8 +199,8 @@ public fun animate(): Animation {
 /// ```rust
 /// // Animate the `r` attribute of an element along the specified path.
 /// let animation1 = animation::animate_motion(option::some(b"M10,90 Q90,90 z"), option::none())
-///    .attribute_name(b"r")
-///    .duration(b"10s");
+///     .attribute_name(b"r")
+///     .duration(b"10s");
 ///
 /// let mut circle = shape::circle(5);
 /// circle.add_animation(animation1);
@@ -322,8 +337,8 @@ public fun attributes_mut(self: &mut Animation): &mut VecMap<String, String> {
 ///
 /// ```rust
 /// let mut animation = animation::animate().map_attributes!(|attrs| {
-///    attrs.insert(b"fill".to_string(), b"red".to_string());
-///    attrs.insert(b"stroke".to_string(), b"black".to_string());
+///     attrs.insert(b"fill".to_string(), b"red".to_string());
+///     attrs.insert(b"stroke".to_string(), b"black".to_string());
 /// });
 /// ```
 public macro fun map_attributes($self: Animation, $f: |&mut VecMap<String, String>|): Animation {
@@ -337,9 +352,9 @@ public macro fun map_attributes($self: Animation, $f: |&mut VecMap<String, Strin
 ///
 /// ```rust
 /// let animation = animation::animate()
-///   .attribute_name(b"rx")
-///   .values(b"0;5;0")
-///   .duration(b"10s");
+///     .attribute_name(b"rx")
+///     .values(b"0;5;0")
+///     .duration(b"10s");
 ///
 /// animation.to_string();
 /// ```

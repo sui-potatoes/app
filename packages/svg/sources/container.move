@@ -189,7 +189,7 @@ public fun to_string(container: &Container): String {
         return container.shapes.fold!(b"".to_string(), |mut acc, shape| {
             acc.append(shape.to_string());
             acc
-        });
+        })
     };
 
     print::print(

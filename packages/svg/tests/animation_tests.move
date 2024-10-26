@@ -37,8 +37,6 @@ fun test_animate() {
         svg.to_string(),
         b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10'><animate attributeName='rx' values='0;5;0' dur='10s' repeatCount='indefinite'/></rect></svg>".to_string()
     );
-
-    // svg.debug();
 }
 
 #[test]
@@ -73,8 +71,6 @@ fun test_animate_transform() {
         svg.to_string(),
         b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='10' height='10'><animateTransform attributeName='transform' dur='10s' repeatCount='indefinite' type='rotate' from='0 5 5' to='360 5 5'/></rect></svg>".to_string()
     );
-
-    // svg.debug();
 }
 
 #[test]
@@ -119,8 +115,6 @@ fun test_animate_motion() {
         svg.to_string(),
         b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'><path id='#path' fill='none' stroke='lightgrey' d='M20,50 C20,-50 180,150 180,50 C180-50 20,150 20,50 z'/><circle fill='red' r='5'><animateMotion dur='10s' repeatCount='indefinite' path='M20,50 C20,-50 180,150 180,50 C180-50 20,150 20,50 z'/></circle></svg>".to_string()
     );
-
-    // svg.debug();
 }
 
 #[test]
@@ -151,7 +145,6 @@ fun test_set() {
         svg.to_string(),
         b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10'><set begin='mouseover' end='mouseout' attributeName='fill' to='red'/></rect></svg>".to_string()
     );
-
 }
 
 #[test]

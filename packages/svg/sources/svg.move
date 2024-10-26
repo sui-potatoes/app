@@ -4,6 +4,7 @@
 /// Module: svg
 module svg::svg;
 
+use codec::base64;
 use std::string::String;
 use sui::vec_map::{Self, VecMap};
 use svg::{container::{Self, Container}, print, shape::Shape};
@@ -132,6 +133,20 @@ public fun to_string(svg: &Svg): String {
         attributes,
         option::some(svg.elements.map_ref!(|element| element.to_string())),
     )
+}
+
+/// Convert the SVG element to a base64-encoded data URI.
+public fun to_data_uri(svg: &Svg): String {
+    let mut result  = b"data:image/svg+xml;base64,".to_string();
+    result.append(base64::encode(to_string(svg).into_bytes()));
+    result
+}
+
+/// Convert the SVG element to a url-encoded data URI.
+public fun to_url(svg: &Svg): String {
+    let mut result  = b"data:image/svg+xml,".to_string();
+    result.append(to_string(svg));
+    result
 }
 
 #[test_only]

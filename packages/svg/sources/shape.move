@@ -8,8 +8,8 @@ use std::string::String;
 use sui::vec_map::{Self, VecMap};
 use svg::{animation::Animation, point::{Self, Point}, print};
 
-#[error]
-const ENotImplemented: vector<u8> = b"This shape is not implemented yet.";
+/// Abort code for the `NotImplemented` error.
+const ENotImplemented: u64 = 264;
 
 /// SVG shape struct, contains a shape type and a set of attributes.
 public struct Shape has store, copy, drop {
@@ -233,7 +233,18 @@ public fun circle(r: u16): Shape {
     }
 }
 
-/// Create a new ellipse shape.
+/// Create a new ellipse `Shape`.
+///
+/// ```rust
+/// let cx = 1400;
+/// let cy = 1400;
+/// let rx = 100;
+/// let ry = 50;
+///
+/// let ellipse = shape::ellipse(cx, cy, rx, ry);
+///
+/// ellipse.to_string();
+/// ```
 public fun ellipse(cx: u16, cy: u16, rx: u16, ry: u16): Shape {
     Shape {
         shape: ShapeType::Ellipse(point::point(cx, cy), rx, ry),
@@ -284,6 +295,15 @@ public fun text(text: String): Shape {
 }
 
 /// Create a new `<path>` shape.
+///
+/// ```rust
+/// let path_string = b"M 10 10 L 20 20".to_string();
+/// let path = shape::path(path_string, option::none());
+///
+/// let mut svg = svg::svg(vector[0, 0, 100, 100]);
+/// svg.root(vector[path]);
+/// svg.to_string();
+/// ```
 public fun path(path: String, length: Option<u16>): Shape {
     Shape {
         shape: ShapeType::Path(path, length),
