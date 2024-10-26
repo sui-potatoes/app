@@ -21,7 +21,7 @@ public struct Svg has store, copy, drop {
 ///
 /// ```rust
 /// let mut svg = svg::svg(vector[0, 0, 200, 200]);
-/// svg.root(vector[ shape::circle(5).move_to(10, 10) ]);
+/// svg.add_root(vector[ shape::circle(5).move_to(10, 10) ]);
 /// svg.to_string(); // to print as a string
 /// svg.debug(); // to print in the console in tests
 /// ```
@@ -49,31 +49,51 @@ public fun add(svg: &mut Svg, element: Container): &mut Svg {
 
 /// Place `Shape`s directly in the root of the SVG.
 ///
+/// ## Usage
 /// ```rust
 /// let mut svg = svg(vector[0, 0, 200, 200]);
-/// svg.root(vector[
+/// svg.add_root(vector[
 ///   shape::circle(5).move_to(10, 10),
 ///   shape::square(30, 30).move_to(20, 20),
 /// ]);
 /// svg.to_string();
 /// ```
-public fun root(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
+public fun add_root(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
     svg.add(container::root(shapes))
+}
+
+/// Create a `<a>` (hyperlink) container and place `Shape`s in it.
+///
+/// Shortcut for `svg.add(container::a(shapes))`.
+///
+/// ## Usage
+/// ```rust
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// svg.add_a(vector[
+///     shape::circle(5).move_to(10, 10),
+///     shape::ellipse(30, 30, 10, 5),
+/// ]);
+///
+/// svg.to_string();
+/// ```
+public fun add_a(svg: &mut Svg, link: String, shapes: vector<Shape>): &mut Svg {
+    svg.add(container::a(link, shapes))
 }
 
 /// Create a `<g>` (group) container and place `Shape`s in it.
 ///
 /// Shortcut for `svg.add(container::g(shapes))`.
 ///
+/// ## Usage
 /// ```rust
 /// let mut svg = svg(vector[0, 0, 200, 200]);
-/// svg.g(vector[
+/// svg.add_g(vector[
 ///  shape::circle(5).move_to(10, 10),
 ///  shape::ellipse(30, 30, 10, 5),
 /// ]);
 /// svg.to_string();
 /// ```
-public fun g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
+public fun add_g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
     svg.add(container::g(shapes))
 }
 
@@ -81,9 +101,10 @@ public fun g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
 ///
 /// Shortcut for `svg.add(container::defs(shapes))`.
 ///
+/// ## Usage
 /// ```rust
 /// let mut svg = svg(vector[0, 0, 200, 200]);
-/// svg.defs(vector[
+/// svg.add_defs(vector[
 ///     shape::linear_gradient(vector[
 ///         shape::stop(b"10%", b"gold"),
 ///         shape::stop(b"90%", b"red"),
@@ -93,13 +114,14 @@ public fun g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
 /// ]);
 /// svg.to_string();
 /// ```
-public fun defs(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
+public fun add_defs(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
     svg.add(container::defs(shapes))
 }
 
 /// Get mutable access to the attributes of the SVG. This is useful for adding
 /// custom attributes directly to the `<svg>` element.
 ///
+/// ## Usage
 /// ```rust
 /// let mut svg = svg(vector[0, 0, 200, 200]);
 /// svg.attributes_mut().insert(
@@ -113,9 +135,10 @@ public fun attributes_mut(svg: &mut Svg): &mut VecMap<String, String> {
 
 /// Print the SVG element as a `String`.
 ///
+/// ## Usage
 /// ```rust
 /// let mut svg = svg(vector[0, 0, 200, 200]);
-/// svg.root(vector[ shape::circle(5).move_to(10, 10) ]);
+/// svg.add_root(vector[ shape::circle(5).move_to(10, 10) ]);
 /// let printed = svg.to_string();
 /// ```
 public fun to_string(svg: &Svg): String {

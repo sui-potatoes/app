@@ -33,7 +33,7 @@ fun test_to_string() {
 // We expect this container to be ignored and its elements be printed directly in the root.
 fun test_root() {
     let mut svg = svg::svg(vector[0, 0, 200, 200]);
-    svg.root(vector[shape::circle(5).move_to(10, 10)]);
+    svg.add_root(vector[shape::circle(5).move_to(10, 10)]);
 
     assert_eq!(
         svg.to_string(),
@@ -61,7 +61,7 @@ fun test_root() {
 // ```
 fun test_defs() {
     let mut svg = svg::svg(vector[0, 0, 10, 10]);
-    svg.defs(vector[shape::circle(5).map_attributes!(|attrs| {
+    svg.add_defs(vector[shape::circle(5).map_attributes!(|attrs| {
             attrs.insert(b"id".to_string(), b"myCircle".to_string());
             attrs.insert(b"cx".to_string(), b"0".to_string());
             attrs.insert(b"cy".to_string(), b"0".to_string());
@@ -69,7 +69,7 @@ fun test_defs() {
             attrs.insert(b"id".to_string(), b"myGradient".to_string());
         })]);
 
-    svg.root(vector[shape::use_(b"#myCircle".to_string()).map_attributes!(|attrs| {
+    svg.add_root(vector[shape::use_(b"#myCircle".to_string()).map_attributes!(|attrs| {
             attrs.insert(b"x".to_string(), b"5".to_string());
             attrs.insert(b"y".to_string(), b"5".to_string());
             attrs.insert(b"fill".to_string(), b"url(#myGradient)".to_string());

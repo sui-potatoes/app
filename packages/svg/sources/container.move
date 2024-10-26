@@ -14,10 +14,19 @@ const ENotImplemented: u64 = 0;
 /// Represents an SVG container, which contains shapes. All of the containers
 /// support `Shape`s placed inside them, and most of them support attributes,
 /// which will be rendered as XML attributes in the SVG output.
+///
+/// Containers are created via one of:
+/// - `container::root` - no container, just a list of shapes.
+/// - `container::a` - hyperlink container, `<a>`.
+/// - `container::defs` - definition container, `<defs>`, to be used for reusable shapes.
+/// - `container::g` - group container, `<g>`, to group shapes.
+/// - `container::marker` - marker container, `<marker>`, to define a marker symbol.
+/// - `container::symbol` - symbol container, `<symbol>`, to define a reusable graphic.
 public struct Container has store, copy, drop {
     container: ContainerType,
     shapes: vector<Shape>,
     attributes: VecMap<String, String>,
+    desc: vector<Desc>,
 }
 
 /// SVG container enum, which contains shapes.
@@ -39,12 +48,12 @@ public enum ContainerType has store, copy, drop {
 ///
 /// Used to place shapes directly in the root of the SVG.
 ///
-/// ## Example
+/// ## Usage
 ///
 /// ```rust
 /// let mut svg = svg::svg(vector[0, 0, 100, 100]);
 ///
-/// svg.root(vector[
+/// svg.add_root(vector[
 ///     shape::circle(5),
 ///     shape::ellipse(30, 30, 10, 5),
 /// ]);
@@ -56,6 +65,7 @@ public fun root(shapes: vector<Shape>): Container {
         container: ContainerType::Root,
         shapes,
         attributes: vec_map::empty(),
+        desc: vector[],
     }
 }
 
@@ -71,7 +81,7 @@ public fun root(shapes: vector<Shape>): Container {
 ///
 /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/a).
 ///
-/// ## Example
+/// ## Usage
 ///
 /// ```rust
 /// let mut svg = svg::svg(vector[0, 0, 100, 100]);
@@ -92,6 +102,7 @@ public fun a(href: String, shapes: vector<Shape>): Container {
         container: ContainerType::A,
         shapes,
         attributes,
+        desc: vector[],
     }
 }
 
@@ -99,7 +110,7 @@ public fun a(href: String, shapes: vector<Shape>): Container {
 ///
 /// ## Description
 ///
-/// A `<defs> container, to be used for reusable shapes. It's like a
+/// A `<defs>` container, to be used for reusable shapes. It's like a
 // dictionary of shapes.
 ///
 /// - Element: `<defs>`.
@@ -108,7 +119,7 @@ public fun a(href: String, shapes: vector<Shape>): Container {
 ///
 /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/defs).
 ///
-/// ## Example
+/// ## Usage
 ///
 /// ```rust
 /// let mut svg = svg::svg(vector[0, 0, 100, 100]);
@@ -117,7 +128,7 @@ public fun a(href: String, shapes: vector<Shape>): Container {
 ///   shape::ellipse(30, 30, 10, 5),
 /// ]);
 ///
-/// svg.add(defs); // or svg.defs(vector[ /* ... */ ]);
+/// svg.add(defs); // or svg.add_defs(vector[ /* ... */ ]);
 /// let str = svg.to_string();
 /// ```
 public fun defs(shapes: vector<Shape>): Container {
@@ -125,6 +136,7 @@ public fun defs(shapes: vector<Shape>): Container {
         container: ContainerType::Defs,
         shapes,
         attributes: vec_map::empty(),
+        desc: vector[],
     }
 }
 
@@ -141,7 +153,7 @@ public fun defs(shapes: vector<Shape>): Container {
 ///
 /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g).
 ///
-/// ## Example
+/// ## Usage
 ///
 /// ```rust
 /// let mut svg = svg::svg(vector[0, 0, 100, 100]);
@@ -154,7 +166,7 @@ public fun defs(shapes: vector<Shape>): Container {
 ///
 /// group.attributes_mut().insert(b"fill".to_string(), b"red".to_string());
 ///
-/// svg.add(group); // // or svg.group(vector[ /* ... */ ]);
+/// svg.add(group); // // or svg.add_g(vector[ /* ... */ ]);
 /// let str = svg.to_string();
 /// ```
 public fun g(shapes: vector<Shape>): Container {
@@ -162,6 +174,7 @@ public fun g(shapes: vector<Shape>): Container {
         container: ContainerType::G,
         shapes,
         attributes: vec_map::empty(),
+        desc: vector[],
     }
 }
 
@@ -175,7 +188,7 @@ public fun g(shapes: vector<Shape>): Container {
 ///
 /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/marker).
 ///
-/// ## Example
+/// ## Usage
 ///
 /// ```rust
 /// let mut svg = svg::svg(vector[0, 0, 100, 100]);

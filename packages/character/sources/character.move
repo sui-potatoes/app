@@ -411,11 +411,11 @@ fun build_pure_svg(): String {
     let mut svg = svg::svg(vector[0, 0, 11 * PX, 12 * PX]);
     let styles = shape::custom(b"<style>.s{fill:#SKIN} .e{fill:#EYES} .h{fill:#HAIR} .l{fill:#PANTS} .b{fill:#BODY} .a{fill:#ACCENT}</style>".to_string());
 
-    svg.root(vector[styles, body, head]);
+    svg.add_root(vector[styles, body, head]);
     svg.add(eyes);
     svg.add(legs);
     svg.add(hands);
-    svg.root(vector[shape::custom(b"TEMPLATE".to_string())]); // template
+    svg.add_root(vector[shape::custom(b"TEMPLATE".to_string())]); // template
     svg.to_string()
 }
 

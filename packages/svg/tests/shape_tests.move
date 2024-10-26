@@ -32,6 +32,6 @@ fun test_rect() {
     rect.attributes_mut().insert(b"fill".to_string(), b"red".to_string());
 
     let mut svg = svg::svg(vector[0, 0, 100, 100]);
-    svg.root(vector[rect]);
+    svg.add_root(vector[rect]);
     svg.debug();
 }

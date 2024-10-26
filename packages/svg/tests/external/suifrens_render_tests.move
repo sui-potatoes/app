@@ -26,7 +26,7 @@ fun test_render_suifren() {
     let mut svg = svg::svg(vector[0, 0, 3000, 3000]);
 
     // bottom element, goes before everything else
-    svg.root(vector[shadow()]);
+    svg.add_root(vector[shadow()]);
     svg.add(right_arm(main_color));
     svg.add(right_leg(main_color));
     svg.add(body(main_color));
@@ -35,7 +35,7 @@ fun test_render_suifren() {
     svg.add(right_ear(main_color));
     svg.add(head(main_color));
     svg.add(left_ear(main_color));
-    svg.root(vector[logo()]);
+    svg.add_root(vector[logo()]);
 
     let data_uri = svg.to_data_uri();
 

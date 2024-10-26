@@ -301,8 +301,8 @@ public fun text(text: String): Shape {
 /// let path = shape::path(path_string, option::none());
 ///
 /// let mut svg = svg::svg(vector[0, 0, 100, 100]);
-/// svg.root(vector[path]);
-/// 
+/// svg.add_root(vector[path]);
+///
 /// let str = svg.to_string();
 /// ```
 public fun path(path: String, length: Option<u16>): Shape {

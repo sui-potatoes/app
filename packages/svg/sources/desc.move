@@ -35,7 +35,7 @@ public enum Desc has store, copy, drop {
 ///
 /// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/desc)
 ///
-/// ## Example
+/// ## Usage
 ///
 /// ```rust
 /// use svg::{desc, shape, svg};
@@ -45,8 +45,8 @@ public enum Desc has store, copy, drop {
 /// let mut circle = shape::circle(5).move_to(50, 50);
 ///
 /// circle.add_desc(desc);
+/// svg.add_root(vector[ circle ]);
 ///
-/// svg.root(vector[ circle ]);
 /// let str = svg.to_string();
 /// ```
 public fun desc(text: String): Desc { Desc::Desc(text) }
@@ -65,7 +65,7 @@ public fun desc(text: String): Desc { Desc::Desc(text) }
 ///
 /// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/metadata)
 ///
-/// ## Example
+/// ## Usage
 ///
 /// ```rust
 /// use svg::{desc, svg};
@@ -89,7 +89,7 @@ public fun metadata(content: String): Desc { Desc::Metadata(content) }
 ///
 /// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/title)
 ///
-/// ## Example
+/// ## Usage
 ///
 /// ```rust
 /// use svg::{desc, shape, svg};
@@ -99,7 +99,7 @@ public fun metadata(content: String): Desc { Desc::Metadata(content) }
 /// let mut circle = shape::circle(5).move_to(50, 50);
 ///
 /// circle.add_desc(title);
-/// svg.root(vector[ circle ]);
+/// svg.add_root(vector[ circle ]);
 ///
 /// let str = svg.to_string();
 /// ```

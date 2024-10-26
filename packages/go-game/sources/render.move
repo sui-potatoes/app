@@ -34,7 +34,7 @@ public(package) fun svg(b: &Board): Svg {
     let mut background = shape::rect(width, width);
     background.attributes_mut().insert(b"fill".to_string(), b"url(#g)".to_string());
 
-    svg.defs(vector[black, white, pattern]);
+    svg.add_defs(vector[black, white, pattern]);
 
     let mut elements = vector[background];
     size.do!(|i| {
@@ -53,7 +53,7 @@ public(package) fun svg(b: &Board): Svg {
         });
     });
 
-    svg.root(elements);
+    svg.add_root(elements);
     svg
 }
 

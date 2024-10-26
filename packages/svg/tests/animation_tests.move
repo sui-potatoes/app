@@ -31,7 +31,7 @@ fun test_animate() {
     rect.add_animation(animation);
 
     let mut svg = svg::svg(vector[0, 0, 10, 10]);
-    svg.root(vector[rect]);
+    svg.add_root(vector[rect]);
 
     assert_eq!(
         svg.to_string(),
@@ -65,7 +65,7 @@ fun test_animate_transform() {
     rect.add_animation(animation);
 
     let mut svg = svg::svg(vector[0, 0, 120, 120]);
-    svg.root(vector[rect]);
+    svg.add_root(vector[rect]);
 
     assert_eq!(
         svg.to_string(),
@@ -109,7 +109,7 @@ fun test_animate_motion() {
     circle.add_animation(animation);
 
     let mut svg = svg::svg(vector[0, 0, 200, 100]);
-    svg.root(vector[path, circle]);
+    svg.add_root(vector[path, circle]);
 
     assert_eq!(
         svg.to_string(),
@@ -139,7 +139,7 @@ fun test_set() {
     rect.add_animation(animation);
 
     let mut svg = svg::svg(vector[0, 0, 10, 10]);
-    svg.root(vector[rect]);
+    svg.add_root(vector[rect]);
 
     assert_eq!(
         svg.to_string(),
@@ -155,7 +155,7 @@ fun test_custom() {
     rect.add_animation(animation);
 
     let mut svg = svg::svg(vector[0, 0, 10, 10]);
-    svg.root(vector[rect]);
+    svg.add_root(vector[rect]);
 
     assert_eq!(
         svg.to_string(),

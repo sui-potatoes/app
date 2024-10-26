@@ -40,7 +40,7 @@ fun test_character() {
 
     add_attribute!(&mut legs, b"fill", b"black");
 
-    svg.root(vector[head, body]).add(hands).add(legs);
+    svg.add_root(vector[head, body]).add(hands).add(legs);
     std::debug::print(&svg.to_string().as_bytes().length());
 
     // svg.debug()
