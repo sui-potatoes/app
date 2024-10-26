@@ -1,7 +1,9 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-// A dynamic field storage which can store a single value or a single type.
+/// A dynamic field storage which can store a single value or a single type.
+/// Helps bypass Sui verifier limitations on the size of type layout when enums
+/// are used in type definitions.
 module character::box;
 
 use sui::dynamic_field as df;

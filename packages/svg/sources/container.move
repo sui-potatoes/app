@@ -26,59 +26,31 @@ public struct Container has store, copy, drop {
 /// - definition container, `<defs>`, to be used for reusable shapes.
 /// - group container, `<g>`, to group shapes.
 public enum ContainerType has store, copy, drop {
-    /// A root-level container for `Desc` elements, only contains metadata
-    /// like `<title>`, `<desc>`, and `<metadata>`.
-    /// Desc(vector<Desc>),
-    //
-    /// A root container, used to proxy shapes directly to the SVG root.
     Root,
-    // A `<defs> container, to be used for reusable shapes. It's like a
-    // dictionary of shapes.
-    ///
-    /// **Element:** `<defs>`.
-    ///
-    /// **Own properties:** None.
-    ///
-    /// **Extended properties:** None.
-    ///
-    /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/defs).
     Defs,
-    /// Hyperlink container, `<a>`. Must be initialized with an `href`.
-    ///
-    /// **Element:** `<a>`.
-    ///
-    /// **Own properties:** `href`.
-    ///
-    /// **Extended properties:** None.
-    ///
-    /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/a).
     A,
-    /// Group container, `<g>`, to group shapes and apply transformations.
-    ///
-    /// **Element:** `<g>`.
-    ///
-    /// **Own properties:** None.
-    ///
-    /// **Extended properties:** None.
-    ///
-    /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g).
     G,
-    /// Marker container, `<marker>`, to define a marker symbol.
-    ///
-    /// **Element:** `<marker>`.
-    ///
-    /// **Own properties:** None.
-    ///
-    /// **Extended properties:** None.
-    ///
-    /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/marker).
     Marker,
 }
 
-/// Create a new description container, only contains metadata.
-// public fun desc(): Container { Container::Desc(tags) }
-
 /// Create a new root container, no container, just a list of shapes.
+///
+/// ## Description
+///
+/// Used to place shapes directly in the root of the SVG.
+///
+/// ## Example
+///
+/// ```rust
+/// let mut svg = svg::svg(vector[0, 0, 100, 100]);
+///
+/// svg.root(vector[
+///     shape::circle(5),
+///     shape::ellipse(30, 30, 10, 5),
+/// ]);
+///
+/// let str = svg.to_string();
+/// ```
 public fun root(shapes: vector<Shape>): Container {
     Container {
         container: ContainerType::Root,
@@ -88,6 +60,28 @@ public fun root(shapes: vector<Shape>): Container {
 }
 
 /// Create a new hyperlink container.
+///
+/// ## Description
+///
+/// Hyperlink container, `<a>`. Must be initialized with an `href`.
+///
+/// - Element: `<a>`.
+/// - Own properties: `href`.
+/// - Extended properties: None.
+///
+/// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/a).
+///
+/// ## Example
+///
+/// ```rust
+/// let mut svg = svg::svg(vector[0, 0, 100, 100]);
+/// let link = container::a(b"https://example.com".to_string(), vector[
+///     shape::circle(5),
+/// ]);
+///
+/// svg.add(link); // or svg.a(vector[ /* ... */ ]);
+/// let str = svg.to_string();
+/// ```
 public fun a(href: String, shapes: vector<Shape>): Container {
     let mut attributes = vec_map::empty();
     if (href.length() > 0) {
@@ -102,6 +96,30 @@ public fun a(href: String, shapes: vector<Shape>): Container {
 }
 
 /// Create a new `Defs` container.
+///
+/// ## Description
+///
+/// A `<defs> container, to be used for reusable shapes. It's like a
+// dictionary of shapes.
+///
+/// - Element: `<defs>`.
+/// - Own properties: None.
+/// - Extended properties: None.
+///
+/// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/defs).
+///
+/// ## Example
+///
+/// ```rust
+/// let mut svg = svg::svg(vector[0, 0, 100, 100]);
+/// let defs = container::defs(vector[
+///   shape::circle(5),
+///   shape::ellipse(30, 30, 10, 5),
+/// ]);
+///
+/// svg.add(defs); // or svg.defs(vector[ /* ... */ ]);
+/// let str = svg.to_string();
+/// ```
 public fun defs(shapes: vector<Shape>): Container {
     Container {
         container: ContainerType::Defs,
@@ -111,6 +129,34 @@ public fun defs(shapes: vector<Shape>): Container {
 }
 
 /// Create a new `G` container.
+///
+/// ## Description
+///
+/// Group container, `<g>`, to group shapes and apply transformations to groups
+/// of elements.
+///
+/// - Element: `<g>`.
+/// - Own properties: None.
+/// - Extended properties: None.
+///
+/// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g).
+///
+/// ## Example
+///
+/// ```rust
+/// let mut svg = svg::svg(vector[0, 0, 100, 100]);
+///
+/// // Create a group of shapes.
+/// let mut group = container::g(vector[
+///   shape::circle(5),
+///   shape::ellipse(30, 30, 10, 5),
+/// ]);
+///
+/// group.attributes_mut().insert(b"fill".to_string(), b"red".to_string());
+///
+/// svg.add(group); // // or svg.group(vector[ /* ... */ ]);
+/// let str = svg.to_string();
+/// ```
 public fun g(shapes: vector<Shape>): Container {
     Container {
         container: ContainerType::G,
@@ -120,6 +166,27 @@ public fun g(shapes: vector<Shape>): Container {
 }
 
 /// Create a new `_Marker` container.
+///
+/// ## Description
+/// Marker container, `<marker>`, to define a marker symbol.
+/// - Element: `<marker>`.
+/// - Own properties: None.
+/// - Extended properties: None.
+///
+/// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/marker).
+///
+/// ## Example
+///
+/// ```rust
+/// let mut svg = svg::svg(vector[0, 0, 100, 100]);
+/// let marker = container::marker(vector[
+///    shape::circle(5),
+///    shape::ellipse(30, 30, 10, 5),
+/// ]);
+///
+/// svg.add(marker); // or svg.marker(vector[ /* ... */ ]);
+/// let str = svg.to_string();
+/// ```
 public fun marker(_shapes: vector<Shape>): Container { abort ENotImplemented }
 
 /// Move a container, keep the interface consistent with shapes.

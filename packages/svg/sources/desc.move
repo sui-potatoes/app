@@ -13,59 +13,108 @@ use svg::print;
 
 /// Special container for SVG descriptions.
 public enum Desc has store, copy, drop {
-    /// **Element:** `<desc>`.
-    ///
-    /// Provides a description of the SVG content, which can be rendered by user agents in a
-    /// tooltip.
-    /// Authors are encouraged to provide such a description, which can improve accessibility.
-    ///
-    /// **Owned property:** description string.
-    ///
-    /// **Extended properties:** None.
-    ///
-    /// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/desc)
     Desc(String),
-    /// **Element:** `<metadata>`.
-    ///
-    /// Organizes arbitrary metadata for the parent element, which can be used by user agents.
-    /// Metadata should be structured data, such as elements from other XML namespaces, JSON, or
-    /// RDF.
-    ///
-    /// **Owned property:** content.
-    ///
-    /// **Extended properties:** None.
     Metadata(String),
-    /// **Element:** `<title>`.
-    ///
-    /// Provides a title for the parent element, which can be rendered by user agents in a tooltip.
-    ///
-    /// **Owned property:** title text.
-    ///
-    /// **Extended properties:** None.
-    ///
-    /// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/title)
     Title(String),
-    /// Custom element to insert into `Desc` container if needed.
-    /// Does not support any properties or attributes, used as-is.
+    /// Any custom text to be inserted into a shape, container or SVG.
     Custom(String),
 }
 
 /// Create a new `<desc>` element with the given text.
+///
+/// ## Description
+///
+/// Provides a description of the SVG content, which can be rendered by user agents in a
+/// tooltip. Authors are encouraged to provide such a description, which can improve accessibility.
+/// However, in the blockchain environment, space optimization is crucial, so it is recommended to
+/// use this element only when necessary.
+///
+/// - Element: `<desc>`.
+/// - Owned property: description string.
+/// - Extended properties: None.
+///
+/// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/desc)
+///
+/// ## Example
+///
+/// ```rust
+/// use svg::{desc, shape, svg};
+///
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// let desc = desc::desc(b"This is a circle".to_string());
+/// let mut circle = shape::circle(5).move_to(50, 50);
+///
+/// circle.add_desc(desc);
+///
+/// svg.root(vector[ circle ]);
+/// let str = svg.to_string();
+/// ```
 public fun desc(text: String): Desc { Desc::Desc(text) }
 
 /// Create a new `<metadata>` element with the given raw content.
+///
+/// ## Description
+///
+/// Organizes arbitrary metadata for the parent element, which can be used by user agents.
+/// Metadata should be structured data, such as elements from other XML namespaces, JSON, or
+/// RDF.
+///
+/// - Element: `<metadata>`.
+/// - Owned property: content.
+/// - Extended properties: None.
+///
+/// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/metadata)
+///
+/// ## Example
+///
+/// ```rust
+/// use svg::{desc, svg};
+///
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// svg.add_desc(desc::metadata(b"...".to_string()));
+///
+/// let str = svg.to_string();
+/// ```
 public fun metadata(content: String): Desc { Desc::Metadata(content) }
 
 /// Create a new title description.
+///
+/// ## Description
+///
+/// Provides a title for the parent element, which can be rendered by user agents in a tooltip.
+///
+/// - Element: `<title>`.
+/// - Owned property: title text.
+/// - Extended properties: None.
+///
+/// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/title)
+///
+/// ## Example
+///
+/// ```rust
+/// use svg::{desc, shape, svg};
+///
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// let title = desc::title(b"This is a circle");
+/// let mut circle = shape::circle(5).move_to(50, 50);
+///
+/// circle.add_desc(title);
+/// svg.root(vector[ circle ]);
+///
+/// let str = svg.to_string();
+/// ```
 public fun title(text: String): Desc { Desc::Title(text) }
 
 /// Insert a custom element into the `Desc` container.
 ///
-/// ```move
-/// use svg::desc;
+/// ```rust
+/// use svg::{desc, svg};
 ///
 /// let custom = desc::custom("<custom>Custom element</custom>");
-/// let container = container::desc(vector[ custom ]);
+/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// svg.add_desc(custom);
+///
+/// let str = svg.to_string();
 /// ```
 public fun custom(text: String): Desc { Desc::Custom(text) }
 

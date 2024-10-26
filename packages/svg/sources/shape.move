@@ -302,7 +302,8 @@ public fun text(text: String): Shape {
 ///
 /// let mut svg = svg::svg(vector[0, 0, 100, 100]);
 /// svg.root(vector[path]);
-/// svg.to_string();
+/// 
+/// let str = svg.to_string();
 /// ```
 public fun path(path: String, length: Option<u16>): Shape {
     Shape {

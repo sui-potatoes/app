@@ -4,7 +4,7 @@
 /// Module: svg
 module svg::svg;
 
-use codec::base64;
+use codec::{base64, urlencode};
 use std::string::String;
 use sui::vec_map::{Self, VecMap};
 use svg::{container::{Self, Container}, print, shape::Shape};
@@ -63,6 +63,8 @@ public fun root(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
 
 /// Create a `<g>` (group) container and place `Shape`s in it.
 ///
+/// Shortcut for `svg.add(container::g(shapes))`.
+///
 /// ```rust
 /// let mut svg = svg(vector[0, 0, 200, 200]);
 /// svg.g(vector[
@@ -76,6 +78,8 @@ public fun g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
 }
 
 /// Create a `<defs>` container and place `Shape`s in it.
+///
+/// Shortcut for `svg.add(container::defs(shapes))`.
 ///
 /// ```rust
 /// let mut svg = svg(vector[0, 0, 200, 200]);
@@ -136,16 +140,22 @@ public fun to_string(svg: &Svg): String {
 }
 
 /// Convert the SVG element to a base64-encoded data URI.
+///
+/// Outputs: `data:image/svg+xml;base64,PHN2Zz4KPC9zdmc+`.
+/// > If you need a URL-encoded data URI, use `svg.to_url()`
 public fun to_data_uri(svg: &Svg): String {
-    let mut result  = b"data:image/svg+xml;base64,".to_string();
+    let mut result = b"data:image/svg+xml;base64,".to_string();
     result.append(base64::encode(to_string(svg).into_bytes()));
     result
 }
 
 /// Convert the SVG element to a url-encoded data URI.
+///
+/// Outputs: `data:image/svg+xml,%3Csvg%3E%3C%2Fsvg%3E`.
+/// > If you need a base64-encoded data URI, use `svg.to_data_uri()`
 public fun to_url(svg: &Svg): String {
-    let mut result  = b"data:image/svg+xml,".to_string();
-    result.append(to_string(svg));
+    let mut result = b"data:image/svg+xml,".to_string();
+    result.append(urlencode::encode(to_string(svg).into_bytes()));
     result
 }
 
