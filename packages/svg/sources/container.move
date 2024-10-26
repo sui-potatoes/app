@@ -125,8 +125,19 @@ public fun marker(_shapes: vector<Shape>): Container { abort ENotImplemented }
 /// Move a container, keep the interface consistent with shapes.
 public fun move_to(container: Container, x: u16, y: u16): Container {
     container.map_attributes!(|attributes| {
-        attributes.insert(b"x".to_string(), print::num_to_string(x));
-        attributes.insert(b"y".to_string(), print::num_to_string(y));
+        let x_key = b"x".to_string();
+        let y_key = b"y".to_string();
+
+        if (attributes.contains(&x_key)) {
+            attributes.remove(&x_key);
+        };
+
+        if (attributes.contains(&y_key)) {
+            attributes.remove(&y_key);
+        };
+
+        attributes.insert(x_key, x.to_string());
+        attributes.insert(y_key, y.to_string());
     })
 }
 

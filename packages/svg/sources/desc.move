@@ -45,6 +45,9 @@ public enum Desc has store, copy, drop {
     ///
     /// [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/title)
     Title(String),
+    /// Custom element to insert into `Desc` container if needed.
+    /// Does not support any properties or attributes, used as-is.
+    Custom(String),
 }
 
 /// Create a new `<desc>` element with the given text.
@@ -56,8 +59,15 @@ public fun metadata(content: String): Desc { Desc::Metadata(content) }
 /// Create a new title description.
 public fun title(text: String): Desc { Desc::Title(text) }
 
-/// Move a shape.
-public fun move_to(shape: Desc, _x: u64, _y: u64): Desc { shape }
+/// Insert a custom element into the `Desc` container.
+///
+/// ```move
+/// use svg::desc;
+///
+/// let custom = desc::custom("<custom>Custom element</custom>");
+/// let container = container::desc(vector[ custom ]);
+/// ```
+public fun custom(text: String): Desc { Desc::Custom(text) }
 
 /// Print the shape as an `SVG` element.
 public fun to_string(shape: &Desc): String {
@@ -65,6 +75,7 @@ public fun to_string(shape: &Desc): String {
         Desc::Desc(str) => (b"desc", vector[*str]),
         Desc::Metadata(str) => (b"metadata", vector[*str]),
         Desc::Title(str) => (b"title", vector[*str]),
+        Desc::Custom(str) => return *str,
     };
 
     print::print(name.to_string(), vec_map::empty(), option::some(content))

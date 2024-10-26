@@ -38,23 +38,3 @@ public fun print(
     svg.append(b">".to_string());
     svg
 }
-
-/// Converts a number to a string, uses u16 for the digits.
-///
-/// TODO: remove once `.to_string()` is implemented in the standard library.
-public(package) fun num_to_string(mut num: u16): String {
-    let mut chars = vector[];
-
-    if (num == 0) {
-        chars.push_back(48);
-        return chars.to_string()
-    };
-
-    while (num > 0) {
-        let digit = num % 10;
-        num = num / 10;
-        chars.push_back((digit + 48) as u8);
-    };
-    chars.reverse();
-    chars.to_string()
-}

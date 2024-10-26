@@ -87,6 +87,7 @@ public fun g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
 ///     }),
 /// ]);
 /// svg.to_string();
+/// ```
 public fun defs(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
     svg.add(container::defs(shapes))
 }
@@ -120,7 +121,7 @@ public fun to_string(svg: &Svg): String {
     if (length == 4) {
         let mut view_box = b"".to_string();
         length.do!(|index| {
-            view_box.append(print::num_to_string(svg.view_box[index]));
+            view_box.append(svg.view_box[index].to_string());
             if (index < 3) view_box.append(b" ".to_string());
         });
         attributes.insert(b"viewBox".to_string(), view_box);

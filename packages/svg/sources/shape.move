@@ -358,8 +358,8 @@ public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
     match (shape_type) {
         ShapeType::Circle(_) => {
             let (cx, cy) = shape.position.extract().to_values();
-            shape.attributes.insert(b"cx".to_string(), print::num_to_string(cx));
-            shape.attributes.insert(b"cy".to_string(), print::num_to_string(cy));
+            shape.attributes.insert(b"cx".to_string(), cx.to_string());
+            shape.attributes.insert(b"cy".to_string(), cy.to_string());
         },
         ShapeType::Line(p0, p1) => {
             let (x1, y1) = p0.to_values();
@@ -400,30 +400,30 @@ public fun to_string(base_shape: &Shape): String {
 
     position.do_ref!(|point| {
         let (x, y) = point.to_values();
-        attributes.insert(b"x".to_string(), print::num_to_string(x));
-        attributes.insert(b"y".to_string(), print::num_to_string(y));
+        attributes.insert(b"x".to_string(), x.to_string());
+        attributes.insert(b"y".to_string(), y.to_string());
     });
 
     let (name, mut contents) = match (shape) {
         ShapeType::Circle(r) => {
-            attributes.insert(b"r".to_string(), print::num_to_string(*r));
+            attributes.insert(b"r".to_string(), (*r).to_string());
             (b"circle", option::none())
         },
         ShapeType::Ellipse(center, rx, ry) => {
             let (cx, cy) = center.to_values();
-            attributes.insert(b"cx".to_string(), print::num_to_string(cx));
-            attributes.insert(b"cy".to_string(), print::num_to_string(cy));
-            attributes.insert(b"rx".to_string(), print::num_to_string(*rx));
-            attributes.insert(b"ry".to_string(), print::num_to_string(*ry));
+            attributes.insert(b"cx".to_string(), cx.to_string());
+            attributes.insert(b"cy".to_string(), cy.to_string());
+            attributes.insert(b"rx".to_string(), (*rx).to_string());
+            attributes.insert(b"ry".to_string(), (*ry).to_string());
             (b"ellipse", option::none())
         },
         ShapeType::Line(p0, p1) => {
             let (x1, y1) = p0.to_values();
             let (x2, y2) = p1.to_values();
-            attributes.insert(b"x1".to_string(), print::num_to_string(x1));
-            attributes.insert(b"y1".to_string(), print::num_to_string(y1));
-            attributes.insert(b"x2".to_string(), print::num_to_string(x2));
-            attributes.insert(b"y2".to_string(), print::num_to_string(y2));
+            attributes.insert(b"x1".to_string(), x1.to_string());
+            attributes.insert(b"y1".to_string(), y1.to_string());
+            attributes.insert(b"x2".to_string(), x2.to_string());
+            attributes.insert(b"y2".to_string(), y2.to_string());
             (b"line", option::none())
         },
         ShapeType::Polygon(_points) => {
@@ -433,8 +433,8 @@ public fun to_string(base_shape: &Shape): String {
             abort ENotImplemented
         },
         ShapeType::Rect(width, height) => {
-            attributes.insert(b"width".to_string(), print::num_to_string(*width));
-            attributes.insert(b"height".to_string(), print::num_to_string(*height));
+            attributes.insert(b"width".to_string(), (*width).to_string());
+            attributes.insert(b"height".to_string(), (*height).to_string());
             (b"rect", option::none())
         },
         ShapeType::Text(text) => (b"text", option::some(vector[*text])),
@@ -462,7 +462,7 @@ public fun to_string(base_shape: &Shape): String {
             length.do_ref!(
                 |value| attributes.insert(
                     b"length".to_string(),
-                    print::num_to_string(*value),
+                    (*value).to_string(),
                 ),
             );
             (b"path", option::none())
