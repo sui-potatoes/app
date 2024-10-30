@@ -45,6 +45,10 @@ export function Play({ game, refetch, setGame }: Props) {
         onSelect(unit, x, y) {
             setSelectedUnit(unit === null ? null : { unit, x, y });
         },
+        onDeselect() {
+            setSelectedUnit(null);
+            selectAction(null);
+        },
         onTarget(x, y) {
             console.log("ontarget", unitRef.current);
             setTarget(() => ({ x, y }));

@@ -30,20 +30,23 @@ export function newScene(
     const width = 1024;
     const height = 768;
 
-    // create scene
-    const scene = new THREE.Scene();
-    const grid = new Grid(gridWidth, gridHeight); // And first there was a grid
-    const camera = new ControllableCamera(width / height);
-
-    camera.lookAt(grid.center);
-    camera.setDefaults(grid.center);
-
     // create renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(width, height);
     renderer.setAnimationLoop(animate);
     renderer.setPixelRatio(window.devicePixelRatio);
     root.appendChild(renderer.domElement);
+
+    window.onblur = () => renderer.setAnimationLoop(null);
+    window.onfocus = () => renderer.setAnimationLoop(animate);
+
+    // create scene
+    const scene = new THREE.Scene();
+    const grid = new Grid(gridWidth, gridHeight); // And first there was a grid
+    const camera = new ControllableCamera(width / height, renderer.domElement);
+
+    camera.lookAt(grid.center);
+    camera.setDefaults(grid.center);
 
     const light = new THREE.DirectionalLight(0xffffff, 5);
     light.position.add(grid.center.add(new THREE.Vector3(0, 10, 0)));
