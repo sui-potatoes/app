@@ -7,7 +7,7 @@ import { newScene } from "./scene";
 import { AnimatedUnit } from "./AnimatedUnit";
 import { Grid } from "./Grid";
 import { Crate } from "./Crate";
-import { Grid as GridType, Unit as UnitType } from "../types";
+import { Grid as GridType, Unit as UnitType } from "../lib/bcs";
 import { ControllableCamera } from "./ControllableCamera";
 
 /**
@@ -25,6 +25,7 @@ export type MapProps = {
     /** Callback when Unit is commanded to perform an action at X, Y */
     onTarget: (x: number, y: number) => void;
     onSelect: (unit: typeof UnitType.$inferType | null, x: number, y: number) => void;
+    onDeselect: () => void;
 };
 
 /**

@@ -26,7 +26,8 @@
         "react-dom": "^18.3.1",
         "react-hot-toast": "^2.4.1",
         "react-router-dom": "^6.27.0",
-        "three": "^0.169.0"
+        "three": "^0.169.0",
+        "tone": "^15.0.4"
     },
     "devDependencies": {
         "@eslint/js": "^9.13.0",

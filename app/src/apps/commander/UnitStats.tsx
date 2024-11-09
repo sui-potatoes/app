@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect, useState } from "react";
-import { Action, Game, Unit } from "./types";
+import { Action, Game, Unit } from "./lib/bcs";
 
 type Props = {
     game: typeof Game.$inferType;

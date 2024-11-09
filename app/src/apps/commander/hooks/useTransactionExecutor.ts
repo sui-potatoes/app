@@ -1,9 +1,9 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { SuiClient } from "@mysten/sui/client";
+import { SuiClient, SuiTransactionBlockResponse } from "@mysten/sui/client";
 import { Signer } from "@mysten/sui/cryptography";
-import { SerialTransactionExecutor, Transaction } from "@mysten/sui/transactions";
+import { SerialTransactionExecutor, Transaction, TransactionResult } from "@mysten/sui/transactions";
 import { useEffect, useMemo, useState } from "react";
 
 type Props = {
@@ -32,7 +32,14 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
     return {
         executor,
         executeTransaction(tx: Transaction) {
-            return executor!.executeTransaction(tx);
+            const txPromise = executor!.executeTransaction(tx);
+            return {
+                data: txPromise,
+                async wait(): Promise<SuiTransactionBlockResponse> {
+                    const { digest } = await txPromise;
+                    return client.waitForTransaction({ digest });
+                }
+            };
         },
     };
 }

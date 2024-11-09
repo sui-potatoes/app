@@ -3,11 +3,14 @@
 
 /**
  * Contains BCS type definitions for the Commander app.
+ * See matching structs in the `./packages/commander/sources/*.move` files.
  *
- * @module apps/commander/types
+ * @module apps/commander/lib/bcs
  */
 
 import { bcs } from "@mysten/sui/bcs";
+
+export const commanderBcs = bcs as typeof bcs & CommanderBcs;
 
 export type SelectedAction = {
     idx: number;
@@ -20,6 +23,10 @@ export type SelectedUnit = {
     y: number;
 };
 
+/**
+ * Return value of the `trace_path` function.
+ * Used in devInspect call.
+ */
 export const TracedPath = bcs.option(
     bcs.vector(
         bcs.struct("Point", {
@@ -59,7 +66,7 @@ export const Param = bcs.struct("Param", {
 export const Unit = bcs.struct("Unit", {
     symbol: bcs.string(),
     name: bcs.string(),
-    armor: bcs.vector(Armor),
+    armor: bcs.option(Armor),
     actions: bcs.vector(Action),
     health: Param,
     ap: Param,
@@ -84,3 +91,18 @@ export const Game = bcs.struct("Game", {
     turn: bcs.u16(),
     map: Grid,
 });
+
+type CommanderBcs = typeof bcs & {
+    Game: typeof Game.$inferType,
+    Grid: typeof Grid.$inferType,
+    Tile: typeof Tile.$inferType,
+    Unit: typeof Unit.$inferType,
+    Param: typeof Param.$inferType,
+    Action: typeof Action.$inferType,
+    Armor: typeof Armor.$inferType,
+    AttackType: typeof AttackType.$inferType,
+    ActionType: typeof ActionType.$inferType,
+    TracedPath: typeof TracedPath.$inferType,
+}
+
+export { commanderBcs as bcs };

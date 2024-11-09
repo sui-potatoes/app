@@ -8,6 +8,7 @@ import GoGame from "./apps/go-game/App.tsx";
 import Libraries from "./apps/libraries/App.tsx";
 import Character from "./apps/character/App.tsx";
 import Commander from "./apps/commander/App.tsx";
+import TxPlayer from "./apps/audio/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
 import { useSuiClient } from "@mysten/dapp-kit";
@@ -110,6 +111,9 @@ export function App() {
                         <NavLink to="/commander">commander</NavLink>
                     </li>
                     <li>
+                        <NavLink to="/audio">audio</NavLink>
+                    </li>
+                    <li>
                         <NavLink to="/libraries">libraries (for devs)</NavLink>
                     </li>
                     <li>
@@ -124,6 +128,7 @@ export function App() {
                     <Route path="/go/:id" element={<GoGame />} />
                     <Route path="/character" element={<Character />} />
                     <Route path="/commander" element={<Commander />} />
+                    <Route path="/audio" element={<TxPlayer />} />
                     <Route path="/libraries" element={<Libraries />} />
                 </Routes>
             </div>
