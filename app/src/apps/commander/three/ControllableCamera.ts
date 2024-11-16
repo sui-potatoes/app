@@ -6,7 +6,7 @@ import { Component } from "./GameObject";
 import JEASINGS from "jeasings";
 import { CameraControls } from "./CameraControls";
 
-const { MOUSE, TOUCH } = THREE;
+const { MOUSE } = THREE;
 // const CLOSEUP = new THREE.Vector3(-0.2, -0.2, -0.3);
 
 /**

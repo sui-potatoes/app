@@ -3,7 +3,6 @@
 
 import { BcsType, fromBase64 } from "@mysten/bcs";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
-import { SuiClient } from "@mysten/sui/client";
 import { QueryObserverBaseResult } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -44,8 +43,10 @@ export function useQueryObjectBcs<T>({ objectId, parser, enabled }: Props<T>): Q
         setParsed(parsedData);
     }, [result.data]);
 
+    // @ts-expect-error
     if (result.isPending) return { ...result, data: null };
+    // @ts-expect-error
     if (result.error) return { ...result, data: null };
-
+    // @ts-expect-error
     return { ...result, data: parsed };
 }

@@ -38,9 +38,7 @@ public fun decrease(param: &mut Param, amount: u16) {
 }
 
 /// Deplete the value of the parameter to 0.
-public fun deplete(param: &mut Param) {
-    param.value = 0;
-}
+public fun deplete(param: &mut Param) { param.value = 0; }
 
 /// Reset the value of the parameter to the maximum value.
 public fun reset(param: &mut Param) { param.value = param.max_value; }

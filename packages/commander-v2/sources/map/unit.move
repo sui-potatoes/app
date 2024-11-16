@@ -7,8 +7,9 @@
 /// via the `address` -> `UID`.
 module commander::unit;
 
-use commander::{param::{Self, Param}, recruit::Recruit, stats::Stats};
-use sui::random::RandomGenerator;
+use commander::{param::{Self, Param}, recruit::Recruit, stats::{Self, Stats}};
+use std::string::String;
+use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
 /// The chance for a critical hit. (100 - 10%)
 const CRIT_CHANCE: u8 = 90;
@@ -19,8 +20,10 @@ const DAMAGE: u8 = 5;
 
 /// A single `Unit` on the `Map`.
 public struct Unit has copy, store, drop {
+    /// The `ID` of the `Recruit`.
+    recruit: ID,
     /// Number of actions the `Unit` can perform in a single turn. Resets at the
-    /// beginning of each turn. A single action takes 1 point, options vary from
+    /// beginning of eafch turn. A single action takes 1 point, options vary from
     /// moving, attacking, using abilities, etc.
     ap: Param,
     /// The HP of the `Unit`.
@@ -95,7 +98,7 @@ public fun apply_damage(unit: &mut Unit, rng: &mut RandomGenerator, damage: u8, 
 
     // prettier-ignore
     let damage =
-        if (armor_stat >= damage) 1
+        if (armor_stat >= damage) 0
         else damage - armor_stat;
 
     // if attack can be dodged, spin the wheel and see if the unit dodges
@@ -103,7 +106,7 @@ public fun apply_damage(unit: &mut Unit, rng: &mut RandomGenerator, damage: u8, 
         return
     };
 
-    unit.hp.decrease(damage as u16);
+    unit.hp.decrease(damage as u16)
 }
 
 /// Creates a new `Unit` - an in-game represenation of a `Recruit`.
@@ -111,11 +114,43 @@ public fun from_recruit(recruit: &Recruit): Unit {
     let stats = recruit.stats();
 
     Unit {
+        recruit: object::id(recruit),
         ap: param::new(2),
         hp: param::new(stats.health() as u16),
         stats: *stats,
     }
 }
+
+// === Accessors ===
+
+/// Get the `Recruit`'s ID from the `Unit`.
+public fun recruit_id(unit: &Unit): ID { unit.recruit }
+
+/// Get the `Unit`'s HP.
+public fun hp(unit: &Unit): u16 { unit.hp.value() }
+
+/// Get the `Unit`'s AP.
+public fun ap(unit: &Unit): u16 { unit.ap.value() }
+
+// === Convenience and compatibility ===
+
+/// Deserialize bytes into a `Rank`.
+public fun from_bytes(bytes: vector<u8>): Unit {
+    from_bcs(&mut bcs::new(bytes))
+}
+
+/// Helper method to allow nested deserialization of `Unit`.
+public(package) fun from_bcs(bcs: &mut BCS): Unit {
+    Unit {
+        recruit: bcs.peel_address().to_id(),
+        ap: param::from_bcs(bcs),
+        hp: param::from_bcs(bcs),
+        stats: stats::from_bcs(bcs),
+    }
+}
+
+/// Print the `Unit` as a `String`.
+public fun to_string(_unit: &Unit): String { b"Unit".to_string() }
 
 #[test]
 fun test_unit() {
@@ -152,4 +187,31 @@ fun test_unit() {
     assert_eq!(unit.hp.value(), 0);
 
     recruit.dismiss().destroy_none();
+}
+
+#[test]
+fun test_unit_custom_weapon() {
+    use std::unit_test::assert_eq;
+    use sui::random;
+    use commander::{recruit, weapon};
+
+    let ctx = &mut tx_context::dummy();
+    let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
+    let mut recruit = recruit::default(ctx);
+    let weapon = weapon::new(b"Custom Weapon".to_string(), 7, 1, 0, 0, true, false, 1, 5, 3, ctx);
+
+    recruit.add_weapon(weapon);
+
+    let mut unit = recruit.to_unit();
+
+    assert_eq!(unit.stats, *recruit.stats());
+    assert_eq!(unit.hp.value(), recruit.stats().health() as u16);
+    assert_eq!(unit.ap.value(), 2);
+
+    std::debug::print(&unit.perform_attack(&mut rng, ctx));
+    unit.ap.reset();
+    let damage = unit.perform_attack(&mut rng, ctx);
+    assert_eq!(damage, 6); // 1 point below the base weapon damage (7 points)
+
+    recruit.dismiss().destroy!(|w| w.destroy());
 }

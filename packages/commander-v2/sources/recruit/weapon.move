@@ -42,6 +42,35 @@ public struct Weapon has key, store {
     // upgrades: /* ... */
 }
 
+/// Create a new `Weapon` with the provided parameters.
+public fun new(
+    name: String,
+    damage: u8,
+    spread: u8,
+    plus_one: u8,
+    crit_chance: u8,
+    is_dodgeable: bool,
+    area_damage: bool,
+    area_size: u8,
+    range: u8,
+    ammo: u8,
+    ctx: &mut TxContext,
+): Weapon {
+    Weapon {
+        id: object::new(ctx),
+        name,
+        damage,
+        spread,
+        plus_one,
+        crit_chance,
+        is_dodgeable,
+        area_damage,
+        area_size,
+        range,
+        ammo,
+    }
+}
+
 /// Create a new default `Weapon`.
 public fun default(ctx: &mut TxContext): Weapon {
     Weapon {
@@ -99,4 +128,4 @@ public fun range(w: &Weapon): u8 { w.range }
 public fun ammo(w: &Weapon): u8 { w.ammo }
 
 #[test]
-fun match_test() {}
+fun test_weapon() {}

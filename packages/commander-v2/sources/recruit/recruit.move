@@ -41,6 +41,8 @@ public struct DogTag has key, store {
     id: UID,
     /// The rank of the fallen soldier.
     rank: Rank,
+    /// Metadata (including backstory) of the fallen recruit.
+    metadata: Metadata,
 }
 
 /// Add a weapon to the Recruit.
@@ -87,15 +89,30 @@ public fun default(ctx: &mut TxContext): Recruit {
     }
 }
 
+/// Create a new `Recruit` with the given name and backstory.
+/// TODOs:
+/// - [ ] restrict who can submit new names and backstory. Right now anyone can
+///       create a Recruit with any name and backstory.
+public fun new(name: String, backstory: String, ctx: &mut TxContext): Recruit {
+    Recruit {
+        id: object::new(ctx),
+        metadata: Metadata { name, backstory },
+        rank: rank::rookie(),
+        stats: stats::default(),
+        weapon: option::none(),
+        leader: ctx.sender(),
+    }
+}
+
 /// Kills the Recruit and returns the DogTag.
 fun kill(recruit: Recruit, ctx: &mut TxContext): DogTag {
-    let Recruit { id, rank, weapon, .. } = recruit;
+    let Recruit { id, rank, weapon, metadata, .. } = recruit;
     id.delete();
 
     // TODO: figure a way to leave the weapon
     weapon.destroy!(|w| w.destroy());
 
-    DogTag { id: object::new(ctx), rank }
+    DogTag { id: object::new(ctx), rank, metadata }
 }
 
 /// Dismiss the Recruit, remove them forever from the game.

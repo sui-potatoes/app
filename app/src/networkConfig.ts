@@ -7,6 +7,7 @@ import {
     CHARACTER_PACKAGE_ID,
     CHARACTER_BUILDER_ID,
     COMMANDER_PACKAGE_ID,
+    COMMANDER_V2_PACKAGE_ID,
 } from "./constants";
 import { createNetworkConfig } from "@mysten/dapp-kit";
 
@@ -20,6 +21,7 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
                 /** The ID of the Builder object from `character` package */
                 characterBuilderId: CHARACTER_BUILDER_ID,
                 commanderPackageId: COMMANDER_PACKAGE_ID,
+                commanderV2PackageId: COMMANDER_V2_PACKAGE_ID,
             },
         },
     });

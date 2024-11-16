@@ -37,8 +37,14 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
                 data: txPromise,
                 async wait(): Promise<SuiTransactionBlockResponse> {
                     const { digest } = await txPromise;
-                    return client.waitForTransaction({ digest });
-                }
+                    return client.waitForTransaction({
+                        digest,
+                        options: {
+                            showObjectChanges: true,
+                            showEffects: true,
+                        },
+                    });
+                },
             };
         },
     };

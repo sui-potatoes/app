@@ -6,6 +6,8 @@
 /// parameters.
 module commander::stats;
 
+use sui::bcs::{Self, BCS};
+
 /// Max mobility value, in tiles.
 const MAX_MOBILITY: u8 = 30;
 /// Max aim value %.
@@ -88,6 +90,26 @@ public fun dodge(stats: &Stats): u8 { stats.dodge }
 /// Get the hack of the Recruit.
 public fun hack(stats: &Stats): u8 { stats.hack }
 
+// === Convenience and compatibility ===
+
+/// Deserialize bytes into a `Rank`.
+public fun from_bytes(bytes: vector<u8>): Stats {
+    from_bcs(&mut bcs::new(bytes))
+}
+
+/// Helper method to allow nested deserialization of `Rank`.
+public(package) fun from_bcs(bcs: &mut BCS): Stats {
+    Stats {
+        mobility: bcs.peel_u8(),
+        aim: bcs.peel_u8(),
+        will: bcs.peel_u8(),
+        health: bcs.peel_u8(),
+        armor: bcs.peel_u8(),
+        dodge: bcs.peel_u8(),
+        hack: bcs.peel_u8(),
+    }
+}
+
 #[test]
 fun test_stats() {
     use std::unit_test::assert_eq;
@@ -111,4 +133,7 @@ fun test_stats() {
     assert_eq!(stats.armor(), 0);
     assert_eq!(stats.dodge(), 0);
     assert_eq!(stats.hack(), 0);
+
+    // compare deserialized stats with the original
+    assert_eq!(stats, Self::from_bytes(bcs::to_bytes(&stats)));
 }

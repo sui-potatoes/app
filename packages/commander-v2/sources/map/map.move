@@ -9,6 +9,7 @@ module commander::map;
 use commander::{recruit::Recruit, unit::Unit};
 use grid::grid::{Self, Grid};
 use std::string::String;
+use sui::bcs::BCS;
 
 const EUnitAlreadyOnTile: u64 = 1;
 const ETileIsUnwalkable: u64 = 2;
@@ -45,12 +46,11 @@ public struct Map has store, drop {
     grid: Grid<Tile>,
 }
 
-/// Maps will be 30x30 tiles for now. Initially empty.
-public fun default(): Map {
+public fun new(size: u16): Map {
     Map {
         grid: grid::tabulate!(
-            30,
-            30,
+            size,
+            size,
             |_, _| Tile {
                 tile_type: TileType::Empty,
                 unit: option::none(),
@@ -59,8 +59,13 @@ public fun default(): Map {
     }
 }
 
+/// Maps will be 30x30 tiles for now. Initially empty.
+public fun default(): Map {
+    new(30)
+}
+
 /// Place Rookie on the map at the given position.
-public fun place_rookie(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
+public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
     assert!(!map.tile_has_unit(x, y), EUnitAlreadyOnTile);
     assert!(!map.is_tile_unwalkable(x, y), ETileIsUnwalkable);
 
@@ -101,15 +106,74 @@ public use fun tile_to_string as Tile.to_string;
 
 /// Get the tile at the given position.
 public fun tile_to_string(tile: &Tile): String {
+    if (tile.unit.is_some()) {
+        return tile.unit.borrow().hp().to_string();
+        // return b"U".to_string()
+    };
+
     match (tile.tile_type) {
+        // _ if (tile.unit.is_some()) => b"U".to_string(),
         TileType::Empty => b" ".to_string(),
         TileType::Cover { .. } => b"C".to_string(),
         TileType::Unwalkable => b"X".to_string(),
     }
 }
 
+#[allow(unused_variable)]
+/// Deserialize bytes into a `Rank`.
+public fun from_bytes(bytes: vector<u8>): Map {
+    abort 264
+}
+
+#[allow(unused_variable, unused_mut_parameter)]
+/// Helper method to allow nested deserialization of `Rank`.
+public(package) fun from_bcs(bcs: &mut BCS): Map {
+    abort 264
+}
+
 /// Implements the `Grid.to_string` method due to `Tile` implementing
 /// `to_string` too.
 public fun to_string(map: &Map): String {
     map.grid.to_string!()
+}
+
+#[test]
+fun test_map_with_units() {
+    use sui::random;
+    use commander::recruit;
+
+    let ctx = &mut tx_context::dummy();
+    let mut rng = random::new_generator_from_seed_for_testing(vector[2]);
+    let recruit_one = recruit::default(ctx);
+    let recruit_two = recruit::default(ctx);
+
+    let mut map = Self::new(6);
+
+    assert!(!map.tile_has_unit(3, 3));
+    assert!(!map.tile_has_unit(5, 2));
+
+    map.place_recruit(&recruit_one, 3, 3);
+    map.place_recruit(&recruit_two, 5, 2);
+
+    assert!(map.tile_has_unit(3, 3));
+    assert!(map.tile_has_unit(5, 2));
+
+    std::debug::print(&map.to_string());
+
+    // now try to attack another unit with the first one
+    let damage = map
+        .grid[3, 3]
+        .unit
+        .map!(|mut unit| unit.perform_attack(&mut rng, ctx))
+        .destroy_or!(abort 264);
+
+    std::debug::print(&damage.to_string());
+
+    // apply the damage to the second unit
+    map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);
+
+    std::debug::print(&map.to_string()); // shows damage dealt
+
+    recruit_one.dismiss().destroy_none();
+    recruit_two.dismiss().destroy_none();
 }
