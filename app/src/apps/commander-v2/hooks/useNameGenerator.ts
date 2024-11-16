@@ -4,13 +4,6 @@
 import { OpenAI } from "openai";
 
 const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
-const openai = new OpenAI({
-    apiKey: openaiKey,
-    dangerouslyAllowBrowser: true,
-    organization: "org-LbgyoMKieNbw3y0EIFzqHjFH",
-    project: "proj_ViXYIpVFHl70ahu6gAXWDeyk",
-});
-const assistantId = "asst_ESENwbgdYzcTnzuJ07kQcb7Q";
 
 export async function useNameGenerator() {
     if (!openaiKey) {
@@ -19,6 +12,15 @@ export async function useNameGenerator() {
             backstory: "Recently graduated from the academy, John is eager to prove himself in the field.",
         };
     }
+
+    const openai = new OpenAI({
+        apiKey: openaiKey,
+        dangerouslyAllowBrowser: true,
+        organization: "org-LbgyoMKieNbw3y0EIFzqHjFH",
+        project: "proj_ViXYIpVFHl70ahu6gAXWDeyk",
+    });
+    const assistantId = "asst_ESENwbgdYzcTnzuJ07kQcb7Q";
+
 
     const thread = await openai.beta.threads.create();
     const run = await openai.beta.threads.runs.create(thread.id, {
