@@ -12,7 +12,7 @@ export class UI extends THREE.EventDispatcher<UIEvents> {
     public readonly domElement: HTMLElement;
     public readonly leftPanel: HTMLElement;
     public readonly rightPanel: HTMLElement;
-    public readonly version: string = "v0.0.2-secret-sauce";
+    public readonly version: string = "v0.0.2-secret-sauce-tracer";
 
     constructor(domElement: HTMLElement) {
         super();
