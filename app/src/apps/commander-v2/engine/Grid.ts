@@ -3,15 +3,32 @@
 
 import * as THREE from "three";
 import { Tile } from "./Game";
+import { models } from "./scene";
+import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 
 export class Grid extends THREE.Object3D {
     public readonly grid: Tile[][];
     public readonly size: number = 30;
+    public readonly floor = new THREE.Group();
 
     constructor(size: number) {
         super();
         this.size = size;
         this.grid = Array.from({ length: size }, () => Array(size).fill({ type: "Empty" }));
+        this.add(this.floor);
+
+        if (!models.floor || !models.fence) {
+            console.warn("No floor model found.");
+            return
+        }
+
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                const floorTile = clone(models.floor.scene);
+                floorTile.position.set(i, 0, j);
+                this.floor.add(floorTile);
+            }
+        }
     }
 
     isInBounds(x: number, y: number) {
@@ -36,41 +53,58 @@ export class Grid extends THREE.Object3D {
                         RIGHT: rngBool(),
                     });
 
-                    const cube = (direction: "UP" | "DOWN" | "LEFT" | "RIGHT") => {
-                        const geometry = new THREE.BoxGeometry(0.1, 1, 1);
+                    // place obstacles instead of cover
+                    if (tile.DOWN && tile.LEFT && tile.RIGHT && tile.UP) {
+                        this.grid[x][z] = { type: "Obstacle" };
+                        const geometry = new THREE.BoxGeometry(1, 1, 1);
                         const material = new THREE.MeshStandardMaterial({ map: texture });
                         const cube = new THREE.Mesh(geometry, material);
-                        cube.position.set(x, 0.3, z);
+                        cube.position.set(x, 0.5, z);
+                        this.add(cube);
+                        return
+                    }
+
+                    const fence = (direction: "UP" | "DOWN" | "LEFT" | "RIGHT") => {
+                        const geometry = new THREE.BoxGeometry(0.1, 1, 1);
+                        const material = new THREE.MeshStandardMaterial({ map: texture });
+                        const fence = new THREE.Mesh(geometry, material);
+
+                        // const fence = clone(models.fence.scene);
+                        // fence.scale.set(1, 1, 1);
+                        // fence.position.set(i, 0, j);
+                        // this.floor.add(fence);
+
+                        fence.position.set(x, 0, z);
 
                         switch (direction) {
                             case "UP": {
-                                cube.rotation.y = Math.PI / 2;
-                                cube.position.set(x, 0.3, z - 0.5);
+                                fence.rotation.y = Math.PI / 2;
+                                fence.position.set(x, -0.1, z - 0.5);
                                 break;
                             }
                             case "DOWN": {
-                                cube.rotation.y = Math.PI / 2;
-                                cube.position.set(x, 0.3, z + 0.5);
+                                fence.rotation.y = Math.PI / 2;
+                                fence.position.set(x, -0.1, z + 0.5);
                                 break;
                             }
                             case "LEFT": {
-                                cube.position.set(x - 0.5, 0.3, z);
+                                fence.position.set(x - 0.5, -0.1, z);
                                 break;
                             }
                             case "RIGHT": {
-                                cube.position.set(x + 0.5, 0.3, z);
+                                fence.position.set(x + 0.5, -0.1, z);
                                 break;
                             }
                         }
 
-                        return cube;
+                        return fence;
                     };
 
                     // this.add(...cube("UP"));
-                    if (tile.UP) this.add(cube("UP"));
-                    if (tile.DOWN) this.add(cube("DOWN"));
-                    if (tile.LEFT) this.add(cube("LEFT"));
-                    if (tile.RIGHT) this.add(cube("RIGHT"));
+                    if (tile.UP) this.add(fence("UP"));
+                    if (tile.DOWN) this.add(fence("DOWN"));
+                    if (tile.LEFT) this.add(fence("LEFT"));
+                    if (tile.RIGHT) this.add(fence("RIGHT"));
                 }
             });
         });

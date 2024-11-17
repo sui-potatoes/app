@@ -4,9 +4,12 @@
 import * as THREE from "three";
 import { Game } from "./Game";
 import { Controls } from "./Controls";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { Unit } from "./Unit";
 import { UI } from "./UI";
+
+export const models: { [key: string]: GLTF } = {};
 
 /**
  * Creates a new Game scene (not to be confused with the Menu background scene).
@@ -43,13 +46,19 @@ export async function createScene(element: string) {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
     scene.add(ambientLight);
 
-    // const light = new THREE.DirectionalLight(0xffffff, 1);
-    // light.position.set(0, 10, 10);
-    // light.castShadow = true;
-    // scene.add(light);
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(dracoLoader);
 
     // loaded unit scene with animations
-    const unit = await new GLTFLoader().loadAsync("/soldier_2.gltf");
+    const unit = models.soldier = await loader.loadAsync("/soldier_2.gltf");
+
+    // load other models
+    models.floor = await loader.loadAsync("/models/rusted_floor.glb");
+    models.fence = await loader.loadAsync("/models/fence.glb");
+    models.fenceCorner = await loader.loadAsync("/models/fence_corner.glb");
 
     // game
     const game = new Game();
