@@ -34,30 +34,13 @@ export class UnitModel extends THREE.Object3D {
         this.add(this.model);
     }
 
-    playAnimation(name: string, once = false) {
-        // const clip = THREE.AnimationClip.findByName(this.animations, name);
-        // const action = this.mixer.clipAction(clip, undefined, THREE.NormalAnimationBlendMode);
-        // action.play();
-
-        return new Promise((resolve) => {
-            const mixer = this.mixer!;
-            const unit = this;
-
-            const clip = THREE.AnimationClip.findByName(this.animations, name);
-            const action = this.mixer!.clipAction(clip, undefined, THREE.NormalAnimationBlendMode);
-            mixer.stopAllAction();
-            action.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, 10);
-            action.play();
-
-            mixer.addEventListener("finished", onFinished);
-
-            function onFinished() {
-                action.stop();
-                unit.playAnimation("Idle");
-                mixer.removeEventListener("finished", onFinished);
-                resolve(null);
-            }
-        });
+    playAnimation(name: string) {
+        this.mixer.stopAllAction();
+        const clip = THREE.AnimationClip.findByName(this.animations, name);
+        const action = this.mixer.clipAction(clip, undefined, THREE.NormalAnimationBlendMode);
+        action.setLoop(THREE.LoopRepeat, 999);
+        action.timeScale = 0.9;
+        action.play();
     }
 
     async walk(path: THREE.Vector2[]) {
