@@ -6,7 +6,7 @@ module svg::container;
 
 use std::string::String;
 use sui::vec_map::{Self, VecMap};
-use svg::{desc::Desc, print, shape::Shape};
+use svg::{animation::Animation, desc::Desc, print, shape::Shape};
 
 /// Code for the `NotImplemented` error.
 const ENotImplemented: u64 = 0;
@@ -26,6 +26,7 @@ public struct Container has store, copy, drop {
     container: ContainerType,
     shapes: vector<Shape>,
     attributes: VecMap<String, String>,
+    animation: Option<Animation>,
     desc: vector<Desc>,
 }
 
@@ -65,6 +66,7 @@ public fun root(shapes: vector<Shape>): Container {
         container: ContainerType::Root,
         shapes,
         attributes: vec_map::empty(),
+        animation: option::none(),
         desc: vector[],
     }
 }
@@ -102,6 +104,7 @@ public fun a(href: String, shapes: vector<Shape>): Container {
         container: ContainerType::A,
         shapes,
         attributes,
+        animation: option::none(),
         desc: vector[],
     }
 }
@@ -136,6 +139,7 @@ public fun defs(shapes: vector<Shape>): Container {
         container: ContainerType::Defs,
         shapes,
         attributes: vec_map::empty(),
+        animation: option::none(),
         desc: vector[],
     }
 }
@@ -174,6 +178,7 @@ public fun g(shapes: vector<Shape>): Container {
         container: ContainerType::G,
         shapes,
         attributes: vec_map::empty(),
+        animation: option::none(),
         desc: vector[],
     }
 }
@@ -226,6 +231,11 @@ public fun add(container: &mut Container, shape: Shape) {
     container.shapes.push_back(shape);
 }
 
+/// Access Option with `Animation`, fill, extract and so on.
+public fun animation_mut(container: &mut Container): &mut Option<Animation> {
+    &mut container.animation
+}
+
 /// Get a mutable reference to the attributes of a container.
 public fun attributes_mut(container: &mut Container): &mut VecMap<String, String> {
     &mut container.attributes
@@ -272,10 +282,13 @@ public fun to_string(container: &Container): String {
         })
     };
 
+    let mut contents = container.shapes.map!(|shape| shape.to_string());
+    container.animation.do_ref!(|animation| contents.push_back(animation.to_string()));
+
     print::print(
         container.name(),
         container.attributes,
-        option::some(container.shapes.map!(|shape| shape.to_string())),
+        option::some(contents),
     )
 }
 

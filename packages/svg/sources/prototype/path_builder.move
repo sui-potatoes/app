@@ -105,7 +105,7 @@ public fun elliptical_arc(
 }
 
 /// Converts a path into a `String` that can be used as an SVG path attribute.
-public fun into_string(path: &Path): String {
+public fun to_string(path: &Path): String {
     path.contents.fold!(b"".to_string(), |mut acc, cmd| { acc.append(cmd.to_string()); acc })
 }
 
@@ -213,31 +213,31 @@ public fun command_to_string(cmd: &Command): String {
 
 #[test]
 fun test_path_builder() {
-    let str = new().move_to(10, 10).line_to(20, 20).into_string();
+    let str = new().move_to(10, 10).line_to(20, 20).to_string();
     assert_eq!(str, b"M10,10L20,20".to_string());
 
-    let str = new().move_to(10, 10).horizontal_line_to(20).into_string();
+    let str = new().move_to(10, 10).horizontal_line_to(20).to_string();
     assert_eq!(str, b"M10,10H20".to_string());
 
-    let str = new().move_to(10, 10).vertical_line_to(20).into_string();
+    let str = new().move_to(10, 10).vertical_line_to(20).to_string();
     assert_eq!(str, b"M10,10V20".to_string());
 
-    let str = new().move_to(10, 10).close_path().into_string();
+    let str = new().move_to(10, 10).close_path().to_string();
     assert_eq!(str, b"M10,10Z".to_string());
 
-    let str = new().move_to(10, 10).curve_to(20, 20, 30, 30, 40, 40).into_string();
+    let str = new().move_to(10, 10).curve_to(20, 20, 30, 30, 40, 40).to_string();
     assert_eq!(str, b"M10,10C20,20,30,30,40,40".to_string());
 
-    let str = new().move_to(10, 10).smooth_curve_to(20, 20, 30, 30).into_string();
+    let str = new().move_to(10, 10).smooth_curve_to(20, 20, 30, 30).to_string();
     assert_eq!(str, b"M10,10S20,20,30,30".to_string());
 
-    let str = new().move_to(10, 10).quadratic_bezier_curve_to(20, 20, 30, 30).into_string();
+    let str = new().move_to(10, 10).quadratic_bezier_curve_to(20, 20, 30, 30).to_string();
     assert_eq!(str, b"M10,10Q20,20,30,30".to_string());
 
-    let str = new().move_to(10, 10).smooth_quadratic_bezier_curve_to(20, 20).into_string();
+    let str = new().move_to(10, 10).smooth_quadratic_bezier_curve_to(20, 20).to_string();
     assert_eq!(str, b"M10,10T20,20".to_string());
 
-    let str = new().move_to(10, 10).elliptical_arc(20, 20, 30, true, false, 40, 40).into_string();
+    let str = new().move_to(10, 10).elliptical_arc(20, 20, 30, true, false, 40, 40).to_string();
     assert_eq!(str, b"M10,10A20,20,30,1,0,40,40".to_string());
 
     let str = new()
@@ -251,7 +251,7 @@ fun test_path_builder() {
         .quadratic_bezier_curve_to(100, 100, 110, 110)
         .smooth_quadratic_bezier_curve_to(120, 120)
         .elliptical_arc(130, 130, 140, true, false, 150, 150)
-        .into_string();
+        .to_string();
 
     assert_eq!(
         str,

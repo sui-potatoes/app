@@ -40,7 +40,7 @@ public enum Desc has store, copy, drop {
 /// ```rust
 /// use svg::{desc, shape, svg};
 ///
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// let desc = desc::desc(b"This is a circle".to_string());
 /// let mut circle = shape::circle(5).move_to(50, 50);
 ///
@@ -70,7 +70,7 @@ public fun desc(text: String): Desc { Desc::Desc(text) }
 /// ```rust
 /// use svg::{desc, svg};
 ///
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// svg.add_desc(desc::metadata(b"...".to_string()));
 ///
 /// let str = svg.to_string();
@@ -94,7 +94,7 @@ public fun metadata(content: String): Desc { Desc::Metadata(content) }
 /// ```rust
 /// use svg::{desc, shape, svg};
 ///
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// let title = desc::title(b"This is a circle");
 /// let mut circle = shape::circle(5).move_to(50, 50);
 ///
@@ -111,7 +111,7 @@ public fun title(text: String): Desc { Desc::Title(text) }
 /// use svg::{desc, svg};
 ///
 /// let custom = desc::custom("<custom>Custom element</custom>");
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// svg.add_desc(custom);
 ///
 /// let str = svg.to_string();

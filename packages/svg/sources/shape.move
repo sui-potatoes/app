@@ -26,111 +26,12 @@ public struct Shape has store, copy, drop {
 /// SVG shape enum. Each variant represents a different shape, all of them
 /// containing a set of attributes as a `VecMap`.
 public enum ShapeType has store, copy, drop {
-    /// Circle shape, a circle with a center and a radius.
-    ///
-    /// **Element:** `<circle>`
-    ///
-    /// **Own properties:**
-    /// - `r` - the radius of the circle.
-    ///
-    /// **Inherited properties:**
-    /// - `cx` - the x-coordinate of the circle.
-    /// - `cy` - the y-coordinate of the circle.
-    ///
-    /// **Extended properties:**
-    /// - `pathLength` - the total length of the path.
-    /// - `transform` - a transformation to apply to the circle.
-    ///
-    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle
     Circle(u16),
-    /// Ellipse shape, a circle that is stretched in one direction.
-    ///
-    /// **Element:** `<ellipse>`
-    ///
-    /// **Own properties:**
-    /// - `pc` - the point of the center of the ellipse.
-    /// - `rx` - the radius of the ellipse in the x-axis.
-    /// - `ry` - the radius of the ellipse in the y-axis.
-    ///
-    /// **Inherited properties:**
-    /// - `x` - the x-coordinate of the ellipse.
-    /// - `y` - the y-coordinate of the ellipse.
-    ///
-    /// **Extended properties:**
-    /// - `pathLength` - the total length of the path.
-    /// - `transform` - a transformation to apply to the ellipse.
-    ///
-    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/ellipse
     Ellipse(Point, u16, u16),
-    /// Line shape, a line that connects two points, each point is a pair
-    /// of `x` and `y`.
-    ///
-    /// **Element:** `<line>`
-    ///
-    /// **Own properties:**
-    /// - p0 - the first point.
-    /// - p1 - the second point.
-    ///
-    /// **Extended properties:**
-    /// - `pathLength` - the total length of the path.
-    ///
-    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
     Line(Point, Point),
-    /// Polygon shape, a closed shape that connects multiple points. With
-    /// straight lines between each pair of points.
-    ///
-    /// **Element:** `<polygon>`
-    ///
-    /// **Own properties:**
-    /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
-    ///
-    /// **Inherited properties:**
-    /// - `x` - the x-coordinate of the polygon.
-    /// - `y` - the y-coordinate of the polygon.
-    ///
-    /// **Extended properties:**
-    /// - `pathLength` - the total length of the path.
     Polygon(vector<Point>),
-    /// Polyline shape, a line that connects multiple points.
-    ///
-    /// **Own properties:**
-    /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
-    ///
-    /// **Extended properties:**
-    /// - `pathLength` - the total length of the path.
     Polyline(vector<Point>),
-    /// Rectangle shape, a rectangle with a position, width, and height.
-    ///
-    /// **Element:** `<rect>`
-    ///
-    /// **Own properties:**
-    /// - `width` - the width of the rectangle.
-    /// - `height` - the height of the rectangle.
-    ///
-    /// **Extended properties:**
-    /// - `rx` - the radius of the rectangle in the x-axis.
-    /// - `ry` - the radius of the rectangle in the y-axis.
-    /// - `pathLength` - the total length of the path.
-    ///
-    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/rect
     Rect(u16, u16),
-    /// Text shape, a text element with a string and a position.
-    ///
-    /// **Element:** `<text>`
-    ///
-    /// **Own properties:**
-    /// - `text` - the text to display.
-    /// - `path` - an optional `TextPath` element.
-    ///
-    /// **Inherited properties:**
-    /// - `x` - the x-coordinate of the text.
-    /// - `y` - the y-coordinate of the text.
-    ///
-    /// **Extended properties:**
-    /// - `dx` - the x-offset of the text.
-    /// - `dy` - the y-offset of the text.
-    ///
-    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
     Text(String),
     /// Text with text path shape, a text element with a string and a path.
     ///
@@ -146,77 +47,14 @@ public enum ShapeType has store, copy, drop {
     ///
     /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/textPath
     TextWithTextPath { text: String, href: String },
-    /// Path shape, a shape defined by a path string. The path string is
-    /// a series of commands and coordinates. The `length` attribute is
-    /// optional and specifies the total length of the path.
-    ///
-    /// **Element:** `<path>`
-    ///
-    /// **Own properties:**
-    /// - `path` - the path string.
-    /// - `length` - the total length of the path.
-    ///
-    /// **Inherited properties:**
-    /// - `x` - the x-coordinate of the path.
-    /// - `y` - the y-coordinate of the path.
-    ///
-    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
     Path(String, Option<u16>),
-    /// Use shape, a reference to a shape defined elsewhere in the document.
-    ///
-    /// **Element:** `<use>`
-    ///
-    /// **Own properties:**
-    /// - `href` - the id of the shape to reference.
-    ///
-    /// **Inherited properties:**
-    /// - `x` - the x-coordinate of the shape.
-    /// - `y` - the y-coordinate of the shape.
-    ///
-    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/use
     Use(String),
-    /// Part of the `defs` container, a shape that is not a standard SVG shape.
-    ///
-    /// **Element:** `<linearGradient>`
-    ///
-    /// **Own properties:**
-    /// - `stops` - a list of stop elements.
-    ///
-    /// **Inherited properties:** none
-    ///
-    /// **Extended properties:**
-    /// - `x1` - the x-coordinate of the start of the gradient.
-    /// - `y1` - the y-coordinate of the start of the gradient.
-    /// - `x2` - the x-coordinate of the end of the gradient.
-    /// - `y2` - the y-coordinate of the end of the gradient.
-    ///
-    /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/linearGradient
     LinearGradient {
         stops: vector<Stop>,
     },
-    /// Part of the `defs` container, a shape that is not a standard SVG shape.
-    /// A radial gradient is a gradient that starts from a center point and
-    /// spreads out in all directions.
-    ///
-    /// **Element:** `<radialGradient>`
-    ///
-    /// **Inherited properties:** none
-    ///
-    /// **Own properties:**
-    /// - `stops` - a list of stop elements.
-    ///
-    /// **Extended properties:**
-    /// - `cx` - the x-coordinate of the center of the gradient.
-    /// - `cy` - the y-coordinate of the center of the gradient.
-    /// - `r` - the radius of the gradient.
     RadialGradient {
         stops: vector<Stop>,
     },
-    /// Custom string, allows for custom expressions passed as a string.
-    ///
-    /// ** Ownedproperties: none**
-    /// **Inherited properties:** none
-    /// **Extended properties: none**
     Custom(String),
 }
 
@@ -224,6 +62,22 @@ public enum ShapeType has store, copy, drop {
 public struct Stop has store, copy, drop { offset: String, color: String }
 
 /// Create a new circle shape.
+/// Circle shape, a circle with a center and a radius.
+///
+/// **Element:** `<circle>`
+///
+/// **Own properties:**
+/// - `r` - the radius of the circle.
+///
+/// **Inherited properties:**
+/// - `cx` - the x-coordinate of the circle.
+/// - `cy` - the y-coordinate of the circle.
+///
+/// **Extended properties:**
+/// - `pathLength` - the total length of the path.
+/// - `transform` - a transformation to apply to the circle.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle
 public fun circle(r: u16): Shape {
     Shape {
         shape: ShapeType::Circle(r),
@@ -234,6 +88,27 @@ public fun circle(r: u16): Shape {
 }
 
 /// Create a new ellipse `Shape`.
+///
+/// ## Decription
+///
+/// Ellipse shape, a circle that is stretched in one direction.
+///
+/// **Element:** `<ellipse>`
+///
+/// **Own properties:**
+/// - `pc` - the point of the center of the ellipse.
+/// - `rx` - the radius of the ellipse in the x-axis.
+/// - `ry` - the radius of the ellipse in the y-axis.
+///
+/// **Inherited properties:**
+/// - `x` - the x-coordinate of the ellipse.
+/// - `y` - the y-coordinate of the ellipse.
+///
+/// **Extended properties:**
+/// - `pathLength` - the total length of the path.
+/// - `transform` - a transformation to apply to the ellipse.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/ellipse
 ///
 /// ```rust
 /// let cx = 1400;
@@ -255,6 +130,22 @@ public fun ellipse(cx: u16, cy: u16, rx: u16, ry: u16): Shape {
 }
 
 /// Create a new line shape.
+///
+/// ## Decription
+///
+/// Line shape, a line that connects two points, each point is a pair
+/// of `x` and `y`.
+///
+/// **Element:** `<line>`
+///
+/// **Own properties:**
+/// - p0 - the first point.
+/// - p1 - the second point.
+///
+/// **Extended properties:**
+/// - `pathLength` - the total length of the path.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
 public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
     Shape {
         shape: ShapeType::Line(point::point(x1, y1), point::point(x2, y2)),
@@ -264,17 +155,64 @@ public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
     }
 }
 
-/// Create a new polygon shape.
+/// Create a new polygon shape (not implemented).
+///
+/// ## Decription
+///
+/// Polygon shape, a closed shape that connects multiple points. With
+/// straight lines between each pair of points.
+///
+/// **Element:** `<polygon>`
+///
+/// **Own properties:**
+/// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
+///
+/// **Inherited properties:**
+/// - `x` - the x-coordinate of the polygon.
+/// - `y` - the y-coordinate of the polygon.
+///
+/// **Extended properties:**
+/// - `pathLength` - the total length of the path.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polygon
 public fun polygon(_points: vector<vector<u16>>): Shape {
     abort ENotImplemented
 }
 
 /// Create a new polyline shape.
+/// Polyline shape, a line that connects multiple points.
+///
+/// ## Decription
+///
+/// **Own properties:**
+/// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
+///
+/// **Extended properties:**
+/// - `pathLength` - the total length of the path.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polyline
 public fun polyline(_points: vector<vector<u16>>): Shape {
     abort ENotImplemented
 }
 
 /// Create a new rectangle shape.
+///
+/// ## Decription
+///
+/// Rectangle shape, a rectangle with a position, width, and height.
+///
+/// **Element:** `<rect>`
+///
+/// **Own properties:**
+/// - `width` - the width of the rectangle.
+/// - `height` - the height of the rectangle.
+///
+/// **Extended properties:**
+/// - `rx` - the radius of the rectangle in the x-axis.
+/// - `ry` - the radius of the rectangle in the y-axis.
+/// - `pathLength` - the total length of the path.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/rect
 public fun rect(width: u16, height: u16): Shape {
     Shape {
         shape: ShapeType::Rect(width, height),
@@ -285,6 +223,26 @@ public fun rect(width: u16, height: u16): Shape {
 }
 
 /// Create a new `<text>` shape.
+///
+/// ## Decription
+///
+/// Text shape, a text element with a string and a position.
+///
+/// **Element:** `<text>`
+///
+/// **Own properties:**
+/// - `text` - the text to display.
+/// - `path` - an optional `TextPath` element.
+///
+/// **Inherited properties:**
+/// - `x` - the x-coordinate of the text.
+/// - `y` - the y-coordinate of the text.
+///
+/// **Extended properties:**
+/// - `dx` - the x-offset of the text.
+/// - `dy` - the y-offset of the text.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
 public fun text(text: String): Shape {
     Shape {
         shape: ShapeType::Text(text),
@@ -295,6 +253,24 @@ public fun text(text: String): Shape {
 }
 
 /// Create a new `<path>` shape.
+///
+/// ## Decription
+///
+/// Path shape, a shape defined by a path string. The path string is
+/// a series of commands and coordinates. The `length` attribute is
+/// optional and specifies the total length of the path.
+///
+/// **Element:** `<path>`
+///
+/// **Own properties:**
+/// - `path` - the path string.
+/// - `length` - the total length of the path.
+///
+/// **Inherited properties:**
+/// - `x` - the x-coordinate of the path.
+/// - `y` - the y-coordinate of the path.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
 ///
 /// ```rust
 /// let path_string = b"M 10 10 L 20 20".to_string();
@@ -315,6 +291,21 @@ public fun path(path: String, length: Option<u16>): Shape {
 }
 
 /// Create a new `<use>` shape.
+///
+/// ## Decription
+///
+/// Use shape, a reference to a shape defined elsewhere in the document.
+///
+/// **Element:** `<use>`
+///
+/// **Own properties:**
+/// - `href` - the id of the shape to reference.
+///
+/// **Inherited properties:**
+/// - `x` - the x-coordinate of the shape.
+/// - `y` - the y-coordinate of the shape.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/use
 public fun use_(href: String): Shape {
     Shape {
         shape: ShapeType::Use(href),
@@ -325,6 +316,25 @@ public fun use_(href: String): Shape {
 }
 
 /// Create a new `<linearGradient>` shape.
+///
+/// ## Decription
+///
+/// Part of the `defs` container, a shape that is not a standard SVG shape.
+///
+/// **Element:** `<linearGradient>`
+///
+/// **Own properties:**
+/// - `stops` - a list of stop elements.
+///
+/// **Inherited properties:** none
+///
+/// **Extended properties:**
+/// - `x1` - the x-coordinate of the start of the gradient.
+/// - `y1` - the y-coordinate of the start of the gradient.
+/// - `x2` - the x-coordinate of the end of the gradient.
+/// - `y2` - the y-coordinate of the end of the gradient.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/linearGradient
 public fun linear_gradient(stops: vector<Stop>): Shape {
     Shape {
         shape: ShapeType::LinearGradient { stops },
@@ -335,6 +345,26 @@ public fun linear_gradient(stops: vector<Stop>): Shape {
 }
 
 /// Create a new `<radialGradient>` shape.
+///
+/// ## Decription
+///
+/// Part of the `defs` container, a shape that is not a standard SVG shape.
+/// A radial gradient is a gradient that starts from a center point and
+/// spreads out in all directions.
+///
+/// **Element:** `<radialGradient>`
+///
+/// **Inherited properties:** none
+///
+/// **Own properties:**
+/// - `stops` - a list of stop elements.
+///
+/// **Extended properties:**
+/// - `cx` - the x-coordinate of the center of the gradient.
+/// - `cy` - the y-coordinate of the center of the gradient.
+/// - `r` - the radius of the gradient.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/radialGradient
 public fun radial_gradient(stops: vector<Stop>): Shape {
     Shape {
         shape: ShapeType::RadialGradient { stops },
@@ -345,6 +375,16 @@ public fun radial_gradient(stops: vector<Stop>): Shape {
 }
 
 /// Create a new custom shape.
+///
+/// ## Decription
+///
+/// Custom string, allows for custom expressions passed as a string.
+///
+/// **Own properties:** none
+///
+/// **Inherited properties:** none
+///
+/// **Extended properties:** none
 public fun custom(text: String): Shape {
     Shape {
         shape: ShapeType::Custom(text),
@@ -536,9 +576,39 @@ public fun set_attributes(shape: &mut Shape, attrs: VecMap<String, String>) {
     shape.attributes = attrs;
 }
 
-/// Add an animation to a shape.
+/// Add an attribute to a shape.
+///
+/// ```rust
+/// use svg::{animation, shape};
+///
+/// let mut shape = shape::rect(10, 10);
+/// let animation = animation::set(b"5")
+///     .attribute_name(b"r")
+///     .duration(b"10s")
+///     .repeat_count(b"indefinite");
+///
+/// shape.add_animation(animation);
+/// ```
 public fun add_animation(shape: &mut Shape, animation: Animation) {
     shape.animation = option::some(animation);
+}
+
+/// Get a mutable reference to the animation field.
+///
+/// ```rust
+/// use svg::{animation, shape};
+///
+/// let mut shape = shape::rect(10, 10);
+/// let animation = animation::set(b"5")
+///     .attribute_name(b"r")
+///     .duration(b"10s")
+///     .repeat_count(b"indefinite");
+///
+/// shape.add_animation(animation);
+/// shape.animation_mut().extract(); // remove animation
+/// ```
+public fun animation_mut(shape: &mut Shape): &mut Option<Animation> {
+    &mut shape.animation
 }
 
 /// Map over the attributes of the animation.

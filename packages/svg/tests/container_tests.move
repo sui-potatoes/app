@@ -12,7 +12,6 @@ fun test_name() {
     assert_eq!(container::defs(vector[]).name(), b"defs".to_string());
     assert_eq!(container::a(b"".to_string(), vector[]).name(), b"a".to_string());
     assert_eq!(container::g(vector[]).name(), b"g".to_string());
-    // assert_eq!(container::desc(vector[]).name(), b"".to_string());
     // assert_eq!(container::marker(vector[]).name(), b"marker".to_string());
     // assert_eq!(container::symbol(vector[]).name(), b"symbol".to_string());
 }
@@ -22,9 +21,11 @@ fun test_to_string() {
     assert_eq!(container::root(vector[]).to_string(), b"".to_string());
     assert_eq!(container::defs(vector[]).to_string(), b"<defs></defs>".to_string());
     assert_eq!(container::a(b"".to_string(), vector[]).to_string(), b"<a></a>".to_string());
-    assert_eq!(container::a(b"/potatoes".to_string(), vector[]).to_string(), b"<a href='/potatoes'></a>".to_string());
+    assert_eq!(
+        container::a(b"/potatoes".to_string(), vector[]).to_string(),
+        b"<a href='/potatoes'></a>".to_string(),
+    );
     assert_eq!(container::g(vector[]).to_string(), b"<g></g>".to_string());
-    // assert_eq!(container::desc(vector[]).to_string(), b"".to_string());
     // assert_eq!(container::marker(vector[]).to_string(), b"<marker/>".to_string());
     // assert_eq!(container::symbol(vector[]).to_string(), b"<symbol/>".to_string());
 }
@@ -42,7 +43,6 @@ fun test_root() {
 
     // svg.debug();
 }
-
 
 #[test]
 // From MDN Web Docs: https://developer.mozilla.org/en-US/docs/Web/SVG/Element/defs
@@ -101,12 +101,18 @@ fun test_defs() {
 // ```
 fun test_a() {
     let mut svg = svg::svg(vector[0, 0, 100, 100]);
-    let link = container::a(b"/docs/Web/SVG/Element/circle".to_string(), vector[shape::circle(35).move_to(50, 40)]);
+    let link = container::a(
+        b"/docs/Web/SVG/Element/circle".to_string(),
+        vector[shape::circle(35).move_to(50, 40)],
+    );
     svg.add(link);
 
-    let link = container::a(b"/docs/Web/SVG/Element/text".to_string(), vector[shape::text(b"&lt;circle&gt;".to_string()).move_to(50, 90).map_attributes!(|attrs| {
-        attrs.insert(b"text-anchor".to_string(), b"middle".to_string());
-    })]);
+    let link = container::a(
+        b"/docs/Web/SVG/Element/text".to_string(),
+        vector[shape::text(b"&lt;circle&gt;".to_string()).move_to(50, 90).map_attributes!(|attrs| {
+                attrs.insert(b"text-anchor".to_string(), b"middle".to_string());
+            })],
+    );
     svg.add(link);
 
     assert_eq!(

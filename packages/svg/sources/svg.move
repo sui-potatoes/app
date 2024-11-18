@@ -34,11 +34,13 @@ public fun svg(view_box: vector<u16>): Svg {
 /// to add a group container or place elements in the "root", use `root` or `g` functions.
 ///
 /// ```rust
+/// use svg::{shape, svg};
+///
 /// let container = container::g(vector[
 ///    shape::circle(5).move_to(10, 10),
 ///    shape::ellipse(30, 30, 10, 5),
 /// ]);
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// svg.add(container);
 /// svg.to_string();
 /// ```
@@ -51,7 +53,9 @@ public fun add(svg: &mut Svg, element: Container): &mut Svg {
 ///
 /// ## Usage
 /// ```rust
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// use svg::{shape, svg};
+///
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// svg.add_root(vector[
 ///   shape::circle(5).move_to(10, 10),
 ///   shape::square(30, 30).move_to(20, 20),
@@ -68,7 +72,9 @@ public fun add_root(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
 ///
 /// ## Usage
 /// ```rust
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// use svg::{shape, svg};
+///
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// svg.add_a(vector[
 ///     shape::circle(5).move_to(10, 10),
 ///     shape::ellipse(30, 30, 10, 5),
@@ -86,7 +92,9 @@ public fun add_a(svg: &mut Svg, link: String, shapes: vector<Shape>): &mut Svg {
 ///
 /// ## Usage
 /// ```rust
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// use svg::{shape, svg};
+///
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// svg.add_g(vector[
 ///  shape::circle(5).move_to(10, 10),
 ///  shape::ellipse(30, 30, 10, 5),
@@ -103,7 +111,9 @@ public fun add_g(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
 ///
 /// ## Usage
 /// ```rust
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// use svg::{shape, svg};
+///
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// svg.add_defs(vector[
 ///     shape::linear_gradient(vector[
 ///         shape::stop(b"10%", b"gold"),
@@ -123,7 +133,9 @@ public fun add_defs(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
 ///
 /// ## Usage
 /// ```rust
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// use svg::svg;
+///
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// svg.attributes_mut().insert(
 ///     b"width".to_string(),
 ///     b"10000".to_string()
@@ -137,7 +149,9 @@ public fun attributes_mut(svg: &mut Svg): &mut VecMap<String, String> {
 ///
 /// ## Usage
 /// ```rust
-/// let mut svg = svg(vector[0, 0, 200, 200]);
+/// use svg::{shape, svg};
+///
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
 /// svg.add_root(vector[ shape::circle(5).move_to(10, 10) ]);
 /// let printed = svg.to_string();
 /// ```
@@ -165,7 +179,8 @@ public fun to_string(svg: &Svg): String {
 /// Convert the SVG element to a base64-encoded data URI.
 ///
 /// Outputs: `data:image/svg+xml;base64,PHN2Zz4KPC9zdmc+`.
-/// > If you need a URL-encoded data URI, use `svg.to_url()`
+///
+/// **If you need a URL-encoded data URI, use `svg.to_url()`**
 public fun to_data_uri(svg: &Svg): String {
     let mut result = b"data:image/svg+xml;base64,".to_string();
     result.append(base64::encode(to_string(svg).into_bytes()));
@@ -175,7 +190,8 @@ public fun to_data_uri(svg: &Svg): String {
 /// Convert the SVG element to a url-encoded data URI.
 ///
 /// Outputs: `data:image/svg+xml,%3Csvg%3E%3C%2Fsvg%3E`.
-/// > If you need a base64-encoded data URI, use `svg.to_data_uri()`
+///
+/// **If you need a base64-encoded data URI, use `svg.to_data_uri()`**
 public fun to_url(svg: &Svg): String {
     let mut result = b"data:image/svg+xml,".to_string();
     result.append(urlencode::encode(to_string(svg).into_bytes()));

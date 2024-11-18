@@ -4,7 +4,7 @@
 module svg::animation_tests;
 
 use std::unit_test::assert_eq;
-use svg::{animation, shape, svg};
+use svg::{animation, container, shape, svg};
 
 #[test]
 // From MDN Web Docs: https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animate
@@ -20,7 +20,7 @@ use svg::{animation, shape, svg};
 // </rect>
 // </svg>
 // ```
-fun test_animate() {
+fun animate() {
     let animation = animation::animate()
         .attribute_name(b"rx")
         .values(b"0;5;0")
@@ -28,14 +28,14 @@ fun test_animate() {
         .repeat_count(b"indefinite");
 
     let mut rect = shape::rect(10, 10);
-    rect.add_animation(animation);
+    rect.animation_mut().fill(animation);
 
     let mut svg = svg::svg(vector[0, 0, 10, 10]);
     svg.add_root(vector[rect]);
 
     assert_eq!(
         svg.to_string(),
-        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10'><animate attributeName='rx' values='0;5;0' dur='10s' repeatCount='indefinite'/></rect></svg>".to_string()
+        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10'><animate attributeName='rx' values='0;5;0' dur='10s' repeatCount='indefinite'/></rect></svg>".to_string(),
     );
 }
 
@@ -55,21 +55,21 @@ fun test_animate() {
 // </rect>
 // </svg>
 // ```
-fun test_animate_transform() {
+fun animate_transform() {
     let animation = animation::animate_transform(b"rotate", b"0 5 5", b"360 5 5")
         .attribute_name(b"transform")
         .duration(b"10s")
         .repeat_count(b"indefinite");
 
     let mut rect = shape::rect(10, 10);
-    rect.add_animation(animation);
+    rect.animation_mut().fill(animation);
 
     let mut svg = svg::svg(vector[0, 0, 120, 120]);
     svg.add_root(vector[rect]);
 
     assert_eq!(
         svg.to_string(),
-        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='10' height='10'><animateTransform attributeName='transform' dur='10s' repeatCount='indefinite' type='rotate' from='0 5 5' to='360 5 5'/></rect></svg>".to_string()
+        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'><rect width='10' height='10'><animateTransform attributeName='transform' dur='10s' repeatCount='indefinite' type='rotate' from='0 5 5' to='360 5 5'/></rect></svg>".to_string(),
     );
 }
 
@@ -91,7 +91,7 @@ fun test_animate_transform() {
 //   </circle>
 // </svg>
 // ```
-fun test_animate_motion() {
+fun animate_motion() {
     let path_value = b"M20,50 C20,-50 180,150 180,50 C180-50 20,150 20,50 z";
     let mut path = shape::path(path_value.to_string(), option::none());
     let attributes = path.attributes_mut();
@@ -106,14 +106,14 @@ fun test_animate_motion() {
 
     let mut circle = shape::circle(5);
     circle.attributes_mut().insert(b"fill".to_string(), b"red".to_string());
-    circle.add_animation(animation);
+    circle.animation_mut().fill(animation);
 
     let mut svg = svg::svg(vector[0, 0, 200, 100]);
     svg.add_root(vector[path, circle]);
 
     assert_eq!(
         svg.to_string(),
-        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'><path id='#path' fill='none' stroke='lightgrey' d='M20,50 C20,-50 180,150 180,50 C180-50 20,150 20,50 z'/><circle fill='red' r='5'><animateMotion dur='10s' repeatCount='indefinite' path='M20,50 C20,-50 180,150 180,50 C180-50 20,150 20,50 z'/></circle></svg>".to_string()
+        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'><path id='#path' fill='none' stroke='lightgrey' d='M20,50 C20,-50 180,150 180,50 C180-50 20,150 20,50 z'/><circle fill='red' r='5'><animateMotion dur='10s' repeatCount='indefinite' path='M20,50 C20,-50 180,150 180,50 C180-50 20,150 20,50 z'/></circle></svg>".to_string(),
     );
 }
 
@@ -127,38 +127,56 @@ fun test_animate_motion() {
 // </rect>
 // </svg>
 // ```
-fun test_set() {
-    let animation = animation::set(b"red")
-        .attribute_name(b"fill")
-        .map_attributes!(|a| {
-            a.insert(b"begin".to_string(), b"mouseover".to_string());
-            a.insert(b"end".to_string(), b"mouseout".to_string());
-        });
+fun set() {
+    let animation = animation::set(b"red").attribute_name(b"fill").map_attributes!(|a| {
+        a.insert(b"begin".to_string(), b"mouseover".to_string());
+        a.insert(b"end".to_string(), b"mouseout".to_string());
+    });
 
     let mut rect = shape::rect(10, 10);
-    rect.add_animation(animation);
+    rect.animation_mut().fill(animation);
 
     let mut svg = svg::svg(vector[0, 0, 10, 10]);
     svg.add_root(vector[rect]);
 
     assert_eq!(
         svg.to_string(),
-        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10'><set begin='mouseover' end='mouseout' attributeName='fill' to='red'/></rect></svg>".to_string()
+        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10'><set begin='mouseover' end='mouseout' attributeName='fill' to='red'/></rect></svg>".to_string(),
     );
 }
 
 #[test]
 // Test custom animation shape.
-fun test_custom() {
+fun custom() {
     let animation = animation::custom(b"<custom />".to_string());
     let mut rect = shape::rect(10, 10);
-    rect.add_animation(animation);
+    rect.animation_mut().fill(animation);
 
     let mut svg = svg::svg(vector[0, 0, 10, 10]);
     svg.add_root(vector[rect]);
 
     assert_eq!(
         svg.to_string(),
-        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10'><custom /></rect></svg>".to_string()
+        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><rect width='10' height='10'><custom /></rect></svg>".to_string(),
+    );
+}
+
+#[test]
+fun container() {
+    let animation = animation::set(b"red").attribute_name(b"fill").map_attributes!(|a| {
+        a.insert(b"begin".to_string(), b"mouseover".to_string());
+        a.insert(b"end".to_string(), b"mouseout".to_string());
+    });
+
+    let rect = shape::rect(10, 10);
+    let mut g = container::g(vector[rect]);
+    g.animation_mut().fill(animation);
+
+    let mut svg = svg::svg(vector[0, 0, 10, 10]);
+    svg.add(g);
+
+    assert_eq!(
+        svg.to_string(),
+        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><g><rect width='10' height='10'/><set begin='mouseover' end='mouseout' attributeName='fill' to='red'/></g></svg>".to_string(),
     );
 }
