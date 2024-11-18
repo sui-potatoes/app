@@ -56,13 +56,13 @@ export async function createScene(element: string) {
     const unit = models.soldier = await loader.loadAsync("/soldier_2.gltf");
 
     // load other models
-    models.floor = await loader.loadAsync("/models/rusted_floor.glb");
-    models.fence = await loader.loadAsync("/models/fence.glb");
-    models.fenceCorner = await loader.loadAsync("/models/fence_corner.glb");
+    models.base_tile = await loader.loadAsync("/models/base_tile.glb");
+    models.barrier_steel = await loader.loadAsync("/models/barrier_steel.glb");
+    models.barrel_stack = await loader.loadAsync("/models/barrel_stack.glb");
 
     // game
     const game = new Game();
-    game.addUnit(new Unit(unit), 10, 10);
+    game.addUnit(new Unit(unit), 14, 15);
     scene.add(game);
 
     // controls & raycaster

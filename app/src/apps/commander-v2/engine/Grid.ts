@@ -17,15 +17,11 @@ export class Grid extends THREE.Object3D {
         this.grid = Array.from({ length: size }, () => Array(size).fill({ type: "Empty" }));
         this.add(this.floor);
 
-        if (!models.floor || !models.fence) {
-            console.warn("No floor model found.");
-            return
-        }
-
         for (let i = 0; i < size; i++) {
             for (let j = 0; j < size; j++) {
-                const floorTile = clone(models.floor.scene);
+                const floorTile = clone(models.base_tile.scene);
                 floorTile.position.set(i, 0, j);
+                floorTile.scale.set(1.1, 1, 1.1);
                 this.floor.add(floorTile);
             }
         }
@@ -47,52 +43,47 @@ export class Grid extends THREE.Object3D {
                     const rngBool = () => Math.random() > 0.5;
                     const tile = (this.grid[x][z] = {
                         type: "Cover",
-                        UP: true,
-                        DOWN: rngBool(),
-                        LEFT: rngBool(),
-                        RIGHT: rngBool(),
+                        UP: rngBool(),
+                        DOWN: rngBool(), // true,
+                        LEFT: rngBool(), // true,
+                        RIGHT: rngBool(), // false,
                     });
 
                     // place obstacles instead of cover
                     if (tile.DOWN && tile.LEFT && tile.RIGHT && tile.UP) {
                         this.grid[x][z] = { type: "Obstacle" };
-                        const geometry = new THREE.BoxGeometry(1, 1, 1);
-                        const material = new THREE.MeshStandardMaterial({ map: texture });
-                        const cube = new THREE.Mesh(geometry, material);
-                        cube.position.set(x, 0.5, z);
-                        this.add(cube);
+
+                        const light = new THREE.PointLight(0xffffff, 2, 10);
+                        light.position.y = 10;
+
+                        const barrels = clone(models.barrel_stack.scene);
+                        barrels.add(light);
+                        barrels.scale.set(0.5, 0.5, 0.5);
+                        barrels.position.set(x, 0, z);
+                        this.add(barrels);
                         return
                     }
 
                     const fence = (direction: "UP" | "DOWN" | "LEFT" | "RIGHT") => {
-                        const geometry = new THREE.BoxGeometry(0.1, 1, 1);
-                        const material = new THREE.MeshStandardMaterial({ map: texture });
-                        const fence = new THREE.Mesh(geometry, material);
-
-                        // const fence = clone(models.fence.scene);
-                        // fence.scale.set(1, 1, 1);
-                        // fence.position.set(i, 0, j);
-                        // this.floor.add(fence);
-
+                        const fence = clone(models.barrier_steel.scene);
+                        fence.scale.set(1, 1.5, 1);
                         fence.position.set(x, 0, z);
 
                         switch (direction) {
                             case "UP": {
-                                fence.rotation.y = Math.PI / 2;
-                                fence.position.set(x, -0.1, z - 0.5);
+                                fence.rotation.y = Math.PI;
                                 break;
                             }
                             case "DOWN": {
-                                fence.rotation.y = Math.PI / 2;
-                                fence.position.set(x, -0.1, z + 0.5);
+                                // default rotation
                                 break;
                             }
                             case "LEFT": {
-                                fence.position.set(x - 0.5, -0.1, z);
+                                fence.rotation.y = -Math.PI / 2;
                                 break;
                             }
                             case "RIGHT": {
-                                fence.position.set(x + 0.5, -0.1, z);
+                                fence.rotation.y = Math.PI / 2;
                                 break;
                             }
                         }
