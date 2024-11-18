@@ -16,19 +16,71 @@ export class Grid extends THREE.Object3D {
         this.size = size;
         this.grid = Array.from({ length: size }, () => Array(size).fill({ type: "Empty" }));
         this.add(this.floor);
-
-        for (let i = 0; i < size; i++) {
-            for (let j = 0; j < size; j++) {
-                const floorTile = clone(models.base_tile.scene);
-                floorTile.position.set(i, 0, j);
-                floorTile.scale.set(1.1, 1, 1.1);
-                this.floor.add(floorTile);
-            }
-        }
+        this.initFloorTiles(size);
     }
 
     isInBounds(x: number, y: number) {
         return x >= 0 && x < this.size && y >= 0 && y < this.size;
+    }
+
+    initFloorTiles(size: number) {
+        const mesh = models.base_tile.scene.children[0] as THREE.Mesh;
+        const tileMaterial = mesh.material as THREE.MeshStandardMaterial;
+        const material = tileMaterial.clone();
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(size, size), material);
+
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.set(size / 2 - 0.5, 0, size / 2 - 0.5);
+        this.floor.add(floor);
+
+        // alternatively, add individual tiles
+        // for (let i = 0; i < size; i++) {
+        //     for (let j = 0; j < size; j++) {
+        //         const floorTile = clone(models.base_tile.scene);
+        //         floorTile.position.set(i, 0, j);
+        //         floorTile.scale.set(1.1, 1, 1.1);
+        //         this.floor.add(floorTile);
+        //     }
+        // }
+    }
+
+    drawBarrier(x: number, z: number, direction: "UP" | "DOWN" | "LEFT" | "RIGHT") {
+        // const fence = clone(models.barrier_steel.scene);
+        // fence.scale.set(1, 1.5, 1);
+        // fence.position.set(x, 0, z);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 1), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+        mesh.position.set(x, 0.75, z);
+
+        switch (direction) {
+            case "UP": {
+                mesh.position.z -= 0.5;
+                mesh.rotation.y = Math.PI / 2;
+                // fence.rotation.y = Math.PI;
+                // return fence;
+                return mesh
+            }
+            // case "DOWN": return fence;
+            case "DOWN": {
+                mesh.position.z += 0.5;
+                mesh.rotation.y = Math.PI / 2;
+                // mesh.rotation.y = -Math.PI / 2;
+                return mesh
+            }
+            case "LEFT": {
+                mesh.position.x -= 0.5;
+
+                // fence.rotation.y = -Math.PI / 2;
+                // return fence;
+                return mesh
+            }
+            case "RIGHT": {
+                mesh.position.x += 0.5;
+
+                return mesh
+                // fence.rotation.y = Math.PI / 2;
+                // return fence;
+            }
+        }
     }
 
     initRandom() {
@@ -39,63 +91,31 @@ export class Grid extends THREE.Object3D {
 
         this.grid.forEach((col, x) => {
             col.forEach((_el, z) => {
-                if (Math.random() > 0.6) {
+                if (Math.random() > 0.7) {
                     const rngBool = () => Math.random() > 0.5;
                     const tile = (this.grid[x][z] = {
                         type: "Cover",
                         UP: rngBool(),
-                        DOWN: rngBool(), // true,
-                        LEFT: rngBool(), // true,
-                        RIGHT: rngBool(), // false,
+                        DOWN: rngBool(),
+                        LEFT: rngBool(),
+                        RIGHT: rngBool(),
                     });
 
                     // place obstacles instead of cover
                     if (tile.DOWN && tile.LEFT && tile.RIGHT && tile.UP) {
                         this.grid[x][z] = { type: "Obstacle" };
 
-                        const light = new THREE.PointLight(0xffffff, 2, 10);
-                        light.position.y = 10;
-
                         const barrels = clone(models.barrel_stack.scene);
-                        barrels.add(light);
                         barrels.scale.set(0.5, 0.5, 0.5);
                         barrels.position.set(x, 0, z);
                         this.add(barrels);
-                        return
+                        return;
                     }
 
-                    const fence = (direction: "UP" | "DOWN" | "LEFT" | "RIGHT") => {
-                        const fence = clone(models.barrier_steel.scene);
-                        fence.scale.set(1, 1.5, 1);
-                        fence.position.set(x, 0, z);
-
-                        switch (direction) {
-                            case "UP": {
-                                fence.rotation.y = Math.PI;
-                                break;
-                            }
-                            case "DOWN": {
-                                // default rotation
-                                break;
-                            }
-                            case "LEFT": {
-                                fence.rotation.y = -Math.PI / 2;
-                                break;
-                            }
-                            case "RIGHT": {
-                                fence.rotation.y = Math.PI / 2;
-                                break;
-                            }
-                        }
-
-                        return fence;
-                    };
-
-                    // this.add(...cube("UP"));
-                    if (tile.UP) this.add(fence("UP"));
-                    if (tile.DOWN) this.add(fence("DOWN"));
-                    if (tile.LEFT) this.add(fence("LEFT"));
-                    if (tile.RIGHT) this.add(fence("RIGHT"));
+                    if (tile.UP) this.add(this.drawBarrier(x, z, "UP"));
+                    if (tile.DOWN) this.add(this.drawBarrier(x, z, "DOWN"));
+                    if (tile.LEFT) this.add(this.drawBarrier(x, z, "LEFT"));
+                    if (tile.RIGHT) this.add(this.drawBarrier(x, z, "RIGHT"));
                 }
             });
         });

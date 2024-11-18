@@ -14,6 +14,8 @@ export type Tile =
     | { type: "Obstacle" }
     | { type: "Cover"; UP: boolean; DOWN: boolean; LEFT: boolean; RIGHT: boolean; unit?: number };
 
+export type Mode = "Move" | "None";
+
 /**
  * The base class for the Game scene and related objects. Contains the game logic,
  * grid movement, character stats, and other game-related data. A super-class for
@@ -33,19 +35,22 @@ export class Game extends THREE.Object3D {
     public readonly highlight = new THREE.Group();
     /** The Grid object */
     public readonly grid: Grid;
+    /** Default Mode is none - show nothing */
+    public mode: Mode = "None";
 
     /** Line used for drawing paths */
     private line: Line2 | null = null;
     /** Selected Unit */
     private selected: Unit | null = null;
-    /** Selected target (not always available) */
-    // private target: THREE.Vector2 | null = null;
+    /** Selected Tile (assuming Unit is there) */
+    private selectedTile: THREE.Vector2 | null = null;
+    /** Target Tile (eg, the target destination in Move action) */
+    private targetTile: THREE.Vector2 | null = null;
     /** Active pointer based on input */
     private pointer: THREE.Vector2 = new THREE.Vector2();
-    /** Highlighted cell */
-    // private targetCell: THREE.Object3D | null = null;
-
     private units: { [key: number]: Unit } = {};
+
+    private _isBlocked: boolean = false;
 
     constructor() {
         super();
@@ -103,58 +108,123 @@ export class Game extends THREE.Object3D {
 
     /** Called every frame to update the game state. */
     input(controls: Controls) {
-        if (Object.values(controls.arrows).includes(true)) {
-            const unit = Object.values(this.units)[0];
-            switch (true) {
-                case controls.arrows.UP:
-                    unit.position.z -= 0.1;
-                    break;
-                case controls.arrows.DOWN:
-                    unit.position.z += 0.1;
-                    break;
-                case controls.arrows.LEFT:
-                    unit.position.x -= 0.1;
-                    break;
-                case controls.arrows.RIGHT:
-                    unit.position.x += 0.1;
-                    break;
+        // if (Object.values(controls.arrows).includes(true)) {
+        //     const unit = Object.values(this.units)[0];
+        //     switch (true) {
+        //         case controls.arrows.UP:
+        //             unit.position.z -= 0.1;
+        //             break;
+        //         case controls.arrows.DOWN:
+        //             unit.position.z += 0.1;
+        //             break;
+        //         case controls.arrows.LEFT:
+        //             unit.position.x -= 0.1;
+        //             break;
+        //         case controls.arrows.RIGHT:
+        //             unit.position.x += 0.1;
+        //             break;
+        //     }
+        // }
+
+        // in default mode we can select units and then switch to Move mode
+        if (this.mode == "None") {
+            if (controls.mouse[THREE.MOUSE.LEFT]) {
+                let { x, y: z } = this.pointer;
+                if (this.grid.grid[x][z].type === "Obstacle") return;
+                if (!this.grid.grid[x][z].unit) return;
+
+                const walkable = this.grid.walkableTiles([x, z], 8);
+                this.drawWalkable(walkable);
+                this.selectedTile = new THREE.Vector2(x, z);
+                this.selected = this.units[this.grid.grid[x][z].unit];
+                this.mode = "Move";
+                return;
             }
         }
 
-        if (controls.mouse[THREE.MOUSE.LEFT]) {
-            let { x, y } = this.pointer;
+        if (this.mode == "Move") {
+            if (controls.mouse[THREE.MOUSE.LEFT]) {
+                let { x, y } = this.pointer;
 
-            // if we're clicking on a unit, select it
-            if (
-                this.grid.grid[x][y].type !== "Obstacle" &&
-                typeof this.grid.grid[x][y].unit === "number" &&
-                !this.selected
-            ) {
-                this.selected = this.units[this.grid.grid[x][y].unit];
-                const walkable = this.grid.walkableTiles([x, y], 8);
-                this.drawWalkable(walkable);
-            }
+                // if we have a unit selected and we're clicking on an empty tile
+                // try drawing a path to this tile
+                if (this.selected && this.grid.grid[x][y].type !== "Obstacle") {
+                    const path = this.grid.tracePath(
+                        [this.selected.position.x, this.selected.position.z],
+                        [x, y],
+                        8,
+                    );
 
-            // if we have a unit selected and we're clicking on an empty tile
-            // try drawing a path to this tile
-            if (this.selected && this.grid.grid[x][y].type !== "Obstacle") {
-                const path = this.grid.tracePath(
-                    [this.selected.position.x, this.selected.position.z],
-                    [x, y],
-                    8,
-                );
+                    if (path && path.length > 0) {
+                        const newDestination = new THREE.Vector2(...path.slice(-8 - 1)[0]);
 
-                if (path && path.length > 0) {
-                    this.drawPath(path.slice(-8 - 1) as [number, number][]);
-                    // this.target = new THREE.Vector2(...path[path.length - 1]);
+                        if (
+                            this.targetTile?.x != newDestination.x ||
+                            this.targetTile?.y != newDestination.y
+                        ) {
+                            this.targetTile = newDestination;
+                            this.drawPath(path.slice(-8 - 1) as [number, number][]);
+                        }
+                    }
                 }
             }
         }
 
         if (controls.mouse[THREE.MOUSE.RIGHT]) {
+            this.mode = "None";
             this.selected = null;
+            this.selectedTile = null;
+            this.targetTile = null;
             this.drawPath([]);
             this.drawWalkable(new Set());
+        }
+    }
+
+    async performAction() {
+        if (this._isBlocked) {
+            return;
+        }
+
+        if (this.mode === "None") {
+            return;
+        }
+
+        if (
+            this.mode === "Move" &&
+            this.selected &&
+            this.selectedTile &&
+            this.targetTile &&
+            this.grid.grid[this.selectedTile.x][this.selectedTile.y].type !== "Obstacle" &&
+            this.grid.grid[this.targetTile.x][this.targetTile.y].type !== "Obstacle"
+        ) {
+            this._isBlocked = true;
+
+            const path = this.grid.tracePath(
+                this.selectedTile.toArray(),
+                this.targetTile.toArray(),
+                8,
+            );
+
+            if (!path) {
+                this._isBlocked = false;
+                return;
+            }
+
+            const unitId = this.selected.id;
+            const unit = this.selected;
+            // @ts-ignore
+            this.grid.grid[this.selectedTile.x][this.selectedTile.y].unit = null;
+            // @ts-ignore
+            this.grid.grid[this.targetTile.x][this.targetTile.y].unit = unitId;
+            this.selected = null;
+            this.selectedTile = null;
+            this.targetTile = null;
+            this.drawPath([]);
+            this.drawWalkable(new Set());
+            this.mode = "None";
+
+            await unit.walk(path.map(([x, z]) => new THREE.Vector2(x, z)));
+            this._isBlocked = false;
         }
     }
 
@@ -189,8 +259,9 @@ export class Game extends THREE.Object3D {
             return;
         }
 
-        const tiles = this.grid.walkableTiles([x, z], 8);
-        this.drawWalkable(tiles);
+        if (this.grid.grid[x][z].unit) {
+            return; // highlight the unit tile when pointer over
+        }
     }
 
     updateUnits() {
@@ -237,7 +308,7 @@ export class Game extends THREE.Object3D {
             const material = new THREE.MeshStandardMaterial({
                 color: "red",
                 transparent: true,
-                opacity: 3 / (distance + 2),
+                opacity: 2 / (distance + 2),
             });
 
             const cube = new THREE.Mesh(geometry, material);

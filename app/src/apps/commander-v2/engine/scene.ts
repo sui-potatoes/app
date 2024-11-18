@@ -9,6 +9,9 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { Unit } from "./Unit";
 import { UI } from "./UI";
 
+import Stats from "stats.js";
+import JEASINGS from "jeasings";
+
 export const models: { [key: string]: GLTF } = {};
 
 /**
@@ -19,6 +22,13 @@ export async function createScene(element: string) {
     if (!root || root.children.length !== 0) {
         return;
     }
+
+     // 0: fps, 1: ms, 2: mb, 3+: custom
+    const stats = new Stats();
+    stats.showPanel(0);
+    // stats.showPanel(1);
+    // stats.showPanel(2);
+    document.body.appendChild( stats.dom );
 
     const offset = 30 / 2 - 0.5;
     const scene = new THREE.Scene();
@@ -43,8 +53,10 @@ export async function createScene(element: string) {
     renderer.setPixelRatio(window.devicePixelRatio);
     root.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
+
+    // scene.fog = new THREE.Fog(0x000000, 10, 30);
 
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
@@ -65,6 +77,12 @@ export async function createScene(element: string) {
     game.addUnit(new Unit(unit), 14, 15);
     scene.add(game);
 
+    ui.addEventListener("button", ({ id }) => {
+        if (id === "confirm") {
+            game.performAction();
+        }
+    })
+
     // controls & raycaster
     const controls = new Controls(game, renderer.domElement, camera);
     controls.connect();
@@ -82,12 +100,16 @@ export async function createScene(element: string) {
     });
 
     function animate() {
+        stats.begin();
+        JEASINGS.update();
+        
         controls.update(0.01);
         const cursor = controls.raycast(game.plane);
         cursor && game.update(cursor);
         game.input(controls);
 
         renderer.render(scene, camera);
+        stats.end();
     }
 
     renderer.setAnimationLoop(animate);
