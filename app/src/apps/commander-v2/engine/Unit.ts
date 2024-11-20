@@ -37,8 +37,9 @@ export class UnitModel extends THREE.Object3D {
     playAnimation(name: string) {
         this.mixer.stopAllAction();
         const clip = THREE.AnimationClip.findByName(this.animations, name);
-        const action = this.mixer.clipAction(clip, undefined, THREE.NormalAnimationBlendMode);
+        const action = this.mixer.clipAction(clip, this, THREE.NormalAnimationBlendMode);
         action.setLoop(THREE.LoopRepeat, 999);
+
         action.timeScale = 0.9;
         action.play();
     }

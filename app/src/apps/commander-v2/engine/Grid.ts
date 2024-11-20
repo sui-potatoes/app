@@ -8,6 +8,7 @@ import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 
 export class Grid extends THREE.Object3D {
     public readonly grid: Tile[][];
+    public readonly meshes: { [key: string]: THREE.Object3D | THREE.Group } = {};
     public readonly size: number = 30;
     public readonly floor = new THREE.Group();
 
@@ -44,12 +45,33 @@ export class Grid extends THREE.Object3D {
         // }
     }
 
+    clearCell(x: number, y: number) {
+        if (this.grid[x][y].type === "Obstacle") {
+            this.remove(this.meshes[`${x}-${y}`].clear());
+        }
+
+        let unit;
+        if (this.grid[x][y].type === "Cover") {
+            unit = this.grid[x][y].unit;
+            this.remove(this.meshes[`${x}-${y}-UP`].clear());
+        }
+
+        if (this.grid[x][y].type === "Empty") {
+            return
+        }
+
+        this.grid[x][y] = { type: "Empty", unit };
+    }
+
     drawBarrier(x: number, z: number, direction: "UP" | "DOWN" | "LEFT" | "RIGHT") {
         // const fence = clone(models.barrier_steel.scene);
         // fence.scale.set(1, 1.5, 1);
         // fence.position.set(x, 0, z);
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 1), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-        mesh.position.set(x, 0.75, z);
+        const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(0.1, 0.8, 1),
+            new THREE.MeshStandardMaterial({ color: 0x333333 }),
+        );
+        mesh.position.set(x, 0.4, z);
 
         switch (direction) {
             case "UP": {
@@ -57,26 +79,26 @@ export class Grid extends THREE.Object3D {
                 mesh.rotation.y = Math.PI / 2;
                 // fence.rotation.y = Math.PI;
                 // return fence;
-                return mesh
+                return mesh;
             }
             // case "DOWN": return fence;
             case "DOWN": {
                 mesh.position.z += 0.5;
                 mesh.rotation.y = Math.PI / 2;
                 // mesh.rotation.y = -Math.PI / 2;
-                return mesh
+                return mesh;
             }
             case "LEFT": {
                 mesh.position.x -= 0.5;
 
                 // fence.rotation.y = -Math.PI / 2;
                 // return fence;
-                return mesh
+                return mesh;
             }
             case "RIGHT": {
                 mesh.position.x += 0.5;
 
-                return mesh
+                return mesh;
                 // fence.rotation.y = Math.PI / 2;
                 // return fence;
             }
@@ -108,14 +130,21 @@ export class Grid extends THREE.Object3D {
                         const barrels = clone(models.barrel_stack.scene);
                         barrels.scale.set(0.5, 0.5, 0.5);
                         barrels.position.set(x, 0, z);
+
+                        this.meshes[`${x}-${z}`] = barrels;
                         this.add(barrels);
                         return;
                     }
 
-                    if (tile.UP) this.add(this.drawBarrier(x, z, "UP"));
-                    if (tile.DOWN) this.add(this.drawBarrier(x, z, "DOWN"));
-                    if (tile.LEFT) this.add(this.drawBarrier(x, z, "LEFT"));
-                    if (tile.RIGHT) this.add(this.drawBarrier(x, z, "RIGHT"));
+                    const group = new THREE.Group();
+
+                    if (tile.UP) group.add(this.drawBarrier(x, z, "UP"));
+                    if (tile.DOWN) group.add(this.drawBarrier(x, z, "DOWN"));
+                    if (tile.LEFT) group.add(this.drawBarrier(x, z, "LEFT"));
+                    if (tile.RIGHT) group.add(this.drawBarrier(x, z, "RIGHT"));
+
+                    this.meshes[`${x}-${z}-UP`] = group;
+                    this.add(group);
                 }
             });
         });
@@ -230,7 +259,6 @@ export class Grid extends THREE.Object3D {
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
                     if (to.type === "Obstacle") continue;
-
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.DOWN) continue;
                         if (direction === "DOWN" && to.UP) continue;

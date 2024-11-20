@@ -14,7 +14,45 @@ export type Tile =
     | { type: "Obstacle" }
     | { type: "Cover"; UP: boolean; DOWN: boolean; LEFT: boolean; RIGHT: boolean; unit?: number };
 
-export type Mode = "Move" | "None";
+export type Mode = "Move" | "None" | "Edit";
+
+
+// export abstract class Mode {
+//     static readonly NAME: "Move" | "None" | "Edit";
+
+//     constructor() {}
+
+//     abstract input(controls: Controls): void;
+//     abstract connect(): void;
+//     abstract disconnect(): void;
+// }
+
+// export class Move extends Mode {
+//     static readonly NAME = "Move";
+
+//     constructor(gr) {
+//         super();
+//     }
+
+//     input(controls: Controls) {
+//         if (controls.mouse[THREE.MOUSE.LEFT]) {
+//             let { x, y: z } = this.pointer;
+//             if (this.grid.grid[x][z].type === "Obstacle") return;
+//             if (!this.grid.grid[x][z].unit) return;
+
+//             const walkable = this.grid.walkableTiles([x, z], 8);
+//             this.drawWalkable(walkable);
+//             this.selectedTile = new THREE.Vector2(x, z);
+//             this.selected = this.units[this.grid.grid[x][z].unit];
+//             this.mode = "Move";
+//             return;
+//         }
+//     }
+
+//     connect() {}
+
+//     disconnect() {}
+// }
 
 /**
  * The base class for the Game scene and related objects. Contains the game logic,
@@ -37,6 +75,9 @@ export class Game extends THREE.Object3D {
     public readonly grid: Grid;
     /** Default Mode is none - show nothing */
     public mode: Mode = "None";
+
+    /** In Edit mode, a mesh follows the pointer position */
+    private pointerMesh: THREE.Mesh | null = null;
 
     /** Line used for drawing paths */
     private line: Line2 | null = null;
@@ -83,7 +124,8 @@ export class Game extends THREE.Object3D {
         }
 
         if (this.grid.grid[x][z].type === "Obstacle") {
-            throw new Error("Unit cannot be placed on an obstacle");
+            return;
+            // throw new Error("Unit cannot be placed on an obstacle");
         }
 
         unit.position.set(x, 0, z);
@@ -142,6 +184,42 @@ export class Game extends THREE.Object3D {
             }
         }
 
+        // in edit mode a mesh follows the pointer position
+        if (this.mode == "Edit") {
+            let { x, y: z } = this.pointer;
+            if (this.pointerMesh == null) {
+                this.pointerMesh = new THREE.Mesh(
+                    new THREE.BoxGeometry(1, 1, 1),
+                    new THREE.MeshStandardMaterial({
+                        color: "red",
+                        transparent: true,
+                        opacity: 0.3,
+                    }),
+                );
+                this.pointerMesh.position.set(x, 0.5, z);
+                this.add(this.pointerMesh);
+            } else {
+                this.pointerMesh.position.set(x, 0.5, z);
+            }
+
+            if (!(this.pointerMesh.material instanceof THREE.MeshStandardMaterial)) {
+                throw new Error("Material is off");
+            }
+
+            // if obstacle, color red, if empty, color green, if cover, color blue
+            if (this.grid.grid[x][z].type === "Obstacle") {
+                this.pointerMesh.material.color.set("red");
+            } else if (this.grid.grid[x][z].type === "Empty") {
+                this.pointerMesh.material.color.set("green");
+            } else if (this.grid.grid[x][z].type === "Cover") {
+                this.pointerMesh.material.color.set("blue");
+            }
+
+            if (controls.mouse[THREE.MOUSE.LEFT]) {
+                this.grid.clearCell(x, z);
+            }
+        }
+
         if (this.mode == "Move") {
             if (controls.mouse[THREE.MOUSE.LEFT]) {
                 let { x, y } = this.pointer;
@@ -171,12 +249,7 @@ export class Game extends THREE.Object3D {
         }
 
         if (controls.mouse[THREE.MOUSE.RIGHT]) {
-            this.mode = "None";
-            this.selected = null;
-            this.selectedTile = null;
-            this.targetTile = null;
-            this.drawPath([]);
-            this.drawWalkable(new Set());
+            this.switchMode("None");
         }
     }
 
@@ -294,15 +367,7 @@ export class Game extends THREE.Object3D {
     drawTarget() {}
 
     drawWalkable(tiles: Set<[number, number, number]>) {
-        // @ts-ignore
-        this.highlight.children.forEach((child: THREE.Mesh) => {
-            child.geometry.dispose();
-            Array.isArray(child.material)
-                ? child.material.forEach((m) => m.dispose())
-                : child.material.dispose();
-        });
-        this.highlight.clear();
-
+        this.clearHighlight();
         tiles.forEach(([x, z, distance]) => {
             const geometry = new THREE.BoxGeometry(1, 0.1, 1);
             const material = new THREE.MeshStandardMaterial({
@@ -319,6 +384,31 @@ export class Game extends THREE.Object3D {
 
     dispose() {
         // TODO: implement me
+    }
+
+    clearHighlight() {
+        // @ts-ignore
+        this.highlight.children.forEach((child: THREE.Mesh) => {
+            child.geometry.dispose();
+            Array.isArray(child.material)
+                ? child.material.forEach((m) => m.dispose())
+                : child.material.dispose();
+        });
+        this.highlight.clear();
+    }
+
+    switchMode(mode: Mode) {
+        this.mode = mode;
+        this.selected = null;
+        this.selectedTile = null;
+
+        this.pointerMesh?.geometry.dispose();
+        this.pointerMesh && this.remove(this.pointerMesh);
+        this.pointerMesh = null;
+
+        this.targetTile = null;
+        this.drawPath([]);
+        this.drawWalkable(new Set());
     }
 }
 

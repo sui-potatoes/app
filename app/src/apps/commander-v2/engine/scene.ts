@@ -36,7 +36,7 @@ export async function createScene(element: string) {
     const ui = new UI(root);
     ui.leftPanel.append(
         ui.createButton("move"),
-        ui.createButton("attack"),
+        ui.createButton("edit"),
     );
     ui.rightPanel.append(
         ui.createButton("cancel"),
@@ -75,11 +75,14 @@ export async function createScene(element: string) {
     // game
     const game = new Game();
     game.addUnit(new Unit(unit), 14, 15);
+    game.addUnit(new Unit(unit), 10, 20);
+    game.addUnit(new Unit(unit), 6, 4);
     scene.add(game);
 
     ui.addEventListener("button", ({ id }) => {
-        if (id === "confirm") {
-            game.performAction();
+        switch (id) {
+            case "confirm": return game.performAction();
+            case "edit": return game.switchMode("Edit");
         }
     })
 
@@ -102,7 +105,7 @@ export async function createScene(element: string) {
     function animate() {
         stats.begin();
         JEASINGS.update();
-        
+
         controls.update(0.01);
         const cursor = controls.raycast(game.plane);
         cursor && game.update(cursor);
