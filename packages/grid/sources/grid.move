@@ -143,7 +143,7 @@ public macro fun trace<$T>(
     $x1: u16,
     $y1: u16,
     $limit: u16,
-    $f: |&$T| -> bool, // whether the cell is passable
+    $f: |u16, u16, u16, u16| -> bool, // whether the cell is passable
 ): Option<vector<Point>> {
     let (x0, y0) = ($x0, $y0);
     let (x1, y1) = ($x1, $y1);
@@ -173,7 +173,8 @@ public macro fun trace<$T>(
         num = num + 1;
 
         // flush the queue, marking all cells around the current number
-        queue.destroy!(|point| grid.von_neumann(point).destroy!(|point| {
+        queue.destroy!(|source| grid.von_neumann(source).destroy!(|point| {
+            let (x0, y0) = source.into_values();
             let (x, y) = point.into_values();
 
             // if we reached the destination, break the loop
@@ -183,7 +184,7 @@ public macro fun trace<$T>(
             };
 
             // if we can't pass through the cell, skip it
-            if (!$f(&map[x, y])) return;
+            if (!$f(x0, y0, x, y)) return;
 
             // if the cell is empty, mark it with the current number
             if (grid[x, y] == 0) {
@@ -266,7 +267,7 @@ fun test_path_tracing() {
     };
 
     // we can only
-    let path = trace!(&grid, 0, 0, 1, 4, 6, |cell| cell == &0);
+    let path = trace!(&grid, 0, 0, 1, 4, 6, |_, _, x, y| grid[x, y] == &0);
 
     assert!(path.is_some());
     assert!(path.borrow().length() == 5);
@@ -282,7 +283,7 @@ fun test_path_tracing() {
         ],
     };
 
-    let path = trace!(&grid, 0, 1, 3, 0, 10, |cell| cell == &0);
+    let path = trace!(&grid, 0, 1, 3, 0, 10, |_, _, x, y| grid[x, y] == &0);
 
     assert!(path.is_some());
 }

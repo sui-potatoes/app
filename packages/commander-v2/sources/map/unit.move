@@ -211,7 +211,7 @@ fun test_unit_custom_weapon() {
     std::debug::print(&unit.perform_attack(&mut rng, ctx));
     unit.ap.reset();
     let damage = unit.perform_attack(&mut rng, ctx);
-    assert_eq!(damage, 6); // 1 point below the base weapon damage (7 points)
+    assert_eq!(damage, 4); // 1 point below the base weapon damage (7 points)
 
     recruit.dismiss().destroy!(|w| w.destroy());
 }

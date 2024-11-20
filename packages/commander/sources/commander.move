@@ -261,8 +261,8 @@ fun trace_path(
     x1: u16,
     y1: u16,
 ): Option<vector<Point>> {
-    game.map.trace!(x0, y0, x1, y1, max_range, |tile| {
-        match (tile) {
+    game.map.trace!(x0, y0, x1, y1, max_range, |_, _, x, y| {
+        match (game.map[x, y]) {
             Tile::Empty => true,
             Tile::Unit(_, team) => team == game.turn,
         }

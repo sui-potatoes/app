@@ -7,10 +7,11 @@
 module commander::map;
 
 use commander::{recruit::Recruit, unit::Unit};
-use grid::grid::{Self, Grid};
+use grid::{grid::{Self, Grid}, point::Point};
 use std::string::String;
 use sui::bcs::BCS;
 
+const ENotImplemented: u64 = 264;
 const EUnitAlreadyOnTile: u64 = 1;
 const ETileIsUnwalkable: u64 = 2;
 
@@ -30,6 +31,9 @@ public enum TileType has store, copy, drop {
     Empty,
     /// A low cover tile. Provides partial cover from 1-3 sides. Can be
     /// destroyed by explosives and heavy weapons.
+    ///
+    /// Cover also limits the movement of units, as they cannot move through
+    /// cover sides.
     Cover {
         left: bool,
         right: bool,
@@ -107,8 +111,7 @@ public use fun tile_to_string as Tile.to_string;
 /// Get the tile at the given position.
 public fun tile_to_string(tile: &Tile): String {
     if (tile.unit.is_some()) {
-        return tile.unit.borrow().hp().to_string();
-        // return b"U".to_string()
+        return tile.unit.borrow().hp().to_string()
     };
 
     match (tile.tile_type) {
@@ -119,16 +122,87 @@ public fun tile_to_string(tile: &Tile): String {
     }
 }
 
-#[allow(unused_variable)]
-/// Deserialize bytes into a `Rank`.
-public fun from_bytes(bytes: vector<u8>): Map {
-    abort 264
+/// Check if the given path is walkable. Can be an optimization for pathfinding,
+/// if the path is traced on the frontend.
+public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
+    let mut prev = path[0];
+    'a: {
+        path.do_ref!(|step| {
+            if (step == prev) return; // skip 1st and duplicate steps
+            let (x0, y0) = (prev[0], prev[1]);
+            let (x1, y1) = (step[0], step[1]);
+
+            let source = &map.grid[x0, y0];
+            let target = &map.grid[x1, y1];
+            if (target.unit.is_some()) return 'a false;
+
+            prev = *step;
+
+            // UP
+            if (x0 == x1 && y0 == y1 + 1) {
+                match (&source.tile_type) {
+                    TileType::Cover { top, .. } if (*top) => return 'a false,
+                    _ => (),
+                };
+
+                match (&target.tile_type) {
+                    TileType::Cover { bottom, .. } if (*bottom) => return 'a false,
+                    _ => (),
+                };
+            };
+
+            // DOWN
+            if (x0 == x1 && y0 + 1 == y1) {
+                match (&source.tile_type) {
+                    TileType::Cover { bottom, .. } if (*bottom) => return 'a false,
+                    _ => (),
+                };
+
+                match (&target.tile_type) {
+                    TileType::Cover { top, .. } if (*top) => return 'a false,
+                    _ => (),
+                };
+            };
+
+            // LEFT
+            if (y0 == y1 && x0 == x1 + 1) {
+                match (&source.tile_type) {
+                    TileType::Cover { left, .. } if (*left) => return 'a false,
+                    _ => (),
+                };
+
+                match (&target.tile_type) {
+                    TileType::Cover { right, .. } if (*right) => return 'a false,
+                    _ => (),
+                };
+            };
+
+            // RIGHT
+            if (y0 == y1 && x1 == x0 + 1) {
+                match (&source.tile_type) {
+                    TileType::Cover { right, .. } if (*right) => return 'a false,
+                    _ => (),
+                };
+
+                match (&target.tile_type) {
+                    TileType::Cover { left, .. } if (*left) => return 'a false,
+                    _ => (),
+                };
+            }
+        });
+
+        true
+    }
 }
 
-#[allow(unused_variable, unused_mut_parameter)]
+/// Deserialize bytes into a `Rank`.
+public fun from_bytes(_bytes: vector<u8>): Map {
+    abort ENotImplemented
+}
+
 /// Helper method to allow nested deserialization of `Rank`.
-public(package) fun from_bcs(bcs: &mut BCS): Map {
-    abort 264
+public(package) fun from_bcs(_bcs: &mut BCS): Map {
+    abort ENotImplemented
 }
 
 /// Implements the `Grid.to_string` method due to `Tile` implementing
@@ -167,13 +241,36 @@ fun test_map_with_units() {
         .map!(|mut unit| unit.perform_attack(&mut rng, ctx))
         .destroy_or!(abort 264);
 
-    std::debug::print(&damage.to_string());
-
     // apply the damage to the second unit
     map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);
 
-    std::debug::print(&map.to_string()); // shows damage dealt
-
     recruit_one.dismiss().destroy_none();
     recruit_two.dismiss().destroy_none();
+}
+
+#[test]
+fun test_check_path() {
+    let mut map = Self::new(3);
+    *&mut map.grid[0, 0].tile_type =
+        TileType::Cover { left: false, right: true, top: false, bottom: false };
+
+    // try going right and then back-left
+    assert!(map.check_path(vector[vector[0, 0], vector[1, 0]]) == false);
+    assert!(map.check_path(vector[vector[1, 0], vector[0, 0]]) == false);
+
+    // try going down, right and then back-up; then reverse
+    assert!(map.check_path(vector[vector[0, 0], vector[0, 1], vector[1, 1], vector[1, 0]]) == true);
+    assert!(map.check_path(vector[vector[1, 0], vector[1, 1], vector[0, 1], vector[0, 0]]) == true);
+
+    let mut map = Self::new(3);
+    *&mut map.grid[0, 0].tile_type =
+        TileType::Cover { left: false, right: false, top: false, bottom: true };
+
+    // try going down and then back-up
+    assert!(map.check_path(vector[vector[0, 0], vector[0, 1]]) == false);
+    assert!(map.check_path(vector[vector[0, 1], vector[0, 0]]) == false);
+
+    // try going right, down and then back-left; then reverse
+    assert!(map.check_path(vector[vector[0, 0], vector[1, 0], vector[1, 1], vector[0, 1]]) == true);
+    assert!(map.check_path(vector[vector[0, 1], vector[1, 1], vector[1, 0], vector[0, 0]]) == true);
 }
