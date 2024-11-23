@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 import * as THREE from "three";
-// import { bcs } from "../types/bcs";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import JEASINGS from "jeasings";
@@ -38,6 +37,13 @@ export class UnitModel extends THREE.Object3D {
         this.mixer.stopAllAction();
         const clip = THREE.AnimationClip.findByName(this.animations, name);
         const action = this.mixer.clipAction(clip, this, THREE.NormalAnimationBlendMode);
+
+        if (!action) {
+            throw new Error(
+                `Animation ${name} not found. Available names are: ${this.animations.map((clip) => clip.name).join(", ")}`,
+            );
+        }
+
         action.setLoop(THREE.LoopRepeat, 999);
 
         action.timeScale = 0.9;
@@ -73,8 +79,11 @@ export class UnitModel extends THREE.Object3D {
 }
 
 export class Unit extends UnitModel {
-    constructor(gltf: GLTF) {
+    public readonly gridPosition: THREE.Vector2 = new THREE.Vector2();
+
+    constructor(gltf: GLTF, x: number, z: number) {
         super(gltf);
+        this.gridPosition.set(x, z);
         this.playAnimation("Idle");
     }
 }

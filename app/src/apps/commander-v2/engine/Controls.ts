@@ -7,6 +7,7 @@ import { Game } from "./Game";
 export type ControlsEvents = {
     zoom: { delta: number };
     scroll: { delta: number };
+    click: { x: number; y: number; button: number };
 };
 
 export interface Pointer {
@@ -120,19 +121,35 @@ export class Controls extends THREE.Controls<ControlsEvents> {
 
         if (event.type === "keydown" && event instanceof KeyboardEvent) {
             switch (event.key) {
-                case "ArrowUp": this.arrows.UP = true; break;
-                case "ArrowDown": this.arrows.DOWN = true; break;
-                case "ArrowLeft": this.arrows.LEFT = true; break;
-                case "ArrowRight": this.arrows.RIGHT = true; break;
+                case "ArrowUp":
+                    this.arrows.UP = true;
+                    break;
+                case "ArrowDown":
+                    this.arrows.DOWN = true;
+                    break;
+                case "ArrowLeft":
+                    this.arrows.LEFT = true;
+                    break;
+                case "ArrowRight":
+                    this.arrows.RIGHT = true;
+                    break;
             }
         }
 
         if (event.type === "keyup" && event instanceof KeyboardEvent) {
             switch (event.key) {
-                case "ArrowUp": this.arrows.UP = false; break;
-                case "ArrowDown": this.arrows.DOWN = false; break;
-                case "ArrowLeft": this.arrows.LEFT = false; break;
-                case "ArrowRight": this.arrows.RIGHT = false; break;
+                case "ArrowUp":
+                    this.arrows.UP = false;
+                    break;
+                case "ArrowDown":
+                    this.arrows.DOWN = false;
+                    break;
+                case "ArrowLeft":
+                    this.arrows.LEFT = false;
+                    break;
+                case "ArrowRight":
+                    this.arrows.RIGHT = false;
+                    break;
             }
         }
 
@@ -144,6 +161,13 @@ export class Controls extends THREE.Controls<ControlsEvents> {
 
                 if (event.pointerType === "mouse") {
                     this.mouse[event.button as 0 | 1 | 2] = false;
+
+                    this.dispatchEvent({
+                        type: "click",
+                        x: this.pointer.x,
+                        y: this.pointer.y,
+                        button: event.button,
+                    });
                 } else {
                     this.mouse[THREE.MOUSE.LEFT] = false;
                 }

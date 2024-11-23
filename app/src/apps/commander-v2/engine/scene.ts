@@ -11,7 +11,10 @@ import { UI } from "./UI";
 
 import Stats from "stats.js";
 import JEASINGS from "jeasings";
-import { Edit } from "./Mode";
+import { EditMode } from "./modes/EditMode";
+import { NoneMode } from "./modes/NoneMode";
+import { ShootMode } from "./modes/ShootMode";
+import { MoveMode } from "./modes/MoveMode";
 
 export const models: { [key: string]: GLTF } = {};
 
@@ -37,6 +40,7 @@ export async function createScene(element: string) {
     const ui = new UI(root);
     ui.leftPanel.append(
         ui.createButton("move"),
+        ui.createButton("shoot"),
         ui.createButton("edit"),
     );
     ui.rightPanel.append(
@@ -75,17 +79,10 @@ export async function createScene(element: string) {
 
     // game
     const game = new Game();
-    game.addUnit(new Unit(unit), 14, 15);
-    game.addUnit(new Unit(unit), 10, 20);
-    game.addUnit(new Unit(unit), 6, 4);
+    game.addUnit(new Unit(unit, 14, 15));
+    game.addUnit(new Unit(unit, 10, 20));
+    game.addUnit(new Unit(unit, 6, 4));
     scene.add(game);
-
-    ui.addEventListener("button", ({ id }) => {
-        switch (id) {
-            case "confirm": return game.performAction();
-            case "edit": return game.switchMode(Edit);
-        }
-    })
 
     // controls & raycaster
     const controls = new Controls(game, renderer.domElement, camera);
@@ -102,6 +99,16 @@ export async function createScene(element: string) {
             camera.position.y = newPosition;
         }
     });
+
+    ui.addEventListener("button", ({ id }) => {
+        switch (id) {
+            case "confirm": return game.performAction();
+            case "move": return game.switchMode(new MoveMode());
+            case "shoot": return game.switchMode(new ShootMode(camera));
+            case "edit": return game.switchMode(new EditMode(controls));
+            case "cancel": return game.switchMode(new NoneMode());
+        }
+    })
 
     function animate() {
         stats.begin();

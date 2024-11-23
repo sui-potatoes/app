@@ -47,20 +47,48 @@ export class Grid extends THREE.Object3D {
 
     clearCell(x: number, y: number) {
         if (this.grid[x][y].type === "Obstacle") {
-            this.remove(this.meshes[`${x}-${y}`].clear());
+            this.remove(this.meshes[`${x}-${y}`]?.clear());
         }
 
-        let unit;
+        let unit = null;
         if (this.grid[x][y].type === "Cover") {
             unit = this.grid[x][y].unit;
-            this.remove(this.meshes[`${x}-${y}-UP`].clear());
+            this.remove(this.meshes[`${x}-${y}`]?.clear());
         }
 
         if (this.grid[x][y].type === "Empty") {
-            return
+            return;
         }
 
         this.grid[x][y] = { type: "Empty", unit };
+    }
+
+    setCell(x: number, z: number, tile: Tile) {
+        this.clearCell(x, z);
+        this.grid[x][z] = { ...tile, unit: this.grid[x][z].unit };
+        const group = new THREE.Group();
+
+        if (tile.type === "Obstacle") {
+            this.grid[x][z] = { type: "Obstacle", unit: null };
+
+            const barrels = clone(models.barrel_stack.scene);
+            barrels.scale.set(0.5, 0.5, 0.5);
+            barrels.position.set(x, 0, z);
+
+            this.meshes[`${x}-${z}`] = barrels;
+            this.add(barrels);
+            return;
+        }
+
+        if (tile.type === "Cover") {
+            if (tile.UP) group.add(this.drawBarrier(x, z, "UP"));
+            if (tile.DOWN) group.add(this.drawBarrier(x, z, "DOWN"));
+            if (tile.LEFT) group.add(this.drawBarrier(x, z, "LEFT"));
+            if (tile.RIGHT) group.add(this.drawBarrier(x, z, "RIGHT"));
+        }
+
+        this.meshes[`${x}-${z}`] = group;
+        this.add(group);
     }
 
     drawBarrier(x: number, z: number, direction: "UP" | "DOWN" | "LEFT" | "RIGHT") {
@@ -68,10 +96,10 @@ export class Grid extends THREE.Object3D {
         // fence.scale.set(1, 1.5, 1);
         // fence.position.set(x, 0, z);
         const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(0.1, 0.8, 1),
+            new THREE.BoxGeometry(0.1, 1, 1),
             new THREE.MeshStandardMaterial({ color: 0x333333 }),
         );
-        mesh.position.set(x, 0.4, z);
+        mesh.position.set(x, 0.5, z);
 
         switch (direction) {
             case "UP": {
@@ -115,36 +143,21 @@ export class Grid extends THREE.Object3D {
             col.forEach((_el, z) => {
                 if (Math.random() > 0.7) {
                     const rngBool = () => Math.random() > 0.5;
-                    const tile = (this.grid[x][z] = {
+                    let tile: Tile = (this.grid[x][z] = {
                         type: "Cover",
                         UP: rngBool(),
                         DOWN: rngBool(),
                         LEFT: rngBool(),
                         RIGHT: rngBool(),
+                        unit: null,
                     });
 
-                    // place obstacles instead of cover
                     if (tile.DOWN && tile.LEFT && tile.RIGHT && tile.UP) {
-                        this.grid[x][z] = { type: "Obstacle" };
-
-                        const barrels = clone(models.barrel_stack.scene);
-                        barrels.scale.set(0.5, 0.5, 0.5);
-                        barrels.position.set(x, 0, z);
-
-                        this.meshes[`${x}-${z}`] = barrels;
-                        this.add(barrels);
-                        return;
+                        tile = { type: "Obstacle", unit: null };
                     }
 
-                    const group = new THREE.Group();
-
-                    if (tile.UP) group.add(this.drawBarrier(x, z, "UP"));
-                    if (tile.DOWN) group.add(this.drawBarrier(x, z, "DOWN"));
-                    if (tile.LEFT) group.add(this.drawBarrier(x, z, "LEFT"));
-                    if (tile.RIGHT) group.add(this.drawBarrier(x, z, "RIGHT"));
-
-                    this.meshes[`${x}-${z}-UP`] = group;
-                    this.add(group);
+                    // place obstacles instead of cover
+                    this.setCell(x, z, tile);
                 }
             });
         });
@@ -172,7 +185,7 @@ export class Grid extends THREE.Object3D {
 
         map[x0][y0] = num;
 
-        search: while (queue.length > 0) {
+        while (queue.length > 0) {
             num += 1;
             let tempQueue = [...queue];
             queue = [];

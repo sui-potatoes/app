@@ -3,12 +3,10 @@
 
 import * as THREE from "three";
 import { Controls } from "./Controls";
-import { Line2 } from "three/addons/lines/Line2.js";
-import { LineMaterial } from "three/addons/lines/LineMaterial.js";
-import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { Unit } from "./Unit";
 import { Grid } from "./Grid";
-import { None, GameMode } from "./Mode";
+import { Mode } from "./modes/Mode";
+import { NoneMode } from "./modes/NoneMode";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
@@ -37,26 +35,26 @@ export class Game extends THREE.Object3D {
     static readonly SIZE: 30;
     /** The Plane used for intersections */
     public readonly plane: THREE.Mesh;
-    /** The Group used for highlighting */
-    public readonly highlight = new THREE.Group();
     /** The Grid object */
     public readonly grid: Grid;
-    /** Default Mode is none - show nothing */
-    public mode: GameMode = None;
 
-    /** In Edit mode, a mesh follows the pointer position */
-    // private pointerMesh: THREE.Mesh | null = null;
-
-    /** Line used for drawing paths */
-    private line: Line2 | null = null;
+    /**
+     * Mode is a configurable behavior that can be switched at runtime. It allows
+     * the game to have different states of interaction. For example, when a unit
+     * is selected, the mode changes to `Move` by default. If another action is
+     * selected, the mode changes to that action. Additionally, there's an `Edit`
+     * mode which allows modifying the map.
+     *
+     * Modes are what define the game's behavior and interaction.
+     *
+     * @see Mode
+     */
+    public mode: Mode = new NoneMode();
 
     /** Selected Unit */
     protected selectedUnit: Unit | null = null;
     /** Selected Tile (assuming Unit is there) */
     protected selectedTile: THREE.Vector2 | null = null;
-
-    /** Target Tile (eg, the target destination in Move action) */
-    // private targetTile: THREE.Vector2 | null = null;
 
     /** Active pointer based on input */
     protected pointer: THREE.Vector2 = new THREE.Vector2();
@@ -65,13 +63,17 @@ export class Game extends THREE.Object3D {
     /** Flag to block execution any other action from being run in parallel */
     protected _isBlocked: boolean = false;
 
-    constructor() {
+    constructor(useGrid: boolean = false) {
         super();
 
         const size = 30; // Game.SIZE;
-        const offset = this.offset;
-        const helper = new THREE.GridHelper(30, 30);
-        helper.position.set(offset, -0.01, offset);
+
+        if (useGrid) {
+            const offset = this.offset;
+            const helper = new THREE.GridHelper(30, 30);
+            helper.position.set(offset, -0.01, offset);
+            this.add(helper);
+        }
 
         // create the intersectable plane
         this.plane = this.initPlane(size);
@@ -81,16 +83,15 @@ export class Game extends THREE.Object3D {
         this.grid = new Grid(size);
         this.grid.initRandom();
         this.add(this.grid);
-
-        // other initializers
-        this.add(this.highlight);
     }
 
     get offset() {
         return 30 / 2 - 0.5;
     }
 
-    addUnit(unit: Unit, x: number, z: number) {
+    addUnit(unit: Unit) {
+        const { x, y: z } = unit.gridPosition;
+
         if (!this.grid.isInBounds(x, z)) {
             throw new Error("Invalid Unit positioning");
         }
@@ -121,19 +122,12 @@ export class Game extends THREE.Object3D {
 
     /** Called every frame to update the game state. */
     input(controls: Controls) {
-        if (controls.mouse[THREE.MOUSE.RIGHT]) {
-            this.switchMode(None);
-            this.selectedTile = null;
-            this.selectedUnit = null;
-        }
-
-        this.mode.input.call(this, controls, this.mode.storage as any);
+        this.mode.input.call(this, controls, this.mode);
     }
 
     async performAction() {
         if (this._isBlocked) return;
-
-        this.mode.performAction.call(this, this.mode.storage as any);
+        this.mode.performAction.call(this, this.mode);
     }
 
     /**
@@ -167,68 +161,9 @@ export class Game extends THREE.Object3D {
         }
     }
 
-    /**
-     * Draws a path on the grid.
-     * @param path Array of grid coordinates.
-     */
-    drawPath(path: THREE.Vector2[]) {
-        if (this.line) {
-            this.remove(this.line);
-            this.line.geometry.dispose();
-            this.line.material.dispose();
-            this.line = null;
-        }
-
-        if (path.length < 2) {
-            return;
-        }
-
-        const points = path.map(([x, z]) => new THREE.Vector3(x, 0.3, z));
-        this.line = newLine(points);
-        this.add(this.line);
-    }
-
-    drawWalkable(tiles: Set<[number, number, number]>) {
-        this.clearHighlight();
-        tiles.forEach(([x, z, distance]) => {
-            const geometry = new THREE.BoxGeometry(1, 0.1, 1);
-            const material = new THREE.MeshStandardMaterial({
-                color: "red",
-                transparent: true,
-                opacity: 2 / (distance + 2),
-            });
-
-            const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(x, 0.1, z);
-            this.highlight.add(cube);
-        });
-    }
-
-    clearHighlight() {
-        // @ts-ignore
-        this.highlight.children.forEach((child: THREE.Mesh) => {
-            child.geometry.dispose();
-            Array.isArray(child.material)
-                ? child.material.forEach((m) => m.dispose())
-                : child.material.dispose();
-        });
-        this.highlight.clear();
-    }
-
-    switchMode(mode: GameMode) {
-        this.mode.disconnect.call(this, this.mode.storage as any);
+    switchMode(mode: Mode) {
+        this.mode.disconnect.call(this, this.mode);
         this.mode = mode;
-        this.mode.connect.call(this, this.mode.storage as any);
+        this.mode.connect.call(this, this.mode);
     }
-}
-
-function newLine(points: THREE.Vector3[]) {
-    const geometry = new LineGeometry().setPositions(points.map((p) => p.toArray()).flat());
-    const material = new LineMaterial({
-        color: "crimson",
-        linewidth: 4,
-        alphaToCoverage: false,
-    });
-
-    return new Line2(geometry, material);
 }
