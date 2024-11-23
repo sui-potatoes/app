@@ -11,6 +11,7 @@ import { UI } from "./UI";
 
 import Stats from "stats.js";
 import JEASINGS from "jeasings";
+import { Edit } from "./Mode";
 
 export const models: { [key: string]: GLTF } = {};
 
@@ -82,7 +83,7 @@ export async function createScene(element: string) {
     ui.addEventListener("button", ({ id }) => {
         switch (id) {
             case "confirm": return game.performAction();
-            case "edit": return game.switchMode("Edit");
+            case "edit": return game.switchMode(Edit);
         }
     })
 

@@ -229,7 +229,7 @@ export class Grid extends THREE.Object3D {
     /**
      * Traces a path from start to end using the wave algorithm.
      */
-    tracePath(start: [number, number], end: [number, number], _limit: number = 30) {
+    tracePath(start: THREE.Vector2, end: THREE.Vector2, _limit: number = 30) {
         let [x0, y0] = start;
         let [x1, y1] = end;
         let [width, height] = [this.grid.length, this.grid[0].length];
@@ -331,6 +331,6 @@ export class Grid extends THREE.Object3D {
             }
         }
 
-        return path;
+        return path.map(([x, y]) => new THREE.Vector2(x, y));
     }
 }
