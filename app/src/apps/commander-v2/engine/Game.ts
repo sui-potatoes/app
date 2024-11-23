@@ -16,44 +16,6 @@ export type Tile =
 
 export type Mode = "Move" | "None" | "Edit";
 
-
-// export abstract class Mode {
-//     static readonly NAME: "Move" | "None" | "Edit";
-
-//     constructor() {}
-
-//     abstract input(controls: Controls): void;
-//     abstract connect(): void;
-//     abstract disconnect(): void;
-// }
-
-// export class Move extends Mode {
-//     static readonly NAME = "Move";
-
-//     constructor(gr) {
-//         super();
-//     }
-
-//     input(controls: Controls) {
-//         if (controls.mouse[THREE.MOUSE.LEFT]) {
-//             let { x, y: z } = this.pointer;
-//             if (this.grid.grid[x][z].type === "Obstacle") return;
-//             if (!this.grid.grid[x][z].unit) return;
-
-//             const walkable = this.grid.walkableTiles([x, z], 8);
-//             this.drawWalkable(walkable);
-//             this.selectedTile = new THREE.Vector2(x, z);
-//             this.selected = this.units[this.grid.grid[x][z].unit];
-//             this.mode = "Move";
-//             return;
-//         }
-//     }
-
-//     connect() {}
-
-//     disconnect() {}
-// }
-
 /**
  * The base class for the Game scene and related objects. Contains the game logic,
  * grid movement, character stats, and other game-related data. A super-class for
@@ -150,24 +112,6 @@ export class Game extends THREE.Object3D {
 
     /** Called every frame to update the game state. */
     input(controls: Controls) {
-        // if (Object.values(controls.arrows).includes(true)) {
-        //     const unit = Object.values(this.units)[0];
-        //     switch (true) {
-        //         case controls.arrows.UP:
-        //             unit.position.z -= 0.1;
-        //             break;
-        //         case controls.arrows.DOWN:
-        //             unit.position.z += 0.1;
-        //             break;
-        //         case controls.arrows.LEFT:
-        //             unit.position.x -= 0.1;
-        //             break;
-        //         case controls.arrows.RIGHT:
-        //             unit.position.x += 0.1;
-        //             break;
-        //     }
-        // }
-
         // in default mode we can select units and then switch to Move mode
         if (this.mode == "None") {
             if (controls.mouse[THREE.MOUSE.LEFT]) {
