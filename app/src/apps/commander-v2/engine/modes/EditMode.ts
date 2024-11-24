@@ -10,13 +10,15 @@ import { Mode } from "./Mode";
  * The `Edit` mode allows the user to modify the map by adding, removing or modifying
  * obstacles, cover, and empty tiles.
  */
-export class EditMode implements Mode {
+export class EditMode extends Mode {
     pointerMesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial> | null = null;
 
     private _cb: ((_: any) => void) | null = null;
 
     /** Separate listener for controls,  */
-    constructor(private controls: Controls) {}
+    constructor(private controls: Controls) {
+        super();
+    }
 
     get name() {
         return "Edit";
@@ -79,8 +81,6 @@ export class EditMode implements Mode {
             });
         }
     }
-
-    async performAction() {}
 
     onClick(this: Game, { button }: { button: number }) {
         const { x, y } = this.pointer;

@@ -3,6 +3,7 @@
 
 import * as THREE from "three";
 import { Game } from "./Game";
+import { Camera } from "./Camera";
 import { Controls } from "./Controls";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
@@ -15,6 +16,7 @@ import { EditMode } from "./modes/EditMode";
 import { NoneMode } from "./modes/NoneMode";
 import { ShootMode } from "./modes/ShootMode";
 import { MoveMode } from "./modes/MoveMode";
+import { GrenadeMode } from "./modes/GrenadeMode";
 
 export const models: { [key: string]: GLTF } = {};
 
@@ -28,6 +30,7 @@ export async function createScene(element: string) {
     }
 
      // 0: fps, 1: ms, 2: mb, 3+: custom
+    const clock = new THREE.Clock();
     const stats = new Stats();
     stats.showPanel(0);
     // stats.showPanel(1);
@@ -41,6 +44,7 @@ export async function createScene(element: string) {
     ui.leftPanel.append(
         ui.createButton("move"),
         ui.createButton("shoot"),
+        ui.createButton("grenade"),
         ui.createButton("edit"),
     );
     ui.rightPanel.append(
@@ -49,9 +53,13 @@ export async function createScene(element: string) {
     );
 
     const aspect = window.innerWidth / window.innerHeight;
-    const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
-    camera.position.set(offset, 20, offset);
-    camera.lookAt(offset, 0, offset);
+    const camera = new Camera(75, aspect, 0.1, 100);
+
+    camera.defaultPosition = new THREE.Vector3(offset, 20, offset);
+    camera.defaultTarget = new THREE.Vector3(offset, 0, offset);
+
+    camera.position.copy(camera.defaultPosition);
+    camera.lookAt(camera.defaultTarget);
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -70,7 +78,7 @@ export async function createScene(element: string) {
     loader.setDRACOLoader(dracoLoader);
 
     // loaded unit scene with animations
-    const unit = models.soldier = await loader.loadAsync("/soldier_2.gltf");
+    const unit = models.soldier = await loader.loadAsync("/soldier_3.glb");
 
     // load other models
     models.base_tile = await loader.loadAsync("/models/base_tile.glb");
@@ -105,6 +113,7 @@ export async function createScene(element: string) {
             case "confirm": return game.performAction();
             case "move": return game.switchMode(new MoveMode(controls));
             case "shoot": return game.switchMode(new ShootMode(camera, ui));
+            case "grenade": return game.switchMode(new GrenadeMode(controls));
             case "edit": return game.switchMode(new EditMode(controls));
             case "cancel": return game.switchMode(new NoneMode());
         }
@@ -112,9 +121,10 @@ export async function createScene(element: string) {
 
     function animate() {
         stats.begin();
+        const delta = clock.getDelta();
         JEASINGS.update();
 
-        controls.update(0.01);
+        controls.update(delta);
         const cursor = controls.raycast(game.plane);
         cursor && game.update(cursor);
         game.input(controls);

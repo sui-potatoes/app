@@ -45,8 +45,6 @@ export class MoveMode implements Mode {
     }
 
     disconnect(this: Game, mode: this) {
-        // this.selectedTile = null;
-        // this.selectedUnit = null;
         mode.target = null;
         mode.path = [];
         mode.clearHighlight();
@@ -140,6 +138,8 @@ export class MoveMode implements Mode {
         const { x, y: z } = this.pointer;
         const mode = this.mode as MoveMode;
         const tile = this.grid.grid[x][z];
+
+        if (!(this.mode instanceof MoveMode)) return console.error(`Invalid mode ${this.mode.name}`);
 
         if (button === THREE.MOUSE.LEFT) {
             if (tile.type === "Obstacle") return;

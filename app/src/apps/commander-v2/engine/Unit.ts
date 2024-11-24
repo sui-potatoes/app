@@ -87,7 +87,9 @@ export class Unit extends UnitModel {
         this.playAnimation("Idle");
     }
 
-    markSelected(_selected: boolean) {
+    markSelected(_selected: boolean) {}
 
+    update() {
+        super.update();
     }
 }

@@ -21,5 +21,7 @@ export abstract class Mode {
     abstract connect(this: Game, mode: this): void;
     abstract disconnect(this: Game, mode: this): void;
     abstract input(this: Game, controls: Controls, mode: this): void;
-    abstract performAction(this: Game, mode: this): Promise<void>;
+    async performAction(this: Game, _mode: this): Promise<void> {
+        return;
+    }
 }

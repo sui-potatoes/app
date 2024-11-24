@@ -229,6 +229,44 @@ export class Grid extends THREE.Object3D {
         return tiles;
     }
 
+    /**
+     * Almost the same as walkableTiles, but returns the tiles within a radius, and ignores obstacles.
+     * This is useful for finding tiles within a certain range, like for a grenade throw.
+     */
+    radiusTiles(start: [number, number], radius: number) {
+        let [x0, y0] = start;
+        let map = Array.from({ length: this.grid.length }, () =>
+            Array(this.grid[0].length).fill(0),
+        );
+        let queue = [[x0, y0]];
+        let tiles: Set<[number, number, number]> = new Set([[x0, y0, 1]]);
+        let num = 1;
+
+        map[x0][y0] = num;
+
+        while (queue.length > 0) {
+            num += 1;
+            let tempQueue = [...queue];
+            queue = [];
+
+            if (num > radius + 1) {
+                break;
+            }
+
+            for (let [nx, ny] of tempQueue) {
+                for (let [x, y] of this.vonNeumann(nx, ny)) {
+                    if (map[x][y] !== 0) continue;
+
+                    map[x][y] = num;
+                    queue.push([x, y, num]);
+                    tiles.add([x, y, num]);
+                }
+            }
+        }
+
+        return tiles;
+    }
+
     private coordsToDirection(from: [number, number], to: [number, number]) {
         let [x0, y0] = from;
         let [x1, y1] = to;

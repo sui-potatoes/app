@@ -3,23 +3,33 @@
 
 import * as THREE from "three";
 import { Game } from "./../Game";
+import { Camera } from "../Camera";
 import { Controls } from "./../Controls";
 import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
 import { UI } from "../UI";
+import JEASINGS from "jeasings";
 
 /**
  * None is the default game mode. It allows selecting units and their actions.
  * When game resets the mode is set to None.
  */
-export class ShootMode implements Mode {
+export class ShootMode extends Mode {
     /** List of targets for the action to choose between */
     public targets: Unit[] = [];
     /** Currently chosen target */
     private currentTarget: Unit | null = null; // Index of the current target
+    /** Whether the camera is already in the aiming mode */
+    private isAiming = false;
+
     /** Shoot Mode takes control of the Camera while active */
-    constructor(protected camera: THREE.Camera, protected ui: UI) {}
+    constructor(
+        protected camera: Camera,
+        protected ui: UI,
+    ) {
+        super();
+    }
 
     get name(): string {
         return "None";
@@ -47,8 +57,8 @@ export class ShootMode implements Mode {
         }
 
         // add UI buttons to select targets
-        const prev = mode.ui.createButton('<');
-        const next = mode.ui.createButton('>');
+        const prev = mode.ui.createButton("<");
+        const next = mode.ui.createButton(">");
         mode.ui.leftPanel.append(prev, next);
 
         prev.addEventListener("click", () => {
@@ -57,7 +67,7 @@ export class ShootMode implements Mode {
         });
 
         next.addEventListener("click", () => {
-            mode.nextTarget(true)
+            mode.nextTarget(true);
             mode.aimAtTarget.call(this, mode);
         });
 
@@ -76,10 +86,11 @@ export class ShootMode implements Mode {
         this.selectedUnit.mixer.timeScale = 1;
 
         // remove `<` and `>` buttons
-        mode.ui.removeButton('<');
-        mode.ui.removeButton('>');
+        mode.ui.removeButton("<");
+        mode.ui.removeButton(">");
 
         mode.targets = [];
+        mode.isAiming = false;
         mode.currentTarget = null;
 
         {
@@ -107,9 +118,7 @@ export class ShootMode implements Mode {
         }
     }
 
-    async performAction() {}
-
-    aimAtTarget(this: Game, mode: this) {
+    async aimAtTarget(this: Game, mode: this) {
         if (!this.selectedUnit || !mode.currentTarget) {
             throw new Error("Can't aim at target without a selected unit or target.");
         }
@@ -117,15 +126,50 @@ export class ShootMode implements Mode {
         const selectedUnit = this.selectedUnit;
 
         // move camera to the selected unit aiming at the target
-        selectedUnit.lookAt(mode.currentTarget.position);
-        selectedUnit.playAnimation("Snipershot");
+        selectedUnit.playAnimation("SniperShot");
         selectedUnit.mixer.timeScale = 0.1;
 
-        mode.camera.position.set(selectedUnit.position.x, 1.5, selectedUnit.position.z);
-        mode.camera.lookAt(mode.currentTarget.position);
-        mode.camera.translateZ(1);
-        mode.camera.translateX(0.3);
-        mode.camera.lookAt(mode.currentTarget.position);
+        if (!mode.isAiming) {
+            selectedUnit.lookAt(mode.currentTarget.position);
+            // get the future position of the camera
+            const fake = new THREE.Object3D();
+            fake.position.set(
+                ...selectedUnit.position
+                    .clone()
+                    .add(new THREE.Vector3(0, 1.5, 0))
+                    .toArray(),
+            );
+            fake.lookAt(mode.currentTarget.position);
+            fake.translateZ(-1);
+            fake.translateX(-0.3);
+
+            await mode.camera.moveToUnit(fake.position.clone(), mode.currentTarget.position);
+            mode.isAiming = true;
+        } else {
+            const fake = new THREE.Object3D();
+            fake.position.set(...mode.camera.position.toArray());
+            fake.rotation.set(...mode.camera.rotation.toArray());
+            fake.lookAt(mode.currentTarget.position);
+
+            mode.camera.position.set(fake.position.x, fake.position.y, fake.position.z);
+            const mt1 = new THREE.Matrix4();
+            mt1.lookAt(fake.position, mode.currentTarget.position, new THREE.Vector3(0, 1, 0));
+            const { x, y, z, w } = mode.camera.quaternion.clone().setFromRotationMatrix(mt1);
+
+
+
+            await new Promise((resolve) => {
+                // get angle change between current camera and the target
+                // const angleChange = mode.camera.rotation.y - fake.rotation.y
+                new JEASINGS.JEasing(mode.camera.quaternion)
+                    .to({ x, y, z, w }, 500)
+                    .easing(JEASINGS.Sinusoidal.In)
+                    .onComplete(() => resolve(null))
+                    .start();
+
+                selectedUnit.lookAt(mode.currentTarget!.position);
+            });
+        }
     }
 
     nextTarget(forward: boolean = true) {
@@ -134,8 +178,6 @@ export class ShootMode implements Mode {
         }
 
         const index = this.targets.indexOf(this.currentTarget) - (forward ? 1 : -1);
-
-        console.log(this.targets.indexOf(this.currentTarget), -forward, index);
 
         if (index < 0) {
             this.currentTarget = this.targets[this.targets.length - 1];
