@@ -17,20 +17,29 @@ export class MoveMode implements Mode {
     /** Line used for drawing paths */
     private line: Line2 | null = null;
 
+    /** Click callback  */
+    private _clickCb = ({}: { button: number }) => {};
+
     /** The Group used for highlighting tiles */
     public readonly highlight = new THREE.Group();
+
+    constructor(private controls: Controls) {}
 
     get name(): string {
         return "Move";
     }
 
     connect(this: Game, mode: this) {
-        if (!this.selectedTile || !this.selectedUnit) {
+        if (!this.selectedUnit) {
             throw new Error("Can't perform action without a selected Unit.");
         }
 
         this.add(mode.highlight);
-        const { x, y } = this.selectedTile;
+
+        mode._clickCb = mode.onClick.bind(this);
+        mode.controls.addEventListener("click", mode._clickCb);
+
+        const { x, y } = this.selectedUnit.gridPosition;
         const walkable = this.grid.walkableTiles([x, y], 8);
         mode.drawWalkable(walkable);
     }
@@ -44,34 +53,16 @@ export class MoveMode implements Mode {
         this.remove(mode.highlight);
         mode.drawWalkable(new Set());
         mode.drawPath([]);
+
+        mode.controls.removeEventListener("click", mode._clickCb);
     }
 
-    input(this: Game, controls: Controls, mode: this) {
-        if (!controls.mouse[THREE.MOUSE.LEFT]) return;
-        if (!this.selectedTile) return;
-
-        const { x, y } = this.pointer;
-        const cell = this.grid.grid[x][y];
-
-        if (cell.type === "Obstacle") return;
-        if (typeof cell.unit === "number") return;
-
-        let path = this.grid.tracePath(this.selectedTile!, new THREE.Vector2(x, y));
-
-        if (!path || path.length === 0) return;
-        if (path.length > 8) path = path.slice(-9);
-
-        mode.path = path;
-        mode.target = path[0];
-
-        mode.drawPath(path);
-    }
+    input(this: Game, _controls: Controls, _mode: this) {}
 
     async performAction(this: Game, mode: this) {
         if (this._isBlocked) return;
         if (!mode.target) return;
         if (!this.selectedUnit) return;
-        if (!this.selectedTile) return;
         if (!mode.path) return;
 
         this._isBlocked = true;
@@ -80,10 +71,8 @@ export class MoveMode implements Mode {
         const unit = this.selectedUnit;
         const path = mode.path;
 
-        this.grid.grid[this.selectedTile.x][this.selectedTile.y].unit = null;
+        this.grid.grid[unit.gridPosition.x][unit.gridPosition.y].unit = null;
         this.grid.grid[mode.target.x][mode.target.y].unit = unitId;
-        this.selectedUnit = null;
-        this.selectedTile = null;
 
         mode.drawPath([]);
         mode.drawWalkable(new Set());
@@ -145,6 +134,32 @@ export class MoveMode implements Mode {
                 : child.material.dispose();
         });
         this.highlight.clear();
+    }
+
+    onClick(this: Game, { button }: { button: number }) {
+        const { x, y: z } = this.pointer;
+        const mode = this.mode as MoveMode;
+        const tile = this.grid.grid[x][z];
+
+        if (button === THREE.MOUSE.LEFT) {
+            if (tile.type === "Obstacle") return;
+            if (tile.unit) {
+                this.selectUnit(x, z); // order of operations is important!
+                this.switchMode(this.mode);
+                return
+            }
+
+            if (this.selectUnit === null) return;
+
+            mode.target = new THREE.Vector2(x, z);
+            let path = this.grid.tracePath(this.selectedUnit?.gridPosition!, mode.target);
+            if (!path || path.length === 0) return;
+            if (path.length > 8) path = path.slice(-9);
+
+            mode.path = path;
+            mode.target = path[0]; // update target to the last step of the path
+            mode.drawPath(path);
+        }
     }
 }
 

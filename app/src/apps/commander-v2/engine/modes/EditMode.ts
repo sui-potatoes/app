@@ -68,10 +68,6 @@ export class EditMode implements Mode {
             this.grid.clearCell(x, y);
         }
 
-        if (controls.mouse[THREE.MOUSE.MIDDLE]) {
-            alert("Middle click");
-        }
-
         if (controls.mouse[THREE.MOUSE.LEFT]) {
             this.grid.setCell(x, y, {
                 type: "Cover",
@@ -79,14 +75,14 @@ export class EditMode implements Mode {
                 DOWN: false,
                 LEFT: false,
                 RIGHT: false,
-                unit: null
+                unit: null,
             });
         }
     }
 
     async performAction() {}
 
-    onClick(this: Game, { button }: { button: number; }) {
+    onClick(this: Game, { button }: { button: number }) {
         const { x, y } = this.pointer;
 
         if (button === THREE.MOUSE.RIGHT) {
@@ -95,14 +91,25 @@ export class EditMode implements Mode {
 
         if (button === THREE.MOUSE.MIDDLE) {
             const curr = this.grid.grid[x][y];
-            const def: Tile = { type: "Cover", UP: false, DOWN: false, LEFT: false, RIGHT: false, unit: null };
+            const def: Tile = {
+                type: "Cover",
+                UP: false,
+                DOWN: false,
+                LEFT: false,
+                RIGHT: false,
+                unit: null,
+            };
 
             if (curr.type === "Cover") {
                 switch (true) {
-                    case curr.UP: return this.grid.setCell(x, y, { ...def, UP: false, RIGHT: true });
-                    case curr.RIGHT: return this.grid.setCell(x, y, { ...def, RIGHT: false, DOWN: true });
-                    case curr.DOWN: return this.grid.setCell(x, y, { ...def, DOWN: false, LEFT: true });
-                    case curr.LEFT: return this.grid.setCell(x, y, { ...def, LEFT: false, UP: true });
+                    case curr.UP:
+                        return this.grid.setCell(x, y, { ...def, UP: false, RIGHT: true });
+                    case curr.RIGHT:
+                        return this.grid.setCell(x, y, { ...def, RIGHT: false, DOWN: true });
+                    case curr.DOWN:
+                        return this.grid.setCell(x, y, { ...def, DOWN: false, LEFT: true });
+                    case curr.LEFT:
+                        return this.grid.setCell(x, y, { ...def, LEFT: false, UP: true });
                 }
             }
         }
@@ -114,7 +121,7 @@ export class EditMode implements Mode {
                 DOWN: false,
                 LEFT: false,
                 RIGHT: false,
-                unit: null
+                unit: null,
             });
         }
     }

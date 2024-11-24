@@ -7,6 +7,7 @@ import { Controls } from "./../Controls";
 import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
+import { UI } from "../UI";
 
 /**
  * None is the default game mode. It allows selecting units and their actions.
@@ -14,18 +15,18 @@ import { Unit } from "../Unit";
  */
 export class ShootMode implements Mode {
     /** List of targets for the action to choose between */
-    public targets: THREE.Vector2[] = [];
+    public targets: Unit[] = [];
     /** Currently chosen target */
     private currentTarget: Unit | null = null; // Index of the current target
     /** Shoot Mode takes control of the Camera while active */
-    constructor(protected camera: THREE.Camera) {}
+    constructor(protected camera: THREE.Camera, protected ui: UI) {}
 
     get name(): string {
         return "None";
     }
 
     connect(this: Game, mode: this) {
-        if (this.selectedUnit === null || this.selectedTile === null) {
+        if (this.selectedUnit === null) {
             throw new Error("Can't perform action without a selected unit or tile.");
         }
 
@@ -45,28 +46,38 @@ export class ShootMode implements Mode {
             return;
         }
 
-        mode.targets = targets.map((unit) => unit.gridPosition);
+        // add UI buttons to select targets
+        const prev = mode.ui.createButton('<');
+        const next = mode.ui.createButton('>');
+        mode.ui.leftPanel.append(prev, next);
+
+        prev.addEventListener("click", () => {
+            mode.nextTarget(false);
+            mode.aimAtTarget.call(this, mode);
+        });
+
+        next.addEventListener("click", () => {
+            mode.nextTarget(true)
+            mode.aimAtTarget.call(this, mode);
+        });
+
+        // set the targets and the current target
+        mode.targets = targets;
         mode.currentTarget = targets[0];
-
-        console.log(`Targets: ${targets.map((unit) => unit.id).join(", ")}`);
-        console.log(`Current Target: ${mode.currentTarget.id}`);
-
-        // move camera to the selected unit aiming at the target
-        selectedUnit.lookAt(mode.currentTarget.position);
-        selectedUnit.playAnimation("Snipershot");
-        selectedUnit.mixer.timeScale = 0.1;
-        mode.camera.position.set(selectedUnit.position.x, 1.5, selectedUnit.position.z);
-        mode.camera.translateY(1);
-        mode.camera.lookAt(mode.currentTarget.position);
+        mode.aimAtTarget.call(this, mode);
     }
 
     disconnect(this: Game, mode: this) {
-        if (!this.selectedUnit || !this.selectedTile) {
+        if (!this.selectedUnit) {
             throw new Error("Can't perform action without a selected unit or tile.");
         }
 
         this.selectedUnit.playAnimation("Idle");
         this.selectedUnit.mixer.timeScale = 1;
+
+        // remove `<` and `>` buttons
+        mode.ui.removeButton('<');
+        mode.ui.removeButton('>');
 
         mode.targets = [];
         mode.currentTarget = null;
@@ -86,16 +97,52 @@ export class ShootMode implements Mode {
         const { x, y } = this.pointer;
         const cell = this.grid.grid[x][y];
 
-        if (this.selectedTile !== null && this.selectedTile.x === x && this.selectedTile.y === y) {
+        if (this.selectedUnit?.gridPosition.x === x && this.selectedUnit?.gridPosition.y === y) {
             return;
         }
 
         if (typeof cell.unit === "number" && cell.type !== "Obstacle") {
             this.selectedUnit = this.units[cell.unit];
-            this.selectedTile = new THREE.Vector2(x, y);
-            this.switchMode(new MoveMode());
+            this.switchMode(new MoveMode(controls));
         }
     }
 
     async performAction() {}
+
+    aimAtTarget(this: Game, mode: this) {
+        if (!this.selectedUnit || !mode.currentTarget) {
+            throw new Error("Can't aim at target without a selected unit or target.");
+        }
+
+        const selectedUnit = this.selectedUnit;
+
+        // move camera to the selected unit aiming at the target
+        selectedUnit.lookAt(mode.currentTarget.position);
+        selectedUnit.playAnimation("Snipershot");
+        selectedUnit.mixer.timeScale = 0.1;
+
+        mode.camera.position.set(selectedUnit.position.x, 1.5, selectedUnit.position.z);
+        mode.camera.lookAt(mode.currentTarget.position);
+        mode.camera.translateZ(1);
+        mode.camera.translateX(0.3);
+        mode.camera.lookAt(mode.currentTarget.position);
+    }
+
+    nextTarget(forward: boolean = true) {
+        if (this.currentTarget === null) {
+            throw new Error("No targets available.");
+        }
+
+        const index = this.targets.indexOf(this.currentTarget) - (forward ? 1 : -1);
+
+        console.log(this.targets.indexOf(this.currentTarget), -forward, index);
+
+        if (index < 0) {
+            this.currentTarget = this.targets[this.targets.length - 1];
+        } else if (index >= this.targets.length) {
+            this.currentTarget = this.targets[0];
+        } else {
+            this.currentTarget = this.targets[index];
+        }
+    }
 }

@@ -103,8 +103,8 @@ export async function createScene(element: string) {
     ui.addEventListener("button", ({ id }) => {
         switch (id) {
             case "confirm": return game.performAction();
-            case "move": return game.switchMode(new MoveMode());
-            case "shoot": return game.switchMode(new ShootMode(camera));
+            case "move": return game.switchMode(new MoveMode(controls));
+            case "shoot": return game.switchMode(new ShootMode(camera, ui));
             case "edit": return game.switchMode(new EditMode(controls));
             case "cancel": return game.switchMode(new NoneMode());
         }

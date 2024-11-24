@@ -35,6 +35,17 @@ export class UI extends THREE.EventDispatcher<UIEvents> {
         return div;
     }
 
+    public removeButton(text: string) {
+        const buttons = document.getElementsByClassName("action-button");
+        for (let i = 0; i < buttons.length; i++) {
+            const button = buttons[i] as HTMLElement;
+            if (button.textContent === text) {
+                button.remove();
+                return;
+            }
+        }
+    }
+
     private createRightPanel() {
         const panel = document.createElement("div");
         panel.id = "panel-right";

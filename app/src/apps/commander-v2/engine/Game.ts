@@ -26,9 +26,11 @@ export type Tile =
  * game logic.
  *
  * TODO:
- * - implement Controls class
- * - implement Sound class
- * - implement Models and Textures classes
+ * - [x] implement Controls class
+ * - [ ] implement Sound class
+ * - [ ] implement Models and Textures classes
+ * - [ ] behaviours for game interface
+
  */
 export class Game extends THREE.Object3D {
     /** Default size of the Grid */
@@ -53,8 +55,6 @@ export class Game extends THREE.Object3D {
 
     /** Selected Unit */
     protected selectedUnit: Unit | null = null;
-    /** Selected Tile (assuming Unit is there) */
-    protected selectedTile: THREE.Vector2 | null = null;
 
     /** Active pointer based on input */
     protected pointer: THREE.Vector2 = new THREE.Vector2();
@@ -104,6 +104,17 @@ export class Game extends THREE.Object3D {
         this.grid.grid[x][z].unit = unit.id;
         this.units[unit.id] = unit;
         this.add(unit);
+    }
+
+    selectUnit(x: number, z: number) {
+        if (!this.grid.grid[x][z].unit) {
+            this.selectedUnit?.markSelected(false);
+            this.selectedUnit = null;
+            return;
+        }
+
+        this.selectedUnit = this.units[this.grid.grid[x][z].unit];
+        this.selectedUnit.markSelected(true);
     }
 
     initPlane(size: number) {

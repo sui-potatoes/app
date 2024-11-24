@@ -58,7 +58,7 @@ export class UnitModel extends THREE.Object3D {
             .slice(1)
             .map(({ x, y: z }) => [
                 { x, z },
-                new JEASINGS.JEasing(this.position).to({ x, z }, 300 + Math.random() * 100),
+                new JEASINGS.JEasing(this.position).to({ x, z }, 400 + Math.random() * 100),
             ]);
 
         while (easings.length) {
@@ -74,7 +74,7 @@ export class UnitModel extends THREE.Object3D {
     }
 
     update() {
-        this.mixer.update(0.01);
+        this.mixer.update(0.005);
     }
 }
 
@@ -85,5 +85,9 @@ export class Unit extends UnitModel {
         super(gltf);
         this.gridPosition.set(x, z);
         this.playAnimation("Idle");
+    }
+
+    markSelected(_selected: boolean) {
+
     }
 }
