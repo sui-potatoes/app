@@ -13,7 +13,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Use Node.js
         uses: actions/setup-node@v4
-        with:
-          cache: 'npm'
       - run: npm i -g @mysten/prettier-plugin-move
       - run: prettier-move -c */sources/**/*.move
