@@ -1,0 +1,63 @@
+name: Potatoes QA
+
+on:
+  pull_request:
+
+env:
+  MOVE_PACKAGES_PATH: packages
+  APP_PATH: app
+
+jobs:
+  test-move-packages:
+    name: Test Move packages
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.MOVE_PACKAGES_PATH }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download Sui
+        uses: jaxxstorm/action-install-gh-release@v1.12.0
+        with:
+          repo: MystenLabs/sui
+          platform: ubuntu
+          version: testnet
+          cache: enable
+      # List all directories in the packages folder, and run sui move test on
+      # each of them
+      - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
+
+  prettier-move:
+    name: Check Move files formatting
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.MOVE_PACKAGES_PATH }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+      - run: npm i @mysten/prettier-plugin-move
+      - run: npx prettier-move -c */sources/**/*.move
+
+  frontend-app-build:
+    name: Build frontend application
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.APP_PATH }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          cache-dependency-path: './node_modules'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run build
+        run: pnpm build
