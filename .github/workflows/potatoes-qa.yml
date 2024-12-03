@@ -56,7 +56,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          cache-dependency-path: './package.json'
       - name: Install dependencies
         run: pnpm install
       - name: Run build
