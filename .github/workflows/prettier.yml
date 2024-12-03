@@ -1,0 +1,19 @@
+name: Check Formatting
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+      - run: npm i -g @mysten/prettier-plugin-move
+      - run: prettier-move -c */sources/**/*.move
