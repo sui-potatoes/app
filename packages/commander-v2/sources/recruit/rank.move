@@ -9,7 +9,7 @@ use std::string::String;
 use sui::bcs::{Self, BCS};
 
 /// Defines all available ranks in the game.
-public enum Rank has copy, store, drop {
+public enum Rank has copy, drop, store {
     Rookie,
     Squaddie,
     Corporal,
@@ -142,7 +142,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Rank {
         5 => Rank::Captain,
         6 => Rank::Major,
         7 => Rank::Colonel,
-        _ => abort 264
+        _ => abort 264,
     }
 }
 

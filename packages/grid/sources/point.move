@@ -5,7 +5,7 @@
 module grid::point;
 
 /// A point in 2D space.
-public struct Point(u16, u16) has store, copy, drop;
+public struct Point(u16, u16) has copy, drop, store;
 
 /// Create a new point.
 public fun new(x: u16, y: u16): Point { Point(x, y) }

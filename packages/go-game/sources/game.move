@@ -31,7 +31,7 @@ public struct Account has key {
 }
 
 /// Stores
-public struct Players(Option<ID>, Option<ID>) has store, drop;
+public struct Players(Option<ID>, Option<ID>) has drop, store;
 
 /// A single instance of the game.
 public struct Game has key {
@@ -137,7 +137,10 @@ fun init(otw: GAME, ctx: &mut TxContext) {
     let pub = package::claim(otw, ctx);
     let mut d = display::new<Game>(&pub, ctx);
 
-    d.add(b"image_url".to_string(), b"data:image/svg+xml;charset=utf8,{image_blob}".to_string());
+    d.add(
+        b"image_url".to_string(),
+        b"data:image/svg+xml;charset=utf8,{image_blob}".to_string(),
+    );
     d.add(b"name".to_string(), b"Go Game Board {id}".to_string());
     d.add(b"description".to_string(), b"{board.size}".to_string());
     d.add(b"link".to_string(), b"https://potatoes.app/go/{id}".to_string());

@@ -13,7 +13,7 @@ use std::string::String;
 use sui::random::Random;
 
 /// Rank of the recruit.
-public enum Rank has store, drop {
+public enum Rank has drop, store {
     Rookie,
     Squaddie,
     Corporal,
@@ -76,12 +76,7 @@ fun init(ctx: &mut TxContext) {
 
 /// Generate new `Recruit` with random stat modifiers and transfer it to the
 /// sender.
-entry fun recruit(
-    recruiting: &mut Recruiting,
-    rng: &Random,
-    _num: u8,
-    ctx: &mut TxContext,
-) {
+entry fun recruit(recruiting: &mut Recruiting, rng: &Random, _num: u8, ctx: &mut TxContext) {
     let mut generator = rng.new_generator(ctx);
 
     // aim has base value of 50, in the damage formula we rely SOLELY on aim

@@ -4,14 +4,14 @@
 ///
 module commander::modifier;
 
-public struct Modifier has store, copy, drop {
+public struct Modifier has copy, drop, store {
     /// The effect of the modifier.
     effect: ModifierEffect,
     /// The duration of the modifier, in turns.
     duration: u16,
 }
 
-public enum ModifierEffect has store, copy, drop {
+public enum ModifierEffect has copy, drop, store {
     /// Increase the value by the given amount.
     Increase(u16),
     /// Decrease the value by the given amount.
@@ -21,7 +21,7 @@ public enum ModifierEffect has store, copy, drop {
 }
 
 /// A parameter that can be modified by `Modifier`s.
-public struct Param has store, copy, drop {
+public struct Param has copy, drop, store {
     /// The current value of the parameter.
     value: u16,
     /// The maximum value of the parameter, originally set.

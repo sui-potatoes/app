@@ -9,7 +9,7 @@ use sui::vec_map;
 use svg::print;
 
 /// SVG shape enum.
-public enum Desc has store, copy, drop {
+public enum Desc has copy, drop, store {
     Desc(String),
     Metadata,
     Title(String),

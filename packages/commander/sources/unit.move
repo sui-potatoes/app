@@ -11,7 +11,7 @@ use sui::bcs;
 /// A unit in the game. Units have health, action points, and can perform actions
 /// such as moving and attacking. Units are placed on the `Game` and taken after
 /// the match ends.
-public struct Unit has copy, store, drop {
+public struct Unit has copy, drop, store {
     /// A unique symbol representing the unit. For pretty-printing the map.
     symbol: String,
     /// The name of the unit. Purely cosmetic.

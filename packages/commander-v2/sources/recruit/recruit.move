@@ -13,7 +13,7 @@ public use fun commander::unit::from_recruit as Recruit.to_unit;
 
 /// Recruit metadata, contains information about the Recruit that is not
 /// directly related to the game mechanics.
-public struct Metadata has store, drop {
+public struct Metadata has drop, store {
     name: String,
     backstory: String,
 }

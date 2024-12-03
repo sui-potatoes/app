@@ -7,7 +7,7 @@
 module commander::map;
 
 use commander::{recruit::Recruit, unit::Unit};
-use grid::{grid::{Self, Grid}, point::Point};
+use grid::grid::{Self, Grid};
 use std::string::String;
 use sui::bcs::BCS;
 
@@ -18,7 +18,7 @@ const ETileIsUnwalkable: u64 = 2;
 /// Defines a single Tile in the game `Map`. Tiles can be empty, provide cover
 /// or be unwalkable. Additionally, a unit standing on a tile effectively makes
 /// it unwalkable.
-public struct Tile has store, drop {
+public struct Tile has drop, store {
     /// The type of the tile.
     tile_type: TileType,
     /// The position of the tile on the map.
@@ -26,7 +26,7 @@ public struct Tile has store, drop {
 }
 
 /// A type of the `Tile`.
-public enum TileType has store, copy, drop {
+public enum TileType has copy, drop, store {
     /// An empty tile without any cover.
     Empty,
     /// A low cover tile. Provides partial cover from 1-3 sides. Can be
@@ -45,7 +45,7 @@ public enum TileType has store, copy, drop {
 }
 
 /// Defines the game Map - a grid of tiles where the game takes place.
-public struct Map has store, drop {
+public struct Map has drop, store {
     /// The grid of tiles.
     grid: Grid<Tile>,
 }

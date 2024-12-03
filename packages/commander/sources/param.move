@@ -11,7 +11,7 @@ use sui::bcs::{Self, BCS};
 /// `Unit` such as health, action points, and other stats. Parameters have a
 /// value and a maximum value, and can be reset to the maximum value at the
 /// start of each turn.
-public struct Param has copy, store, drop {
+public struct Param has copy, drop, store {
     value: u16,
     max_value: u16,
 }

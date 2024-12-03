@@ -16,7 +16,7 @@ const ENotImplemented: u64 = 0;
 /// - hyperlink container, `<a>`.
 /// - definition container, `<defs>`, to be used for reusable shapes.
 /// - group container, `<g>`, to group shapes.
-public enum Container has store, copy, drop {
+public enum Container has copy, drop, store {
     // A root-level container for `Desc` elements, only contains metadata
     // like `<title>`, `<desc>`, and `<metadata>`.
     Desc(vector<Desc>),

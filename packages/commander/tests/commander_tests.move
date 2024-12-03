@@ -1,17 +1,15 @@
 #[test_only]
-module commander::commander_tests {
-    // uncomment this line to import the module
-    // use commander::commander;
+module commander::commander_tests;
 
-    const ENotImplemented: u64 = 0;
+// uncomment this line to import the module
+// use commander::commander;
 
-    #[test]
-    fun test_commander() {
-        // pass
-    }
+const ENotImplemented: u64 = 0;
 
-    #[test, expected_failure(abort_code = ::commander::commander_tests::ENotImplemented)]
-    fun test_commander_fail() {
-        abort ENotImplemented
-    }
+#[test]
+fun test_commander() {}
+
+#[test, expected_failure(abort_code = ::commander::commander_tests::ENotImplemented)]
+fun test_commander_fail() {
+    abort ENotImplemented
 }

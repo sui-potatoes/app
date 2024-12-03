@@ -21,7 +21,7 @@ public struct Game has key, store {
 /// A tile on the map. Tiles can be either empty or contain a unit. Every object
 /// in the `Game` is a `Unit` including obstacles, terrain types and actual
 /// actionable units.
-public enum Tile has copy, store, drop {
+public enum Tile has copy, drop, store {
     Empty,
     Unit(Unit, Team),
 }
@@ -29,7 +29,7 @@ public enum Tile has copy, store, drop {
 /// A team in the game. Teams can be neutral, red, or blue. Neutral teams are
 /// typically used for obstacles or terrain types. Red and blue teams are used
 /// for player units.
-public enum Team has copy, store, drop {
+public enum Team has copy, drop, store {
     Neutral,
     Red,
     Blue,

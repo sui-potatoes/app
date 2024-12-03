@@ -7,7 +7,7 @@ module grid::group;
 use grid::point::{Self, Point};
 
 /// A point in 2D space.
-public struct Group(vector<Point>) has store, copy, drop;
+public struct Group(vector<Point>) has copy, drop, store;
 
 /// Create a new point.
 public fun new(points: vector<Point>): Group { Group(points) }

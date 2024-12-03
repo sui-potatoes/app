@@ -9,14 +9,14 @@ use sui::vec_map::{Self, VecMap};
 use svg::print;
 
 /// SVG shape struct, contains a shape type and a set of attributes.
-public struct Shape has store, copy, drop {
+public struct Shape has copy, drop, store {
     shape: Type,
     attributes: VecMap<String, String>,
 }
 
 /// SVG shape enum. Each variant represents a different shape, all of them
 /// containing a set of attributes as a `VecMap`.
-public enum Type has store, copy, drop {
+public enum Type has copy, drop, store {
     Circle(u16, u16, u16),
     Ellipse(u16, u16, u16, u16),
     Line(u16, u16, u16, u16),

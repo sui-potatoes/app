@@ -13,7 +13,7 @@ use grid::point::{Self, Point};
 use std::string::String;
 
 /// A generic 2D grid, each cell stores `T`.
-public struct Grid<T> has store, copy, drop {
+public struct Grid<T> has copy, drop, store {
     grid: vector<vector<T>>,
 }
 

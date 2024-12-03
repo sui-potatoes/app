@@ -91,7 +91,7 @@ public struct CHARACTER has drop {}
 
 /// The builder for the image of a Character, can use available shapes and
 /// colours from the game object.
-public struct Props has store, drop {
+public struct Props has drop, store {
     /// Body type.
     body_type: String,
     /// Hair type.
@@ -303,10 +303,7 @@ fun init(otw: CHARACTER, ctx: &mut TxContext) {
 /// Set the initial assets for the character.
 fun set_initial_assets(builder: &mut Builder) {
     // hair: punk
-    let mut punk = container::g(vector[
-        shape::rect(80, 20, 60, 20),
-        shape::rect(80, 0, 40, 20),
-    ]);
+    let mut punk = container::g(vector[shape::rect(80, 20, 60, 20), shape::rect(80, 0, 40, 20)]);
 
     add_class!(&mut punk, HAIR);
     builder.hair.insert(b"punk".to_string(), punk);
@@ -317,10 +314,7 @@ fun set_initial_assets(builder: &mut Builder) {
     builder.hair.insert(b"flat".to_string(), container::root(vector[flat]));
 
     // hair: bang
-    let mut bang = container::g(vector[
-        shape::rect(80, 20, 60, 20),
-        shape::rect(120, 40, 20, 20),
-    ]);
+    let mut bang = container::g(vector[shape::rect(80, 20, 60, 20), shape::rect(120, 40, 20, 20)]);
     add_class!(&mut bang, HAIR);
     builder.hair.insert(b"bang".to_string(), bang);
 
@@ -384,10 +378,7 @@ fun build_pure_svg(): String {
     let mut head = shape::rect(80, 40, 60, 60);
     add_class!(&mut head, SKIN);
 
-    let mut eyes = container::g(vector[
-        shape::rect(80, 60, 20, 20),
-        shape::rect(120, 60, 20, 20),
-    ]);
+    let mut eyes = container::g(vector[shape::rect(80, 60, 20, 20), shape::rect(120, 60, 20, 20)]);
     add_class!(&mut eyes, EYES);
 
     let mut legs = container::g(vector[

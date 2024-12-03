@@ -25,7 +25,7 @@ const MAX_DODGE: u8 = 100;
 const EIncorrectValue: u64 = 1;
 
 /// Defines the stats of the Recruit, similar to the stats in the XCom game.
-public struct Stats has copy, store, drop {
+public struct Stats has copy, drop, store {
     /// Number of tiles a Recruit can move in a single action (normally, there
     /// can be up to two actions per turn).
     mobility: u8,

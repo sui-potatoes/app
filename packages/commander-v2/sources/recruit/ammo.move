@@ -8,7 +8,7 @@ use std::string::String;
 use sui::bcs::{Self, BCS};
 
 /// All available Ammo types to be used in the game.
-public enum Ammo has store, drop {
+public enum Ammo has drop, store {
     /// Standard ammo type, no special properties.
     Standard,
     /// Ignores armor.
@@ -55,7 +55,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Ammo {
         3 => Ammo::Incendiary,
         4 => Ammo::Poison,
         5 => Ammo::Stun,
-        _ => abort 264
+        _ => abort 264,
     }
 }
 

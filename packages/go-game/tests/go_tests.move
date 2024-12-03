@@ -8,19 +8,14 @@ use gogame::go;
 
 #[test, expected_failure(abort_code = go::ESuicideMove)]
 fun test_board_suicide_fail() {
-    let mut board = go::from_vector(vector[
-        vector[0, 2],
-        vector[2, 0],
-    ]);
+    let mut board = go::from_vector(vector[vector[0, 2], vector[2, 0]]);
 
     board.place(0, 0);
 }
 
 #[test, expected_failure(abort_code = go::EInvalidMove)]
 fun test_invalid_move_fail() {
-    let mut board = go::from_vector(vector[
-        vector[1],
-    ]);
+    let mut board = go::from_vector(vector[vector[1]]);
 
     board.place(0, 0); // aborts!
 }
@@ -106,17 +101,11 @@ fun test_board_sacrifice_move() {
         vector[0, 0, 0, 0],
     ]);
 
-    let mut board = go::from_vector(vector[
-        vector[0, 2],
-        vector[2, 1],
-    ]);
+    let mut board = go::from_vector(vector[vector[0, 2], vector[2, 1]]);
 
     board.place(0, 0);
     board.assert_score(vector[0, 2, 0]);
-    board.assert_state(vector[
-        vector[1, 0],
-        vector[0, 1],
-    ]);
+    board.assert_state(vector[vector[1, 0], vector[0, 1]]);
 }
 
 #[test]
@@ -141,9 +130,7 @@ fun test_board() {
         vector[0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]);
 
-    let _board = go::from_vector(vector[
-        vector[2, 0, 0, 0, 0, 0, 0, 0, 2],
-    ]);
+    let _board = go::from_vector(vector[vector[2, 0, 0, 0, 0, 0, 0, 0, 2]]);
 
     // std::debug::print(
     //     &gogame::render::urlencode(

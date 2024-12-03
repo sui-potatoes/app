@@ -15,7 +15,7 @@ const ENotAttackAction: vector<u8> = b"Action is not an attack action";
 
 /// A unit action. Actions can be performed by units and cost action points.
 /// Each action has a name, cost, and type with action-specific data.
-public struct Action has copy, store, drop {
+public struct Action has copy, drop, store {
     /// The name of the action. Purely cosmetic.
     name: String,
     /// The cost of the action in Action Points (AP).
@@ -26,7 +26,7 @@ public struct Action has copy, store, drop {
 
 /// Global action types that can be performed by units. A single unit can have
 /// multiple actions, including the same action multiple times.
-public enum ActionType has copy, store, drop {
+public enum ActionType has copy, drop, store {
     /// Perform an attack on a target within a certain range (depends on the
     /// unit type).
     Attack { max_range: u16, damage: u16 },
