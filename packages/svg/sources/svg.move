@@ -128,6 +128,23 @@ public fun add_defs(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
     svg.add(container::defs(shapes))
 }
 
+/// Create a `<clipPath>` container and place `Shape`s in it.
+///
+/// Shortcut for `svg.add(container::clip_path(shapes))`.
+///
+/// ## Usage
+/// ```rust
+/// use svg::{shape, svg};
+/// let mut svg = svg::svg(vector[0, 0, 200, 200]);
+/// svg.add_clip_path(vector[
+///    shape::circle(5),
+/// ]);
+/// svg.to_string();
+/// ```
+public fun add_clip_path(svg: &mut Svg, shapes: vector<Shape>): &mut Svg {
+    svg.add(container::clip_path(shapes))
+}
+
 /// Get mutable access to the attributes of the SVG. This is useful for adding
 /// custom attributes directly to the `<svg>` element.
 ///

@@ -41,6 +41,7 @@ public enum ContainerType has store, copy, drop {
     A,
     G,
     Marker,
+    ClipPath,
 }
 
 /// Create a new root container, no container, just a list of shapes.
@@ -206,6 +207,36 @@ public fun g(shapes: vector<Shape>): Container {
 /// let str = svg.to_string();
 /// ```
 public fun marker(_shapes: vector<Shape>): Container { abort ENotImplemented }
+
+/// Create a new `ClipPath` container.
+///
+/// ## Description
+/// ClipPath container, `<clipPath>`, to define a clipping path.
+/// - Element: `<clipPath>`.
+/// - Own properties: None.
+/// - Extended properties: None.
+///
+/// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/clipPath).
+///
+/// ## Usage
+///
+/// ```rust
+/// let mut svg = svg::svg(vector[0, 0, 100, 100]);
+/// let clip_path = container::clip_path(vector[
+///   shape::circle(5),
+/// ]);
+/// svg.add(clip_path); // or svg.clip_path(vector[ /* ... */ ]);
+/// let str = svg.to_string();
+/// ```
+public fun clip_path(shapes: vector<Shape>): Container {
+    Container {
+        container: ContainerType::ClipPath,
+        shapes,
+        attributes: vec_map::empty(),
+        animation: option::none(),
+        desc: vector[],
+    }
+}
 
 /// Move a container, keep the interface consistent with shapes.
 public fun move_to(container: Container, x: u16, y: u16): Container {
