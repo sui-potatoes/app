@@ -4,7 +4,7 @@
 module svg::shape_tests;
 
 use std::unit_test::assert_eq;
-use svg::{animation, shape, svg};
+use svg::{animation, filter, shape, svg};
 
 #[test]
 // prettier-ignore
@@ -76,6 +76,44 @@ fun ellipse() {
     assert_eq!(
         svg.to_string(),
         b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'><ellipse cx='100' cy='50' rx='100' ry='50'/></svg>".to_string(),
+    );
+}
+
+#[test]
+// From MDN Web Docs: https://developer.mozilla.org/en-US/docs/Web/SVG/Element/filter
+//
+// ```
+// <svg width="230" height="120" xmlns="http://www.w3.org/2000/svg">
+//   <filter id="blurMe">
+//     <feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+//   </filter>
+//   <circle cx="60" cy="60" r="50" fill="green" />
+//   <circle cx="170" cy="60" r="50" fill="green" filter="url(#blurMe)" />
+// </svg>
+// ```
+fun filter() {
+    let mut svg = svg::svg(vector[0, 0, 230, 120]);
+    let filter = shape::filter(
+        b"blurMe".to_string(),
+        vector[filter::gaussian_blur(b"SourceGraphic".to_string(), b"5".to_string())],
+    );
+
+    let c1 = shape::circle(50)
+        .move_to(60, 60)
+        .map_attributes!(|attrs| attrs.insert(b"fill".to_string(), b"green".to_string()));
+
+    let c2 = shape::circle(50)
+        .move_to(170, 60)
+        .map_attributes!(|attrs| {
+            attrs.insert(b"fill".to_string(), b"green".to_string());
+            attrs.insert(b"filter".to_string(), b"url(#blurMe)".to_string());
+        });
+
+    svg.add_root(vector[filter, c1, c2]);
+
+    assert_eq!(
+        svg.to_string(),
+        b"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 120'><filter id='blurMe'><feGaussianBlur in='SourceGraphic' stdDeviation='5'/></filter><circle cx='60' cy='60' fill='green' r='50'/><circle cx='170' cy='60' fill='green' filter='url(#blurMe)' r='50'/></svg>".to_string(),
     );
 }
 
@@ -213,7 +251,7 @@ fun animation_shape() {
         .duration(b"1s");
 
     circle.animation_mut().fill(animation);
-    svg.add_root(vector[ circle ]);
+    svg.add_root(vector[circle]);
 
     assert_eq!(
         svg.to_string(),

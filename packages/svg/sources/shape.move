@@ -6,7 +6,7 @@ module svg::shape;
 
 use std::string::String;
 use sui::vec_map::{Self, VecMap};
-use svg::{animation::Animation, point::{Self, Point}, print};
+use svg::{animation::Animation, filter::Filter, point::{Self, Point}, print};
 
 /// Abort code for the `NotImplemented` error.
 const ENotImplemented: u64 = 264;
@@ -28,6 +28,7 @@ public struct Shape has store, copy, drop {
 public enum ShapeType has store, copy, drop {
     Circle(u16),
     Ellipse(Point, u16, u16),
+    Filter(String, vector<Filter>),
     Line(Point, Point),
     Polygon(vector<Point>),
     Polyline(vector<Point>),
@@ -35,13 +36,13 @@ public enum ShapeType has store, copy, drop {
     Text(String),
     /// Text with text path shape, a text element with a string and a path.
     ///
-    /// **Element:** `<text><textPath>` (group)
+    /// Element: `<text><textPath>` (group)
     ///
-    /// **Own properties:**
+    /// Own properties:
     /// - `text` - the text to display.
     /// - `path` - the path to follow.
     ///
-    /// **Inherited properties:**
+    /// Inherited properties:
     /// - `x` - the x-coordinate of the text.
     /// - `y` - the y-coordinate of the text.
     ///
@@ -64,16 +65,16 @@ public struct Stop has store, copy, drop { offset: String, color: String }
 /// Create a new circle shape.
 /// Circle shape, a circle with a center and a radius.
 ///
-/// **Element:** `<circle>`
+/// Element: `<circle>`
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `r` - the radius of the circle.
 ///
-/// **Inherited properties:**
+/// Inherited properties:
 /// - `cx` - the x-coordinate of the circle.
 /// - `cy` - the y-coordinate of the circle.
 ///
-/// **Extended properties:**
+/// Extended properties:
 /// - `pathLength` - the total length of the path.
 /// - `transform` - a transformation to apply to the circle.
 ///
@@ -93,18 +94,18 @@ public fun circle(r: u16): Shape {
 ///
 /// Ellipse shape, a circle that is stretched in one direction.
 ///
-/// **Element:** `<ellipse>`
+/// Element: `<ellipse>`
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `pc` - the point of the center of the ellipse.
 /// - `rx` - the radius of the ellipse in the x-axis.
 /// - `ry` - the radius of the ellipse in the y-axis.
 ///
-/// **Inherited properties:**
+/// Inherited properties:
 /// - `x` - the x-coordinate of the ellipse.
 /// - `y` - the y-coordinate of the ellipse.
 ///
-/// **Extended properties:**
+/// Extended properties:
 /// - `pathLength` - the total length of the path.
 /// - `transform` - a transformation to apply to the ellipse.
 ///
@@ -129,6 +130,43 @@ public fun ellipse(cx: u16, cy: u16, rx: u16, ry: u16): Shape {
     }
 }
 
+/// Create a new filter element with the given id and a list of filter elements.
+///
+/// ## Description
+///
+/// Filter shape, a filter element that can be applied to other elements. Must
+/// be used inside a `defs` container, contains an `id` and a list of filters
+/// such as `feGaussianBlur`, `feColorMatrix`, and `feBlend`.
+///
+/// Element: `<filter>`
+///
+/// Own properties:
+/// - `id` - the id of the filter.
+/// - `filters` - a list of filter elements.
+///
+/// Extended properties: none
+///
+/// ## Usage
+///
+/// ```rust
+/// let filter = shape::filter(b"f1".to_string(), vector[
+///    filter::gaussian_blur(5),
+///    filter::color_matrix(b"grayscale"),
+/// ]);
+///
+/// let mut svg = svg::svg(vector[0, 0, 100, 100]);
+/// svg.add_root(vector[filter]);
+/// let str = svg.to_string();
+/// ```
+public fun filter(id: String, filters: vector<Filter>): Shape {
+    Shape {
+        shape: ShapeType::Filter(id, filters),
+        attributes: vec_map::empty(),
+        animation: option::none(),
+        position: option::none(),
+    }
+}
+
 /// Create a new line shape.
 ///
 /// ## Decription
@@ -136,13 +174,13 @@ public fun ellipse(cx: u16, cy: u16, rx: u16, ry: u16): Shape {
 /// Line shape, a line that connects two points, each point is a pair
 /// of `x` and `y`.
 ///
-/// **Element:** `<line>`
+/// Element: `<line>`
 ///
-/// **Own properties:**
+/// Own properties:
 /// - p0 - the first point.
 /// - p1 - the second point.
 ///
-/// **Extended properties:**
+/// Extended properties:
 /// - `pathLength` - the total length of the path.
 ///
 /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
@@ -162,16 +200,16 @@ public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
 /// Polygon shape, a closed shape that connects multiple points. With
 /// straight lines between each pair of points.
 ///
-/// **Element:** `<polygon>`
+/// Element: `<polygon>`
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
 ///
-/// **Inherited properties:**
+/// Inherited properties:
 /// - `x` - the x-coordinate of the polygon.
 /// - `y` - the y-coordinate of the polygon.
 ///
-/// **Extended properties:**
+/// Extended properties:
 /// - `pathLength` - the total length of the path.
 ///
 /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polygon
@@ -184,10 +222,10 @@ public fun polygon(_points: vector<vector<u16>>): Shape {
 ///
 /// ## Decription
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
 ///
-/// **Extended properties:**
+/// Extended properties:
 /// - `pathLength` - the total length of the path.
 ///
 /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polyline
@@ -201,13 +239,13 @@ public fun polyline(_points: vector<vector<u16>>): Shape {
 ///
 /// Rectangle shape, a rectangle with a position, width, and height.
 ///
-/// **Element:** `<rect>`
+/// Element: `<rect>`
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `width` - the width of the rectangle.
 /// - `height` - the height of the rectangle.
 ///
-/// **Extended properties:**
+/// Extended properties:
 /// - `rx` - the radius of the rectangle in the x-axis.
 /// - `ry` - the radius of the rectangle in the y-axis.
 /// - `pathLength` - the total length of the path.
@@ -228,17 +266,17 @@ public fun rect(width: u16, height: u16): Shape {
 ///
 /// Text shape, a text element with a string and a position.
 ///
-/// **Element:** `<text>`
+/// Element: `<text>`
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `text` - the text to display.
 /// - `path` - an optional `TextPath` element.
 ///
-/// **Inherited properties:**
+/// Inherited properties:
 /// - `x` - the x-coordinate of the text.
 /// - `y` - the y-coordinate of the text.
 ///
-/// **Extended properties:**
+/// Extended properties:
 /// - `dx` - the x-offset of the text.
 /// - `dy` - the y-offset of the text.
 ///
@@ -260,13 +298,13 @@ public fun text(text: String): Shape {
 /// a series of commands and coordinates. The `length` attribute is
 /// optional and specifies the total length of the path.
 ///
-/// **Element:** `<path>`
+/// Element: `<path>`
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `path` - the path string.
 /// - `length` - the total length of the path.
 ///
-/// **Inherited properties:**
+/// Inherited properties:
 /// - `x` - the x-coordinate of the path.
 /// - `y` - the y-coordinate of the path.
 ///
@@ -296,12 +334,12 @@ public fun path(path: String, length: Option<u16>): Shape {
 ///
 /// Use shape, a reference to a shape defined elsewhere in the document.
 ///
-/// **Element:** `<use>`
+/// Element: `<use>`
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `href` - the id of the shape to reference.
 ///
-/// **Inherited properties:**
+/// Inherited properties:
 /// - `x` - the x-coordinate of the shape.
 /// - `y` - the y-coordinate of the shape.
 ///
@@ -321,14 +359,14 @@ public fun use_(href: String): Shape {
 ///
 /// Part of the `defs` container, a shape that is not a standard SVG shape.
 ///
-/// **Element:** `<linearGradient>`
+/// Element: `<linearGradient>`
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `stops` - a list of stop elements.
 ///
-/// **Inherited properties:** none
+/// Inherited properties: none
 ///
-/// **Extended properties:**
+/// Extended properties:
 /// - `x1` - the x-coordinate of the start of the gradient.
 /// - `y1` - the y-coordinate of the start of the gradient.
 /// - `x2` - the x-coordinate of the end of the gradient.
@@ -352,14 +390,14 @@ public fun linear_gradient(stops: vector<Stop>): Shape {
 /// A radial gradient is a gradient that starts from a center point and
 /// spreads out in all directions.
 ///
-/// **Element:** `<radialGradient>`
+/// Element: `<radialGradient>`
 ///
-/// **Inherited properties:** none
+/// Inherited properties: none
 ///
-/// **Own properties:**
+/// Own properties:
 /// - `stops` - a list of stop elements.
 ///
-/// **Extended properties:**
+/// Extended properties:
 /// - `cx` - the x-coordinate of the center of the gradient.
 /// - `cy` - the y-coordinate of the center of the gradient.
 /// - `r` - the radius of the gradient.
@@ -380,11 +418,11 @@ public fun radial_gradient(stops: vector<Stop>): Shape {
 ///
 /// Custom string, allows for custom expressions passed as a string.
 ///
-/// **Own properties:** none
+/// Own properties: none
 ///
-/// **Inherited properties:** none
+/// Inherited properties: none
 ///
-/// **Extended properties:** none
+/// Extended properties: none
 public fun custom(text: String): Shape {
     Shape {
         shape: ShapeType::Custom(text),
@@ -404,7 +442,7 @@ public fun add_stop(gradient: &mut Shape, offset: String, color: String) {
     let stops = match (&mut gradient.shape) {
         ShapeType::LinearGradient { stops } => stops,
         ShapeType::RadialGradient { stops } => stops,
-        _ => abort 0,
+        _ => abort ,
     };
 
     stops.push_back(Stop { offset, color });
@@ -442,15 +480,19 @@ public fun name(shape: &Shape): String {
     match (shape.shape) {
         ShapeType::Circle(..) => b"circle".to_string(),
         ShapeType::Ellipse(..) => b"ellipse".to_string(),
+        ShapeType::Filter(..) => b"filter".to_string(),
         ShapeType::Line(..) => b"line".to_string(),
+        ShapeType::LinearGradient { .. } => b"linearGradient".to_string(),
+        ShapeType::Path(..) => b"path".to_string(),
         ShapeType::Polygon(..) => abort ENotImplemented,
         ShapeType::Polyline(..) => abort ENotImplemented,
+        ShapeType::RadialGradient { .. } => b"radialGradient".to_string(),
         ShapeType::Rect(..) => b"rect".to_string(),
         ShapeType::Text(..) => b"text".to_string(),
+        ShapeType::TextWithTextPath { .. } => b"text".to_string(),
         ShapeType::Use(..) => b"use".to_string(),
         ShapeType::Custom(..) => b"custom".to_string(),
-        ShapeType::Path(..) => b"path".to_string(),
-        _ => abort 0,
+        _ => abort ,
     }
 }
 
@@ -477,6 +519,11 @@ public fun to_string(base_shape: &Shape): String {
             attributes.insert(b"rx".to_string(), (*rx).to_string());
             attributes.insert(b"ry".to_string(), (*ry).to_string());
             (b"ellipse", option::none())
+        },
+        ShapeType::Filter(id, filters) => {
+            let filters = filters.map_ref!(|filter| filter.to_string());
+            attributes.insert(b"id".to_string(), *id);
+            (b"filter", option::some(filters))
         },
         ShapeType::Line(p0, p1) => {
             let (x1, y1) = p0.to_values();

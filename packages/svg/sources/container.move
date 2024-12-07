@@ -299,8 +299,9 @@ public fun name(container: &Container): String {
         ContainerType::G => b"g".to_string(),
         ContainerType::Defs => b"defs".to_string(),
         ContainerType::Marker => b"marker".to_string(),
+        ContainerType::ClipPath => b"clipPath".to_string(),
         // Container::Symbol(..) => b"symbol".to_string(),
-        _ => abort 0,
+        _ => abort ,
     }
 }
 

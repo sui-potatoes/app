@@ -30,60 +30,60 @@
 - [x] Desc
 - [x] Defs
 - [x] A
-- [ ] G
-- [ ] Marker
+- [x] ClipPath
+- [x] G
+- [x] Marker
 - [ ] Symbol
 
 ### Shapes
 
 - [x] Circle
 - [x] Ellipse
-- [x] Rect
-- [x] Path
+- [x] Filter
 - [x] Line
-- [x] Text
-- [ ] TextPath
+- [ ] LinearGradient
+- [x] Path
 - [ ] Polygon
 - [ ] Polyline
+- [ ] RadialGradient
+- [x] Rect
+- [x] Text
+- [x] TextPath
 
 ### FE
 
-- [ ] FeBlend
-- [ ] FeColorMatrix
-- [ ] FeComponentTransfer
-- [ ] FeComposite
-- [ ] FeConvolveMatrix
-- [ ] FeDiffuseLighting
-- [ ] FeDisplacementMap
-- [ ] FeDistantLight
-- [ ] FeDropShadow
-- [ ] FeFlood
-- [ ] FeFuncA
-- [ ] FeFuncB
-- [ ] FeFuncG
-- [ ] FeFuncR
-- [ ] FeGaussianBlur
-- [ ] FeImage
-- [ ] FeMerge
-- [ ] FeMergeNode
-- [ ] FeMorphology
-- [ ] FeOffset
-- [ ] FePointLight
-- [ ] FeSpecularLighting
-- [ ] FeSpotLight
-- [ ] FeTile
-- [ ] FeTurbulence
+- [x] FeBlend
+- [x] FeColorMatrix
+- [x] FeComponentTransfer
+- [x] FeComposite
+- [x] FeConvolveMatrix
+- [x] FeDiffuseLighting
+- [x] FeDisplacementMap
+- [x] FeDistantLight
+- [x] FeDropShadow
+- [x] FeFlood
+- [x] FeFuncA
+- [x] FeFuncB
+- [x] FeFuncG
+- [x] FeFuncR
+- [x] FeGaussianBlur
+- [x] FeImage
+- [x] FeMerge
+- [x] FeMergeNode
+- [x] FeMorphology
+- [x] FeOffset
+- [x] FePointLight
+- [x] FeSpecularLighting
+- [x] FeSpotLight
+- [x] FeTile
+- [x] FeTurbulence
 
 ### Other
 
-- [ ] ClipPath
-- [ ] Filter
 - [ ] ForeignObject
 - [ ] Image
-- [ ] LinearGradient
 - [ ] Mask
 - [ ] Pattern
-- [ ] RadialGradient
 - [ ] Stop
 - [ ] Switch
 - [ ] Tspan
