@@ -36,12 +36,12 @@ codec = "0x..."
 In your code, import and use the package as:
 
 ```move
-module my::awesome_project {
-    use codec::hex;
+module my::awesome_project;
 
-    public fun do() {
-        let _ = hex::encode(b"hey y'all");
-    }
+use codec::hex;
+
+public fun do() {
+    let _ = hex::encode(b"hey y'all");
 }
 ```
 

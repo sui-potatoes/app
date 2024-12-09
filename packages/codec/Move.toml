@@ -4,7 +4,7 @@ edition = "2024.beta"
 authors = ["Sui Potatoes"]
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "releases/sui-v1.38.0-release" }
 
 [addresses]
 codec = "0x0"

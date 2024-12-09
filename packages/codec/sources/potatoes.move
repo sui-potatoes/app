@@ -13,6 +13,9 @@ module codec::potatoes;
 
 use std::string::String;
 
+/// Error code for incorrect number of characters.
+const EIncorrectNumberOfCharacters: u64 = 0;
+
 // prettier-ignore
 /// Each byte is encoded to one of these sub-characters.
 /// Similar to the HEX encoding, but uses the word "POTAES" instead of "ABCDEF".
@@ -51,9 +54,9 @@ public fun encode(bytes: vector<u8>): String {
 public fun decode(str: String): vector<u8> {
     let bytes = str.into_bytes();
     let (mut i, mut r, l) = (0, vector[], bytes.length());
-    assert!(l % 2 == 0);
+    assert!(l % 2 == 0, EIncorrectNumberOfCharacters);
     while (i < l) {
-        let decimal = decode_byte(bytes[i]) * 16 + decode_byte(bytes[i + 1]);
+        let decimal = decode_byte!(bytes[i]) * 16 + decode_byte!(bytes[i + 1]);
         r.push_back(decimal);
         i = i + 2;
     };
@@ -65,7 +68,8 @@ public fun decode(str: String): vector<u8> {
 // p, o, t, a, e, s
 // Codes for them are: 48 .. 57, 80, 79, 84, 65, 112, 111, 116, 97
 // Codes for A,B,C,D,E,F are: 65, 66, 67, 68, 69, 70, which are 10, 11, 12, 13, 14, 15
-fun decode_byte(byte: u8): u8 {
+macro fun decode_byte($byte: u8): u8 {
+    let byte = $byte;
     if (48 <= byte && byte < 58) byte - 48 // 0 .. 9
     else if (byte == 112 || byte == 80) 10 // p or P
     else if (byte == 111 || byte == 79) 11 // o or O
@@ -77,14 +81,23 @@ fun decode_byte(byte: u8): u8 {
 }
 
 #[test]
-fun check_character_set_length() {
+fun test_check_character_set_length() {
+    use std::unit_test::assert_eq;
+
     let set = CHARACTER_SET;
-    assert!(set.length() == 256);
+    assert_eq!(set.length(), 256);
 }
 
 #[test]
 fun test_encode() {
-    assert!(encode(vector[0, 1, 2, 3]) == b"00010203".to_string());
-    assert!(encode(decode(b"potatoes".to_string())) == b"potatoes".to_string());
-    assert!(encode(decode(b"potato4tea".to_string())) == b"potato4tea".to_string());
+    use std::unit_test::assert_eq;
+
+    assert_eq!(encode(vector[0, 1, 2, 3]), b"00010203".to_string());
+    assert_eq!(encode(decode(b"potatoes".to_string())), b"potatoes".to_string());
+    assert_eq!(encode(decode(b"potato4tea".to_string())), b"potato4tea".to_string());
+}
+
+#[test, expected_failure(abort_code = EIncorrectNumberOfCharacters)]
+fun test_incorrect_number_of_characters() {
+    decode(b"potat".to_string());
 }

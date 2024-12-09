@@ -20,17 +20,19 @@ public fun decode(string: String): vector<u8> {
 
 #[test]
 fun test_encode_decode() {
-    assert!(encode_decode(b"hello"));
-    assert!(encode_decode(b"world"));
-    assert!(encode_decode(b""));
-    assert!(encode_decode(b"1234567890"));
-    assert!(encode_decode(b"!@#$%^&*()"));
-    assert!(encode_decode(b"🦄🦄🦄🦄🦄"));
+    encode_decode(b"hello");
+    encode_decode(b"world");
+    encode_decode(b"");
+    encode_decode(b"1234567890");
+    encode_decode(b"!@#$%^&*()");
+    encode_decode(b"🦄🦄🦄🦄🦄");
 }
 
 #[test_only]
-fun encode_decode(bytes: vector<u8>): bool {
+fun encode_decode(bytes: vector<u8>) {
+    use std::unit_test::assert_eq;
+
     let encoded = encode(bytes);
     let decoded = decode(encoded);
-    bytes == decoded
+    assert_eq!(bytes, decoded);
 }
