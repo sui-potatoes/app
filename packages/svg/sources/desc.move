@@ -11,13 +11,15 @@ use std::string::String;
 use sui::vec_map;
 use svg::print;
 
+const TYPE_DESC: u8 = 0;
+const TYPE_METADATA: u8 = 1;
+const TYPE_TITLE: u8 = 2;
+const TYPE_CUSTOM: u8 = 3;
+
 /// Special container for SVG descriptions.
-public enum Desc has store, copy, drop {
-    Desc(String),
-    Metadata(String),
-    Title(String),
-    /// Any custom text to be inserted into a shape, container or SVG.
-    Custom(String),
+public struct Desc has store, copy, drop {
+    desc_type: u8,
+    content: String,
 }
 
 /// Create a new `<desc>` element with the given text.
@@ -49,7 +51,7 @@ public enum Desc has store, copy, drop {
 ///
 /// let str = svg.to_string();
 /// ```
-public fun desc(text: String): Desc { Desc::Desc(text) }
+public fun desc(content: String): Desc { Desc { desc_type: TYPE_DESC, content } }
 
 /// Create a new `<metadata>` element with the given raw content.
 ///
@@ -75,7 +77,7 @@ public fun desc(text: String): Desc { Desc::Desc(text) }
 ///
 /// let str = svg.to_string();
 /// ```
-public fun metadata(content: String): Desc { Desc::Metadata(content) }
+public fun metadata(content: String): Desc { Desc { desc_type: TYPE_METADATA, content } }
 
 /// Create a new title description.
 ///
@@ -103,7 +105,7 @@ public fun metadata(content: String): Desc { Desc::Metadata(content) }
 ///
 /// let str = svg.to_string();
 /// ```
-public fun title(text: String): Desc { Desc::Title(text) }
+public fun title(text: String): Desc { Desc { desc_type: TYPE_TITLE, content: text } }
 
 /// Insert a custom element into the `Desc` container.
 ///
@@ -116,15 +118,18 @@ public fun title(text: String): Desc { Desc::Title(text) }
 ///
 /// let str = svg.to_string();
 /// ```
-public fun custom(text: String): Desc { Desc::Custom(text) }
+public fun custom(text: String): Desc { Desc { desc_type: TYPE_CUSTOM, content: text } }
 
 /// Print the shape as an `SVG` element.
+///
+/// TODO: replace with constants when compiler bug is fixed.
 public fun to_string(shape: &Desc): String {
-    let (name, content) = match (shape) {
-        Desc::Desc(str) => (b"desc", vector[*str]),
-        Desc::Metadata(str) => (b"metadata", vector[*str]),
-        Desc::Title(str) => (b"title", vector[*str]),
-        Desc::Custom(str) => return *str,
+    let (name, content) = match (shape.desc_type) {
+        0 => (b"desc", vector[shape.content]),
+        1 => (b"metadata", vector[shape.content]),
+        2 => (b"title", vector[shape.content]),
+        3 => return shape.content,
+        _ => abort ,
     };
 
     print::print(name.to_string(), vec_map::empty(), option::some(content))

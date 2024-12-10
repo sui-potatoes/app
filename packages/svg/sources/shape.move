@@ -29,7 +29,9 @@ public enum ShapeType has store, copy, drop {
     Circle(u16),
     Ellipse(Point, u16, u16),
     Filter(String, vector<Filter>),
+    ForeignObject(String),
     Line(Point, Point),
+    Image(String),
     Polygon(vector<Point>),
     Polyline(vector<Point>),
     Rect(u16, u16),
@@ -50,6 +52,7 @@ public enum ShapeType has store, copy, drop {
     TextWithTextPath { text: String, href: String },
     Path(String, Option<u16>),
     Use(String),
+    View(vector<u16>),
     LinearGradient {
         stops: vector<Stop>,
     },
@@ -193,6 +196,7 @@ public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
     }
 }
 
+#[allow(unused_function)]
 /// Create a new polygon shape (not implemented).
 ///
 /// ## Decription
@@ -213,10 +217,11 @@ public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
 /// - `pathLength` - the total length of the path.
 ///
 /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polygon
-public fun polygon(_points: vector<vector<u16>>): Shape {
+fun polygon(_points: vector<vector<u16>>): Shape {
     abort ENotImplemented
 }
 
+#[allow(unused_function)]
 /// Create a new polyline shape.
 /// Polyline shape, a line that connects multiple points.
 ///
@@ -229,7 +234,7 @@ public fun polygon(_points: vector<vector<u16>>): Shape {
 /// - `pathLength` - the total length of the path.
 ///
 /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polyline
-public fun polyline(_points: vector<vector<u16>>): Shape {
+fun polyline(_points: vector<vector<u16>>): Shape {
     abort ENotImplemented
 }
 
@@ -596,6 +601,7 @@ public fun to_string(base_shape: &Shape): String {
             (b"radialGradient", option::some(stops))
         },
         ShapeType::Custom(text) => return *text,
+        _ => abort ,
     };
 
     animation.do_ref!(|el| {

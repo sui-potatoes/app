@@ -11,11 +11,20 @@ use svg::{animation::Animation, desc::Desc, print, shape::Shape};
 /// Code for the `NotImplemented` error.
 const ENotImplemented: u64 = 0;
 
+const TYPE_ROOT: u8 = 0;
+const TYPE_A: u8 = 1;
+const TYPE_DEFS: u8 = 2;
+const TYPE_G: u8 = 3;
+const TYPE_MARKER: u8 = 4;
+const TYPE_CLIP_PATH: u8 = 5;
+const TYPE_SYMBOL: u8 = 6;
+const TYPE_MASK: u8 = 7;
+
 /// Represents an SVG container, which contains shapes. All of the containers
 /// support `Shape`s placed inside them, and most of them support attributes,
 /// which will be rendered as XML attributes in the SVG output.
 ///
-/// Containers are created via one of:
+/// Containers are created via one of: 
 /// - `container::root` - no container, just a list of shapes.
 /// - `container::a` - hyperlink container, `<a>`.
 /// - `container::defs` - definition container, `<defs>`, to be used for reusable shapes.
@@ -23,25 +32,13 @@ const ENotImplemented: u64 = 0;
 /// - `container::marker` - marker container, `<marker>`, to define a marker symbol.
 /// - `container::symbol` - symbol container, `<symbol>`, to define a reusable graphic.
 public struct Container has store, copy, drop {
-    container: ContainerType,
+    /// Uses `u8` instead of `ContainerType` to avoid verifier conflict on type
+    /// signatures being too large.
+    container: u8,
     shapes: vector<Shape>,
     attributes: VecMap<String, String>,
     animation: Option<Animation>,
     desc: vector<Desc>,
-}
-
-/// SVG container enum, which contains shapes.
-/// - using `None` - no container, just a list of shapes.
-/// - hyperlink container, `<a>`.
-/// - definition container, `<defs>`, to be used for reusable shapes.
-/// - group container, `<g>`, to group shapes.
-public enum ContainerType has store, copy, drop {
-    Root,
-    Defs,
-    A,
-    G,
-    Marker,
-    ClipPath,
 }
 
 /// Create a new root container, no container, just a list of shapes.
@@ -64,7 +61,7 @@ public enum ContainerType has store, copy, drop {
 /// ```
 public fun root(shapes: vector<Shape>): Container {
     Container {
-        container: ContainerType::Root,
+        container: TYPE_ROOT,
         shapes,
         attributes: vec_map::empty(),
         animation: option::none(),
@@ -102,7 +99,7 @@ public fun a(href: String, shapes: vector<Shape>): Container {
     };
 
     Container {
-        container: ContainerType::A,
+        container: TYPE_A,
         shapes,
         attributes,
         animation: option::none(),
@@ -137,7 +134,7 @@ public fun a(href: String, shapes: vector<Shape>): Container {
 /// ```
 public fun defs(shapes: vector<Shape>): Container {
     Container {
-        container: ContainerType::Defs,
+        container: TYPE_DEFS,
         shapes,
         attributes: vec_map::empty(),
         animation: option::none(),
@@ -176,7 +173,7 @@ public fun defs(shapes: vector<Shape>): Container {
 /// ```
 public fun g(shapes: vector<Shape>): Container {
     Container {
-        container: ContainerType::G,
+        container: TYPE_G,
         shapes,
         attributes: vec_map::empty(),
         animation: option::none(),
@@ -206,7 +203,62 @@ public fun g(shapes: vector<Shape>): Container {
 /// svg.add(marker); // or svg.marker(vector[ /* ... */ ]);
 /// let str = svg.to_string();
 /// ```
-public fun marker(_shapes: vector<Shape>): Container { abort ENotImplemented }
+public fun marker(id: String, _shapes: vector<Shape>): Container {
+    let mut attributes = vec_map::empty();
+    attributes.insert(b"id".to_string(), id);
+
+    Container {
+        container: TYPE_MARKER,
+        shapes: vector[],
+        attributes: vec_map::empty(),
+        animation: option::none(),
+        desc: vector[],
+    }
+}
+
+/// Create a new `Mask` container.
+///
+/// ## Description
+/// Mask container, `<mask>`, to define a mask.
+/// - Element: `<mask>`.
+/// - Own properties: None.
+/// - Extended properties: None.
+///
+/// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/mask).
+public fun mask(id: String, _shapes: vector<Shape>): Container {
+    let mut attributes = vec_map::empty();
+    attributes.insert(b"id".to_string(), id);
+
+    Container {
+        container: TYPE_MASK,
+        shapes: vector[],
+        attributes: vec_map::empty(),
+        animation: option::none(),
+        desc: vector[],
+    }
+}
+
+/// Create a new `Symbol` container.
+///
+/// ## Description
+/// Symbol container, `<symbol>`, to define a reusable graphic.
+/// - Element: `<symbol>`.
+/// - Own properties: None.
+/// - Extended properties: None.
+///
+/// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/symbol).
+public fun symbol(id: String, _shapes: vector<Shape>): Container {
+    let mut attributes = vec_map::empty();
+    attributes.insert(b"id".to_string(), id);
+
+    Container {
+        container: TYPE_SYMBOL,
+        shapes: vector[],
+        attributes: vec_map::empty(),
+        animation: option::none(),
+        desc: vector[],
+    }
+}
 
 /// Create a new `ClipPath` container.
 ///
@@ -230,7 +282,7 @@ public fun marker(_shapes: vector<Shape>): Container { abort ENotImplemented }
 /// ```
 public fun clip_path(shapes: vector<Shape>): Container {
     Container {
-        container: ContainerType::ClipPath,
+        container: TYPE_CLIP_PATH,
         shapes,
         attributes: vec_map::empty(),
         animation: option::none(),
@@ -291,23 +343,25 @@ public macro fun map_attributes($self: Container, $f: |&mut VecMap<String, Strin
 }
 
 /// Simplification to not create functions for each container invariant.
+///
+/// TODO: replace with constants in the future release, when compiler bug is fixed.
 public fun name(container: &Container): String {
     match (&container.container) {
-        // ContainerType::Desc(..) => b"".to_string(),
-        ContainerType::Root => b"".to_string(),
-        ContainerType::A => b"a".to_string(),
-        ContainerType::G => b"g".to_string(),
-        ContainerType::Defs => b"defs".to_string(),
-        ContainerType::Marker => b"marker".to_string(),
-        ContainerType::ClipPath => b"clipPath".to_string(),
-        // Container::Symbol(..) => b"symbol".to_string(),
+        0 => b"".to_string(),
+        1 => b"a".to_string(),
+        2 => b"defs".to_string(),
+        3 => b"g".to_string(),
+        4 => b"marker".to_string(),
+        5 => b"clipPath".to_string(),
+        6 => b"symbol".to_string(),
+        7 => b"mask".to_string(),
         _ => abort ,
     }
 }
 
 /// Print the container as an `SVG` element.
 public fun to_string(container: &Container): String {
-    if (container.container == ContainerType::Root) {
+    if (container.container == TYPE_ROOT) {
         return container.shapes.fold!(b"".to_string(), |mut acc, shape| {
             acc.append(shape.to_string());
             acc

@@ -5,7 +5,7 @@
 
 ### Core
 
-- [ ] Svg
+- [x] Svg
 - [ ] Script
 - [ ] Style
 
@@ -33,22 +33,27 @@
 - [x] ClipPath
 - [x] G
 - [x] Marker
-- [ ] Symbol
+- [x] Mask
+- [x] Symbol
 
 ### Shapes
 
 - [x] Circle
 - [x] Ellipse
 - [x] Filter
+- [x] ForeignObject
 - [x] Line
-- [ ] LinearGradient
+- [x] LinearGradient
 - [x] Path
-- [ ] Polygon
-- [ ] Polyline
-- [ ] RadialGradient
+- [x] Image
+- [ ] Polygon # not implemented
+- [ ] Polyline # not implemented
+- [x] RadialGradient
 - [x] Rect
+- [x] Stop
 - [x] Text
 - [x] TextPath
+- [x] View
 
 ### FE
 
@@ -80,11 +85,6 @@
 
 ### Other
 
-- [ ] ForeignObject
-- [ ] Image
-- [ ] Mask
 - [ ] Pattern
-- [ ] Stop
 - [ ] Switch
 - [ ] Tspan
-- [ ] View
