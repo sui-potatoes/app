@@ -90,7 +90,7 @@ export class Game extends THREE.Object3D {
     }
 
     addUnit(unit: Unit) {
-        const { x, y: z } = unit.gridPosition;
+        const { x, y: z } = unit.gridPosition.clone();
 
         if (!this.grid.isInBounds(x, z)) {
             throw new Error("Invalid Unit positioning");

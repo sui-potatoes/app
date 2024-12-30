@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 /* Take full screen */
 #commander-v2 {
     position: absolute;
+    color: white !important;
     z-index: 1;
     background: black;
     width: 100%;

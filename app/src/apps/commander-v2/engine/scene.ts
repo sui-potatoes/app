@@ -33,8 +33,6 @@ export async function createScene(element: string) {
     const clock = new THREE.Clock();
     const stats = new Stats();
     stats.showPanel(0);
-    // stats.showPanel(1);
-    // stats.showPanel(2);
     document.body.appendChild( stats.dom );
 
     const offset = 30 / 2 - 0.5;
@@ -55,7 +53,7 @@ export async function createScene(element: string) {
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new Camera(75, aspect, 0.1, 100);
 
-    camera.defaultPosition = new THREE.Vector3(offset, 20, offset);
+    camera.defaultPosition = new THREE.Vector3(offset, 20, offset * 2);
     camera.defaultTarget = new THREE.Vector3(offset, 0, offset);
 
     camera.position.copy(camera.defaultPosition);
@@ -68,8 +66,6 @@ export async function createScene(element: string) {
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
-
-    // scene.fog = new THREE.Fog(0x000000, 10, 30);
 
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
@@ -97,14 +93,16 @@ export async function createScene(element: string) {
     controls.connect();
     controls.addEventListener("scroll", ({ delta }) => {
         let newPosition = camera.position.z + delta * 0.01;
-        if (newPosition >= 0 && newPosition < 30) {
+        if (newPosition >= -5 && newPosition < 35) {
             camera.position.z = newPosition;
+            camera.lookAt(camera.defaultTarget);
         }
     });
     controls.addEventListener("zoom", ({ delta }) => {
         let newPosition = camera.position.y + delta * 0.1;
         if (newPosition >= 10 && newPosition <= 30) {
             camera.position.y = newPosition;
+            camera.lookAt(camera.defaultTarget);
         }
     });
 

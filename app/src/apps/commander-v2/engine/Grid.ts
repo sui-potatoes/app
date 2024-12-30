@@ -15,7 +15,19 @@ export class Grid extends THREE.Object3D {
     constructor(size: number) {
         super();
         this.size = size;
-        this.grid = Array.from({ length: size }, () => Array(size).fill({ type: "Empty" }));
+        this.grid = [];
+
+        // we cannot use Array(size).fill([]) because it will create a reference
+        // to the same array and hence all the columns will be the same.
+        //
+        // hashtag: ilovejavascript
+        for (let i = 0; i < size; i++) {
+            this.grid.push([]);
+            for (let j = 0; j < size; j++) {
+                this.grid[i].push({ type: "Empty", unit: null });
+            }
+        }
+
         this.add(this.floor);
         this.initFloorTiles(size);
     }
