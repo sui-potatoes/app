@@ -49,8 +49,8 @@ public fun encode(mut bytes: vector<u8>): String {
 public fun decode(str: String): vector<u8> {
     let keys = KEYS;
     let mut res = vector[];
-    let mut len = str.length();
     let mut bytes = str.into_bytes();
+    let mut len = bytes.length();
     bytes.reverse();
 
     // Ensure the length is a multiple of 4.
