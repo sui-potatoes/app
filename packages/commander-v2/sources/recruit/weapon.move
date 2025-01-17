@@ -28,8 +28,6 @@ public struct Weapon has key, store {
     crit_chance: u8,
     /// Whether the weapon can be dodged.
     is_dodgeable: bool,
-    /// Whether the weapon damages the area.
-    area_damage: bool,
     /// The area size of the weapon, in tiles, an odd number.
     area_size: u8,
     /// The effective range of the weapon, without penalties.
@@ -50,7 +48,7 @@ public fun new(
     plus_one: u8,
     crit_chance: u8,
     is_dodgeable: bool,
-    area_damage: bool,
+    _area_damage: bool,
     area_size: u8,
     range: u8,
     ammo: u8,
@@ -64,7 +62,6 @@ public fun new(
         plus_one,
         crit_chance,
         is_dodgeable,
-        area_damage,
         area_size,
         range,
         ammo,
@@ -81,7 +78,6 @@ public fun default(ctx: &mut TxContext): Weapon {
         plus_one: 0,
         crit_chance: 0,
         is_dodgeable: true,
-        area_damage: false,
         area_size: 1,
         range: 5,
         ammo: 3,
@@ -116,7 +112,7 @@ public fun crit_chance(w: &Weapon): u8 { w.crit_chance }
 public fun is_dodgeable(w: &Weapon): bool { w.is_dodgeable }
 
 /// Get the area damage of the `Weapon`.
-public fun area_damage(w: &Weapon): bool { w.area_damage }
+public fun area_damage(w: &Weapon): bool { w.area_size > 1 }
 
 /// Get the area size of the `Weapon`, only for area damage weapons.
 ///
