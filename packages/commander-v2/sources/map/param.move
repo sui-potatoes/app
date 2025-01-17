@@ -78,6 +78,9 @@ fun test_param() {
     param.decrease(5);
     assert!(param.is_empty());
 
+    param.decrease(5); // should just be 0
+    assert_eq!(param.value(), 0);
+
     param.reset();
     assert_eq!(param.value(), 10);
     assert!(param.is_full());

@@ -95,7 +95,7 @@ public fun destroy(weapon: Weapon) {
 }
 
 /// Get the name of the `Weapon`.
-public fun name(w: &Weapon): &String { &w.name }
+public fun name(w: &Weapon): String { w.name }
 
 /// Get the base damage of the `Weapon`.
 public fun damage(w: &Weapon): u8 { w.damage }
@@ -119,6 +119,18 @@ public fun is_dodgeable(w: &Weapon): bool { w.is_dodgeable }
 public fun area_damage(w: &Weapon): bool { w.area_damage }
 
 /// Get the area size of the `Weapon`, only for area damage weapons.
+///
+/// Expected value for most of the weapons is `1`. Each increment adds all the
+/// neighboring tiles to the area of effect.
+///
+/// This example illustrates different area sizes (1-3):
+/// ```
+/// | | |3| | |
+/// | |3|2|3| |
+/// |3|2|1|2|3|
+/// | |3|2|3| |
+/// | | |3| | |
+/// ```
 public fun area_size(w: &Weapon): u8 { w.area_size }
 
 /// Get the range of the `Weapon`.
@@ -126,6 +138,3 @@ public fun range(w: &Weapon): u8 { w.range }
 
 /// Get the ammo of the `Weapon`.
 public fun ammo(w: &Weapon): u8 { w.ammo }
-
-#[test]
-fun test_weapon() {}

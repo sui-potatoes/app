@@ -78,15 +78,15 @@ public fun perform_attack(unit: &mut Unit, rng: &mut RandomGenerator, _ctx: &mut
         return 0
     };
 
-    let is_crit = rng.generate_u8_in_range(0, 99) >= CRIT_CHANCE;
-    let swing = rng.generate_u8_in_range(0, 99) % 3; // 0, 1, 2
+    let is_critical = rng.generate_u8_in_range(0, 99) >= CRIT_CHANCE;
+    let swing = rng.generate_u8_in_range(0, 9) % 3; // 0, 1, 2
     let damage = match (swing) {
         0 => dmg_stat + 1,
         2 => dmg_stat - 1,
         _ => dmg_stat,
     };
 
-    if (is_crit) ((damage as u16) * 15 / 10) as u8
+    if (is_critical) ((damage as u16) * 15 / 10) as u8
     else damage
 }
 
@@ -173,9 +173,9 @@ fun test_unit() {
     assert_eq!(unit.perform_attack(&mut rng, ctx), 0);
     assert!(unit.ap.is_empty());
     unit.ap.reset();
-    assert_eq!(unit.perform_attack(&mut rng, ctx), 4);
+    assert_eq!(unit.perform_attack(&mut rng, ctx), 6);
     unit.ap.reset();
-    assert_eq!(unit.perform_attack(&mut rng, ctx), 5);
+    assert_eq!(unit.perform_attack(&mut rng, ctx), 4);
     unit.ap.reset();
     assert_eq!(unit.perform_attack(&mut rng, ctx), 0);
     unit.ap.reset();
@@ -184,7 +184,7 @@ fun test_unit() {
     // now test application of damage to the unit
     // for simplicity we'll use the same unit
     unit.apply_damage(&mut rng, 5, true);
-    assert_eq!(unit.hp.value(), 0);
+    assert_eq!(unit.hp.value(), 5);
 
     recruit.dismiss().destroy_none();
 }
@@ -198,19 +198,7 @@ fun test_unit_custom_weapon() {
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
     let mut recruit = recruit::default(ctx);
-    let weapon = weapon::new(
-        b"Custom Weapon".to_string(),
-        7,
-        1,
-        0,
-        0,
-        true,
-        false,
-        1,
-        5,
-        3,
-        ctx,
-    );
+    let weapon = weapon::new(b"Custom Weapon".to_string(), 7, 1, 0, 0, true, false, 1, 5, 3, ctx);
 
     recruit.add_weapon(weapon);
 
@@ -220,10 +208,11 @@ fun test_unit_custom_weapon() {
     assert_eq!(unit.hp.value(), recruit.stats().health() as u16);
     assert_eq!(unit.ap.value(), 2);
 
-    std::debug::print(&unit.perform_attack(&mut rng, ctx));
     unit.ap.reset();
-    let damage = unit.perform_attack(&mut rng, ctx);
-    assert_eq!(damage, 4); // 1 point below the base weapon damage (7 points)
+    assert_eq!(unit.perform_attack(&mut rng, ctx), 0); // miss
+
+    unit.ap.reset();
+    assert_eq!(unit.perform_attack(&mut rng, ctx), 6); // hit
 
     recruit.dismiss().destroy!(|w| w.destroy());
 }

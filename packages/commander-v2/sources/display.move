@@ -4,11 +4,12 @@
 /// Implements Sui Object Display for objects in the game.
 module commander::display;
 
-use commander::{recruit::Recruit, weapon::Weapon};
+use commander::{recruit::{DogTag, Recruit}, weapon::Weapon};
 use sui::display;
 
 public struct DISPLAY has drop {}
 
+/// Creates Display objects for the Recruit and Weapon objects.
 fun init(otw: DISPLAY, ctx: &mut TxContext) {
     let publisher = sui::package::claim(otw, ctx);
 
@@ -45,7 +46,27 @@ fun init(otw: DISPLAY, ctx: &mut TxContext) {
         display
     };
 
-    transfer::public_transfer(recruit_display, ctx.sender());
-    transfer::public_transfer(weapon_display, ctx.sender());
-    transfer::public_transfer(publisher, ctx.sender());
+    // Display for the `DogTag` object.
+    let dogtag_display = {
+        let mut display = display::new<DogTag>(&publisher, ctx);
+        display.add(b"name".to_string(), b"{metadata.name} (Rank: {rank})".to_string());
+        display.add(b"description".to_string(), b"{metadata.description}".to_string());
+        display.add(
+            b"image_url".to_string(),
+            b"https://i.postimg.cc/wTdDxN7V/recruit.webp".to_string(),
+        );
+        display.add(
+            b"link".to_string(),
+            b"http://localhost:5173/commander/recruit/{id}".to_string(),
+        );
+        display.update_version();
+        display
+    };
+
+    let sender = ctx.sender();
+
+    transfer::public_transfer(recruit_display, sender);
+    transfer::public_transfer(weapon_display, sender);
+    transfer::public_transfer(dogtag_display, sender);
+    transfer::public_transfer(publisher, sender);
 }

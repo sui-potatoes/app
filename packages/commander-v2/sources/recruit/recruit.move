@@ -8,6 +8,11 @@ module commander::recruit;
 use commander::{rank::{Self, Rank}, stats::{Self, Stats}, weapon::Weapon};
 use std::string::String;
 
+/// Attempt to equip a `Weapon` while a Recruit already it.
+const EAlreadyHasWeapon: u64 = 1;
+/// Trying to remove a `Weapon` that does not exist.
+const ENoWeapon: u64 = 2;
+
 // Convenience alias which allows simpler conversion from Recruit to Unit.
 public use fun commander::unit::from_recruit as Recruit.to_unit;
 
@@ -48,12 +53,14 @@ public struct DogTag has key, store {
 /// Add a weapon to the Recruit.
 /// Aborts if the Recruit already has a weapon.
 public fun add_weapon(r: &mut Recruit, weapon: Weapon) {
+    assert!(r.weapon.is_none(), EAlreadyHasWeapon);
     r.weapon.fill(weapon);
 }
 
 /// Remove the weapon from the Recruit.
 /// Aborts if the Recruit does not have a weapon.
 public fun remove_weapon(r: &mut Recruit): Weapon {
+    assert!(r.weapon.is_some(), ENoWeapon);
     r.weapon.extract()
 }
 
@@ -104,17 +111,6 @@ public fun new(name: String, backstory: String, ctx: &mut TxContext): Recruit {
     }
 }
 
-/// Kills the Recruit and returns the DogTag.
-fun kill(recruit: Recruit, ctx: &mut TxContext): DogTag {
-    let Recruit { id, rank, weapon, metadata, .. } = recruit;
-    id.delete();
-
-    // TODO: figure a way to leave the weapon
-    weapon.destroy!(|w| w.destroy());
-
-    DogTag { id: object::new(ctx), rank, metadata }
-}
-
 /// Dismiss the Recruit, remove them forever from the game.
 public fun dismiss(recruit: Recruit): Option<Weapon> {
     let Recruit { id, weapon, .. } = recruit;
@@ -126,6 +122,17 @@ public fun dismiss(recruit: Recruit): Option<Weapon> {
 public fun throw_away(dog_tag: DogTag) {
     let DogTag { id, .. } = dog_tag;
     id.delete();
+}
+
+/// Kills the Recruit and returns the DogTag.
+public(package) fun kill(recruit: Recruit, ctx: &mut TxContext): DogTag {
+    let Recruit { id, rank, weapon, metadata, .. } = recruit;
+    id.delete();
+
+    // TODO: figure a way to leave the weapon
+    weapon.destroy!(|w| w.destroy());
+
+    DogTag { id: object::new(ctx), rank, metadata }
 }
 
 #[test]

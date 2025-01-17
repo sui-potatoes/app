@@ -127,7 +127,7 @@ public fun tile_to_string(tile: &Tile): String {
 public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
     let mut prev = path[0];
     'a: {
-        path.do_ref!(|step| {
+        path.do!(|step| {
             if (step == prev) return; // skip 1st and duplicate steps
             let (x0, y0) = (prev[0], prev[1]);
             let (x1, y1) = (step[0], step[1]);
@@ -136,7 +136,7 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
             let target = &map.grid[x1, y1];
             if (target.unit.is_some()) return 'a false;
 
-            prev = *step;
+            prev = step;
 
             // UP
             if (x0 == x1 && y0 == y1 + 1) {
@@ -232,14 +232,19 @@ fun test_map_with_units() {
     assert!(map.tile_has_unit(3, 3));
     assert!(map.tile_has_unit(5, 2));
 
-    std::debug::print(&map.to_string());
+    // | | | | | | |
+    // | | | | | | |
+    // | | | | | |5|
+    // | | | |5| | |
+    // | | | | | | |
+    // | | | | | | |
 
     // now try to attack another unit with the first one
     let damage = map
         .grid[3, 3]
         .unit
         .map!(|mut unit| unit.perform_attack(&mut rng, ctx))
-        .destroy_or!(abort 264);
+        .destroy_or!(abort);
 
     // apply the damage to the second unit
     map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);
@@ -255,22 +260,22 @@ fun test_check_path() {
         TileType::Cover { left: false, right: true, top: false, bottom: false };
 
     // try going right and then back-left
-    assert!(map.check_path(vector[vector[0, 0], vector[1, 0]]) == false);
-    assert!(map.check_path(vector[vector[1, 0], vector[0, 0]]) == false);
+    assert!(!map.check_path(vector[vector[0, 0], vector[1, 0]]));
+    assert!(!map.check_path(vector[vector[1, 0], vector[0, 0]]));
 
     // try going down, right and then back-up; then reverse
-    assert!(map.check_path(vector[vector[0, 0], vector[0, 1], vector[1, 1], vector[1, 0]]) == true);
-    assert!(map.check_path(vector[vector[1, 0], vector[1, 1], vector[0, 1], vector[0, 0]]) == true);
+    assert!(map.check_path(vector[vector[0, 0], vector[0, 1], vector[1, 1], vector[1, 0]]));
+    assert!(map.check_path(vector[vector[1, 0], vector[1, 1], vector[0, 1], vector[0, 0]]));
 
     let mut map = Self::new(3);
     *&mut map.grid[0, 0].tile_type =
         TileType::Cover { left: false, right: false, top: false, bottom: true };
 
     // try going down and then back-up
-    assert!(map.check_path(vector[vector[0, 0], vector[0, 1]]) == false);
-    assert!(map.check_path(vector[vector[0, 1], vector[0, 0]]) == false);
+    assert!(!map.check_path(vector[vector[0, 0], vector[0, 1]]));
+    assert!(!map.check_path(vector[vector[0, 1], vector[0, 0]]));
 
     // try going right, down and then back-left; then reverse
-    assert!(map.check_path(vector[vector[0, 0], vector[1, 0], vector[1, 1], vector[0, 1]]) == true);
-    assert!(map.check_path(vector[vector[0, 1], vector[1, 1], vector[1, 0], vector[0, 0]]) == true);
+    assert!(map.check_path(vector[vector[0, 0], vector[1, 0], vector[1, 1], vector[0, 1]]));
+    assert!(map.check_path(vector[vector[0, 1], vector[1, 1], vector[1, 0], vector[0, 0]]));
 }

@@ -12,6 +12,8 @@ module grid::grid;
 use grid::point::{Self, Point};
 use std::string::String;
 
+const EIncorrectVectorLength: u64 = 0;
+
 /// A generic 2D grid, each cell stores `T`.
 public struct Grid<T> has copy, drop, store {
     grid: vector<vector<T>>,
@@ -23,7 +25,7 @@ public struct Grid<T> has copy, drop, store {
 public fun from_vector<T>(grid: vector<vector<T>>): Grid<T> {
     assert!(grid.length() > 0);
     let height = grid[0].length();
-    grid.do_ref!(|row| assert!(row.length() == height));
+    grid.do_ref!(|row| assert!(row.length() == height, EIncorrectVectorLength));
     Grid { grid }
 }
 

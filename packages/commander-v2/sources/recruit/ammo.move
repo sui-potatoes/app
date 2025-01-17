@@ -55,7 +55,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Ammo {
         3 => Ammo::Incendiary,
         4 => Ammo::Poison,
         5 => Ammo::Stun,
-        _ => abort 264,
+        _ => abort,
     }
 }
 
