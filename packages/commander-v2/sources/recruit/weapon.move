@@ -48,7 +48,6 @@ public fun new(
     plus_one: u8,
     crit_chance: u8,
     is_dodgeable: bool,
-    _area_damage: bool,
     area_size: u8,
     range: u8,
     ammo: u8,

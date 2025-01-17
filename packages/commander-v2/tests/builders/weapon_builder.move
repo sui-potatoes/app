@@ -15,7 +15,6 @@ public struct WeaponBuilder has drop {
     plus_one: Option<u8>,
     crit_chance: Option<u8>,
     is_dodgeable: Option<bool>,
-    area_damage: Option<bool>,
     area_size: Option<u8>,
     range: Option<u8>,
     ammo: Option<u8>,
@@ -30,7 +29,6 @@ public fun new(): WeaponBuilder {
         plus_one: option::none(),
         crit_chance: option::none(),
         is_dodgeable: option::none(),
-        area_damage: option::none(),
         area_size: option::none(),
         range: option::none(),
         ammo: option::none(),
@@ -73,12 +71,6 @@ public fun is_dodgeable(mut self: WeaponBuilder, is_dodgeable: bool): WeaponBuil
     self
 }
 
-/// Set whether the weapon deals area damage.
-public fun area_damage(mut self: WeaponBuilder, area_damage: bool): WeaponBuilder {
-    self.area_damage = option::some(area_damage);
-    self
-}
-
 /// Set the area size of the weapon.
 public fun area_size(mut self: WeaponBuilder, area_size: u8): WeaponBuilder {
     self.area_size = option::some(area_size);
@@ -106,7 +98,6 @@ public fun build(self: WeaponBuilder, ctx: &mut TxContext): Weapon {
         self.plus_one.destroy_or!(0),
         self.crit_chance.destroy_or!(0),
         self.is_dodgeable.destroy_or!(true),
-        self.area_damage.destroy_or!(false),
         self.area_size.destroy_or!(1),
         self.range.destroy_or!(5),
         self.ammo.destroy_or!(3),
@@ -125,7 +116,6 @@ fun test_weapon_builder() {
         .plus_one(0)
         .crit_chance(0)
         .is_dodgeable(true)
-        .area_damage(false)
         .area_size(1)
         .range(5)
         .ammo(3)

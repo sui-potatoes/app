@@ -198,7 +198,7 @@ fun test_unit_custom_weapon() {
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
     let mut recruit = recruit::default(ctx);
-    let weapon = weapon::new(b"Custom Weapon".to_string(), 7, 1, 0, 0, true, false, 1, 5, 3, ctx);
+    let weapon = weapon::new(b"Custom Weapon".to_string(), 7, 1, 0, 0, true, 1, 5, 3, ctx);
 
     recruit.add_weapon(weapon);
 

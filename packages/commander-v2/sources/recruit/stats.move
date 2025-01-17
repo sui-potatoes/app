@@ -6,6 +6,7 @@
 module commander::stats;
 
 use sui::bcs::{Self, BCS};
+use std::macros::num_min;
 
 /// Capped at 7 bits. Max value for signed 8-bit integers.
 const SIGN_VALUE: u64 = 128;
@@ -163,20 +164,20 @@ public fun apply_modifier(stats: &Stats, modifier: &Modifier): Stats {
         let value = stats >> offset & 0xFF;
         let reset_mask = 0xFFFFFFFFFFFFFFFF ^ (0xFF << offset);
         let new_value = if (modifier > sign) {
-            (value - (modifier - sign).min(value) as u64)
+            (value - num_min!(modifier - sign, value) as u64)
         } else {
             ((stats >> offset & 0xFF) + modifier)
         };
 
         // prettier-ignore
         stats = stats & reset_mask | match (i) {
-            0 => new_value.min(MAX_MOBILITY as u64),
-            1 => new_value.min(MAX_AIM as u64),
-            2 => new_value.min(MAX_WILL as u64),
-            3 => new_value.min(MAX_HEALTH as u64),
-            4 => new_value.min(MAX_ARMOR as u64),
-            5 => new_value.min(MAX_DODGE as u64),
-            6 => new_value.min(MAX_HACK as u64),
+            0 => num_min!(new_value, MAX_MOBILITY as u64),
+            1 => num_min!(new_value, MAX_AIM as u64),
+            2 => num_min!(new_value, MAX_WILL as u64),
+            3 => num_min!(new_value, MAX_HEALTH as u64),
+            4 => num_min!(new_value, MAX_ARMOR as u64),
+            5 => num_min!(new_value, MAX_DODGE as u64),
+            6 => num_min!(new_value, MAX_HACK as u64),
             _ => 0x00, // unreachable
         } << offset;
     });
