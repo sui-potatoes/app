@@ -63,12 +63,6 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
     g.grid[x as u64].remove(y as u64 + 1)
 }
 
-/// Get all von Neumann neighbours of a point, checking if the point is within
-/// the bounds of the grid.
-public fun von_neumann<T>(g: &Grid<T>, p: Point): vector<Point> {
-    p.von_neumann().filter!(|point| point.x() < g.width() && point.y() < g.height())
-}
-
 // === Utils ===
 
 /// Get a difference between two points, useful for calculating distances or
@@ -76,6 +70,18 @@ public fun von_neumann<T>(g: &Grid<T>, p: Point): vector<Point> {
 public fun range(x0: u16, y0: u16, x1: u16, y1: u16): u16 { x0.diff(x1) + y0.diff(y1) }
 
 // === Macros ===
+
+/// Get all von Neumann neighbours of a point, checking if the point is within
+/// the bounds of the grid.
+public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point): vector<Point> {
+    let p = $p;
+    let g = $g;
+    let (width, height) = (g.width(), g.height());
+    p.von_neumann().filter!(|point| {
+        let (x, y) = point.to_values();
+        x < width && y < height
+    })
+}
 
 /// Create a grid of the specified size by applying the function `f` to each cell.
 /// The function receives the x and y coordinates of the cell.
@@ -115,7 +121,7 @@ public macro fun find_group<$T>(
 
     while (!queue.is_empty()) {
         let point = queue.pop_back();
-        map.von_neumann(point).do!(|point| {
+        map.von_neumann!(point).do!(|point| {
             let (x, y) = point.into_values();
 
             if (x >= width || y >= height || visited[x, y]) return;
@@ -135,7 +141,7 @@ public macro fun find_group<$T>(
 ///
 /// ```move
 /// // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
-/// grid.trace!(0, 0, 1, 4, 6, |cell| cell == 0);
+/// grid.trace!(0, 0, 1, 4, 6, |prev_x, prev_y, next_x, next_y| cell == 0);
 /// ```
 ///
 /// TODO: consider using a A* algorithm for better performance.
@@ -176,7 +182,7 @@ public macro fun trace<$T>(
         num = num + 1;
 
         // flush the queue, marking all cells around the current number
-        queue.destroy!(|source| grid.von_neumann(source).destroy!(|point| {
+        queue.destroy!(|source| grid.von_neumann!(source).destroy!(|point| {
             let (x0, y0) = source.into_values();
             let (x, y) = point.into_values();
 
@@ -209,7 +215,7 @@ public macro fun trace<$T>(
 
     'reconstruct: while (num > 1) {
         num = num - 1;
-        grid.von_neumann(last_point).destroy!(|point| {
+        grid.von_neumann!(last_point).destroy!(|point| {
             let (x, y) = point.into_values();
             if (x == x0 && y == y0) break 'reconstruct;
             if (grid[x, y] == num) {
@@ -277,7 +283,6 @@ fun test_path_tracing() {
         ],
     };
 
-    // we can only
     let path = trace!(&grid, 0, 0, 1, 4, 6, |_, _, x, y| grid[x, y] == &0);
 
     assert!(path.is_some());
@@ -322,11 +327,7 @@ fun test_from_bcs() {
     use sui::bcs;
 
     let grid = Grid<u8> {
-        grid: vector[
-            vector[0, 1, 2],
-            vector[3, 4, 5],
-            vector[6, 7, 8],
-        ],
+        grid: vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]],
     };
 
     let bytes = bcs::to_bytes(&grid);
