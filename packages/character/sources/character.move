@@ -300,58 +300,68 @@ fun init(otw: CHARACTER, ctx: &mut TxContext) {
     transfer::share_object(builder);
 }
 
+/// Size of a single pixel in the Character
+const PX: u16 = 20;
+
 /// Set the initial assets for the character.
 fun set_initial_assets(builder: &mut Builder) {
     // hair: punk
-    let mut punk = container::g(vector[shape::rect(80, 20, 60, 20), shape::rect(80, 0, 40, 20)]);
+    // let px = 20;
+    let mut punk = container::g(vector[
+        shape::rect(3 * PX, PX).move_to(4 * PX, PX),
+        shape::rect(2 * PX, PX).move_to(4 * PX, 0),
+    ]);
 
     add_class!(&mut punk, HAIR);
     builder.hair.insert(b"punk".to_string(), punk);
 
     // hair: flat
-    let mut flat = shape::rect(80, 20, 60, 20);
+    let mut flat = shape::rect(3 * PX, PX).move_to(4 * PX, PX);
     add_class!(&mut flat, HAIR);
     builder.hair.insert(b"flat".to_string(), container::root(vector[flat]));
 
     // hair: bang
-    let mut bang = container::g(vector[shape::rect(80, 20, 60, 20), shape::rect(120, 40, 20, 20)]);
+    let mut bang = container::g(vector[
+        shape::rect(3 * PX, PX).move_to(80, PX),
+        shape::rect(PX, PX).move_to(6 * PX, 2 * PX),
+    ]);
     add_class!(&mut bang, HAIR);
     builder.hair.insert(b"bang".to_string(), bang);
 
     // hair: wind
     let mut wind = container::g(vector[
-        shape::rect(60, 20, 20, 60),
-        shape::rect(80, 20, 80, 20),
-        shape::rect(140, 40, 40, 40),
-        shape::rect(180, 40, 20, 20),
+        shape::rect(PX, 3 * PX).move_to(3 * PX, PX),
+        shape::rect(4 * PX, PX).move_to(4 * PX, PX),
+        shape::rect(2 * PX, 2 * PX).move_to(7 * PX, 2 * PX),
+        shape::rect(PX, PX).move_to(9 * PX, 2 * PX),
     ]);
     add_class!(&mut wind, HAIR);
     builder.hair.insert(b"wind".to_string(), wind);
 
     // body: blazer
     let mut blazer = container::g(vector[
-        shape::rect(80, 100, 20, 20),
-        shape::rect(120, 100, 20, 20),
-        shape::rect(100, 120, 20, 20),
-        shape::rect(60, 100, 20, 20),
-        shape::rect(140, 100, 20, 20),
+        shape::rect(PX, PX).move_to(4 * PX, 5 * PX),
+        shape::rect(PX, PX).move_to(6 * PX, 5 * PX),
+        shape::rect(PX, PX).move_to(5 * PX, 6 * PX),
+        shape::rect(PX, PX).move_to(3 * PX, 5 * PX),
+        shape::rect(PX, PX).move_to(7 * PX, 5 * PX),
     ]);
     add_class!(&mut blazer, BODY);
     builder.body.insert(b"blazer".to_string(), blazer);
 
     // body: office
     let mut office = container::g(vector[
-        shape::rect(60, 100, 20, 40),
-        shape::rect(100, 100, 20, 40),
-        shape::rect(140, 100, 20, 40),
+        shape::rect(PX, 2 * PX).move_to(3 * PX, 5 * PX),
+        shape::rect(PX, 2 * PX).move_to(5 * PX, 5 * PX),
+        shape::rect(PX, 2 * PX).move_to(7 * PX, 5 * PX),
     ]);
     add_class!(&mut office, ACCENT);
     builder.body.insert(b"office".to_string(), office);
 
     // body: tshirt
     let mut tshirt = container::g(vector[
-        shape::rect(60, 100, 20, 20),
-        shape::rect(140, 100, 20, 20),
+        shape::rect(PX, PX).move_to(3 * PX, 5 * PX),
+        shape::rect(PX, PX).move_to(7 * PX, 5 * PX),
     ]);
     add_class!(&mut tshirt, BODY);
     builder.body.insert(b"tshirt".to_string(), tshirt);
@@ -372,37 +382,40 @@ fun set_display(d: &mut Display<Character>) {
 }
 
 fun build_pure_svg(): String {
-    let mut body = shape::rect(80, 100, 60, 60);
+    let mut body = shape::rect(3 * PX, 3 * PX).move_to(4 * PX, 5 * PX);
     add_class!(&mut body, BODY);
 
-    let mut head = shape::rect(80, 40, 60, 60);
+    let mut head = shape::rect(3 * PX, 3 * PX).move_to(4 * PX, 2 * PX);
     add_class!(&mut head, SKIN);
 
-    let mut eyes = container::g(vector[shape::rect(80, 60, 20, 20), shape::rect(120, 60, 20, 20)]);
+    let mut eyes = container::g(vector[
+        shape::rect(PX, PX).move_to(4 * PX, 3 * PX),
+        shape::rect(PX, PX).move_to(6 * PX, 3 * PX),
+    ]);
     add_class!(&mut eyes, EYES);
 
     let mut legs = container::g(vector[
-        shape::rect(80, 160, 20, 60),
-        shape::rect(100, 160, 20, 20),
-        shape::rect(120, 160, 20, 60),
+        shape::rect(PX, 3 * PX).move_to(4 * PX, 8 * PX),
+        shape::rect(PX, PX).move_to(5 * PX, 8 * PX),
+        shape::rect(PX, 3 * PX).move_to(6 * PX, 8 * PX),
     ]);
     add_class!(&mut legs, LEGS);
 
     let mut hands = container::g(vector[
-        shape::rect(60, 100, 20, 60),
-        shape::rect(140, 100, 20, 60),
+        shape::rect(PX, 3 * PX).move_to(3 * PX, 5 * PX),
+        shape::rect(PX, 3 * PX).move_to(7 * PX, 5 * PX),
     ]);
     add_class!(&mut hands, SKIN);
 
     // New SVG with the viewbox.
-    let mut svg = svg::svg(vector[0, 0, 220, 240]);
+    let mut svg = svg::svg(vector[0, 0, 11 * PX, 12 * PX]);
     let styles = shape::custom(b"<style>.s{fill:#SKIN} .e{fill:#EYES} .h{fill:#HAIR} .l{fill:#PANTS} .b{fill:#BODY} .a{fill:#ACCENT}</style>".to_string());
 
-    svg.root(vector[styles, body, head]);
+    svg.add_root(vector[styles, body, head]);
     svg.add(eyes);
     svg.add(legs);
     svg.add(hands);
-    svg.root(vector[shape::custom(b"TEMPLATE".to_string())]); // template
+    svg.add_root(vector[shape::custom(b"TEMPLATE".to_string())]); // template
     svg.to_string()
 }
 

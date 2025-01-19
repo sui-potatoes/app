@@ -116,7 +116,7 @@ fun test_board() {
     board.place(8, 6);
     board.place(3, 16);
 
-    std::debug::print(&board.print_svg());
+    // std::debug::print(&board.print_svg().to_url());
 
     let _board = go::from_vector(vector[
         vector[0, 0, 0, 2, 0, 0, 0, 0, 0],
@@ -130,7 +130,7 @@ fun test_board() {
         vector[0, 0, 0, 0, 0, 0, 0, 0, 0],
     ]);
 
-    let _board = go::from_vector(vector[vector[2, 0, 0, 0, 0, 0, 0, 0, 2]]);
+    // std::debug::print(&board.print_svg().to_url());
 
     // std::debug::print(
     //     &gogame::render::urlencode(

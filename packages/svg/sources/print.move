@@ -1,13 +1,34 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Module: print
+/// Implements tag printing for any XML elements. This is a base utility used by
+/// most of the types in this library.
 module svg::print;
 
 use std::string::String;
 use sui::vec_map::VecMap;
 
-/// Prints a generic SVG element, with attributes and elements.
+/// Prints a generic SVG element, with attributes and elements. Rarely should be
+/// used directly, given that each type in this library has its own `to_string`.
+///
+/// In case custom XML elements are needed for `Custom(String)` nodes, here is
+/// an example of usage:
+///
+/// ```rust
+/// // for double tags `<a>Link contents</a>`
+/// let printed = svg::print::print(
+///     b"a".to_string(), // element name
+///     vec_map::empty(), // VecMap of attributes
+///     option::some(vector[ b"Link contents".to_string() ]), // Option<vector<String>> of elements
+/// );
+///
+/// // for single tag `<br />`
+/// let printed = svg::print::print(
+///     b"br".to_string(), // element name
+///     vec_map::empty(), // VecMap of attributes
+///     option::none(), // empty option for single tags
+/// );
+/// ```
 public fun print(
     name: String,
     attributes: VecMap<String, String>,
@@ -37,22 +58,4 @@ public fun print(
     svg.append(name);
     svg.append(b">".to_string());
     svg
-}
-
-/// Converts a number to a string, uses u16 for the digits.
-public fun num_to_string(mut num: u16): String {
-    let mut chars = vector[];
-
-    if (num == 0) {
-        chars.push_back(48);
-        return chars.to_string()
-    };
-
-    while (num > 0) {
-        let digit = num % 10;
-        num = num / 10;
-        chars.push_back((digit + 48) as u8);
-    };
-    chars.reverse();
-    chars.to_string()
 }
