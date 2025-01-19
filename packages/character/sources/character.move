@@ -27,24 +27,24 @@ use std::{string::String, type_name};
 use sui::{display::{Self, Display}, dynamic_field as df, package, vec_map::{Self, VecMap}};
 use svg::{container::{Self, Container}, macros::add_class, shape, svg};
 
-#[error]
-const EWrongBody: vector<u8> = b"The body type is not found in the `Builder`";
-#[error]
-const EWrongHair: vector<u8> = b"The hair type is not found in the `Builder`";
-#[error]
-const EWrongEyesColour: vector<u8> = b"Eyes colour must be in the allowed palette";
-#[error]
-const EWrongTrousersColour: vector<u8> = b"Trousers colour must be in the allowed palette";
-#[error]
-const EWrongSkinColour: vector<u8> = b"Skin colour must be in the allowed palette";
-#[error]
-const EWrongBaseColour: vector<u8> = b"Base colour must be in the allowed palette";
-#[error]
-const EWrongAccentColour: vector<u8> = b"Accent colour must be in the allowed palette";
-#[error]
-const EWrongHairColour: vector<u8> = b"Hair colour must be in the allowed palette";
-#[error]
-const EIncorrectDynamicField: vector<u8> = b"Application key cannot be a primitive type";
+/// The body type is not found in the `Builder`.
+const EWrongBody: u64 = 1;
+/// The hair type is not found in the `Builder`.
+const EWrongHair: u64 = 2;
+/// Eyes colour must be in the allowed palette.
+const EWrongEyesColour: u64 = 3;
+/// Trousers colour must be in the allowed palette.
+const EWrongTrousersColour: u64 = 4;
+/// Skin colour must be in the allowed palette.
+const EWrongSkinColour: u64 = 5;
+/// Base colour must be in the allowed palette.
+const EWrongBaseColour: u64 = 6;
+/// Accent colour must be in the allowed palette.
+const EWrongAccentColour: u64 = 7;
+/// Hair colour must be in the allowed palette.
+const EWrongHairColour: u64 = 8;
+/// Application key cannot be a primitive type.
+const EIncorrectDynamicField: u64 = 9;
 
 // === Constants ===
 
