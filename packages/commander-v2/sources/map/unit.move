@@ -5,6 +5,9 @@
 /// fields of the `Recruit` into a "digestible" form for the `Map`. Units are
 /// placed on the `Map` directly and linked to their corresponding `Recruit`s
 /// via the `address` -> `UID`.
+///
+/// Traits:
+/// - from_bcs
 module commander::unit;
 
 use commander::{param::{Self, Param}, recruit::Recruit, stats::{Self, Stats}};
@@ -215,4 +218,21 @@ fun test_unit_custom_weapon() {
     assert_eq!(unit.perform_attack(&mut rng, ctx), 6); // hit
 
     recruit.dismiss().destroy!(|w| w.destroy());
+}
+
+#[test]
+fun test_from_bcs() {
+    use std::unit_test::assert_eq;
+    use sui::test_utils::destroy;
+    use commander::recruit;
+
+    let ctx = &mut tx_context::dummy();
+    let recruit = recruit::default(ctx);
+    let unit = recruit.to_unit();
+
+    let bytes = bcs::to_bytes(&unit);
+    let unit2 = from_bytes(bytes);
+
+    assert_eq!(unit.recruit, unit2.recruit);
+    destroy(recruit);
 }

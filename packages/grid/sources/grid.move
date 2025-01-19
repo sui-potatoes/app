@@ -11,6 +11,7 @@ module grid::grid;
 
 use grid::point::{Self, Point};
 use std::string::String;
+use sui::bcs::BCS;
 
 const EIncorrectVectorLength: u64 = 0;
 
@@ -230,16 +231,24 @@ public macro fun to_string<$T>($grid: &Grid<$T>): String {
     let (width, height) = (grid.width(), grid.height());
 
     // the layout is vertical, so we iterate over the height first
-    height.do!(|y| {
+    width.do!(|y| {
         result.append_utf8(b"|");
-        width.do!(|x| {
-            result.append(grid[x, y].to_string());
+        height.do!(|x| {
+            result.append(grid[y, x].to_string());
             result.append_utf8(b"|");
         });
         result.append_utf8(b"\n");
     });
 
     result
+}
+
+/// Deserialize `BCS` into a grid. This macro is a helping hand in writing
+/// custom deserializers.
+public macro fun from_bcs<$T>($bcs: &mut BCS, $f: |&mut BCS| -> $T): Grid<$T> {
+    let bcs = $bcs;
+    let grid = bcs.peel_vec!(|row| row.peel_vec!(|val| $f(val)));
+    from_vector_unchecked(grid)
 }
 
 #[test_only]
@@ -292,16 +301,37 @@ fun test_path_tracing() {
 
 #[test]
 fun test_find_group() {
-    let grid = Grid {
+    let grid = Grid<u8> {
         grid: vector[
             vector[0, 0, 1, 0, 0],
             vector[0, 0, 1, 0, 2],
             vector[0, 0, 1, 0, 0],
             vector[1, 0, 1, 0, 0],
             vector[0, 1, 1, 0, 0],
+            vector[0, 0, 0, 0, 0],
         ],
     };
 
     let group = grid.find_group!(0, 2, |el| *el == 1);
     assert!(group.length() == 6);
+}
+
+#[test]
+fun test_from_bcs() {
+    use std::unit_test::assert_ref_eq;
+    use sui::bcs;
+
+    let grid = Grid<u8> {
+        grid: vector[
+            vector[0, 1, 2],
+            vector[3, 4, 5],
+            vector[6, 7, 8],
+        ],
+    };
+
+    let bytes = bcs::to_bytes(&grid);
+    let grid2 = from_bcs!(&mut bcs::new(bytes), |bcs| bcs.peel_u8());
+
+    assert!(grid2.width() == 3);
+    assert_ref_eq!(&grid, &grid2);
 }

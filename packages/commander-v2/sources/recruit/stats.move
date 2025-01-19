@@ -3,10 +3,15 @@
 
 /// Attempt to replace the `Stats` struct with a single `u64` value which uses
 /// bit manipulation to store all the stats at right positions.
+///
+/// Traits:
+/// - default
+/// - from_bcs
+/// - to_string
 module commander::stats;
 
+use std::{macros::num_min, string::String};
 use sui::bcs::{Self, BCS};
-use std::macros::num_min;
 
 /// Capped at 7 bits. Max value for signed 8-bit integers.
 const SIGN_VALUE: u64 = 128;
@@ -26,7 +31,11 @@ const MAX_DODGE: u8 = 100;
 const MAX_HACK: u8 = 100;
 /// Default version of the `Stats`.
 const VERSION: u64 = 10;
+/// Number of bitmap encoded parameters.
+const NUM_PARAMS: u8 = 7;
 
+/// Error code for not implemented functions.
+const ENotImplemented: u64 = 264;
 /// Error code for incorrect value passed into `new` function.
 const EIncorrectValue: u64 = 1;
 /// Modifier version does not match the stats version.
@@ -153,7 +162,7 @@ public fun apply_modifier(stats: &Stats, modifier: &Modifier): Stats {
 
     // version is not modified, the rest of the values are modified
     // based on the signed values of the modifier
-    7u8.do!(|i| {
+    NUM_PARAMS.do!(|i| {
         let offset = i * 8 + 8;
         let modifier = modifier >> offset & 0xFF;
 
@@ -186,6 +195,11 @@ public fun apply_modifier(stats: &Stats, modifier: &Modifier): Stats {
 }
 
 // === Convenience and compatibility ===
+
+/// Print the `Stats` as a string.
+public fun to_string(_stats: &Stats): String {
+    abort ENotImplemented
+}
 
 /// Deserialize bytes into a `Rank`.
 public fun from_bytes(bytes: vector<u8>): Stats {

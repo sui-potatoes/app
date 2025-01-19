@@ -109,7 +109,7 @@ public fun build(self: WeaponBuilder, ctx: &mut TxContext): Weapon {
 fun test_weapon_builder() {
     use std::unit_test::assert_eq;
     let ctx = &mut tx_context::dummy();
-    let weapon = new()
+    let weapon = Self::new()
         .name(b"Custom Weapon".to_string())
         .damage(7)
         .spread(1)

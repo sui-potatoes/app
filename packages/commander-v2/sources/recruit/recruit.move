@@ -3,6 +3,9 @@
 
 /// Defines the Recruit - an ownable unit in the game. Recruit contains all the
 /// information about the unit, its rank, modifications, gear, stats and more.
+///
+/// Traits:
+/// - default
 module commander::recruit;
 
 use commander::{rank::{Self, Rank}, stats::{Self, Stats}, weapon::Weapon};
@@ -89,7 +92,7 @@ public fun default(ctx: &mut TxContext): Recruit {
             name: b"John Doe".to_string(),
             backstory: b"A rookie soldier, ready to prove themselves.".to_string(),
         },
-        rank: rank::rookie(),
+        rank: rank::default(),
         stats: stats::default(),
         weapon: option::none(),
         leader: ctx.sender(),

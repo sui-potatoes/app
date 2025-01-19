@@ -88,7 +88,7 @@ public fun build(self: StatsBuilder): Stats {
 #[test]
 fun test_stats_builder() {
     use std::unit_test::assert_eq;
-    let stats = new().mobility(10).aim(50).will(50).hp(10).armor(0).dodge(0).hack(0).build();
+    let stats = Self::new().mobility(10).aim(50).will(50).hp(10).armor(0).dodge(0).hack(0).build();
 
     assert_eq!(stats.aim(), 50);
     assert_eq!(stats.mobility(), 10);

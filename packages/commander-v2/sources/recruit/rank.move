@@ -3,6 +3,11 @@
 
 /// Defines the ranking system for the game. Each Recruit gets assigned a rank,
 /// normally starting with a `Rookie` and then getting promoted to higher ranks.
+///
+/// Traits:
+/// - default
+/// - from_bcs
+/// - to_string
 module commander::rank;
 
 use std::string::String;
@@ -19,6 +24,9 @@ public enum Rank has copy, drop, store {
     Major,
     Colonel,
 }
+
+/// Default rank for a new Recruit.
+public fun default(): Rank { Rank::Rookie }
 
 /// Create a new `Rookie` rank.
 public fun rookie(): Rank { Rank::Rookie }
