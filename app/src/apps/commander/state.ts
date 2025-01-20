@@ -1,7 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { Grid, Action, Unit } from "./types";
+import { Grid, Action, Unit } from "./lib/bcs";
 
 export class GridState {
     // public actions: Action[];
@@ -12,7 +12,7 @@ export class GridState {
 }
 
 /**
- * 
+ *
  *
  * @param unit
  * @param action

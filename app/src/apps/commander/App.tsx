@@ -6,13 +6,13 @@ import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useNetworkVariable } from "../../networkConfig";
 import { Transaction } from "@mysten/sui/transactions";
 import { useEffect, useState } from "react";
-import { Game } from "./types";
-import { fromB64 } from "@mysten/bcs";
+import { Game } from "./lib/bcs";
+import { fromBase64 } from "@mysten/bcs";
 import { Play } from "./Play";
 
 import "./commander.css";
 import { Editor } from "./Editor";
-import { useTransactionExecutor } from "./useTransactionExecutor";
+import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 
 export default function Commander() {
     const zkLogin = useZkLogin();
@@ -45,7 +45,7 @@ export default function Commander() {
 
         const object = data.data[0].data!;
         const { bcsBytes } = object.bcs as { bcsBytes: string };
-        const game = Game.parse(fromB64(bcsBytes));
+        const game = Game.parse(fromBase64(bcsBytes));
 
         setGame(game);
     }, [data]);
@@ -119,8 +119,7 @@ export default function Commander() {
         const game = tx.moveCall({ target: `${packageId}::commander::preset` });
         tx.transferObjects([game], zkLogin.address!);
 
-        const { digest } = await executeTransaction(tx);
-        await client.waitForTransaction({ digest });
+        await executeTransaction(tx).wait();
         refetch();
     }
 
@@ -138,8 +137,7 @@ export default function Commander() {
 
         tx.transferObjects([game], zkLogin.address!);
 
-        const { digest } = await executeTransaction(tx);
-        await client.waitForTransaction({ digest });
+        await executeTransaction(tx).wait();
         refetch();
     }
 }

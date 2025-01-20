@@ -26,7 +26,6 @@ If you need a **mainnet** version of this package, use the `mainnet-v1` tag inst
 Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@mainnet-v1" }
 ```
 
-
 Exported address of this package is:
 
 ```toml
@@ -68,6 +67,7 @@ Each encoding is placed into a separate module, here is a full list:
 ### HEX
 
 Implements the Base16 encoding scheme. The module is called `hex`.
+
 ```rust
 use codec::hex;
 
@@ -78,6 +78,7 @@ let decoded: vector<u8> = hex::decode(b"DEADBEEF".to_string());
 ### Base64
 
 Implements the Base64 encoding scheme. The module is called `base64`.
+
 ```rust
 use codec::base64;
 
@@ -88,6 +89,7 @@ let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE=".to_string());
 ### URL Encoding
 
 Implements the URL encoding scheme. The module is called `urlencode`.
+
 ```rust
 use codec::urlencode;
 
@@ -98,6 +100,7 @@ let decoded: vector<u8> = urlencode::decode(b"hello%2C%20potato%21".to_string())
 ### Potatoes
 
 Implements the POTAES encoding scheme. The module is called `potatoes`.
+
 ```rust
 use codec::potatoes;
 

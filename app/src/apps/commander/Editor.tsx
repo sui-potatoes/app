@@ -4,11 +4,11 @@
 import { useSuiClient } from "@mysten/dapp-kit";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useNetworkVariable } from "../../networkConfig";
-import { Game, Unit } from "./types";
+import { Game, Unit } from "./lib/bcs";
 import { useState } from "react";
 import { EditorMap } from "./EditorMap";
 import { Transaction } from "@mysten/sui/transactions";
-import { useTransactionExecutor } from "./useTransactionExecutor";
+import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 
 type Props = {
     game: typeof Game.$inferType;
@@ -52,6 +52,7 @@ export function Editor({ game, refetch }: Props) {
                         grid={game.map}
                         onSelect={(tile, x, y) => setTile({ tile, x, y })}
                         onTarget={(x, y) => performAction(x, y)}
+                        onDeselect={() => setTile(null)}
                     />
                 </div>
             </div>
@@ -118,9 +119,7 @@ export function Editor({ game, refetch }: Props) {
             arguments: [tx.object(game.id), tx.pure.u16(x), tx.pure.u16(y)],
         });
 
-        const { digest } = await executeTransaction(tx)!;
-        await client.waitForTransaction({ digest });
-
+        await executeTransaction(tx)!.wait();
         refetch();
     }
 
@@ -188,12 +187,7 @@ export function Editor({ game, refetch }: Props) {
             arguments: [tx.object(game.id), tx.pure.u16(x), tx.pure.u16(y), unit, team],
         });
 
-        const { digest } = await executeTransaction(tx)!;
-        await client.waitForTransaction({ digest });
-
-        console.log('unit placed');
-        console.log(digest);
-
+        await executeTransaction(tx)!.wait();
         refetch();
     }
 }

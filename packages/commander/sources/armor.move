@@ -14,7 +14,7 @@ const EIncorrectValue: vector<u8> = b"Armor level cannot be greater than 10";
 
 /// The `Armor` struct represents the armor of a `Unit`. Armor reduces incoming
 /// damage by a value equal to the armor's level. The level can be 0-10.
-public struct Armor has store, copy, drop {
+public struct Armor has copy, drop, store {
     /// No armor. The unit will take full damage.
     name: String,
     /// Damage reduction in basis points.

@@ -6,7 +6,7 @@ import * as THREE from "three";
 export interface Component {
     initialize: (scene: THREE.Scene) => void;
     _ready: () => void;
-    _input: (event: any) => void;
+    _input: (event: MouseEvent | KeyboardEvent | WheelEvent | TouchEvent) => void;
     _select: () => void;
     _deselect: () => void;
     _process: (delta: number) => void;
@@ -47,7 +47,7 @@ export class GameObject<TEventMap extends THREE.Object3DEventMap>
      * Called when an input event is received, such as a mouse click or key press.
      * Can be used to handle user input and update the object's state.
      */
-    _input(_event: MouseEvent | KeyboardEvent | WheelEvent): void {}
+    _input(_event: MouseEvent | KeyboardEvent | WheelEvent | TouchEvent): void {}
 
     /**
      * Called every frame. The `delta` parameter is the time since the last frame,

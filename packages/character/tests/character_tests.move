@@ -7,7 +7,7 @@ use character::character;
 use sui::test_utils;
 
 /// The key to use in application tests.
-public struct ApplicationKey(u8) has store, copy, drop;
+public struct ApplicationKey(u8) has copy, drop, store;
 
 #[test]
 fun test_new_edit_flow() {

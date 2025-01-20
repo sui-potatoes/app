@@ -69,7 +69,10 @@ export class Grid extends GameObject<GridEvents> {
     protected highlight: THREE.Group;
 
     /** Construct the Grid using dimensions and divisions */
-    constructor(public width: number, public height: number) {
+    constructor(
+        public width: number,
+        public height: number,
+    ) {
         const geometry = new THREE.PlaneGeometry(width, height);
         const material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
 
@@ -81,7 +84,12 @@ export class Grid extends GameObject<GridEvents> {
         this.rotation.x = Math.PI / 2;
 
         // Create the grid helper
-        this.gridHelper = new THREE.GridHelper(Math.max(width, height), Math.max(width, height), 0xaa5555, 0xffffff);
+        this.gridHelper = new THREE.GridHelper(
+            Math.max(width, height),
+            Math.max(width, height),
+            0xaa5555,
+            0xffffff,
+        );
         this.gridHelper.position.y = 0;
         this.gridHelper.position.x = Math.ceil(width / 2) - 1;
         this.gridHelper.position.z = Math.ceil(height / 2) - 1;
@@ -190,7 +198,7 @@ export class Grid extends GameObject<GridEvents> {
                     object.movement.stop();
                 }
 
-                this.selectCell(path[path.length - 1]);
+                // this.selectCell(path[path.length - 1]);
             });
     }
 
@@ -204,7 +212,7 @@ export class Grid extends GameObject<GridEvents> {
             target.lookAt(this.gridWorld(from));
             return Promise.all([
                 object.attack.prepare(),
-                target instanceof AnimatedUnit && target.attack.receive()
+                target instanceof AnimatedUnit && target.attack.receive(),
             ]);
         }
     }
@@ -254,7 +262,7 @@ export class Grid extends GameObject<GridEvents> {
         );
     }
 
-    _input(event: MouseEvent | KeyboardEvent | WheelEvent): void {
+    _input(event: MouseEvent | KeyboardEvent | WheelEvent | TouchEvent): void {
         // proxy input events to the cursor and to units
         this.cursor.children.forEach((child) => child instanceof GameObject && child._input(event));
         this.units.children.forEach((child) => child instanceof GameObject && child._input(event));
@@ -262,7 +270,7 @@ export class Grid extends GameObject<GridEvents> {
         if (event instanceof MouseEvent) {
             event.preventDefault();
 
-            if (event.type === "click") {
+            if (event.type === "mousedown") {
                 const cell = this.gridCell(this.cursor.position);
                 this.selectCell(cell);
                 return;
@@ -275,7 +283,7 @@ export class Grid extends GameObject<GridEvents> {
                     point: this.gridCell(this.cursor.position),
                 });
 
-                // this.deselectCell();
+                this.deselectCell();
                 this.pathTracer.clear();
             }
         }

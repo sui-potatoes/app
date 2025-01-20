@@ -5,10 +5,13 @@
 module grid::point;
 
 /// A point in 2D space.
-public struct Point(u16, u16) has store, copy, drop;
+public struct Point(u16, u16) has copy, drop, store;
 
 /// Create a new point.
 public fun new(x: u16, y: u16): Point { Point(x, y) }
+
+/// Get a tuple of two values from a point.
+public fun to_values(p: &Point): (u16, u16) { let Point(x, y) = p; (*x, *y) }
 
 /// Convert a point to a tuple of two values.
 public fun into_values(p: Point): (u16, u16) { let Point(x, y) = p; (x, y) }
@@ -38,6 +41,7 @@ fun test_point() {
     assert!(p.x() == 1);
     assert!(p.y() == 2);
 
+    let (_, _) = p.to_values();
     let (x, y) = p.into_values();
     assert!(x == 1);
     assert!(y == 2);
