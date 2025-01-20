@@ -14,7 +14,6 @@ public struct StatsBuilder has drop {
     hp: Option<u8>,
     armor: Option<u8>,
     dodge: Option<u8>,
-    hack: Option<u8>,
 }
 
 /// Create a new builder instance.
@@ -26,7 +25,6 @@ public fun new(): StatsBuilder {
         hp: option::none(),
         armor: option::none(),
         dodge: option::none(),
-        hack: option::none(),
     }
 }
 
@@ -66,12 +64,6 @@ public fun dodge(mut self: StatsBuilder, dodge: u8): StatsBuilder {
     self
 }
 
-/// Set the hack in the `Stats`.
-public fun hack(mut self: StatsBuilder, hack: u8): StatsBuilder {
-    self.hack = option::some(hack);
-    self
-}
-
 /// Build the `Stats` from the provided parameters.
 public fun build(self: StatsBuilder): Stats {
     stats::new(
@@ -81,14 +73,13 @@ public fun build(self: StatsBuilder): Stats {
         self.hp.destroy_or!(10),
         self.armor.destroy_or!(0),
         self.dodge.destroy_or!(0),
-        self.hack.destroy_or!(0),
     )
 }
 
 #[test]
 fun test_stats_builder() {
     use std::unit_test::assert_eq;
-    let stats = Self::new().mobility(10).aim(50).will(50).hp(10).armor(0).dodge(0).hack(0).build();
+    let stats = Self::new().mobility(10).aim(50).will(50).hp(10).armor(0).dodge(0).build();
 
     assert_eq!(stats.aim(), 50);
     assert_eq!(stats.mobility(), 10);
@@ -96,5 +87,4 @@ fun test_stats_builder() {
     assert_eq!(stats.health(), 10);
     assert_eq!(stats.armor(), 0);
     assert_eq!(stats.dodge(), 0);
-    assert_eq!(stats.hack(), 0);
 }
