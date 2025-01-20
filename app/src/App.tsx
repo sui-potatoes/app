@@ -8,6 +8,7 @@ import GoGame from "./apps/go-game/App.tsx";
 import Libraries from "./apps/libraries/App.tsx";
 import Character from "./apps/character/App.tsx";
 import Commander from "./apps/commander/App.tsx";
+import CommanderV2 from "./apps/commander-v2/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
 import { useSuiClient } from "@mysten/dapp-kit";
@@ -110,6 +111,9 @@ export function App() {
                         <NavLink to="/commander">commander</NavLink>
                     </li>
                     <li>
+                        <NavLink to="/commander-v2">commander (v2)</NavLink>
+                    </li>
+                    <li>
                         <NavLink to="/libraries">libraries (for devs)</NavLink>
                     </li>
                     <li>
@@ -119,11 +123,12 @@ export function App() {
             </div>
             <div className="content py-[10px] px-[20px] md:py-[20px]">
                 <Routes>
-                    <Route path="/" element={<Root />} />
+                    <Route index path="/" element={<Root />} />
                     <Route path="/go" element={<GoGame />} />
                     <Route path="/go/:id" element={<GoGame />} />
                     <Route path="/character" element={<Character />} />
                     <Route path="/commander" element={<Commander />} />
+                    <Route path="/commander-v2/*" element={<CommanderV2 />} />
                     <Route path="/libraries" element={<Libraries />} />
                 </Routes>
             </div>

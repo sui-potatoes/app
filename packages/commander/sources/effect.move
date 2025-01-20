@@ -22,7 +22,9 @@ public enum EffectType has copy, drop, store {
 }
 
 /// Create a new bleeding effect with the given duration.
-public fun new_bleeding(duration: u16): Effect { Effect { effect: EffectType::Bleeding, duration } }
+public fun new_bleeding(duration: u16): Effect {
+    Effect { effect: EffectType::Bleeding, duration }
+}
 
 /// Create a new poison effect with the given duration.
 public fun new_poison(duration: u16): Effect { Effect { effect: EffectType::Poison, duration } }

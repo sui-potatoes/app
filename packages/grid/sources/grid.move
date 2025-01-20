@@ -11,9 +11,12 @@ module grid::grid;
 
 use grid::point::{Self, Point};
 use std::string::String;
+use sui::bcs::BCS;
+
+const EIncorrectVectorLength: u64 = 0;
 
 /// A generic 2D grid, each cell stores `T`.
-public struct Grid<T> has store, copy, drop {
+public struct Grid<T> has copy, drop, store {
     grid: vector<vector<T>>,
 }
 
@@ -23,7 +26,7 @@ public struct Grid<T> has store, copy, drop {
 public fun from_vector<T>(grid: vector<vector<T>>): Grid<T> {
     assert!(grid.length() > 0);
     let height = grid[0].length();
-    grid.do_ref!(|row| assert!(row.length() == height));
+    grid.do_ref!(|row| assert!(row.length() == height, EIncorrectVectorLength));
     Grid { grid }
 }
 
@@ -60,12 +63,6 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
     g.grid[x as u64].remove(y as u64 + 1)
 }
 
-/// Get all von Neumann neighbours of a point, checking if the point is within
-/// the bounds of the grid.
-public fun von_neumann<T>(g: &Grid<T>, p: Point): vector<Point> {
-    p.von_neumann().filter!(|point| point.x() < g.width() && point.y() < g.height())
-}
-
 // === Utils ===
 
 /// Get a difference between two points, useful for calculating distances or
@@ -73,6 +70,18 @@ public fun von_neumann<T>(g: &Grid<T>, p: Point): vector<Point> {
 public fun range(x0: u16, y0: u16, x1: u16, y1: u16): u16 { x0.diff(x1) + y0.diff(y1) }
 
 // === Macros ===
+
+/// Get all von Neumann neighbours of a point, checking if the point is within
+/// the bounds of the grid.
+public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point): vector<Point> {
+    let p = $p;
+    let g = $g;
+    let (width, height) = (g.width(), g.height());
+    p.von_neumann().filter!(|point| {
+        let (x, y) = point.to_values();
+        x < width && y < height
+    })
+}
 
 /// Create a grid of the specified size by applying the function `f` to each cell.
 /// The function receives the x and y coordinates of the cell.
@@ -112,7 +121,7 @@ public macro fun find_group<$T>(
 
     while (!queue.is_empty()) {
         let point = queue.pop_back();
-        map.von_neumann(point).do!(|point| {
+        map.von_neumann!(point).do!(|point| {
             let (x, y) = point.into_values();
 
             if (x >= width || y >= height || visited[x, y]) return;
@@ -132,7 +141,7 @@ public macro fun find_group<$T>(
 ///
 /// ```move
 /// // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
-/// grid.trace!(0, 0, 1, 4, 6, |cell| cell == 0);
+/// grid.trace!(0, 0, 1, 4, 6, |prev_x, prev_y, next_x, next_y| cell == 0);
 /// ```
 ///
 /// TODO: consider using a A* algorithm for better performance.
@@ -143,7 +152,7 @@ public macro fun trace<$T>(
     $x1: u16,
     $y1: u16,
     $limit: u16,
-    $f: |&$T| -> bool, // whether the cell is passable
+    $f: |u16, u16, u16, u16| -> bool, // whether the cell is passable
 ): Option<vector<Point>> {
     let (x0, y0) = ($x0, $y0);
     let (x1, y1) = ($x1, $y1);
@@ -173,7 +182,8 @@ public macro fun trace<$T>(
         num = num + 1;
 
         // flush the queue, marking all cells around the current number
-        queue.destroy!(|point| grid.von_neumann(point).destroy!(|point| {
+        queue.destroy!(|source| grid.von_neumann!(source).destroy!(|point| {
+            let (x0, y0) = source.into_values();
             let (x, y) = point.into_values();
 
             // if we reached the destination, break the loop
@@ -183,7 +193,7 @@ public macro fun trace<$T>(
             };
 
             // if we can't pass through the cell, skip it
-            if (!$f(&map[x, y])) return;
+            if (!$f(x0, y0, x, y)) return;
 
             // if the cell is empty, mark it with the current number
             if (grid[x, y] == 0) {
@@ -205,7 +215,7 @@ public macro fun trace<$T>(
 
     'reconstruct: while (num > 1) {
         num = num - 1;
-        grid.von_neumann(last_point).destroy!(|point| {
+        grid.von_neumann!(last_point).destroy!(|point| {
             let (x, y) = point.into_values();
             if (x == x0 && y == y0) break 'reconstruct;
             if (grid[x, y] == num) {
@@ -227,16 +237,24 @@ public macro fun to_string<$T>($grid: &Grid<$T>): String {
     let (width, height) = (grid.width(), grid.height());
 
     // the layout is vertical, so we iterate over the height first
-    height.do!(|y| {
+    width.do!(|y| {
         result.append_utf8(b"|");
-        width.do!(|x| {
-            result.append(grid[x, y].to_string());
+        height.do!(|x| {
+            result.append(grid[y, x].to_string());
             result.append_utf8(b"|");
         });
         result.append_utf8(b"\n");
     });
 
     result
+}
+
+/// Deserialize `BCS` into a grid. This macro is a helping hand in writing
+/// custom deserializers.
+public macro fun from_bcs<$T>($bcs: &mut BCS, $f: |&mut BCS| -> $T): Grid<$T> {
+    let bcs = $bcs;
+    let grid = bcs.peel_vec!(|row| row.peel_vec!(|val| $f(val)));
+    from_vector_unchecked(grid)
 }
 
 #[test_only]
@@ -265,8 +283,7 @@ fun test_path_tracing() {
         ],
     };
 
-    // we can only
-    let path = trace!(&grid, 0, 0, 1, 4, 6, |cell| cell == &0);
+    let path = trace!(&grid, 0, 0, 1, 4, 6, |_, _, x, y| grid[x, y] == &0);
 
     assert!(path.is_some());
     assert!(path.borrow().length() == 5);
@@ -282,23 +299,40 @@ fun test_path_tracing() {
         ],
     };
 
-    let path = trace!(&grid, 0, 1, 3, 0, 10, |cell| cell == &0);
+    let path = trace!(&grid, 0, 1, 3, 0, 10, |_, _, x, y| grid[x, y] == &0);
 
     assert!(path.is_some());
 }
 
 #[test]
 fun test_find_group() {
-    let grid = Grid {
+    let grid = Grid<u8> {
         grid: vector[
             vector[0, 0, 1, 0, 0],
             vector[0, 0, 1, 0, 2],
             vector[0, 0, 1, 0, 0],
             vector[1, 0, 1, 0, 0],
             vector[0, 1, 1, 0, 0],
+            vector[0, 0, 0, 0, 0],
         ],
     };
 
     let group = grid.find_group!(0, 2, |el| *el == 1);
     assert!(group.length() == 6);
+}
+
+#[test]
+fun test_from_bcs() {
+    use std::unit_test::assert_ref_eq;
+    use sui::bcs;
+
+    let grid = Grid<u8> {
+        grid: vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]],
+    };
+
+    let bytes = bcs::to_bytes(&grid);
+    let grid2 = from_bcs!(&mut bcs::new(bytes), |bcs| bcs.peel_u8());
+
+    assert!(grid2.width() == 3);
+    assert_ref_eq!(&grid, &grid2);
 }

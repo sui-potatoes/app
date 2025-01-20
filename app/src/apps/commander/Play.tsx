@@ -4,14 +4,14 @@
 import { useEffect, useRef, useState } from "react";
 import { UnitStats } from "./UnitStats";
 import { Map } from "./three/Map";
-import { SelectedAction, SelectedUnit, Game, TracedPath } from "./types";
+import { SelectedAction, SelectedUnit, Game, TracedPath } from "./lib/bcs";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiObjectId } from "@mysten/sui/utils";
 import { Transaction } from "@mysten/sui/transactions";
 import { useNetworkVariable } from "../../networkConfig";
 import { actionRange, markInRange } from "./state";
-import { useTransactionExecutor } from "./useTransactionExecutor";
+import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 
 type Props = {
     game: typeof Game.$inferType;
@@ -44,6 +44,10 @@ export function Play({ game, refetch, setGame }: Props) {
         grid: game.map,
         onSelect(unit, x, y) {
             setSelectedUnit(unit === null ? null : { unit, x, y });
+        },
+        onDeselect() {
+            setSelectedUnit(null);
+            selectAction(null);
         },
         onTarget(x, y) {
             console.log("ontarget", unitRef.current);
@@ -229,8 +233,7 @@ export function Play({ game, refetch, setGame }: Props) {
             ],
         });
 
-        const { digest } = await executeTransaction(tx)!;
-        await client.waitForTransaction({ digest });
+        await executeTransaction(tx)!.wait();
 
         clearInterval(timer);
         refetch();
@@ -247,8 +250,7 @@ export function Play({ game, refetch, setGame }: Props) {
             arguments: [tx.object(normalizeSuiObjectId(game.id))],
         });
 
-        const { digest } = await executeTransaction(tx)!;
-        await client.waitForTransaction({ digest });
+        await executeTransaction(tx)!.wait();
 
         setGame(null);
         refetch();
@@ -268,8 +270,7 @@ export function Play({ game, refetch, setGame }: Props) {
         });
 
         setGame({ ...game, turn: game.turn + 1 });
-        const { digest } = await executeTransaction(tx)!;
-        await client.waitForTransaction({ digest });
+        await executeTransaction(tx)!.wait();
         selectAction(action);
         refetch();
     }

@@ -4,10 +4,11 @@
 #[allow(unused_const, unused_variable)]
 module gogame::game;
 
-use codec::urlencode;
-use gogame::{go::{Self, Board}, render};
+use gogame::go::{Self, Board};
 use std::string::String;
 use sui::{clock::Clock, display, package, vec_set::{Self, VecSet}};
+
+use fun gogame::render::svg as Board.to_svg;
 
 /// The size of the board is invalid (not 9, 13, or 19)
 const EInvalidSize: u64 = 0;
@@ -31,7 +32,7 @@ public struct Account has key {
 }
 
 /// Stores
-public struct Players(Option<ID>, Option<ID>) has store, drop;
+public struct Players(Option<ID>, Option<ID>) has drop, store;
 
 /// A single instance of the game.
 public struct Game has key {
@@ -69,7 +70,7 @@ public fun new(acc: &mut Account, size: u8, ctx: &mut TxContext) {
         id,
         board: go::new(size),
         players: Players(option::some(acc.id.to_inner()), option::none()),
-        image_blob: urlencode::encode(render::svg(&board).into_bytes()),
+        image_blob: board.to_svg().to_url(),
     });
 }
 
@@ -96,7 +97,7 @@ public fun play(game: &mut Game, cap: &Account, x: u8, y: u8, clock: &Clock, ctx
     };
 
     game.board.place(x, y);
-    game.image_blob = urlencode::encode(render::svg(&game.board).into_bytes());
+    game.image_blob = game.board.to_svg().to_url();
 }
 
 public fun quit(game: &mut Game, acc: &mut Account) {
@@ -137,7 +138,10 @@ fun init(otw: GAME, ctx: &mut TxContext) {
     let pub = package::claim(otw, ctx);
     let mut d = display::new<Game>(&pub, ctx);
 
-    d.add(b"image_url".to_string(), b"data:image/svg+xml;charset=utf8,{image_blob}".to_string());
+    d.add(
+        b"image_url".to_string(),
+        b"data:image/svg+xml;charset=utf8,{image_blob}".to_string(),
+    );
     d.add(b"name".to_string(), b"Go Game Board {id}".to_string());
     d.add(b"description".to_string(), b"{board.size}".to_string());
     d.add(b"link".to_string(), b"https://potatoes.app/go/{id}".to_string());

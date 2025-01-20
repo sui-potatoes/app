@@ -22,31 +22,31 @@ const ESuicideMove: u64 = 1;
 const EKoRule: u64 = 2;
 
 /// A colour of a player or `Empty` when the field is not taken.
-public enum Colour has copy, store, drop {
+public enum Colour has copy, drop, store {
     Empty,
     Black,
     White,
 }
 
 /// The current turn of the game. The turn is either `Black` or `White`.
-public enum Turn has copy, store, drop {
+public enum Turn has copy, drop, store {
     Black,
     White,
 }
 
 /// A player's move on the board, simply a pair of coordinates.
-public struct Point(u8, u8) has store, copy, drop;
+public struct Point(u8, u8) has copy, drop, store;
 
 /// A group of stones on the board. A group is a set of connected stones of
 /// the same colour. A group can be captured if all its liberties are taken.
 /// The first element is the colour of the group, the second element is the
 /// set of points that make up the group.
-public struct Group(Colour, vector<Point>) has store, copy, drop;
+public struct Group(Colour, vector<Point>) has copy, drop, store;
 
 /// The game board. The board is a square grid of size `size` by `size`.
 /// Normally, the board is 19x19, but casual games can be played on smaller
 /// boards, such as 9x9 or 13x13.
-public struct Board has store, copy, drop {
+public struct Board has copy, drop, store {
     /// The board data. The board is a 2D vector of `u8` values. The values
     /// can be `EMPTY`, `BLACK`, or `WHITE`.
     data: vector<vector<Colour>>,

@@ -1,7 +1,9 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-// A dynamic field storage which can store a single value or a single type.
+/// A dynamic field storage which can store a single value or a single type.
+/// Helps bypass Sui verifier limitations on the size of type layout when enums
+/// are used in type definitions.
 module character::box;
 
 use sui::dynamic_field as df;
@@ -9,7 +11,7 @@ use sui::dynamic_field as df;
 /// A box that stores a single value or a single type.
 public struct Box<phantom T> has key, store { id: UID }
 
-public struct Key() has copy, store, drop;
+public struct Key() has copy, drop, store;
 
 /// Create a new box with the given value.
 public fun create<T: store>(value: T, ctx: &mut TxContext): Box<T> {

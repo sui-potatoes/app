@@ -7,7 +7,7 @@ import { newScene } from "./scene";
 import { AnimatedUnit } from "./AnimatedUnit";
 import { Grid } from "./Grid";
 import { Crate } from "./Crate";
-import { Grid as GridType, Unit as UnitType } from "../types";
+import { Grid as GridType, Unit as UnitType } from "../lib/bcs";
 import { ControllableCamera } from "./ControllableCamera";
 
 /**
@@ -25,6 +25,7 @@ export type MapProps = {
     /** Callback when Unit is commanded to perform an action at X, Y */
     onTarget: (x: number, y: number) => void;
     onSelect: (unit: typeof UnitType.$inferType | null, x: number, y: number) => void;
+    onDeselect: () => void;
 };
 
 /**
@@ -35,7 +36,7 @@ export type MapProps = {
  *
  * Flips the X and Y coordinates to match the ThreeJS scene.
  */
-export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps) {
+export function Map({ grid: gameGrid, highlight, onTarget, onSelect, onDeselect }: MapProps) {
     const [scene, setScene] = useState<{ grid: Grid, camera: ControllableCamera } | null>(null);
 
     useEffect(() => {
@@ -63,6 +64,7 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect }: MapProps)
         // However, there's more to it than just active Unit and Action.
         _scene.grid.addEventListener("selectCell", onSelectCell);
         _scene.grid.addEventListener("pointCell", onPointCell);
+        _scene.grid.addEventListener("deselectCell", onDeselect);
     }, []);
 
     return {
