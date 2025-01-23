@@ -62,11 +62,11 @@ public(package) fun from_bcs(bcs: &mut BCS): Ammo {
 /// Convert the Ammo type to a string.
 public fun to_string(a: &Ammo): String {
     match (a) {
-        Ammo::Standard => b"Standard".to_string(),
-        Ammo::ArmorPiercing => b"ArmorPiercing".to_string(),
-        Ammo::Talon => b"Talon".to_string(),
-        Ammo::Incendiary => b"Incendiary".to_string(),
-        Ammo::Poison => b"Poison".to_string(),
-        Ammo::Stun => b"Stun".to_string(),
-    }
+        Ammo::Standard => b"Standard",
+        Ammo::ArmorPiercing => b"ArmorPiercing",
+        Ammo::Talon => b"Talon",
+        Ammo::Incendiary => b"Incendiary",
+        Ammo::Poison => b"Poison",
+        Ammo::Stun => b"Stun",
+    }.to_string()
 }

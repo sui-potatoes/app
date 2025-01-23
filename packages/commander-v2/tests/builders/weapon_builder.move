@@ -4,7 +4,7 @@
 /// A simple builder for easier creation and testing of `Weapon` instances.
 module commander::weapon_builder;
 
-use commander::weapon::{Self, Weapon};
+use commander::{weapon::{Self, Weapon}, weapon_stats};
 use std::string::String;
 
 /// Test-only utility to create a weapon with custom parameters.
@@ -16,6 +16,7 @@ public struct WeaponBuilder has drop {
     crit_chance: Option<u8>,
     is_dodgeable: Option<bool>,
     area_size: Option<u8>,
+    environmental_damage: bool,
     range: Option<u8>,
     ammo: Option<u8>,
 }
@@ -30,14 +31,15 @@ public fun new(): WeaponBuilder {
         crit_chance: option::none(),
         is_dodgeable: option::none(),
         area_size: option::none(),
+        environmental_damage: false,
         range: option::none(),
         ammo: option::none(),
     }
 }
 
 /// Set the name of the weapon.
-public fun name(mut self: WeaponBuilder, name: String): WeaponBuilder {
-    self.name = option::some(name);
+public fun name(mut self: WeaponBuilder, name: vector<u8>): WeaponBuilder {
+    self.name = option::some(name.to_string());
     self
 }
 
@@ -77,6 +79,15 @@ public fun area_size(mut self: WeaponBuilder, area_size: u8): WeaponBuilder {
     self
 }
 
+/// Set the environmental damage of the weapon.
+public fun environmental_damage(
+    mut self: WeaponBuilder,
+    environmental_damage: bool,
+): WeaponBuilder {
+    self.environmental_damage = environmental_damage;
+    self
+}
+
 /// Set the range of the weapon.
 public fun range(mut self: WeaponBuilder, range: u8): WeaponBuilder {
     self.range = option::some(range);
@@ -91,18 +102,20 @@ public fun ammo(mut self: WeaponBuilder, ammo: u8): WeaponBuilder {
 
 /// Build the weapon.
 public fun build(self: WeaponBuilder, ctx: &mut TxContext): Weapon {
-    weapon::new(
-        self.name.destroy_or!(b"Standard Issue Rifle".to_string()),
+    let name = self.name.destroy_or!(b"Custom Weapon".to_string());
+    let stats = weapon_stats::new(
         self.damage.destroy_or!(5),
         self.spread.destroy_or!(1),
         self.plus_one.destroy_or!(0),
         self.crit_chance.destroy_or!(0),
         self.is_dodgeable.destroy_or!(true),
         self.area_size.destroy_or!(1),
+        self.environmental_damage,
         self.range.destroy_or!(5),
         self.ammo.destroy_or!(3),
-        ctx,
-    )
+    );
+
+    weapon::new(name, stats, ctx)
 }
 
 #[test]
@@ -110,27 +123,28 @@ fun test_weapon_builder() {
     use std::unit_test::assert_eq;
     let ctx = &mut tx_context::dummy();
     let weapon = Self::new()
-        .name(b"Custom Weapon".to_string())
+        .name(b"Custom Weapon")
         .damage(7)
         .spread(1)
         .plus_one(0)
         .crit_chance(0)
         .is_dodgeable(true)
         .area_size(1)
+        .environmental_damage(false)
         .range(5)
         .ammo(3)
         .build(ctx);
 
     assert_eq!(weapon.name(), b"Custom Weapon".to_string());
-    assert_eq!(weapon.damage(), 7);
-    assert_eq!(weapon.spread(), 1);
-    assert_eq!(weapon.plus_one(), 0);
-    assert_eq!(weapon.crit_chance(), 0);
-    assert_eq!(weapon.is_dodgeable(), true);
-    assert_eq!(weapon.area_damage(), false);
-    assert_eq!(weapon.area_size(), 1);
-    assert_eq!(weapon.range(), 5);
-    assert_eq!(weapon.ammo(), 3);
+    assert_eq!(weapon.stats().damage(), 7);
+    assert_eq!(weapon.stats().spread(), 1);
+    assert_eq!(weapon.stats().plus_one(), 0);
+    assert_eq!(weapon.stats().crit_chance(), 0);
+    assert_eq!(weapon.stats().is_dodgeable(), true);
+    assert_eq!(weapon.stats().environmental_damage(), false);
+    assert_eq!(weapon.stats().area_size(), 1);
+    assert_eq!(weapon.stats().range(), 5);
+    assert_eq!(weapon.stats().ammo(), 3);
 
     weapon.destroy();
 }

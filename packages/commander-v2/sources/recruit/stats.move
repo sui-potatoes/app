@@ -48,12 +48,12 @@ const EIncorrectValue: u64 = 1;
 /// - health
 /// - armor
 /// - dodge
-public struct Stats(u64) has copy, drop, store;
+public struct Stats(u128) has copy, drop, store;
 
-/// Modifier is a single `u64` value that replicates the structure of the `Stats`,
+/// Modifier is a single `u128` value that replicates the structure of the `Stats`,
 /// but is used to store the modifiers for the stats as signed integers. Modifiers
 /// are applied to the base stats of the Recruit to calculate the final stats.
-public struct Modifier(u64) has copy, drop, store;
+public struct Modifier(u128) has copy, drop, store;
 
 /// Create a new `BitStats` struct with the given values.
 public fun new(mobility: u8, aim: u8, will: u8, health: u8, armor: u8, dodge: u8): Stats {
@@ -84,6 +84,19 @@ public fun new_modifier(
     Modifier(bf::pack_u8!(vector[mobility, aim, will, health, armor, dodge]))
 }
 
+/// Negates the modifier values. Creates a new `Modifier` which, when applied to
+/// the `WeaponStats`, will negate the effects of the original modifier.
+public fun negate(modifier: &Modifier): Modifier {
+    let modifier = modifier.0;
+    let sign = SIGN_VALUE;
+    let negated = bf::unpack_u8!(modifier, NUM_PARAMS).map!(|value| {
+        if (value > sign) value - sign
+        else value + sign
+    });
+
+    Modifier(bf::pack_u8!(negated))
+}
+
 /// Default stats for a Recruit.
 public fun default(): Stats { new(7, 65, 65, 10, 0, 0) }
 
@@ -105,9 +118,9 @@ public fun armor(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 4) }
 /// Get the dodge of the `Stats`.
 public fun dodge(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 5) }
 
-/// Get the inner `u64` value of the `Stats`. Can be used for performance
+/// Get the inner `u128` value of the `Stats`. Can be used for performance
 /// optimizations and macros.
-public fun inner(stats: &Stats): u64 { stats.0 }
+public fun inner(stats: &Stats): u128 { stats.0 }
 
 // === Modifier ===
 
@@ -169,7 +182,7 @@ public fun from_bytes(bytes: vector<u8>): Stats {
 
 /// Helper method to allow nested deserialization of `Rank`.
 public(package) fun from_bcs(bcs: &mut BCS): Stats {
-    Stats(bcs.peel_u64())
+    Stats(bcs.peel_u128())
 }
 
 #[test]
