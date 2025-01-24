@@ -11,14 +11,16 @@ use std::string::String;
 /// a vector of bytes as input. This function is safe to use with UTF8 strings.
 public fun encode(string: vector<u8>): String {
     let mut res = vector[];
-    string.do!(|c| if (c == 32) {
-        res.append(b"%20");
-    } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
-        res.push_back(37);
-        res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
-        res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
-    } else {
-        res.push_back(c);
+    string.do!(|c| {
+        if (c == 32) {
+            res.append(b"%20");
+        } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
+            res.push_back(37);
+            res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
+            res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
+        } else {
+            res.push_back(c);
+        }
     });
 
     res.to_string()
@@ -29,23 +31,31 @@ public fun encode(string: vector<u8>): String {
 public fun decode(s: String): vector<u8> {
     let mut res = vector[];
     let mut bytes = s.into_bytes();
+    let mut len = bytes.length();
     bytes.reverse();
 
-    while (bytes.length() > 0) {
-        let c = bytes.pop_back();
-        if (c == 43) {
+    while (len > 0) {
+        match (bytes.pop_back()) {
             // plus "+"
-            res.push_back(32);
-        } else if (c == 37) {
+            43 => {
+                len = len - 1;
+                res.push_back(32)
+            },
             // percent "%"
-            let a = bytes.pop_back();
-            let b = bytes.pop_back();
-            let a = if (a >= 65) a - 55 else a - 48;
-            let b = if (b >= 65) b - 55 else b - 48;
-            res.push_back(a * 16 + b);
-        } else {
-            res.push_back(c);
-        };
+            37 => {
+                len = len - 3;
+                let a = bytes.pop_back();
+                let b = bytes.pop_back();
+                let a = if (a >= 65) a - 55 else a - 48;
+                let b = if (b >= 65) b - 55 else b - 48;
+                res.push_back(a * 16 + b)
+            },
+            // regular ASCII character
+            c @ _ => {
+                len = len - 1;
+                res.push_back(c)
+            },
+        }
     };
 
     res
@@ -72,30 +82,23 @@ fun test_is_ascii_character() {
 
 #[test]
 fun test_urlencode() {
-    use sui::test_utils::assert_eq;
+    use std::unit_test::assert_eq;
 
-    assert_eq(
-        decode(b"hello+world".to_string()),
-        b"hello world",
-    );
-
-    assert_eq(
-        encode(b"Hello, World!"),
-        b"Hello%2C%20World%21".to_string(),
-    );
+    assert_eq!(decode(b"hello+world".to_string()), b"hello world");
+    assert_eq!(encode(b"Hello, World!"), b"Hello%2C%20World%21".to_string());
 
     let str = b"Hello, World!?<>aa:;";
-    assert_eq(decode(encode(str)), str);
+    assert_eq!(decode(encode(str)), str);
 
     let str = b"    ";
-    assert_eq(decode(encode(str)), str);
+    assert_eq!(decode(encode(str)), str);
 
     let str = x"00FF00";
-    assert_eq(decode(encode(str)), str);
+    assert_eq!(decode(encode(str)), str);
 
     let str = x"FF00FF";
-    assert_eq(decode(encode(str)), str);
+    assert_eq!(decode(encode(str)), str);
 
     let str = b"🦄🦄🦄🦄🦄";
-    assert_eq(decode(encode(str)), str);
+    assert_eq!(decode(encode(str)), str);
 }
