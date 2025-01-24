@@ -8,7 +8,7 @@ use commander::{weapon::{Self, Weapon}, weapon_stats};
 use std::string::String;
 
 /// Test-only utility to create a weapon with custom parameters.
-public struct WeaponBuilder has drop {
+public struct WeaponBuilder {
     name: Option<String>,
     damage: Option<u8>,
     spread: Option<u8>,
@@ -102,20 +102,38 @@ public fun ammo(mut self: WeaponBuilder, ammo: u8): WeaponBuilder {
 
 /// Build the weapon.
 public fun build(self: WeaponBuilder, ctx: &mut TxContext): Weapon {
-    let name = self.name.destroy_or!(b"Custom Weapon".to_string());
+    let WeaponBuilder {
+        name,
+        damage,
+        spread,
+        plus_one,
+        crit_chance,
+        is_dodgeable,
+        area_size,
+        environmental_damage,
+        range,
+        ammo,
+    } = self;
+
+    let name = name.destroy_or!(b"Custom Weapon".to_string());
     let stats = weapon_stats::new(
-        self.damage.destroy_or!(5),
-        self.spread.destroy_or!(1),
-        self.plus_one.destroy_or!(0),
-        self.crit_chance.destroy_or!(0),
-        self.is_dodgeable.destroy_or!(true),
-        self.area_size.destroy_or!(1),
-        self.environmental_damage,
-        self.range.destroy_or!(5),
-        self.ammo.destroy_or!(3),
+        damage.destroy_or!(5),
+        spread.destroy_or!(1),
+        plus_one.destroy_or!(0),
+        crit_chance.destroy_or!(0),
+        is_dodgeable.destroy_or!(true),
+        area_size.destroy_or!(1),
+        environmental_damage,
+        range.destroy_or!(5),
+        ammo.destroy_or!(3),
     );
 
     weapon::new(name, stats, ctx)
+}
+
+#[test_only]
+public fun destroy(self: WeaponBuilder) {
+    sui::test_utils::destroy(self)
 }
 
 #[test]

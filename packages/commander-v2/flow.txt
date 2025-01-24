@@ -1,0 +1,11 @@
+User Interaction Scenario:
+
+- sign in, top up balance (while on testnet, at least)
+- generate recruits (3 times, each getting slightly different stats / name) // name generator? maybe!
+-
+
+LEGO Demo Scenario:
+
+- create & download the map
+- choose a unit to move / perform action
+- when all units' AP are depleted (or before) next turn

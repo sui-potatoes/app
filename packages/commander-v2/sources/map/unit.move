@@ -22,7 +22,7 @@ const CRIT_CHANCE: u8 = 90;
 const DAMAGE: u8 = 5;
 
 /// A single `Unit` on the `Map`.
-public struct Unit has copy, drop, store {
+public struct Unit has copy, store {
     /// The `ID` of the `Recruit`.
     recruit: ID,
     /// Number of actions the `Unit` can perform in a single turn. Resets at the
@@ -124,6 +124,12 @@ public fun from_recruit(recruit: &Recruit): Unit {
     }
 }
 
+/// Destroy the `Unit` struct. KIA.
+public fun destroy(unit: Unit): ID {
+    let Unit { recruit, .. } = unit;
+    recruit
+}
+
 // === Accessors ===
 
 /// Get the `Recruit`'s ID from the `Unit`.
@@ -134,6 +140,9 @@ public fun hp(unit: &Unit): u16 { unit.hp.value() }
 
 /// Get the `Unit`'s AP.
 public fun ap(unit: &Unit): u16 { unit.ap.value() }
+
+/// Get the `Unit`'s stats.
+public fun stats(unit: &Unit): &Stats { &unit.stats }
 
 // === Convenience and compatibility ===
 

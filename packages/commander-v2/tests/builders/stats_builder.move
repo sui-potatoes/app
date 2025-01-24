@@ -7,7 +7,7 @@ module commander::stats_builder;
 use commander::stats::{Self, Stats};
 
 /// Test-only utility to create a stats with custom parameters.
-public struct StatsBuilder has drop {
+public struct StatsBuilder {
     mobility: Option<u8>,
     aim: Option<u8>,
     will: Option<u8>,
@@ -66,14 +66,28 @@ public fun dodge(mut self: StatsBuilder, dodge: u8): StatsBuilder {
 
 /// Build the `Stats` from the provided parameters.
 public fun build(self: StatsBuilder): Stats {
+    let StatsBuilder {
+        mobility,
+        aim,
+        will,
+        hp,
+        armor,
+        dodge,
+    } = self;
+
     stats::new(
-        self.mobility.destroy_or!(5),
-        self.aim.destroy_or!(50),
-        self.will.destroy_or!(10),
-        self.hp.destroy_or!(10),
-        self.armor.destroy_or!(0),
-        self.dodge.destroy_or!(0),
+        mobility.destroy_or!(5),
+        aim.destroy_or!(50),
+        will.destroy_or!(10),
+        hp.destroy_or!(10),
+        armor.destroy_or!(0),
+        dodge.destroy_or!(0),
     )
+}
+
+#[test_only]
+public fun destroy(self: StatsBuilder) {
+    sui::test_utils::destroy(self)
 }
 
 #[test]

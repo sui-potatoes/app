@@ -13,7 +13,7 @@ module commander::map;
 use commander::{recruit::Recruit, unit::{Self, Unit}};
 use grid::grid::{Self, Grid};
 use std::string::String;
-use sui::bcs::{Self, BCS};
+use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
 /// Attempt to place a `Recruit` on a tile that already has a unit.
 const EUnitAlreadyOnTile: u64 = 1;
@@ -30,7 +30,7 @@ const HIGH_COVER: u8 = 2;
 /// Defines a single Tile in the game `Map`. Tiles can be empty, provide cover
 /// or be unwalkable. Additionally, a unit standing on a tile effectively makes
 /// it unwalkable.
-public struct Tile has drop, store {
+public struct Tile has store {
     /// The type of the tile.
     tile_type: TileType,
     /// The position of the tile on the map.
@@ -57,7 +57,7 @@ public enum TileType has copy, drop, store {
 }
 
 /// Defines the game Map - a grid of tiles where the game takes place.
-public struct Map has drop, store {
+public struct Map has store {
     /// The grid of tiles.
     grid: Grid<Tile>,
 }
@@ -80,6 +80,8 @@ public fun default(): Map {
     new(30)
 }
 
+// === Actions ===
+
 /// Place a `Recruit` on the map at the given position.
 public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
     let target_tile = &map.grid[x, y];
@@ -88,6 +90,55 @@ public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
     assert!(target_tile.tile_type != TileType::Unwalkable, ETileIsUnwalkable);
 
     map.grid[x, y].unit.fill(recruit.to_unit())
+}
+
+/// Move a unit along the path. The first point is the current position of the unit.
+public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
+    let distance = path.length();
+    let (first, last) = (path[0], path[distance - 1]);
+    let (x0, y0) = (first[0], first[1]);
+    let (x1, y1) = (last[0], last[1]);
+    let (width, height) = (map.grid.width(), map.grid.height());
+
+    assert!(y0 < height && x0 < width, ETileIsUnwalkable);
+    assert!(y1 < height && x1 < width, ETileIsUnwalkable);
+    assert!(map.check_path(path));
+
+    // transfer the unit from one position to another
+    let mut unit = map.grid[x0, y0].unit.extract();
+    unit.perform_move(distance as u8);
+    map.grid[x1, y1].unit.fill(unit);
+}
+
+#[allow(lint(public_random))]
+/// Perform a ranged attack.
+///
+/// TODO: cover mechanic, provide `DEF` stat based on the direction of the
+///     attack and the relative position of the attacker and the target.
+public fun perform_attack(
+    map: &mut Map,
+    rng: &mut RandomGenerator,
+    x0: u16,
+    y0: u16,
+    x1: u16,
+    y1: u16,
+    ctx: &mut TxContext,
+): Option<ID> {
+    let attacker = &mut map.grid[x0, y0].unit;
+    assert!(attacker.is_some());
+
+    let damage = attacker.borrow_mut().perform_attack(rng, ctx);
+    let mut target = map.grid[x1, y1].unit.extract();
+    if (damage > 0) {
+        target.apply_damage(rng, damage, true); // TODO: allow `can_dodge`
+    };
+
+    if (target.hp() == 0) {
+        option::some(target.destroy())
+    } else {
+        map.grid[x1, y1].unit.fill(target);
+        option::none()
+    }
 }
 
 /// Check if the given tile has a unit on it.
