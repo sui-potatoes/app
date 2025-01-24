@@ -199,18 +199,23 @@ fun test_unit() {
     assert_eq!(unit.hp.value(), 5);
 
     recruit.dismiss().destroy_none();
+    unit.destroy();
 }
 
 #[test]
 fun test_unit_custom_weapon() {
     use std::unit_test::assert_eq;
     use sui::random;
-    use commander::{recruit, weapon_builder};
+    use commander::{recruit, weapon, stats_builder};
 
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
     let mut recruit = recruit::default(ctx);
-    let weapon = weapon_builder::new().name(b"Test Rifle").damage(7).build(ctx);
+    let weapon = weapon::new(
+        b"Test Rifle".to_string(),
+        stats_builder::new().damage(7).build_weapon(),
+        ctx,
+    );
 
     recruit.add_weapon(weapon);
 
@@ -227,12 +232,12 @@ fun test_unit_custom_weapon() {
     assert_eq!(unit.perform_attack(&mut rng, ctx), 6); // hit
 
     recruit.dismiss().destroy!(|w| w.destroy());
+    unit.destroy();
 }
 
 #[test]
 fun test_from_bcs() {
     use std::unit_test::assert_eq;
-    use sui::test_utils::destroy;
     use commander::recruit;
 
     let ctx = &mut tx_context::dummy();
@@ -243,5 +248,7 @@ fun test_from_bcs() {
     let unit2 = from_bytes(bytes);
 
     assert_eq!(unit.recruit, unit2.recruit);
-    destroy(recruit);
+    recruit.dismiss().do!(|w| w.destroy());
+    unit2.destroy();
+    unit.destroy();
 }

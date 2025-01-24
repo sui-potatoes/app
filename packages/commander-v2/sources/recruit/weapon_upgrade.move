@@ -5,7 +5,7 @@
 /// modify its stats.
 module commander::weapon_upgrade;
 
-use commander::weapon_stats::Modifier;
+use commander::stats::Stats;
 use std::string::String;
 
 /// `WeaponUpgrade` is a primitive which represents an upgrade module for a
@@ -14,11 +14,11 @@ use std::string::String;
 public struct WeaponUpgrade has drop, store {
     name: String,
     tier: u8,
-    modifier: Modifier,
+    modifier: Stats,
 }
 
 /// Create a new `WeaponUpgrade` with the provided parameters.
-public fun new(name: String, tier: u8, modifier: Modifier): WeaponUpgrade {
+public fun new(name: String, tier: u8, modifier: Stats): WeaponUpgrade {
     WeaponUpgrade { name, tier, modifier }
 }
 
@@ -29,7 +29,7 @@ public fun name(u: &WeaponUpgrade): String { u.name }
 public fun tier(u: &WeaponUpgrade): u8 { u.tier }
 
 /// Get the modifier of the `WeaponUpgrade`.
-public fun modifier(u: &WeaponUpgrade): &Modifier { &u.modifier }
+public fun modifier(u: &WeaponUpgrade): &Stats { &u.modifier }
 
 /// Destroy the `WeaponUpgrade`.
 public fun destroy(u: WeaponUpgrade) { let WeaponUpgrade { .. } = u; }
@@ -42,5 +42,3 @@ public fun to_string(u: &WeaponUpgrade): String {
     str.append_utf8(b")");
     str
 }
-
-

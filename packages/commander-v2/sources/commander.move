@@ -5,7 +5,6 @@
 module commander::commander;
 
 use commander::{map::{Self, Map}, recruit::Recruit};
-use grid::point::{Self, Point};
 use sui::table::{Self, Table};
 
 /// The main object of the game, controls the game state, configuration and

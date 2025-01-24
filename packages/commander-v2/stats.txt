@@ -25,7 +25,7 @@ Traits (additional bonuses units might have):
     -
 
 Weapon Classes:
-    1. Rifle - average damage, mid range, mid ammo
+    1. Rifle - average damage, mid range, mid ammop
     2. Shotgun - high damage, low range, huge penalties for distance
     3. Sniper - high damage, high range, low ammo
     4. Minigun - average-high damage, mid range, more ammo + extra abilities + lower mobility

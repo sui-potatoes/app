@@ -327,6 +327,11 @@ public fun demo_1(): Map {
     from_bytes(preset_bytes)
 }
 
+#[test_only]
+public fun destroy(map: Map) {
+    sui::test_utils::destroy(map)
+}
+
 #[test]
 fun test_map_with_units() {
     use sui::random;
@@ -356,17 +361,15 @@ fun test_map_with_units() {
     // | | | | | | |
 
     // now try to attack another unit with the first one
-    let damage = map
-        .grid[3, 3]
-        .unit
-        .map!(|mut unit| unit.perform_attack(&mut rng, ctx))
-        .destroy_or!(abort);
+    let mut damage = 0;
+    map.grid[3, 3].unit.do_mut!(|unit| damage = unit.perform_attack(&mut rng, ctx));
 
     // apply the damage to the second unit
     map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);
 
     recruit_one.dismiss().destroy!(|w| w.destroy());
     recruit_two.dismiss().destroy!(|w| w.destroy());
+    map.destroy();
 }
 
 #[test]
@@ -398,6 +401,7 @@ fun test_check_path() {
     // try going down, right and then back-up; then reverse
     assert!(map.check_path(vector[vector[0, 0], vector[0, 1], vector[1, 1], vector[1, 0]]));
     assert!(map.check_path(vector[vector[1, 0], vector[1, 1], vector[0, 1], vector[0, 0]]));
+    map.destroy();
 
     let mut map = Self::new(3);
     *&mut map.grid[0, 0].tile_type =
@@ -435,6 +439,8 @@ fun test_check_path() {
             top: LOW_COVER,
             bottom: NO_COVER,
         };
+
+    map.destroy();
 }
 
 #[test]
@@ -447,6 +453,7 @@ fun test_demo_maps() {
     assert!(demo_1.check_path(vector[vector[6, 5], vector[5, 5]])); // also low cover
     assert!(!demo_1.check_path(vector[vector[0, 0], vector[1, 0]])); // unwalkable tile
     assert!(!demo_1.check_path(vector[vector[0, 3], vector[0, 2], vector[1, 2]])); // high cover
+    demo_1.destroy();
 }
 
 #[test]
@@ -457,4 +464,6 @@ fun test_from_bcs() {
     let map_copy = from_bytes(bytes);
 
     assert_ref_eq!(&map, &map_copy);
+    map_copy.destroy();
+    map.destroy();
 }

@@ -16,88 +16,54 @@ use sui::bcs::{Self, BCS};
 
 /// Capped at 7 bits. Max value for signed 8-bit integers.
 const SIGN_VALUE: u8 = 128;
-/// Max mobility value, in tiles.
-const MAX_MOBILITY: u8 = 30;
-/// Max aim value %.
-const MAX_AIM: u8 = 100;
-/// Max willpower value %.
-const MAX_WILL: u8 = 100;
-/// Max health value, in health points.
-const MAX_HEALTH: u8 = 30;
-/// Max armor value, in armor points.
-const MAX_ARMOR: u8 = 10;
-/// Dodge chance %.
-const MAX_DODGE: u8 = 100;
 /// Number of bitmap encoded parameters.
 const NUM_PARAMS: u8 = 6;
 
 /// Error code for not implemented functions.
 const ENotImplemented: u64 = 264;
-/// Error code for incorrect value passed into `new` function.
-const EIncorrectValue: u64 = 1;
 
-/// The `BitStats` struct is a single uint value that stores all the stats of
+/// The `Stats` struct is a single uint value that stores all the stats of
 /// a `Recruit` in a single value. It uses bit manipulation to store the values
 /// at the right positions.
 ///
 /// Order (8bit each):
-/// - version: 10
 /// - mobility
 /// - aim
-/// - will
 /// - health
 /// - armor
 /// - dodge
+/// - defense (natural + cover bonus)
 public struct Stats(u128) has copy, drop, store;
 
-/// Modifier is a single `u128` value that replicates the structure of the `Stats`,
-/// but is used to store the modifiers for the stats as signed integers. Modifiers
-/// are applied to the base stats of the Recruit to calculate the final stats.
-public struct Modifier(u128) has copy, drop, store;
-
 /// Create a new `BitStats` struct with the given values.
-public fun new(mobility: u8, aim: u8, health: u8, armor: u8, dodge: u8, will: u8): Stats {
-    assert!(mobility < MAX_MOBILITY, EIncorrectValue);
-    assert!(health < MAX_HEALTH, EIncorrectValue);
-    assert!(aim < MAX_AIM, EIncorrectValue);
-    assert!(armor < MAX_ARMOR, EIncorrectValue);
-    assert!(dodge < MAX_DODGE, EIncorrectValue);
-    assert!(will < MAX_WILL, EIncorrectValue);
-
-    Stats(bf::pack_u8!(vector[mobility, aim, health, armor, dodge, will]))
+public fun new(mobility: u8, aim: u8, health: u8, armor: u8, dodge: u8): Stats {
+    Stats(bf::pack_u8!(vector[mobility, aim, health, armor, dodge]))
 }
 
-/// Create a new `Modifier` struct with the given values. Values are passed in
-/// as signed integers: if the value is bigger than 128, it is subtracted from
-/// the base stats, if it is smaller than 128, it is added to the base stats.
-///
-/// Modifiers cannot overflow the base stats, and the values are capped at their
-/// corresponding maximum values.
-public fun new_modifier(
-    mobility: u8,
-    aim: u8,
-    health: u8,
-    armor: u8,
-    dodge: u8,
-    will: u8,
-): Modifier {
-    Modifier(bf::pack_u8!(vector[mobility, aim, health, armor, dodge, will]))
-}
+/// Create a new `Stats` struct with the given unchecked value.
+public fun new_unchecked(v: u128): Stats { Stats(v) }
 
 /// Negates the modifier values. Creates a new `Modifier` which, when applied to
 /// the `WeaponStats`, will negate the effects of the original modifier.
-public fun negate(modifier: &Modifier): Modifier {
-    let modifier = modifier.0;
+public fun negate(stats: &Stats): Stats {
+    let stats = stats.0;
     let sign = SIGN_VALUE;
-    let negated = bf::unpack_u8!(modifier, NUM_PARAMS).map!(|value| {
+    let negated = bf::unpack_u8!(stats, NUM_PARAMS).map!(|value| {
         if (value > sign) value - sign else value + sign
     });
 
-    Modifier(bf::pack_u8!(negated))
+    Stats(bf::pack_u8!(negated))
 }
 
 /// Default stats for a Recruit.
-public fun default(): Stats { new(7, 65, 10, 0, 0, 65) }
+public fun default(): Stats { new(7, 65, 10, 0, 0) }
+
+/// Default stats for a Weapon.
+public fun default_weapon(): Stats {
+    // 0-5 -> mobility, aim, health, armor, dodge
+    // 6-14 -> damage, spread, plus_one, crit_chance, is_dodgeable, area_size, env_damage, range, ammo
+    Stats(0x00_00_00_00_00_00___04_02_00_00_01_01_00_04_03)
+}
 
 /// Get the `mobility` stat.
 public fun mobility(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 0) }
@@ -114,8 +80,37 @@ public fun armor(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 3) }
 /// Get the `dodge` stat.
 public fun dodge(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 4) }
 
-/// Get the `will` stat.
-public fun will(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 5) }
+/// Get the `defense` stat.
+public fun defense(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 5) }
+
+// === Weapon Stats ===
+
+/// Get the `damage` stat.
+public fun damage(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 6) }
+
+/// Get the `spread` stat.
+public fun spread(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 7) }
+
+/// Get the `plus_one` stat.
+public fun plus_one(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 8) }
+
+/// Get the `crit_chance` stat.
+public fun crit_chance(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 9) }
+
+/// Get the `is_dodgeable` stat.
+public fun is_dodgeable(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 10) }
+
+/// Get the `area_size` stat.
+public fun area_size(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 11) }
+
+/// Get the `env_damage` stat.
+public fun env_damage(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 12) }
+
+/// Get the `range` stat.
+public fun range(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 13) }
+
+/// Get the `ammo` stat.
+public fun ammo(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 14) }
 
 /// Get the inner `u128` value of the `Stats`. Can be used for performance
 /// optimizations and macros.
@@ -129,7 +124,7 @@ public fun inner(stats: &Stats): u128 { stats.0 }
 ///
 /// The result can never overflow the base stats, and the values are capped at
 /// the maximum values for each stat.
-public fun apply_modifier(stats: &Stats, modifier: &Modifier): Stats {
+public fun add(stats: &Stats, modifier: &Stats): Stats {
     let stats = stats.0;
     let modifier = modifier.0;
     let sign = SIGN_VALUE;
@@ -152,16 +147,7 @@ public fun apply_modifier(stats: &Stats, modifier: &Modifier): Stats {
             value + modifier
         };
 
-        // prettier-ignore
-        *&mut stat_values[i] = match (i) {
-            0 => num_min!(new_value, MAX_MOBILITY),
-            1 => num_min!(new_value, MAX_AIM),
-            2 => num_min!(new_value, MAX_HEALTH),
-            3 => num_min!(new_value, MAX_ARMOR),
-            4 => num_min!(new_value, MAX_DODGE),
-            5 => num_min!(new_value, MAX_WILL),
-            _ => 0x00, // unreachable
-        };
+        *&mut stat_values[i] = num_min!(new_value, SIGN_VALUE - 1);
     });
 
     Stats(bf::pack_u8!(stat_values))
@@ -194,7 +180,6 @@ fun test_stats() {
         10, // health
         0, // armor
         0, // dodge
-        60, // will
     );
 
     assert_eq!(stats.mobility(), 7);
@@ -202,38 +187,30 @@ fun test_stats() {
     assert_eq!(stats.health(), 10);
     assert_eq!(stats.armor(), 0);
     assert_eq!(stats.dodge(), 0);
-    assert_eq!(stats.will(), 60);
 }
 
 #[test]
 fun test_with_modifier() {
     use std::unit_test::assert_eq;
 
-    let stats = Self::new(7, 50, 10, 0, 0, 60);
-
-    // hyperfocus modifier: -2 mobility, +30 aim, -20 will
-    let modifier = Self::new_modifier(128 + 2, 30, 0, 0, 0, 128 + 20);
-
-    assert_eq!(stats.mobility(), 7);
-
-    // apply the modifier and check the new stats
-    let modified = stats.apply_modifier(&modifier);
+    let stats = Self::new(7, 50, 10, 0, 0);
+    let modifier = Self::new(128 + 2, 30, 0, 0, 0); // hyperfocus modifier: -2 mobility, +30 aim
+    let modified = stats.add(&modifier); // apply the modifier and check the new stats
 
     assert_eq!(modified.mobility(), 5);
     assert_eq!(modified.aim(), 80);
-    // assert_eq!(modified.will(), 40);
     assert_eq!(modified.health(), 10);
     assert_eq!(modified.armor(), 0);
     assert_eq!(modified.dodge(), 0);
 
     // test negation
-    assert_eq!(modified.apply_modifier(&modifier.negate()), stats);
+    assert_eq!(modified.add(&modifier.negate()), stats);
 
     // test overflow (max value) and underflow (arithmetic error) protection
-    let modifier = Self::new_modifier(100, 0, 0, 255, 255, 0);
-    let modified = modified.apply_modifier(&modifier);
+    let modifier = Self::new(127, 0, 0, 255, 255);
+    let modified = modified.add(&modifier);
 
-    assert_eq!(modified.mobility(), MAX_MOBILITY); // overflow -> capped
+    assert_eq!(modified.mobility(), SIGN_VALUE - 1); // overflow -> capped
     assert_eq!(modified.armor(), 0); // underflow -> 0
     assert_eq!(modified.dodge(), 0); // underflow -> 0
 }

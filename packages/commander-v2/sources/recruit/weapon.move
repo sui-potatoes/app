@@ -5,7 +5,7 @@
 /// Weapons have different stats and can be upgraded with additional modules.
 module commander::weapon;
 
-use commander::{weapon_stats::{Self, WeaponStats}, weapon_upgrade::WeaponUpgrade};
+use commander::{stats::{Self, Stats}, weapon_upgrade::WeaponUpgrade};
 use std::string::String;
 
 /// Attempt to attach too many upgrades to a weapon.
@@ -21,14 +21,14 @@ public struct Weapon has key, store {
     id: UID,
     /// The name of the weapon. "Plasma Rifle", "Sniper Rifle", etc.
     name: String,
-    /// The `WeaponStats` of the weapon.
-    stats: WeaponStats,
+    /// The `Stats` of the weapon.
+    stats: Stats,
     /// The list of upgrades that the weapon has.
     upgrades: vector<WeaponUpgrade>,
 }
 
 /// Create a new `Weapon` with the provided parameters.
-public fun new(name: String, stats: WeaponStats, ctx: &mut TxContext): Weapon {
+public fun new(name: String, stats: Stats, ctx: &mut TxContext): Weapon {
     Weapon { id: object::new(ctx), name, stats, upgrades: vector[] }
 }
 
@@ -37,7 +37,7 @@ public fun default(ctx: &mut TxContext): Weapon {
     Weapon {
         id: object::new(ctx),
         name: b"Standard Issue Rifle".to_string(),
-        stats: weapon_stats::default(),
+        stats: stats::default_weapon(),
         upgrades: vector[],
     }
 }
@@ -52,7 +52,7 @@ public fun destroy(weapon: Weapon) {
 public fun name(w: &Weapon): String { w.name }
 
 /// Get the stats of the `Weapon`.
-public fun stats(w: &Weapon): &WeaponStats { &w.stats }
+public fun stats(w: &Weapon): &Stats { &w.stats }
 
 /// Get the upgrades of the `Weapon`.
 public fun upgrades(w: &Weapon): &vector<WeaponUpgrade> { &w.upgrades }
@@ -60,7 +60,7 @@ public fun upgrades(w: &Weapon): &vector<WeaponUpgrade> { &w.upgrades }
 /// Add an upgrade to the `Weapon`.
 public fun add_upgrade(w: &mut Weapon, upgrade: WeaponUpgrade) {
     assert!(w.upgrades.length() < 3, ETooManyUpgrades);
-    w.stats = w.stats.apply_modifier(upgrade.modifier());
+    w.stats = w.stats.add(upgrade.modifier());
     w.upgrades.push_back(upgrade);
 }
 
@@ -68,5 +68,5 @@ public fun add_upgrade(w: &mut Weapon, upgrade: WeaponUpgrade) {
 public fun remove_upgrade(w: &mut Weapon, upgrade_idx: u8) {
     assert!(w.upgrades.length() > upgrade_idx as u64, ENoUpgrade);
     let upgrade = w.upgrades.remove(upgrade_idx as u64);
-    w.stats = w.stats.apply_modifier(&upgrade.modifier().negate());
+    w.stats = w.stats.add(&upgrade.modifier().negate());
 }
