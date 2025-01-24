@@ -4,9 +4,18 @@ edition = "2024.beta"
 authors = ["Sui Potatoes"]
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "releases/sui-v1.39.0-release" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "releases/sui-v1.40.1-release" }
 
 [addresses]
 codec = "0x0"
-codec_testnet_upgrade_cap = "0xb3356ec1937e93fbe3ce9f5408d34abbc6ee2ad06cbeb4aa917bd80d8954bcb7"
-codec_mainnet_upgrade_cap = "0x9656fad9500d5b2df614f10e14f07b421c566079c852eb094269c0326e4bc212"
+
+
+# testnet
+# v1: 0xa11d4e236d3456c14edd263859c475bc539b43afb8b41fa10974ca0abca6a1c0
+# v2: 0x8ded9a4a5d5dc19eb2302441da8db49afe0c784ab81347ae2a515950f6fa2a5d
+# codec_testnet_upgrade_cap = "0xb3356ec1937e93fbe3ce9f5408d34abbc6ee2ad06cbeb4aa917bd80d8954bcb7"
+
+# mainnet
+# v1: 0xea15ee7c28ff237eeb8fa1fe64b507ab97c352a46bba54b67fa751dde42696e5
+# v2: 0x0c17c048189092f0cd0d6dcea954c8ee3cc31c742464e34920dc22a8560bef53
+# codec_mainnet_upgrade_cap = "0x9656fad9500d5b2df614f10e14f07b421c566079c852eb094269c0326e4bc212"

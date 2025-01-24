@@ -11,19 +11,30 @@ letters in "potatoes").
 
 ## Installing
 
+## [Move Registry CLI](https://docs.suins.io/move-registry)
+
+```bash
+mvr add @potatoes/codec --network testnet
+
+# or for mainnet
+mvr add @potatoes/codec --network mainnet
+```
+
+## Manual
+
 To add this library to your project, add this to your `Move.toml` file under
 `[dependencies]` section:
 
 ```toml
 # goes into [dependencies] section
-Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@testnet-v1" }
+Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@testnet-v2" }
 ```
 
-If you need a **mainnet** version of this package, use the `mainnet-v1` tag instead:
+If you need a **mainnet** version of this package, use the `mainnet-v2` tag instead:
 
 ```toml
 # goes into [dependencies] section
-Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@mainnet-v1" }
+Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@mainnet-v2" }
 ```
 
 Exported address of this package is:
