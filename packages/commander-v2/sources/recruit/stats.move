@@ -227,6 +227,9 @@ fun test_with_modifier() {
     assert_eq!(modified.armor(), 0);
     assert_eq!(modified.dodge(), 0);
 
+    // test negation
+    assert_eq!(modified.apply_modifier(&modifier.negate()), stats);
+
     // test overflow (max value) and underflow (arithmetic error) protection
     let modifier = Self::new_modifier(100, 0, 0, 0, 255, 255);
     let modified = modified.apply_modifier(&modifier);
