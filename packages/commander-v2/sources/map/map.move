@@ -19,6 +19,8 @@ use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 const EUnitAlreadyOnTile: u64 = 1;
 /// Attempt to place a `Recruit` on an unwalkable tile.
 const ETileIsUnwalkable: u64 = 2;
+/// The path is unwalkable.
+const EPathUnwalkable: u64 = 3;
 
 /// Constant for no cover in the `TileType::Cover`.
 const NO_COVER: u8 = 0;
@@ -60,10 +62,13 @@ public enum TileType has copy, drop, store {
 public struct Map has store {
     /// The grid of tiles.
     grid: Grid<Tile>,
+    /// The current turn number.
+    turn: u16,
 }
 
 public fun new(size: u16): Map {
     Map {
+        turn: 0,
         grid: grid::tabulate!(
             size,
             size,
@@ -82,6 +87,11 @@ public fun default(): Map {
 
 // === Actions ===
 
+/// Proceed to the next turn.
+public fun next_turn(map: &mut Map) {
+    map.turn = map.turn + 1;
+}
+
 /// Place a `Recruit` on the map at the given position.
 public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
     let target_tile = &map.grid[x, y];
@@ -94,18 +104,21 @@ public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
 
 /// Move a unit along the path. The first point is the current position of the unit.
 public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
-    let distance = path.length();
-    let (first, last) = (path[0], path[distance - 1]);
+    assert!(path.length() > 1);
+
+    let distance = path.length() - 1;
+    let (first, last) = (path[0], path[distance]);
     let (x0, y0) = (first[0], first[1]);
     let (x1, y1) = (last[0], last[1]);
     let (width, height) = (map.grid.width(), map.grid.height());
 
     assert!(y0 < height && x0 < width, ETileIsUnwalkable);
     assert!(y1 < height && x1 < width, ETileIsUnwalkable);
-    assert!(map.check_path(path));
+    assert!(map.check_path(path), EPathUnwalkable);
 
     // transfer the unit from one position to another
     let mut unit = map.grid[x0, y0].unit.extract();
+    unit.try_reset_ap(map.turn);
     unit.perform_move(distance as u8);
     map.grid[x1, y1].unit.fill(unit);
 }
@@ -115,6 +128,8 @@ public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
 ///
 /// TODO: cover mechanic, provide `DEF` stat based on the direction of the
 ///     attack and the relative position of the attacker and the target.
+/// TODO: come up with valuable return values which indicate what exactly
+///     happened during the attack.
 public fun perform_attack(
     map: &mut Map,
     rng: &mut RandomGenerator,
@@ -123,22 +138,33 @@ public fun perform_attack(
     x1: u16,
     y1: u16,
     ctx: &mut TxContext,
-): Option<ID> {
+): (bool, Option<ID>) {
     let attacker = &mut map.grid[x0, y0].unit;
     assert!(attacker.is_some());
 
-    let damage = attacker.borrow_mut().perform_attack(rng, ctx);
+    let unit = attacker.borrow_mut();
+    unit.try_reset_ap(map.turn);
+    let damage = unit.perform_attack(rng, ctx);
     let mut target = map.grid[x1, y1].unit.extract();
-    if (damage > 0) {
-        target.apply_damage(rng, damage, true); // TODO: allow `can_dodge`
-    };
+
+    let is_hit = if (damage > 0) {
+        target.apply_damage(rng, damage, true)
+    } else false;
 
     if (target.hp() == 0) {
-        option::some(target.destroy())
+        (true, option::some(target.destroy()))
     } else {
         map.grid[x1, y1].unit.fill(target);
-        option::none()
+        (is_hit, option::none())
     }
+}
+
+/// Get the current turn number.
+public fun turn(map: &Map): u16 { map.turn }
+
+/// Read the Unit at the given position.
+public fun unit(map: &Map, x: u16, y: u16): &Option<Unit> {
+    &map.grid[x, y].unit
 }
 
 /// Check if the given tile has a unit on it.
@@ -212,7 +238,7 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
             prev = step;
 
             // UP
-            if (x0 == x1 && y0 == y1 + 1) {
+            if (x0 == x1 && y0 + 1 == y1) {
                 match (&source.tile_type) {
                     TileType::Cover { top, .. } if (top == &high_cover) => return 'a false,
                     _ => (),
@@ -225,7 +251,7 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
             };
 
             // DOWN
-            if (x0 == x1 && y0 + 1 == y1) {
+            if (x0 == x1 && y0 == y1 + 1) {
                 match (&source.tile_type) {
                     TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'a false,
                     _ => (),
@@ -294,13 +320,18 @@ public(package) fun from_bcs(bcs: &mut BCS): Map {
         }
     });
 
-    Map { grid }
+    Map { turn: 0, grid }
 }
 
 /// Implements the `Grid.to_string` method due to `Tile` implementing
 /// `to_string` too.
 public fun to_string(map: &Map): String {
     map.grid.to_string!()
+}
+
+#[test_only]
+public fun debug(map: &Map) {
+    std::debug::print(&map.to_string())
 }
 
 // === Map Presets ===
@@ -374,7 +405,7 @@ fun test_map_with_units() {
     let (weapon, armor) = recruit_two.dismiss();
     weapon.destroy!(|w| w.destroy());
     armor.destroy!(|a| a.destroy());
-    
+
     map.destroy();
 }
 

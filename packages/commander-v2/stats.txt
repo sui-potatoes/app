@@ -31,6 +31,11 @@ Weapon Classes:
     4. Minigun - average-high damage, mid range, more ammo + extra abilities + lower mobility
     5. Grenade Launcher - mid range, env damage, fixed damage stat, low spread, destroys armour with upgrades
 
+Attack events:
+    - missed
+    - dodged
+    - damage
+
 Weapon Properties:
     - weapons can have as many upgrades as the tier of the weapon (1-3, noted)
 

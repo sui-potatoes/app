@@ -36,10 +36,10 @@ public fun rifle(tier: u8, ctx: &mut TxContext): Weapon {
     let (name, stats) = match (tier) {
         // 4 DMG, 2 SPREAD, +10% CRIT, 1 AREA, 4 RANGE, 3 AMMO
         1 => (b"Standard Rifle", 0x03_04_00_01_01_0A_0A_02_04 << (6 * 8)),
-        // 5 DMG, 1 SPREAD, +20% CRIT, 1 AREA, 4 RANGE, 3 AMMO
-        2 => (b"Sharpshooter Rifle", 0x03_04_00_01_01_14_14_01_05 << (6 * 8)),
-        // 6 DMG, 1 SPREAD, +30% CRIT, 1 AREA, 4 RANGE, 3 AMMO
-        3 => (b"Plasma Rifle", 0x03_04_00_01_01_1E_1E_01_06 << (6 * 8)),
+        // 5 DMG, 1 SPREAD, +20% CRIT, 1 AREA, 5 RANGE, 3 AMMO
+        2 => (b"Sharpshooter Rifle", 0x03_05_00_01_01_14_14_01_05 << (6 * 8)),
+        // 6 DMG, 1 SPREAD, +30% CRIT, 1 AREA, 5 RANGE, 3 AMMO
+        3 => (b"Plasma Rifle", 0x03_05_00_01_01_1E_1E_01_06 << (6 * 8)),
         _ => abort,
     };
     weapon::new(name.to_string(), stats::new_unchecked(stats), ctx)
@@ -135,7 +135,7 @@ fun test_weapons() {
         assert_eq!(rifle.stats().is_dodgeable(), 1);
         assert_eq!(rifle.stats().area_size(), 1);
         assert_eq!(rifle.stats().env_damage(), 0);
-        assert_eq!(rifle.stats().range(), 4);
+        assert_eq!(rifle.stats().range(), 5);
         assert_eq!(rifle.stats().ammo(), 3);
         rifle.destroy();
     };
@@ -149,7 +149,7 @@ fun test_weapons() {
         assert_eq!(rifle.stats().is_dodgeable(), 1);
         assert_eq!(rifle.stats().area_size(), 1);
         assert_eq!(rifle.stats().env_damage(), 0);
-        assert_eq!(rifle.stats().range(), 4);
+        assert_eq!(rifle.stats().range(), 5);
         assert_eq!(rifle.stats().ammo(), 3);
         rifle.destroy();
     };
@@ -232,21 +232,21 @@ fun test_weapon_upgrades() {
 
     // stock 1
     rifle.add_upgrade(stock(1));
-    assert_eq!(rifle.stats().range(), 5);
+    assert_eq!(rifle.stats().range(), 6);
     let _ = rifle.remove_upgrade(0);
-    assert_eq!(rifle.stats().range(), 4);
+    assert_eq!(rifle.stats().range(), 5);
 
     // stock 2
     rifle.add_upgrade(stock(2));
-    assert_eq!(rifle.stats().range(), 6);
+    assert_eq!(rifle.stats().range(), 7);
     let _ = rifle.remove_upgrade(0);
-    assert_eq!(rifle.stats().range(), 4);
+    assert_eq!(rifle.stats().range(), 5);
 
     // stock 3
     rifle.add_upgrade(stock(3));
-    assert_eq!(rifle.stats().range(), 7);
+    assert_eq!(rifle.stats().range(), 8);
     let _ = rifle.remove_upgrade(0);
-    assert_eq!(rifle.stats().range(), 4);
+    assert_eq!(rifle.stats().range(), 5);
 
     // expanded clip 1
     rifle.add_upgrade(expanded_clip(1));

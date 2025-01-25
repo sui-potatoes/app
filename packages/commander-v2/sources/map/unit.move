@@ -29,11 +29,18 @@ public struct Unit has copy, store {
     hp: Param,
     /// Stats of the `Recruit`.
     stats: Stats,
+    /// The last turn the `Unit` has performed an action.
+    last_turn: u16,
 }
 
 /// Get the attack parameters of the `Unit`: damage and aim.
 public fun attack_params(unit: &Unit): (u16, u16) {
     (unit.stats.damage() as u16, unit.stats.aim() as u16)
+}
+
+/// Reset the AP of the `Unit` to the default value if the turn is over.
+public fun try_reset_ap(unit: &mut Unit, turn: u16) {
+    if (unit.last_turn < turn) unit.ap.reset();
 }
 
 /// Get the HP of the `Unit`.
@@ -65,7 +72,7 @@ public fun perform_reload(unit: &mut Unit) {
 /// - this function is more expensive in the happy path, so the gas limit attack
 /// is less likely to be successful
 public fun perform_attack(unit: &mut Unit, rng: &mut RandomGenerator, _ctx: &mut TxContext): u8 {
-    assert!(unit.ap.value() > 1);
+    assert!(unit.ap.value() > 0);
 
     unit.ap.deplete();
 
@@ -91,21 +98,29 @@ public fun perform_attack(unit: &mut Unit, rng: &mut RandomGenerator, _ctx: &mut
 
 #[allow(lint(public_random))]
 /// Apply damage to unit, can dodgeable (shot) or not (explosive).
-public fun apply_damage(unit: &mut Unit, rng: &mut RandomGenerator, damage: u8, can_dodge: bool) {
+/// TODO: return result of the attack
+public fun apply_damage(
+    unit: &mut Unit,
+    rng: &mut RandomGenerator,
+    damage: u8,
+    can_dodge: bool,
+): bool {
     let dodge_stat = unit.stats.dodge();
     let armor_stat = unit.stats.armor();
 
     // prettier-ignore
     let damage =
-        if (armor_stat >= damage) 0
+        if (armor_stat >= damage) 1
         else damage - armor_stat;
 
     // if attack can be dodged, spin the wheel and see if the unit dodges
-    if (can_dodge && dodge_stat > 0 && rng.generate_u8_in_range(0, 99) < dodge_stat) {
-        return
+    let rng = rng.generate_u8_in_range(0, 99);
+    if (can_dodge && dodge_stat > 0 && rng < dodge_stat) {
+        return false
     };
 
-    unit.hp.decrease(damage as u16)
+    unit.hp.decrease(damage as u16);
+    damage != 0
 }
 
 /// Creates a new `Unit` - an in-game represenation of a `Recruit`.
@@ -121,6 +136,7 @@ public fun from_recruit(recruit: &Recruit): Unit {
         ap: param::new(2),
         hp: param::new(stats.health() as u16),
         stats: stats.add(&weapon_stats.add(&armor_stats)),
+        last_turn: 0,
     }
 }
 
@@ -160,6 +176,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Unit {
         ap: param::from_bcs(bcs),
         hp: param::from_bcs(bcs),
         stats: stats::from_bcs(bcs),
+        last_turn: bcs.peel_u16(),
     }
 }
 
