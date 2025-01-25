@@ -65,8 +65,9 @@ public fun add_upgrade(w: &mut Weapon, upgrade: WeaponUpgrade) {
 }
 
 /// Remove an upgrade from the `Weapon`.
-public fun remove_upgrade(w: &mut Weapon, upgrade_idx: u8) {
+public fun remove_upgrade(w: &mut Weapon, upgrade_idx: u8): WeaponUpgrade {
     assert!(w.upgrades.length() > upgrade_idx as u64, ENoUpgrade);
     let upgrade = w.upgrades.remove(upgrade_idx as u64);
     w.stats = w.stats.add(&upgrade.modifier().negate());
+    upgrade
 }

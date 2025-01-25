@@ -367,8 +367,14 @@ fun test_map_with_units() {
     // apply the damage to the second unit
     map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);
 
-    recruit_one.dismiss().destroy!(|w| w.destroy());
-    recruit_two.dismiss().destroy!(|w| w.destroy());
+    let (weapon, armor) = recruit_one.dismiss();
+    weapon.destroy!(|w| w.destroy());
+    armor.destroy!(|a| a.destroy());
+
+    let (weapon, armor) = recruit_two.dismiss();
+    weapon.destroy!(|w| w.destroy());
+    armor.destroy!(|a| a.destroy());
+    
     map.destroy();
 }
 

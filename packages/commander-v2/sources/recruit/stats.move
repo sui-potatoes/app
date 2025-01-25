@@ -1,13 +1,12 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Attempt to replace the `Stats` struct with a single `u64` value which uses
-/// bit manipulation to store all the stats at right positions.
+/// Universal stats for Recruits and their equipment, and for `Unit`s.
 ///
-/// Traits:
-/// - default
-/// - from_bcs
-/// - to_string
+/// Stats are built in a way that allows easy modification, negation and
+/// addition. Recruit stats are distributed in their equipment, and during the
+/// conversion to `Unit` (pre-battle), the stats are combined into a single
+/// `Stats` value.
 module commander::stats;
 
 use bit_field::bit_field as bf;
@@ -15,9 +14,9 @@ use std::{macros::num_min, string::String};
 use sui::bcs::{Self, BCS};
 
 /// Capped at 7 bits. Max value for signed 8-bit integers.
-const SIGN_VALUE: u8 = 128;
+const SIGN_VALUE: u8 = 0x80;
 /// Number of bitmap encoded parameters.
-const NUM_PARAMS: u8 = 6;
+const NUM_PARAMS: u8 = 15;
 
 /// Error code for not implemented functions.
 const ENotImplemented: u64 = 264;
@@ -26,13 +25,23 @@ const ENotImplemented: u64 = 264;
 /// a `Recruit` in a single value. It uses bit manipulation to store the values
 /// at the right positions.
 ///
-/// Order (8bit each):
+/// 16 values in a single u128 (in order):
 /// - mobility
 /// - aim
 /// - health
 /// - armor
 /// - dodge
 /// - defense (natural + cover bonus)
+/// - damage
+/// - spread
+/// - plus_one (extra damage)
+/// - crit_chance
+/// - is_dodgeable
+/// - area_size
+/// - env_damage
+/// - range
+/// - ammo
+/// - xxx (one u8 value is unused)
 public struct Stats(u128) has copy, drop, store;
 
 /// Create a new `BitStats` struct with the given values.
@@ -60,10 +69,13 @@ public fun default(): Stats { new(7, 65, 10, 0, 0) }
 
 /// Default stats for a Weapon.
 public fun default_weapon(): Stats {
-    // 0-5 -> mobility, aim, health, armor, dodge
+    // reverse:
     // 6-14 -> damage, spread, plus_one, crit_chance, is_dodgeable, area_size, env_damage, range, ammo
-    Stats(0x00_00_00_00_00_00___04_02_00_00_01_01_00_04_03)
+    Stats(0x03_04_00_01_01_00_00_02_04 << (6 * 8))
 }
+
+/// Default stats for an Armor.
+public fun default_armor(): Stats { new(0, 0, 0, 0, 0) }
 
 /// Get the `mobility` stat.
 public fun mobility(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 0) }
@@ -187,6 +199,49 @@ fun test_stats() {
     assert_eq!(stats.health(), 10);
     assert_eq!(stats.armor(), 0);
     assert_eq!(stats.dodge(), 0);
+}
+
+#[test]
+fun test_defaults() {
+    use std::unit_test::assert_eq;
+
+    let stats = Self::default();
+
+    assert_eq!(stats.mobility(), 7);
+    assert_eq!(stats.aim(), 65);
+    assert_eq!(stats.health(), 10);
+    assert_eq!(stats.armor(), 0);
+    assert_eq!(stats.dodge(), 0);
+    assert_eq!(stats.defense(), 0);
+
+    assert_eq!(stats.damage(), 0);
+    assert_eq!(stats.spread(), 0);
+    assert_eq!(stats.plus_one(), 0);
+    assert_eq!(stats.crit_chance(), 0);
+    assert_eq!(stats.is_dodgeable(), 0);
+    assert_eq!(stats.area_size(), 0);
+    assert_eq!(stats.env_damage(), 0);
+    assert_eq!(stats.range(), 0);
+    assert_eq!(stats.ammo(), 0);
+
+    let weapon_stats = Self::default_weapon();
+
+    assert_eq!(weapon_stats.damage(), 4);
+    assert_eq!(weapon_stats.spread(), 2);
+    assert_eq!(weapon_stats.plus_one(), 0);
+    assert_eq!(weapon_stats.crit_chance(), 0);
+    assert_eq!(weapon_stats.is_dodgeable(), 1);
+    assert_eq!(weapon_stats.area_size(), 1);
+    assert_eq!(weapon_stats.env_damage(), 0);
+    assert_eq!(weapon_stats.range(), 4);
+    assert_eq!(weapon_stats.ammo(), 3);
+
+    assert_eq!(weapon_stats.mobility(), 0);
+    assert_eq!(weapon_stats.aim(), 0);
+    assert_eq!(weapon_stats.health(), 0);
+    assert_eq!(weapon_stats.armor(), 0);
+    assert_eq!(weapon_stats.dodge(), 0);
+    assert_eq!(weapon_stats.defense(), 0);
 }
 
 #[test]
