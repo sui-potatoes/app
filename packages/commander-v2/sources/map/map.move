@@ -238,7 +238,7 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
             prev = step;
 
             // UP
-            if (x0 == x1 && y0 + 1 == y1) {
+            if (x0 == x1 + 1 && y0 == y1) {
                 match (&source.tile_type) {
                     TileType::Cover { top, .. } if (top == &high_cover) => return 'a false,
                     _ => (),
@@ -251,7 +251,7 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
             };
 
             // DOWN
-            if (x0 == x1 && y0 == y1 + 1) {
+            if (x0 + 1 == x1 && y0 == y1) {
                 match (&source.tile_type) {
                     TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'a false,
                     _ => (),
@@ -264,7 +264,7 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
             };
 
             // LEFT
-            if (y0 == y1 && x0 == x1 + 1) {
+            if (x0 == x1 && y0 == y1 + 1) {
                 match (&source.tile_type) {
                     TileType::Cover { left, .. } if (left == &high_cover) => return 'a false,
                     _ => (),
@@ -277,7 +277,7 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
             };
 
             // RIGHT
-            if (y0 == y1 && x1 == x0 + 1) {
+            if (x0 == x1 && y0 + 1 == y1) {
                 match (&source.tile_type) {
                     TileType::Cover { right, .. } if (right == &high_cover) => return 'a false,
                     _ => (),
@@ -432,12 +432,26 @@ fun test_check_path() {
         TileType::Cover { left: NO_COVER, right: HIGH_COVER, top: NO_COVER, bottom: NO_COVER };
 
     // try going right and then back-left
-    assert!(!map.check_path(vector[vector[0, 0], vector[1, 0]]));
-    assert!(!map.check_path(vector[vector[1, 0], vector[0, 0]]));
+    assert!(!map.check_path(vector[vector[0, 0], vector[0, 1]]));
+    assert!(!map.check_path(vector[vector[0, 1], vector[0, 0]]));
 
     // try going down, right and then back-up; then reverse
-    assert!(map.check_path(vector[vector[0, 0], vector[0, 1], vector[1, 1], vector[1, 0]]));
-    assert!(map.check_path(vector[vector[1, 0], vector[1, 1], vector[0, 1], vector[0, 0]]));
+    assert!(
+        map.check_path(vector[
+            /* start */ vector[0, 0],
+            /* down  */ vector[1, 0],
+            /* right */ vector[1, 1],
+            /* left  */ vector[1, 0],
+        ]),
+    );
+    assert!(
+        map.check_path(vector[
+            /* start */ vector[0, 1],
+            /* down  */ vector[1, 1],
+            /* left  */ vector[1, 0],
+            /* up    */ vector[0, 0],
+        ]),
+    );
     map.destroy();
 
     let mut map = Self::new(3);
@@ -445,12 +459,27 @@ fun test_check_path() {
         TileType::Cover { left: NO_COVER, right: NO_COVER, top: NO_COVER, bottom: HIGH_COVER };
 
     // try going down and then back-up
-    assert!(!map.check_path(vector[vector[0, 0], vector[0, 1]]));
-    assert!(!map.check_path(vector[vector[0, 1], vector[0, 0]]));
+    assert!(!map.check_path(vector[vector[0, 0], /* down */ vector[1, 0]]));
+    assert!(!map.check_path(vector[vector[1, 0], /* up   */ vector[0, 0]]));
 
     // try going right, down and then back-left; then reverse
-    assert!(map.check_path(vector[vector[0, 0], vector[1, 0], vector[1, 1], vector[0, 1]]));
-    assert!(map.check_path(vector[vector[0, 1], vector[1, 1], vector[1, 0], vector[0, 0]]));
+    assert!(
+        map.check_path(vector[
+            /* start */ vector[0, 0],
+            /* right */ vector[0, 1],
+            /* down  */ vector[1, 1],
+            /* left  */ vector[1, 0],
+        ]),
+    );
+
+    assert!(
+        map.check_path(vector[
+            /* start */ vector[1, 0],
+            /* right */ vector[1, 1],
+            /* up    */ vector[0, 1],
+            /* left  */ vector[0, 0],
+        ]),
+    );
 
     // crawl over the cover
     *&mut map.grid[0, 0].tile_type =
@@ -486,10 +515,22 @@ fun test_check_path() {
 fun test_demo_maps() {
     let demo_1 = demo_1();
     assert!(demo_1.check_path(vector[vector[1, 6], vector[2, 6], vector[3, 6], vector[3, 5]]));
-    assert!(demo_1.check_path(vector[vector[0, 0], vector[0, 1], vector[0, 2]])); // hop over low cover
-    assert!(demo_1.check_path(vector[vector[6, 5], vector[5, 5]])); // also low cover
+    assert!(
+        !demo_1.check_path(vector[
+            /* start */ vector[0, 0],
+            /* right */ vector[0, 1],
+            /* right */ vector[0, 2],
+        ]),
+    ); // hop over low cover
+    assert!(demo_1.check_path(vector[vector[6, 5], /* up */ vector[5, 5]])); // also low cover
     assert!(!demo_1.check_path(vector[vector[0, 0], vector[1, 0]])); // unwalkable tile
-    assert!(!demo_1.check_path(vector[vector[0, 3], vector[0, 2], vector[1, 2]])); // high cover
+    assert!(
+        !demo_1.check_path(vector[
+            /* start */ vector[0, 3],
+            /* left */ vector[0, 2],
+            /* bottom */ vector[1, 2],
+        ]),
+    ); // high cover
     demo_1.destroy();
 }
 

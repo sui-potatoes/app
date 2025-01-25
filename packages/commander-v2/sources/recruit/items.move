@@ -232,21 +232,21 @@ fun test_weapon_upgrades() {
 
     // stock 1
     rifle.add_upgrade(stock(1));
-    assert_eq!(rifle.stats().range(), 6);
-    let _ = rifle.remove_upgrade(0);
     assert_eq!(rifle.stats().range(), 5);
+    let _ = rifle.remove_upgrade(0);
+    assert_eq!(rifle.stats().range(), 4);
 
     // stock 2
     rifle.add_upgrade(stock(2));
-    assert_eq!(rifle.stats().range(), 7);
+    assert_eq!(rifle.stats().range(), 6);
     let _ = rifle.remove_upgrade(0);
-    assert_eq!(rifle.stats().range(), 5);
+    assert_eq!(rifle.stats().range(), 4);
 
     // stock 3
     rifle.add_upgrade(stock(3));
-    assert_eq!(rifle.stats().range(), 8);
+    assert_eq!(rifle.stats().range(), 7);
     let _ = rifle.remove_upgrade(0);
-    assert_eq!(rifle.stats().range(), 5);
+    assert_eq!(rifle.stats().range(), 4);
 
     // expanded clip 1
     rifle.add_upgrade(expanded_clip(1));
