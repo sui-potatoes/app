@@ -33,8 +33,6 @@ export type Tile =
 
  */
 export class Game extends THREE.Object3D {
-    /** Default size of the Grid */
-    static readonly SIZE: 30;
     /** The Plane used for intersections */
     public readonly plane: THREE.Mesh;
     /** The Grid object */
@@ -63,14 +61,12 @@ export class Game extends THREE.Object3D {
     /** Flag to block execution any other action from being run in parallel */
     protected _isBlocked: boolean = false;
 
-    constructor(useGrid: boolean = false) {
+    constructor(public size: number, useGrid: boolean = false) {
         super();
-
-        const size = 30; // Game.SIZE;
 
         if (useGrid) {
             const offset = this.offset;
-            const helper = new THREE.GridHelper(30, 30);
+            const helper = new THREE.GridHelper(size, size);
             helper.position.set(offset, -0.01, offset);
             this.add(helper);
         }
@@ -86,7 +82,7 @@ export class Game extends THREE.Object3D {
     }
 
     get offset() {
-        return 30 / 2 - 0.5;
+        return this.size / 2 - 0.5;
     }
 
     addUnit(unit: Unit) {

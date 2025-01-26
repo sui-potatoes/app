@@ -17,13 +17,14 @@ import { NoneMode } from "./modes/NoneMode";
 import { ShootMode } from "./modes/ShootMode";
 import { MoveMode } from "./modes/MoveMode";
 import { GrenadeMode } from "./modes/GrenadeMode";
+import { Map as GameMap } from "../types/bcs";
 
 export const models: { [key: string]: GLTF } = {};
 
 /**
  * Creates a new Game scene (not to be confused with the Menu background scene).
  */
-export async function createScene(element: string) {
+export async function createScene(element: string, size: number, _map: typeof GameMap.$inferType) {
     const root = document.getElementById(element);
     if (!root || root.children.length !== 0) {
         return;
@@ -35,7 +36,7 @@ export async function createScene(element: string) {
     stats.showPanel(0);
     document.body.appendChild( stats.dom );
 
-    const offset = 30 / 2 - 0.5;
+    const offset = size / 2 - 0.5;
     const scene = new THREE.Scene();
 
     const ui = new UI(root);
@@ -82,9 +83,9 @@ export async function createScene(element: string) {
     models.barrel_stack = await loader.loadAsync("/models/barrel_stack.glb");
 
     // game
-    const game = new Game();
-    game.addUnit(new Unit(unit, 14, 15));
-    game.addUnit(new Unit(unit, 10, 20));
+    const game = new Game(size);
+    // game.addUnit(new Unit(unit, 14, 15));
+    // game.addUnit(new Unit(unit, 10, 20));
     game.addUnit(new Unit(unit, 6, 4));
     scene.add(game);
 

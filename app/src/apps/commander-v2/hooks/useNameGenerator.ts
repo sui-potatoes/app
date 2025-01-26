@@ -57,9 +57,9 @@ export async function useNameGenerator() {
         throw new Error("Failed to generate name");
     }
 
-    const text = JSON.parse(first.text.value as string);
-    return {
-        name: text.character_name,
-        backstory: text.background,
-    }
+    // const text = JSON.parse(first.text.value as string);
+    // return {
+    //     name: text.character_name,
+    //     backstory: text.background,
+    // }
 }
