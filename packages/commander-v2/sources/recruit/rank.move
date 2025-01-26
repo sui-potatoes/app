@@ -157,15 +157,15 @@ public(package) fun from_bcs(bcs: &mut BCS): Rank {
 /// Convert the rank to a string. Very useful for debugging and logging.
 public fun to_string(rank: &Rank): String {
     match (rank) {
-        Rank::Rookie => b"Rookie".to_string(),
-        Rank::Squaddie => b"Squaddie".to_string(),
-        Rank::Corporal => b"Corporal".to_string(),
-        Rank::Sergeant => b"Sergeant".to_string(),
-        Rank::Lieutenant => b"Lieutenant".to_string(),
-        Rank::Captain => b"Captain".to_string(),
-        Rank::Major => b"Major".to_string(),
-        Rank::Colonel => b"Colonel".to_string(),
-    }
+        Rank::Rookie => b"Rookie",
+        Rank::Squaddie => b"Squaddie",
+        Rank::Corporal => b"Corporal",
+        Rank::Sergeant => b"Sergeant",
+        Rank::Lieutenant => b"Lieutenant",
+        Rank::Captain => b"Captain",
+        Rank::Major => b"Major",
+        Rank::Colonel => b"Colonel",
+    }.to_string()
 }
 
 // === Tests ===

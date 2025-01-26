@@ -8,13 +8,17 @@
 /// - default
 module commander::recruit;
 
-use commander::{rank::{Self, Rank}, stats::{Self, Stats}, weapon::Weapon};
+use commander::{armor::Armor, rank::{Self, Rank}, stats::{Self, Stats}, weapon::Weapon};
 use std::string::String;
 
 /// Attempt to equip a `Weapon` while a Recruit already it.
 const EAlreadyHasWeapon: u64 = 1;
 /// Trying to remove a `Weapon` that does not exist.
 const ENoWeapon: u64 = 2;
+/// Attempt to equip an `Armor` while a Recruit already has one.
+const EAlreadyHasArmor: u64 = 3;
+/// Trying to remove an `Armor` that does not exist.
+const ENoArmor: u64 = 4;
 
 // Convenience alias which allows simpler conversion from Recruit to Unit.
 public use fun commander::unit::from_recruit as Recruit.to_unit;
@@ -39,6 +43,8 @@ public struct Recruit has key, store {
     stats: Stats,
     /// Weapon of the Unit. When not set, the Recruit uses the default weapon.
     weapon: Option<Weapon>,
+    /// Armor of the Unit. When not set, the Recruit uses the default armor.
+    armor: Option<Armor>,
     /// The address that hired the Recruit.
     leader: address,
 }
@@ -51,6 +57,18 @@ public struct DogTag has key, store {
     rank: Rank,
     /// Metadata (including backstory) of the fallen recruit.
     metadata: Metadata,
+}
+
+/// Add an armor to the Recruit.
+public fun add_armor(r: &mut Recruit, armor: Armor) {
+    assert!(r.armor.is_none(), EAlreadyHasArmor);
+    r.armor.fill(armor);
+}
+
+/// Remove the armor from the Recruit.
+public fun remove_armor(r: &mut Recruit): Armor {
+    assert!(r.armor.is_some(), ENoArmor);
+    r.armor.extract()
 }
 
 /// Add a weapon to the Recruit.
@@ -67,6 +85,9 @@ public fun remove_weapon(r: &mut Recruit): Weapon {
     r.weapon.extract()
 }
 
+/// Get the armor of the Recruit.
+public fun armor(r: &Recruit): &Option<Armor> { &r.armor }
+
 /// Get the weapon of the Recruit.
 public fun weapon(r: &Recruit): &Option<Weapon> { &r.weapon }
 
@@ -78,6 +99,9 @@ public fun rank(r: &Recruit): &Rank { &r.rank }
 
 /// Get the address of the Recruit's leader.
 public fun leader(r: &Recruit): address { r.leader }
+
+/// Get the metadata of the Recruit.
+public fun metadata(r: &Recruit): &Metadata { &r.metadata }
 
 /// Promotes the rank of the Recruit.
 public fun rank_up(recruit: &mut Recruit) {
@@ -95,6 +119,7 @@ public fun default(ctx: &mut TxContext): Recruit {
         rank: rank::default(),
         stats: stats::default(),
         weapon: option::none(),
+        armor: option::none(),
         leader: ctx.sender(),
     }
 }
@@ -110,15 +135,16 @@ public fun new(name: String, backstory: String, ctx: &mut TxContext): Recruit {
         rank: rank::rookie(),
         stats: stats::default(),
         weapon: option::none(),
+        armor: option::none(),
         leader: ctx.sender(),
     }
 }
 
 /// Dismiss the Recruit, remove them forever from the game.
-public fun dismiss(recruit: Recruit): Option<Weapon> {
-    let Recruit { id, weapon, .. } = recruit;
+public fun dismiss(recruit: Recruit): (Option<Weapon>, Option<Armor>) {
+    let Recruit { id, weapon, armor, .. } = recruit;
     id.delete();
-    weapon
+    (weapon, armor)
 }
 
 /// Throw away the DogTag, destroy it and bury the memory.
@@ -129,11 +155,12 @@ public fun throw_away(dog_tag: DogTag) {
 
 /// Kills the Recruit and returns the DogTag.
 public(package) fun kill(recruit: Recruit, ctx: &mut TxContext): DogTag {
-    let Recruit { id, rank, weapon, metadata, .. } = recruit;
+    let Recruit { id, rank, weapon, metadata, armor, .. } = recruit;
     id.delete();
 
     // TODO: figure a way to leave the weapon
     weapon.destroy!(|w| w.destroy());
+    armor.destroy!(|a| a.destroy());
 
     DogTag { id: object::new(ctx), rank, metadata }
 }

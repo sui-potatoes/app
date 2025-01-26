@@ -2,11 +2,20 @@
 
 [move]
 version = 3
-manifest_digest = "35A8F58AA7ED7A827F4E6C5927465C91D0F85D432A9C07BF962893485050509F"
-deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
+manifest_digest = "D45EBEE20D06318C315B1FBC41008E06BC7DB7C3839EA17F3C3188B0D550848A"
+deps_digest = "F9B494B64F0615AED0E98FC12A85B85ECD2BC5185C22D30E7F67786BB52E507C"
 dependencies = [
+  { id = "BitField", name = "BitField" },
   { id = "Codec", name = "Codec" },
   { id = "Grid", name = "Grid" },
+  { id = "Sui", name = "Sui" },
+]
+
+[[move.package]]
+id = "BitField"
+source = { local = "../bit_field" }
+
+dependencies = [
   { id = "Sui", name = "Sui" },
 ]
 
@@ -28,18 +37,18 @@ dependencies = [
 
 [[move.package]]
 id = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "releases/sui-v1.39.0-release", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
 id = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/testnet", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "releases/sui-v1.39.0-release", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
 ]
 
 [move.toolchain-version]
-compiler-version = "1.37.1"
+compiler-version = "1.40.3"
 edition = "2024.beta"
 flavor = "sui"
 

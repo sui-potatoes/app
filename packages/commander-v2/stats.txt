@@ -1,0 +1,50 @@
+Unit:
+    1. aim (AIM) - % chance to hit the target (lowers with distance, additional penalties may apply)
+    2. health (HP) - starting health of a unit in an encounter
+    3. mobility (MOB) - number of grid tiles a unit can walk in a single action
+    4. armor (ARM) - armor of the unit, can be destroyed; decreases incoming damage by arm stat but no lower than 1
+    5. dodge (DOG) - % chance to dodge the incoming damage
+    6. will (WIL) - % psychic stability to shuttering events during the encounter
+    7. defence - % decreased from the attacker's aim, provided by cover + natural class bonus
+
+Weapon:
+    1. damage (DMG) - base damage dealt by a unit
+    2. spread (SPR) - potential spread of the base damage, based on RNG
+    3. plus_one (PLO) - % chance of dealing extra point of damage
+    4. crit_chance (CRT) - % chance of dealing critical damage
+    5. is_dodgeable (IDG) - boolean - whether a weapon can be dodged
+    6. area_size (ARS) - size of the damage area in von neumann neighbourhood tiles
+    7. env damage (ENV) - whether a weapon can destroy env objects
+    8. range (RAN) - Manhattan range of the weapon (in tiles)
+    9. ammo (AMM) - number of shots a weapon can shoot until reload
+
+Traits (additional bonuses units might have):
+    - sharpshooter - bonus aim 10%
+    - thick skin - extra hp point
+    - survivor - chance to not die after a lethal shot
+    -
+
+Weapon Classes:
+    1. Rifle - average damage, mid range, mid ammop
+    2. Shotgun - high damage, low range, huge penalties for distance
+    3. Sniper - high damage, high range, low ammo
+    4. Minigun - average-high damage, mid range, more ammo + extra abilities + lower mobility
+    5. Grenade Launcher - mid range, env damage, fixed damage stat, low spread, destroys armour with upgrades
+
+Attack events:
+    - missed
+    - dodged
+    - damage
+
+Weapon Properties:
+    - weapons can have as many upgrades as the tier of the weapon (1-3, noted)
+
+Challenges:
+    - weapon upgrades affect unit stats
+    -
+
+Notes:
+
+- u128 fits 16 params
+- what about making a Weapon copy the stats of the Unit but apply offset?
+- so what if

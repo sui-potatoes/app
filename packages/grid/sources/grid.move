@@ -58,26 +58,29 @@ public fun borrow_mut<T>(g: &mut Grid<T>, x: u16, y: u16): &mut T {
 }
 
 /// Swap an element in the grid with another element, returning the old element.
+/// This is important for `T` types that don't have `copy`.
 public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
-    g.grid[x as u64].insert(element, y as u64);
-    g.grid[x as u64].remove(y as u64 + 1)
+    g.grid[x as u64].push_back(element);
+    g.grid[x as u64].swap_remove(y as u64)
 }
 
 // === Utils ===
 
-/// Get a difference between two points, useful for calculating distances or
-/// ranges for shooting, for example.
+/// Get a Manhattan distance between two points. Useful for calculating distances
+/// or ranges for ranged attacks or walking, for example.
 public fun range(x0: u16, y0: u16, x1: u16, y1: u16): u16 { x0.diff(x1) + y0.diff(y1) }
 
 // === Macros ===
 
 /// Get all von Neumann neighbours of a point, checking if the point is within
-/// the bounds of the grid.
-public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point): vector<Point> {
+/// the bounds of the grid. The size parameter specifies the size of the neighbourhood.
+///
+/// See `Point` for more information on the von Neumann neighbourhood.
+public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> {
     let p = $p;
     let g = $g;
     let (width, height) = (g.width(), g.height());
-    p.von_neumann().filter!(|point| {
+    p.von_neumann($size).filter!(|point| {
         let (x, y) = point.to_values();
         x < width && y < height
     })
@@ -121,7 +124,7 @@ public macro fun find_group<$T>(
 
     while (!queue.is_empty()) {
         let point = queue.pop_back();
-        map.von_neumann!(point).do!(|point| {
+        map.von_neumann!(point, 1).do!(|point| {
             let (x, y) = point.into_values();
 
             if (x >= width || y >= height || visited[x, y]) return;
@@ -182,7 +185,7 @@ public macro fun trace<$T>(
         num = num + 1;
 
         // flush the queue, marking all cells around the current number
-        queue.destroy!(|source| grid.von_neumann!(source).destroy!(|point| {
+        queue.destroy!(|source| grid.von_neumann!(source, 1).destroy!(|point| {
             let (x0, y0) = source.into_values();
             let (x, y) = point.into_values();
 
@@ -215,7 +218,7 @@ public macro fun trace<$T>(
 
     'reconstruct: while (num > 1) {
         num = num - 1;
-        grid.von_neumann!(last_point).destroy!(|point| {
+        grid.von_neumann!(last_point, 1).destroy!(|point| {
             let (x, y) = point.into_values();
             if (x == x0 && y == y0) break 'reconstruct;
             if (grid[x, y] == num) {
@@ -265,10 +268,33 @@ public macro fun debug<$T>($grid: &Grid<$T>) {
 
 #[test]
 fun test_borrows() {
+    use std::unit_test::assert_eq;
+
     let mut grid = Grid { grid: vector[vector[0]] };
-    assert!(grid[0, 0] == 0);
+    assert_eq!(grid[0, 0], 0);
+
+    // perform a mutable borrow
     *&mut grid[0, 0] = 1;
-    assert!(grid[0, 0] == 1);
+    assert_eq!(grid[0, 0], 1);
+}
+
+#[test]
+fun test_swap() {
+    use std::unit_test::assert_eq;
+
+    let mut grid = from_vector_unchecked(vector[
+        // simple 3x3 grid
+        vector[0, 0, 0],
+        vector[0, 9, 0],
+        vector[0, 0, 0],
+    ]);
+
+    let swapped = grid.swap(1, 1, 3);
+
+    assert_eq!(swapped, 9);
+    assert_eq!(grid[1, 1], 3);
+    assert_eq!(grid[1, 0], 0);
+    assert_eq!(grid[1, 2], 0);
 }
 
 #[test]
@@ -306,6 +332,8 @@ fun test_path_tracing() {
 
 #[test]
 fun test_find_group() {
+    use std::unit_test::assert_eq;
+
     let grid = Grid<u8> {
         grid: vector[
             vector[0, 0, 1, 0, 0],
@@ -318,7 +346,7 @@ fun test_find_group() {
     };
 
     let group = grid.find_group!(0, 2, |el| *el == 1);
-    assert!(group.length() == 6);
+    assert_eq!(group.length(), 6);
 }
 
 #[test]
