@@ -20,7 +20,7 @@ import {
 import { requestSuiFromFaucetV1, getFaucetHost } from "@mysten/sui/faucet";
 import { Toaster } from "react-hot-toast";
 
-const GOBACK_KEY = "go_back";
+export const GOBACK_KEY = "go_back";
 
 export function App() {
     const flow = useEnokiFlow();
@@ -66,10 +66,7 @@ export function App() {
                             <button
                                 className="connect"
                                 onClick={async () => {
-                                    localStorage.setItem(
-                                        GOBACK_KEY,
-                                        window.location.href,
-                                    );
+                                    localStorage.setItem(GOBACK_KEY, window.location.href);
 
                                     // Refresh the page to go back to the root path, this is a
                                     // workaround for the issue where google auth doesn't work

@@ -24,6 +24,13 @@ export async function createMenuScene(element: string) {
     root.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
+
+    const texture = new THREE.TextureLoader().load( "images/background.png" );
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    // texture.repeat.set( 4, 4 );
+    scene.background = texture;
+
     const camera = new THREE.PerspectiveCamera(75, witdh / height, 0.1, 100);
 
     camera.position.z = -1;
@@ -39,20 +46,22 @@ export async function createMenuScene(element: string) {
         camera.updateProjectionMatrix();
     });
 
-    const geometry = new THREE.CircleGeometry(10, 1000);
+    const geometry = new THREE.CircleGeometry(1.5, 1000);
     const material = new THREE.MeshStandardMaterial({
-        color: 0x111111,
-        side: THREE.DoubleSide,
-        // reflectivity: 1,
-        shadowSide: THREE.DoubleSide,
+        color: 0x1df7cf,
+        // side: THREE.DoubleSide,
+        // shadowSide: THREE.DoubleSide,
+        opacity: 0.1,
+        transparent: true,
     });
+
     const plane = new THREE.Mesh(geometry, material);
     plane.receiveShadow = true;
     plane.rotateX(-Math.PI / 2);
     scene.add(plane);
 
     {
-        const light = new THREE.SpotLight(0xffffff, 40);
+        const light = new THREE.SpotLight(0xffffff, 70);
         light.target.position.set(0, 0, 0);
         light.position.set(2, 10, 4);
         light.castShadow = true;

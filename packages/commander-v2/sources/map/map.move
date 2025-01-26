@@ -22,8 +22,10 @@ const ETileIsUnwalkable: u64 = 2;
 /// The path is unwalkable.
 const EPathUnwalkable: u64 = 3;
 
+#[allow(unused_const)]
 /// Constant for no cover in the `TileType::Cover`.
 const NO_COVER: u8 = 0;
+#[allow(unused_const)]
 /// Constant for low cover in the `TileType::Cover`.
 const LOW_COVER: u8 = 1;
 /// Constant for high cover in the `TileType::Cover`.
@@ -50,8 +52,8 @@ public enum TileType has copy, drop, store {
     /// cover sides.
     Cover {
         left: u8,
-        right: u8,
         top: u8,
+        right: u8,
         bottom: u8,
     },
     /// Certain tiles cannot be walked on, like walls or water.
@@ -309,8 +311,8 @@ public(package) fun from_bcs(bcs: &mut BCS): Map {
                 0 => TileType::Empty,
                 1 => TileType::Cover {
                     left: bcs.peel_u8(),
-                    right: bcs.peel_u8(),
                     top: bcs.peel_u8(),
+                    right: bcs.peel_u8(),
                     bottom: bcs.peel_u8(),
                 },
                 2 => TileType::Unwalkable,

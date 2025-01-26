@@ -10,6 +10,11 @@ import { Line2 } from "three/addons/lines/Line2.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 
+const COLOR = 0x1AE7bf;
+const DARKER_COLOR = 0x369e90;
+const DARK_COLOR = 0x0c2026;
+
+
 export class MoveMode implements Mode {
     public target: THREE.Vector2 | null = null;
     public path: THREE.Vector2[] = [];
@@ -102,7 +107,7 @@ export class MoveMode implements Mode {
             return;
         }
 
-        const points = path.map(([x, z]) => new THREE.Vector3(x, 0.3, z));
+        const points = path.map(([x, z]) => new THREE.Vector3(x, 0.1, z));
         this.line = newLine(points);
         this.highlight.add(this.line);
     }
@@ -112,13 +117,13 @@ export class MoveMode implements Mode {
         tiles.forEach(([x, z, distance]) => {
             const geometry = new THREE.BoxGeometry(1, 0.1, 1);
             const material = new THREE.MeshStandardMaterial({
-                color: "red",
+                color: DARKER_COLOR,
                 transparent: true,
                 opacity: 2 / (distance + 2),
             });
 
             const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(x, 0.1, z);
+            cube.position.set(x, 0.001, z);
             this.highlight.add(cube);
         });
     }
@@ -166,8 +171,8 @@ export class MoveMode implements Mode {
 function newLine(points: THREE.Vector3[]) {
     const geometry = new LineGeometry().setPositions(points.map((p) => p.toArray()).flat());
     const material = new LineMaterial({
-        color: "crimson",
-        linewidth: 4,
+        color: COLOR,
+        linewidth: 3,
         alphaToCoverage: false,
     });
 

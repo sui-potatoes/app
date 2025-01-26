@@ -6,6 +6,7 @@ module commander::commander;
 
 use commander::{map::{Self, Map}, recruit::Recruit};
 use sui::table::{Self, Table};
+use sui::random::Random;
 
 /// The main object of the game, controls the game state, configuration and
 /// serves as the registry for all users and their recruits.
@@ -52,6 +53,23 @@ public fun place_recruit(game: &mut Game, recruit: Recruit, x: u16, y: u16, ctx:
 /// Move a unit along the path, the first point is the current position of the unit.
 public fun move_unit(game: &mut Game, path: vector<vector<u16>>, _ctx: &mut TxContext) {
     game.map.move_unit(path);
+}
+
+/// Perform an attack action.
+entry fun perform_attack(game: &mut Game, rng: &Random, x0: u16, y0: u16, x1: u16, y1: u16, ctx: &mut TxContext) {
+    let mut rng = rng.new_generator(ctx);
+    let (_, is_dead) = game.map.perform_attack(&mut rng, x0, y0, x1, y1, ctx);
+
+    is_dead.do!(|id| {
+        let recruit = game.recruits.remove(id);
+        let leader = recruit.leader();
+        transfer::public_transfer(recruit.kill(ctx), leader);
+    });
+}
+
+/// Switch to the next turn.
+public fun next_turn(game: &mut Game) {
+    game.map.next_turn();
 }
 
 /// Share the `key`-only object after placing Recruits on the map.
