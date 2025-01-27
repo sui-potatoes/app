@@ -42,7 +42,6 @@ export class ShootMode extends Mode {
 
         const selectedUnit = this.selectedUnit;
 
-        console.log(`Selected Unit: ${this.selectedUnit.id}`);
         const targets = Object.values(this.units).filter((unit) => {
             if (unit.id === selectedUnit.id) {
                 return false;
@@ -94,7 +93,7 @@ export class ShootMode extends Mode {
         mode.currentTarget = null;
 
         {
-            const offset = 30 / 2 - 0.5;
+            const offset = this.size / 2 - 0.5;
             mode.camera.position.set(offset, 20, offset);
             mode.camera.lookAt(offset, 0, offset);
         }

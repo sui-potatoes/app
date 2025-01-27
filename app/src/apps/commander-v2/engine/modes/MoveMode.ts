@@ -12,8 +12,7 @@ import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 
 const COLOR = 0x1AE7bf;
 const DARKER_COLOR = 0x369e90;
-const DARK_COLOR = 0x0c2026;
-
+// const DARK_COLOR = 0x0c2026;
 
 export class MoveMode implements Mode {
     public target: THREE.Vector2 | null = null;
