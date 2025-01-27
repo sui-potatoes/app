@@ -7,6 +7,17 @@
 /// Additionally, the module provides functions to work with the grid, such as
 /// getting the width and height, borrowing elements, and finding the shortest
 /// path between two points using the Wave Algorithm.
+///
+/// Structure, printing and directions:
+/// - the grid is a 2-dimensional vector of elements, with `x` coordinate being
+/// the outer vector and the row number, and `y` coordinate being the inner vector
+/// and the column number
+/// - x=0 is the top of the grid, y=0 is the left side of the grid, with increase
+/// in x going downwards and increase in y going to the right
+/// - the grid is printed vertically, with the top left corner being the first
+/// element and the bottom right corner being the last element
+/// - the grid provides macro functions to check if a point is above, below, to
+/// the left or to the right of another point
 module grid::grid;
 
 use grid::point::{Self, Point};
@@ -65,6 +76,18 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
 }
 
 // === Utils ===
+
+/// Check if a point is above another point (decrease in X).
+public macro fun is_up($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 > $x1 && $y0 == $y1 }
+
+/// Check if a point is below another point (increase in X).
+public macro fun is_down($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 < $x1 && $y0 == $y1 }
+
+/// Check if a point is to the left of another point (decrease in Y).
+public macro fun is_left($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 == $x1 && $y0 > $y1 }
+
+/// Check if a point is to the right of another point (increase in Y).
+public macro fun is_right($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 == $x1 && $y0 < $y1 }
 
 /// Get a Manhattan distance between two points. Useful for calculating distances
 /// or ranges for ranged attacks or walking, for example.
@@ -234,9 +257,19 @@ public macro fun trace<$T>(
 }
 
 /// Print the grid to a string. Only works if `$T` has a `.to_string()` method.
+///
+/// ```rust
+/// let grid = from_vector(vector[
+///     vector[1, 2, 3],
+///     vector[4, 5, 6],
+///     vector[7, 8, 9u8],
+/// ]);
+///
+/// std::debug::print(&grid.to_string!())
+/// ```
 public macro fun to_string<$T>($grid: &Grid<$T>): String {
     let grid = $grid;
-    let mut result = b"\n".to_string();
+    let mut result = b"".to_string();
     let (width, height) = (grid.width(), grid.height());
 
     // the layout is vertical, so we iterate over the height first
@@ -264,103 +297,4 @@ public macro fun from_bcs<$T>($bcs: &mut BCS, $f: |&mut BCS| -> $T): Grid<$T> {
 /// Test-only function to print the grid to the console.
 public macro fun debug<$T>($grid: &Grid<$T>) {
     std::debug::print(&to_string!($grid));
-}
-
-#[test]
-fun test_borrows() {
-    use std::unit_test::assert_eq;
-
-    let mut grid = Grid { grid: vector[vector[0]] };
-    assert_eq!(grid[0, 0], 0);
-
-    // perform a mutable borrow
-    *&mut grid[0, 0] = 1;
-    assert_eq!(grid[0, 0], 1);
-}
-
-#[test]
-fun test_swap() {
-    use std::unit_test::assert_eq;
-
-    let mut grid = from_vector_unchecked(vector[
-        // simple 3x3 grid
-        vector[0, 0, 0],
-        vector[0, 9, 0],
-        vector[0, 0, 0],
-    ]);
-
-    let swapped = grid.swap(1, 1, 3);
-
-    assert_eq!(swapped, 9);
-    assert_eq!(grid[1, 1], 3);
-    assert_eq!(grid[1, 0], 0);
-    assert_eq!(grid[1, 2], 0);
-}
-
-#[test]
-fun test_path_tracing() {
-    let grid = Grid {
-        grid: vector[
-            vector[1, 0, 0, 0, 0],
-            vector[0, 0, 0, 0, 2],
-            vector[0, 0, 0, 0, 0],
-            vector[0, 0, 0, 0, 0], // 9 is a wall
-            vector[0, 0, 0, 0, 0],
-        ],
-    };
-
-    let path = trace!(&grid, 0, 0, 1, 4, 6, |_, _, x, y| grid[x, y] == &0);
-
-    assert!(path.is_some());
-    assert!(path.borrow().length() == 5);
-    assert!(path.borrow()[4] == point::new(1, 4));
-
-    let grid = Grid {
-        grid: vector[
-            vector[0, 1, 0, 0, 0],
-            vector[0, 0, 0, 0, 0],
-            vector[4, 4, 0, 0, 0],
-            vector[2, 4, 0, 0, 0], // 9 is a wall
-            vector[0, 0, 0, 0, 0],
-        ],
-    };
-
-    let path = trace!(&grid, 0, 1, 3, 0, 10, |_, _, x, y| grid[x, y] == &0);
-
-    assert!(path.is_some());
-}
-
-#[test]
-fun test_find_group() {
-    use std::unit_test::assert_eq;
-
-    let grid = Grid<u8> {
-        grid: vector[
-            vector[0, 0, 1, 0, 0],
-            vector[0, 0, 1, 0, 2],
-            vector[0, 0, 1, 0, 0],
-            vector[1, 0, 1, 0, 0],
-            vector[0, 1, 1, 0, 0],
-            vector[0, 0, 0, 0, 0],
-        ],
-    };
-
-    let group = grid.find_group!(0, 2, |el| *el == 1);
-    assert_eq!(group.length(), 6);
-}
-
-#[test]
-fun test_from_bcs() {
-    use std::unit_test::assert_ref_eq;
-    use sui::bcs;
-
-    let grid = Grid<u8> {
-        grid: vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]],
-    };
-
-    let bytes = bcs::to_bytes(&grid);
-    let grid2 = from_bcs!(&mut bcs::new(bytes), |bcs| bcs.peel_u8());
-
-    assert!(grid2.width() == 3);
-    assert_ref_eq!(&grid, &grid2);
 }

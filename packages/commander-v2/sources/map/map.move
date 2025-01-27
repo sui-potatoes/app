@@ -21,6 +21,8 @@ const EUnitAlreadyOnTile: u64 = 1;
 const ETileIsUnwalkable: u64 = 2;
 /// The path is unwalkable.
 const EPathUnwalkable: u64 = 3;
+/// The path is incorrect: skipping tiles or standing still.
+const EIncorrectPath: u64 = 4;
 
 #[allow(unused_const)]
 /// Constant for no cover in the `TileType::Cover`.
@@ -226,67 +228,71 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
     let mut prev = path[0];
     let high_cover = HIGH_COVER;
 
-    'a: {
+    'path: {
         path.do!(|step| {
-            if (step == prev) return; // skip 1st and duplicate steps
+            if (prev == step) return;
             let (x0, y0) = (prev[0], prev[1]);
             let (x1, y1) = (step[0], step[1]);
 
             let source = &map.grid[x0, y0];
             let target = &map.grid[x1, y1];
-            if (target.unit.is_some()) return 'a false;
-            if (target.tile_type == TileType::Unwalkable) return 'a false;
+            if (target.unit.is_some()) return 'path false;
+            if (target.tile_type == TileType::Unwalkable) return 'path false;
+
+            // make sure that the path is not skipping tiles and is not repeating
+            // the same tile
+            assert!(x0.diff(x1) == 1 && y0 == y1 || y0.diff(y1) == 1 && x0 == x1, EIncorrectPath);
 
             prev = step;
 
             // UP
-            if (x0 == x1 + 1 && y0 == y1) {
+            if (grid::is_up!(x0, y0, x1, y1)) {
                 match (&source.tile_type) {
-                    TileType::Cover { top, .. } if (top == &high_cover) => return 'a false,
+                    TileType::Cover { top, .. } if (top == &high_cover) => return 'path false,
                     _ => (),
                 };
 
                 match (&target.tile_type) {
-                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'a false,
+                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'path false,
                     _ => (),
                 };
             };
 
             // DOWN
-            if (x0 + 1 == x1 && y0 == y1) {
+            if (grid::is_down!(x0, y0, x1, y1)) {
                 match (&source.tile_type) {
-                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'a false,
+                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'path false,
                     _ => (),
                 };
 
                 match (&target.tile_type) {
-                    TileType::Cover { top, .. } if (top == &high_cover) => return 'a false,
+                    TileType::Cover { top, .. } if (top == &high_cover) => return 'path false,
                     _ => (),
                 };
             };
 
             // LEFT
-            if (x0 == x1 && y0 == y1 + 1) {
+            if (grid::is_left!(x0, y0, x1, y1)) {
                 match (&source.tile_type) {
-                    TileType::Cover { left, .. } if (left == &high_cover) => return 'a false,
+                    TileType::Cover { left, .. } if (left == &high_cover) => return 'path false,
                     _ => (),
                 };
 
                 match (&target.tile_type) {
-                    TileType::Cover { right, .. } if (right == &high_cover) => return 'a false,
+                    TileType::Cover { right, .. } if (right == &high_cover) => return 'path false,
                     _ => (),
                 };
             };
 
             // RIGHT
-            if (x0 == x1 && y0 + 1 == y1) {
+            if (grid::is_right!(x0, y0, x1, y1)) {
                 match (&source.tile_type) {
-                    TileType::Cover { right, .. } if (right == &high_cover) => return 'a false,
+                    TileType::Cover { right, .. } if (right == &high_cover) => return 'path false,
                     _ => (),
                 };
 
                 match (&target.tile_type) {
-                    TileType::Cover { left, .. } if (left == &high_cover) => return 'a false,
+                    TileType::Cover { left, .. } if (left == &high_cover) => return 'path false,
                     _ => (),
                 };
             }
