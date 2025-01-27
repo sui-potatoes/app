@@ -21,7 +21,7 @@
 module grid::grid;
 
 use grid::point::{Self, Point};
-use std::string::String;
+use std::{macros, string::String};
 use sui::bcs::BCS;
 
 const EIncorrectVectorLength: u64 = 0;
@@ -91,7 +91,9 @@ public macro fun is_right($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 ==
 
 /// Get a Manhattan distance between two points. Useful for calculating distances
 /// or ranges for ranged attacks or walking, for example.
-public fun range(x0: u16, y0: u16, x1: u16, y1: u16): u16 { x0.diff(x1) + y0.diff(y1) }
+public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {
+    macros::num_diff!($x0, $x1) + macros::num_diff!($y0, $y1)
+}
 
 // === Macros ===
 
@@ -185,7 +187,7 @@ public macro fun trace<$T>(
     let limit = 1 + $limit;
 
     // if the difference between A and B is greater than the limit, return none
-    if (range(x0, y0, x1, y1) > limit) {
+    if (range!(x0, y0, x1, y1) > limit) {
         return option::none()
     };
 
