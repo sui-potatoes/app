@@ -46,7 +46,6 @@ export class ShootMode extends Mode {
             if (unit.id === selectedUnit.id) {
                 return false;
             }
-            console.log(unit.gridPosition.distanceTo(selectedUnit.gridPosition));
             return true;
         });
 
@@ -84,6 +83,8 @@ export class ShootMode extends Mode {
         this.selectedUnit.playAnimation("Idle");
         this.selectedUnit.mixer.timeScale = 1;
 
+        (this.mode as ShootMode).currentTarget?.removeTarget();
+
         // remove `<` and `>` buttons
         mode.ui.removeButton("<");
         mode.ui.removeButton(">");
@@ -117,6 +118,10 @@ export class ShootMode extends Mode {
         }
     }
 
+    async performAction(this: Game, _mode: this): Promise<void> {
+        alert('pow');
+    }
+
     async aimAtTarget(this: Game, mode: this) {
         if (!this.selectedUnit || !mode.currentTarget) {
             throw new Error("Can't aim at target without a selected unit or target.");
@@ -130,6 +135,9 @@ export class ShootMode extends Mode {
 
         if (!mode.isAiming) {
             selectedUnit.lookAt(mode.currentTarget.position);
+            mode.currentTarget.lookAt(selectedUnit.position);
+            mode.currentTarget.drawTarget();
+
             // get the future position of the camera
             const fake = new THREE.Object3D();
             fake.position.set(
@@ -155,8 +163,6 @@ export class ShootMode extends Mode {
             mt1.lookAt(fake.position, mode.currentTarget.position, new THREE.Vector3(0, 1, 0));
             const { x, y, z, w } = mode.camera.quaternion.clone().setFromRotationMatrix(mt1);
 
-
-
             await new Promise((resolve) => {
                 // get angle change between current camera and the target
                 // const angleChange = mode.camera.rotation.y - fake.rotation.y
@@ -176,6 +182,7 @@ export class ShootMode extends Mode {
             throw new Error("No targets available.");
         }
 
+        this.currentTarget.removeTarget();
         const index = this.targets.indexOf(this.currentTarget) - (forward ? 1 : -1);
 
         if (index < 0) {

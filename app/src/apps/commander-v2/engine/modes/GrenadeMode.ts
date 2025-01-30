@@ -40,17 +40,41 @@ export class GrenadeMode extends Mode {
         return;
     }
 
+    async performAction(this: Game, _mode: this): Promise<void> {
+        if (!this.selectedUnit) return;
+        const mode = this.mode as GrenadeMode;
+
+        if (!mode.targetTile) return;
+        const { x, y } = mode.targetTile as THREE.Vector2;
+
+        const tiles = this.grid.radiusTiles([x, y], 2);
+        for (const [x, y] of tiles) this.grid.clearCell(x, y);
+
+        this.selectedUnit.playAnimation("Fire");
+    }
+
+    get range(): number {
+        return 5;
+    }
+
     get name(): string {
         return "Grenade";
     }
 
     onClick(this: Game, event: { button: number }) {
         if (!this.selectedUnit) return;
+        const { x: x0, y: y0 } = this.selectedUnit.gridPosition;
         const mode = this.mode as GrenadeMode;
 
         // left click to select target tile
         if (event.button == THREE.MOUSE.LEFT) {
-            mode.targetTile = this.pointer.clone();
+            const { x, y } = this.pointer.clone();
+            if (Math.abs(x - x0) + Math.abs(y - y0) > mode.range) {
+                console.log("Target is out of range.");
+                return;
+            }
+
+            mode.targetTile = new THREE.Vector2(x, y);
             mode.drawBlastArea.call(this, mode.targetTile);
         }
 

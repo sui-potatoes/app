@@ -17,14 +17,39 @@ import { NoneMode } from "./modes/NoneMode";
 import { ShootMode } from "./modes/ShootMode";
 import { MoveMode } from "./modes/MoveMode";
 import { GrenadeMode } from "./modes/GrenadeMode";
-import { Map as GameMap } from "../types/bcs";
 
 export const models: { [key: string]: GLTF } = {};
+
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+export async function loadModels() {
+    let [
+        soldier,
+        base_tile,
+        barrier_steel,
+        barrel_stack
+    ] = await Promise.all([
+        loader.loadAsync("/soldier_3.glb"),
+        loader.loadAsync("/models/base_tile.glb"),
+        loader.loadAsync("/models/barrier_steel.glb"),
+        loader.loadAsync("/models/barrel_stack.glb"),
+    ]);
+
+    models.soldier = soldier;
+    models.base_tile = base_tile;
+    models.barrier_steel = barrier_steel;
+    models.barrel_stack = barrel_stack;
+}
+
 
 /**
  * Creates a new Game scene (not to be confused with the Menu background scene).
  */
-export async function createScene(element: string, size: number, _map: typeof GameMap.$inferType) {
+export async function createScene(element: string, size: number) {
     const root = document.getElementById(element);
     if (!root || root.children.length !== 0) {
         return;
@@ -125,7 +150,7 @@ export async function createScene(element: string, size: number, _map: typeof Ga
 
         controls.update(delta);
         const cursor = controls.raycast(game.plane);
-        cursor && game.update(cursor);
+        cursor && game.update(cursor, delta);
         game.input(controls);
 
         renderer.render(scene, camera);

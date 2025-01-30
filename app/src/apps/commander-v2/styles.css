@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 :root {
     --card-size-1: 40px;
     --main-color: #1df7cf;
+    --button-size: 62px;
 }
 
 /* Take full screen */
@@ -135,12 +136,14 @@ SPDX-License-Identifier: MIT
 }
 
 .action-button {
-    width: 80px;
-    height: 80px;
-    line-height: 80px;
-    margin: 10px 10px 0px 10px;
+    width: var(--button-size);
+    height: var(--button-size);
+    /* line-height: var(--button-size); */
+    /* margin: 10px 10px 0px 10px; */
+    margin: 10px auto;
     background: black;
-    border: 1px solid white;
+    border: 1px solid var(--main-color);
+    color: var(--main-color);
     cursor: pointer;
 }
 

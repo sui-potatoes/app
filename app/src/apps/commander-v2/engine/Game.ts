@@ -141,12 +141,14 @@ export class Game extends THREE.Object3D {
      * Update the state of the game based on the cursor intersection.
      * This is maintained by the `Controls` class.
      */
-    update(cursor: THREE.Intersection) {
-        const [rawX, _, rawZ] = cursor.point;
-        const [x, z] = [Math.floor(rawX + 0.5), Math.floor(rawZ + 0.5)];
+    update(cursor: THREE.Intersection | null, delta: number) {
+        if (cursor !== null) {
+            const [rawX, _, rawZ] = cursor.point;
+            const [x, z] = [Math.floor(rawX + 0.5), Math.floor(rawZ + 0.5)];
+            this.updatePointer(x, z);
+        }
 
-        this.updatePointer(x, z);
-        this.updateUnits();
+        this.updateUnits(delta);
     }
 
     /**
@@ -162,9 +164,9 @@ export class Game extends THREE.Object3D {
         if (this.grid.grid[x][z].unit) return; // highlight the unit tile when pointer over
     }
 
-    updateUnits() {
+    updateUnits(delta: number) {
         for (let id in this.units) {
-            this.units[id].update();
+            this.units[id].update(delta);
         }
     }
 

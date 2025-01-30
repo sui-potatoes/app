@@ -41,10 +41,19 @@ export class Grid extends THREE.Object3D {
         const tileMaterial = mesh.material as THREE.MeshStandardMaterial;
         const material = tileMaterial.clone();
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(size, size), material);
+        const secondFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(size * 10, size * 10),
+            new THREE.MeshStandardMaterial({ color: 0x333333 }),
+        );
 
         floor.rotation.x = -Math.PI / 2;
         floor.position.set(size / 2 - 0.5, 0, size / 2 - 0.5);
+
+        secondFloor.rotation.x = -Math.PI / 2;
+        secondFloor.position.set(0, -0.1, 0);
+
         this.floor.add(floor);
+        this.add(secondFloor);
 
         // alternatively, add individual tiles
         // for (let i = 0; i < size; i++) {

@@ -10,7 +10,7 @@ import { Line2 } from "three/addons/lines/Line2.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 
-const COLOR = 0x1AE7bf;
+const COLOR = 0x1ae7bf;
 const DARKER_COLOR = 0x369e90;
 // const DARK_COLOR = 0x0c2026;
 
@@ -143,14 +143,15 @@ export class MoveMode implements Mode {
         const mode = this.mode as MoveMode;
         const tile = this.grid.grid[x][z];
 
-        if (!(this.mode instanceof MoveMode)) return console.error(`Invalid mode ${this.mode.name}`);
+        if (!(this.mode instanceof MoveMode))
+            return console.error(`Invalid mode ${this.mode.name}`);
 
         if (button === THREE.MOUSE.LEFT) {
             if (tile.type === "Obstacle") return;
             if (tile.unit) {
                 this.selectUnit(x, z); // order of operations is important!
                 this.switchMode(this.mode);
-                return
+                return;
             }
 
             if (this.selectUnit === null) return;
@@ -167,13 +168,15 @@ export class MoveMode implements Mode {
     }
 }
 
-function newLine(points: THREE.Vector3[]) {
-    const geometry = new LineGeometry().setPositions(points.map((p) => p.toArray()).flat());
-    const material = new LineMaterial({
-        color: COLOR,
-        linewidth: 3,
-        alphaToCoverage: false,
-    });
+function newLine(path: THREE.Vector3[]) {
+    const curve = new THREE.CatmullRomCurve3(path, false, "catmullrom", 0.05);
+    const points = curve.getPoints(30);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+    const curveObject = new THREE.Line( geometry, material );
 
-    return new Line2(geometry, material);
+    return new Line2(
+        new LineGeometry().fromLine(curveObject),
+        new LineMaterial({ color: COLOR, linewidth: 3, alphaToCoverage: true }),
+    );
 }

@@ -19,6 +19,8 @@
         "@radix-ui/colors": "^3.0.0",
         "@radix-ui/react-icons": "^1.3.2",
         "@radix-ui/themes": "^3.1.6",
+        "@react-three/drei": "^9.121.4",
+        "@react-three/fiber": "^8.17.13",
         "@tanstack/react-query": "^5.61.0",
         "@undergroundsociety/cybername-gen": "^1.1.0",
         "blake2b": "^2.1.4",
@@ -30,7 +32,8 @@
         "react-router-dom": "^6.28.0",
         "stats.js": "^0.17.0",
         "three": "^0.169.0",
-        "tone": "^15.0.4"
+        "tone": "^15.0.4",
+        "troika-three-text": "^0.52.3"
     },
     "devDependencies": {
         "@eslint/js": "^9.15.0",
