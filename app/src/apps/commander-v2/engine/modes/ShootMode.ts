@@ -9,6 +9,7 @@ import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
 import JEASINGS from "jeasings";
+import { GameEvent } from "../EventBus";
 
 /**
  * None is the default game mode. It allows selecting units and their actions.
@@ -22,6 +23,8 @@ export class ShootMode extends Mode {
     private currentTarget: Unit | null = null; // Index of the current target
     /** Whether the camera is already in the aiming mode */
     private isAiming = false;
+    /** Store listener cb to unsubscribe later */
+    private _cb: ((_: GameEvent["ui"]) => void) | null = null;
     /** Name of the function to  */
     public static moveFun(pkg: string) {
         return `${pkg}::commander::perform_attack`;
@@ -46,7 +49,9 @@ export class ShootMode extends Mode {
             return console.log("No targets available.");
         }
 
-        this.eventBus?.addEventListener("ui", mode._uiEventListener.bind(this));
+        // subscribe to the UI events
+        mode._cb = mode._uiEventListener.bind(this);
+        this.eventBus?.addEventListener("ui", mode._cb);
 
         // set the targets and the current target
         mode.targets = targets;
@@ -62,12 +67,10 @@ export class ShootMode extends Mode {
         this.selectedUnit.playAnimation("Idle");
         this.selectedUnit.mixer.timeScale = 1;
 
+        // unsubscribe from the UI events
         (this.mode as ShootMode).currentTarget?.removeTarget();
-        this.eventBus?.removeEventListener("ui", mode._uiEventListener.bind(this));
-
-        // remove `<` and `>` buttons
-        // mode.ui.removeButton("<");
-        // mode.ui.removeButton(">");
+        mode._cb && this.eventBus?.removeEventListener("ui", mode._cb);
+        mode._cb = null;
 
         mode.targets = [];
         mode.isAiming = false;
@@ -154,25 +157,38 @@ export class ShootMode extends Mode {
         }
     }
 
-    nextTarget(forward: boolean = true) {
-        if (this.currentTarget === null) {
-            throw new Error("No targets available.");
-        }
+    nextTarget(this: Game, mode: this, forward: boolean = true) {
+        if (!this.selectedUnit) return;
+        if (mode.currentTarget === null) throw new Error("No targets available.");
 
-        this.currentTarget.removeTarget();
-        const index = this.targets.indexOf(this.currentTarget) - (forward ? 1 : -1);
+        mode.currentTarget.removeTarget();
+        const index = mode.targets.indexOf(mode.currentTarget) - (forward ? 1 : -1);
 
         if (index < 0) {
-            this.currentTarget = this.targets[this.targets.length - 1];
-        } else if (index >= this.targets.length) {
-            this.currentTarget = this.targets[0];
+            mode.currentTarget = mode.targets[mode.targets.length - 1];
+        } else if (index >= mode.targets.length) {
+            mode.currentTarget = mode.targets[0];
         } else {
-            this.currentTarget = this.targets[index];
+            mode.currentTarget = mode.targets[index];
         }
+
+        const [low, high] = damage(this.selectedUnit);
+        const chanceToHit = chance(this.selectedUnit, mode.currentTarget);
+        mode.currentTarget.drawTarget(chanceToHit, low, high);
     }
 
-    protected _uiEventListener() {
-        console.log("ui event listener");
+    /** Listen to UI events, expecting `next_target` or `prev_target` action */
+    protected _uiEventListener(this: Game, { action }: GameEvent["ui"]) {
+        const mode = this.mode as this;
+        if (action == "next_target") {
+            mode.nextTarget.call(this, mode);
+            mode.aimAtTarget.call(this, mode);
+        }
+
+        if (action == "prev_target") {
+            mode.nextTarget.call(this, mode);
+            mode.aimAtTarget.call(this, mode);
+        }
     }
 }
 

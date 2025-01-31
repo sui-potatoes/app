@@ -200,19 +200,27 @@ const LOG_LENGTH = 5;
 
 export function UI({ eventBus }: { eventBus: EventBus }) {
     const onAction = (action: string) => eventBus.dispatchEvent({ type: "ui", action });
-    const button = (id: string) => (
+    const button = (id: string, text?: string) => (
         <button onClick={() => onAction(id)} className="action-button mb-2">
-            {id}
+            {text || id}
         </button>
     );
 
+    const [shootMode, setShootMode] = useState(false);
     const [log, setLog] = useState<string[]>([]);
 
     useEffect(() => {
+        eventBus.addEventListener("game", (event) => {
+            if (event.action === "mode_switch" && event.mode instanceof ShootMode) {
+                return setShootMode(true);
+            }
+            if (event.action === "mode_switch") return setShootMode(false);
+        });
+
         eventBus.all((event) => {
             setLog((log) => {
                 let { type, action } = event;
-                let fullLog = [...log, `${type}: ${action ? action : ''}`];
+                let fullLog = [...log, `${type}: ${action ? action : ""}`];
                 if (fullLog.length > LOG_LENGTH) fullLog = fullLog.slice(fullLog.length - 5);
                 return fullLog;
             });
@@ -232,13 +240,22 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
                     End Turn
                 </button>
             </div>
-            <div id="panel-bottom" className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10">
-                {log.map((entry, i) => (<p key={'log-' + i} className="text-sm text-white">{entry}</p>))}
+            <div
+                id="panel-bottom"
+                className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10"
+            >
+                {log.map((entry, i) => (
+                    <p key={"log-" + i} className="text-sm text-white">
+                        {entry}
+                    </p>
+                ))}
             </div>
             <div
                 id="panel-right"
                 className="fixed h-full right-0 top-0 p-10 flex justify-end flex-col text-center"
             >
+                {shootMode && button("next_target", ">")}
+                {shootMode && button("prev_target", "<")}
                 {button("confirm")}
                 {button("cancel")}
                 {button("edit")}

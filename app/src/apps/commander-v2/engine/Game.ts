@@ -194,7 +194,7 @@ export class Game extends THREE.Object3D {
         this.mode.disconnect.call(this, this.mode);
         this.mode = mode;
         this.mode.connect.call(this, this.mode);
-        this.tryDispatch({ action: "mode_switch", mode: mode.name });
+        this.tryDispatch({ action: "mode_switch", game: this, mode: this.mode });
     }
 
     /**

@@ -376,7 +376,7 @@ export default function App() {
         }
 
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }) as any,
+            signer: (await flow.getKeypair({ network: "testnet" })) as any,
             transaction: tx as any,
         });
 
