@@ -9,16 +9,17 @@ import { Mode } from "./modes/Mode";
 import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
 import { models } from "./models";
+import { EventBus } from "./EventBus";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
     | { type: "Unwalkable"; unit: number | null }
     | {
           type: "Cover";
-          UP: number;
-          DOWN: number;
-          LEFT: number;
-          RIGHT: number;
+          up: number;
+          down: number;
+          left: number;
+          right: number;
           unit: number | null;
       };
 
@@ -39,7 +40,6 @@ export class Game extends THREE.Object3D {
     public readonly plane: THREE.Mesh;
     /** The Grid object */
     public readonly grid: Grid;
-
     /**
      * Mode is a configurable behavior that can be switched at runtime. It allows
      * the game to have different states of interaction. For example, when a unit
@@ -48,14 +48,15 @@ export class Game extends THREE.Object3D {
      * mode which allows modifying the map.
      *
      * Modes are what define the game's behavior and interaction.
+     * See the `modes` directory for more information.
      *
      * @see Mode
      */
     public mode: Mode = new NoneMode();
-
+    /** Optionally registered EventBus */
+    protected eventBus: EventBus | null = null;
     /** Selected Unit */
     protected selectedUnit: Unit | null = null;
-
     /** Active pointer based on input */
     protected pointer: THREE.Vector2 = new THREE.Vector2();
     /** List of `Unit`s placed on the map, indexed by their Unique ID */
@@ -63,6 +64,7 @@ export class Game extends THREE.Object3D {
     /** Flag to block execution any other action from being run in parallel */
     protected _isBlocked: boolean = false;
 
+    /** Contruct the `Game` instance from BCS representation (fetched Sui Object) */
     public static fromBCS(data: GameMap): Game {
         const map = data.map.map;
         const size = map.grid[0].length;
@@ -82,17 +84,11 @@ export class Game extends THREE.Object3D {
                 }
 
                 if (mapTile.tile_type.$kind === "Cover") {
-                    const {
-                        left: LEFT,
-                        right: RIGHT,
-                        bottom: DOWN,
-                        top: UP,
-                    } = mapTile.tile_type.Cover;
-                    game.grid.setCell(x, z, { type: "Cover", LEFT, RIGHT, UP, DOWN, unit: null });
+                    const { left, right, bottom: down, top: up } = mapTile.tile_type.Cover;
+                    game.grid.setCell(x, z, { type: "Cover", left, right, up, down, unit: null });
                 }
 
                 if (unit) {
-                    console.log("Adding unit", unit, x, z);
                     let unitObj = new Unit(unit, models.soldier, x, z);
                     game.addUnit(unitObj);
                 }
@@ -111,40 +107,30 @@ export class Game extends THREE.Object3D {
         if (useGrid) {
             const offset = this.offset;
             const helper = new THREE.GridHelper(size, size);
-            helper.position.set(offset, +0.02, offset);
+            helper.position.set(offset, +0.02, -offset);
             this.add(helper);
         }
 
         // create the intersectable plane
         this.plane = this.initPlane(size);
         this.add(this.plane);
-
-        // init the grid with random obstacles
         this.grid = new Grid(size);
-        // this.grid.initRandom();
         this.add(this.grid);
     }
 
-    get offset() {
-        return this.size / 2 - 0.5;
+    // === Component integration ===
+
+    /** Register an EventBus to the Game */
+    registerEventBus(eventBus: EventBus) {
+        this.eventBus = eventBus;
     }
 
-    addUnit(unit: Unit) {
-        const { x, y: z } = unit.gridPosition.clone();
-
-        if (!this.grid.isInBounds(x, z)) {
-            throw new Error("Invalid Unit positioning");
-        }
-
-        if (this.grid.grid[x][z].type === "Unwalkable") {
-            return;
-        }
-
-        unit.position.set(x, 0, z);
-        this.grid.grid[x][z].unit = unit.id;
-        this.units[unit.id] = unit;
-        this.add(unit);
+    /** Try dispatching an event if the EventBus is present */
+    tryDispatch(event: { action: string } & any) {
+        this.eventBus?.dispatchEvent({ type: "game", ...event });
     }
+
+    // === Animation Loop & Controls
 
     selectUnit(x: number, z: number) {
         if (!this.grid.grid[x][z].unit) {
@@ -155,31 +141,12 @@ export class Game extends THREE.Object3D {
 
         this.selectedUnit = this.units[this.grid.grid[x][z].unit];
         this.selectedUnit.markSelected(true);
-    }
-
-    initPlane(size: number) {
-        const offset = this.offset;
-        const geometry = new THREE.PlaneGeometry(size, size);
-        const material = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
-        const plane = new THREE.Mesh(geometry, material);
-
-        plane.receiveShadow = true;
-        plane.castShadow = false;
-        plane.rotateX(-Math.PI / 2);
-        // plane.rotateZ(Math.PI / 2);
-        plane.position.set(offset, -0.02, offset);
-
-        return plane;
+        this.eventBus?.dispatchEvent({ type: "game", action: "unit_selected", unit: this.selectedUnit });
     }
 
     /** Called every frame to update the game state. */
     input(controls: Controls) {
         this.mode.input.call(this, controls, this.mode);
-    }
-
-    async performAction() {
-        if (this._isBlocked) return;
-        this.mode.performAction.call(this, this.mode);
     }
 
     /**
@@ -193,31 +160,87 @@ export class Game extends THREE.Object3D {
             this.updatePointer(x, z);
         }
 
-        this.updateUnits(delta);
+        // update all units
+        for (let id in this.units) {
+            this.units[id].update(delta);
+        }
     }
 
-    /**
-     * Update the pointer position and highlight walkable tiles.
-     */
+    /** Update the pointer position. */
     updatePointer(x: number, z: number) {
+        z = -z; // flip the z-axis
         if (this.pointer.x == x && this.pointer.y == z) return;
 
         this.pointer.set(x, z);
 
         if (this.grid.grid[x][z].type === "Unwalkable") return;
         if (this.selectedUnit) return;
-        if (this.grid.grid[x][z].unit) return; // highlight the unit tile when pointer over
+
+        // TODO: highlight the unit tile when pointer over to give user a hint
+        //  that a unit is clickable
+        if (this.grid.grid[x][z].unit) return;
     }
 
-    updateUnits(delta: number) {
-        for (let id in this.units) {
-            this.units[id].update(delta);
-        }
-    }
+    // === Mode Controls ===
 
+    /**
+     * Switch between different modes. This method uses JavaScript's dynamic
+     * method invocation to call the `connect` and `disconnect` methods of the
+     * current and new mode.
+     *
+     * @param mode The new mode to switch to.
+     */
     switchMode(mode: Mode) {
         this.mode.disconnect.call(this, this.mode);
         this.mode = mode;
         this.mode.connect.call(this, this.mode);
+        this.tryDispatch({ action: "mode_switch", mode: mode.name });
+    }
+
+    /**
+     * Perform an action of the current mode.
+     * Each mode must implement a `performAction` method.
+     */
+    async performAction() {
+        if (this._isBlocked) return;
+        this.mode.performAction.call(this, this.mode);
+    }
+
+    // === Scene Setup ===
+
+    /** The plane handling the intersections -> marking coordinates of the cursor */
+    initPlane(size: number) {
+        const offset = this.offset;
+        const geometry = new THREE.PlaneGeometry(size, size);
+        const material = new THREE.MeshBasicMaterial({ color: 0 });
+        const plane = new THREE.Mesh(geometry, material);
+
+        plane.rotateX(-Math.PI / 2);
+        plane.position.set(offset, -0.0, -offset);
+
+        return plane;
+    }
+
+    /** The offset of the grid. This is used to center the grid in the scene. */
+    get offset() {
+        return this.size / 2 - 0.5;
+    }
+
+    /** Add a unit to the game, use its grid position to place it on the map. */
+    addUnit(unit: Unit) {
+        const { x, y: z } = unit.gridPosition.clone();
+
+        if (!this.grid.isInBounds(x, z)) {
+            throw new Error("Invalid Unit positioning");
+        }
+
+        if (this.grid.grid[x][z].type === "Unwalkable") {
+            return;
+        }
+
+        unit.position.set(x, 0, -z);
+        this.grid.grid[x][z].unit = unit.id;
+        this.units[unit.id] = unit;
+        this.add(unit);
     }
 }

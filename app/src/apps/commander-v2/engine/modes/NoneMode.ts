@@ -12,9 +12,7 @@ import { MoveMode } from "./MoveMode";
  * When game resets the mode is set to None.
  */
 export class NoneMode extends Mode {
-    get name(): string {
-        return "None";
-    }
+    public readonly name = "None";
 
     connect() {}
     disconnect() {}

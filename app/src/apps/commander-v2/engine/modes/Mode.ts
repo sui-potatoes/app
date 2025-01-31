@@ -17,7 +17,7 @@ import { Controls } from "./../Controls";
  * `Storage` type parameter defines the structure of the data the mode needs to store.
  */
 export abstract class Mode {
-    public abstract get name(): string;
+    public abstract readonly name: string;
     abstract connect(this: Game, mode: this): void;
     abstract disconnect(this: Game, mode: this): void;
     abstract input(this: Game, controls: Controls, mode: this): void;

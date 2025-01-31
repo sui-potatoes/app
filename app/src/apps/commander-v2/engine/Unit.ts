@@ -21,12 +21,16 @@ export class UnitModel extends THREE.Object3D {
     public readonly animations: THREE.AnimationClip[];
     public readonly mixer: THREE.AnimationMixer;
     public readonly aimCircle: THREE.Group = new THREE.Group();
+    public readonly statsPanel: THREE.Group = new THREE.Group();
     public readonly light = new THREE.SpotLight(0xffffff, 20, 10, Math.PI / 2);
 
     protected text: Text;
     protected updateQueue: ((d: number) => {})[] = [];
 
-    constructor(gltf: GLTF) {
+    constructor(
+        public props: typeof UnitProps.$inferType,
+        gltf: GLTF,
+    ) {
         super();
 
         this.animations = Array.from(gltf.animations);
@@ -42,13 +46,14 @@ export class UnitModel extends THREE.Object3D {
         this.add(this.light);
         this.add(this.model);
         this.add(this.aimCircle);
+        this.add(this.statsPanel);
     }
 
-    drawTarget() {
+    drawTarget(chance: number, damage_low: number, damage_high: number) {
         this.updateQueue = [];
 
         const text = (this.text = new Text());
-        text.text = "CHANCE: 65%\nDAMAGE: 5-8\nHEALTH: 10/10";
+        text.text = `CHANCE: ${chance}%\nDAMAGE: ${damage_low}-${damage_high}\nHEALTH: ${this.props.hp.value}/${this.props.hp.max_value}`;
         text.fontSize = 0.1;
         text.color = 0x1ae7bf;
         text.sync();
@@ -148,18 +153,15 @@ export class UnitModel extends THREE.Object3D {
 export class Unit extends UnitModel {
     public readonly gridPosition: THREE.Vector2 = new THREE.Vector2();
 
-    constructor(
-        public props: typeof UnitProps.$inferType,
-        gltf: GLTF,
-        x: number,
-        z: number,
-    ) {
-        super(gltf);
+    constructor(props: typeof UnitProps.$inferType, gltf: GLTF, x: number, z: number) {
+        super(props, gltf);
         this.gridPosition.set(x, z);
         this.playAnimation("Idle");
     }
 
-    markSelected(_selected: boolean) {}
+    markSelected(_selected: boolean) {
+        console.log("Selected", _selected, this);
+    }
 
     update(delta: number) {
         super.update(delta);

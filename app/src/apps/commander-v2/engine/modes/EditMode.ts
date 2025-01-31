@@ -9,19 +9,19 @@ import { Mode } from "./Mode";
 /**
  * The `Edit` mode allows the user to modify the map by adding, removing or modifying
  * obstacles, cover, and empty tiles.
+ *
+ * Edit mode cannot be used in the game.
+ * There will be a special mode for editing the map.
  */
 export class EditMode extends Mode {
     pointerMesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial> | null = null;
 
+    public readonly name = "Edit";
     private _cb: ((_: any) => void) | null = null;
 
     /** Separate listener for controls,  */
     constructor(private controls: Controls) {
         super();
-    }
-
-    get name() {
-        return "Edit";
     }
 
     connect(this: Game, mode: this) {
@@ -49,10 +49,10 @@ export class EditMode extends Mode {
             );
             mode.pointerMesh.material.transparent = true;
             mode.pointerMesh.material.opacity = 0.5;
-            mode.pointerMesh.position.set(x, 0.5, y);
+            mode.pointerMesh.position.set(x, 0.5, -y);
             this.add(mode.pointerMesh);
         } else {
-            mode.pointerMesh.position.set(x, 0.5, y);
+            mode.pointerMesh.position.set(x, 0.5, -y);
         }
 
         const pointer = mode.pointerMesh;
@@ -73,10 +73,10 @@ export class EditMode extends Mode {
         if (controls.mouse[THREE.MOUSE.LEFT]) {
             this.grid.setCell(x, y, {
                 type: "Cover",
-                UP: 1,
-                DOWN: 0,
-                LEFT: 0,
-                RIGHT: 0,
+                up: 1,
+                down: 0,
+                left: 0,
+                right: 0,
                 unit: null,
             });
         }
@@ -93,23 +93,23 @@ export class EditMode extends Mode {
             const curr = this.grid.grid[x][y];
             const def: Tile = {
                 type: "Cover",
-                UP: 0,
-                DOWN: 0,
-                LEFT: 0,
-                RIGHT: 0,
+                up: 0,
+                down: 0,
+                left: 0,
+                right: 0,
                 unit: null,
             };
 
             if (curr.type === "Cover") {
                 switch (true) {
-                    case curr.UP > 0:
-                        return this.grid.setCell(x, y, { ...def, UP: 0, RIGHT: 1 });
-                    case curr.RIGHT > 0:
-                        return this.grid.setCell(x, y, { ...def, RIGHT: 0, DOWN: 1 });
-                    case curr.DOWN > 0:
-                        return this.grid.setCell(x, y, { ...def, DOWN: 0, LEFT: 1 });
-                    case curr.LEFT > 0:
-                        return this.grid.setCell(x, y, { ...def, LEFT: 0, UP: 1 });
+                    case curr.up > 0:
+                        return this.grid.setCell(x, y, { ...def, up: 0, right: 1 });
+                    case curr.right > 0:
+                        return this.grid.setCell(x, y, { ...def, right: 0, down: 1 });
+                    case curr.down > 0:
+                        return this.grid.setCell(x, y, { ...def, down: 0, left: 1 });
+                    case curr.left > 0:
+                        return this.grid.setCell(x, y, { ...def, left: 0, up: 1 });
                 }
             }
         }
@@ -117,10 +117,10 @@ export class EditMode extends Mode {
         if (button === THREE.MOUSE.LEFT) {
             return this.grid.setCell(x, y, {
                 type: "Cover",
-                UP: 1,
-                DOWN: 0,
-                LEFT: 0,
-                RIGHT: 0,
+                up: 1,
+                down: 0,
+                left: 0,
+                right: 0,
                 unit: null,
             });
         }

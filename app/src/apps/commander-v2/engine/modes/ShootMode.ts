@@ -8,7 +8,6 @@ import { Controls } from "./../Controls";
 import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
-import { UI } from "../UI";
 import JEASINGS from "jeasings";
 
 /**
@@ -16,23 +15,21 @@ import JEASINGS from "jeasings";
  * When game resets the mode is set to None.
  */
 export class ShootMode extends Mode {
+    public readonly name = "Shoot";
     /** List of targets for the action to choose between */
     public targets: Unit[] = [];
     /** Currently chosen target */
     private currentTarget: Unit | null = null; // Index of the current target
     /** Whether the camera is already in the aiming mode */
     private isAiming = false;
-
-    /** Shoot Mode takes control of the Camera while active */
-    constructor(
-        protected camera: Camera,
-        protected ui: UI,
-    ) {
-        super();
+    /** Name of the function to  */
+    public static moveFun(pkg: string) {
+        return `${pkg}::commander::perform_attack`;
     }
 
-    get name(): string {
-        return "None";
+    /** Shoot Mode takes control of the Camera while active */
+    constructor(protected camera: Camera) {
+        super();
     }
 
     connect(this: Game, mode: this) {
@@ -41,33 +38,15 @@ export class ShootMode extends Mode {
         }
 
         const selectedUnit = this.selectedUnit;
-
-        const targets = Object.values(this.units).filter((unit) => {
-            if (unit.id === selectedUnit.id) {
-                return false;
-            }
-            return true;
-        });
+        const targets = Object.values(this.units).filter(
+            (unit) => unit.id !== selectedUnit.id && chance(selectedUnit, unit) > 0,
+        );
 
         if (targets.length === 0) {
-            console.log("No targets available.");
-            return;
+            return console.log("No targets available.");
         }
 
-        // add UI buttons to select targets
-        const prev = mode.ui.createButton("<");
-        const next = mode.ui.createButton(">");
-        mode.ui.leftPanel.append(prev, next);
-
-        prev.addEventListener("click", () => {
-            mode.nextTarget(false);
-            mode.aimAtTarget.call(this, mode);
-        });
-
-        next.addEventListener("click", () => {
-            mode.nextTarget(true);
-            mode.aimAtTarget.call(this, mode);
-        });
+        this.eventBus?.addEventListener("ui", mode._uiEventListener.bind(this));
 
         // set the targets and the current target
         mode.targets = targets;
@@ -84,20 +63,17 @@ export class ShootMode extends Mode {
         this.selectedUnit.mixer.timeScale = 1;
 
         (this.mode as ShootMode).currentTarget?.removeTarget();
+        this.eventBus?.removeEventListener("ui", mode._uiEventListener.bind(this));
 
         // remove `<` and `>` buttons
-        mode.ui.removeButton("<");
-        mode.ui.removeButton(">");
+        // mode.ui.removeButton("<");
+        // mode.ui.removeButton(">");
 
         mode.targets = [];
         mode.isAiming = false;
         mode.currentTarget = null;
 
-        {
-            const offset = this.size / 2 - 0.5;
-            mode.camera.position.set(offset, 20, offset);
-            mode.camera.lookAt(offset, 0, offset);
-        }
+        mode.camera.moveBack();
     }
 
     input(this: Game, controls: Controls, _: this) {
@@ -107,11 +83,9 @@ export class ShootMode extends Mode {
 
         const { x, y } = this.pointer;
         const cell = this.grid.grid[x][y];
+        const pos = this.selectedUnit?.gridPosition;
 
-        if (this.selectedUnit?.gridPosition.x === x && this.selectedUnit?.gridPosition.y === y) {
-            return;
-        }
-
+        if (pos?.x === x && pos?.y === y) return; // clicked on the selected unit
         if (typeof cell.unit === "number" && cell.type !== "Unwalkable") {
             this.selectedUnit = this.units[cell.unit];
             this.switchMode(new MoveMode(controls));
@@ -119,7 +93,7 @@ export class ShootMode extends Mode {
     }
 
     async performAction(this: Game, _mode: this): Promise<void> {
-        alert("pow");
+        console.log("shoot action performed");
     }
 
     async aimAtTarget(this: Game, mode: this) {
@@ -135,8 +109,11 @@ export class ShootMode extends Mode {
 
         if (!mode.isAiming) {
             selectedUnit.lookAt(mode.currentTarget.position);
+
+            const [low, high] = damage(this.selectedUnit);
+            const chanceToHit = chance(this.selectedUnit, mode.currentTarget);
             mode.currentTarget.lookAt(selectedUnit.position);
-            mode.currentTarget.drawTarget();
+            mode.currentTarget.drawTarget(chanceToHit, low, high);
 
             // get the future position of the camera
             const fake = new THREE.Object3D();
@@ -193,4 +170,46 @@ export class ShootMode extends Mode {
             this.currentTarget = this.targets[index];
         }
     }
+
+    protected _uiEventListener() {
+        console.log("ui event listener");
+    }
+}
+
+/**
+ *
+ * @param unit
+ * @returns
+ */
+function damage(unit: Unit | null): [number, number] {
+    if (!unit) return [0, 0];
+    const stats = unit.props.stats;
+
+    let damage_low = stats.damage - stats.spread;
+    let damage_high = stats.damage + stats.spread + (stats.plus_one ? 1 : 0);
+
+    return [damage_low, damage_high];
+}
+
+const CLOSE_DISTANCE_MODIFIER = 5;
+const DISTANCE_MODIFIER = 10;
+
+function chance(unit: Unit | null, target: Unit | null): number {
+    if (!unit || !target) return 0;
+
+    let aim = unit.props.stats.aim;
+    let distance =
+        Math.abs(unit.gridPosition.x - target.gridPosition.x) +
+        Math.abs(unit.gridPosition.y - target.gridPosition.y);
+    let eff_range = unit.props.stats.range;
+
+    if (distance == eff_range) {
+        return aim;
+    }
+
+    if (distance < eff_range) {
+        return aim + (eff_range - distance) * CLOSE_DISTANCE_MODIFIER;
+    }
+
+    return aim - (distance - eff_range) * DISTANCE_MODIFIER;
 }

@@ -4,6 +4,10 @@
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
+/**
+ * Contains all loaded models.
+ * Required to be loaded before the game starts.
+ */
 export const models: { [key: string]: GLTF } = {};
 
 const dracoLoader = new DRACOLoader();
@@ -12,6 +16,7 @@ dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5
 const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 
+/** Trigger loading of all models. */
 export async function loadModels() {
     let [
         soldier,

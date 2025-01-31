@@ -6,12 +6,10 @@
 // import { useEffect } from "react";
 import { Canvas, extend, useFrame, useThree } from "@react-three/fiber";
 import { Camera } from "./engine/Camera";
-import * as THREE from "three";
 import { useEffect, useMemo, useState } from "react";
 import { Game } from "./engine/Game";
 import { loadModels, models } from "./engine/models";
-import { UI as inUI } from "./engine/UI";
-import { Controls, ControlsEvents } from "./engine/Controls";
+import { Controls } from "./engine/Controls";
 import JEASINGS from "jeasings";
 import { MoveMode } from "./engine/modes/MoveMode";
 import { ShootMode } from "./engine/modes/ShootMode";
@@ -25,15 +23,9 @@ import { useNetworkVariable } from "../../networkConfig";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 import { useSuiClient } from "@mysten/dapp-kit";
+import { EventBus } from "./engine/EventBus";
 
 extend({ Camera, Game });
-
-export type GameEvents = {
-    ui: { action: string };
-    controls: { action: ControlsEvents };
-};
-
-export type GameDispatcher = THREE.EventDispatcher<GameEvents>;
 
 declare module "@react-three/fiber" {
     interface ThreeElements {
@@ -55,14 +47,15 @@ export function Playground() {
         enabled: !!zkLogin.address,
     });
     const camera = useMemo(loadCamera, []);
-    const eventStream = useMemo(() => new THREE.EventDispatcher<GameEvents>(), []);
+    const eventBus = useMemo(() => new EventBus(), []);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const localKey = localStorage.getItem(LS_KEY);
     const { data: map, isFetching, isFetched } = useGame({ id: localKey, enabled: true });
 
     useEffect(() => {
         loadModels().then(() => setModelsLoaded(true));
-        console.log("Models loaded");
+        eventBus.dispatchEvent({ type: "three", action: "models_loaded" });
+        eventBus.all((_event) => {}); // subscribe to all events if needed
     }, [models]);
 
     const centerDiv = (children: any) => (
@@ -84,23 +77,16 @@ export function Playground() {
 
     if (map) {
         const size = map.map.map.grid[0].length;
-        const offset = size / 2 - 0.5;
-
-        camera.defaultPosition = new THREE.Vector3(offset * 2, size + 5, offset);
-        camera.defaultTarget = new THREE.Vector3(offset, 0, offset);
-        camera.position.copy(camera.defaultPosition);
-        camera.lookAt(camera.defaultTarget);
+        camera.resetForSize(size);
     }
 
     return (
         <>
             <Canvas camera={camera}>
-                {modelsLoaded && map && (
-                    <GameApp map={map} eventStream={eventStream} camera={camera} />
-                )}
+                {modelsLoaded && map && <GameApp map={map} eventBus={eventBus} camera={camera} />}
                 <Stats />
             </Canvas>
-            <UI onAction={(action) => eventStream.dispatchEvent({ type: "ui", action })} />
+            <UI eventBus={eventBus} />
         </>
     );
 
@@ -138,17 +124,19 @@ export function Playground() {
 
         localStorage.setItem(LS_KEY, map.objectId);
         alert("Map created");
+
+        eventBus.dispatchEvent({ type: "sui", action: "map_created" });
     }
 }
 
 export function GameApp({
     map,
     camera,
-    eventStream,
+    eventBus,
 }: {
     map: GameMap;
     camera: Camera;
-    eventStream: GameDispatcher;
+    eventBus: EventBus;
 }) {
     const { gl } = useThree();
     const game = useMemo(() => Game.fromBCS(map), [map]);
@@ -163,13 +151,8 @@ export function GameApp({
     });
 
     useEffect(() => {
-
-        console.log(map, game.grid.grid[0][2]);
-
+        game.registerEventBus(eventBus);
         controls.connect();
-        // game.addUnit(new Unit(models.soldier, 2, 1));
-        // game.addUnit(new Unit(models.soldier, 6, 4));
-
         controls.addEventListener("scroll", ({ delta }) => {
             let newPosition = camera.position.z + delta * 0.01;
             if (newPosition >= 0 && newPosition < SIZE + 5) {
@@ -186,14 +169,14 @@ export function GameApp({
             }
         });
 
-        eventStream.addEventListener("ui", ({ action }) => {
+        eventBus.addEventListener("ui", ({ action }) => {
             switch (action) {
                 case "confirm":
                     return game.performAction();
                 case "move":
                     return game.switchMode(new MoveMode(controls));
                 case "shoot":
-                    return game.switchMode(new ShootMode(camera, new inUI(gl.domElement)));
+                    return game.switchMode(new ShootMode(camera));
                 case "grenade":
                     return game.switchMode(new GrenadeMode(controls));
                 case "edit":
@@ -213,12 +196,28 @@ export function GameApp({
     );
 }
 
-export function UI({ onAction }: { onAction: (id: string) => void }) {
+const LOG_LENGTH = 5;
+
+export function UI({ eventBus }: { eventBus: EventBus }) {
+    const onAction = (action: string) => eventBus.dispatchEvent({ type: "ui", action });
     const button = (id: string) => (
         <button onClick={() => onAction(id)} className="action-button mb-2">
             {id}
         </button>
     );
+
+    const [log, setLog] = useState<string[]>([]);
+
+    useEffect(() => {
+        eventBus.all((event) => {
+            setLog((log) => {
+                let { type, action, ...r } = event;
+                let fullLog = [...log, `${type}: ${action ? action : ''}`];
+                if (fullLog.length > LOG_LENGTH) fullLog = fullLog.slice(fullLog.length - 5);
+                return fullLog;
+            });
+        });
+    }, []);
 
     return (
         <div id="ui">
@@ -233,6 +232,9 @@ export function UI({ onAction }: { onAction: (id: string) => void }) {
                     End Turn
                 </button>
             </div>
+            <div id="panel-bottom" className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10">
+                {log.map((entry, i) => (<p key={'log-' + i} className="text-sm text-white">{entry}</p>))}
+            </div>
             <div
                 id="panel-right"
                 className="fixed h-full right-0 top-0 p-10 flex justify-end flex-col text-center"
@@ -246,15 +248,8 @@ export function UI({ onAction }: { onAction: (id: string) => void }) {
 }
 
 function loadCamera() {
-    const size = SIZE;
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new Camera(75, aspect, 0.1, 100);
-    const offset = size / 2 - 0.5;
-
-    camera.defaultPosition = new THREE.Vector3(offset * 2, size + 5, offset);
-    camera.defaultTarget = new THREE.Vector3(offset, 0, offset);
-    camera.position.copy(camera.defaultPosition);
-    camera.lookAt(camera.defaultTarget);
-
+    camera.resetForSize(SIZE);
     return camera;
 }

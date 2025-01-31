@@ -11,10 +11,10 @@ import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 
 const COLOR = 0x1ae7bf;
-const DARKER_COLOR = 0x369e90;
-// const DARK_COLOR = 0x0c2026;
+const DARKER_COLOR = 0x568882; //0x369e90;
 
 export class MoveMode implements Mode {
+    public readonly name = "Move";
     public target: THREE.Vector2 | null = null;
     public path: THREE.Vector2[] = [];
 
@@ -29,18 +29,10 @@ export class MoveMode implements Mode {
 
     constructor(private controls: Controls) {}
 
-    get name(): string {
-        return "Move";
-    }
-
     connect(this: Game, mode: this) {
-        if (!this.selectedUnit) {
-            throw new Error("Can't perform action without a selected Unit.");
-        }
+        if (!this.selectedUnit) return this.switchMode(new NoneMode());
 
         this.add(mode.highlight);
-
-        console.log(this.selectedUnit?.gridPosition);
 
         mode._clickCb = mode.onClick.bind(this);
         mode.controls.addEventListener("click", mode._clickCb);
@@ -80,7 +72,7 @@ export class MoveMode implements Mode {
 
         mode.drawPath([]);
         mode.drawWalkable(new Set());
-        this.mode = new NoneMode();
+        // this.mode = new NoneMode();
 
         await unit.walk(path);
 
@@ -90,7 +82,7 @@ export class MoveMode implements Mode {
         this._isBlocked = false;
     }
 
-    /* Custom methods */
+    // === Custom methods ===
 
     /**
      * Draws a path on the grid.
@@ -108,7 +100,7 @@ export class MoveMode implements Mode {
             return;
         }
 
-        const points = path.map(([x, z]) => new THREE.Vector3(x, 0.1, z));
+        const points = path.map(([x, z]) => new THREE.Vector3(x, 0.1, -z));
         this.line = newLine(points);
         this.highlight.add(this.line);
     }
@@ -124,7 +116,7 @@ export class MoveMode implements Mode {
             });
 
             const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(x, 0.001, z);
+            cube.position.set(x, 0.001, -z);
             this.highlight.add(cube);
         });
     }
@@ -148,6 +140,8 @@ export class MoveMode implements Mode {
         if (!(this.mode instanceof MoveMode))
             return console.error(`Invalid mode ${this.mode.name}`);
 
+        if (this.selectedUnit === null) return;
+
         if (button === THREE.MOUSE.LEFT) {
             if (tile.type === "Unwalkable") return;
             if (tile.unit) {
@@ -159,11 +153,13 @@ export class MoveMode implements Mode {
             if (this.selectUnit === null) return;
 
             mode.target = new THREE.Vector2(x, z);
-            let path = this.grid.tracePath(this.selectedUnit?.gridPosition!, mode.target);
+            const limit = this.selectedUnit.props.stats.mobility;
+
+            let path = this.grid.tracePath(this.selectedUnit?.gridPosition!, mode.target, limit);
             if (!path || path.length === 0) return;
             if (path.length > 8) path = path.slice(-9);
 
-            mode.path = path;
+            mode.path = path.map(([x, z]) => new THREE.Vector2(x, -z));
             mode.target = path[0]; // update target to the last step of the path
             mode.drawPath(path);
         }
