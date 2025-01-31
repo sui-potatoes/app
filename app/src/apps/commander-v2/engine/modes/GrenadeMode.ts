@@ -28,6 +28,7 @@ export class GrenadeMode extends Mode {
     }
 
     connect(this: Game, mode: this): void {
+        if (this.selectedUnit === null) return this.switchMode(new NoneMode());
         mode._clickCb = mode.onClick.bind(this);
         mode.controls.addEventListener("click", mode._clickCb);
         this.add(mode.elements);

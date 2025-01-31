@@ -10,6 +10,7 @@ import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
 import JEASINGS from "jeasings";
 import { GameEvent } from "../EventBus";
+import { NoneMode } from "./NoneMode";
 
 /**
  * None is the default game mode. It allows selecting units and their actions.
@@ -36,9 +37,7 @@ export class ShootMode extends Mode {
     }
 
     connect(this: Game, mode: this) {
-        if (this.selectedUnit === null) {
-            throw new Error("Can't perform action without a selected unit or tile.");
-        }
+        if (this.selectedUnit === null) return this.switchMode(new NoneMode());
 
         const selectedUnit = this.selectedUnit;
         const targets = Object.values(this.units).filter(
@@ -60,12 +59,10 @@ export class ShootMode extends Mode {
     }
 
     disconnect(this: Game, mode: this) {
-        if (!this.selectedUnit) {
-            throw new Error("Can't perform action without a selected unit or tile.");
+        if (this.selectedUnit) {
+            this.selectedUnit.playAnimation("Idle");
+            this.selectedUnit.mixer.timeScale = 1;
         }
-
-        this.selectedUnit.playAnimation("Idle");
-        this.selectedUnit.mixer.timeScale = 1;
 
         // unsubscribe from the UI events
         (this.mode as ShootMode).currentTarget?.removeTarget();
@@ -75,7 +72,6 @@ export class ShootMode extends Mode {
         mode.targets = [];
         mode.isAiming = false;
         mode.currentTarget = null;
-
         mode.camera.moveBack();
     }
 
@@ -219,13 +215,7 @@ function chance(unit: Unit | null, target: Unit | null): number {
         Math.abs(unit.gridPosition.y - target.gridPosition.y);
     let eff_range = unit.props.stats.range;
 
-    if (distance == eff_range) {
-        return aim;
-    }
-
-    if (distance < eff_range) {
-        return aim + (eff_range - distance) * CLOSE_DISTANCE_MODIFIER;
-    }
-
+    if (distance == eff_range) return aim;
+    if (distance < eff_range) return aim + (eff_range - distance) * CLOSE_DISTANCE_MODIFIER;
     return aim - (distance - eff_range) * DISTANCE_MODIFIER;
 }

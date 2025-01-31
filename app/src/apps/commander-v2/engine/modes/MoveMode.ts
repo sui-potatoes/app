@@ -72,9 +72,9 @@ export class MoveMode implements Mode {
 
         mode.drawPath([]);
         mode.drawWalkable(new Set());
-        // this.mode = new NoneMode();
-
         await unit.walk(path);
+
+        this.tryDispatch({ action: "move_unit", unit, path });
 
         unit.gridPosition.set(mode.target.x, mode.target.y);
         mode.path = [];
@@ -150,8 +150,6 @@ export class MoveMode implements Mode {
                 return;
             }
 
-            if (this.selectUnit === null) return;
-
             mode.target = new THREE.Vector2(x, z);
             const limit = this.selectedUnit.props.stats.mobility;
 
@@ -162,6 +160,7 @@ export class MoveMode implements Mode {
             mode.path = path.map(([x, z]) => new THREE.Vector2(x, -z));
             mode.target = path[0]; // update target to the last step of the path
             mode.drawPath(path);
+            this.tryDispatch({ action: "draw_path", path });
         }
     }
 }

@@ -203,6 +203,7 @@ export class Game extends THREE.Object3D {
      */
     async performAction() {
         if (this._isBlocked) return;
+        this.tryDispatch({ action: "action", game: this, mode: this.mode });
         this.mode.performAction.call(this, this.mode);
     }
 

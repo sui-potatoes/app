@@ -19,7 +19,7 @@ export class EditMode extends Mode {
     public readonly name = "Edit";
     private _cb: ((_: any) => void) | null = null;
 
-    /** Separate listener for controls,  */
+    /** Separate listener for controls */
     constructor(private controls: Controls) {
         super();
     }
