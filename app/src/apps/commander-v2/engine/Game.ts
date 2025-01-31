@@ -7,16 +7,18 @@ import { Unit } from "./Unit";
 import { Grid } from "./Grid";
 import { Mode } from "./modes/Mode";
 import { NoneMode } from "./modes/NoneMode";
+import { GameMap } from "../hooks/useGame";
+import { models } from "./models";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
-    | { type: "Obstacle"; unit: number | null }
+    | { type: "Unwalkable"; unit: number | null }
     | {
           type: "Cover";
-          UP: boolean;
-          DOWN: boolean;
-          LEFT: boolean;
-          RIGHT: boolean;
+          UP: number;
+          DOWN: number;
+          LEFT: number;
+          RIGHT: number;
           unit: number | null;
       };
 
@@ -61,13 +63,55 @@ export class Game extends THREE.Object3D {
     /** Flag to block execution any other action from being run in parallel */
     protected _isBlocked: boolean = false;
 
-    constructor(public size: number, useGrid: boolean = false) {
+    public static fromBCS(data: GameMap): Game {
+        const map = data.map.map;
+        const size = map.grid[0].length;
+        const game = new Game(size, true);
+
+        for (let x = 0; x < size; x++) {
+            for (let z = 0; z < size; z++) {
+                let mapTile = map.grid[x][z];
+                let unit = mapTile.unit;
+
+                if (mapTile.tile_type.$kind == "Unwalkable") {
+                    game.grid.setCell(x, z, { type: "Unwalkable", unit: null });
+                }
+
+                if (mapTile.tile_type.$kind == "Empty") {
+                    game.grid.setCell(x, z, { type: "Empty", unit: null });
+                }
+
+                if (mapTile.tile_type.$kind === "Cover") {
+                    const {
+                        left: LEFT,
+                        right: RIGHT,
+                        bottom: DOWN,
+                        top: UP,
+                    } = mapTile.tile_type.Cover;
+                    game.grid.setCell(x, z, { type: "Cover", LEFT, RIGHT, UP, DOWN, unit: null });
+                }
+
+                if (unit) {
+                    console.log("Adding unit", unit, x, z);
+                    let unitObj = new Unit(unit, models.soldier, x, z);
+                    game.addUnit(unitObj);
+                }
+            }
+        }
+
+        return game;
+    }
+
+    constructor(
+        public size: number,
+        useGrid: boolean = false,
+    ) {
         super();
 
         if (useGrid) {
             const offset = this.offset;
             const helper = new THREE.GridHelper(size, size);
-            helper.position.set(offset, -0.01, offset);
+            helper.position.set(offset, +0.02, offset);
             this.add(helper);
         }
 
@@ -77,7 +121,7 @@ export class Game extends THREE.Object3D {
 
         // init the grid with random obstacles
         this.grid = new Grid(size);
-        this.grid.initRandom();
+        // this.grid.initRandom();
         this.add(this.grid);
     }
 
@@ -92,7 +136,7 @@ export class Game extends THREE.Object3D {
             throw new Error("Invalid Unit positioning");
         }
 
-        if (this.grid.grid[x][z].type === "Obstacle") {
+        if (this.grid.grid[x][z].type === "Unwalkable") {
             return;
         }
 
@@ -122,6 +166,7 @@ export class Game extends THREE.Object3D {
         plane.receiveShadow = true;
         plane.castShadow = false;
         plane.rotateX(-Math.PI / 2);
+        // plane.rotateZ(Math.PI / 2);
         plane.position.set(offset, -0.02, offset);
 
         return plane;
@@ -159,7 +204,7 @@ export class Game extends THREE.Object3D {
 
         this.pointer.set(x, z);
 
-        if (this.grid.grid[x][z].type === "Obstacle") return;
+        if (this.grid.grid[x][z].type === "Unwalkable") return;
         if (this.selectedUnit) return;
         if (this.grid.grid[x][z].unit) return; // highlight the unit tile when pointer over
     }

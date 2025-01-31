@@ -5,7 +5,6 @@ import * as THREE from "three";
 import * as JEASINGS from "jeasings";
 
 export class Camera extends THREE.PerspectiveCamera {
-
     public defaultPosition = new THREE.Vector3();
     public defaultTarget = new THREE.Vector3();
     public rotationMatrix = new THREE.Matrix4();

@@ -112,14 +112,14 @@ export class ShootMode extends Mode {
             return;
         }
 
-        if (typeof cell.unit === "number" && cell.type !== "Obstacle") {
+        if (typeof cell.unit === "number" && cell.type !== "Unwalkable") {
             this.selectedUnit = this.units[cell.unit];
             this.switchMode(new MoveMode(controls));
         }
     }
 
     async performAction(this: Game, _mode: this): Promise<void> {
-        alert('pow');
+        alert("pow");
     }
 
     async aimAtTarget(this: Game, mode: this) {

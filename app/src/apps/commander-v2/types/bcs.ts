@@ -117,7 +117,7 @@ export const Weapon = bcs.struct("Weapon", {
     id: bcs.Address,
     name: bcs.string(),
     stats: Stats,
-    upgrades: bcs.vector(WeaponUpgrade)
+    upgrades: bcs.vector(WeaponUpgrade),
 });
 
 export const Armor = bcs.struct("Armor", {

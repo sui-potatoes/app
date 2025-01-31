@@ -8,6 +8,8 @@ import { Line2 } from "three/addons/lines/Line2.js";
 import JEASINGS from "jeasings";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
+import { Unit as UnitProps } from "../types/bcs";
+// @ts-ignore
 import { Text } from "troika-three-text";
 
 /**
@@ -45,8 +47,7 @@ export class UnitModel extends THREE.Object3D {
     drawTarget() {
         this.updateQueue = [];
 
-        // write text
-        const text = this.text = new Text();
+        const text = (this.text = new Text());
         text.text = "CHANCE: 65%\nDAMAGE: 5-8\nHEALTH: 10/10";
         text.fontSize = 0.1;
         text.color = 0x1ae7bf;
@@ -57,13 +58,20 @@ export class UnitModel extends THREE.Object3D {
         // adds an aim circle to the unit
         const circle = createCircleSegmentLine(0.3, 32, 0x1ae7bf, 0, Math.PI * 2, 1);
         const innerCircle = createCircleSegmentLine(0.25, 32, 0x1ae7bf, Math.PI / 2, Math.PI, 0.8);
-        const innerCircle2 = createCircleSegmentLine(0.22, 32, 0x1ae7bf, Math.PI * 1.1, Math.PI * 1.5, 0.8);
+        const innerCircle2 = createCircleSegmentLine(
+            0.22,
+            32,
+            0x1ae7bf,
+            Math.PI * 1.1,
+            Math.PI * 1.5,
+            0.8,
+        );
         circle.position.set(0, 1.5, 0.8);
         circle.add(innerCircle);
         circle.add(innerCircle2);
 
-        this.updateQueue.push((d) => innerCircle.rotation.y += d * 1.2);
-        this.updateQueue.push((d) => innerCircle2.rotation.y += d * 0.9);
+        this.updateQueue.push((d) => (innerCircle.rotation.y += d * 1.2));
+        this.updateQueue.push((d) => (innerCircle2.rotation.y += d * 0.9));
 
         circle.rotation.x = Math.PI / 2;
         this.aimCircle.add(circle);
@@ -140,7 +148,12 @@ export class UnitModel extends THREE.Object3D {
 export class Unit extends UnitModel {
     public readonly gridPosition: THREE.Vector2 = new THREE.Vector2();
 
-    constructor(gltf: GLTF, x: number, z: number) {
+    constructor(
+        public props: typeof UnitProps.$inferType,
+        gltf: GLTF,
+        x: number,
+        z: number,
+    ) {
         super(gltf);
         this.gridPosition.set(x, z);
         this.playAnimation("Idle");
@@ -153,7 +166,14 @@ export class Unit extends UnitModel {
     }
 }
 
-function createCircleSegmentLine(radius: number, segments: number, color: number, startAngle: number, endAngle: number, width: number = 0.4) {
+function createCircleSegmentLine(
+    radius: number,
+    segments: number,
+    color: number,
+    startAngle: number,
+    endAngle: number,
+    width: number = 0.4,
+) {
     const vertices = [];
     const angleStep = (endAngle - startAngle) / segments;
 

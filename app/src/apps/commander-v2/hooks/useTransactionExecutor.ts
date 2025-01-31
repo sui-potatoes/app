@@ -28,7 +28,8 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
         getSigner().then(setSigner);
     }, [enabled]);
 
-    if (!enabled || !signer) return { executor: null, isExecuting: false, executeTransaction: () => {} };
+    if (!enabled || !signer)
+        return { executor: null, isExecuting: false, executeTransaction: () => {} };
 
     return {
         executor,
@@ -40,16 +41,18 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
                 data: txPromise,
                 async wait(): Promise<SuiTransactionBlockResponse> {
                     const { digest } = await txPromise;
-                    return client.waitForTransaction({
-                        digest,
-                        options: {
-                            showObjectChanges: true,
-                            showEffects: true,
-                        },
-                    }).then((res) => {
-                        setIsExecuting(false);
-                        return res;
-                    })
+                    return client
+                        .waitForTransaction({
+                            digest,
+                            options: {
+                                showObjectChanges: true,
+                                showEffects: true,
+                            },
+                        })
+                        .then((res) => {
+                            setIsExecuting(false);
+                            return res;
+                        });
                 },
             };
         },

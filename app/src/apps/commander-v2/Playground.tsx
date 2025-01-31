@@ -9,8 +9,7 @@ import { Camera } from "./engine/Camera";
 import * as THREE from "three";
 import { useEffect, useMemo, useState } from "react";
 import { Game } from "./engine/Game";
-import { Unit } from "./engine/Unit";
-import { loadModels, models } from "./engine/scene";
+import { loadModels, models } from "./engine/models";
 import { UI as inUI } from "./engine/UI";
 import { Controls, ControlsEvents } from "./engine/Controls";
 import JEASINGS from "jeasings";
@@ -20,6 +19,12 @@ import { GrenadeMode } from "./engine/modes/GrenadeMode";
 import { EditMode } from "./engine/modes/EditMode";
 import { NoneMode } from "./engine/modes/NoneMode";
 import { Stats } from "@react-three/drei";
+import { GameMap, useGame } from "./hooks/useGame";
+import { Transaction } from "@mysten/sui/transactions";
+import { useNetworkVariable } from "../../networkConfig";
+import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
+import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
+import { useSuiClient } from "@mysten/dapp-kit";
 
 extend({ Camera, Game });
 
@@ -37,34 +42,117 @@ declare module "@react-three/fiber" {
 }
 
 export const SIZE = 10;
+export const LS_KEY = "commander-v2";
 
 export function Playground() {
+    const packageId = useNetworkVariable("commanderV2PackageId");
+    const client = useSuiClient() as any;
+    const flow = useEnokiFlow();
+    const zkLogin = useZkLogin();
+    const { executeTransaction, isExecuting } = useTransactionExecutor({
+        client,
+        signer: () => flow.getKeypair({ network: "testnet" }),
+        enabled: !!zkLogin.address,
+    });
     const camera = useMemo(loadCamera, []);
     const eventStream = useMemo(() => new THREE.EventDispatcher<GameEvents>(), []);
     const [modelsLoaded, setModelsLoaded] = useState(false);
+    const localKey = localStorage.getItem(LS_KEY);
+    const { data: map, isFetching, isFetched } = useGame({ id: localKey, enabled: true });
 
     useEffect(() => {
         loadModels().then(() => setModelsLoaded(true));
         console.log("Models loaded");
     }, [models]);
 
-    if (!modelsLoaded) return <>...</>;
+    const centerDiv = (children: any) => (
+        <div className="text-center bg-black/40 w-full h-full flex items-center justify-center">
+            {children}
+        </div>
+    );
+
+    if (isFetching) return centerDiv("Loading...");
+    if (isFetched && !map) return centerDiv("Map not found");
+    if (!modelsLoaded) return centerDiv("Models not loaded");
+    if (!map)
+        return centerDiv(
+            <div className="block">
+                <h1 className="mb-10">Map not found</h1>
+                <button onClick={() => createMap()}>create demo 1</button>
+            </div>,
+        );
+
+    if (map) {
+        const size = map.map.map.grid[0].length;
+        const offset = size / 2 - 0.5;
+
+        camera.defaultPosition = new THREE.Vector3(offset * 2, size + 5, offset);
+        camera.defaultTarget = new THREE.Vector3(offset, 0, offset);
+        camera.position.copy(camera.defaultPosition);
+        camera.lookAt(camera.defaultTarget);
+    }
 
     return (
         <>
             <Canvas camera={camera}>
-                {modelsLoaded && <GameApp eventStream={eventStream} camera={camera} />}
+                {modelsLoaded && map && (
+                    <GameApp map={map} eventStream={eventStream} camera={camera} />
+                )}
                 <Stats />
             </Canvas>
             <UI onAction={(action) => eventStream.dispatchEvent({ type: "ui", action })} />
         </>
     );
+
+    async function createMap() {
+        if (isExecuting) return;
+        if (!zkLogin.address) return;
+        if (!executeTransaction) return;
+
+        const tx = new Transaction();
+        const r1 = tx.moveCall({ target: `${packageId}::recruit::default` });
+        const r2 = tx.moveCall({ target: `${packageId}::recruit::default` });
+        const game = tx.moveCall({ target: `${packageId}::commander::demo` });
+
+        tx.moveCall({
+            target: `${packageId}::commander::place_recruit`,
+            arguments: [game, r1, tx.pure.u16(0), tx.pure.u16(3)],
+        });
+
+        tx.moveCall({
+            target: `${packageId}::commander::place_recruit`,
+            arguments: [game, r2, tx.pure.u16(6), tx.pure.u16(5)],
+        });
+
+        tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
+
+        const res = await executeTransaction(tx)!.wait();
+        const map = res.objectChanges?.find((change) => {
+            return (
+                change.type === "created" && change.objectType === `${packageId}::commander::Game`
+            );
+        });
+
+        if (!map) throw new Error("Map not found, something is off");
+        if (map.type !== "created") throw new Error("Map not created, something is off");
+
+        localStorage.setItem(LS_KEY, map.objectId);
+        alert("Map created");
+    }
 }
 
-export function GameApp({ camera, eventStream }: { camera: Camera; eventStream: GameDispatcher }) {
+export function GameApp({
+    map,
+    camera,
+    eventStream,
+}: {
+    map: GameMap;
+    camera: Camera;
+    eventStream: GameDispatcher;
+}) {
     const { gl } = useThree();
-    const game = useMemo(() => new Game(SIZE, false), []);
-    const controls = useMemo(() => new Controls(game, gl.domElement, camera), []);
+    const game = useMemo(() => Game.fromBCS(map), [map]);
+    const controls = useMemo(() => new Controls(game, gl.domElement), []);
 
     useFrame((root, delta) => {
         JEASINGS.update();
@@ -75,9 +163,12 @@ export function GameApp({ camera, eventStream }: { camera: Camera; eventStream: 
     });
 
     useEffect(() => {
+
+        console.log(map, game.grid.grid[0][2]);
+
         controls.connect();
-        game.addUnit(new Unit(models.soldier, 2, 1));
-        game.addUnit(new Unit(models.soldier, 6, 4));
+        // game.addUnit(new Unit(models.soldier, 2, 1));
+        // game.addUnit(new Unit(models.soldier, 6, 4));
 
         controls.addEventListener("scroll", ({ delta }) => {
             let newPosition = camera.position.z + delta * 0.01;
@@ -160,7 +251,7 @@ function loadCamera() {
     const camera = new Camera(75, aspect, 0.1, 100);
     const offset = size / 2 - 0.5;
 
-    camera.defaultPosition = new THREE.Vector3(offset, size + 5, offset * 2);
+    camera.defaultPosition = new THREE.Vector3(offset * 2, size + 5, offset);
     camera.defaultTarget = new THREE.Vector3(offset, 0, offset);
     camera.position.copy(camera.defaultPosition);
     camera.lookAt(camera.defaultTarget);

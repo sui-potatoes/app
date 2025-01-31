@@ -3,16 +3,23 @@
 
 import * as THREE from "three";
 import { Tile } from "./Game";
-import { models } from "./scene";
+import { models } from "./models";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 
+/**
+ * Grid follows the structure of the game board, similar to how it is handled in
+ * Move. Grid coordinates are 0-indexed, with the origin at the top-left corner.
+ *
+ * [0, 0] - top left: first row, first column
+ * [1, 0] - second row, first column
+ * [0, 1] - first row, second column
+ */
 export class Grid extends THREE.Object3D {
     public readonly grid: Tile[][];
     public readonly meshes: { [key: string]: THREE.Object3D | THREE.Group } = {};
-    public readonly size: number = 30;
     public readonly floor = new THREE.Group();
 
-    constructor(size: number) {
+    constructor(public readonly size: number) {
         super();
         this.size = size;
         this.grid = [];
@@ -67,7 +74,7 @@ export class Grid extends THREE.Object3D {
     }
 
     clearCell(x: number, y: number) {
-        if (this.grid[x][y].type === "Obstacle") {
+        if (this.grid[x][y].type === "Unwalkable") {
             this.remove(this.meshes[`${x}-${y}`]?.clear());
         }
 
@@ -89,8 +96,8 @@ export class Grid extends THREE.Object3D {
         this.grid[x][z] = { ...tile, unit: this.grid[x][z].unit };
         const group = new THREE.Group();
 
-        if (tile.type === "Obstacle") {
-            this.grid[x][z] = { type: "Obstacle", unit: null };
+        if (tile.type === "Unwalkable") {
+            this.grid[x][z] = { type: "Unwalkable", unit: null };
 
             const barrels = clone(models.barrel_stack.scene);
             barrels.scale.set(0.5, 0.5, 0.5);
@@ -155,33 +162,33 @@ export class Grid extends THREE.Object3D {
     }
 
     initRandom() {
-        const texture = new THREE.TextureLoader().load("/images/texture-concrete.jpg");
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 1);
+        // const texture = new THREE.TextureLoader().load("/images/texture-concrete.jpg");
+        // texture.wrapS = THREE.RepeatWrapping;
+        // texture.wrapT = THREE.RepeatWrapping;
+        // texture.repeat.set(1, 1);
 
-        this.grid.forEach((col, x) => {
-            col.forEach((_el, z) => {
-                if (Math.random() > 0.7) {
-                    const rngBool = () => Math.random() > 0.5;
-                    let tile: Tile = (this.grid[x][z] = {
-                        type: "Cover",
-                        UP: rngBool(),
-                        DOWN: rngBool(),
-                        LEFT: rngBool(),
-                        RIGHT: rngBool(),
-                        unit: null,
-                    });
+        // this.grid.forEach((col, x) => {
+        //     col.forEach((_el, z) => {
+        //         if (Math.random() > 0.7) {
+        //             const rngBool = () => Math.random() > 0.5;
+        //             let tile: Tile = (this.grid[x][z] = {
+        //                 type: "Cover",
+        //                 UP: rngBool() && 1,
+        //                 DOWN: rngBool() && 1,
+        //                 LEFT: rngBool() && 1,
+        //                 RIGHT: rngBool() && 1,
+        //                 unit: null,
+        //             });
 
-                    if (tile.DOWN && tile.LEFT && tile.RIGHT && tile.UP) {
-                        tile = { type: "Obstacle", unit: null };
-                    }
+        //             if (tile.DOWN && tile.LEFT && tile.RIGHT && tile.UP) {
+        //                 tile = { type: "Unwalkable", unit: null };
+        //             }
 
-                    // place obstacles instead of cover
-                    this.setCell(x, z, tile);
-                }
-            });
-        });
+        //             // place obstacles instead of cover
+        //             this.setCell(x, z, tile);
+        //         }
+        //     });
+        // });
     }
 
     /** Returns the Von Neumann neighborhood of a cell in this order: right, down, left, up. */
@@ -222,7 +229,7 @@ export class Grid extends THREE.Object3D {
                     const from = this.grid[nx][ny];
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
-                    if (to.type === "Obstacle") continue;
+                    if (to.type === "Unwalkable") continue;
 
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.DOWN) continue;
@@ -292,10 +299,10 @@ export class Grid extends THREE.Object3D {
         let [x0, y0] = from;
         let [x1, y1] = to;
 
-        if (x0 < x1) return "RIGHT";
-        if (x0 > x1) return "LEFT";
-        if (y0 < y1) return "DOWN";
-        if (y0 > y1) return "UP";
+        if (x0 < x1) return "DOWN";
+        if (x0 > x1) return "UP";
+        if (y0 < y1) return "RIGHT";
+        if (y0 > y1) return "LEFT";
     }
 
     /**
@@ -330,7 +337,7 @@ export class Grid extends THREE.Object3D {
                     const from = this.grid[nx][ny];
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
-                    if (to.type === "Obstacle") continue;
+                    if (to.type === "Unwalkable") continue;
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.DOWN) continue;
                         if (direction === "DOWN" && to.UP) continue;

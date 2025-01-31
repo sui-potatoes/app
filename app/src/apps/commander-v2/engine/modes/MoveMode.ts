@@ -40,6 +40,8 @@ export class MoveMode implements Mode {
 
         this.add(mode.highlight);
 
+        console.log(this.selectedUnit?.gridPosition);
+
         mode._clickCb = mode.onClick.bind(this);
         mode.controls.addEventListener("click", mode._clickCb);
 
@@ -147,7 +149,7 @@ export class MoveMode implements Mode {
             return console.error(`Invalid mode ${this.mode.name}`);
 
         if (button === THREE.MOUSE.LEFT) {
-            if (tile.type === "Obstacle") return;
+            if (tile.type === "Unwalkable") return;
             if (tile.unit) {
                 this.selectUnit(x, z); // order of operations is important!
                 this.switchMode(this.mode);
@@ -173,7 +175,7 @@ function newLine(path: THREE.Vector3[]) {
     const points = curve.getPoints(30);
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-    const curveObject = new THREE.Line( geometry, material );
+    const curveObject = new THREE.Line(geometry, material);
 
     return new Line2(
         new LineGeometry().fromLine(curveObject),

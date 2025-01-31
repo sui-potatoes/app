@@ -58,7 +58,7 @@ export class EditMode extends Mode {
         const pointer = mode.pointerMesh;
 
         // if obstacle, color red, if empty, color green, if cover, color blue
-        if (this.grid.grid[x][y].type === "Obstacle") {
+        if (this.grid.grid[x][y].type === "Unwalkable") {
             pointer.material.color.set("red");
         } else if (this.grid.grid[x][y].type === "Empty") {
             pointer.material.color.set("green");
@@ -73,10 +73,10 @@ export class EditMode extends Mode {
         if (controls.mouse[THREE.MOUSE.LEFT]) {
             this.grid.setCell(x, y, {
                 type: "Cover",
-                UP: true,
-                DOWN: false,
-                LEFT: false,
-                RIGHT: false,
+                UP: 1,
+                DOWN: 0,
+                LEFT: 0,
+                RIGHT: 0,
                 unit: null,
             });
         }
@@ -93,23 +93,23 @@ export class EditMode extends Mode {
             const curr = this.grid.grid[x][y];
             const def: Tile = {
                 type: "Cover",
-                UP: false,
-                DOWN: false,
-                LEFT: false,
-                RIGHT: false,
+                UP: 0,
+                DOWN: 0,
+                LEFT: 0,
+                RIGHT: 0,
                 unit: null,
             };
 
             if (curr.type === "Cover") {
                 switch (true) {
-                    case curr.UP:
-                        return this.grid.setCell(x, y, { ...def, UP: false, RIGHT: true });
-                    case curr.RIGHT:
-                        return this.grid.setCell(x, y, { ...def, RIGHT: false, DOWN: true });
-                    case curr.DOWN:
-                        return this.grid.setCell(x, y, { ...def, DOWN: false, LEFT: true });
-                    case curr.LEFT:
-                        return this.grid.setCell(x, y, { ...def, LEFT: false, UP: true });
+                    case curr.UP > 0:
+                        return this.grid.setCell(x, y, { ...def, UP: 0, RIGHT: 1 });
+                    case curr.RIGHT > 0:
+                        return this.grid.setCell(x, y, { ...def, RIGHT: 0, DOWN: 1 });
+                    case curr.DOWN > 0:
+                        return this.grid.setCell(x, y, { ...def, DOWN: 0, LEFT: 1 });
+                    case curr.LEFT > 0:
+                        return this.grid.setCell(x, y, { ...def, LEFT: 0, UP: 1 });
                 }
             }
         }
@@ -117,10 +117,10 @@ export class EditMode extends Mode {
         if (button === THREE.MOUSE.LEFT) {
             return this.grid.setCell(x, y, {
                 type: "Cover",
-                UP: true,
-                DOWN: false,
-                LEFT: false,
-                RIGHT: false,
+                UP: 1,
+                DOWN: 0,
+                LEFT: 0,
+                RIGHT: 0,
                 unit: null,
             });
         }

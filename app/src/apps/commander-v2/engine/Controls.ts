@@ -16,9 +16,7 @@ export interface Pointer {
 }
 
 export class Controls extends THREE.Controls<ControlsEvents> {
-    private raycaster: THREE.Raycaster;
     private pointer: THREE.Vector2;
-    private camera: THREE.Camera;
     private _inputCb: any;
 
     /** Mouse buttons state. */
@@ -37,13 +35,10 @@ export class Controls extends THREE.Controls<ControlsEvents> {
 
     public readonly pointers: { [key: number]: PointerEvent } = {};
 
-    constructor(object: Game, domElement: HTMLElement, camera: THREE.Camera) {
+    constructor(object: Game, domElement: HTMLElement) {
         super(object, domElement);
 
-        // this.game = object;
-        this.camera = camera;
         this.pointer = new THREE.Vector2();
-        this.raycaster = new THREE.Raycaster();
         this._inputCb = this._input.bind(this);
     }
 
@@ -77,15 +72,6 @@ export class Controls extends THREE.Controls<ControlsEvents> {
 
         window.removeEventListener("keydown", this._inputCb, false);
         window.removeEventListener("keyup", this._inputCb, false);
-    }
-
-    raycast(object: THREE.Object3D): THREE.Intersection | null {
-        const { camera, pointer, raycaster } = this;
-
-        // update the picking ray with the camera and pointer position
-        this.raycaster.setFromCamera(pointer, camera);
-        const [gridIntersection] = raycaster.intersectObjects([object]);
-        return gridIntersection || null;
     }
 
     update(_d: number) {
