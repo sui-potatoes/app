@@ -314,7 +314,7 @@ export default function App() {
         tx.transferObjects([char], zkLogin.address!);
 
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
+            signer: await flow.getKeypair({ network: "testnet" }) as any,
             transaction: tx as any,
         });
 
@@ -355,7 +355,7 @@ export default function App() {
         });
 
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
+            signer: await flow.getKeypair({ network: "testnet" }) as any,
             transaction: tx as any,
         });
 

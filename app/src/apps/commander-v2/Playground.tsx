@@ -211,7 +211,7 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
     useEffect(() => {
         eventBus.all((event) => {
             setLog((log) => {
-                let { type, action, ...r } = event;
+                let { type, action } = event;
                 let fullLog = [...log, `${type}: ${action ? action : ''}`];
                 if (fullLog.length > LOG_LENGTH) fullLog = fullLog.slice(fullLog.length - 5);
                 return fullLog;

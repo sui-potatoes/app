@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 import { useSuiClientQuery } from "@mysten/dapp-kit";
-import { useNetworkVariable } from "../../../networkConfig";
 import { fromBase64 } from "@mysten/bcs";
 import { Game } from "../types/bcs";
 import type { SuiObjectRef } from "@mysten/sui/client";
@@ -21,7 +20,6 @@ export type GameMap = SuiObjectRef & {
  * Hook to create a transaction executor
  */
 export function useGame({ id, enabled }: Props) {
-    const packageId = useNetworkVariable("commanderV2PackageId");
     return useSuiClientQuery(
         "getObject",
         { id: id!, options: { showBcs: true, showOwner: true, showType: true } },

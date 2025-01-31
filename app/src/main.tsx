@@ -1,7 +1,6 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import React from "react";
 import ReactDOM from "react-dom/client";
 import "@mysten/dapp-kit/dist/index.css";
 import "@radix-ui/themes/styles.css";
