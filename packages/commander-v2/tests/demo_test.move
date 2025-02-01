@@ -54,8 +54,6 @@ fun run_simulation(seed: vector<u8>): vector<u16> {
         vector[4, 1],
     ]);
 
-    map.unit(4, 1).do_ref!(|u| std::debug::print(&std::bcs::to_bytes(u.stats())));
-
     map.unit(4, 1).do_ref!(|unit| {
         assert_eq!(unit.ap(), 1); // 1 AP used
         assert_eq!(unit.stats().dodge(), 0);

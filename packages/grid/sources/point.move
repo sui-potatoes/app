@@ -131,3 +131,83 @@ public fun to_string(p: &Point): String {
 fun moore(_p: &Point, _size: u16): vector<Point> {
     abort ENotImplemented
 }
+
+#[test]
+fun test_von_neumann() {
+    let p = new(1, 1);
+    assert!(p.von_neumann(0) == vector[]);
+
+    let n = p.von_neumann(1);
+    assert!(n.contains(&new(1, 0)));
+    assert!(n.contains(&new(0, 1)));
+    assert!(n.contains(&new(2, 1)));
+    assert!(n.contains(&new(1, 2)));
+    assert!(n.length() == 4);
+
+    //     0 1 2 3 4
+    // 0: | | |2| | |
+    // 1: | |2|1|2| |
+    // 2: |2|1|0|1|2|
+    // 3: | |3|1|2| |
+    // 4: | | |2| | |
+
+    let n = new(2, 2).von_neumann(2);
+    assert!(n.contains(&new(0, 2))); // 0
+    assert!(n.contains(&new(1, 1))); // 1
+    assert!(n.contains(&new(1, 2))); // 1
+    assert!(n.contains(&new(1, 3))); // 1
+    assert!(n.contains(&new(2, 0))); // 2
+    assert!(n.contains(&new(2, 1))); // 2
+    assert!(n.contains(&new(2, 3))); // 2
+    assert!(n.contains(&new(2, 4))); // 2
+    assert!(n.contains(&new(3, 1))); // 3
+    assert!(n.contains(&new(3, 2))); // 3
+    assert!(n.contains(&new(3, 3))); // 3
+    assert!(n.contains(&new(4, 2))); // 4
+    assert!(n.length() == 12);
+}
+
+#[test, expected_failure]
+fun test_moore() {
+    let p = new(1, 1);
+    assert!(p.moore(0) == vector[]);
+
+    //     0 1 2
+    // 0: |2|2|2|
+    // 1: |2|1|2|
+    // 2: |2|2|2|
+    let n = p.moore(1);
+    assert!(n.contains(&new(0, 0)));
+    assert!(n.contains(&new(0, 1)));
+    assert!(n.contains(&new(0, 2)));
+    assert!(n.contains(&new(1, 0)));
+    assert!(n.contains(&new(1, 2)));
+    assert!(n.contains(&new(2, 0)));
+    assert!(n.contains(&new(2, 1)));
+    assert!(n.contains(&new(2, 2)));
+    assert!(n.length() == 8);
+
+    //    0 1 2 3 4
+    // 0: |2|2|2|2|2|
+    // 1: |2|1|1|1|2|
+    // 2: |2|1|0|1|2|
+    // 3: |2|1|1|1|2|
+    // 4: |2|2|2|2|2|
+
+    let n = new(2, 2).moore(2);
+    assert!(n.contains(&new(0, 0))); // 2
+    assert!(n.contains(&new(0, 1))); // 2
+    assert!(n.contains(&new(0, 2))); // 2
+    assert!(n.contains(&new(0, 3))); // 2
+    assert!(n.contains(&new(0, 4))); // 2
+    assert!(n.contains(&new(1, 0))); // 2
+    assert!(n.contains(&new(1, 1))); // 1
+    assert!(n.contains(&new(1, 2))); // 1
+    assert!(n.contains(&new(1, 3))); // 1
+    assert!(n.contains(&new(1, 4))); // 2
+    assert!(n.contains(&new(2, 0))); // 2
+    assert!(n.contains(&new(2, 1))); // 1
+    assert!(n.contains(&new(2, 2))); // 0
+    assert!(n.contains(&new(2, 3))); // 1
+    assert!(n.length() == 14);
+}
