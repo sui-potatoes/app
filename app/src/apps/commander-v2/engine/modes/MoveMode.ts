@@ -27,17 +27,18 @@ export type MoveModeEvent<T extends string> = BaseGameEvent<T> & {
  * - Move costs 1 AP.
  */
 export class MoveMode implements Mode {
+    /** Name of the Mode */
     public readonly name = "Move";
+    /** Mode action cost */
     public readonly cost = 1;
+    /** Target tile position */
     public target: THREE.Vector2 | null = null;
+    /** Path to the target */
     public path: THREE.Vector2[] = [];
-
     /** Line used for drawing paths */
     private line: Line2 | null = null;
-
     /** Click callback  */
     private _clickCb = ({}: { button: number }) => {};
-
     /** The Group used for highlighting tiles */
     public readonly highlight = new THREE.Group();
 

@@ -20,8 +20,10 @@ export type ShootModeEvents = BaseGameEvent & {
  * None is the default game mode. It allows selecting units and their actions.
  * When game resets the mode is set to None.
  */
-export class ShootMode extends Mode {
+export class ShootMode implements Mode {
+    /** Name of the Mode */
     public readonly name = "Shoot";
+    /** Mode action cost */
     public readonly cost = 2;
     /** List of targets for the action to choose between */
     public targets: Unit[] = [];
@@ -33,9 +35,7 @@ export class ShootMode extends Mode {
     private _cb: ((_: GameEvent["ui"]) => void) | null = null;
 
     /** Shoot Mode takes control of the Camera while active */
-    constructor(protected camera: Camera) {
-        super();
-    }
+    constructor(protected camera: Camera) {}
 
     connect(this: Game, mode: this) {
         if (this.selectedUnit === null) return this.switchMode(new NoneMode());

@@ -13,19 +13,19 @@ import { NoneMode } from "./NoneMode";
 /**
  * Not available yet.
  */
-export class GrenadeMode extends Mode {
+export class GrenadeMode implements Mode {
+    /** Mode action cost */
+    public readonly cost = 1;
+    /** Name of the Mode */
+    public readonly name = "Grenade";
+    /** The Group used for highlighting tiles */
+    public readonly elements = new THREE.Group();
     /** Click callback  */
     private _clickCb = ({}: { button: number }) => {};
-
     /** Target, where grenade can be thrown */
     private targetTile: THREE.Vector2 | null = null;
 
-    public readonly name = "Grenade";
-    public readonly elements = new THREE.Group();
-
-    constructor(private controls: Controls) {
-        super();
-    }
+    constructor(private controls: Controls) {}
 
     connect(this: Game, mode: this): void {
         if (this.selectedUnit === null) return this.switchMode(new NoneMode());
@@ -84,6 +84,9 @@ export class GrenadeMode extends Mode {
         }
     }
 
+    // === Drawing ===
+
+    /** Draw the blast area of the grenade as a semi-transparent sphere */
     drawBlastArea(this: Game, tile: THREE.Vector2) {
         if (!this.selectedUnit) return;
 
@@ -120,6 +123,7 @@ export class GrenadeMode extends Mode {
         mode.drawThrowCurve.call(this, tile);
     }
 
+    /** Draw a Bezier curve from the unit to the target tile, could be used to animate throw */
     drawThrowCurve(this: Game, to: THREE.Vector2) {
         if (!this.selectedUnit) return;
 
