@@ -127,7 +127,7 @@ public fun perform_action(game: &mut Game, x0: u16, y0: u16, action_idx: u16, x1
         let max_range = unit_ap / action.cost();
 
         assert!(game.is_empty(x1, y1));
-        assert!(grid::range(x0, y0, x1, y1) <= max_range);
+        assert!(grid::range!(x0, y0, x1, y1) <= max_range);
 
         // if a path can be traced, move the unit
         let path = game.trace_path(max_range, x0, y0, x1, y1);
@@ -148,7 +148,7 @@ public fun perform_action(game: &mut Game, x0: u16, y0: u16, action_idx: u16, x1
     if (action.is_attack()) {
         let (max_range, mut damage) = action.attack_params();
 
-        assert!(grid::range(x0, y0, x1, y1) <= max_range);
+        assert!(grid::range!(x0, y0, x1, y1) <= max_range);
         assert!(game.is_unit(x1, y1));
 
         // decrease AP of the unit
