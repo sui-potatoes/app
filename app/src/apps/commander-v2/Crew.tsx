@@ -131,7 +131,7 @@ export function Crew() {
 
         tx.transferObjects([recruit], zkLogin.address);
 
-        await executeTransaction(tx)!.wait();
+        await executeTransaction(tx);
         refetch();
     }
 
@@ -164,7 +164,7 @@ export function Crew() {
             arguments: [armor],
         });
 
-        await executeTransaction(tx)!.wait().then(console.log);
+        await executeTransaction(tx).then(console.log);
         refetch();
     }
 }

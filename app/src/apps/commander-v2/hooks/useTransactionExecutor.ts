@@ -1,7 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { SuiClient, SuiTransactionBlockResponse } from "@mysten/sui/client";
+import { SuiClient } from "@mysten/sui/client";
 import { Signer } from "@mysten/sui/cryptography";
 import { SerialTransactionExecutor, Transaction } from "@mysten/sui/transactions";
 import { useEffect, useMemo, useState } from "react";
@@ -19,7 +19,7 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
     const [signer, setSigner] = useState<Signer | null>(null);
     const [isExecuting, setIsExecuting] = useState(false);
     const executor = useMemo(
-        () => signer && new SerialTransactionExecutor({ client, signer }),
+        () => signer && new SerialTransactionExecutor({ client, signer, defaultGasBudget: 1_000_000_000n }),
         [signer],
     );
 
@@ -29,33 +29,19 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
     }, [enabled]);
 
     if (!enabled || !signer)
-        return { executor: null, isExecuting: false, executeTransaction: () => {} };
+        return { executor: null, isExecuting: false, executeTransaction: null };
 
     return {
         executor,
         isExecuting,
         executeTransaction(tx: Transaction) {
             setIsExecuting(true);
-            const txPromise = executor!.executeTransaction(tx);
-            return {
-                data: txPromise,
-                async wait(): Promise<SuiTransactionBlockResponse> {
-                    const { digest } = await txPromise;
-                    return client
-                        .waitForTransaction({
-                            digest,
-                            options: {
-                                showObjectChanges: true,
-                                showEffects: true,
-                                showEvents: true,
-                            },
-                        })
-                        .then((res) => {
-                            setIsExecuting(false);
-                            return res;
-                        });
-                },
-            };
+            return executor!
+                .executeTransaction(tx, { showEffects: true, showObjectChanges: true, showEvents: true })
+                .then((res) => {
+                    setIsExecuting(false);
+                    return res;
+                });
         },
     };
 }

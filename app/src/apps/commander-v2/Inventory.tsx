@@ -176,7 +176,7 @@ export function Inventory() {
 
         tx.transferObjects([armor], zkLogin.address!);
 
-        await executeTransaction!(tx)!.wait();
+        await executeTransaction!(tx);
         refetch();
     }
 
@@ -246,7 +246,7 @@ export function Inventory() {
 
         tx.transferObjects([weapon], zkLogin.address!);
 
-        await executeTransaction!(tx)!.wait();
+        await executeTransaction!(tx);
         refetch();
     }
 
@@ -262,7 +262,7 @@ export function Inventory() {
             arguments: [weapon, tx.pure.u8(idx)],
         });
 
-        await executeTransaction(tx)!.wait();
+        await executeTransaction(tx);
         refetch();
     }
 
@@ -277,7 +277,7 @@ export function Inventory() {
             arguments: [tx.objectRef(ref)],
         });
 
-        await executeTransaction(tx)!.wait();
+        await executeTransaction(tx);
         refetch();
     }
 
@@ -292,7 +292,7 @@ export function Inventory() {
             arguments: [tx.objectRef(ref)],
         });
 
-        await executeTransaction(tx)!.wait();
+        await executeTransaction(tx);
         refetch();
     }
 }
