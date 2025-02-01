@@ -7,6 +7,19 @@ import { NavLink } from "react-router-dom";
 import { formatAddress, fromHex } from "@mysten/sui/utils";
 import { bcs } from "./types/bcs";
 
+/**
+ * Page that stores the settings of the user.
+ *
+ * - top up account balance
+ * - view account balance
+ * - view address
+ *
+ * Maybe:
+ *
+ * - sound settings
+ * - graphics settings
+ * - UI size settings
+ */
 export function Settings() {
     const zkLogin = useZkLogin();
     const { data: balanceQuery, isPending } = useSuiClientQuery("getBalance", {

@@ -46,14 +46,14 @@ public fun try_reset_ap(unit: &mut Unit, turn: u16) {
 /// Get the HP of the `Unit`.
 public fun perform_move(unit: &mut Unit, distance: u8) {
     assert!(unit.stats.mobility() >= distance);
-    assert!(unit.ap.value() > 1);
+    assert!(unit.ap.value() > 0);
 
     unit.ap.decrease(1);
 }
 
 /// Reload the `Unit`'s weapon. It costs 1 AP.
 public fun perform_reload(unit: &mut Unit) {
-    assert!(unit.ap.value() > 1);
+    assert!(unit.ap.value() > 0);
     unit.ap.decrease(1);
 }
 

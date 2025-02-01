@@ -9,8 +9,12 @@ import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
 import JEASINGS from "jeasings";
-import { GameEvent } from "../EventBus";
+import { BaseGameEvent, GameEvent } from "../EventBus";
 import { NoneMode } from "./NoneMode";
+
+export type ShootModeEvents = BaseGameEvent & {
+    aim: { unit: Unit; target: Unit };
+};
 
 /**
  * None is the default game mode. It allows selecting units and their actions.
@@ -105,6 +109,8 @@ export class ShootMode extends Mode {
         // move camera to the selected unit aiming at the target
         selectedUnit.playAnimation("SniperShot");
         selectedUnit.mixer.timeScale = 0.1;
+
+        this.tryDispatch({ type: "game", action: "aim", unit: selectedUnit, targetUnit: mode.currentTarget });
 
         if (!mode.isAiming) {
             selectedUnit.lookAt(mode.currentTarget.position);

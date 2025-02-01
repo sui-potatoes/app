@@ -1,10 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-// import { NavLink } from "react-router-dom";
-// import { createScene } from "./engine/scene";
-// import { useEffect } from "react";
-import { Canvas, extend, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Camera } from "./engine/Camera";
 import { useEffect, useMemo, useState } from "react";
 import { Game } from "./engine/Game";
@@ -23,26 +20,20 @@ import { useNetworkVariable } from "../../networkConfig";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 import { useSuiClient } from "@mysten/dapp-kit";
-import { EventBus } from "./engine/EventBus";
-
-extend({ Camera, Game });
-
-declare module "@react-three/fiber" {
-    interface ThreeElements {
-        game: Game;
-    }
-}
+import { EventBus, GameEvent } from "./engine/EventBus";
+import { bcs } from "./types/bcs";
+import * as THREE from "three";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
 
 export function Playground() {
     const packageId = useNetworkVariable("commanderV2PackageId");
-    const client = useSuiClient() as any;
+    const client = useSuiClient();
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
     const { executeTransaction, isExecuting } = useTransactionExecutor({
-        client,
+        client: client as any,
         signer: () => flow.getKeypair({ network: "testnet" }),
         enabled: !!zkLogin.address,
     });
@@ -50,13 +41,72 @@ export function Playground() {
     const eventBus = useMemo(() => new EventBus(), []);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const localKey = localStorage.getItem(LS_KEY);
-    const { data: map, isFetching, isFetched } = useGame({ id: localKey, enabled: true });
+    const { data: map, isFetching, isFetched, refetch } = useGame({ id: localKey, enabled: true });
+    const [lockedTx, setLockedTx] = useState<Transaction | null>(null);
 
     useEffect(() => {
         loadModels().then(() => setModelsLoaded(true));
         eventBus.dispatchEvent({ type: "three", action: "models_loaded" });
         eventBus.all((_event) => {}); // subscribe to all events if needed
     }, [models]);
+
+    useEffect(() => {
+        if (!map) return;
+
+        /** Listen to move performed event */
+        async function onGameEvent(event: GameEvent["game"]) {
+            if (event.action === "trace") {
+                const result = await moveUnit(event.path.map((p: THREE.Vector2) => [p.x, p.y]));
+                if (!result) return console.log("unable to move unit");
+                setLockedTx(result.tx);
+                eventBus.dispatchEvent({ type: "sui", action: "trace:success" });
+            }
+
+            if (event.action === "aim") {
+                const { x: x0, y: y0 } = event.unit.gridPosition as THREE.Vector2;
+                const { x: x1, y: y1 } = event.targetUnit.gridPosition as THREE.Vector2;
+
+                const result = await performAttack([x0, y0], [x1, y1]);
+                if (!result) return console.log("unable to perform attack");
+                setLockedTx(result.tx);
+                eventBus.dispatchEvent({ type: "sui", action: "aim:success" });
+            }
+        }
+
+        async function onNextTurn(event: GameEvent["ui"]) {
+            if (event.action === "next_turn") {
+                const res = await nextTurn();
+                if (!res) return console.log("unable to end turn");
+
+                await executeTransaction(res.tx)!.wait();
+                eventBus.dispatchEvent({ type: "sui", action: "next_turn:success" });
+            }
+        }
+
+        eventBus.addEventListener("game", onGameEvent);
+        eventBus.addEventListener("ui", onNextTurn);
+
+        return () => {
+            eventBus.removeEventListener("game", onGameEvent);
+            eventBus.removeEventListener("ui", onNextTurn);
+        };
+    }, [map, executeTransaction]);
+
+    useEffect(() => {
+        if (!lockedTx) return;
+
+        /** Listen to the ui:confirm event, trigger tx sending */
+        async function onConfirm(event: GameEvent["ui"]) {
+            if (event.action === "confirm" && lockedTx && !isExecuting) {
+                setLockedTx(null);
+                const res = await executeTransaction(lockedTx)!.wait();
+                eventBus.dispatchEvent({ type: "sui", action: "tx:success", effects: res.effects });
+            }
+        }
+
+        eventBus.addEventListener("ui", onConfirm);
+        return () => eventBus.removeEventListener("ui", onConfirm);
+    }, [lockedTx]);
 
     const centerDiv = (children: any) => (
         <div className="text-center bg-black/40 w-full h-full flex items-center justify-center">
@@ -86,7 +136,7 @@ export function Playground() {
                 {modelsLoaded && map && <GameApp map={map} eventBus={eventBus} camera={camera} />}
                 <Stats />
             </Canvas>
-            <UI eventBus={eventBus} />
+            <UI isExecuting={isExecuting} eventBus={eventBus} />
         </>
     );
 
@@ -123,12 +173,94 @@ export function Playground() {
         if (map.type !== "created") throw new Error("Map not created, something is off");
 
         localStorage.setItem(LS_KEY, map.objectId);
-        alert("Map created");
-
         eventBus.dispatchEvent({ type: "sui", action: "map_created" });
+        refetch();
+    }
+
+    /** Perform ranged attack. I've been waiting for this soooo long */
+    async function performAttack(unit: [number, number], target: [number, number]) {
+        if (!map) return;
+        if (isExecuting) return;
+        if (!zkLogin.address) return;
+        if (!executeTransaction) return;
+
+        const tx = new Transaction();
+        const game = tx.sharedObjectRef({
+            objectId: map.objectId,
+            initialSharedVersion: map.initialSharedVersion,
+            mutable: true,
+        });
+
+        const rng = tx.object.random();
+
+        tx.moveCall({
+            target: `${packageId}::commander::perform_attack`,
+            arguments: [game, rng, tx.pure.u16(unit[0]), tx.pure.u16(unit[1]), tx.pure.u16(target[0]), tx.pure.u16(target[1])],
+        });
+
+        tx.setSender(zkLogin.address);
+
+        const res = await client.dryRunTransactionBlock({
+            transactionBlock: await tx.build({ client: client as any }),
+        });
+
+        return { res, tx };
+    }
+
+    /** Move the unit on the map. The initial coordinate is the gridPosition of the unit. */
+    async function moveUnit(path: [number, number][]) {
+        if (!map) return;
+        if (isExecuting) return;
+        if (!zkLogin.address) return;
+        if (!executeTransaction) return;
+
+        const tx = new Transaction();
+        const game = tx.sharedObjectRef({
+            objectId: map.objectId,
+            initialSharedVersion: map.initialSharedVersion,
+            mutable: true,
+        });
+
+        const pathArg = tx.pure(bcs.vector(bcs.vector(bcs.u16())).serialize(path));
+
+        tx.moveCall({ target: `${packageId}::commander::move_unit`, arguments: [game, pathArg] });
+        tx.setSender(zkLogin.address);
+
+        const res = await client.dryRunTransactionBlock({
+            transactionBlock: await tx.build({ client: client as any }),
+        });
+
+        return { res, tx };
+    }
+
+    /** End the turn. */
+    async function nextTurn() {
+        if (!map) return;
+        if (isExecuting) return;
+        if (!zkLogin.address) return;
+        if (!executeTransaction) return;
+
+        const tx = new Transaction();
+        const game = tx.sharedObjectRef({
+            objectId: map.objectId,
+            initialSharedVersion: map.initialSharedVersion,
+            mutable: true,
+        });
+
+        tx.moveCall({ target: `${packageId}::commander::next_turn`, arguments: [game] });
+        tx.setSender(zkLogin.address);
+
+        const res = await client.dryRunTransactionBlock({
+            transactionBlock: await tx.build({ client: client as any }),
+        });
+
+        return { res, tx };
     }
 }
 
+/**
+ * The Game itself, rendered inside the `Canvas` component.
+ */
 export function GameApp({
     map,
     camera,
@@ -139,7 +271,7 @@ export function GameApp({
     eventBus: EventBus;
 }) {
     const { gl } = useThree();
-    const game = useMemo(() => Game.fromBCS(map), [map]);
+    const game = useMemo(() => Game.fromBCS(map), []);
     const controls = useMemo(() => new Controls(game, gl.domElement), []);
 
     useFrame((root, delta) => {
@@ -196,12 +328,22 @@ export function GameApp({
     );
 }
 
+/**
+ * The length of the log displayed in the UI.
+ */
 const LOG_LENGTH = 5;
 
-export function UI({ eventBus }: { eventBus: EventBus }) {
+/**
+ * UI Component which renders buttons and emits events in the `eventBus` under the `ui` type.
+ * Listens to the in-game events to render additional buttons and log the actions.
+ */
+export function UI({ eventBus, isExecuting }: { eventBus: EventBus; isExecuting?: boolean }) {
     const onAction = (action: string) => eventBus.dispatchEvent({ type: "ui", action });
     const button = (id: string, text?: string) => (
-        <button onClick={() => onAction(id)} className="action-button mb-2">
+        <button
+            onClick={() => onAction(id)}
+            className={"action-button mb-2" + (isExecuting ? " disabled" : "")}
+        >
             {text || id}
         </button>
     );
@@ -236,7 +378,7 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
                 {button("move")}
                 {button("shoot")}
                 {button("grenade")}
-                <button onClick={() => onAction("end_turn")} className="action-button mt-40">
+                <button onClick={() => onAction("next_turn")} className={"action-button mt-40" + (isExecuting ? " disabled" : "")}>
                     End Turn
                 </button>
             </div>
@@ -264,6 +406,10 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
     );
 }
 
+/**
+ * Load the camera for the game.
+ * Happens just ones in `useMemo` and is used in the `Canvas` component.
+ */
 function loadCamera() {
     const aspect = window.innerWidth / window.innerHeight;
     const camera = new Camera(75, aspect, 0.1, 100);

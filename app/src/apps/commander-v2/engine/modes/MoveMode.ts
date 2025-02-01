@@ -9,9 +9,16 @@ import { NoneMode } from "./NoneMode";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
+import { BaseGameEvent } from "../EventBus";
+import { Unit } from "../Unit";
 
 const COLOR = 0x1ae7bf;
 const DARKER_COLOR = 0x568882; //0x369e90;
+
+export type MoveModeEvent<T extends string> = BaseGameEvent<T> & {
+    "move": { unit: Unit; path: THREE.Vector2[] };
+    "trace": { path: THREE.Vector2[] };
+}
 
 export class MoveMode implements Mode {
     public readonly name = "Move";
@@ -37,8 +44,9 @@ export class MoveMode implements Mode {
         mode._clickCb = mode.onClick.bind(this);
         mode.controls.addEventListener("click", mode._clickCb);
 
+        const mobility = this.selectedUnit.props.stats.mobility;
         const { x, y } = this.selectedUnit.gridPosition;
-        const walkable = this.grid.walkableTiles([x, y], 8);
+        const walkable = this.grid.walkableTiles([x, y], mobility);
         mode.drawWalkable(walkable);
     }
 
@@ -74,7 +82,7 @@ export class MoveMode implements Mode {
         mode.drawWalkable(new Set());
         await unit.walk(path);
 
-        this.tryDispatch({ action: "move_unit", unit, path });
+        this.tryDispatch({ action: "move", unit, path });
 
         unit.gridPosition.set(mode.target.x, mode.target.y);
         mode.path = [];
@@ -151,16 +159,16 @@ export class MoveMode implements Mode {
             }
 
             mode.target = new THREE.Vector2(x, z);
-            const limit = this.selectedUnit.props.stats.mobility;
+            const limit = this.selectedUnit.props.stats.mobility + 1;
 
             let path = this.grid.tracePath(this.selectedUnit?.gridPosition!, mode.target, limit);
             if (!path || path.length === 0) return;
-            if (path.length > 8) path = path.slice(-9);
-
+            if (path.length > limit) path = path.slice(-limit);
+            path.reverse();
             mode.path = path.map(([x, z]) => new THREE.Vector2(x, -z));
-            mode.target = path[0]; // update target to the last step of the path
+            mode.target = path[path.length - 1]; // update target to the last step of the path
             mode.drawPath(path);
-            this.tryDispatch({ action: "draw_path", path });
+            this.tryDispatch({ action: "trace", path });
         }
     }
 }

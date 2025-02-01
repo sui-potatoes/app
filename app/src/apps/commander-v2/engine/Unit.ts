@@ -122,7 +122,6 @@ export class UnitModel extends THREE.Object3D {
     }
 
     async walk(path: THREE.Vector2[]) {
-        path.reverse();
         this.playAnimation("Run", 0.5);
 
         let easings: [{ x: number; z: number }, JEASINGS.JEasing][] = path
@@ -160,7 +159,7 @@ export class Unit extends UnitModel {
     }
 
     markSelected(_selected: boolean) {
-        console.log("Selected", _selected, this);
+        // console.log("Selected", _selected, this.props);
     }
 
     update(delta: number) {
