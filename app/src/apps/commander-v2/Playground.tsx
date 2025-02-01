@@ -234,8 +234,6 @@ export function Playground() {
 
         const res = await executeTransaction(tx);
 
-        console.log(res.data);
-
         const map = res.data.objectChanges?.find((change) => {
             return (
                 change.type === "created" && change.objectType === `${packageId}::commander::Game`
@@ -379,7 +377,6 @@ export function GameApp({
             if (action == "attack") {
                 let params = data as AttackEvent;
                 game.applyAttackEvent(params);
-                console.log("game should apply attack", params);
             }
 
             if (action == "next_turn") {
