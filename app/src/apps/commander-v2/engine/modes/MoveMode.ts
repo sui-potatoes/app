@@ -16,12 +16,19 @@ const COLOR = 0x1ae7bf;
 const DARKER_COLOR = 0x568882; //0x369e90;
 
 export type MoveModeEvent<T extends string> = BaseGameEvent<T> & {
-    "move": { unit: Unit; path: THREE.Vector2[] };
-    "trace": { path: THREE.Vector2[] };
-}
+    move: { unit: Unit; path: THREE.Vector2[] };
+    trace: { path: THREE.Vector2[] };
+};
 
+/**
+ * Move mode allows the player to move the selected unit.
+ * It shows the walkable tiles and the path to the target.
+ *
+ * - Move costs 1 AP.
+ */
 export class MoveMode implements Mode {
     public readonly name = "Move";
+    public readonly cost = 1;
     public target: THREE.Vector2 | null = null;
     public path: THREE.Vector2[] = [];
 
@@ -43,6 +50,12 @@ export class MoveMode implements Mode {
 
         mode._clickCb = mode.onClick.bind(this);
         mode.controls.addEventListener("click", mode._clickCb);
+
+        if (this.selectedUnit.props.ap.value == 0) {
+            const { x, y } = this.selectedUnit.gridPosition;
+            const singleTile = [x, y, 0] as [number, number, number];
+            return mode.drawWalkable(new Set([singleTile]));
+        }
 
         const mobility = this.selectedUnit.props.stats.mobility;
         const { x, y } = this.selectedUnit.gridPosition;
@@ -80,6 +93,7 @@ export class MoveMode implements Mode {
 
         mode.drawPath([]);
         mode.drawWalkable(new Set());
+        unit.spendAp(mode.cost);
         await unit.walk(path);
 
         this.tryDispatch({ action: "move", unit, path });
@@ -157,6 +171,8 @@ export class MoveMode implements Mode {
                 this.switchMode(this.mode);
                 return;
             }
+
+            if (this.selectedUnit.props.ap.value === 0) return;
 
             mode.target = new THREE.Vector2(x, z);
             const limit = this.selectedUnit.props.stats.mobility + 1;

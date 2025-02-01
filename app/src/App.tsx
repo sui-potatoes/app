@@ -11,11 +11,7 @@ import CommanderV2 from "./apps/commander-v2/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
 import { useSuiClient } from "@mysten/dapp-kit";
-import {
-    normalizeSuiAddress,
-    normalizeStructTag,
-    SUI_TYPE_ARG,
-} from "@mysten/sui/utils";
+import { normalizeSuiAddress, normalizeStructTag, SUI_TYPE_ARG } from "@mysten/sui/utils";
 import { requestSuiFromFaucetV1, getFaucetHost } from "@mysten/sui/faucet";
 import { Toaster } from "react-hot-toast";
 
@@ -71,26 +67,19 @@ export function App() {
                                     // workaround for the issue where google auth doesn't work
                                     // when the app is hosted on a subpath.
                                     history.pushState({}, "", "/");
-                                    window.location.href =
-                                        await flow.createAuthorizationURL({
-                                            provider: "google",
-                                            clientId:
-                                                "591411088609-6kbt6b07a6np6mq2mnlq97i150amussh.apps.googleusercontent.com",
-                                            redirectUrl:
-                                                window.location.href.split(
-                                                    "#",
-                                                )[0],
-                                            network: "testnet",
-                                        });
+                                    window.location.href = await flow.createAuthorizationURL({
+                                        provider: "google",
+                                        clientId:
+                                            "591411088609-6kbt6b07a6np6mq2mnlq97i150amussh.apps.googleusercontent.com",
+                                        redirectUrl: window.location.href.split("#")[0],
+                                        network: "testnet",
+                                    });
                                 }}
                             >
                                 Sign In
                             </button>
                         )) || (
-                            <button
-                                onClick={() => flow.logout()}
-                                className="connect"
-                            >
+                            <button onClick={() => flow.logout()} className="connect">
                                 Sign Out
                             </button>
                         )}
@@ -113,7 +102,9 @@ export function App() {
                         <NavLink to="/libraries">libraries (for devs)</NavLink>
                     </li>
                     <li>
-                        <a href="https://github.com/sui-potatoes/app" target="_blank">Source Code</a>
+                        <a href="https://github.com/sui-potatoes/app" target="_blank">
+                            Source Code
+                        </a>
                     </li>
                 </ul>
             </div>

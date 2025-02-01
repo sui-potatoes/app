@@ -47,6 +47,7 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
                             options: {
                                 showObjectChanges: true,
                                 showEffects: true,
+                                showEvents: true,
                             },
                         })
                         .then((res) => {

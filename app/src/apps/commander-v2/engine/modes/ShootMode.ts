@@ -22,6 +22,7 @@ export type ShootModeEvents = BaseGameEvent & {
  */
 export class ShootMode extends Mode {
     public readonly name = "Shoot";
+    public readonly cost = 2;
     /** List of targets for the action to choose between */
     public targets: Unit[] = [];
     /** Currently chosen target */
@@ -38,6 +39,7 @@ export class ShootMode extends Mode {
 
     connect(this: Game, mode: this) {
         if (this.selectedUnit === null) return this.switchMode(new NoneMode());
+        if (this.selectedUnit.props.ap.value == 0) return this.switchMode(new NoneMode());
 
         const selectedUnit = this.selectedUnit;
         const targets = Object.values(this.units).filter(
@@ -60,7 +62,7 @@ export class ShootMode extends Mode {
 
     disconnect(this: Game, mode: this) {
         if (this.selectedUnit) {
-            this.selectedUnit.playAnimation("Idle");
+            this.selectedUnit.playAnimation("Idle").play();
             this.selectedUnit.mixer.timeScale = 1;
         }
 
@@ -91,8 +93,20 @@ export class ShootMode extends Mode {
         }
     }
 
-    async performAction(this: Game, _mode: this): Promise<void> {
-        console.log("shoot action performed");
+    async performAction(this: Game, mode: this): Promise<void> {
+        if (!this.selectedUnit || !mode.currentTarget) {
+            throw new Error("Can't perform action without a selected unit or target.");
+        }
+
+        const selectedUnit = this.selectedUnit;
+        const target = mode.currentTarget;
+
+        selectedUnit.spendAp(mode.cost); //
+
+        // perform the shooting action
+        await selectedUnit.shoot(target);
+
+        this.tryDispatch({ type: "game", action: "shoot", unit: selectedUnit, targetUnit: target });
     }
 
     async aimAtTarget(this: Game, mode: this) {
@@ -103,10 +117,14 @@ export class ShootMode extends Mode {
         const selectedUnit = this.selectedUnit;
 
         // move camera to the selected unit aiming at the target
-        selectedUnit.playAnimation("SniperShot");
-        selectedUnit.mixer.timeScale = 0.1;
+        selectedUnit.playAnimation("SniperShot", 0.1).play();
 
-        this.tryDispatch({ type: "game", action: "aim", unit: selectedUnit, targetUnit: mode.currentTarget });
+        this.tryDispatch({
+            type: "game",
+            action: "aim",
+            unit: selectedUnit,
+            targetUnit: mode.currentTarget,
+        });
 
         if (!mode.isAiming) {
             selectedUnit.lookAt(mode.currentTarget.position);

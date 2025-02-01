@@ -27,6 +27,9 @@ import * as THREE from "three";
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
 
+/**
+ * The main component of the game.
+ */
 export function Playground() {
     const packageId = useNetworkVariable("commanderV2PackageId");
     const client = useSuiClient();
@@ -80,6 +83,9 @@ export function Playground() {
 
                 await executeTransaction(res.tx)!.wait();
                 eventBus.dispatchEvent({ type: "sui", action: "next_turn:success" });
+                if (map) {
+                    map.map.map.turn += 1;
+                }
             }
         }
 
@@ -136,7 +142,7 @@ export function Playground() {
                 {modelsLoaded && map && <GameApp map={map} eventBus={eventBus} camera={camera} />}
                 <Stats />
             </Canvas>
-            <UI isExecuting={isExecuting} eventBus={eventBus} />
+            <UI isExecuting={isExecuting} turn={map.map.map.turn} eventBus={eventBus} />
         </>
     );
 
@@ -195,7 +201,14 @@ export function Playground() {
 
         tx.moveCall({
             target: `${packageId}::commander::perform_attack`,
-            arguments: [game, rng, tx.pure.u16(unit[0]), tx.pure.u16(unit[1]), tx.pure.u16(target[0]), tx.pure.u16(target[1])],
+            arguments: [
+                game,
+                rng,
+                tx.pure.u16(unit[0]),
+                tx.pure.u16(unit[1]),
+                tx.pure.u16(target[0]),
+                tx.pure.u16(target[1]),
+            ],
         });
 
         tx.setSender(zkLogin.address);
@@ -301,6 +314,12 @@ export function GameApp({
             }
         });
 
+        eventBus.addEventListener("sui", ({ action }) => {
+            if (action == "next_turn:success") {
+                game.turn = game.turn + 1;
+            }
+        });
+
         eventBus.addEventListener("ui", ({ action }) => {
             switch (action) {
                 case "confirm":
@@ -337,26 +356,38 @@ const LOG_LENGTH = 5;
  * UI Component which renders buttons and emits events in the `eventBus` under the `ui` type.
  * Listens to the in-game events to render additional buttons and log the actions.
  */
-export function UI({ eventBus, isExecuting }: { eventBus: EventBus; isExecuting?: boolean }) {
+export function UI({
+    eventBus,
+    isExecuting,
+    turn,
+}: {
+    eventBus: EventBus;
+    isExecuting?: boolean;
+    turn: number;
+}) {
     const onAction = (action: string) => eventBus.dispatchEvent({ type: "ui", action });
-    const button = (id: string, text?: string) => (
+    const button = (id: string, disabled?: boolean, text?: string) => (
         <button
             onClick={() => onAction(id)}
-            className={"action-button mb-2" + (isExecuting ? " disabled" : "")}
+            className={"action-button mb-2" + (disabled || isExecuting ? " disabled" : "")}
         >
             {text || id}
         </button>
     );
 
+    const [panelDisabled, setPanelDisabled] = useState(true);
     const [shootMode, setShootMode] = useState(false);
     const [log, setLog] = useState<string[]>([]);
 
     useEffect(() => {
         eventBus.addEventListener("game", (event) => {
-            if (event.action === "mode_switch" && event.mode instanceof ShootMode) {
-                return setShootMode(true);
+            if (event.action === "mode_switch") {
+                if (event.mode instanceof ShootMode) setShootMode(true);
+                else setShootMode(false);
+
+                if (event.mode instanceof NoneMode) setPanelDisabled(true);
+                else setPanelDisabled(false);
             }
-            if (event.action === "mode_switch") return setShootMode(false);
         });
 
         eventBus.all((event) => {
@@ -377,9 +408,12 @@ export function UI({ eventBus, isExecuting }: { eventBus: EventBus; isExecuting?
             >
                 {button("move")}
                 {button("shoot")}
-                {button("grenade")}
-                <button onClick={() => onAction("next_turn")} className={"action-button mt-40" + (isExecuting ? " disabled" : "")}>
-                    End Turn
+                {button("grenade", true)}
+                <button
+                    onClick={() => onAction("next_turn")}
+                    className={"action-button mt-40" + (isExecuting ? " disabled" : "")}
+                >
+                    End Turn ({turn})
                 </button>
             </div>
             <div
@@ -396,10 +430,10 @@ export function UI({ eventBus, isExecuting }: { eventBus: EventBus; isExecuting?
                 id="panel-right"
                 className="fixed h-full right-0 top-0 p-10 flex justify-end flex-col text-center"
             >
-                {shootMode && button("next_target", ">")}
-                {shootMode && button("prev_target", "<")}
-                {button("confirm")}
-                {button("cancel")}
+                {shootMode && button("next_target", false, ">")}
+                {shootMode && button("prev_target", false, "<")}
+                {button("confirm", panelDisabled)}
+                {button("cancel", panelDisabled)}
                 {button("edit")}
             </div>
         </div>

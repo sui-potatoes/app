@@ -17,7 +17,7 @@ export class Camera extends THREE.PerspectiveCamera {
      */
     public resetForSize(size: number) {
         const offset = size / 2 - 0.5;
-        this.defaultPosition = new THREE.Vector3(offset * 2, size + 5, -offset);
+        this.defaultPosition = new THREE.Vector3(offset * 2, size, -offset);
         this.defaultTarget = new THREE.Vector3(offset, 0, -offset);
         this.position.copy(this.defaultPosition);
         this.lookAt(this.defaultTarget);
@@ -36,9 +36,7 @@ export class Camera extends THREE.PerspectiveCamera {
                 .easing(JEASINGS.Sinusoidal.In)
                 .onUpdate(() => this.lookAt(new THREE.Vector3(lookAt.x, lookAt.y, lookAt.z)))
                 .start()
-                .onComplete(() => {
-                    resolve(null);
-                });
+                .onComplete(() => resolve(null));
         });
     }
 

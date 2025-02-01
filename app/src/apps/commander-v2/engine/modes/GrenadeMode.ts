@@ -54,8 +54,6 @@ export class GrenadeMode extends Mode {
 
         const tiles = this.grid.radiusTiles([x, y], 2);
         for (const [x, y] of tiles) this.grid.clearCell(x, y);
-
-        this.selectedUnit.playAnimation("Fire");
     }
 
     get range(): number {
