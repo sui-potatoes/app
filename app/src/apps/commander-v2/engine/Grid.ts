@@ -3,16 +3,23 @@
 
 import * as THREE from "three";
 import { Tile } from "./Game";
-import { models } from "./scene";
+import { models } from "./models";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 
+/**
+ * Grid follows the structure of the game board, similar to how it is handled in
+ * Move. Grid coordinates are 0-indexed, with the origin at the top-left corner.
+ *
+ * [0, 0] - top left: first row, first column
+ * [1, 0] - second row, first column
+ * [0, 1] - first row, second column
+ */
 export class Grid extends THREE.Object3D {
     public readonly grid: Tile[][];
     public readonly meshes: { [key: string]: THREE.Object3D | THREE.Group } = {};
-    public readonly size: number = 30;
     public readonly floor = new THREE.Group();
 
-    constructor(size: number) {
+    constructor(public readonly size: number) {
         super();
         this.size = size;
         this.grid = [];
@@ -41,24 +48,23 @@ export class Grid extends THREE.Object3D {
         const tileMaterial = mesh.material as THREE.MeshStandardMaterial;
         const material = tileMaterial.clone();
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(size, size), material);
+        const secondFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(size * 10, size * 10),
+            new THREE.MeshStandardMaterial({ color: 0x333333 }),
+        );
 
         floor.rotation.x = -Math.PI / 2;
-        floor.position.set(size / 2 - 0.5, 0, size / 2 - 0.5);
-        this.floor.add(floor);
+        floor.position.set(size / 2 - 0.5, 0, -(size / 2 - 0.5));
 
-        // alternatively, add individual tiles
-        // for (let i = 0; i < size; i++) {
-        //     for (let j = 0; j < size; j++) {
-        //         const floorTile = clone(models.base_tile.scene);
-        //         floorTile.position.set(i, 0, j);
-        //         floorTile.scale.set(1.1, 1, 1.1);
-        //         this.floor.add(floorTile);
-        //     }
-        // }
+        secondFloor.rotation.x = -Math.PI / 2;
+        secondFloor.position.set(0, -0.1, 0);
+
+        this.floor.add(floor);
+        this.add(secondFloor);
     }
 
     clearCell(x: number, y: number) {
-        if (this.grid[x][y].type === "Obstacle") {
+        if (this.grid[x][y].type === "Unwalkable") {
             this.remove(this.meshes[`${x}-${y}`]?.clear());
         }
 
@@ -80,12 +86,12 @@ export class Grid extends THREE.Object3D {
         this.grid[x][z] = { ...tile, unit: this.grid[x][z].unit };
         const group = new THREE.Group();
 
-        if (tile.type === "Obstacle") {
-            this.grid[x][z] = { type: "Obstacle", unit: null };
+        if (tile.type === "Unwalkable") {
+            this.grid[x][z] = { type: "Unwalkable", unit: null };
 
             const barrels = clone(models.barrel_stack.scene);
             barrels.scale.set(0.5, 0.5, 0.5);
-            barrels.position.set(x, 0, z);
+            barrels.position.set(x, 0, -z);
 
             this.meshes[`${x}-${z}`] = barrels;
             this.add(barrels);
@@ -93,86 +99,74 @@ export class Grid extends THREE.Object3D {
         }
 
         if (tile.type === "Cover") {
-            if (tile.UP) group.add(this.drawBarrier(x, z, "UP"));
-            if (tile.DOWN) group.add(this.drawBarrier(x, z, "DOWN"));
-            if (tile.LEFT) group.add(this.drawBarrier(x, z, "LEFT"));
-            if (tile.RIGHT) group.add(this.drawBarrier(x, z, "RIGHT"));
+            if (tile.up) group.add(this.drawBarrier(x, z, "UP", tile.up));
+            if (tile.down) group.add(this.drawBarrier(x, z, "DOWN", tile.down));
+            if (tile.left) group.add(this.drawBarrier(x, z, "LEFT", tile.left));
+            if (tile.right) group.add(this.drawBarrier(x, z, "RIGHT", tile.right));
         }
 
         this.meshes[`${x}-${z}`] = group;
         this.add(group);
     }
 
-    drawBarrier(x: number, z: number, direction: "UP" | "DOWN" | "LEFT" | "RIGHT") {
-        // const fence = clone(models.barrier_steel.scene);
-        // fence.scale.set(1, 1.5, 1);
-        // fence.position.set(x, 0, z);
+    drawBarrier(x: number, z: number, direction: "UP" | "DOWN" | "LEFT" | "RIGHT", type: number) {
+        const height = type == 1 ? 1 : 2.5;
+
         const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(0.1, 1, 1),
+            new THREE.BoxGeometry(0.1, height, 1),
             new THREE.MeshStandardMaterial({ color: 0x333333 }),
         );
-        mesh.position.set(x, 0.5, z);
+
+        mesh.position.set(x, 0.5, -z);
 
         switch (direction) {
             case "UP": {
-                mesh.position.z -= 0.5;
-                mesh.rotation.y = Math.PI / 2;
-                // fence.rotation.y = Math.PI;
-                // return fence;
+                mesh.position.x -= 0.5;
                 return mesh;
             }
-            // case "DOWN": return fence;
             case "DOWN": {
-                mesh.position.z += 0.5;
-                mesh.rotation.y = Math.PI / 2;
-                // mesh.rotation.y = -Math.PI / 2;
+                mesh.position.x += 0.5;
+                mesh.rotation.y = Math.PI;
                 return mesh;
             }
             case "LEFT": {
-                mesh.position.x -= 0.5;
-
-                // fence.rotation.y = -Math.PI / 2;
-                // return fence;
+                mesh.position.z += 0.5;
+                mesh.rotation.y = -Math.PI / 2;
                 return mesh;
             }
             case "RIGHT": {
-                mesh.position.x += 0.5;
-
+                mesh.position.z -= 0.5;
+                mesh.rotation.y = -Math.PI / 2;
                 return mesh;
-                // fence.rotation.y = Math.PI / 2;
-                // return fence;
             }
         }
     }
 
     initRandom() {
-        const texture = new THREE.TextureLoader().load("/images/texture-concrete.jpg");
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 1);
-
-        this.grid.forEach((col, x) => {
-            col.forEach((_el, z) => {
-                if (Math.random() > 0.7) {
-                    const rngBool = () => Math.random() > 0.5;
-                    let tile: Tile = (this.grid[x][z] = {
-                        type: "Cover",
-                        UP: rngBool(),
-                        DOWN: rngBool(),
-                        LEFT: rngBool(),
-                        RIGHT: rngBool(),
-                        unit: null,
-                    });
-
-                    if (tile.DOWN && tile.LEFT && tile.RIGHT && tile.UP) {
-                        tile = { type: "Obstacle", unit: null };
-                    }
-
-                    // place obstacles instead of cover
-                    this.setCell(x, z, tile);
-                }
-            });
-        });
+        // const texture = new THREE.TextureLoader().load("/images/texture-concrete.jpg");
+        // texture.wrapS = THREE.RepeatWrapping;
+        // texture.wrapT = THREE.RepeatWrapping;
+        // texture.repeat.set(1, 1);
+        // this.grid.forEach((col, x) => {
+        //     col.forEach((_el, z) => {
+        //         if (Math.random() > 0.7) {
+        //             const rngBool = () => Math.random() > 0.5;
+        //             let tile: Tile = (this.grid[x][z] = {
+        //                 type: "Cover",
+        //                 UP: rngBool() && 1,
+        //                 DOWN: rngBool() && 1,
+        //                 LEFT: rngBool() && 1,
+        //                 RIGHT: rngBool() && 1,
+        //                 unit: null,
+        //             });
+        //             if (tile.DOWN && tile.LEFT && tile.RIGHT && tile.UP) {
+        //                 tile = { type: "Unwalkable", unit: null };
+        //             }
+        //             // place obstacles instead of cover
+        //             this.setCell(x, z, tile);
+        //         }
+        //     });
+        // });
     }
 
     /** Returns the Von Neumann neighborhood of a cell in this order: right, down, left, up. */
@@ -213,20 +207,20 @@ export class Grid extends THREE.Object3D {
                     const from = this.grid[nx][ny];
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
-                    if (to.type === "Obstacle") continue;
+                    if (to.type === "Unwalkable") continue;
 
                     if (to.type === "Cover") {
-                        if (direction === "UP" && to.DOWN) continue;
-                        if (direction === "DOWN" && to.UP) continue;
-                        if (direction === "LEFT" && to.RIGHT) continue;
-                        if (direction === "RIGHT" && to.LEFT) continue;
+                        if (direction === "UP" && to.down) continue;
+                        if (direction === "DOWN" && to.up) continue;
+                        if (direction === "LEFT" && to.right) continue;
+                        if (direction === "RIGHT" && to.left) continue;
                     }
 
                     if (from.type === "Cover") {
-                        if (direction === "UP" && from.UP) continue;
-                        if (direction === "DOWN" && from.DOWN) continue;
-                        if (direction === "LEFT" && from.LEFT) continue;
-                        if (direction === "RIGHT" && from.RIGHT) continue;
+                        if (direction === "UP" && from.up) continue;
+                        if (direction === "DOWN" && from.down) continue;
+                        if (direction === "LEFT" && from.left) continue;
+                        if (direction === "RIGHT" && from.right) continue;
                     }
 
                     if (map[x][y] == 0) {
@@ -283,10 +277,10 @@ export class Grid extends THREE.Object3D {
         let [x0, y0] = from;
         let [x1, y1] = to;
 
-        if (x0 < x1) return "RIGHT";
-        if (x0 > x1) return "LEFT";
-        if (y0 < y1) return "DOWN";
-        if (y0 > y1) return "UP";
+        if (x0 < x1) return "DOWN";
+        if (x0 > x1) return "UP";
+        if (y0 > y1) return "LEFT";
+        if (y0 < y1) return "RIGHT";
     }
 
     /**
@@ -321,19 +315,19 @@ export class Grid extends THREE.Object3D {
                     const from = this.grid[nx][ny];
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
-                    if (to.type === "Obstacle") continue;
+                    if (to.type === "Unwalkable") continue;
                     if (to.type === "Cover") {
-                        if (direction === "UP" && to.DOWN) continue;
-                        if (direction === "DOWN" && to.UP) continue;
-                        if (direction === "LEFT" && to.RIGHT) continue;
-                        if (direction === "RIGHT" && to.LEFT) continue;
+                        if (direction === "UP" && to.down) continue;
+                        if (direction === "DOWN" && to.up) continue;
+                        if (direction === "LEFT" && to.right) continue;
+                        if (direction === "RIGHT" && to.left) continue;
                     }
 
                     if (from.type === "Cover") {
-                        if (direction === "UP" && from.UP) continue;
-                        if (direction === "DOWN" && from.DOWN) continue;
-                        if (direction === "LEFT" && from.LEFT) continue;
-                        if (direction === "RIGHT" && from.RIGHT) continue;
+                        if (direction === "UP" && from.up) continue;
+                        if (direction === "DOWN" && from.down) continue;
+                        if (direction === "LEFT" && from.left) continue;
+                        if (direction === "RIGHT" && from.right) continue;
                     }
 
                     if (x == x1 && y == y1) {
@@ -371,17 +365,17 @@ export class Grid extends THREE.Object3D {
                 const to = this.grid[nx][ny];
 
                 if (to.type === "Cover") {
-                    if (direction === "UP" && to.DOWN) continue;
-                    if (direction === "DOWN" && to.UP) continue;
-                    if (direction === "LEFT" && to.RIGHT) continue;
-                    if (direction === "RIGHT" && to.LEFT) continue;
+                    if (direction === "UP" && to.down) continue;
+                    if (direction === "DOWN" && to.up) continue;
+                    if (direction === "LEFT" && to.right) continue;
+                    if (direction === "RIGHT" && to.left) continue;
                 }
 
                 if (from.type === "Cover") {
-                    if (direction === "UP" && from.UP) continue;
-                    if (direction === "DOWN" && from.DOWN) continue;
-                    if (direction === "LEFT" && from.LEFT) continue;
-                    if (direction === "RIGHT" && from.RIGHT) continue;
+                    if (direction === "UP" && from.up) continue;
+                    if (direction === "DOWN" && from.down) continue;
+                    if (direction === "LEFT" && from.left) continue;
+                    if (direction === "RIGHT" && from.right) continue;
                 }
 
                 if (map[nx][ny] === num2 - 1) {

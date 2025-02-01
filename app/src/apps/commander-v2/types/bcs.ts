@@ -14,14 +14,86 @@ export const Rank = bcs.enum("Rank", {
     Colonel: null,
 });
 
-export const Stats = bcs.struct("Stats", {
-    mobility: bcs.u8(),
-    aim: bcs.u8(),
-    will: bcs.u8(),
-    health: bcs.u8(),
-    armor: bcs.u8(),
-    dodge: bcs.u8(),
-    hack: bcs.u8(),
+export type Stats = {
+    mobility: number;
+    aim: number;
+    health: number;
+    armor: number;
+    dodge: number;
+    defense: number;
+    damage: number;
+    spread: number;
+    plus_one: number;
+    crit_chance: number;
+    is_dodgeable: boolean;
+    area_size: number;
+    env_damage: boolean;
+    range: number;
+    ammo: number;
+    _: number;
+};
+
+export const Stats = bcs.u128().transform({
+    input(val): any {
+        return val;
+    },
+    output(stats: string | bigint): Stats {
+        stats = BigInt(stats);
+        return {
+            mobility: Number(stats & 0xffn),
+            aim: Number((stats >> 8n) & 0xffn),
+            health: Number((stats >> 16n) & 0xffn),
+            armor: Number((stats >> 24n) & 0xffn),
+            dodge: Number((stats >> 32n) & 0xffn),
+            defense: Number((stats >> 40n) & 0xffn),
+            damage: Number((stats >> 48n) & 0xffn),
+            spread: Number((stats >> 56n) & 0xffn),
+            plus_one: Number((stats >> 64n) & 0xffn),
+            crit_chance: Number((stats >> 72n) & 0xffn),
+            is_dodgeable: Number((stats >> 80n) & 0xffn) == 1,
+            area_size: Number((stats >> 88n) & 0xffn),
+            env_damage: Number((stats >> 96n) & 0xffn) == 1,
+            range: Number((stats >> 104n) & 0xffn),
+            ammo: Number((stats >> 112n) & 0xffn),
+            _: Number((stats >> 120n) & 0xffn),
+        };
+    },
+});
+
+export const Param = bcs.struct("Param", {
+    value: bcs.u16(),
+    max_value: bcs.u16(),
+});
+
+export const Unit = bcs.struct("Unit", {
+    recruit: bcs.Address,
+    ap: Param,
+    hp: Param,
+    stats: Stats,
+    last_turn: bcs.u16(),
+});
+
+const Cover = bcs.struct("Cover", {
+    left: bcs.u8(),
+    top: bcs.u8(),
+    right: bcs.u8(),
+    bottom: bcs.u8(),
+});
+
+const TileType = bcs.enum("TileType", {
+    Empty: null,
+    Cover: Cover,
+    Unwalkable: null,
+});
+
+export const Tile = bcs.struct("Tile", {
+    tile_type: TileType,
+    unit: bcs.option(Unit),
+});
+
+export const Map = bcs.struct("Map", {
+    grid: bcs.vector(bcs.vector(Tile)),
+    turn: bcs.u16(),
 });
 
 export const Metadata = bcs.struct("Metadata", {
@@ -29,18 +101,29 @@ export const Metadata = bcs.struct("Metadata", {
     backstory: bcs.string(),
 });
 
+export const Game = bcs.struct("Game", {
+    id: bcs.Address,
+    map: Map,
+    // ignores the rest of the fields
+});
+
+export const WeaponUpgrade = bcs.struct("WeaponUpgrade", {
+    name: bcs.string(),
+    tier: bcs.u8(),
+    stats: Stats,
+});
+
 export const Weapon = bcs.struct("Weapon", {
     id: bcs.Address,
     name: bcs.string(),
-    damage: bcs.u8(),
-    spread: bcs.u8(),
-    plus_one: bcs.u8(),
-    crit_chance: bcs.u8(),
-    is_dodgeable: bcs.bool(),
-    area_damage: bcs.bool(),
-    area_size: bcs.u8(),
-    range: bcs.u8(),
-    ammo: bcs.u8(),
+    stats: Stats,
+    upgrades: bcs.vector(WeaponUpgrade),
+});
+
+export const Armor = bcs.struct("Armor", {
+    id: bcs.Address,
+    name: bcs.string(),
+    stats: Stats,
 });
 
 export const Recruit = bcs.struct("Recruit", {
@@ -49,6 +132,7 @@ export const Recruit = bcs.struct("Recruit", {
     rank: Rank,
     stats: Stats,
     weapon: bcs.option(Weapon),
+    armor: bcs.option(Armor),
     leader: bcs.Address,
 });
 

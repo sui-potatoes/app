@@ -2,16 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 import { OpenAI } from "openai";
+import { EGender, Name } from "@undergroundsociety/cybername-gen";
 
 const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
 export async function useNameGenerator() {
-    if (!openaiKey) {
-        return {
-            name: "John Doe",
-            backstory: "Recently graduated from the academy, John is eager to prove himself in the field.",
-        };
-    }
+    // if (!openaiKey) {
+    const name = new Name(EGender.male);
+
+    return {
+        name: `${name.firstname} ${name.lastname}`,
+        backstory: "Story locked",
+    };
+    // }
 
     const openai = new OpenAI({
         apiKey: openaiKey,
@@ -54,9 +57,9 @@ export async function useNameGenerator() {
         throw new Error("Failed to generate name");
     }
 
-    const text = JSON.parse(first.text.value as string);
-    return {
-        name: text.character_name,
-        backstory: text.background,
-    }
+    // const text = JSON.parse(first.text.value as string);
+    // return {
+    //     name: text.character_name,
+    //     backstory: text.background,
+    // }
 }

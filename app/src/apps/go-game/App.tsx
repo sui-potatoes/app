@@ -14,7 +14,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatAddress, normalizeSuiAddress } from "@mysten/sui/utils";
 import { toast } from "react-hot-toast";
 
-normalizeSuiAddress
+normalizeSuiAddress;
 
 const BOARD_SIZES = [9, 13, 19];
 
@@ -65,9 +65,7 @@ export default function App() {
     const [canInteract, setCanInteract] = useState(false);
     const [turn, setTurn] = useState<typeof Turn.$inferInput>({ Black: true });
     const [game, setGame] = useState<typeof Game.$inferType>();
-    const [data, setData] = useState<number[][]>(
-        Array(9).fill(Array(9).fill(0)),
-    );
+    const [data, setData] = useState<number[][]>(Array(9).fill(Array(9).fill(0)));
     const { data: accounts, refetch } = useSuiClientQuery("getOwnedObjects", {
         owner: zkLogin.address!,
         filter: { MoveModule: { package: packageId, module: "game" } },
@@ -103,9 +101,7 @@ export default function App() {
         if (!urlGameId) return;
         if (!gameData?.data) return;
 
-        const game = Game.parse(
-            fromB64((gameData?.data!.bcs! as { bcsBytes: string }).bcsBytes),
-        );
+        const game = Game.parse(fromB64((gameData?.data!.bcs! as { bcsBytes: string }).bcsBytes));
 
         // game is found, set the board state
         setData(game.board.data);
@@ -141,9 +137,7 @@ export default function App() {
                         (account.games as string[]).map((game, i) => {
                             return (
                                 <li key={`game-${i}`} className="list-disc">
-                                    <Link to={`/go/${game}`}>
-                                        {formatAddress(game)}
-                                    </Link>
+                                    <Link to={`/go/${game}`}>{formatAddress(game)}</Link>
                                 </li>
                             );
                         })}
@@ -151,9 +145,7 @@ export default function App() {
 
                 <div className="pt-3">
                     <div className="w-[200px] h-[1px] bg-gray-300 mb-4" />
-                    {!zkLogin.address && (
-                        <p className="mb-2">Sign in to start playing</p>
-                    )}
+                    {!zkLogin.address && <p className="mb-2">Sign in to start playing</p>}
                     <p>
                         {BOARD_SIZES.map((size: number) => (
                             <button
@@ -199,18 +191,12 @@ export default function App() {
                 />
                 <p>
                     {!players.includes(account?.id) && players.length == 1 && (
-                        <button
-                            disabled={!canInteract}
-                            onClick={() => joinGame()}
-                        >
-                            Join?{" "}
-                            {!account ? "(You have to sign in first)" : ""}
+                        <button disabled={!canInteract} onClick={() => joinGame()}>
+                            Join? {!account ? "(You have to sign in first)" : ""}
                         </button>
                     )}
                 </p>
-                <p style={{ padding: "0 10px" }}>
-                    {players.length == 1 && "Waiting for players"}
-                </p>
+                <p style={{ padding: "0 10px" }}>{players.length == 1 && "Waiting for players"}</p>
                 <p style={{ padding: "0 10px" }}>
                     {isMyGame && (isMyTurn ? "Your turn" : "Opponent's turn")}
                 </p>
@@ -252,19 +238,14 @@ export default function App() {
         if (data[x][y] !== 0) return console.log("Cell is already occupied");
         if (!account) return console.log("Account not found");
         if (!game) return console.log("Game not found");
-        if (!canInteract)
-            return console.log("Not your turn, or the state is loading");
+        if (!canInteract) return console.log("Not your turn, or the state is loading");
 
         setCanInteract(false);
 
         const inspect = new Transaction();
         inspect.moveCall({
             target: `${packageId}::game::board_state`,
-            arguments: [
-                inspect.object(game.id),
-                inspect.pure.u8(x),
-                inspect.pure.u8(y),
-            ],
+            arguments: [inspect.object(game.id), inspect.pure.u8(x), inspect.pure.u8(y)],
         });
 
         const res = await client.devInspectTransactionBlock({
@@ -303,7 +284,7 @@ export default function App() {
         });
 
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
+            signer: (await flow.getKeypair({ network: "testnet" })) as any,
             transaction: tx as any,
         });
 
@@ -341,8 +322,8 @@ export default function App() {
         }
 
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }), // @ts-ignore
-            transaction: tx,
+            signer: (await flow.getKeypair({ network: "testnet" })) as any,
+            transaction: tx as any,
         });
 
         const { objectChanges } = await client.waitForTransaction({
@@ -358,9 +339,7 @@ export default function App() {
         }
 
         const change = objectChanges.find(
-            (c) =>
-                c.type === "created" &&
-                c.objectType === `${packageId}::game::Game`,
+            (c) => c.type === "created" && c.objectType === `${packageId}::game::Game`,
         );
 
         if (change?.type !== "created") {
@@ -397,7 +376,7 @@ export default function App() {
         }
 
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
+            signer: (await flow.getKeypair({ network: "testnet" })) as any,
             transaction: tx as any,
         });
 
@@ -412,8 +391,7 @@ export default function App() {
         if (!account) return console.log("Account not found");
         if (!isMyGame) return console.log("Not your game");
 
-        const action =
-            game.players.player1 && game.players.player2 ? "quit" : "wrap_up";
+        const action = game.players.player1 && game.players.player2 ? "quit" : "wrap_up";
 
         const tx = new Transaction();
         tx.moveCall({
@@ -421,7 +399,7 @@ export default function App() {
             arguments: [tx.object(game.id), tx.object(account.id)],
         });
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }),
+            signer: (await flow.getKeypair({ network: "testnet" })) as any,
             // @ts-ignore
             transaction: tx,
         });

@@ -3,12 +3,21 @@ Copyright (c) Sui Potatoes
 SPDX-License-Identifier: MIT
 */
 
+/* define variables for black and white */
+:root {
+    --card-size-1: 40px;
+    --main-color: #1df7cf;
+    --button-size: 62px;
+}
+
 /* Take full screen */
 #commander-v2 {
     position: absolute;
     color: white !important;
+    font-family: monospace;
     z-index: 1;
-    background: black;
+    /* background: black; */
+    background-image: url('/images/background.png');
     width: 100%;
     height: 100%;
     top: 0;
@@ -42,6 +51,69 @@ SPDX-License-Identifier: MIT
     background: black;
 }
 
+.recruit-blank {
+    display: block;
+    border-radius: 1px;
+    max-height: 208px;
+    max-width: 208px;
+    width: auto;
+    height: auto;
+    line-height: 200px;
+    font-size: 32px;
+    border: 1px solid var(--main-color);
+    color: var(--main-color);
+    user-select: none;
+    padding-bottom: 75%;
+}
+
+.recruit-blank:hover {
+    box-shadow: 0 0 5px white;
+    cursor: pointer;
+}
+
+.image-card {
+    /* border: 1px solid white; */
+    position: relative;
+    display: block;
+    padding: 0;
+    margin: 0;
+    height: auto;
+    width: auto;
+    max-width: 208px;
+    max-height: 208px;
+}
+
+.card-image-overlay {
+    position: relative;
+    width: 100%;
+    bottom: var(--card-size-1);
+    height: var(--card-size-1);
+    line-height: var(--card-size-1);
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--main-color);
+    z-index: 1;
+}
+
+.card-dismiss-cross {
+    position: absolute;
+    right: 0px;
+    top: 0;
+    width: calc(var(--card-size-1) / 1.5);
+    height: calc(var(--card-size-1) / 1.5);
+    line-height: calc(var(--card-size-1) / 1.5);
+    text-align: center;
+    font-size: calc(var(--card-size-1) / 1.5);
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--main-color);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.card-dismiss-cross:hover {
+    background: #1df7cf;
+    color: black;
+}
+
 .menu-control {
     /* z-index: 2; */
     display: block;
@@ -53,18 +125,32 @@ SPDX-License-Identifier: MIT
     cursor: pointer;
 }
 
+.menu-control.disabled {
+    color: grey;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .action-button:last-child {
     margin-bottom: 100px;
 }
 
 .action-button {
-    width: 80px;
-    height: 80px;
-    line-height: 80px;
-    margin: 10px 10px 0px 10px;
+    width: var(--button-size);
+    height: var(--button-size);
+    /* line-height: var(--button-size); */
+    /* margin: 10px 10px 0px 10px; */
+    margin: 10px auto;
     background: black;
-    border: 1px solid white;
+    border: 1px solid var(--main-color);
+    color: var(--main-color);
     cursor: pointer;
+}
+
+.action-button.disabled {
+    color: grey !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
 }
 
 .action-button:hover {

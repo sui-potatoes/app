@@ -21,9 +21,13 @@ const EUnitAlreadyOnTile: u64 = 1;
 const ETileIsUnwalkable: u64 = 2;
 /// The path is unwalkable.
 const EPathUnwalkable: u64 = 3;
+/// The path is incorrect: skipping tiles or standing still.
+const EIncorrectPath: u64 = 4;
 
+#[allow(unused_const)]
 /// Constant for no cover in the `TileType::Cover`.
 const NO_COVER: u8 = 0;
+#[allow(unused_const)]
 /// Constant for low cover in the `TileType::Cover`.
 const LOW_COVER: u8 = 1;
 /// Constant for high cover in the `TileType::Cover`.
@@ -50,8 +54,8 @@ public enum TileType has copy, drop, store {
     /// cover sides.
     Cover {
         left: u8,
-        right: u8,
         top: u8,
+        right: u8,
         bottom: u8,
     },
     /// Certain tiles cannot be walked on, like walls or water.
@@ -224,67 +228,71 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
     let mut prev = path[0];
     let high_cover = HIGH_COVER;
 
-    'a: {
+    'path: {
         path.do!(|step| {
-            if (step == prev) return; // skip 1st and duplicate steps
+            if (prev == step) return;
             let (x0, y0) = (prev[0], prev[1]);
             let (x1, y1) = (step[0], step[1]);
 
             let source = &map.grid[x0, y0];
             let target = &map.grid[x1, y1];
-            if (target.unit.is_some()) return 'a false;
-            if (target.tile_type == TileType::Unwalkable) return 'a false;
+            if (target.unit.is_some()) return 'path false;
+            if (target.tile_type == TileType::Unwalkable) return 'path false;
+
+            // make sure that the path is not skipping tiles and is not repeating
+            // the same tile
+            assert!(x0.diff(x1) == 1 && y0 == y1 || y0.diff(y1) == 1 && x0 == x1, EIncorrectPath);
 
             prev = step;
 
             // UP
-            if (x0 == x1 + 1 && y0 == y1) {
+            if (grid::is_up!(x0, y0, x1, y1)) {
                 match (&source.tile_type) {
-                    TileType::Cover { top, .. } if (top == &high_cover) => return 'a false,
+                    TileType::Cover { top, .. } if (top == &high_cover) => return 'path false,
                     _ => (),
                 };
 
                 match (&target.tile_type) {
-                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'a false,
+                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'path false,
                     _ => (),
                 };
             };
 
             // DOWN
-            if (x0 + 1 == x1 && y0 == y1) {
+            if (grid::is_down!(x0, y0, x1, y1)) {
                 match (&source.tile_type) {
-                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'a false,
+                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'path false,
                     _ => (),
                 };
 
                 match (&target.tile_type) {
-                    TileType::Cover { top, .. } if (top == &high_cover) => return 'a false,
+                    TileType::Cover { top, .. } if (top == &high_cover) => return 'path false,
                     _ => (),
                 };
             };
 
             // LEFT
-            if (x0 == x1 && y0 == y1 + 1) {
+            if (grid::is_left!(x0, y0, x1, y1)) {
                 match (&source.tile_type) {
-                    TileType::Cover { left, .. } if (left == &high_cover) => return 'a false,
+                    TileType::Cover { left, .. } if (left == &high_cover) => return 'path false,
                     _ => (),
                 };
 
                 match (&target.tile_type) {
-                    TileType::Cover { right, .. } if (right == &high_cover) => return 'a false,
+                    TileType::Cover { right, .. } if (right == &high_cover) => return 'path false,
                     _ => (),
                 };
             };
 
             // RIGHT
-            if (x0 == x1 && y0 + 1 == y1) {
+            if (grid::is_right!(x0, y0, x1, y1)) {
                 match (&source.tile_type) {
-                    TileType::Cover { right, .. } if (right == &high_cover) => return 'a false,
+                    TileType::Cover { right, .. } if (right == &high_cover) => return 'path false,
                     _ => (),
                 };
 
                 match (&target.tile_type) {
-                    TileType::Cover { left, .. } if (left == &high_cover) => return 'a false,
+                    TileType::Cover { left, .. } if (left == &high_cover) => return 'path false,
                     _ => (),
                 };
             }
@@ -309,8 +317,8 @@ public(package) fun from_bcs(bcs: &mut BCS): Map {
                 0 => TileType::Empty,
                 1 => TileType::Cover {
                     left: bcs.peel_u8(),
-                    right: bcs.peel_u8(),
                     top: bcs.peel_u8(),
+                    right: bcs.peel_u8(),
                     bottom: bcs.peel_u8(),
                 },
                 2 => TileType::Unwalkable,
@@ -354,7 +362,7 @@ public fun debug(map: &Map) {
 /// ```
 public fun demo_1(): Map {
     // prettier-ignore
-    let preset_bytes = x"070700000000010200000200010000000100010000000200000000000702000000000000000000000000000700000000000000000000010000000100010000000100070100000100000100010200000000020000000101000000000101000000000701000000010001000100020000000000000000000000070000000000000000000000000000070000020000000000010100010000010000010000010001010000";
+    let preset_bytes = x"0707000000000102000002000100000001000100000002000000000007020000000000000000000000000007000000000000000000000100000001000100000001000701000100000001000102000000000200000001010000000001010000000007010000000100010001000200000000000000000000000700000000000000000000000000000700000200000000000101010000000100010000000100010100000000";
     from_bytes(preset_bytes)
 }
 

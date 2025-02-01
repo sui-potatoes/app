@@ -4,7 +4,8 @@
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "../../../networkConfig";
 import { fromBase64 } from "@mysten/bcs";
-import { bcs } from "../types/bcs";
+import { Recruit } from "../types/bcs";
+import { SuiObjectRef } from "@mysten/sui/client";
 
 type Props = {
     owner: string;
@@ -25,7 +26,7 @@ export function useRecruits({ owner, enabled }: Props) {
         },
         {
             enabled,
-            select(data) {
+            select(data): (typeof Recruit.$inferType & SuiObjectRef)[] {
                 return data.data.map((res) => {
                     if (!res.data) {
                         throw new Error("Fetching failed, no data");
@@ -37,7 +38,12 @@ export function useRecruits({ owner, enabled }: Props) {
                         throw new Error("Unreachable");
                     }
 
-                    return bcs.Recruit.parse(fromBase64(bcsData.bcsBytes));
+                    return {
+                        objectId: res.data.objectId,
+                        digest: res.data.digest,
+                        version: res.data.version,
+                        ...Recruit.parse(fromBase64(bcsData.bcsBytes)),
+                    };
                 });
             },
         },

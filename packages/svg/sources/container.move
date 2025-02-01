@@ -9,7 +9,7 @@ use sui::vec_map::{Self, VecMap};
 use svg::{animation::Animation, desc::Desc, print, shape::Shape};
 
 /// Code for the `NotImplemented` error.
-const ENotImplemented: u64 = 0;
+// const ENotImplemented: u64 = 0;
 
 const TYPE_ROOT: u8 = 0;
 const TYPE_A: u8 = 1;

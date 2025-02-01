@@ -12,9 +12,7 @@ import { MoveMode } from "./MoveMode";
  * When game resets the mode is set to None.
  */
 export class NoneMode extends Mode {
-    get name(): string {
-        return "None";
-    }
+    public readonly name = "None";
 
     connect() {}
     disconnect() {}
@@ -26,7 +24,7 @@ export class NoneMode extends Mode {
         const { x, y } = this.pointer;
         const cell = this.grid.grid[x][y];
 
-        if (typeof cell.unit === "number" && cell.type !== "Obstacle") {
+        if (typeof cell.unit === "number" && cell.type !== "Unwalkable") {
             this.selectedUnit = this.units[cell.unit];
             this.switchMode(new MoveMode(controls));
         }

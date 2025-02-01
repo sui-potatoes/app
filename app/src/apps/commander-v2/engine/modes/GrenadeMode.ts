@@ -8,8 +8,11 @@ import { Controls } from "../Controls";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
-import { MoveMode } from "./MoveMode";
+import { NoneMode } from "./NoneMode";
 
+/**
+ * Not available yet.
+ */
 export class GrenadeMode extends Mode {
     /** Click callback  */
     private _clickCb = ({}: { button: number }) => {};
@@ -17,6 +20,7 @@ export class GrenadeMode extends Mode {
     /** Target, where grenade can be thrown */
     private targetTile: THREE.Vector2 | null = null;
 
+    public readonly name = "Grenade";
     public readonly elements = new THREE.Group();
 
     constructor(private controls: Controls) {
@@ -24,6 +28,7 @@ export class GrenadeMode extends Mode {
     }
 
     connect(this: Game, mode: this): void {
+        if (this.selectedUnit === null) return this.switchMode(new NoneMode());
         mode._clickCb = mode.onClick.bind(this);
         mode.controls.addEventListener("click", mode._clickCb);
         this.add(mode.elements);
@@ -40,22 +45,44 @@ export class GrenadeMode extends Mode {
         return;
     }
 
-    get name(): string {
-        return "Grenade";
+    async performAction(this: Game, _mode: this): Promise<void> {
+        if (!this.selectedUnit) return;
+        const mode = this.mode as GrenadeMode;
+
+        if (!mode.targetTile) return;
+        const { x, y } = mode.targetTile as THREE.Vector2;
+
+        const tiles = this.grid.radiusTiles([x, y], 2);
+        for (const [x, y] of tiles) this.grid.clearCell(x, y);
+
+        this.selectedUnit.playAnimation("Fire");
+    }
+
+    get range(): number {
+        return 5;
     }
 
     onClick(this: Game, event: { button: number }) {
         if (!this.selectedUnit) return;
+
+        const { x: x0, y: y0 } = this.selectedUnit.gridPosition;
         const mode = this.mode as GrenadeMode;
 
         // left click to select target tile
         if (event.button == THREE.MOUSE.LEFT) {
-            mode.targetTile = this.pointer.clone();
+            const { x, y } = this.pointer.clone();
+            if (Math.abs(x - x0) + Math.abs(y - y0) > mode.range) {
+                console.log("Target is out of range.");
+                return;
+            }
+
+            this.tryDispatch({ action: "grenade_target", x, y });
+            mode.targetTile = new THREE.Vector2(x, y);
             mode.drawBlastArea.call(this, mode.targetTile);
         }
 
         if (event.button == THREE.MOUSE.RIGHT) {
-            this.switchMode(new MoveMode((this.mode as GrenadeMode).controls));
+            this.switchMode(new NoneMode());
         }
     }
 
@@ -78,7 +105,7 @@ export class GrenadeMode extends Mode {
                     opacity: 0.5,
                 }),
             );
-            mesh.position.set(x, 0, y);
+            mesh.position.set(x, 0, -y);
             mode.elements.add(mesh);
         }
 
@@ -90,7 +117,7 @@ export class GrenadeMode extends Mode {
                 opacity: 0.3,
             }),
         );
-        mesh.position.set(x, 0, y);
+        mesh.position.set(x, 0, -y);
         mode.elements.add(mesh);
         mode.drawThrowCurve.call(this, tile);
     }
@@ -101,8 +128,8 @@ export class GrenadeMode extends Mode {
         const { x: x0, y: z0 } = this.selectedUnit.gridPosition;
         const { x: x1, y: z1 } = to;
 
-        const start = new THREE.Vector3(x0, 0.1, z0);
-        const end = new THREE.Vector3(x1, 0.1, z1);
+        const start = new THREE.Vector3(x0, 0.1, -z0);
+        const end = new THREE.Vector3(x1, 0.1, -z1);
 
         const mid = new THREE.Vector3()
             .addVectors(start, end)
@@ -114,7 +141,7 @@ export class GrenadeMode extends Mode {
 
         const geometry = new THREE.BufferGeometry().setFromPoints(points);
         const material = new THREE.LineBasicMaterial({
-            color: 0xff3333,
+            color: 0x369e90,
             colorWrite: true,
             linewidth: 20,
         });
@@ -122,6 +149,8 @@ export class GrenadeMode extends Mode {
         const line2 = new LineGeometry().fromLine(new THREE.Line(geometry, material));
         const mode = this.mode as GrenadeMode;
 
-        mode.elements.add(new Line2(line2, new LineMaterial({ color: 0xff3333, linewidth: 4, fog: true })));
+        mode.elements.add(
+            new Line2(line2, new LineMaterial({ color: 0x369e90, linewidth: 4, fog: true })),
+        );
     }
 }
