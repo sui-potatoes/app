@@ -94,11 +94,12 @@ export function Playground() {
         }
 
         async function onNextTurn(event: GameEvent["ui"]) {
+            if (!executeTransaction) return;
             if (event.action === "next_turn") {
                 const res = await nextTurn();
                 if (!res) return console.log("unable to end turn");
 
-                await executeTransaction(res.tx)!.wait();
+                await executeTransaction(res.tx);
                 if (map) {
                     const turn = ++map.map.map.turn;
                     eventBus.dispatchEvent({
@@ -132,8 +133,8 @@ export function Playground() {
             async function onConfirm(event: GameEvent["ui"]) {
                 if (event.action === "confirm" && lockedTx && canTransact) {
                     setLockedTx(null);
-                    const res = await executeTransaction(lockedTx)!.wait();
-                    const events = res.events || [];
+                    const res = await executeTransaction(lockedTx);
+                    const events = res.data.events || [];
                     eventBus.dispatchEvent({
                         type: "sui",
                         action: "tx:success",
@@ -231,8 +232,9 @@ export function Playground() {
 
         tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
 
-        const res = await executeTransaction(tx)!.wait();
-        const map = res.objectChanges?.find((change) => {
+        const res = await executeTransaction(tx);
+
+        const map = res.data.objectChanges?.find((change) => {
             return (
                 change.type === "created" && change.objectType === `${packageId}::commander::Game`
             );
@@ -375,7 +377,6 @@ export function GameApp({
             if (action == "attack") {
                 let params = data as AttackEvent;
                 game.applyAttackEvent(params);
-                console.log("game should apply attack", params);
             }
 
             if (action == "next_turn") {
