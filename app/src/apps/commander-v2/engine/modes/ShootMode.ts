@@ -30,10 +30,6 @@ export class ShootMode extends Mode {
     private isAiming = false;
     /** Store listener cb to unsubscribe later */
     private _cb: ((_: GameEvent["ui"]) => void) | null = null;
-    /** Name of the function to  */
-    public static moveFun(pkg: string) {
-        return `${pkg}::commander::perform_attack`;
-    }
 
     /** Shoot Mode takes control of the Camera while active */
     constructor(protected camera: Camera) {

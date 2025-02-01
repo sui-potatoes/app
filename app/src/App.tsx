@@ -7,7 +7,6 @@ import { NavLink } from "react-router-dom";
 import GoGame from "./apps/go-game/App.tsx";
 import Libraries from "./apps/libraries/App.tsx";
 import Character from "./apps/character/App.tsx";
-import Commander from "./apps/commander/App.tsx";
 import CommanderV2 from "./apps/commander-v2/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
@@ -104,11 +103,11 @@ export function App() {
                     <li>
                         <NavLink to="/character">character</NavLink>
                     </li>
+                    {/* <li>
+                        <NavLink to="/commander">commander</NavLink>
+                    </li> */}
                     <li>
                         <NavLink to="/commander">commander</NavLink>
-                    </li>
-                    <li>
-                        <NavLink to="/commander-v2">commander (v2)</NavLink>
                     </li>
                     <li>
                         <NavLink to="/libraries">libraries (for devs)</NavLink>
@@ -124,8 +123,8 @@ export function App() {
                     <Route path="/go" element={<GoGame />} />
                     <Route path="/go/:id" element={<GoGame />} />
                     <Route path="/character" element={<Character />} />
-                    <Route path="/commander" element={<Commander />} />
-                    <Route path="/commander-v2/*" element={<CommanderV2 />} />
+                    {/* <Route path="/commander" element={<Commander />} /> */}
+                    <Route path="/commander/*" element={<CommanderV2 />} />
                     <Route path="/libraries" element={<Libraries />} />
                 </Routes>
             </div>
