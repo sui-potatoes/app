@@ -10,7 +10,7 @@
 /// - to_string
 module commander::map;
 
-use commander::{recruit::Recruit, unit::{Self, Unit}};
+use commander::{event, recruit::Recruit, unit::{Self, Unit}};
 use grid::grid::{Self, Grid};
 use std::string::String;
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
@@ -64,14 +64,17 @@ public enum TileType has copy, drop, store {
 
 /// Defines the game Map - a grid of tiles where the game takes place.
 public struct Map has store {
+    /// The unique identifier of the map.
+    id: ID,
     /// The grid of tiles.
     grid: Grid<Tile>,
     /// The current turn number.
     turn: u16,
 }
 
-public fun new(size: u16): Map {
+public fun new(id: ID, size: u16): Map {
     Map {
+        id,
         turn: 0,
         grid: grid::tabulate!(
             size,
@@ -85,8 +88,8 @@ public fun new(size: u16): Map {
 }
 
 /// Maps will be 30x30 tiles for now. Initially empty.
-public fun default(): Map {
-    new(30)
+public fun default(id: ID): Map {
+    new(id, 30)
 }
 
 // === Actions ===
@@ -125,6 +128,9 @@ public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
     unit.try_reset_ap(map.turn);
     unit.perform_move(distance as u8);
     map.grid[x1, y1].unit.fill(unit);
+
+    // emit the move event,
+    event::emit_move_event(map.id, path)
 }
 
 #[allow(lint(public_random))]
@@ -148,18 +154,28 @@ public fun perform_attack(
 
     let unit = attacker.borrow_mut();
     unit.try_reset_ap(map.turn);
-    let damage = unit.perform_attack(rng, ctx);
+    let (is_hit, is_crit, damage) = unit.perform_attack(rng, ctx);
     let mut target = map.grid[x1, y1].unit.extract();
-
-    let is_hit = if (damage > 0) {
+    let (is_dodged, damage, is_kia) = if (is_hit && damage > 0) {
         target.apply_damage(rng, damage, true)
-    } else false;
+    } else (false, 0, false);
 
-    if (target.hp() == 0) {
+    event::emit_attack_event(
+        map.id,
+        vector[x0, y0],
+        vector[x1, y1],
+        damage,
+        is_dodged,
+        !is_hit,
+        is_crit,
+        is_kia,
+    );
+
+    if (is_kia) {
         (true, option::some(target.destroy()))
     } else {
         map.grid[x1, y1].unit.fill(target);
-        (is_hit, option::none())
+        (is_hit && !is_dodged, option::none())
     }
 }
 
@@ -311,6 +327,7 @@ public fun from_bytes(bytes: vector<u8>): Map {
 
 /// Deserialize the `Map` from the `BCS` instance.
 public(package) fun from_bcs(bcs: &mut BCS): Map {
+    let id = bcs.peel_address().to_id();
     let grid = grid::from_bcs!(bcs, |bcs| {
         Tile {
             tile_type: match (bcs.peel_u8()) {
@@ -328,7 +345,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Map {
         }
     });
 
-    Map { turn: 0, grid }
+    Map { id, turn: 0, grid }
 }
 
 /// Implements the `Grid.to_string` method due to `Tile` implementing
@@ -360,9 +377,10 @@ public fun debug(map: &Map) {
 /// |     |     |     |     |     |     |     |
 /// |     | XXX |     |     |1100-|0100-|0110-|
 /// ```
-public fun demo_1(): Map {
+public fun demo_1(id: ID): Map {
+    let mut preset_bytes = bcs::to_bytes(&id);
     // prettier-ignore
-    let preset_bytes = x"0707000000000102000002000100000001000100000002000000000007020000000000000000000000000007000000000000000000000100000001000100000001000701000100000001000102000000000200000001010000000001010000000007010000000100010001000200000000000000000000000700000000000000000000000000000700000200000000000101010000000100010000000100010100000000";
+    preset_bytes.append(x"0707000000000102000002000100000001000100000002000000000007020000000000000000000000000007000000000000000000000100000001000100000001000701000100000001000102000000000200000001010000000001010000000007010000000100010001000200000000000000000000000700000000000000000000000000000700000200000000000101010000000100010000000100010100000000");
     from_bytes(preset_bytes)
 }
 
@@ -381,7 +399,7 @@ fun test_map_with_units() {
     let recruit_one = recruit::default(ctx);
     let recruit_two = recruit::default(ctx);
 
-    let mut map = Self::new(6);
+    let mut map = Self::new(@1.to_id(), 6);
 
     assert!(!map.tile_has_unit(3, 3));
     assert!(!map.tile_has_unit(5, 2));
@@ -401,7 +419,7 @@ fun test_map_with_units() {
 
     // now try to attack another unit with the first one
     let mut damage = 0;
-    map.grid[3, 3].unit.do_mut!(|unit| damage = unit.perform_attack(&mut rng, ctx));
+    map.grid[3, 3].unit.do_mut!(|unit| (_, _, damage) = unit.perform_attack(&mut rng, ctx));
 
     // apply the damage to the second unit
     map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);
@@ -435,7 +453,7 @@ fun test_map_with_units() {
 // o| o |o
 // o| o |o
 fun test_check_path() {
-    let mut map = Self::new(3);
+    let mut map = Self::new(@1.to_id(), 3);
     *&mut map.grid[0, 0].tile_type =
         TileType::Cover { left: NO_COVER, right: HIGH_COVER, top: NO_COVER, bottom: NO_COVER };
 
@@ -462,7 +480,7 @@ fun test_check_path() {
     );
     map.destroy();
 
-    let mut map = Self::new(3);
+    let mut map = Self::new(@1.to_id(), 3);
     *&mut map.grid[0, 0].tile_type =
         TileType::Cover { left: NO_COVER, right: NO_COVER, top: NO_COVER, bottom: HIGH_COVER };
 
@@ -521,7 +539,7 @@ fun test_check_path() {
 // To better understand the test, please refer to the `demo_1` function and see
 // the each map tile in the schema.
 fun test_demo_maps() {
-    let demo_1 = demo_1();
+    let demo_1 = demo_1(@1.to_id());
     assert!(demo_1.check_path(vector[vector[1, 6], vector[2, 6], vector[3, 6], vector[3, 5]]));
     assert!(
         !demo_1.check_path(vector[
@@ -545,7 +563,7 @@ fun test_demo_maps() {
 #[test]
 fun test_from_bcs() {
     use std::unit_test::assert_ref_eq;
-    let map = demo_1();
+    let map = demo_1(@1.to_id());
     let bytes = bcs::to_bytes(&map);
     let map_copy = from_bytes(bytes);
 

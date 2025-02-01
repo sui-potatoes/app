@@ -23,10 +23,25 @@ import { useSuiClient } from "@mysten/dapp-kit";
 import { EventBus, GameEvent } from "./engine/EventBus";
 import { bcs } from "./types/bcs";
 import * as THREE from "three";
+import { NavLink } from "react-router-dom";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
 
+export type AttackEvent = {
+    game: string;
+    attacker: [number, number];
+    target: [number, number];
+    damage: number;
+    is_dodged: boolean;
+    is_missed: boolean;
+    is_crit: boolean;
+    is_kia: boolean;
+};
+
+/**
+ * The main component of the game.
+ */
 export function Playground() {
     const packageId = useNetworkVariable("commanderV2PackageId");
     const client = useSuiClient();
@@ -43,6 +58,7 @@ export function Playground() {
     const localKey = localStorage.getItem(LS_KEY);
     const { data: map, isFetching, isFetched, refetch } = useGame({ id: localKey, enabled: true });
     const [lockedTx, setLockedTx] = useState<Transaction | null>(null);
+    const canTransact = !!zkLogin.address && !!executeTransaction && !isExecuting;
 
     useEffect(() => {
         loadModels().then(() => setModelsLoaded(true));
@@ -59,7 +75,11 @@ export function Playground() {
                 const result = await moveUnit(event.path.map((p: THREE.Vector2) => [p.x, p.y]));
                 if (!result) return console.log("unable to move unit");
                 setLockedTx(result.tx);
-                eventBus.dispatchEvent({ type: "sui", action: "trace:success" });
+                eventBus.dispatchEvent({
+                    type: "sui",
+                    action: "trace",
+                    message: "path checked",
+                });
             }
 
             if (event.action === "aim") {
@@ -69,7 +89,7 @@ export function Playground() {
                 const result = await performAttack([x0, y0], [x1, y1]);
                 if (!result) return console.log("unable to perform attack");
                 setLockedTx(result.tx);
-                eventBus.dispatchEvent({ type: "sui", action: "aim:success" });
+                eventBus.dispatchEvent({ type: "sui", action: "aim", message: "Unit can shoot" });
             }
         }
 
@@ -79,7 +99,15 @@ export function Playground() {
                 if (!res) return console.log("unable to end turn");
 
                 await executeTransaction(res.tx)!.wait();
-                eventBus.dispatchEvent({ type: "sui", action: "next_turn:success" });
+                if (map) {
+                    const turn = ++map.map.map.turn;
+                    eventBus.dispatchEvent({
+                        type: "sui",
+                        action: "next_turn",
+                        message: "Next turn: " + turn,
+                        turn,
+                    });
+                }
             }
         }
 
@@ -92,21 +120,59 @@ export function Playground() {
         };
     }, [map, executeTransaction]);
 
-    useEffect(() => {
-        if (!lockedTx) return;
+    /**
+     * Submit the locked transaction when the user clicks the confirm button.
+     * This event listener is reset every time a transaction is executed.
+     */
+    useEffect(
+        function submitLockedTransaction() {
+            if (!lockedTx) return;
 
-        /** Listen to the ui:confirm event, trigger tx sending */
-        async function onConfirm(event: GameEvent["ui"]) {
-            if (event.action === "confirm" && lockedTx && !isExecuting) {
-                setLockedTx(null);
-                const res = await executeTransaction(lockedTx)!.wait();
-                eventBus.dispatchEvent({ type: "sui", action: "tx:success", effects: res.effects });
+            /** Listen to the ui:confirm event, trigger tx sending */
+            async function onConfirm(event: GameEvent["ui"]) {
+                if (event.action === "confirm" && lockedTx && canTransact) {
+                    setLockedTx(null);
+                    const res = await executeTransaction(lockedTx)!.wait();
+                    const events = res.events || [];
+                    eventBus.dispatchEvent({
+                        type: "sui",
+                        action: "tx:success",
+                        effects: res.effects,
+                    });
+
+                    events.forEach((event) => {
+                        switch (event.type) {
+                            case `${packageId}::event::AttackEvent`:
+                                const data = event.parsedJson as AttackEvent;
+                                eventBus.dispatchEvent({
+                                    type: "sui",
+                                    action: "attack",
+                                    message: printAttackEvent(data),
+                                    data,
+                                });
+                                break;
+                            case `${packageId}::event::MoveEvent`: {
+                                const { path } = event.parsedJson as { path: [number, number][] };
+                                eventBus.dispatchEvent({
+                                    type: "sui",
+                                    action: "path",
+                                    path,
+                                    message:
+                                        "Unit moves: " +
+                                        path.map((p) => `(${p.toString()})`).join(", "),
+                                });
+                                break;
+                            }
+                        }
+                    });
+                }
             }
-        }
 
-        eventBus.addEventListener("ui", onConfirm);
-        return () => eventBus.removeEventListener("ui", onConfirm);
-    }, [lockedTx]);
+            eventBus.addEventListener("ui", onConfirm);
+            return () => eventBus.removeEventListener("ui", onConfirm);
+        },
+        [lockedTx, map],
+    );
 
     const centerDiv = (children: any) => (
         <div className="text-center bg-black/40 w-full h-full flex items-center justify-center">
@@ -119,9 +185,12 @@ export function Playground() {
     if (!modelsLoaded) return centerDiv("Models not loaded");
     if (!map)
         return centerDiv(
-            <div className="block">
+            <div className="block text-md">
                 <h1 className="mb-10">Map not found</h1>
                 <button onClick={() => createMap()}>create demo 1</button>
+                <NavLink className="menu-control mt-10" to="/commander">
+                    Back
+                </NavLink>
             </div>,
         );
 
@@ -136,14 +205,14 @@ export function Playground() {
                 {modelsLoaded && map && <GameApp map={map} eventBus={eventBus} camera={camera} />}
                 <Stats />
             </Canvas>
-            <UI isExecuting={isExecuting} eventBus={eventBus} />
+            <UI isExecuting={isExecuting} turn={map.map.map.turn} eventBus={eventBus} />
         </>
     );
 
+    // === Transaction functions ===
+
     async function createMap() {
-        if (isExecuting) return;
-        if (!zkLogin.address) return;
-        if (!executeTransaction) return;
+        if (!canTransact) return;
 
         const tx = new Transaction();
         const r1 = tx.moveCall({ target: `${packageId}::recruit::default` });
@@ -180,9 +249,7 @@ export function Playground() {
     /** Perform ranged attack. I've been waiting for this soooo long */
     async function performAttack(unit: [number, number], target: [number, number]) {
         if (!map) return;
-        if (isExecuting) return;
-        if (!zkLogin.address) return;
-        if (!executeTransaction) return;
+        if (!canTransact) return;
 
         const tx = new Transaction();
         const game = tx.sharedObjectRef({
@@ -195,10 +262,17 @@ export function Playground() {
 
         tx.moveCall({
             target: `${packageId}::commander::perform_attack`,
-            arguments: [game, rng, tx.pure.u16(unit[0]), tx.pure.u16(unit[1]), tx.pure.u16(target[0]), tx.pure.u16(target[1])],
+            arguments: [
+                game,
+                rng,
+                tx.pure.u16(unit[0]),
+                tx.pure.u16(unit[1]),
+                tx.pure.u16(target[0]),
+                tx.pure.u16(target[1]),
+            ],
         });
 
-        tx.setSender(zkLogin.address);
+        tx.setSender(zkLogin.address!);
 
         const res = await client.dryRunTransactionBlock({
             transactionBlock: await tx.build({ client: client as any }),
@@ -210,9 +284,7 @@ export function Playground() {
     /** Move the unit on the map. The initial coordinate is the gridPosition of the unit. */
     async function moveUnit(path: [number, number][]) {
         if (!map) return;
-        if (isExecuting) return;
-        if (!zkLogin.address) return;
-        if (!executeTransaction) return;
+        if (!canTransact) return;
 
         const tx = new Transaction();
         const game = tx.sharedObjectRef({
@@ -224,7 +296,7 @@ export function Playground() {
         const pathArg = tx.pure(bcs.vector(bcs.vector(bcs.u16())).serialize(path));
 
         tx.moveCall({ target: `${packageId}::commander::move_unit`, arguments: [game, pathArg] });
-        tx.setSender(zkLogin.address);
+        tx.setSender(zkLogin.address!);
 
         const res = await client.dryRunTransactionBlock({
             transactionBlock: await tx.build({ client: client as any }),
@@ -236,9 +308,7 @@ export function Playground() {
     /** End the turn. */
     async function nextTurn() {
         if (!map) return;
-        if (isExecuting) return;
-        if (!zkLogin.address) return;
-        if (!executeTransaction) return;
+        if (!canTransact) return;
 
         const tx = new Transaction();
         const game = tx.sharedObjectRef({
@@ -248,7 +318,7 @@ export function Playground() {
         });
 
         tx.moveCall({ target: `${packageId}::commander::next_turn`, arguments: [game] });
-        tx.setSender(zkLogin.address);
+        tx.setSender(zkLogin.address!);
 
         const res = await client.dryRunTransactionBlock({
             transactionBlock: await tx.build({ client: client as any }),
@@ -301,6 +371,18 @@ export function GameApp({
             }
         });
 
+        eventBus.addEventListener("sui", ({ action, data }) => {
+            if (action == "attack") {
+                let params = data as AttackEvent;
+                game.applyAttackEvent(params);
+                console.log("game should apply attack", params);
+            }
+
+            if (action == "next_turn") {
+                game.turn = game.turn + 1;
+            }
+        });
+
         eventBus.addEventListener("ui", ({ action }) => {
             switch (action) {
                 case "confirm":
@@ -337,32 +419,51 @@ const LOG_LENGTH = 5;
  * UI Component which renders buttons and emits events in the `eventBus` under the `ui` type.
  * Listens to the in-game events to render additional buttons and log the actions.
  */
-export function UI({ eventBus, isExecuting }: { eventBus: EventBus; isExecuting?: boolean }) {
+export function UI({
+    eventBus,
+    isExecuting,
+    turn: initilTurn,
+}: {
+    eventBus: EventBus;
+    isExecuting?: boolean;
+    turn: number;
+}) {
     const onAction = (action: string) => eventBus.dispatchEvent({ type: "ui", action });
-    const button = (id: string, text?: string) => (
+    const button = (id: string, disabled?: boolean, text?: string) => (
         <button
             onClick={() => onAction(id)}
-            className={"action-button mb-2" + (isExecuting ? " disabled" : "")}
+            className={"action-button mb-2" + (disabled || isExecuting ? " disabled" : "")}
         >
             {text || id}
         </button>
     );
 
+    const [panelDisabled, setPanelDisabled] = useState(true);
     const [shootMode, setShootMode] = useState(false);
+    const [turn, setTurn] = useState(initilTurn);
     const [log, setLog] = useState<string[]>([]);
 
     useEffect(() => {
-        eventBus.addEventListener("game", (event) => {
-            if (event.action === "mode_switch" && event.mode instanceof ShootMode) {
-                return setShootMode(true);
+        eventBus.addEventListener("sui", (event) => {
+            if (event.action === "next_turn") {
+                setTurn(event.turn);
             }
-            if (event.action === "mode_switch") return setShootMode(false);
+        });
+
+        eventBus.addEventListener("game", (event) => {
+            if (event.action === "mode_switch") {
+                if (event.mode instanceof ShootMode) setShootMode(true);
+                else setShootMode(false);
+
+                if (event.mode instanceof NoneMode) setPanelDisabled(true);
+                else setPanelDisabled(false);
+            }
         });
 
         eventBus.all((event) => {
             setLog((log) => {
-                let { type, action } = event;
-                let fullLog = [...log, `${type}: ${action ? action : ""}`];
+                let { type, action, message } = event;
+                let fullLog = [...log, `${type}: ${message || action || ""}`];
                 if (fullLog.length > LOG_LENGTH) fullLog = fullLog.slice(fullLog.length - 5);
                 return fullLog;
             });
@@ -377,9 +478,12 @@ export function UI({ eventBus, isExecuting }: { eventBus: EventBus; isExecuting?
             >
                 {button("move")}
                 {button("shoot")}
-                {button("grenade")}
-                <button onClick={() => onAction("next_turn")} className={"action-button mt-40" + (isExecuting ? " disabled" : "")}>
-                    End Turn
+                {button("grenade", true)}
+                <button
+                    onClick={() => onAction("next_turn")}
+                    className={"action-button mt-40" + (isExecuting ? " disabled" : "")}
+                >
+                    End Turn ({turn})
                 </button>
             </div>
             <div
@@ -396,11 +500,20 @@ export function UI({ eventBus, isExecuting }: { eventBus: EventBus; isExecuting?
                 id="panel-right"
                 className="fixed h-full right-0 top-0 p-10 flex justify-end flex-col text-center"
             >
-                {shootMode && button("next_target", ">")}
-                {shootMode && button("prev_target", "<")}
-                {button("confirm")}
-                {button("cancel")}
+                {shootMode && button("next_target", false, ">")}
+                {shootMode && button("prev_target", false, "<")}
+                {button("confirm", panelDisabled)}
+                {button("cancel", panelDisabled)}
                 {button("edit")}
+                <button
+                    onClick={() => {
+                        localStorage.removeItem(LS_KEY);
+                        window.location.reload();
+                    }}
+                    className={"action-button mt-40" + (isExecuting ? " disabled" : "")}
+                >
+                    Exit
+                </button>
             </div>
         </div>
     );
@@ -415,4 +528,15 @@ function loadCamera() {
     const camera = new Camera(75, aspect, 0.1, 100);
     camera.resetForSize(SIZE);
     return camera;
+}
+
+/**
+ * Print the attack event as a nice string.
+ */
+function printAttackEvent(event: AttackEvent): string {
+    if (event.is_missed) return "Miss!";
+    if (event.is_dodged) return "Dodged!";
+    if (event.is_kia) return "Killed in action! Damage: " + event.damage;
+    if (event.is_crit) return `Critical hit! ${event.damage} damage`;
+    return `Dealt ${event.damage} damage`;
 }

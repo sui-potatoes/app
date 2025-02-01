@@ -1,7 +1,8 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import * as THREE from "three";
+// @ts-ignore
+import { Text } from "troika-three-text";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { Line2 } from "three/addons/lines/Line2.js";
@@ -9,8 +10,8 @@ import JEASINGS from "jeasings";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
 import { Unit as UnitProps } from "../types/bcs";
-// @ts-ignore
-import { Text } from "troika-three-text";
+import * as THREE from "three";
+import { Game } from "./Game";
 
 /**
  * Implements the base class for the Unit object. Contains both the data (from
@@ -49,6 +50,124 @@ export class UnitModel extends THREE.Object3D {
         this.add(this.statsPanel);
     }
 
+    // === Unit Actions ===
+
+    /** Perform movemement along the path */
+    async walk(path: THREE.Vector2[]) {
+        this.playAnimation("Run", 0.5).play();
+
+        let easings: [{ x: number; z: number }, JEASINGS.JEasing][] = path
+            .slice(1)
+            .map(({ x, y: z }) => [
+                { x, z },
+                new JEASINGS.JEasing(this.position).to({ x, z }, 400 + Math.random() * 100),
+            ]);
+
+        while (easings.length) {
+            await new Promise((resolve) => {
+                let [target, easing] = easings.shift()!;
+                this.lookAt(target.x, 0, target.z);
+                easing.onComplete(() => resolve(void 0));
+                easing.start();
+            });
+        }
+
+        this.playAnimation("Idle").play();
+    }
+
+    /** Do the "fancy" shooting animation with particles flying toward the target */
+    async shoot(target: this) {
+        this.playAnimation("SniperShot", 3).play();
+
+        // create a vector from this to targetPos and normalize it
+        const targetPos = this.worldToLocal(target.position.clone());
+        // const direction = targetPos.clone().normalize().multiplyScalar(0.5);
+
+        // send particles to the target
+        const particles = new THREE.Group();
+        const particleGeo = new LineGeometry().setPositions([
+            0,
+            0,
+            0,
+            ...targetPos
+                .clone()
+                .normalize()
+                .multiplyScalar(Math.min(0.5, Math.abs(Math.random()))),
+        ]);
+        const particleMat = new LineMaterial({
+            color: 0xffbd6d,
+            linewidth: 3,
+            alphaToCoverage: true,
+        });
+
+        const tempParticles = [];
+
+        for (let i = 0; i < 4; i++) {
+            const particle = new Line2(particleGeo, particleMat);
+            particle.position.set(0, 1.5, 0);
+            particle.translateX(-0.12);
+            particle.translateZ(1);
+            tempParticles.push(particle);
+        }
+
+        this.add(particles);
+
+        const promises = tempParticles.map((particle, i) => {
+            const rng = () => Math.random() * 0.1;
+            const end = targetPos.clone().multiplyScalar(0.8);
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    particles.add(particle);
+                    new JEASINGS.JEasing(particle.position)
+                        .to({ x: end.x + rng(), y: end.y + 1.5 + rng(), z: end.z + rng() }, 100)
+                        .start()
+                        .onComplete(() => {
+                            particles.remove(particle);
+                            resolve(void 0);
+                        });
+                }, i * 400);
+            });
+        });
+
+        target
+            .playAnimation("Damage", 0.5)
+            .crossFadeTo(target.playAnimation("Idle"), 1, true)
+            .play();
+
+        await Promise.all(promises);
+
+        particles.clear();
+        this.playAnimation("Idle").play();
+    }
+
+    // === Animation & Game Loop ===
+
+    /** Play an animation by name */
+    playAnimation(name: string, timeScale: number = 1) {
+        this.mixer.stopAllAction();
+        const clip = THREE.AnimationClip.findByName(this.animations, name);
+        const action = this.mixer.clipAction(clip, this, THREE.NormalAnimationBlendMode);
+
+        if (!action) {
+            throw new Error(
+                `Animation ${name} not found. Available names are: ${this.animations.map((clip) => clip.name).join(", ")}`,
+            );
+        }
+
+        action.setLoop(THREE.LoopRepeat, 999);
+
+        action.timeScale = timeScale;
+        return action;
+    }
+
+    update(delta: number) {
+        this.mixer.update(delta);
+        this.updateQueue.forEach((fn) => fn(delta));
+    }
+
+    // === Visual Indicators ===
+
+    /** Target is drawn on the currently targeted unit */
     drawTarget(chance: number, damage_low: number, damage_high: number) {
         this.updateQueue = [];
 
@@ -82,70 +201,30 @@ export class UnitModel extends THREE.Object3D {
         this.aimCircle.add(circle);
     }
 
+    /** Removes the attack params info from the target */
     removeTarget() {
-        this.text.dispose();
+        this.text.dispose(); // must be done explicitly!
         this.aimCircle.clear();
         this.updateQueue = [];
     }
 
-    playAnimation(name: string, timeScale: number = 1) {
-        this.mixer.stopAllAction();
-        const clip = THREE.AnimationClip.findByName(this.animations, name);
-        const action = this.mixer.clipAction(clip, this, THREE.NormalAnimationBlendMode);
+    /** AP bar is shown when a unit is selected */
+    drawApBar() {
+        this.statsPanel.clear();
+        // const maxValue = this.props.ap.max_value
+        const ap = this.props.ap.value;
 
-        if (!action) {
-            throw new Error(
-                `Animation ${name} not found. Available names are: ${this.animations.map((clip) => clip.name).join(", ")}`,
-            );
+        if (ap === 0) return;
+        if (ap > 0) {
+            const geo = new LineGeometry().setPositions([-0.25, 2, 0, -0.05, 2, 0]);
+            const mat = new LineMaterial({ color: 0x1ae7bf, linewidth: 6, alphaToCoverage: true });
+            this.statsPanel.add(new Line2(geo, mat));
         }
-
-        action.setLoop(THREE.LoopRepeat, 999);
-
-        action.timeScale = timeScale;
-        action.play();
-    }
-
-    playAnimationOnce(name: string) {
-        this.mixer.stopAllAction();
-        const clip = THREE.AnimationClip.findByName(this.animations, name);
-        const action = this.mixer.clipAction(clip, this, THREE.NormalAnimationBlendMode);
-
-        if (!action) {
-            throw new Error(
-                `Animation ${name} not found. Available names are: ${this.animations.map((clip) => clip.name).join(", ")}`,
-            );
+        if (ap > 1) {
+            const geo = new LineGeometry().setPositions([0.05, 2, 0, 0.25, 2, 0]);
+            const mat = new LineMaterial({ color: 0x1ae7bf, linewidth: 6, alphaToCoverage: true });
+            this.statsPanel.add(new Line2(geo, mat));
         }
-
-        action.setLoop(THREE.LoopOnce, 1);
-        action.timeScale = 0.9;
-        action.play();
-    }
-
-    async walk(path: THREE.Vector2[]) {
-        this.playAnimation("Run", 0.5);
-
-        let easings: [{ x: number; z: number }, JEASINGS.JEasing][] = path
-            .slice(1)
-            .map(({ x, y: z }) => [
-                { x, z },
-                new JEASINGS.JEasing(this.position).to({ x, z }, 400 + Math.random() * 100),
-            ]);
-
-        while (easings.length) {
-            await new Promise((resolve) => {
-                let [target, easing] = easings.shift()!;
-                this.lookAt(target.x, 0, target.z);
-                easing.onComplete(() => resolve(void 0));
-                easing.start();
-            });
-        }
-
-        this.playAnimation("Idle");
-    }
-
-    update(delta: number) {
-        this.mixer.update(delta);
-        this.updateQueue.forEach((fn) => fn(delta));
     }
 }
 
@@ -155,15 +234,22 @@ export class Unit extends UnitModel {
     constructor(props: typeof UnitProps.$inferType, gltf: GLTF, x: number, z: number) {
         super(props, gltf);
         this.gridPosition.set(x, z);
-        this.playAnimation("Idle");
+        this.playAnimation("Idle").play();
     }
 
-    markSelected(_selected: boolean) {
-        // console.log("Selected", _selected, this.props);
+    markSelected(game: Game, selected: boolean) {
+        if (this.props.last_turn < game.turn) {
+            this.props.last_turn = game.turn;
+            this.props.ap.value = this.props.ap.max_value;
+        }
+
+        if (selected) this.drawApBar();
+        else this.statsPanel.clear();
     }
 
-    update(delta: number) {
-        super.update(delta);
+    spendAp(value: number) {
+        this.props.ap.value = Math.max(0, this.props.ap.value - value);
+        this.drawApBar();
     }
 }
 

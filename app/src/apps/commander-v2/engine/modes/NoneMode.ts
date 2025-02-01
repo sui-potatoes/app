@@ -11,7 +11,7 @@ import { MoveMode } from "./MoveMode";
  * None is the default game mode. It allows selecting units and their actions.
  * When game resets the mode is set to None.
  */
-export class NoneMode extends Mode {
+export class NoneMode implements Mode {
     public readonly name = "None";
 
     connect() {}
@@ -29,4 +29,6 @@ export class NoneMode extends Mode {
             this.switchMode(new MoveMode(controls));
         }
     }
+
+    async performAction() {}
 }

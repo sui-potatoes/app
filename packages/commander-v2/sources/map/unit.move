@@ -68,10 +68,16 @@ public fun perform_reload(unit: &mut Unit) {
 /// - Regular attack can be + or - 10% of the base damage - random.
 /// - The attack fully depletes the `Unit`'s AP.
 ///
+/// Returns: (is_hit, is_critical, damage)
+///
 /// Rng security:
 /// - this function is more expensive in the happy path, so the gas limit attack
 /// is less likely to be successful
-public fun perform_attack(unit: &mut Unit, rng: &mut RandomGenerator, _ctx: &mut TxContext): u8 {
+public fun perform_attack(
+    unit: &mut Unit,
+    rng: &mut RandomGenerator,
+    _ctx: &mut TxContext,
+): (bool, bool, u8) {
     assert!(unit.ap.value() > 0);
 
     unit.ap.deplete();
@@ -80,31 +86,31 @@ public fun perform_attack(unit: &mut Unit, rng: &mut RandomGenerator, _ctx: &mut
     let aim_stat = unit.stats.aim();
 
     let is_hit = rng.generate_u8_in_range(0, 99) >= aim_stat;
-    if (!is_hit) {
-        return 0
-    };
+    if (!is_hit) return (false, false, 0);
 
     let is_critical = rng.generate_u8_in_range(0, 99) >= CRIT_CHANCE;
     let swing = rng.generate_u8_in_range(0, 9) % 3; // 0, 1, 2
-    let damage = match (swing) {
+    let mut damage = match (swing) {
         0 => dmg_stat + 1,
         2 => dmg_stat - 1,
         _ => dmg_stat,
     };
 
-    if (is_critical) ((damage as u16) * 15 / 10) as u8
-    else damage
+    if (is_critical) damage = ((damage as u16) * 15 / 10) as u8;
+
+    (true, is_critical, damage)
 }
 
 #[allow(lint(public_random))]
 /// Apply damage to unit, can dodgeable (shot) or not (explosive).
-/// TODO: return result of the attack
+///
+/// Returns: (is_dodged, damage applied, is_kia),
 public fun apply_damage(
     unit: &mut Unit,
     rng: &mut RandomGenerator,
     damage: u8,
     can_dodge: bool,
-): bool {
+): (bool, u8, bool) {
     let dodge_stat = unit.stats.dodge();
     let armor_stat = unit.stats.armor();
 
@@ -116,11 +122,11 @@ public fun apply_damage(
     // if attack can be dodged, spin the wheel and see if the unit dodges
     let rng = rng.generate_u8_in_range(0, 99);
     if (can_dodge && dodge_stat > 0 && rng < dodge_stat) {
-        return false
+        return (true, 0, false)
     };
 
-    unit.hp.decrease(damage as u16);
-    damage != 0
+    let hp_left = unit.hp.decrease(damage as u16);
+    (false, damage, hp_left == 0)
 }
 
 /// Creates a new `Unit` - an in-game represenation of a `Recruit`.

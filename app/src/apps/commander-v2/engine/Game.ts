@@ -10,6 +10,7 @@ import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
 import { models } from "./models";
 import { EventBus } from "./EventBus";
+import { AttackEvent } from "../Playground";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
@@ -40,6 +41,8 @@ export class Game extends THREE.Object3D {
     public readonly plane: THREE.Mesh;
     /** The Grid object */
     public readonly grid: Grid;
+    /** Current turn */
+    public turn: number;
     /**
      * Mode is a configurable behavior that can be switched at runtime. It allows
      * the game to have different states of interaction. For example, when a unit
@@ -70,6 +73,8 @@ export class Game extends THREE.Object3D {
         const size = map.grid[0].length;
         const game = new Game(size, true);
 
+        game.turn = map.turn;
+
         for (let x = 0; x < size; x++) {
             for (let z = 0; z < size; z++) {
                 let mapTile = map.grid[x][z];
@@ -89,6 +94,12 @@ export class Game extends THREE.Object3D {
                 }
 
                 if (unit) {
+                    // correct ap points for the unit based on game.turn
+                    if (unit.last_turn < game.turn) {
+                        unit.last_turn = game.turn;
+                        unit.ap.value = unit.ap.max_value;
+                    }
+
                     let unitObj = new Unit(unit, models.soldier, x, z);
                     game.addUnit(unitObj);
                 }
@@ -112,10 +123,38 @@ export class Game extends THREE.Object3D {
         }
 
         // create the intersectable plane
+        this.turn = 0;
         this.plane = this.initPlane(size);
         this.add(this.plane);
         this.grid = new Grid(size);
         this.add(this.grid);
+        this.switchMode(new NoneMode());
+    }
+
+    // === Turn ===
+
+    nextTurn() {
+        this.turn += 1;
+    }
+
+    applyAttackEvent(event: AttackEvent) {
+        const {
+            attacker: _,
+            target: [x1, y1],
+            damage,
+            is_kia,
+        } = event;
+        const unitId = this.grid.grid[x1][y1].unit;
+
+        if (unitId === null) return; // ignore, fetched event too late
+
+        this.units[unitId]!.props.hp.value -= damage;
+
+        if (is_kia) {
+            this.grid.grid[x1][y1].unit = null;
+            this.remove(this.units[unitId]!);
+            delete this.units[unitId];
+        }
     }
 
     // === Component integration ===
@@ -134,14 +173,19 @@ export class Game extends THREE.Object3D {
 
     selectUnit(x: number, z: number) {
         if (!this.grid.grid[x][z].unit) {
-            this.selectedUnit?.markSelected(false);
+            this.selectedUnit?.markSelected(this, false);
             this.selectedUnit = null;
             return;
         }
 
+        this.selectedUnit?.markSelected(this, false);
         this.selectedUnit = this.units[this.grid.grid[x][z].unit];
-        this.selectedUnit.markSelected(true);
-        this.eventBus?.dispatchEvent({ type: "game", action: "unit_selected", unit: this.selectedUnit });
+        this.selectedUnit.markSelected(this, true);
+        this.eventBus?.dispatchEvent({
+            type: "game",
+            action: "unit_selected",
+            unit: this.selectedUnit,
+        });
     }
 
     /** Called every frame to update the game state. */
@@ -204,7 +248,8 @@ export class Game extends THREE.Object3D {
     async performAction() {
         if (this._isBlocked) return;
         this.tryDispatch({ action: "action", game: this, mode: this.mode });
-        this.mode.performAction.call(this, this.mode);
+        await this.mode.performAction.call(this, this.mode);
+        this.switchMode(new NoneMode());
     }
 
     // === Scene Setup ===
