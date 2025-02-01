@@ -5,6 +5,7 @@ import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { fromBase64 } from "@mysten/bcs";
 import { Game } from "../types/bcs";
 import type { SuiObjectRef } from "@mysten/sui/client";
+import { useNetworkVariable } from "../../../networkConfig";
 
 type Props = {
     id: string | null;
@@ -20,6 +21,7 @@ export type GameMap = SuiObjectRef & {
  * Hook to create a transaction executor
  */
 export function useGame({ id, enabled }: Props) {
+    const packageId = useNetworkVariable("commanderV2PackageId");
     return useSuiClientQuery(
         "getObject",
         { id: id!, options: { showBcs: true, showOwner: true, showType: true } },
@@ -28,6 +30,8 @@ export function useGame({ id, enabled }: Props) {
             select(data): GameMap | null {
                 if (!data.data) return null;
                 if (!data.data.bcs) return null;
+                if (!data.data.type) return null;
+                if (data.data.type !== `${packageId}::commander::Game`) return null;
                 if (
                     !data.data.owner ||
                     data.data.owner == "Immutable" ||

@@ -33,8 +33,9 @@ public fun is_empty(param: &Param): bool { param.value == 0 }
 
 /// Decrease the value of the parameter by a certain amount. The value cannot go
 /// below 0.
-public fun decrease(param: &mut Param, amount: u16) {
+public fun decrease(param: &mut Param, amount: u16): u16 {
     param.value = param.value - amount.min(param.value);
+    param.value
 }
 
 /// Deplete the value of the parameter to 0.
@@ -77,9 +78,7 @@ fun test_param() {
 
     param.decrease(5);
     assert!(param.is_empty());
-
-    param.decrease(5); // should just be 0
-    assert_eq!(param.value(), 0);
+    assert_eq!(param.decrease(5), 0);
 
     param.reset();
     assert_eq!(param.value(), 10);

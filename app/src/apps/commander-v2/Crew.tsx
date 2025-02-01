@@ -104,7 +104,7 @@ export function Crew() {
                     ))}
             </div>
             <div className="flex justify-center">
-                <NavLink to="/commander-v2" className="menu-control">
+                <NavLink to="/commander" className="menu-control">
                     Back
                 </NavLink>
             </div>

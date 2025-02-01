@@ -34,7 +34,7 @@ export function Settings() {
             <div className="flex justify-center align-middle h-screen flex-col">
                 <h1 className="menu-control">Settings</h1>
                 <p className="text-center">Please login to view your settings.</p>
-                <NavLink className="menu-control" to="/commander-v2">
+                <NavLink className="menu-control" to="/commander">
                     Back
                 </NavLink>
             </div>
@@ -66,7 +66,7 @@ export function Settings() {
             {balanceQuery && BigInt(balanceQuery?.totalBalance) < 1000000000n && (
                 <p className="text-center">Top up your account to play</p>
             )}
-            <NavLink className="menu-control" to="/commander-v2">
+            <NavLink className="menu-control" to="/commander">
                 Back
             </NavLink>
         </div>

@@ -5,8 +5,7 @@
 module commander::commander;
 
 use commander::{map::{Self, Map}, recruit::Recruit};
-use sui::table::{Self, Table};
-use sui::random::Random;
+use sui::{random::Random, table::{Self, Table}};
 
 /// The main object of the game, controls the game state, configuration and
 /// serves as the registry for all users and their recruits.
@@ -26,19 +25,21 @@ public struct Game has key {
 
 /// Start a new game.
 public fun new(ctx: &mut TxContext): Game {
+    let id = object::new(ctx);
     Game {
-        id: object::new(ctx),
-        map: map::default(),
+        map: map::default(id.to_inner()),
         recruits: table::new(ctx),
+        id,
     }
 }
 
 /// Create a new demo game.
 public fun demo(ctx: &mut TxContext): Game {
+    let id = object::new(ctx);
     Game {
-        id: object::new(ctx),
-        map: map::demo_1(),
+        map: map::demo_1(id.to_inner()),
         recruits: table::new(ctx),
+        id,
     }
 }
 
@@ -56,7 +57,15 @@ public fun move_unit(game: &mut Game, path: vector<vector<u16>>, _ctx: &mut TxCo
 }
 
 /// Perform an attack action.
-entry fun perform_attack(game: &mut Game, rng: &Random, x0: u16, y0: u16, x1: u16, y1: u16, ctx: &mut TxContext) {
+entry fun perform_attack(
+    game: &mut Game,
+    rng: &Random,
+    x0: u16,
+    y0: u16,
+    x1: u16,
+    y1: u16,
+    ctx: &mut TxContext,
+) {
     let mut rng = rng.new_generator(ctx);
     let (_, is_dead) = game.map.perform_attack(&mut rng, x0, y0, x1, y1, ctx);
 

@@ -185,7 +185,7 @@ export class MoveMode implements Mode {
             mode.path = path.map(([x, z]) => new THREE.Vector2(x, -z));
             mode.target = path[path.length - 1]; // update target to the last step of the path
             mode.drawPath(path);
-            this.tryDispatch({ action: "trace", path });
+            this.tryDispatch({ action: "trace", path, message: "path traced" });
         }
     }
 }

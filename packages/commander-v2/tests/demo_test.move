@@ -34,8 +34,9 @@ fun playtest() {
 // - Repeat attack until one unit dies
 fun run_simulation(seed: vector<u8>): vector<u16> {
     let ctx = &mut tx_context::dummy();
+    let id = ctx.fresh_object_address().to_id();
     let mut rng = random::new_generator_from_seed_for_testing(seed);
-    let mut map = map::demo_1();
+    let mut map = map::demo_1(id);
     let (r1, r3) = (recruit_one(ctx), recruit_two(ctx));
 
     // recruit placement over
@@ -65,22 +66,22 @@ fun run_simulation(seed: vector<u8>): vector<u16> {
     });
 
     let result = 'crossfire: loop {
-        let (is_hit, is_dead) = map.perform_attack(&mut rng, 4, 1, 0, 3, ctx);
-        is_dead.do!(|_| break 'crossfire vector[map.turn(), 2] );
-        map.unit(0, 3).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
-        map.unit(4, 1).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // no more AP
+            let (is_hit, is_dead) = map.perform_attack(&mut rng, 4, 1, 0, 3, ctx);
+            is_dead.do!(|_| break 'crossfire vector[map.turn(), 2]);
+            map.unit(0, 3).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
+            map.unit(4, 1).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // no more AP
 
-        // Unit 2 is in a good position already and chooses to perform an attack
-        // Depending on the RNG seed, we want to check different outcomes
-        let (is_hit, is_dead) = map.perform_attack(&mut rng, 0, 3, 4, 1, ctx);
+            // Unit 2 is in a good position already and chooses to perform an attack
+            // Depending on the RNG seed, we want to check different outcomes
+            let (is_hit, is_dead) = map.perform_attack(&mut rng, 0, 3, 4, 1, ctx);
 
-        is_dead.do!(|_| break 'crossfire vector[map.turn(), 1] );
-        map.unit(4, 1).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
-        map.unit(0, 3).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // depleted AP
+            is_dead.do!(|_| break 'crossfire vector[map.turn(), 1]);
+            map.unit(4, 1).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
+            map.unit(0, 3).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // depleted AP
 
-        // Reset the Map turn
-        map.next_turn();
-    };
+            // Reset the Map turn
+            map.next_turn();
+        };
 
     // print the result
     {

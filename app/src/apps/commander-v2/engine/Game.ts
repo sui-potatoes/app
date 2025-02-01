@@ -10,6 +10,7 @@ import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
 import { models } from "./models";
 import { EventBus } from "./EventBus";
+import { AttackEvent } from "../Playground";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
@@ -134,6 +135,26 @@ export class Game extends THREE.Object3D {
 
     nextTurn() {
         this.turn += 1;
+    }
+
+    applyAttackEvent(event: AttackEvent) {
+        const {
+            attacker: _,
+            target: [x1, y1],
+            damage,
+            is_kia,
+        } = event;
+        const unitId = this.grid.grid[x1][y1].unit;
+
+        if (unitId === null) return; // ignore, fetched event too late
+
+        this.units[unitId]!.props.hp.value -= damage;
+
+        if (is_kia) {
+            this.grid.grid[x1][y1].unit = null;
+            this.remove(this.units[unitId]!);
+            delete this.units[unitId];
+        }
     }
 
     // === Component integration ===

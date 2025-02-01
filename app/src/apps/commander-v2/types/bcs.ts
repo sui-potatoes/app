@@ -92,6 +92,7 @@ export const Tile = bcs.struct("Tile", {
 });
 
 export const Map = bcs.struct("Map", {
+    id: bcs.Address,
     grid: bcs.vector(bcs.vector(Tile)),
     turn: bcs.u16(),
 });
