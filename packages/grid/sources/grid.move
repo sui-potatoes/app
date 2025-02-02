@@ -24,7 +24,7 @@ use grid::point::{Self, Point};
 use std::{macros, string::String};
 use sui::bcs::BCS;
 
-const EIncorrectVectorLength: u64 = 0;
+const EIncorrectLength: u64 = 0;
 
 /// A generic 2D grid, each cell stores `T`.
 public struct Grid<T> has copy, drop, store {
@@ -35,9 +35,9 @@ public struct Grid<T> has copy, drop, store {
 /// rows of the grid. The function panics if the grid is empty or if the rows
 /// have different lengths.
 public fun from_vector<T>(grid: vector<vector<T>>): Grid<T> {
-    assert!(grid.length() > 0);
+    assert!(grid.length() > 0, EIncorrectLength);
     let height = grid[0].length();
-    grid.do_ref!(|row| assert!(row.length() == height, EIncorrectVectorLength));
+    grid.do_ref!(|row| assert!(row.length() == height, EIncorrectLength));
     Grid { grid }
 }
 
@@ -69,13 +69,13 @@ public fun borrow_mut<T>(g: &mut Grid<T>, x: u16, y: u16): &mut T {
 }
 
 /// Swap an element in the grid with another element, returning the old element.
-/// This is important for `T` types that don't have `copy`.
+/// This is important for `T` types that don't have `drop`.
 public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
     g.grid[x as u64].push_back(element);
     g.grid[x as u64].swap_remove(y as u64)
 }
 
-// === Utils ===
+// === Macros ===
 
 /// Check if a point is above another point (decrease in X).
 public macro fun is_up($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 > $x1 && $y0 == $y1 }
@@ -94,8 +94,6 @@ public macro fun is_right($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 ==
 public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {
     macros::num_diff!($x0, $x1) + macros::num_diff!($y0, $y1)
 }
-
-// === Macros ===
 
 /// Get all von Neumann neighbours of a point, checking if the point is within
 /// the bounds of the grid. The size parameter specifies the size of the neighbourhood.
@@ -147,7 +145,7 @@ public macro fun find_group<$T>(
 
     let mut queue = vector[point::new(x, y)];
 
-    while (!queue.is_empty()) {
+    while (queue.length() != 0) {
         let point = queue.pop_back();
         map.von_neumann!(point, 1).do!(|point| {
             let (x, y) = point.into_values();

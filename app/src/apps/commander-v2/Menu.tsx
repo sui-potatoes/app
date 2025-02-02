@@ -21,7 +21,7 @@ export function Menu() {
 
     return (
         <>
-            <div id="menu-scene"></div>,
+            <div id="menu-scene"></div>
             <div className="flex justify-center align-middle h-screen flex-col">
                 {disabled && (
                     <div

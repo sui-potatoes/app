@@ -17,7 +17,7 @@ const TYPE_TITLE: u8 = 2;
 const TYPE_CUSTOM: u8 = 3;
 
 /// Special container for SVG descriptions.
-public struct Desc has store, copy, drop {
+public struct Desc has copy, drop, store {
     desc_type: u8,
     content: String,
 }
@@ -129,7 +129,7 @@ public fun to_string(shape: &Desc): String {
         1 => (b"metadata", vector[shape.content]),
         2 => (b"title", vector[shape.content]),
         3 => return shape.content,
-        _ => abort ,
+        _ => abort,
     };
 
     print::print(name.to_string(), vec_map::empty(), option::some(content))

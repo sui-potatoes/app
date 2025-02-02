@@ -133,4 +133,3 @@ public macro fun read_u64_at_offset<$T>($v: $T, $offset: u8): u64 {
 // === Writes ===
 
 // currently not implemented
-

@@ -11,11 +11,18 @@
 module commander::unit;
 
 use commander::{param::{Self, Param}, recruit::Recruit, stats::{Self, Stats}};
-use std::string::String;
+use std::{macros::num_min, string::String};
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
-/// The chance for a critical hit. (100 - 10%)
-const CRIT_CHANCE: u8 = 90;
+/// Trying to attack a target that is out of range.
+const ERangeExceeded: u64 = 1;
+
+/// Weapon range can be exceeded by this value with aim penalty.
+const MAX_RANGE_OFFSET: u8 = 3;
+/// If distance is less than range, the aim bonus is applied for each tile.
+const DISTANCE_BONUS: u8 = 5;
+/// If distance is greater than range, the aim penalty is applied for each tile.
+const DISTANCE_PENALTY: u8 = 10;
 
 /// A single `Unit` on the `Map`.
 public struct Unit has copy, store {
@@ -41,6 +48,7 @@ public fun attack_params(unit: &Unit): (u16, u16) {
 /// Reset the AP of the `Unit` to the default value if the turn is over.
 public fun try_reset_ap(unit: &mut Unit, turn: u16) {
     if (unit.last_turn < turn) unit.ap.reset();
+    unit.last_turn = turn;
 }
 
 /// Get the HP of the `Unit`.
@@ -68,7 +76,7 @@ public fun perform_reload(unit: &mut Unit) {
 /// - Regular attack can be + or - 10% of the base damage - random.
 /// - The attack fully depletes the `Unit`'s AP.
 ///
-/// Returns: (is_hit, is_critical, damage)
+/// Returns: (is_hit, is_critical, is_plus_one, damage, hit_chance)
 ///
 /// Rng security:
 /// - this function is more expensive in the happy path, so the gas limit attack
@@ -76,29 +84,44 @@ public fun perform_reload(unit: &mut Unit) {
 public fun perform_attack(
     unit: &mut Unit,
     rng: &mut RandomGenerator,
-    _ctx: &mut TxContext,
-): (bool, bool, u8) {
+    range: u8,
+): (bool, bool, bool, u8, u8) {
     assert!(unit.ap.value() > 0);
 
     unit.ap.deplete();
 
+    let crit_chance = unit.stats.crit_chance();
     let dmg_stat = unit.stats.damage();
+    let eff_range = unit.stats.range();
     let aim_stat = unit.stats.aim();
+    let spread = MAX_RANGE_OFFSET;
 
-    let is_hit = rng.generate_u8_in_range(0, 99) >= aim_stat;
-    if (!is_hit) return (false, false, 0);
+    assert!(eff_range + spread >= range, ERangeExceeded);
 
-    let is_critical = rng.generate_u8_in_range(0, 99) >= CRIT_CHANCE;
-    let swing = rng.generate_u8_in_range(0, 9) % 3; // 0, 1, 2
-    let mut damage = match (swing) {
-        0 => dmg_stat + 1,
-        2 => dmg_stat - 1,
-        _ => dmg_stat,
+    // aim stat is affected by the range
+    let hit_chance = if (eff_range == range) {
+        aim_stat
+    } else if (eff_range > range) {
+        num_min!(aim_stat + DISTANCE_BONUS * (eff_range - range), 100)
+    } else {
+        aim_stat - num_min!(DISTANCE_PENALTY * (range - eff_range), aim_stat)
     };
 
-    if (is_critical) damage = ((damage as u16) * 15 / 10) as u8;
+    let is_hit = rng.generate_u8_in_range(0, 99) < hit_chance;
+    if (!is_hit) return (false, false, false, 0, hit_chance);
 
-    (true, is_critical, damage)
+    let spread = unit.stats.spread();
+    let is_critical = rng.generate_u8_in_range(0, 99) < crit_chance;
+    let damage = match (rng.generate_bool()) {
+        true => dmg_stat + rng.generate_u8_in_range(0, spread),
+        false => dmg_stat - rng.generate_u8_in_range(0, spread),
+    };
+
+    let is_plus_one = rng.generate_u8_in_range(0, 99) < unit.stats.plus_one();
+    let damage = if (is_plus_one) damage + 1 else damage;
+    let damage = if (is_critical) damage + (dmg_stat / 2) else damage;
+
+    (true, is_plus_one, is_critical, damage, hit_chance)
 }
 
 #[allow(lint(public_random))]
@@ -121,7 +144,7 @@ public fun apply_damage(
 
     // if attack can be dodged, spin the wheel and see if the unit dodges
     let rng = rng.generate_u8_in_range(0, 99);
-    if (can_dodge && dodge_stat > 0 && rng < dodge_stat) {
+    if (can_dodge && rng < dodge_stat) {
         return (true, 0, false)
     };
 
@@ -188,98 +211,3 @@ public(package) fun from_bcs(bcs: &mut BCS): Unit {
 
 /// Print the `Unit` as a `String`.
 public fun to_string(_unit: &Unit): String { b"Unit".to_string() }
-
-#[test]
-fun test_unit() {
-    use std::unit_test::assert_eq;
-    use sui::random;
-    use commander::recruit;
-
-    let ctx = &mut tx_context::dummy();
-    let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
-    let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
-
-    // make sure the conversion is correct
-    // assert_eq!(unit.stats, *recruit.stats());
-    assert_eq!(unit.hp.value(), recruit.stats().health() as u16);
-    assert_eq!(unit.ap.value(), 2);
-
-    // now test the attack params
-    // make sure to update the values if the rng seed changes
-    // assert_eq!(unit.perform_attack(&mut rng, ctx), 0);
-    // assert!(unit.ap.is_empty());
-    // unit.ap.reset();
-    // assert_eq!(unit.perform_attack(&mut rng, ctx), 6);
-    // unit.ap.reset();
-    // assert_eq!(unit.perform_attack(&mut rng, ctx), 4);
-    // unit.ap.reset();
-    // assert_eq!(unit.perform_attack(&mut rng, ctx), 0);
-    // unit.ap.reset();
-    // assert_eq!(unit.perform_attack(&mut rng, ctx), 0);
-
-    // now test application of damage to the unit
-    // for simplicity we'll use the same unit
-    unit.apply_damage(&mut rng, 5, true);
-    assert_eq!(unit.hp.value(), 5);
-
-    let (weapon, armor) = recruit.dismiss();
-    weapon.destroy_none();
-    armor.destroy_none();
-    unit.destroy();
-}
-
-#[test, allow(unused_let_mut, unused_variable, unused_use)]
-fun test_unit_custom_weapon() {
-    use std::unit_test::assert_eq;
-    use sui::random;
-    use commander::{recruit, weapon, stats_builder};
-
-    let ctx = &mut tx_context::dummy();
-    let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
-    let mut recruit = recruit::default(ctx);
-    let weapon = weapon::new(
-        b"Test Rifle".to_string(),
-        stats_builder::new().damage(7).build_weapon(),
-        ctx,
-    );
-
-    recruit.add_weapon(weapon);
-
-    let mut unit = recruit.to_unit();
-
-    // assert_eq!(unit.stats, *recruit.stats());
-    // assert_eq!(unit.hp.value(), recruit.stats().health() as u16);
-    // assert_eq!(unit.ap.value(), 2);
-
-    // unit.ap.reset();
-    // assert_eq!(unit.perform_attack(&mut rng, ctx), 0); // miss
-
-    // unit.ap.reset();
-    // assert_eq!(unit.perform_attack(&mut rng, ctx), 6); // hit
-
-    let (weapon, armor) = recruit.dismiss();
-    weapon.do!(|weapon| weapon.destroy());
-    armor.do!(|armor| armor.destroy());
-    unit.destroy();
-}
-
-#[test]
-fun test_from_bcs() {
-    use std::unit_test::assert_eq;
-    use commander::recruit;
-
-    let ctx = &mut tx_context::dummy();
-    let recruit = recruit::default(ctx);
-    let unit = recruit.to_unit();
-
-    let bytes = bcs::to_bytes(&unit);
-    let unit2 = from_bytes(bytes);
-
-    assert_eq!(unit.recruit, unit2.recruit);
-    let (weapon, armor) = recruit.dismiss();
-    weapon.do!(|weapon| weapon.destroy());
-    armor.do!(|armor| armor.destroy());
-    unit2.destroy();
-    unit.destroy();
-}

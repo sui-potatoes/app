@@ -35,19 +35,33 @@ export class ShootMode implements Mode {
     private _cb: ((_: GameEvent["ui"]) => void) | null = null;
 
     /** Shoot Mode takes control of the Camera while active */
-    constructor(protected camera: Camera) {}
+    constructor(
+        protected camera: Camera,
+        protected controls: Controls,
+    ) {}
 
     connect(this: Game, mode: this) {
         if (this.selectedUnit === null) return this.switchMode(new NoneMode());
-        if (this.selectedUnit.props.ap.value == 0) return this.switchMode(new NoneMode());
+        if (this.selectedUnit.props.ap.value == 0)
+            return this.switchMode(new MoveMode(mode.controls));
 
         const selectedUnit = this.selectedUnit;
         const targets = Object.values(this.units).filter(
-            (unit) => unit.id !== selectedUnit.id && chance(selectedUnit, unit) > 0,
+            (unit) =>
+                unit.id !== selectedUnit.id &&
+                chance(selectedUnit, unit) > 0 &&
+                distance(selectedUnit, unit) <=
+                    selectedUnit.props.stats.range + MAX_DISTANCE_OFFSET,
         );
 
         if (targets.length === 0) {
-            return console.log("No targets available.");
+            this.tryDispatch({
+                type: "game",
+                action: "no_targets",
+                message: "no targets available",
+            });
+
+            return this.switchMode(new MoveMode(mode.controls));
         }
 
         // subscribe to the UI events
@@ -208,6 +222,17 @@ export class ShootMode implements Mode {
     }
 }
 
+const CLOSE_DISTANCE_MODIFIER = 5;
+const DISTANCE_MODIFIER = 10;
+const MAX_DISTANCE_OFFSET = 3;
+
+function distance(unit: Unit, target: Unit) {
+    return (
+        Math.abs(unit.gridPosition.x - target.gridPosition.x) +
+        Math.abs(unit.gridPosition.y - target.gridPosition.y)
+    );
+}
+
 /**
  *
  * @param unit
@@ -222,9 +247,6 @@ function damage(unit: Unit | null): [number, number] {
 
     return [damage_low, damage_high];
 }
-
-const CLOSE_DISTANCE_MODIFIER = 5;
-const DISTANCE_MODIFIER = 10;
 
 function chance(unit: Unit | null, target: Unit | null): number {
     if (!unit || !target) return 0;

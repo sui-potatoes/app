@@ -5,7 +5,7 @@
 module commander::commander;
 
 use commander::{map::{Self, Map}, recruit::Recruit};
-use sui::{random::Random, table::{Self, Table}};
+use sui::{object_table::{Self, ObjectTable}, random::Random};
 
 /// The main object of the game, controls the game state, configuration and
 /// serves as the registry for all users and their recruits.
@@ -20,7 +20,7 @@ public struct Game has key {
     map: Map,
     /// Temporarily stores recruits for the duration of the game.
     /// If recruits are KIA, they're "killed" upon removal from this table.
-    recruits: Table<ID, Recruit>,
+    recruits: ObjectTable<ID, Recruit>,
 }
 
 /// Start a new game.
@@ -28,7 +28,7 @@ public fun new(ctx: &mut TxContext): Game {
     let id = object::new(ctx);
     Game {
         map: map::default(id.to_inner()),
-        recruits: table::new(ctx),
+        recruits: object_table::new(ctx),
         id,
     }
 }
@@ -38,7 +38,7 @@ public fun demo(ctx: &mut TxContext): Game {
     let id = object::new(ctx);
     Game {
         map: map::demo_1(id.to_inner()),
-        recruits: table::new(ctx),
+        recruits: object_table::new(ctx),
         id,
     }
 }
@@ -67,7 +67,7 @@ entry fun perform_attack(
     ctx: &mut TxContext,
 ) {
     let mut rng = rng.new_generator(ctx);
-    let (_, is_dead) = game.map.perform_attack(&mut rng, x0, y0, x1, y1, ctx);
+    let (_, is_dead) = game.map.perform_attack(&mut rng, x0, y0, x1, y1);
 
     is_dead.do!(|id| {
         let recruit = game.recruits.remove(id);
