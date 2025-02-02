@@ -12,8 +12,10 @@ public struct AttackEvent has copy, drop {
     attacker: vector<u16>, // a pair of x, y coordinates
     target: vector<u16>, // a pair of x, y coordinates
     damage: u8,
+    hit_chance: u8,
     is_dodged: bool,
     is_missed: bool,
+    is_plus_one: bool,
     is_crit: bool,
     is_kia: bool,
 }
@@ -30,8 +32,10 @@ public fun emit_attack_event(
     attacker: vector<u16>,
     target: vector<u16>,
     damage: u8,
+    hit_chance: u8,
     is_dodged: bool,
     is_missed: bool,
+    is_plus_one: bool,
     is_crit: bool,
     is_kia: bool,
 ) {
@@ -40,8 +44,10 @@ public fun emit_attack_event(
         attacker,
         target,
         damage,
+        hit_chance,
         is_dodged,
         is_missed,
+        is_plus_one,
         is_crit,
         is_kia,
     })

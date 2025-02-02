@@ -24,7 +24,7 @@ use grid::point::{Self, Point};
 use std::{macros, string::String};
 use sui::bcs::BCS;
 
-const EIncorrectVectorLength: u64 = 0;
+const EIncorrectLength: u64 = 0;
 
 /// A generic 2D grid, each cell stores `T`.
 public struct Grid<T> has copy, drop, store {
@@ -35,9 +35,9 @@ public struct Grid<T> has copy, drop, store {
 /// rows of the grid. The function panics if the grid is empty or if the rows
 /// have different lengths.
 public fun from_vector<T>(grid: vector<vector<T>>): Grid<T> {
-    assert!(grid.length() > 0);
+    assert!(grid.length() > 0, EIncorrectLength);
     let height = grid[0].length();
-    grid.do_ref!(|row| assert!(row.length() == height, EIncorrectVectorLength));
+    grid.do_ref!(|row| assert!(row.length() == height, EIncorrectLength));
     Grid { grid }
 }
 

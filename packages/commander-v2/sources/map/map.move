@@ -23,6 +23,12 @@ const ETileIsUnwalkable: u64 = 2;
 const EPathUnwalkable: u64 = 3;
 /// The path is incorrect: skipping tiles or standing still.
 const EIncorrectPath: u64 = 4;
+/// The unit is not on the tile.
+const ENoUnit: u64 = 5;
+/// The path is too short.
+const EPathTooShort: u64 = 6;
+/// The tile is out of bounds.
+const ETileOutOfBounds: u64 = 7;
 
 #[allow(unused_const)]
 /// Constant for no cover in the `TileType::Cover`.
@@ -111,7 +117,7 @@ public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
 
 /// Move a unit along the path. The first point is the current position of the unit.
 public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
-    assert!(path.length() > 1);
+    assert!(path.length() > 1, EPathTooShort);
 
     let distance = path.length() - 1;
     let (first, last) = (path[0], path[distance]);
@@ -119,8 +125,8 @@ public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
     let (x1, y1) = (last[0], last[1]);
     let (width, height) = (map.grid.width(), map.grid.height());
 
-    assert!(y0 < height && x0 < width, ETileIsUnwalkable);
-    assert!(y1 < height && x1 < width, ETileIsUnwalkable);
+    assert!(y0 < height && x0 < width, ETileOutOfBounds);
+    assert!(y1 < height && x1 < width, ETileOutOfBounds);
     assert!(map.check_path(path), EPathUnwalkable);
 
     // transfer the unit from one position to another
@@ -147,15 +153,19 @@ public fun perform_attack(
     y0: u16,
     x1: u16,
     y1: u16,
-    ctx: &mut TxContext,
 ): (bool, Option<ID>) {
     let attacker = &mut map.grid[x0, y0].unit;
-    assert!(attacker.is_some());
+    assert!(attacker.is_some(), ENoUnit);
 
     let unit = attacker.borrow_mut();
     unit.try_reset_ap(map.turn);
-    let (is_hit, is_crit, damage) = unit.perform_attack(rng, ctx);
-    let mut target = map.grid[x1, y1].unit.extract();
+
+    let range = grid::range!(x0, y0, x1, y1) as u8;
+    let (is_hit, is_plus_one, is_crit, damage, hit_chance) = unit.perform_attack(rng, range);
+    let target = &mut map.grid[x1, y1].unit;
+    assert!(target.is_some(), ENoUnit);
+
+    let mut target = target.extract();
     let (is_dodged, damage, is_kia) = if (is_hit && damage > 0) {
         target.apply_damage(rng, damage, true)
     } else (false, 0, false);
@@ -165,8 +175,10 @@ public fun perform_attack(
         vector[x0, y0],
         vector[x1, y1],
         damage,
+        hit_chance,
         is_dodged,
         !is_hit,
+        is_plus_one,
         is_crit,
         is_kia,
     );
@@ -419,7 +431,7 @@ fun test_map_with_units() {
 
     // now try to attack another unit with the first one
     let mut damage = 0;
-    map.grid[3, 3].unit.do_mut!(|unit| (_, _, damage) = unit.perform_attack(&mut rng, ctx));
+    map.grid[3, 3].unit.do_mut!(|unit| (_, _, _, damage, _) = unit.perform_attack(&mut rng, 4));
 
     // apply the damage to the second unit
     map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);

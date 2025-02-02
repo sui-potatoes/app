@@ -216,14 +216,14 @@ export class UnitModel extends THREE.Object3D {
 
         if (ap === 0) return;
         if (ap > 0) {
-            const geo = new LineGeometry().setPositions([-0.25, 2, 0, -0.05, 2, 0]);
-            const mat = new LineMaterial({ color: 0x1ae7bf, linewidth: 6, alphaToCoverage: true });
-            this.statsPanel.add(new Line2(geo, mat));
+            let line = createCircleSegmentLine(0.4, 32, 0x1ae7bf, 0, Math.PI / 2, 4);
+            line.position.set(0, 0.1, 0);
+            this.statsPanel.add(line);
         }
         if (ap > 1) {
-            const geo = new LineGeometry().setPositions([0.05, 2, 0, 0.25, 2, 0]);
-            const mat = new LineMaterial({ color: 0x1ae7bf, linewidth: 6, alphaToCoverage: true });
-            this.statsPanel.add(new Line2(geo, mat));
+            let line = createCircleSegmentLine(0.4, 32, 0x1ae7bf, Math.PI / 2 + 0.3, Math.PI, 4);
+            line.position.set(0, 0.1, 0);
+            this.statsPanel.add(line);
         }
     }
 }
