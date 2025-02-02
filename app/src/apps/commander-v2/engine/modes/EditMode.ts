@@ -17,6 +17,7 @@ export class EditMode extends Mode {
     pointerMesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial> | null = null;
 
     public readonly name = "Edit";
+    private direction: "up" | "down" | "left" | "right" = "up";
     private _cb: ((_: any) => void) | null = null;
 
     /** Separate listener for controls */
@@ -73,11 +74,12 @@ export class EditMode extends Mode {
         if (controls.mouse[THREE.MOUSE.LEFT]) {
             this.grid.setCell(x, y, {
                 type: "Cover",
-                up: 1,
+                up: 0,
                 down: 0,
                 left: 0,
                 right: 0,
                 unit: null,
+                ...{ [mode.direction]: 1 },
             });
         }
     }
@@ -115,6 +117,8 @@ export class EditMode extends Mode {
         }
 
         if (button === THREE.MOUSE.LEFT) {
+            console.log("left click", x, y);
+
             return this.grid.setCell(x, y, {
                 type: "Cover",
                 up: 1,

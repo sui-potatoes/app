@@ -54,6 +54,9 @@ export function Menu() {
                 <NavLink to="inventory" className={className}>
                     Inventory
                 </NavLink>
+                <NavLink to="editor" className={className}>
+                    Level Editor
+                </NavLink>
                 <NavLink to="settings" className={className}>
                     Settings
                 </NavLink>
