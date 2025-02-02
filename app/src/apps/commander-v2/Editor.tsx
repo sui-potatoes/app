@@ -6,7 +6,7 @@ import { Camera, Game } from "./engine";
 import { Canvas } from "@react-three/fiber";
 
 export function Editor() {
-    const [size, setSize] = useState(30);
+    const [size, _] = useState(30);
     const camera = useMemo(() => loadCamera(size), [size]);
     const game = useMemo(() => new Game(size), [size]);
 

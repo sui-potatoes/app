@@ -1,31 +1,36 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Camera } from "./engine/Camera";
-import { useEffect, useMemo, useState } from "react";
-import { Game } from "./engine/Game";
-import { loadModels, models } from "./engine/models";
-import { Controls } from "./engine/Controls";
-import JEASINGS from "jeasings";
-import { MoveMode } from "./engine/modes/MoveMode";
-import { ShootMode } from "./engine/modes/ShootMode";
-import { GrenadeMode } from "./engine/modes/GrenadeMode";
-import { EditMode } from "./engine/modes/EditMode";
-import { NoneMode } from "./engine/modes/NoneMode";
-import { Stats } from "@react-three/drei";
-import { GameMap, useGame } from "./hooks/useGame";
-import { Transaction } from "@mysten/sui/transactions";
-import { useNetworkVariable } from "../../networkConfig";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
-import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
-import { useSuiClient } from "@mysten/dapp-kit";
-import { EventBus, GameEvent } from "./engine/EventBus";
-import { bcs, Recruit } from "./types/bcs";
-import { Unit } from "./engine/Unit";
 import * as THREE from "three";
+import JEASINGS from "jeasings";
+import { Stats } from "@react-three/drei";
 import { NavLink } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import {
+    Game,
+    Camera,
+    Controls,
+    Unit,
+    MoveMode,
+    GameEvent,
+    EventBus,
+    GrenadeMode,
+    ShootMode,
+    EditMode,
+    NoneMode,
+    models,
+    loadModels,
+} from "./engine";
+import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
+import { Transaction } from "@mysten/sui/transactions";
+import { useSuiClient } from "@mysten/dapp-kit";
+
+import { bcs, Recruit } from "./types/bcs";
+import { GameMap, useGame } from "./hooks/useGame";
 import { useGameRecruits } from "./hooks/useGameRecruits";
+import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
+import { useNetworkVariable } from "../../networkConfig";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";

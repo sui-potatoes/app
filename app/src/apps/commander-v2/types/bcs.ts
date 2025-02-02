@@ -102,20 +102,22 @@ export const Metadata = bcs.struct("Metadata", {
     backstory: bcs.string(),
 });
 
-export const Game = bcs.struct("Game", {
-    id: bcs.Address,
-    map: Map,
-}).transform({
-    output(game) {
-        let recruits: string[] = [];
-        game.map.grid.forEach((row) => {
-            row.forEach((cell) => {
-                if (cell.unit) recruits.push(cell.unit.recruit);
-            })
-        });
-        return { ...game, recruits };
-    }
-})
+export const Game = bcs
+    .struct("Game", {
+        id: bcs.Address,
+        map: Map,
+    })
+    .transform({
+        output(game) {
+            let recruits: string[] = [];
+            game.map.grid.forEach((row) => {
+                row.forEach((cell) => {
+                    if (cell.unit) recruits.push(cell.unit.recruit);
+                });
+            });
+            return { ...game, recruits };
+        },
+    });
 
 export const WeaponUpgrade = bcs.struct("WeaponUpgrade", {
     name: bcs.string(),
