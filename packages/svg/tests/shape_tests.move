@@ -102,12 +102,10 @@ fun filter() {
         .move_to(60, 60)
         .map_attributes!(|attrs| attrs.insert(b"fill".to_string(), b"green".to_string()));
 
-    let c2 = shape::circle(50)
-        .move_to(170, 60)
-        .map_attributes!(|attrs| {
-            attrs.insert(b"fill".to_string(), b"green".to_string());
-            attrs.insert(b"filter".to_string(), b"url(#blurMe)".to_string());
-        });
+    let c2 = shape::circle(50).move_to(170, 60).map_attributes!(|attrs| {
+        attrs.insert(b"fill".to_string(), b"green".to_string());
+        attrs.insert(b"filter".to_string(), b"url(#blurMe)".to_string());
+    });
 
     svg.add_root(vector[filter, c1, c2]);
 

@@ -100,7 +100,9 @@ fun test_u16_pack_u16() {
 
 #[test]
 fun test_u8_pack_bool() {
-    let packed: u8 = bit_field::pack_bool!(vector[true, false, true, false, true, false, true, false]);
+    let packed: u8 = bit_field::pack_bool!(
+        vector[true, false, true, false, true, false, true, false],
+    );
 
     assert_eq!(bit_field::read_bool_at_offset!(packed, 0), true);
     assert_eq!(bit_field::read_bool_at_offset!(packed, 1), false);
@@ -110,12 +112,17 @@ fun test_u8_pack_bool() {
     assert_eq!(bit_field::read_bool_at_offset!(packed, 5), false);
     assert_eq!(bit_field::read_bool_at_offset!(packed, 6), true);
     assert_eq!(bit_field::read_bool_at_offset!(packed, 7), false);
-    assert_eq!(bit_field::unpack_bool!(packed, 8), vector[true, false, true, false, true, false, true, false]);
+    assert_eq!(
+        bit_field::unpack_bool!(packed, 8),
+        vector[true, false, true, false, true, false, true, false],
+    );
 }
 
 #[test]
 fun test_u16_pack_bool() {
-    let packed: u16 = bit_field::pack_bool!(vector[true, false, true, false, true, false, true, false]);
+    let packed: u16 = bit_field::pack_bool!(
+        vector[true, false, true, false, true, false, true, false],
+    );
 
     assert_eq!(bit_field::read_bool_at_offset!(packed, 0), true);
     assert_eq!(bit_field::read_bool_at_offset!(packed, 1), false);
@@ -125,12 +132,17 @@ fun test_u16_pack_bool() {
     assert_eq!(bit_field::read_bool_at_offset!(packed, 5), false);
     assert_eq!(bit_field::read_bool_at_offset!(packed, 6), true);
     assert_eq!(bit_field::read_bool_at_offset!(packed, 7), false);
-    assert_eq!(bit_field::unpack_bool!(packed, 8), vector[true, false, true, false, true, false, true, false]);
+    assert_eq!(
+        bit_field::unpack_bool!(packed, 8),
+        vector[true, false, true, false, true, false, true, false],
+    );
 }
 
 #[test]
 fun test_u32_pack_bool() {
-    let packed: u32 = bit_field::pack_bool!(vector[true, false, true, false, true, false, true, false]);
+    let packed: u32 = bit_field::pack_bool!(
+        vector[true, false, true, false, true, false, true, false],
+    );
 
     assert_eq!(bit_field::read_bool_at_offset!(packed, 0), true);
     assert_eq!(bit_field::read_bool_at_offset!(packed, 1), false);
@@ -140,7 +152,10 @@ fun test_u32_pack_bool() {
     assert_eq!(bit_field::read_bool_at_offset!(packed, 5), false);
     assert_eq!(bit_field::read_bool_at_offset!(packed, 6), true);
     assert_eq!(bit_field::read_bool_at_offset!(packed, 7), false);
-    assert_eq!(bit_field::unpack_bool!(packed, 8), vector[true, false, true, false, true, false, true, false]);
+    assert_eq!(
+        bit_field::unpack_bool!(packed, 8),
+        vector[true, false, true, false, true, false, true, false],
+    );
 }
 
 #[test]

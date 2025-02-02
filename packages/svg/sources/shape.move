@@ -13,7 +13,7 @@ use svg::{animation::Animation, filter::Filter, point::{Self, Point}, print};
 const ENotImplemented: u64 = 264;
 
 /// SVG shape struct, contains a shape type and a set of attributes.
-public struct Shape has store, copy, drop {
+public struct Shape has copy, drop, store {
     /// The shape type, such as a circle, rectangle, or path.
     shape: ShapeType,
     /// A set of attributes for the shape.
@@ -26,7 +26,7 @@ public struct Shape has store, copy, drop {
 
 /// SVG shape enum. Each variant represents a different shape, all of them
 /// containing a set of attributes as a `VecMap`.
-public enum ShapeType has store, copy, drop {
+public enum ShapeType has copy, drop, store {
     Circle(u16),
     Ellipse(Point, u16, u16),
     Filter(String, vector<Filter>),
@@ -64,7 +64,7 @@ public enum ShapeType has store, copy, drop {
 }
 
 /// A stop element for a gradient nodes (`linearGradient`, `radialGradient`).
-public struct Stop has store, copy, drop { offset: String, color: String }
+public struct Stop has copy, drop, store { offset: String, color: String }
 
 /// Create a new circle shape.
 /// Circle shape, a circle with a center and a radius.
@@ -448,7 +448,7 @@ public fun add_stop(gradient: &mut Shape, offset: String, color: String) {
     let stops = match (&mut gradient.shape) {
         ShapeType::LinearGradient { stops } => stops,
         ShapeType::RadialGradient { stops } => stops,
-        _ => abort ,
+        _ => abort,
     };
 
     stops.push_back(Stop { offset, color });
@@ -498,7 +498,7 @@ public fun name(shape: &Shape): String {
         ShapeType::TextWithTextPath { .. } => b"text".to_string(),
         ShapeType::Use(..) => b"use".to_string(),
         ShapeType::Custom(..) => b"custom".to_string(),
-        _ => abort ,
+        _ => abort,
     }
 }
 
@@ -602,7 +602,7 @@ public fun to_string(base_shape: &Shape): String {
             (b"radialGradient", option::some(stops))
         },
         ShapeType::Custom(text) => return *text,
-        _ => abort ,
+        _ => abort,
     };
 
     animation.do_ref!(|el| {

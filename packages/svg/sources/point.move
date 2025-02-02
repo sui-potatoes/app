@@ -6,7 +6,7 @@
 module svg::point;
 
 /// Point struct, represents a point in 2D space.
-public struct Point(u16, u16) has copy, store, drop;
+public struct Point(u16, u16) has copy, drop, store;
 
 /// Create a new point.
 public fun point(x: u16, y: u16): Point { Point(x, y) }

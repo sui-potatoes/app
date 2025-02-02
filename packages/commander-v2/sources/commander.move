@@ -5,7 +5,7 @@
 module commander::commander;
 
 use commander::{map::{Self, Map}, recruit::Recruit};
-use sui::{random::Random, object_table::{Self, ObjectTable}};
+use sui::{object_table::{Self, ObjectTable}, random::Random};
 
 /// The main object of the game, controls the game state, configuration and
 /// serves as the registry for all users and their recruits.

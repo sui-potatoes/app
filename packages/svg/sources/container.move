@@ -31,7 +31,7 @@ const TYPE_MASK: u8 = 7;
 /// - `container::g` - group container, `<g>`, to group shapes.
 /// - `container::marker` - marker container, `<marker>`, to define a marker symbol.
 /// - `container::symbol` - symbol container, `<symbol>`, to define a reusable graphic.
-public struct Container has store, copy, drop {
+public struct Container has copy, drop, store {
     /// Uses `u8` instead of `ContainerType` to avoid verifier conflict on type
     /// signatures being too large.
     container: u8,
@@ -355,7 +355,7 @@ public fun name(container: &Container): String {
         5 => b"clipPath".to_string(),
         6 => b"symbol".to_string(),
         7 => b"mask".to_string(),
-        _ => abort ,
+        _ => abort,
     }
 }
 

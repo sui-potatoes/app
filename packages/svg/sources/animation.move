@@ -56,10 +56,10 @@ use svg::print;
 /// - `href` - the id of the path element to follow.
 ///
 /// See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/mpath)
-public struct MPath(String) has copy, store, drop;
+public struct MPath(String) has copy, drop, store;
 
 /// Animation struct, represents an animation that can be applied to SVG elements.
-public struct Animation has copy, store, drop {
+public struct Animation has copy, drop, store {
     /// The type of animation element.
     animation: AnimationType,
     /// The name of the attribute to animate. Translates to the `attributeName`
@@ -84,7 +84,7 @@ public struct Animation has copy, store, drop {
 /// - `AnimateMotion` - animate motion animation, animates an element along a path.
 /// - `AnimateTransform` - animate transform animation, animates a transformation.
 /// - `Set` - set animation, sets the value of an attribute at a specific time.
-public enum AnimationType has copy, store, drop {
+public enum AnimationType has copy, drop, store {
     Animate,
     AnimateMotion {
         path: Option<String>,

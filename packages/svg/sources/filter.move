@@ -465,7 +465,7 @@ public fun name(filter: &Filter): String {
         22 => b"feSpotLight",
         23 => b"feTile",
         24 => b"feTurbulence",
-        _ => abort ,
+        _ => abort,
     }.to_string()
 }
 
