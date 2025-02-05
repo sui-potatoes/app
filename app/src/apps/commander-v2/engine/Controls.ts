@@ -6,6 +6,7 @@ import { Game } from "./Game";
 
 export type ControlsEvents = {
     zoom: { delta: number };
+    keyup: { key: string; altKey: boolean };
     scroll: { delta: number };
     click: { x: number; y: number; button: number };
 };
@@ -137,6 +138,12 @@ export class Controls extends THREE.Controls<ControlsEvents> {
                     this.arrows.RIGHT = false;
                     break;
             }
+
+            this.dispatchEvent({
+                type: "keyup",
+                key: event.key,
+                altKey: event.altKey,
+            });
         }
 
         if (event instanceof PointerEvent) {

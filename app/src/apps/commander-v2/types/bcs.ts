@@ -75,9 +75,9 @@ export const Unit = bcs.struct("Unit", {
 
 const Cover = bcs.struct("Cover", {
     left: bcs.u8(),
-    top: bcs.u8(),
+    up: bcs.u8(),
     right: bcs.u8(),
-    bottom: bcs.u8(),
+    down: bcs.u8(),
 });
 
 const TileType = bcs.enum("TileType", {

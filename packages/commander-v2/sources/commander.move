@@ -33,11 +33,31 @@ public fun new(ctx: &mut TxContext): Game {
     }
 }
 
+/// Start a new game with a custom map passed directly as a byte array.
+public fun new_with_map(map: vector<u8>, ctx: &mut TxContext): Game {
+    let id = object::new(ctx);
+    Game {
+        map: map::from_bytes(map),
+        recruits: object_table::new(ctx),
+        id,
+    }
+}
+
 /// Create a new demo game.
-public fun demo(ctx: &mut TxContext): Game {
+public fun demo_1(ctx: &mut TxContext): Game {
     let id = object::new(ctx);
     Game {
         map: map::demo_1(id.to_inner()),
+        recruits: object_table::new(ctx),
+        id,
+    }
+}
+
+/// Create a new demo game.
+public fun demo_2(ctx: &mut TxContext): Game {
+    let id = object::new(ctx);
+    Game {
+        map: map::demo_2(id.to_inner()),
         recruits: object_table::new(ctx),
         id,
     }

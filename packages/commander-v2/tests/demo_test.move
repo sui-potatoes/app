@@ -8,13 +8,21 @@ use std::unit_test::assert_eq;
 use sui::{random, test_utils::destroy};
 
 #[test]
-fun playtest() {
-    assert_eq!(run_simulation(b"demo_o1"), vector[4, 1]);
-    assert_eq!(run_simulation(b"demo_o2"), vector[3, 2]);
-    assert_eq!(run_simulation(b"demo_o3"), vector[2, 1]);
-    assert_eq!(run_simulation(b"demo_o4"), vector[4, 2]);
-    assert_eq!(run_simulation(b"demo_o5"), vector[3, 1]);
-    assert_eq!(run_simulation(b"demo_o6"), vector[6, 1]);
+fun playtest_demo_1() {
+    assert_eq!(run_simulation_demo_1(b"demo_o1"), vector[4, 1]);
+    assert_eq!(run_simulation_demo_1(b"demo_o2"), vector[3, 2]);
+    assert_eq!(run_simulation_demo_1(b"demo_o3"), vector[2, 1]);
+    assert_eq!(run_simulation_demo_1(b"demo_o4"), vector[4, 2]);
+    assert_eq!(run_simulation_demo_1(b"demo_o5"), vector[3, 1]);
+    assert_eq!(run_simulation_demo_1(b"demo_o6"), vector[6, 1]);
+}
+
+#[test]
+fun playtest_demo_2() {
+    let map = map::demo_2(@1.to_id());
+    let mut out = b"\n".to_string();
+    out.append(map.to_string());
+    map.destroy();
 }
 
 // Using the Demo map:
@@ -32,7 +40,7 @@ fun playtest() {
 // - Attack: (4, 1) -> (0, 3)
 // - Attack: (0, 3) -> (4, 1)
 // - Repeat attack until one unit dies
-fun run_simulation(seed: vector<u8>): vector<u16> {
+fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
     let ctx = &mut tx_context::dummy();
     let id = ctx.fresh_object_address().to_id();
     let mut rng = random::new_generator_from_seed_for_testing(seed);

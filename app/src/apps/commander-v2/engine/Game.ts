@@ -89,7 +89,7 @@ export class Game extends THREE.Object3D {
                 }
 
                 if (mapTile.tile_type.$kind === "Cover") {
-                    const { left, right, bottom: down, top: up } = mapTile.tile_type.Cover;
+                    const { left, right, down, up } = mapTile.tile_type.Cover;
                     game.grid.setCell(x, z, { type: "Cover", left, right, up, down, unit: null });
                 }
 

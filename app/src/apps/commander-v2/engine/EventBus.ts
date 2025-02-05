@@ -21,6 +21,7 @@ export type GameEvent = {
     sui: { action: string } & any;
     game: { action: string } & any;
     three: { action: string };
+    editor: { tool: string; direction: string };
     controls: { action: ControlsEvents };
 };
 
