@@ -152,6 +152,15 @@ export class Controls extends THREE.Controls<ControlsEvents> {
             if (event.type === "pointerup") {
                 delete this.pointers[event.pointerId];
 
+                if (event.pointerType === "touch") {
+                    this.dispatchEvent({
+                        type: "click",
+                        x: this.pointer.x,
+                        y: this.pointer.y,
+                        button: event.button,
+                    });
+                }
+
                 if (event.pointerType === "mouse") {
                     this.mouse[event.button as 0 | 1 | 2] = false;
 

@@ -31,6 +31,7 @@ import { GameMap, useGame } from "./hooks/useGame";
 import { useGameRecruits } from "./hooks/useGameRecruits";
 import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 import { useNetworkVariable } from "../../networkConfig";
+import { useNameGenerator } from "./hooks/useNameGenerator";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
@@ -61,7 +62,7 @@ export function Playground() {
         signer: () => flow.getKeypair({ network: "testnet" }),
         enabled: !!zkLogin.address,
     });
-    const camera = useMemo(loadCamera, []);
+    const camera = useMemo(() => loadCamera(), []);
     const eventBus = useMemo(() => new EventBus(), []);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [mapKey, setMapKey] = useState<string | null>(sessionStorage.getItem(LS_KEY));
@@ -209,11 +210,6 @@ export function Playground() {
             </div>,
         );
 
-    if (map) {
-        const size = map.map.map.grid[0].length;
-        camera.resetForSize(size);
-    }
-
     return (
         <>
             <Canvas camera={camera}>
@@ -235,19 +231,35 @@ export function Playground() {
         if (!canTransact) return;
 
         const tx = new Transaction();
-        const r1 = tx.moveCall({ target: `${packageId}::recruit::default` });
-        const r2 = tx.moveCall({ target: `${packageId}::recruit::default` });
         const game = tx.moveCall({ target: `${packageId}::commander::demo` });
 
-        tx.moveCall({
-            target: `${packageId}::commander::place_recruit`,
-            arguments: [game, r1, tx.pure.u16(0), tx.pure.u16(3)],
-        });
+        const positions = [
+            [0, 3],
+            [6, 5],
+            [6, 0],
+        ];
+        for (let [x, y] of positions) {
+            const { name, backstory } = await useNameGenerator();
+            const recruit = tx.moveCall({
+                target: `${packageId}::recruit::new`,
+                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
+            });
 
-        tx.moveCall({
-            target: `${packageId}::commander::place_recruit`,
-            arguments: [game, r2, tx.pure.u16(6), tx.pure.u16(5)],
-        });
+            const armor = tx.moveCall({
+                target: `${packageId}::items::armor`,
+                arguments: [tx.pure.u8(1)],
+            });
+
+            tx.moveCall({
+                target: `${packageId}::recruit::add_armor`,
+                arguments: [recruit, armor],
+            });
+
+            tx.moveCall({
+                target: `${packageId}::commander::place_recruit`,
+                arguments: [game, recruit, tx.pure.u16(x), tx.pure.u16(y)],
+            });
+        }
 
         tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
 
@@ -373,6 +385,7 @@ export function GameApp({
     });
 
     useEffect(() => {
+        camera.resetForSize(game.size);
         game.registerEventBus(eventBus);
         controls.connect();
         controls.addEventListener("scroll", ({ delta }) => {

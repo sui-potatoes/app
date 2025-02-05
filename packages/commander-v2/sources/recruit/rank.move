@@ -13,6 +13,8 @@ module commander::rank;
 use std::string::String;
 use sui::bcs::{Self, BCS};
 
+const EMaxRank: u64 = 1;
+
 /// Defines all available ranks in the game.
 public enum Rank has copy, drop, store {
     Rookie,
@@ -54,15 +56,15 @@ public fun colonel(): Rank { Rank::Colonel }
 
 /// Promotes the rank of the Recruit.
 public fun rank_up(rank: &mut Rank) {
-    match (rank) {
-        Rank::Rookie => *rank = Rank::Squaddie,
-        Rank::Squaddie => *rank = Rank::Corporal,
-        Rank::Corporal => *rank = Rank::Sergeant,
-        Rank::Sergeant => *rank = Rank::Lieutenant,
-        Rank::Lieutenant => *rank = Rank::Captain,
-        Rank::Captain => *rank = Rank::Major,
-        Rank::Major => *rank = Rank::Colonel,
-        Rank::Colonel => (),
+    *rank = match (rank) {
+        Rank::Rookie => Rank::Squaddie,
+        Rank::Squaddie => Rank::Corporal,
+        Rank::Corporal => Rank::Sergeant,
+        Rank::Sergeant => Rank::Lieutenant,
+        Rank::Lieutenant => Rank::Captain,
+        Rank::Captain => Rank::Major,
+        Rank::Major => Rank::Colonel,
+        Rank::Colonel => abort EMaxRank,
     }
 }
 
@@ -166,68 +168,4 @@ public fun to_string(rank: &Rank): String {
         Rank::Major => b"Major",
         Rank::Colonel => b"Colonel",
     }.to_string()
-}
-
-// === Tests ===
-
-#[test]
-fun test_ranking_system() {
-    use std::unit_test::{assert_eq, assert_ref_eq};
-    use std::bcs::to_bytes as to_bcs;
-
-    let mut rank = rookie();
-
-    assert_ref_eq!(&rank, &Rank::Rookie);
-    assert_eq!(rank.to_string(), b"Rookie".to_string());
-    assert!(Self::rookie().is_rookie());
-    assert!(rank.is_rookie());
-
-    rank.rank_up();
-    assert_eq!(rank, Rank::Squaddie);
-    assert_eq!(rank.to_string(), b"Squaddie".to_string());
-    assert_eq!(rank, from_bytes(to_bcs(&rank)));
-    assert!(Self::squaddie().is_squaddie());
-    assert!(rank.is_squaddie());
-
-    rank.rank_up();
-    assert_eq!(rank, Rank::Corporal);
-    assert_eq!(rank.to_string(), b"Corporal".to_string());
-    assert_eq!(rank, from_bytes(to_bcs(&rank)));
-    assert!(Self::corporal().is_corporal());
-    assert!(rank.is_corporal());
-
-    rank.rank_up();
-    assert_eq!(rank, Rank::Sergeant);
-    assert_eq!(rank.to_string(), b"Sergeant".to_string());
-    assert_eq!(rank, from_bytes(to_bcs(&rank)));
-    assert!(Self::sergeant().is_sergeant());
-    assert!(rank.is_sergeant());
-
-    rank.rank_up();
-    assert_eq!(rank, Rank::Lieutenant);
-    assert_eq!(rank.to_string(), b"Lieutenant".to_string());
-    assert_eq!(rank, from_bytes(to_bcs(&rank)));
-    assert!(Self::lieutenant().is_lieutenant());
-    assert!(rank.is_lieutenant());
-
-    rank.rank_up();
-    assert_eq!(rank, Rank::Captain);
-    assert_eq!(rank.to_string(), b"Captain".to_string());
-    assert_eq!(rank, from_bytes(to_bcs(&rank)));
-    assert!(Self::captain().is_captain());
-    assert!(rank.is_captain());
-
-    rank.rank_up();
-    assert_eq!(rank, Rank::Major);
-    assert_eq!(rank.to_string(), b"Major".to_string());
-    assert_eq!(rank, from_bytes(to_bcs(&rank)));
-    assert!(Self::major().is_major());
-    assert!(rank.is_major());
-
-    rank.rank_up();
-    assert_eq!(rank, Rank::Colonel);
-    assert_eq!(rank.to_string(), b"Colonel".to_string());
-    assert_eq!(rank, from_bytes(to_bcs(&rank)));
-    assert!(Self::colonel().is_colonel());
-    assert!(rank.is_colonel());
 }

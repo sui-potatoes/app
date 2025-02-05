@@ -4,14 +4,14 @@
 /// Implements Sui Object Display for objects in the game.
 module commander::display;
 
-use commander::{recruit::{DogTag, Recruit}, weapon::Weapon};
-use sui::display;
+use commander::{armor::Armor, recruit::{DogTag, Recruit}, weapon::Weapon};
+use sui::{display, package};
 
 public struct DISPLAY has drop {}
 
 /// Creates Display objects for the Recruit and Weapon objects.
 fun init(otw: DISPLAY, ctx: &mut TxContext) {
-    let publisher = sui::package::claim(otw, ctx);
+    let publisher = package::claim(otw, ctx);
 
     // Display for the `Recruit` object.
     let recruit_display = {
@@ -20,11 +20,11 @@ fun init(otw: DISPLAY, ctx: &mut TxContext) {
         display.add(b"description".to_string(), b"{metadata.description}".to_string());
         display.add(
             b"image_url".to_string(),
-            b"https://i.postimg.cc/wTdDxN7V/recruit.webp".to_string(),
+            b"https://potatoes.app/images/recruit.webp".to_string(),
         );
         display.add(
             b"link".to_string(),
-            b"http://localhost:5173/commander/recruit/{id}".to_string(),
+            b"https://potatoes.app/commander/recruit/{id}".to_string(),
         );
         display.update_version();
         display
@@ -40,9 +40,27 @@ fun init(otw: DISPLAY, ctx: &mut TxContext) {
         );
         display.add(
             b"image_url".to_string(),
-            b"https://i.postimg.cc/ZKG1FT05/weapon.webp".to_string(),
+            b"https://potatoes.app/images/weapon.webp".to_string(),
         );
         display.add(b"link".to_string(), b"".to_string());
+        display.update_version();
+        display
+    };
+
+    // Armor display
+    let armor_display = {
+        let mut display = display::new<Armor>(&publisher, ctx);
+        display.add(b"name".to_string(), b"Standard Issue Rifle".to_string());
+        display.add(
+            b"description".to_string(),
+            b"Standard Rifle (DMG {damage}; RNG {range}; AMMO {ammo})".to_string(),
+        );
+        display.add(
+            b"image_url".to_string(),
+            b"https://potatoes.app/images/armor-light.webp".to_string(),
+        );
+        display.add(b"link".to_string(), b"".to_string());
+        display.update_version();
         display
     };
 
@@ -53,11 +71,11 @@ fun init(otw: DISPLAY, ctx: &mut TxContext) {
         display.add(b"description".to_string(), b"{metadata.description}".to_string());
         display.add(
             b"image_url".to_string(),
-            b"https://i.postimg.cc/wTdDxN7V/recruit.webp".to_string(),
+            b"https://potatoes.app/images/recruit.webp".to_string(),
         );
         display.add(
             b"link".to_string(),
-            b"http://localhost:5173/commander/recruit/{id}".to_string(),
+            b"https://potatoes.app/commander/recruit/{id}".to_string(),
         );
         display.update_version();
         display
@@ -68,5 +86,6 @@ fun init(otw: DISPLAY, ctx: &mut TxContext) {
     transfer::public_transfer(recruit_display, sender);
     transfer::public_transfer(weapon_display, sender);
     transfer::public_transfer(dogtag_display, sender);
+    transfer::public_transfer(armor_display, sender);
     transfer::public_transfer(publisher, sender);
 }

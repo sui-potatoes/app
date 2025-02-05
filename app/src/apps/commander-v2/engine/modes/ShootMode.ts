@@ -8,9 +8,7 @@ import { Controls } from "./../Controls";
 import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
-import JEASINGS from "jeasings";
 import { BaseGameEvent, GameEvent } from "../EventBus";
-import { NoneMode } from "./NoneMode";
 
 export type ShootModeEvents = BaseGameEvent & {
     aim: { unit: Unit; target: Unit };
@@ -41,7 +39,7 @@ export class ShootMode implements Mode {
     ) {}
 
     connect(this: Game, mode: this) {
-        if (this.selectedUnit === null) return this.switchMode(new NoneMode());
+        if (this.selectedUnit === null) return this.switchMode(new MoveMode(mode.controls));
         if (this.selectedUnit.props.ap.value == 0)
             return this.switchMode(new MoveMode(mode.controls));
 
@@ -115,7 +113,8 @@ export class ShootMode implements Mode {
         const selectedUnit = this.selectedUnit;
         const target = mode.currentTarget;
 
-        selectedUnit.spendAp(mode.cost); //
+        selectedUnit.spendAp(mode.cost);
+        mode.camera.resetForSize(this.grid.size);
 
         // perform the shooting action
         await selectedUnit.shoot(target);
@@ -140,50 +139,35 @@ export class ShootMode implements Mode {
             targetUnit: mode.currentTarget,
         });
 
-        if (!mode.isAiming) {
-            selectedUnit.lookAt(mode.currentTarget.position);
+        // using this object to get the position of the camera
+        const fake = new THREE.Object3D();
+        fake.position.set(
+            ...selectedUnit.position
+                .clone()
+                .add(new THREE.Vector3(0, 1.5, 0))
+                .toArray(),
+        );
+        fake.lookAt(mode.currentTarget.position);
+        fake.translateZ(-1);
+        fake.translateX(-0.3);
+        selectedUnit.lookAt(mode.currentTarget.position);
 
+        if (!mode.isAiming) {
             const [low, high] = damage(this.selectedUnit);
             const chanceToHit = chance(this.selectedUnit, mode.currentTarget);
             mode.currentTarget.lookAt(selectedUnit.position);
             mode.currentTarget.drawTarget(chanceToHit, low, high);
 
-            // get the future position of the camera
-            const fake = new THREE.Object3D();
-            fake.position.set(
-                ...selectedUnit.position
-                    .clone()
-                    .add(new THREE.Vector3(0, 1.5, 0))
-                    .toArray(),
-            );
-            fake.lookAt(mode.currentTarget.position);
-            fake.translateZ(-1);
-            fake.translateX(-0.3);
-
             await mode.camera.moveToUnit(fake.position.clone(), mode.currentTarget.position);
             mode.isAiming = true;
         } else {
-            const fake = new THREE.Object3D();
-            fake.position.set(...mode.camera.position.toArray());
-            fake.rotation.set(...mode.camera.rotation.toArray());
-            fake.lookAt(mode.currentTarget.position);
+            const [low, high] = damage(this.selectedUnit);
+            const chanceToHit = chance(this.selectedUnit, mode.currentTarget);
+            mode.currentTarget.lookAt(selectedUnit.position);
+            mode.currentTarget.drawTarget(chanceToHit, low, high);
 
-            mode.camera.position.set(fake.position.x, fake.position.y, fake.position.z);
-            const mt1 = new THREE.Matrix4();
-            mt1.lookAt(fake.position, mode.currentTarget.position, new THREE.Vector3(0, 1, 0));
-            const { x, y, z, w } = mode.camera.quaternion.clone().setFromRotationMatrix(mt1);
-
-            await new Promise((resolve) => {
-                // get angle change between current camera and the target
-                // const angleChange = mode.camera.rotation.y - fake.rotation.y
-                new JEASINGS.JEasing(mode.camera.quaternion)
-                    .to({ x, y, z, w }, 500)
-                    .easing(JEASINGS.Sinusoidal.In)
-                    .onComplete(() => resolve(null))
-                    .start();
-
-                selectedUnit.lookAt(mode.currentTarget!.position);
-            });
+            mode.camera.position.copy(fake.position);
+            mode.camera.lookAt(mode.currentTarget.position);
         }
     }
 
@@ -205,6 +189,7 @@ export class ShootMode implements Mode {
         const [low, high] = damage(this.selectedUnit);
         const chanceToHit = chance(this.selectedUnit, mode.currentTarget);
         mode.currentTarget.drawTarget(chanceToHit, low, high);
+        mode.currentTarget.lookAt(this.selectedUnit.position);
     }
 
     /** Listen to UI events, expecting `next_target` or `prev_target` action */
