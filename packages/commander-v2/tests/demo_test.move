@@ -9,12 +9,12 @@ use sui::{random, test_utils::destroy};
 
 #[test]
 fun playtest_demo_1() {
-    assert_eq!(run_simulation_demo_1(b"demo_o1"), vector[4, 1]);
-    assert_eq!(run_simulation_demo_1(b"demo_o2"), vector[3, 2]);
-    assert_eq!(run_simulation_demo_1(b"demo_o3"), vector[2, 1]);
-    assert_eq!(run_simulation_demo_1(b"demo_o4"), vector[4, 2]);
-    assert_eq!(run_simulation_demo_1(b"demo_o5"), vector[3, 1]);
-    assert_eq!(run_simulation_demo_1(b"demo_o6"), vector[6, 1]);
+    assert_eq!(run_simulation_demo_1(b"demo_o1"), vector[5, 1]);
+    assert_eq!(run_simulation_demo_1(b"demo_o2"), vector[4, 2]);
+    assert_eq!(run_simulation_demo_1(b"demo_o3"), vector[3, 1]);
+    assert_eq!(run_simulation_demo_1(b"demo_o4"), vector[5, 2]);
+    assert_eq!(run_simulation_demo_1(b"demo_o5"), vector[4, 1]);
+    assert_eq!(run_simulation_demo_1(b"demo_o6"), vector[7, 1]);
 }
 
 #[test]
@@ -73,7 +73,10 @@ fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
         assert_eq!(unit.stats().dodge(), 0);
     });
 
+    map.next_turn();
+
     let result = 'crossfire: loop {
+            map.unit(4, 1).do_ref!(|unit| if (unit.ammo() == 0) map.perform_reload(4, 1));
             let (is_hit, is_dead) = map.perform_attack(&mut rng, 4, 1, 0, 3);
             is_dead.do!(|_| break 'crossfire vector[map.turn(), 2]);
             map.unit(0, 3).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
@@ -81,8 +84,8 @@ fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
 
             // Unit 2 is in a good position already and chooses to perform an attack
             // Depending on the RNG seed, we want to check different outcomes
+            map.unit(0, 3).do_ref!(|unit| if (unit.ammo() == 0) map.perform_reload(0, 3));
             let (is_hit, is_dead) = map.perform_attack(&mut rng, 0, 3, 4, 1);
-
             is_dead.do!(|_| break 'crossfire vector[map.turn(), 1]);
             map.unit(4, 1).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
             map.unit(0, 3).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // depleted AP

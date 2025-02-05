@@ -69,6 +69,7 @@ export const Unit = bcs.struct("Unit", {
     recruit: bcs.Address,
     ap: Param,
     hp: Param,
+    ammo: Param,
     stats: Stats,
     last_turn: bcs.u16(),
 });

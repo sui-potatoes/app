@@ -157,3 +157,16 @@ SPDX-License-Identifier: MIT
     background: white;
     color: black;
 }
+
+.action-button.active {
+    background: var(--main-color);
+    color: black;
+}
+
+.action-button.active:hover {
+    background: var(--main-color);
+    color: black;
+    cursor: not-allowed;
+    text-decoration: none;
+    pointer-events: none;
+}

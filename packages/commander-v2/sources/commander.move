@@ -76,6 +76,11 @@ public fun move_unit(game: &mut Game, path: vector<vector<u16>>, _ctx: &mut TxCo
     game.map.move_unit(path);
 }
 
+/// Perform a reload action, replenishing ammo.
+public fun perform_reload(game: &mut Game, x: u16, y: u16, _ctx: &mut TxContext) {
+    game.map.perform_reload(x, y);
+}
+
 /// Perform an attack action.
 entry fun perform_attack(
     game: &mut Game,

@@ -9,6 +9,7 @@ import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
 import { BaseGameEvent, GameEvent } from "../EventBus";
+import { ReloadMode } from "./ReloadMode";
 
 export type ShootModeEvents = BaseGameEvent & {
     aim: { unit: Unit; target: Unit };
@@ -51,6 +52,20 @@ export class ShootMode implements Mode {
                 distance(selectedUnit, unit) <=
                     selectedUnit.props.stats.range + MAX_DISTANCE_OFFSET,
         );
+
+        if (this.selectedUnit.props.ap.value == 0) {
+            return this.switchMode(new MoveMode(mode.controls));
+        }
+
+        if (this.selectedUnit.props.ammo.value == 0) {
+            this.tryDispatch({
+                type: "game",
+                action: "no_ammo",
+                message: "no ammo available",
+            });
+
+            return this.switchMode(new ReloadMode());
+        }
 
         if (targets.length === 0) {
             this.tryDispatch({
@@ -118,6 +133,7 @@ export class ShootMode implements Mode {
 
         // perform the shooting action
         await selectedUnit.shoot(target);
+        selectedUnit.props.ammo.value -= 1;
 
         this.tryDispatch({ type: "game", action: "shoot", unit: selectedUnit, targetUnit: target });
     }

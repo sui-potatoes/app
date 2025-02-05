@@ -19,6 +19,7 @@ import {
     ShootMode,
     EditMode,
     NoneMode,
+    ReloadMode,
     models,
     loadModels,
 } from "./engine";
@@ -106,6 +107,18 @@ export function Playground() {
                     message: "target within range",
                 });
             }
+
+            if (event.action === "reload") {
+                const { x, y } = event.unit.gridPosition as THREE.Vector2;
+                const result = await performReload([x, y]);
+                if (!result) return console.log("unable to reload");
+                setLockedTx(result.tx);
+                eventBus.dispatchEvent({
+                    type: "sui",
+                    action: "reload",
+                    message: "unit can reload",
+                });
+            }
         }
 
         async function onNextTurn(event: GameEvent["ui"]) {
@@ -179,6 +192,15 @@ export function Playground() {
                                 });
                                 break;
                             }
+                            case `${packageId}::event::ReloadEvent`: {
+                                const { unit } = event.parsedJson as { unit: [number, number] };
+                                eventBus.dispatchEvent({
+                                    type: "sui",
+                                    action: "reload",
+                                    unit,
+                                    message: "Unit reloads: " + unit.toString(),
+                                });
+                            }
                         }
                     });
                 }
@@ -201,9 +223,32 @@ export function Playground() {
     if (!modelsLoaded) return centerDiv("Models not loaded");
     if (!map)
         return centerDiv(
-            <div className="block text-md">
+            <div className="block text-md" style={{ fontSize: "16px" }}>
                 <h1 className="mb-10">Map not found</h1>
-                <button onClick={() => createDemo1()}>create demo 1</button>
+                <button
+                    className="block"
+                    onClick={() =>
+                        createDemo(1, [
+                            [0, 3],
+                            [6, 5],
+                        ])
+                    }
+                >
+                    create demo 1
+                </button>
+                <button
+                    className="block"
+                    onClick={() =>
+                        createDemo(2, [
+                            [8, 2],
+                            [7, 6],
+                            [1, 2],
+                            [1, 7],
+                        ])
+                    }
+                >
+                    create demo 2
+                </button>
                 <NavLink className="menu-control mt-10" to="/commander">
                     Back
                 </NavLink>
@@ -227,17 +272,12 @@ export function Playground() {
 
     // === Transaction functions ===
 
-    async function createDemo1() {
+    async function createDemo(num: 1 | 2, positions: [number, number][] = []) {
         if (!canTransact) return;
 
         const tx = new Transaction();
-        const game = tx.moveCall({ target: `${packageId}::commander::demo` });
+        const game = tx.moveCall({ target: `${packageId}::commander::demo_${num}` });
 
-        const positions = [
-            [0, 3],
-            [6, 5],
-            [6, 0],
-        ];
         for (let [x, y] of positions) {
             const { name, backstory } = await useNameGenerator();
             const recruit = tx.moveCall({
@@ -302,6 +342,31 @@ export function Playground() {
                 tx.pure.u16(target[0]),
                 tx.pure.u16(target[1]),
             ],
+        });
+
+        tx.setSender(zkLogin.address!);
+
+        const res = await client.dryRunTransactionBlock({
+            transactionBlock: await tx.build({ client: client as any }),
+        });
+
+        return { res, tx };
+    }
+
+    async function performReload(unit: [number, number]) {
+        if (!map) return;
+        if (!canTransact) return;
+
+        const tx = new Transaction();
+        const game = tx.sharedObjectRef({
+            objectId: map.objectId,
+            initialSharedVersion: map.initialSharedVersion,
+            mutable: true,
+        });
+
+        tx.moveCall({
+            target: `${packageId}::commander::perform_reload`,
+            arguments: [game, tx.pure.u16(unit[0]), tx.pure.u16(unit[1])],
         });
 
         tx.setSender(zkLogin.address!);
@@ -404,7 +469,7 @@ export function GameApp({
             }
         });
 
-        eventBus.addEventListener("sui", ({ action, data }) => {
+        eventBus.addEventListener("sui", ({ action, data, unit }) => {
             if (action == "attack") {
                 let params = data as AttackEvent;
                 game.applyAttackEvent(params);
@@ -412,6 +477,10 @@ export function GameApp({
 
             if (action == "next_turn") {
                 game.turn = game.turn + 1;
+            }
+
+            if (action == "reload") {
+                game.applyReloadEvent(unit);
             }
         });
 
@@ -421,6 +490,8 @@ export function GameApp({
                     return game.performAction();
                 // case "move":
                 //     return game.switchMode(new MoveMode(controls));
+                case "reload":
+                    return game.switchMode(new ReloadMode());
                 case "shoot":
                     return game.switchMode(new ShootMode(camera, controls));
                 case "grenade":
@@ -464,27 +535,34 @@ export function UI({
     turn: number;
     recruits: { [key: string]: Recruit } | undefined;
 }) {
+    const [panelDisabled, setPanelDisabled] = useState(true);
+    const [shootMode, setShootMode] = useState(false);
+    const [turn, setTurn] = useState(initilTurn);
+    const [mode, setMode] = useState<string | null>(null);
+    const [log, setLog] = useState<string[]>([]);
+    const [unit, setUnit] = useState<Unit | null>(null);
+    const [recruit, setRecruit] = useState<Recruit | null>(null);
+
     const onAction = (action: string) => eventBus.dispatchEvent({ type: "ui", action });
     const button = (id: string, disabled?: boolean, text?: string) => (
         <button
             onClick={() => onAction(id)}
-            className={"action-button mb-2" + (disabled || isExecuting ? " disabled" : "")}
+            className={
+                "action-button mb-2" +
+                (disabled || isExecuting ? " disabled" : "") +
+                (mode && mode.toLocaleLowerCase() == id ? " active" : "")
+            }
         >
             {text || id}
         </button>
     );
 
-    const [panelDisabled, setPanelDisabled] = useState(true);
-    const [shootMode, setShootMode] = useState(false);
-    const [turn, setTurn] = useState(initilTurn);
-    const [log, setLog] = useState<string[]>([]);
-    const [unit, setUnit] = useState<Unit | null>(null);
-    const [recruit, setRecruit] = useState<Recruit | null>(null);
-
     // Subscribe to the game events to update the UI.
     useEffect(() => {
         function gameEventsHandler(event: GameEvent["game"]) {
             if (event.action === "mode_switch") {
+                setMode(event.mode.name);
+
                 if (event.mode instanceof ShootMode) setShootMode(true);
                 else setShootMode(false);
 
@@ -524,6 +602,8 @@ export function UI({
         });
     }, []);
 
+    const reloadText = unit && "Reload " + unit.props.ammo.value + "/" + unit.props.ammo.max_value || "Reload";
+
     return (
         <div id="ui">
             {unit && recruit && (
@@ -533,7 +613,8 @@ export function UI({
                 >
                     <p className="text-sm text-white">
                         {recruit.metadata.name} ({recruit.rank.$kind}) HP: {unit.props.hp.value}/
-                        {unit.props.hp.max_value}; AP {unit.props.ap.value}/2
+                        {unit.props.hp.max_value}; AP {unit.props.ap.value}/2; Ammo:{" "}
+                        {unit.props.ammo.value}/{unit.props.ammo.max_value}
                     </p>
                 </div>
             )}
@@ -541,8 +622,8 @@ export function UI({
                 id="panel-left"
                 className="fixed h-full left-0 top-0 p-10 flex justify-end flex-col text-center"
             >
-                {/* {button("move")} */}
                 {button("shoot")}
+                {button("reload", false, reloadText)}
                 {button("grenade", true)}
                 <button
                     onClick={() => onAction("next_turn")}

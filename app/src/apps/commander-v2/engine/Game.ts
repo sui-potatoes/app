@@ -137,6 +137,7 @@ export class Game extends THREE.Object3D {
         this.turn += 1;
     }
 
+    /** Apply event received from Sui */
     applyAttackEvent(event: AttackEvent) {
         const {
             attacker: _,
@@ -155,6 +156,17 @@ export class Game extends THREE.Object3D {
             this.remove(this.units[unitId]!);
             delete this.units[unitId];
         }
+    }
+
+    applyReloadEvent(unit: [number, number]) {
+        const [x, z] = unit;
+        const unitId = this.grid.grid[x][z].unit;
+
+        if (unitId === null) return; // ignore, fetched event too late
+
+        console.log("reloading unit", unitId);
+
+        this.units[unitId]!.props.ammo.value = this.units[unitId]!.props.ammo.max_value;
     }
 
     // === Component integration ===

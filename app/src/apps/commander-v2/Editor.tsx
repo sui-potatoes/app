@@ -6,6 +6,7 @@ import { Camera, Game, loadModels, EditMode, Controls, EventBus } from "./engine
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
 import { fromHex } from "@mysten/bcs";
+import { NavLink } from "react-router-dom";
 
 const STORAGE_KEY = "editor-state";
 
@@ -143,6 +144,9 @@ export function SelectSize({
             <button onClick={() => startOver(10)}>Small (10x10)</button>
             <button onClick={() => startOver(15)}>Medium (20x20)</button>
             <button onClick={() => startOver(30)}>Large (30x30)</button>
+            <NavLink to="/commander" className="text-white mt-10">
+                Back to main menu
+            </NavLink>
         </div>
     );
 }
