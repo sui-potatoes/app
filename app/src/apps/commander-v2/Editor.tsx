@@ -139,14 +139,18 @@ export function SelectSize({
 
     return (
         <div className="flex justify-center align-middle h-screen flex-col text-center">
+            <div className="bg-black bg-opacity-70 p-5 text-md rounded">
+            <h1 className="block p-1 mb-10 text-center text-lg uppercase white">Level Editor</h1>
             {preset && <button onClick={() => setSize(size)}>Continue with preset</button>}
             {preset && <p className="my-10">Or select a new size:</p>}
-            <button onClick={() => startOver(10)}>Small (10x10)</button>
-            <button onClick={() => startOver(15)}>Medium (20x20)</button>
-            <button onClick={() => startOver(30)}>Large (30x30)</button>
-            <NavLink to="/commander" className="text-white mt-10">
-                Back to main menu
+            {!preset && <p className="my-10">Select size:</p>}
+            <p><button onClick={() => startOver(10)}>Small (10x10)</button></p>
+            <p><button onClick={() => startOver(15)}>Medium (20x20)</button></p>
+            <p><button onClick={() => startOver(30)}>Large (30x30)</button></p>
+            <NavLink to="/commander" className="menu-control mt-10">
+                Back
             </NavLink>
+            </div>
         </div>
     );
 }

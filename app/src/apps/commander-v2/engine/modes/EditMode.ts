@@ -84,6 +84,10 @@ export class EditMode extends Mode {
         const mode = this.mode as EditMode;
 
         if (button === THREE.MOUSE.RIGHT) {
+            this.tryDispatch({
+                type: "editor",
+                message: `clear cell at (${x},${y})`,
+            })
             return this.grid.clearCell(x, y);
         }
 
@@ -150,6 +154,7 @@ export class EditMode extends Mode {
 
         this.tryDispatch({
             type: "editor",
+            message: `tool change: ${mode.tool}; direction: ${mode.coverDirection}`,
             tool: mode.tool,
             direction: mode.coverDirection,
         });

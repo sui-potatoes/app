@@ -10,6 +10,7 @@ import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 import { fromBase64 } from "@mysten/bcs";
 import { Armor, Stats, Weapon } from "./types/bcs";
 import { SuiObjectRef } from "@mysten/sui/client";
+import { Loader } from "./Loader";
 
 export function Inventory() {
     const flow = useEnokiFlow();
@@ -72,13 +73,7 @@ export function Inventory() {
         .filter((obj) => obj.type === `${packageId}::weapon::Weapon`)
         .map((obj) => ({ ...obj, parsed: Weapon.parse(obj.bcs) }));
 
-    if (isPending) {
-        return (
-            <div className="flex justify-center align-middle h-screen flex-col">
-                <div>Loading...</div>
-            </div>
-        );
-    }
+    if (isPending || isExecuting) return <Loader />;
 
     if (isError) {
         return (
@@ -177,7 +172,7 @@ export function Inventory() {
         tx.transferObjects([armor], zkLogin.address!);
 
         await executeTransaction!(tx);
-        refetch();
+        setTimeout(() => refetch(), 1000);
     }
 
     /**
@@ -247,7 +242,7 @@ export function Inventory() {
         tx.transferObjects([weapon], zkLogin.address!);
 
         await executeTransaction!(tx);
-        refetch();
+        setTimeout(() => refetch(), 1000);
     }
 
     async function removeWeaponUpgrade(ref: SuiObjectRef, idx: number) {

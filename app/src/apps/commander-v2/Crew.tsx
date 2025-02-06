@@ -11,6 +11,7 @@ import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
 import { useNameGenerator } from "./hooks/useNameGenerator";
 import { SuiObjectRef } from "@mysten/sui/client";
+import { Loader } from "./Loader";
 
 export function Crew() {
     const flow = useEnokiFlow();
@@ -20,6 +21,7 @@ export function Crew() {
     const {
         data: recruits,
         isRefetching,
+        isFetching,
         refetch,
     } = useRecruits({ owner: zkLogin.address!, enabled: !!zkLogin.address });
     const { executeTransaction, isExecuting } = useTransactionExecutor({
@@ -35,14 +37,11 @@ export function Crew() {
 
     const numRecruits = recruits?.length || 0;
 
-    console.log(recruits);
-
     return (
         <div className="flex flex-col justify-center h-full">
             <h1 className="text-center">MY CREW ({numRecruits} / 3)</h1>
             <div className="flex justify-center align-middle">
-                {/* columns template */}
-                {isRefetching && <p>Loading...</p>}
+                {(isFetching || isExecuting) && <Loader />}
                 {!isRefetching &&
                     recruits &&
                     recruits.concat(blanks(3 - numRecruits)).map((recruit) => (
@@ -132,7 +131,7 @@ export function Crew() {
         tx.transferObjects([recruit], zkLogin.address);
 
         await executeTransaction(tx);
-        refetch();
+        setTimeout(() => refetch(), 1000);
     }
 
     /**
@@ -165,7 +164,9 @@ export function Crew() {
         });
 
         await executeTransaction(tx).then(console.log);
-        refetch();
+        const removedIdx = recruits?.findIndex((r) => r.id == recruit.objectId);
+        removedIdx && recruits?.splice(removedIdx, 1);
+        setTimeout(() => refetch(), 1000);
     }
 }
 

@@ -4,6 +4,7 @@
 import * as THREE from "three";
 import JEASINGS from "jeasings";
 import { Stats } from "@react-three/drei";
+import { Loader } from "./Loader";
 import { NavLink } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
@@ -218,13 +219,12 @@ export function Playground() {
         </div>
     );
 
-    if (isFetching) return centerDiv("Loading...");
+    if (isFetching || isExecuting && !map) return <Loader />;
     if (isFetched && !map) return centerDiv("Map not found");
     if (!modelsLoaded) return centerDiv("Models not loaded");
     if (!map)
         return centerDiv(
             <div className="block text-md" style={{ fontSize: "16px" }}>
-                <h1 className="mb-10">Map not found</h1>
                 <button
                     className="block"
                     onClick={() =>
@@ -623,7 +623,7 @@ export function UI({
                 className="fixed h-full left-0 top-0 p-10 flex justify-end flex-col text-center"
             >
                 {button("shoot")}
-                {button("reload", false, reloadText)}
+                {button("reload", unit?.props.ammo.value == unit?.props.ammo.max_value, reloadText)}
                 {button("grenade", true)}
                 <button
                     onClick={() => onAction("next_turn")}
