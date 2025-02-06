@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { Tile } from "./Game";
 import { models } from "./models";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
+import { Map as GameMap } from "../types/bcs";
+import { normalizeSuiObjectId } from "@mysten/sui/utils";
 
 /**
  * Grid follows the structure of the game board, similar to how it is handled in
@@ -142,33 +144,6 @@ export class Grid extends THREE.Object3D {
         }
     }
 
-    initRandom() {
-        // const texture = new THREE.TextureLoader().load("/images/texture-concrete.jpg");
-        // texture.wrapS = THREE.RepeatWrapping;
-        // texture.wrapT = THREE.RepeatWrapping;
-        // texture.repeat.set(1, 1);
-        // this.grid.forEach((col, x) => {
-        //     col.forEach((_el, z) => {
-        //         if (Math.random() > 0.7) {
-        //             const rngBool = () => Math.random() > 0.5;
-        //             let tile: Tile = (this.grid[x][z] = {
-        //                 type: "Cover",
-        //                 UP: rngBool() && 1,
-        //                 DOWN: rngBool() && 1,
-        //                 LEFT: rngBool() && 1,
-        //                 RIGHT: rngBool() && 1,
-        //                 unit: null,
-        //             });
-        //             if (tile.DOWN && tile.LEFT && tile.RIGHT && tile.UP) {
-        //                 tile = { type: "Unwalkable", unit: null };
-        //             }
-        //             // place obstacles instead of cover
-        //             this.setCell(x, z, tile);
-        //         }
-        //     });
-        // });
-    }
-
     /** Returns the Von Neumann neighborhood of a cell in this order: right, down, left, up. */
     private *vonNeumann(x: number, y: number) {
         if (x < this.grid.length - 1) yield [x + 1, y];
@@ -281,6 +256,44 @@ export class Grid extends THREE.Object3D {
         if (x0 > x1) return "UP";
         if (y0 > y1) return "LEFT";
         if (y0 < y1) return "RIGHT";
+    }
+
+    resetFromBcs(bcs: Uint8Array) {
+        const map = GameMap.parse(bcs);
+        map.grid.forEach((row, x) => {
+            row.forEach((cell, y) => {
+                switch (cell.tile_type.$kind) {
+                    case "Empty": return this.setCell(x, y, { type: "Empty", unit: null });
+                    case "Unwalkable": return this.setCell(x, y, { type: "Unwalkable", unit: null });
+                    case "Cover": {
+                        const { left, right, up, down } = cell.tile_type.Cover;
+                        this.setCell(x, y, { type: "Cover", left, right, up, down, unit: null });
+                    }
+                }
+            });
+        })
+    }
+
+    toBytes() {
+        const grid = this.grid;
+        return GameMap.serialize({
+            id: normalizeSuiObjectId('0x0'),
+            grid: grid.map((row) => row.map((cell) => {
+                switch (cell.type) {
+                    case "Empty":
+                        return { tile_type: { ["Empty"]: true }, unit: null, }
+                    case "Cover":
+                        return {
+                            tile_type: { ["Cover"]: { ...cell } },
+                            unit: null,
+                        }
+                    case "Unwalkable":
+                        return { tile_type: { ["Unwalkable"]: true }, unit: null, }
+                    default: throw new Error("Invalid tile type");
+                }
+            })),
+            turn: 0,
+        });
     }
 
     /**

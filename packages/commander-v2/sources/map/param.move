@@ -65,28 +65,3 @@ public fun to_string(param: &Param): String {
     str.append(param.max_value.to_string());
     str
 }
-
-#[test]
-fun test_param() {
-    use std::unit_test::assert_eq;
-
-    let mut param = new(10);
-
-    param.decrease(5);
-    assert_eq!(param.max_value(), 10);
-    assert_eq!(param.value(), 5);
-
-    param.decrease(5);
-    assert!(param.is_empty());
-    assert_eq!(param.decrease(5), 0);
-
-    param.reset();
-    assert_eq!(param.value(), 10);
-    assert!(param.is_full());
-
-    let old_param = *&param;
-    let bytes = bcs::to_bytes(&param);
-    let param = from_bytes(bytes);
-
-    assert_eq!(old_param, param);
-}

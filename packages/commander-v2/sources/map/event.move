@@ -26,6 +26,12 @@ public struct MoveEvent has copy, drop {
     path: vector<vector<u16>>,
 }
 
+/// Unit reloaded.
+public struct ReloadEvent has copy, drop {
+    game: ID,
+    unit: vector<u16>,
+}
+
 /// Emit the attack event.
 public fun emit_attack_event(
     game: ID,
@@ -56,4 +62,9 @@ public fun emit_attack_event(
 /// Emit the move event.
 public fun emit_move_event(game: ID, path: vector<vector<u16>>) {
     event::emit(MoveEvent { game, path })
+}
+
+/// Emit the reload event.
+public fun emit_reload_event(game: ID, unit: vector<u16>) {
+    event::emit(ReloadEvent { game, unit })
 }

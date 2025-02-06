@@ -89,7 +89,7 @@ export class Game extends THREE.Object3D {
                 }
 
                 if (mapTile.tile_type.$kind === "Cover") {
-                    const { left, right, bottom: down, top: up } = mapTile.tile_type.Cover;
+                    const { left, right, down, up } = mapTile.tile_type.Cover;
                     game.grid.setCell(x, z, { type: "Cover", left, right, up, down, unit: null });
                 }
 
@@ -137,6 +137,7 @@ export class Game extends THREE.Object3D {
         this.turn += 1;
     }
 
+    /** Apply event received from Sui */
     applyAttackEvent(event: AttackEvent) {
         const {
             attacker: _,
@@ -155,6 +156,17 @@ export class Game extends THREE.Object3D {
             this.remove(this.units[unitId]!);
             delete this.units[unitId];
         }
+    }
+
+    applyReloadEvent(unit: [number, number]) {
+        const [x, z] = unit;
+        const unitId = this.grid.grid[x][z].unit;
+
+        if (unitId === null) return; // ignore, fetched event too late
+
+        console.log("reloading unit", unitId);
+
+        this.units[unitId]!.props.ammo.value = this.units[unitId]!.props.ammo.max_value;
     }
 
     // === Component integration ===
@@ -238,7 +250,12 @@ export class Game extends THREE.Object3D {
         this.mode.disconnect.call(this, this.mode);
         this.mode = mode;
         this.mode.connect.call(this, this.mode);
-        this.tryDispatch({ action: "mode_switch", game: this, mode: this.mode });
+        this.tryDispatch({
+            action: "mode_switch",
+            game: this,
+            mode: this.mode,
+            message: `mode switched to ${this.mode.name}`,
+        });
     }
 
     /**

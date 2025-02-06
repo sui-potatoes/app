@@ -43,6 +43,7 @@ export class UnitModel extends THREE.Object3D {
         this.light.position.set(0, 4, 0);
         this.light.target = this.model;
         this.light.castShadow = true;
+        this.aimCircle.renderOrder = 0;
 
         this.add(this.light);
         this.add(this.model);

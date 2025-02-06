@@ -6,6 +6,7 @@ import { Game } from "./Game";
 
 export type ControlsEvents = {
     zoom: { delta: number };
+    keyup: { key: string; altKey: boolean };
     scroll: { delta: number };
     click: { x: number; y: number; button: number };
 };
@@ -137,6 +138,12 @@ export class Controls extends THREE.Controls<ControlsEvents> {
                     this.arrows.RIGHT = false;
                     break;
             }
+
+            this.dispatchEvent({
+                type: "keyup",
+                key: event.key,
+                altKey: event.altKey,
+            });
         }
 
         if (event instanceof PointerEvent) {
@@ -144,6 +151,15 @@ export class Controls extends THREE.Controls<ControlsEvents> {
 
             if (event.type === "pointerup") {
                 delete this.pointers[event.pointerId];
+
+                if (event.pointerType === "touch") {
+                    this.dispatchEvent({
+                        type: "click",
+                        x: this.pointer.x,
+                        y: this.pointer.y,
+                        button: event.button,
+                    });
+                }
 
                 if (event.pointerType === "mouse") {
                     this.mouse[event.button as 0 | 1 | 2] = false;

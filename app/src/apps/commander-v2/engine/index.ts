@@ -13,4 +13,5 @@ export * from "./modes/EditMode";
 export * from "./modes/MoveMode";
 export * from "./modes/ShootMode";
 export * from "./modes/GrenadeMode";
+export * from "./modes/ReloadMode";
 export * from "./models";

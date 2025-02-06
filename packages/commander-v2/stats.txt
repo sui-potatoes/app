@@ -41,7 +41,6 @@ Weapon Properties:
 
 Challenges:
     - weapon upgrades affect unit stats
-    -
 
 Notes:
 

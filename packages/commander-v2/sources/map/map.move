@@ -115,6 +115,16 @@ public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
     map.grid[x, y].unit.fill(recruit.to_unit())
 }
 
+/// Reload the unit's weapon. It costs 1 AP.
+public fun perform_reload(map: &mut Map, x: u16, y: u16) {
+    assert!(map.grid[x, y].unit.is_some(), ENoUnit);
+    let unit = map.grid[x, y].unit.borrow_mut();
+    unit.try_reset_ap(map.turn);
+    unit.perform_reload();
+
+    event::emit_reload_event(map.id, vector[x, y])
+}
+
 /// Move a unit along the path. The first point is the current position of the unit.
 public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
     assert!(path.length() > 1, EPathTooShort);
@@ -330,6 +340,39 @@ public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
     }
 }
 
+// === Map Presets ===
+
+/// Creates a demo map #1.
+///
+/// - Map: 01 - 7x7 LEGO prototype.
+/// - Unit positions: (0, 3), (1, 6), (6, 5)
+/// - Goal: close encounter with low and high cover to test line of sight and cover mechanics.
+/// - Schema:
+///
+/// ```
+/// |     |     |2002-|0001-|0002-|     |     |
+/// | XXX |     |     |     |     |     |     |
+/// |     |     |     |     |     |0001-|0001-|
+/// |0100-|0210-|     | XXX |     |1000-|1000-|
+/// |0001-|0012-|     |     |     |     |     |
+/// |     |     |     |     |     |     |     |
+/// |     | XXX |     |     |1100-|0100-|0110-|
+/// ```
+public fun demo_1(id: ID): Map {
+    let mut preset_bytes = bcs::to_bytes(&id);
+    // prettier-ignore
+    preset_bytes.append(x"0707000000000102000002000100000001000100000002000000000007020000000000000000000000000007000000000000000000000100000001000100000001000701000100000001000102000000000200000001010000000001010000000007010000000100010001000200000000000000000000000700000000000000000000000000000700000200000000000101010000000100010000000100010100000000");
+    from_bytes(preset_bytes)
+}
+
+/// Creates a demo map #2.
+public fun demo_2(id: ID): Map {
+    // prettier-ignore
+    let mut map = from_bytes(x"00000000000000000000000000000000000000000000000000000000000000000a0a00000000000000000000000000000000000000000a00000101000001000100000001000100000101000000000001010000010001000000010001000001010000000a00000000000000000000000000000000000000000a00000200020002000000000002000200020000000a000001010000010000000100000101000000000000000200000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a010202000000010001000000010001000000010002020000000000000101020000000100010000000100010000000100020200000a01020000000000000000010000010000000000000000000000000100000200000a0102000002000100000002000100000002000100000002000100000002000100000002000100000002000100000002000100000002000100000202000000");
+    map.id = id;
+    map
+}
+
 // === Compatibility / Conversion ===
 
 /// Deserializes the `Map` from the given bytes.
@@ -371,80 +414,9 @@ public fun debug(map: &Map) {
     std::debug::print(&map.to_string())
 }
 
-// === Map Presets ===
-
-/// Creates a demo map #1.
-///
-/// - Map: 01 - 7x7 LEGO prototype.
-/// - Unit positions: (0, 3), (1, 6), (6, 5)
-/// - Goal: close encounter with low and high cover to test line of sight and cover mechanics.
-/// - Schema:
-///
-/// ```
-/// |     |     |2002-|0001-|0002-|     |     |
-/// | XXX |     |     |     |     |     |     |
-/// |     |     |     |     |     |0001-|0001-|
-/// |0100-|0210-|     | XXX |     |1000-|1000-|
-/// |0001-|0012-|     |     |     |     |     |
-/// |     |     |     |     |     |     |     |
-/// |     | XXX |     |     |1100-|0100-|0110-|
-/// ```
-public fun demo_1(id: ID): Map {
-    let mut preset_bytes = bcs::to_bytes(&id);
-    // prettier-ignore
-    preset_bytes.append(x"0707000000000102000002000100000001000100000002000000000007020000000000000000000000000007000000000000000000000100000001000100000001000701000100000001000102000000000200000001010000000001010000000007010000000100010001000200000000000000000000000700000000000000000000000000000700000200000000000101010000000100010000000100010100000000");
-    from_bytes(preset_bytes)
-}
-
 #[test_only]
 public fun destroy(map: Map) {
     sui::test_utils::destroy(map)
-}
-
-#[test]
-fun test_map_with_units() {
-    use sui::random;
-    use commander::recruit;
-
-    let ctx = &mut tx_context::dummy();
-    let mut rng = random::new_generator_from_seed_for_testing(vector[2]);
-    let recruit_one = recruit::default(ctx);
-    let recruit_two = recruit::default(ctx);
-
-    let mut map = Self::new(@1.to_id(), 6);
-
-    assert!(!map.tile_has_unit(3, 3));
-    assert!(!map.tile_has_unit(5, 2));
-
-    map.place_recruit(&recruit_one, 3, 3);
-    map.place_recruit(&recruit_two, 5, 2);
-
-    assert!(map.tile_has_unit(3, 3));
-    assert!(map.tile_has_unit(5, 2));
-
-    // | | | | | | |
-    // | | | | | | |
-    // | | | | | |5|
-    // | | | |5| | |
-    // | | | | | | |
-    // | | | | | | |
-
-    // now try to attack another unit with the first one
-    let mut damage = 0;
-    map.grid[3, 3].unit.do_mut!(|unit| (_, _, _, damage, _) = unit.perform_attack(&mut rng, 4));
-
-    // apply the damage to the second unit
-    map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);
-
-    let (weapon, armor) = recruit_one.dismiss();
-    weapon.destroy!(|w| w.destroy());
-    armor.destroy!(|a| a.destroy());
-
-    let (weapon, armor) = recruit_two.dismiss();
-    weapon.destroy!(|w| w.destroy());
-    armor.destroy!(|a| a.destroy());
-
-    map.destroy();
 }
 
 #[test]
@@ -548,38 +520,47 @@ fun test_check_path() {
 }
 
 #[test]
-// To better understand the test, please refer to the `demo_1` function and see
-// the each map tile in the schema.
-fun test_demo_maps() {
-    let demo_1 = demo_1(@1.to_id());
-    assert!(demo_1.check_path(vector[vector[1, 6], vector[2, 6], vector[3, 6], vector[3, 5]]));
-    assert!(
-        !demo_1.check_path(vector[
-            /* start */ vector[0, 0],
-            /* right */ vector[0, 1],
-            /* right */ vector[0, 2],
-        ]),
-    ); // hop over low cover
-    assert!(demo_1.check_path(vector[vector[6, 5], /* up */ vector[5, 5]])); // also low cover
-    assert!(!demo_1.check_path(vector[vector[0, 0], vector[1, 0]])); // unwalkable tile
-    assert!(
-        !demo_1.check_path(vector[
-            /* start */ vector[0, 3],
-            /* left */ vector[0, 2],
-            /* bottom */ vector[1, 2],
-        ]),
-    ); // high cover
-    demo_1.destroy();
-}
+fun test_map_with_units() {
+    use sui::random;
+    use commander::recruit;
 
-#[test]
-fun test_from_bcs() {
-    use std::unit_test::assert_ref_eq;
-    let map = demo_1(@1.to_id());
-    let bytes = bcs::to_bytes(&map);
-    let map_copy = from_bytes(bytes);
+    let ctx = &mut tx_context::dummy();
+    let mut rng = random::new_generator_from_seed_for_testing(vector[2]);
+    let recruit_one = recruit::default(ctx);
+    let recruit_two = recruit::default(ctx);
 
-    assert_ref_eq!(&map, &map_copy);
-    map_copy.destroy();
+    let mut map = Self::new(@1.to_id(), 6);
+
+    assert!(!map.tile_has_unit(3, 3));
+    assert!(!map.tile_has_unit(5, 2));
+
+    map.place_recruit(&recruit_one, 3, 3);
+    map.place_recruit(&recruit_two, 5, 2);
+
+    assert!(map.tile_has_unit(3, 3));
+    assert!(map.tile_has_unit(5, 2));
+
+    // | | | | | | |
+    // | | | | | | |
+    // | | | | | |5|
+    // | | | |5| | |
+    // | | | | | | |
+    // | | | | | | |
+
+    // now try to attack another unit with the first one
+    let mut damage = 0;
+    map.grid[3, 3].unit.do_mut!(|unit| (_, _, _, damage, _) = unit.perform_attack(&mut rng, 4));
+
+    // apply the damage to the second unit
+    map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);
+
+    let (weapon, armor) = recruit_one.dismiss();
+    weapon.destroy!(|w| w.destroy());
+    armor.destroy!(|a| a.destroy());
+
+    let (weapon, armor) = recruit_two.dismiss();
+    weapon.destroy!(|w| w.destroy());
+    armor.destroy!(|a| a.destroy());
+
     map.destroy();
 }

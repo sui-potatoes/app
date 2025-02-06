@@ -16,6 +16,10 @@ use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
 /// Trying to attack a target that is out of range.
 const ERangeExceeded: u64 = 1;
+/// Trying to attack with no ammo.
+const EOutOfAmmo: u64 = 2;
+/// No AP left to perform an action.
+const ENoAP: u64 = 3;
 
 /// Weapon range can be exceeded by this value with aim penalty.
 const MAX_RANGE_OFFSET: u8 = 3;
@@ -34,6 +38,8 @@ public struct Unit has copy, store {
     ap: Param,
     /// The HP of the `Unit`.
     hp: Param,
+    /// The ammo of the `Unit`.
+    ammo: Param,
     /// Stats of the `Recruit`.
     stats: Stats,
     /// The last turn the `Unit` has performed an action.
@@ -53,16 +59,17 @@ public fun try_reset_ap(unit: &mut Unit, turn: u16) {
 
 /// Get the HP of the `Unit`.
 public fun perform_move(unit: &mut Unit, distance: u8) {
-    assert!(unit.stats.mobility() >= distance);
-    assert!(unit.ap.value() > 0);
+    assert!(unit.stats.mobility() >= distance, ERangeExceeded);
+    assert!(unit.ap.value() > 0, ENoAP);
 
     unit.ap.decrease(1);
 }
 
-/// Reload the `Unit`'s weapon. It costs 1 AP.
+/// Reload `Unit`'s weapon. It costs 1 AP.
 public fun perform_reload(unit: &mut Unit) {
-    assert!(unit.ap.value() > 0);
+    assert!(unit.ap.value() > 0, ENoAP);
     unit.ap.decrease(1);
+    unit.ammo.reset();
 }
 
 #[allow(lint(public_random))]
@@ -86,9 +93,11 @@ public fun perform_attack(
     rng: &mut RandomGenerator,
     range: u8,
 ): (bool, bool, bool, u8, u8) {
-    assert!(unit.ap.value() > 0);
+    assert!(unit.ap.value() > 0, ENoAP);
+    assert!(unit.ammo.value() > 0, EOutOfAmmo);
 
     unit.ap.deplete();
+    unit.ammo.decrease(1);
 
     let crit_chance = unit.stats.crit_chance();
     let dmg_stat = unit.stats.damage();
@@ -159,12 +168,14 @@ public fun from_recruit(recruit: &Recruit): Unit {
     let mut weapon_stats = stats::default_weapon();
     recruit.weapon().do_ref!(|w| weapon_stats = *w.stats());
     recruit.armor().do_ref!(|a| armor_stats = *a.stats());
+    let stats = stats.add(&weapon_stats.add(&armor_stats));
 
     Unit {
         recruit: object::id(recruit),
         ap: param::new(2),
         hp: param::new(stats.health() as u16),
-        stats: stats.add(&weapon_stats.add(&armor_stats)),
+        ammo: param::new(stats.ammo() as u16),
+        stats,
         last_turn: 0,
     }
 }
@@ -188,6 +199,9 @@ public fun hp(unit: &Unit): u16 { unit.hp.value() }
 /// Get the `Unit`'s AP.
 public fun ap(unit: &Unit): u16 { unit.ap.value() }
 
+/// Get the `Unit`'s ammo.
+public fun ammo(unit: &Unit): u16 { unit.ammo.value() }
+
 /// Get the `Unit`'s stats.
 public fun stats(unit: &Unit): &Stats { &unit.stats }
 
@@ -204,6 +218,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Unit {
         recruit: bcs.peel_address().to_id(),
         ap: param::from_bcs(bcs),
         hp: param::from_bcs(bcs),
+        ammo: param::from_bcs(bcs),
         stats: stats::from_bcs(bcs),
         last_turn: bcs.peel_u16(),
     }

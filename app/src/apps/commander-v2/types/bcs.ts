@@ -69,15 +69,16 @@ export const Unit = bcs.struct("Unit", {
     recruit: bcs.Address,
     ap: Param,
     hp: Param,
+    ammo: Param,
     stats: Stats,
     last_turn: bcs.u16(),
 });
 
 const Cover = bcs.struct("Cover", {
     left: bcs.u8(),
-    top: bcs.u8(),
+    up: bcs.u8(),
     right: bcs.u8(),
-    bottom: bcs.u8(),
+    down: bcs.u8(),
 });
 
 const TileType = bcs.enum("TileType", {

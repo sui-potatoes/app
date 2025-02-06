@@ -56,6 +56,7 @@ fun perform_attack_distance_modifiers() {
     unit.try_reset_ap(3);
 
     // no bonus, no penalty
+    unit.perform_reload();
     let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 4);
     assert_eq!(hit_chance, 65);
     unit.try_reset_ap(4);
@@ -71,9 +72,37 @@ fun perform_attack_distance_modifiers() {
     unit.try_reset_ap(6);
 
     // 30% penalty
+    unit.perform_reload();
     let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 7);
     assert_eq!(hit_chance, 35);
     unit.try_reset_ap(7);
+
+    recruit.kill(ctx).throw_away();
+    unit.destroy();
+}
+
+#[test]
+fun shoot_and_reload() {
+    let ctx = &mut tx_context::dummy();
+    let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
+    let recruit = recruit::default(ctx);
+    let mut unit = recruit.to_unit();
+
+    assert_eq!(unit.ammo(), 3);
+    unit.perform_attack(&mut rng, 1);
+    assert_eq!(unit.ammo(), 2);
+    unit.try_reset_ap(1);
+    unit.perform_reload();
+    assert_eq!(unit.ammo(), 3);
+    assert_eq!(unit.ap(), 1);
+    unit.perform_attack(&mut rng, 1);
+    assert_eq!(unit.ammo(), 2);
+    unit.try_reset_ap(2);
+    unit.perform_attack(&mut rng, 1);
+    assert_eq!(unit.ammo(), 1);
+    unit.try_reset_ap(3);
+    unit.perform_attack(&mut rng, 1);
+    assert_eq!(unit.ammo(), 0);
 
     recruit.kill(ctx).throw_away();
     unit.destroy();

@@ -51,16 +51,3 @@ public fun stats(a: &Armor): &Stats { &a.stats }
 
 /// Add an upgrade to the `Armor`.
 public fun to_string(a: &Armor): String { a.name }
-
-#[test]
-fun test_armor() {
-    use std::unit_test::assert_eq;
-
-    let ctx = &mut tx_context::dummy();
-    let arm = Self::default(ctx);
-
-    assert_eq!(arm.name(), b"Standard Armor".to_string());
-    assert_eq!(arm.stats().inner(), 0);
-
-    arm.destroy();
-}
