@@ -56,16 +56,17 @@ public fun colonel(): Rank { Rank::Colonel }
 
 /// Promotes the rank of the Recruit.
 public fun rank_up(rank: &mut Rank) {
-    *rank = match (rank) {
-        Rank::Rookie => Rank::Squaddie,
-        Rank::Squaddie => Rank::Corporal,
-        Rank::Corporal => Rank::Sergeant,
-        Rank::Sergeant => Rank::Lieutenant,
-        Rank::Lieutenant => Rank::Captain,
-        Rank::Captain => Rank::Major,
-        Rank::Major => Rank::Colonel,
-        Rank::Colonel => abort EMaxRank,
-    }
+    *rank =
+        match (rank) {
+            Rank::Rookie => Rank::Squaddie,
+            Rank::Squaddie => Rank::Corporal,
+            Rank::Corporal => Rank::Sergeant,
+            Rank::Sergeant => Rank::Lieutenant,
+            Rank::Lieutenant => Rank::Captain,
+            Rank::Captain => Rank::Major,
+            Rank::Major => Rank::Colonel,
+            Rank::Colonel => abort EMaxRank,
+        }
 }
 
 // === Checks ===

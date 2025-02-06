@@ -65,4 +65,3 @@ public fun to_string(param: &Param): String {
     str.append(param.max_value.to_string());
     str
 }
-
