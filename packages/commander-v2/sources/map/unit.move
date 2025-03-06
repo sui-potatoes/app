@@ -33,7 +33,7 @@ public struct Unit has copy, store {
     /// The `ID` of the `Recruit`.
     recruit: ID,
     /// Number of actions the `Unit` can perform in a single turn. Resets at the
-    /// beginning of eafch turn. A single action takes 1 point, options vary from
+    /// beginning of each turn. A single action takes 1 point, options vary from
     /// moving, attacking, using abilities, etc.
     ap: Param,
     /// The HP of the `Unit`.
@@ -134,7 +134,7 @@ public fun perform_attack(
 }
 
 #[allow(lint(public_random))]
-/// Apply damage to unit, can dodgeable (shot) or not (explosive).
+/// Apply damage to unit, can be dodged (shot) or not (explosive).
 ///
 /// Returns: (is_dodged, damage applied, is_kia),
 public fun apply_damage(
@@ -161,7 +161,7 @@ public fun apply_damage(
     (false, damage, hp_left == 0)
 }
 
-/// Creates a new `Unit` - an in-game represenation of a `Recruit`.
+/// Creates a new `Unit` - an in-game representation of a `Recruit`.
 public fun from_recruit(recruit: &Recruit): Unit {
     let stats = *recruit.stats();
     let mut armor_stats = stats::default_armor();

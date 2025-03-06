@@ -95,10 +95,10 @@ public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {
     macros::num_diff!($x0, $x1) + macros::num_diff!($y0, $y1)
 }
 
-/// Get all von Neumann neighbours of a point, checking if the point is within
-/// the bounds of the grid. The size parameter specifies the size of the neighbourhood.
+/// Get all von Neumann neighbors of a point, checking if the point is within
+/// the bounds of the grid. The size parameter specifies the size of the neighborhood.
 ///
-/// See `Point` for more information on the von Neumann neighbourhood.
+/// See `Point` for more information on the von Neumann neighborhood.
 public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> {
     let p = $p;
     let g = $g;

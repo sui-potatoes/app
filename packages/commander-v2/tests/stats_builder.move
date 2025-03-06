@@ -18,7 +18,7 @@ public struct StatsBuilder {
     spread: Option<u8>,
     plus_one: Option<u8>,
     crit_chance: Option<u8>,
-    is_dodgeable: Option<u8>,
+    can_be_dodged: Option<u8>,
     area_size: Option<u8>,
     env_damage: Option<u8>,
     range: Option<u8>,
@@ -38,7 +38,7 @@ public fun new(): StatsBuilder {
         spread: option::none(),
         plus_one: option::none(),
         crit_chance: option::none(),
-        is_dodgeable: option::none(),
+        can_be_dodged: option::none(),
         area_size: option::none(),
         env_damage: option::none(),
         range: option::none(),
@@ -106,9 +106,9 @@ public fun crit_chance(mut self: StatsBuilder, crit_chance: u8): StatsBuilder {
     self
 }
 
-/// Set the is_dodgeable in the `Stats`.
-public fun is_dodgeable(mut self: StatsBuilder, is_dodgeable: u8): StatsBuilder {
-    self.is_dodgeable = option::some(is_dodgeable);
+/// Set the can_be_dodged in the `Stats`.
+public fun can_be_dodged(mut self: StatsBuilder, can_be_dodged: u8): StatsBuilder {
+    self.can_be_dodged = option::some(can_be_dodged);
     self
 }
 
@@ -149,7 +149,7 @@ public fun build(self: StatsBuilder): Stats {
         spread,
         plus_one,
         crit_chance,
-        is_dodgeable,
+        can_be_dodged,
         area_size,
         env_damage,
         range,
@@ -169,7 +169,7 @@ public fun build(self: StatsBuilder): Stats {
                 spread.destroy_or!(2),
                 plus_one.destroy_or!(0),
                 crit_chance.destroy_or!(0),
-                is_dodgeable.destroy_or!(1),
+                can_be_dodged.destroy_or!(1),
                 area_size.destroy_or!(1),
                 env_damage.destroy_or!(0),
                 range.destroy_or!(4),
@@ -192,7 +192,7 @@ public fun build_base(self: StatsBuilder): Stats {
         spread,
         plus_one,
         crit_chance,
-        is_dodgeable,
+        can_be_dodged,
         area_size,
         env_damage,
         range,
@@ -212,7 +212,7 @@ public fun build_base(self: StatsBuilder): Stats {
                 spread.destroy_or!(0),
                 plus_one.destroy_or!(0),
                 crit_chance.destroy_or!(0),
-                is_dodgeable.destroy_or!(0),
+                can_be_dodged.destroy_or!(0),
                 area_size.destroy_or!(0),
                 env_damage.destroy_or!(0),
                 range.destroy_or!(0),
@@ -235,7 +235,7 @@ public fun build_weapon(self: StatsBuilder): Stats {
         spread,
         plus_one,
         crit_chance,
-        is_dodgeable,
+        can_be_dodged,
         area_size,
         env_damage,
         range,
@@ -255,7 +255,7 @@ public fun build_weapon(self: StatsBuilder): Stats {
                 spread.destroy_or!(2),
                 plus_one.destroy_or!(0),
                 crit_chance.destroy_or!(0),
-                is_dodgeable.destroy_or!(1),
+                can_be_dodged.destroy_or!(1),
                 area_size.destroy_or!(1),
                 env_damage.destroy_or!(0),
                 range.destroy_or!(4),

@@ -31,18 +31,18 @@ use svg::{container::{Self, Container}, macros::add_class, shape, svg};
 const EWrongBody: u64 = 1;
 /// The hair type is not found in the `Builder`.
 const EWrongHair: u64 = 2;
-/// Eyes colour must be in the allowed palette.
-const EWrongEyesColour: u64 = 3;
-/// Trousers colour must be in the allowed palette.
-const EWrongTrousersColour: u64 = 4;
-/// Skin colour must be in the allowed palette.
-const EWrongSkinColour: u64 = 5;
-/// Base colour must be in the allowed palette.
-const EWrongBaseColour: u64 = 6;
-/// Accent colour must be in the allowed palette.
-const EWrongAccentColour: u64 = 7;
-/// Hair colour must be in the allowed palette.
-const EWrongHairColour: u64 = 8;
+/// Eyes color must be in the allowed palette.
+const EWrongEyesColor: u64 = 3;
+/// Trousers color must be in the allowed palette.
+const EWrongTrousersColor: u64 = 4;
+/// Skin color must be in the allowed palette.
+const EWrongSkinColor: u64 = 5;
+/// Base color must be in the allowed palette.
+const EWrongBaseColor: u64 = 6;
+/// Accent color must be in the allowed palette.
+const EWrongAccentColor: u64 = 7;
+/// Hair color must be in the allowed palette.
+const EWrongHairColor: u64 = 8;
 /// Application key cannot be a primitive type.
 const EIncorrectDynamicField: u64 = 9;
 
@@ -56,7 +56,7 @@ const SKIN: vector<u8> = b"s";
 const ACCENT: vector<u8> = b"a";
 
 // prettier-ignore
-/// EDG 32 palette. Classic 32 colour palette.
+/// EDG 32 palette. Classic 32 color palette.
 const PALETTE: vector<vector<u8>> = vector[
     b"be4a2f", b"d77643", b"ead4aa",
     b"e4a672", b"b86f50", b"733e39",
@@ -83,14 +83,14 @@ public struct Builder has key {
     id: UID,
     body: VecMap<String, Container>,
     hair: VecMap<String, Container>,
-    colours: vector<vector<u8>>,
+    colors: vector<vector<u8>>,
 }
 
 /// The OTW for the application.
 public struct CHARACTER has drop {}
 
 /// The builder for the image of a Character, can use available shapes and
-/// colours from the game object.
+/// colors from the game object.
 public struct Props has drop, store {
     /// Body type.
     body_type: String,
@@ -100,18 +100,18 @@ public struct Props has drop, store {
     body: String,
     /// Urlencoded Hair parts.
     hair: String,
-    /// Hair colour, a HEX string.
-    hair_colour: String,
-    /// Eyes colour, a HEX string.
-    eyes_colour: String,
-    /// Trousers colour, a HEX string.
-    trousers_colour: String,
-    /// Skin colour, a HEX string.
-    skin_colour: String,
-    /// Base colour, a HEX string.
-    base_colour: String,
-    /// Accent colour, a HEX string.
-    accent_colour: String,
+    /// Hair color, a HEX string.
+    hair_color: String,
+    /// Eyes color, a HEX string.
+    eyes_color: String,
+    /// Trousers color, a HEX string.
+    trousers_color: String,
+    /// Skin color, a HEX string.
+    skin_color: String,
+    /// Base color, a HEX string.
+    base_color: String,
+    /// Accent color, a HEX string.
+    accent_color: String,
 }
 
 /// A character in the game.
@@ -125,34 +125,34 @@ public fun new(
     b: &mut Builder,
     body_type: String,
     hair_type: String,
-    eyes_colour: String,
-    hair_colour: String,
-    trousers_colour: String,
-    skin_colour: String,
-    base_colour: String,
-    accent_colour: String,
+    eyes_color: String,
+    hair_color: String,
+    trousers_color: String,
+    skin_color: String,
+    base_color: String,
+    accent_color: String,
     ctx: &mut TxContext,
 ): Character {
     assert!(b.body.contains(&body_type), EWrongBody);
     assert!(b.hair.contains(&hair_type), EWrongHair);
-    assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
-    assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongEyesColour);
-    assert!(b.colours.contains(trousers_colour.as_bytes()), EWrongTrousersColour);
-    assert!(b.colours.contains(skin_colour.as_bytes()), EWrongSkinColour);
-    assert!(b.colours.contains(base_colour.as_bytes()), EWrongBaseColour);
-    assert!(b.colours.contains(accent_colour.as_bytes()), EWrongAccentColour);
+    assert!(b.colors.contains(hair_color.as_bytes()), EWrongHairColor);
+    assert!(b.colors.contains(eyes_color.as_bytes()), EWrongEyesColor);
+    assert!(b.colors.contains(trousers_color.as_bytes()), EWrongTrousersColor);
+    assert!(b.colors.contains(skin_color.as_bytes()), EWrongSkinColor);
+    assert!(b.colors.contains(base_color.as_bytes()), EWrongBaseColor);
+    assert!(b.colors.contains(accent_color.as_bytes()), EWrongAccentColor);
 
     let image = Props {
         body: urlencode::encode(b.body[&body_type].to_string().into_bytes()),
         hair: urlencode::encode(b.hair[&hair_type].to_string().into_bytes()),
         body_type,
         hair_type,
-        eyes_colour,
-        hair_colour,
-        trousers_colour,
-        skin_colour,
-        base_colour,
-        accent_colour,
+        eyes_color,
+        hair_color,
+        trousers_color,
+        skin_color,
+        base_color,
+        accent_color,
     };
 
     Character { id: object::new(ctx), image }
@@ -164,12 +164,12 @@ public fun update_image(
     c: &mut Character,
     body_type: Option<String>,
     hair_type: Option<String>,
-    eyes_colour: Option<String>,
-    hair_colour: Option<String>,
-    trousers_colour: Option<String>,
-    skin_colour: Option<String>,
-    base_colour: Option<String>,
-    accent_colour: Option<String>,
+    eyes_color: Option<String>,
+    hair_color: Option<String>,
+    trousers_color: Option<String>,
+    skin_color: Option<String>,
+    base_color: Option<String>,
+    accent_color: Option<String>,
     _ctx: &mut TxContext,
 ) {
     body_type.do!(|body_type| {
@@ -184,34 +184,34 @@ public fun update_image(
         c.image.hair_type = hair_type;
     });
 
-    hair_colour.do!(|hair_colour| {
-        assert!(b.colours.contains(hair_colour.as_bytes()), EWrongHairColour);
-        c.image.hair_colour = hair_colour;
+    hair_color.do!(|hair_color| {
+        assert!(b.colors.contains(hair_color.as_bytes()), EWrongHairColor);
+        c.image.hair_color = hair_color;
     });
 
-    eyes_colour.do!(|eyes_colour| {
-        assert!(b.colours.contains(eyes_colour.as_bytes()), EWrongHairColour);
-        c.image.eyes_colour = eyes_colour;
+    eyes_color.do!(|eyes_color| {
+        assert!(b.colors.contains(eyes_color.as_bytes()), EWrongHairColor);
+        c.image.eyes_color = eyes_color;
     });
 
-    trousers_colour.do!(|trousers_colour| {
-        assert!(b.colours.contains(trousers_colour.as_bytes()), EWrongHairColour);
-        c.image.trousers_colour = trousers_colour;
+    trousers_color.do!(|trousers_color| {
+        assert!(b.colors.contains(trousers_color.as_bytes()), EWrongHairColor);
+        c.image.trousers_color = trousers_color;
     });
 
-    skin_colour.do!(|skin_colour| {
-        assert!(b.colours.contains(skin_colour.as_bytes()), EWrongHairColour);
-        c.image.skin_colour = skin_colour;
+    skin_color.do!(|skin_color| {
+        assert!(b.colors.contains(skin_color.as_bytes()), EWrongHairColor);
+        c.image.skin_color = skin_color;
     });
 
-    base_colour.do!(|base_colour| {
-        assert!(b.colours.contains(base_colour.as_bytes()), EWrongHairColour);
-        c.image.base_colour = base_colour;
+    base_color.do!(|base_color| {
+        assert!(b.colors.contains(base_color.as_bytes()), EWrongHairColor);
+        c.image.base_color = base_color;
     });
 
-    accent_colour.do!(|accent_colour| {
-        assert!(b.colours.contains(accent_colour.as_bytes()), EWrongHairColour);
-        c.image.accent_colour = accent_colour;
+    accent_color.do!(|accent_color| {
+        assert!(b.colors.contains(accent_color.as_bytes()), EWrongHairColor);
+        c.image.accent_color = accent_color;
     });
 }
 
@@ -220,8 +220,8 @@ public fun update_image(
 /// Add a dynamic field to the character.
 ///
 /// We make sure that the Key is not a primitive type to enforce the usage of custom
-/// types for dynamic fields. This is a necessary step in preventing misimplementation
-/// of the dynamic fields in this setting.
+/// types for dynamic fields. This is a necessary step in preventing incorrect
+/// implementation of the dynamic fields in this setting.
 ///
 /// TODO: a stricter check would be to check against the `0x1` and `0x2` origin
 ///      of the type, but we can leave it for now.
@@ -255,27 +255,27 @@ public fun body_type(c: &Character): String { c.image.body_type }
 /// Get the hair type of the character.
 public fun hair_type(c: &Character): String { c.image.hair_type }
 
-/// Get the eyes colour of the character.
-public fun eyes_colour(c: &Character): String { c.image.eyes_colour }
+/// Get the eyes color of the character.
+public fun eyes_color(c: &Character): String { c.image.eyes_color }
 
-/// Get the hair colour of the character.
-public fun hair_colour(c: &Character): String { c.image.hair_colour }
+/// Get the hair color of the character.
+public fun hair_color(c: &Character): String { c.image.hair_color }
 
-/// Get the pants colour of the character.
-public fun trousers_colour(c: &Character): String { c.image.trousers_colour }
+/// Get the pants color of the character.
+public fun trousers_color(c: &Character): String { c.image.trousers_color }
 
-/// Get the skin colour of the character.
-public fun skin_colour(c: &Character): String { c.image.skin_colour }
+/// Get the skin color of the character.
+public fun skin_color(c: &Character): String { c.image.skin_color }
 
-/// Get the base colour of the character.
-public fun base_colour(c: &Character): String { c.image.base_colour }
+/// Get the base color of the character.
+public fun base_color(c: &Character): String { c.image.base_color }
 
-/// Get the accent colour of the character.
-public fun accent_colour(c: &Character): String { c.image.accent_colour }
+/// Get the accent color of the character.
+public fun accent_color(c: &Character): String { c.image.accent_color }
 
 // === Static Read ===
 
-/// Returns vector of available colours for the application.
+/// Returns vector of available colors for the application.
 public fun palette(): vector<vector<u8>> { PALETTE }
 
 // === Display & Rendering ===
@@ -289,7 +289,7 @@ fun init(otw: CHARACTER, ctx: &mut TxContext) {
         id: object::new(ctx),
         body: vec_map::empty(),
         hair: vec_map::empty(),
-        colours: PALETTE,
+        colors: PALETTE,
     };
 
     builder.set_initial_assets();
@@ -425,23 +425,23 @@ fun build_character_base(): String {
     let template = build_pure_svg();
 
     // then run replacement script with the following values
-    // HAIR -> {image.hair_colour}
-    // EYES -> {image.eyes_colour}w
-    // PANTS -> {image.pants_colour}
-    // SKIN -> {image.skin_colour}
-    // BODY -> {image.base_colour}
-    // ACCENT -> {image.accent_colour}
+    // HAIR -> {image.hair_color}
+    // EYES -> {image.eyes_color}w
+    // PANTS -> {image.pants_color}
+    // SKIN -> {image.skin_color}
+    // BODY -> {image.base_color}
+    // ACCENT -> {image.accent_color}
 
     // ideally let's just write the template with Move...
-    let template = replace(template, b"SKIN".to_string(), b"{image.skin_colour}".to_string());
-    let template = replace(template, b"EYES".to_string(), b"{image.eyes_colour}".to_string());
-    let template = replace(template, b"HAIR".to_string(), b"{image.hair_colour}".to_string());
-    let template = replace(template, b"PANTS".to_string(), b"{image.pants_colour}".to_string());
-    let template = replace(template, b"BODY".to_string(), b"{image.base_colour}".to_string());
+    let template = replace(template, b"SKIN".to_string(), b"{image.skin_color}".to_string());
+    let template = replace(template, b"EYES".to_string(), b"{image.eyes_color}".to_string());
+    let template = replace(template, b"HAIR".to_string(), b"{image.hair_color}".to_string());
+    let template = replace(template, b"PANTS".to_string(), b"{image.pants_color}".to_string());
+    let template = replace(template, b"BODY".to_string(), b"{image.base_color}".to_string());
     let template = replace(
         template,
         b"ACCENT".to_string(),
-        b"{image.accent_colour}".to_string(),
+        b"{image.accent_color}".to_string(),
     );
     let template = replace(
         template,
@@ -470,7 +470,7 @@ public fun new_builder_for_testing(ctx: &mut TxContext): Builder {
         id: object::new(ctx),
         body: vec_map::empty(),
         hair: vec_map::empty(),
-        colours: PALETTE,
+        colors: PALETTE,
     };
 
     builder.set_initial_assets();

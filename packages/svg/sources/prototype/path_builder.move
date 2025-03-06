@@ -3,7 +3,7 @@
 
 #[test_only]
 /// Currently a test-only module which can be used to build SVG paths.
-/// Paths are a standardised way to define shapes in SVG.
+/// Paths are a standardized way to define shapes in SVG.
 module svg::path_builder;
 
 use std::{string::String, unit_test::assert_eq};

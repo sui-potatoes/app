@@ -94,7 +94,7 @@ public fun circle(r: u16): Shape {
 
 /// Create a new ellipse `Shape`.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Ellipse shape, a circle that is stretched in one direction.
 ///
@@ -173,7 +173,7 @@ public fun filter(id: String, filters: vector<Filter>): Shape {
 
 /// Create a new line shape.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Line shape, a line that connects two points, each point is a pair
 /// of `x` and `y`.
@@ -200,7 +200,7 @@ public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
 #[test_only]
 /// Create a new polygon shape (not implemented).
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Polygon shape, a closed shape that connects multiple points. With
 /// straight lines between each pair of points.
@@ -226,7 +226,7 @@ public fun polygon(_points: vector<vector<u16>>): Shape {
 /// Create a new polyline shape.
 /// Polyline shape, a line that connects multiple points.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Own properties:
 /// - `vector<u16>` - a list of points, each point is a pair of `x` and `y`.
@@ -241,7 +241,7 @@ public fun polyline(_points: vector<vector<u16>>): Shape {
 
 /// Create a new rectangle shape.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Rectangle shape, a rectangle with a position, width, and height.
 ///
@@ -268,7 +268,7 @@ public fun rect(width: u16, height: u16): Shape {
 
 /// Create a new `<text>` shape.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Text shape, a text element with a string and a position.
 ///
@@ -298,7 +298,7 @@ public fun text(text: String): Shape {
 
 /// Create a new `<path>` shape.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Path shape, a shape defined by a path string. The path string is
 /// a series of commands and coordinates. The `length` attribute is
@@ -336,7 +336,7 @@ public fun path(path: String, length: Option<u16>): Shape {
 
 /// Create a new `<use>` shape.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Use shape, a reference to a shape defined elsewhere in the document.
 ///
@@ -361,7 +361,7 @@ public fun use_(href: String): Shape {
 
 /// Create a new `<linearGradient>` shape.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Part of the `defs` container, a shape that is not a standard SVG shape.
 ///
@@ -390,7 +390,7 @@ public fun linear_gradient(stops: vector<Stop>): Shape {
 
 /// Create a new `<radialGradient>` shape.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Part of the `defs` container, a shape that is not a standard SVG shape.
 /// A radial gradient is a gradient that starts from a center point and
@@ -420,7 +420,7 @@ public fun radial_gradient(stops: vector<Stop>): Shape {
 
 /// Create a new custom shape.
 ///
-/// ## Decription
+/// ## Description
 ///
 /// Custom string, allows for custom expressions passed as a string.
 ///

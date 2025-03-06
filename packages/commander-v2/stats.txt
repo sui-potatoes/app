@@ -12,7 +12,7 @@ Weapon:
     2. spread (SPR) - potential spread of the base damage, based on RNG
     3. plus_one (PLO) - % chance of dealing extra point of damage
     4. crit_chance (CRT) - % chance of dealing critical damage
-    5. is_dodgeable (IDG) - boolean - whether a weapon can be dodged
+    5. can_be_dodged (IDG) - boolean - whether a weapon can be dodged
     6. area_size (ARS) - size of the damage area in von neumann neighbourhood tiles
     7. env damage (ENV) - whether a weapon can destroy env objects
     8. range (RAN) - Manhattan range of the weapon (in tiles)

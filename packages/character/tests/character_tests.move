@@ -27,12 +27,12 @@ fun test_new_edit_flow() {
 
     assert!(character.body_type() == b"blazer".to_string());
     assert!(character.hair_type() == b"wind".to_string());
-    assert!(character.eyes_colour() == b"3e8948".to_string());
-    assert!(character.hair_colour() == b"2ce8f5".to_string());
-    assert!(character.trousers_colour() == b"181425".to_string());
-    assert!(character.skin_colour() == b"ff0044".to_string());
-    assert!(character.base_colour() == b"0099db".to_string());
-    assert!(character.accent_colour() == b"ead4aa".to_string());
+    assert!(character.eyes_color() == b"3e8948".to_string());
+    assert!(character.hair_color() == b"2ce8f5".to_string());
+    assert!(character.trousers_color() == b"181425".to_string());
+    assert!(character.skin_color() == b"ff0044".to_string());
+    assert!(character.base_color() == b"0099db".to_string());
+    assert!(character.accent_color() == b"ead4aa".to_string());
 
     builder.update_image(
         &mut character,
@@ -49,12 +49,12 @@ fun test_new_edit_flow() {
 
     assert!(character.body_type() == b"office".to_string());
     assert!(character.hair_type() == b"punk".to_string());
-    assert!(character.eyes_colour() == b"ead4aa".to_string());
-    assert!(character.hair_colour() == b"0099db".to_string());
-    assert!(character.trousers_colour() == b"ff0044".to_string());
-    assert!(character.skin_colour() == b"181425".to_string());
-    assert!(character.base_colour() == b"2ce8f5".to_string());
-    assert!(character.accent_colour() == b"3e8948".to_string());
+    assert!(character.eyes_color() == b"ead4aa".to_string());
+    assert!(character.hair_color() == b"0099db".to_string());
+    assert!(character.trousers_color() == b"ff0044".to_string());
+    assert!(character.skin_color() == b"181425".to_string());
+    assert!(character.base_color() == b"2ce8f5".to_string());
+    assert!(character.accent_color() == b"3e8948".to_string());
 
     builder.update_image(
         &mut character,
@@ -71,12 +71,12 @@ fun test_new_edit_flow() {
 
     assert!(character.body_type() == b"office".to_string());
     assert!(character.hair_type() == b"punk".to_string());
-    assert!(character.eyes_colour() == b"ead4aa".to_string());
-    assert!(character.hair_colour() == b"0099db".to_string());
-    assert!(character.trousers_colour() == b"ff0044".to_string());
-    assert!(character.skin_colour() == b"181425".to_string());
-    assert!(character.base_colour() == b"2ce8f5".to_string());
-    assert!(character.accent_colour() == b"3e8948".to_string());
+    assert!(character.eyes_color() == b"ead4aa".to_string());
+    assert!(character.hair_color() == b"0099db".to_string());
+    assert!(character.trousers_color() == b"ff0044".to_string());
+    assert!(character.skin_color() == b"181425".to_string());
+    assert!(character.base_color() == b"2ce8f5".to_string());
+    assert!(character.accent_color() == b"3e8948".to_string());
 
     test_utils::destroy(character);
     test_utils::destroy(builder);
