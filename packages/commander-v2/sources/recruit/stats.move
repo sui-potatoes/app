@@ -36,7 +36,7 @@ const ENotImplemented: u64 = 264;
 /// - spread
 /// - plus_one (extra damage)
 /// - crit_chance
-/// - is_dodgeable
+/// - can_be_dodged
 /// - area_size
 /// - env_damage
 /// - range
@@ -70,7 +70,7 @@ public fun default(): Stats { new(7, 65, 10, 0, 0) }
 /// Default stats for a Weapon.
 public fun default_weapon(): Stats {
     // reverse:
-    // 6-14 -> damage, spread, plus_one, crit_chance, is_dodgeable, area_size, env_damage, range, ammo
+    // 6-14 -> damage, spread, plus_one, crit_chance, can_be_dodged, area_size, env_damage, range, ammo
     Stats(0x03_04_00_01_01_00_00_02_04 << (6 * 8))
 }
 
@@ -109,8 +109,8 @@ public fun plus_one(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 8) }
 /// Get the `crit_chance` stat.
 public fun crit_chance(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 9) }
 
-/// Get the `is_dodgeable` stat.
-public fun is_dodgeable(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 10) }
+/// Get the `can_be_dodged` stat.
+public fun can_be_dodged(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 10) }
 
 /// Get the `area_size` stat.
 public fun area_size(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 11) }

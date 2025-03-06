@@ -8,7 +8,7 @@ use std::unit_test::assert_eq;
 use sui::{random, test_utils::destroy};
 
 #[test]
-fun playtest_demo_1() {
+fun play_test_demo_1() {
     assert_eq!(run_simulation_demo_1(b"demo_o1"), vector[5, 1]);
     assert_eq!(run_simulation_demo_1(b"demo_o2"), vector[4, 2]);
     assert_eq!(run_simulation_demo_1(b"demo_o3"), vector[3, 1]);
@@ -18,7 +18,7 @@ fun playtest_demo_1() {
 }
 
 #[test]
-fun playtest_demo_2() {
+fun play_test_demo_2() {
     let map = map::demo_2(@1.to_id());
     let mut out = b"\n".to_string();
     out.append(map.to_string());

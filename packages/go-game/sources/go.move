@@ -5,7 +5,7 @@
 /// that originated in China more than 2,500 years ago. The game is rich in
 /// strategy despite its simple rules. The game is played on a square grid of
 /// size 19x19, 13x13, or 9x9. Players take turns placing stones of their
-/// colour on the intersections of the grid. The goal is to surround territory
+/// color on the intersections of the grid. The goal is to surround territory
 /// and capture the opponent's stones. The game ends when both players pass
 /// consecutively, and the player with the most territory wins.
 ///
@@ -21,8 +21,8 @@ const ESuicideMove: u64 = 1;
 /// The move would violate the Ko rule (repeating the board state).
 const EKoRule: u64 = 2;
 
-/// A colour of a player or `Empty` when the field is not taken.
-public enum Colour has copy, drop, store {
+/// A color of a player or `Empty` when the field is not taken.
+public enum Color has copy, drop, store {
     Empty,
     Black,
     White,
@@ -38,10 +38,10 @@ public enum Turn has copy, drop, store {
 public struct Point(u8, u8) has copy, drop, store;
 
 /// A group of stones on the board. A group is a set of connected stones of
-/// the same colour. A group can be captured if all its liberties are taken.
-/// The first element is the colour of the group, the second element is the
+/// the same color. A group can be captured if all its liberties are taken.
+/// The first element is the color of the group, the second element is the
 /// set of points that make up the group.
-public struct Group(Colour, vector<Point>) has copy, drop, store;
+public struct Group(Color, vector<Point>) has copy, drop, store;
 
 /// The game board. The board is a square grid of size `size` by `size`.
 /// Normally, the board is 19x19, but casual games can be played on smaller
@@ -49,7 +49,7 @@ public struct Group(Colour, vector<Point>) has copy, drop, store;
 public struct Board has copy, drop, store {
     /// The board data. The board is a 2D vector of `u8` values. The values
     /// can be `EMPTY`, `BLACK`, or `WHITE`.
-    data: vector<vector<Colour>>,
+    data: vector<vector<Color>>,
     /// The size of the board. The board is a square grid of size `size` by
     /// `size`.
     size: u8,
@@ -65,12 +65,12 @@ public struct Board has copy, drop, store {
     /// - the score of the white player
     scores: vector<u64>,
     /// Stores the last two board states to check for the Ko rule.
-    ko_store: vector<vector<vector<Colour>>>,
+    ko_store: vector<vector<vector<Color>>>,
 }
 
 /// Create a new board.
 public fun new(size: u8): Board {
-    let row = vector::tabulate!(size as u64, |_| Colour::Empty);
+    let row = vector::tabulate!(size as u64, |_| Color::Empty);
     let data = vector::tabulate!(size as u64, |_| row);
 
     Board {
@@ -92,21 +92,21 @@ public fun place(board: &mut Board, x: u8, y: u8) {
 
     assert!(point.is_empty(), EInvalidMove); // #[can't on a non-empty field]
 
-    *point = board.turn.to_colour();
+    *point = board.turn.to_color();
     board.turn.switch();
     board.moves.push_back(Point(x, y));
 
-    let neighbours = neighbours(board.size, Point(x, y));
+    let neighbors = neighbors(board.size, Point(x, y));
     let mut opponent_stones = vector[];
     let mut score = 0;
 
-    // quick scan through the neighbours for the following reasons:
+    // quick scan through the neighbors for the following reasons:
     // 1. find enemy groups for the "sacrifice move"
     // 2. learn the state of the points around the put stone
-    neighbours.length().do!(|i| {
-        let stone = board[neighbours[i]];
-        if (stone != turn.to_colour() && !stone.is_empty()) {
-            opponent_stones.push_back(neighbours[i]);
+    neighbors.length().do!(|i| {
+        let stone = board[neighbors[i]];
+        if (stone != turn.to_color() && !stone.is_empty()) {
+            opponent_stones.push_back(neighbors[i]);
         };
     });
 
@@ -115,7 +115,7 @@ public fun place(board: &mut Board, x: u8, y: u8) {
         if (board[point].is_empty()) return; // already killed
         let group = board.get_group(point);
         if (board.is_group_surrounded(&group)) {
-            score = score + board.replace_group(group, Colour::Empty);
+            score = score + board.replace_group(group, Color::Empty);
         }
     });
 
@@ -130,7 +130,7 @@ public fun place(board: &mut Board, x: u8, y: u8) {
     };
 
     // update the score with taken stones
-    let idx = turn.to_colour().to_index();
+    let idx = turn.to_color().to_index();
     *&mut board.scores[idx] = board.scores[idx] + score;
 }
 
@@ -147,7 +147,7 @@ public fun get_group(board: &Board, point: Point): Group {
 }
 
 /// Removes the group from the field, returns the size of the group.
-public fun replace_group(board: &mut Board, group: Group, with: Colour): u64 {
+public fun replace_group(board: &mut Board, group: Group, with: Color): u64 {
     let Group(_, group) = group;
     let size = group.length();
     group.destroy!(|el| *board.get_mut(el) = with);
@@ -159,11 +159,11 @@ public fun is_group_surrounded(board: &Board, group: &Group): bool {
     let mut i = 0;
     let Group(_, group) = group;
     while (i < group.length()) {
-        let neighbours = neighbours(board.size, group[i]);
+        let neighbors = neighbors(board.size, group[i]);
         let mut j = 0;
-        while (j < neighbours.length()) {
-            let neighbour = neighbours[j];
-            if (board[neighbour].is_empty()) return false;
+        while (j < neighbors.length()) {
+            let neighbor = neighbors[j];
+            if (board[neighbor].is_empty()) return false;
             j = j + 1;
         };
         i = i + 1;
@@ -172,18 +172,18 @@ public fun is_group_surrounded(board: &Board, group: &Group): bool {
     true
 }
 
-/// Helper function to get the `Point` neighbours of a given point. Helps
-/// ignore out-of-bounds neighbours for points on the edge of the board.
-public fun neighbours(size: u8, p: Point): vector<Point> {
+/// Helper function to get the `Point` neighbors of a given point. Helps
+/// ignore out-of-bounds neighbors for points on the edge of the board.
+public fun neighbors(size: u8, p: Point): vector<Point> {
     let Point(x, y) = p;
-    let mut neighbours = vector[];
+    let mut neighbors = vector[];
 
-    if (x > 0) neighbours.push_back(Point(x - 1, y)); // left
-    if (y > 0) neighbours.push_back(Point(x, y - 1)); // top
-    if (x < size - 1) neighbours.push_back(Point(x + 1, y)); // right
-    if (y < size - 1) neighbours.push_back(Point(x, y + 1)); // bottom
+    if (x > 0) neighbors.push_back(Point(x - 1, y)); // left
+    if (y > 0) neighbors.push_back(Point(x, y - 1)); // top
+    if (x < size - 1) neighbors.push_back(Point(x + 1, y)); // right
+    if (y < size - 1) neighbors.push_back(Point(x, y + 1)); // bottom
 
-    neighbours
+    neighbors
 }
 
 /// Public accessor for the board size.
@@ -199,7 +199,7 @@ public fun moves(b: &Board): &vector<Point> { &b.moves }
 public fun scores(b: &Board): &vector<u64> { &b.scores }
 
 /// Public accessor for the board data.
-public fun data(b: &Board): &vector<vector<Colour>> { &b.data }
+public fun data(b: &Board): &vector<vector<Color>> { &b.data }
 
 /// Public accessor for the x coordinate of a point.
 public fun x(p: &Point): u8 { p.0 }
@@ -207,48 +207,48 @@ public fun x(p: &Point): u8 { p.0 }
 /// Public accessor for the y coordinate of a point.
 public fun y(p: &Point): u8 { p.1 }
 
-/// Convert a `u64` index to a `Colour`.
-public fun from_index(index: u64): Colour {
+/// Convert a `u64` index to a `Color`.
+public fun from_index(index: u64): Color {
     if (index == 0) {
-        Colour::Empty
+        Color::Empty
     } else if (index == 1) {
-        Colour::Black
+        Color::Black
     } else if (index == 2) {
-        Colour::White
+        Color::White
     } else {
         abort 0
     }
 }
 
-/// Convert a `Colour` to a `u64` index.
-public fun to_index(p: &Colour): u64 {
+/// Convert a `Color` to a `u64` index.
+public fun to_index(p: &Color): u64 {
     match (p) {
-        Colour::Empty => 0,
-        Colour::Black => 1,
-        Colour::White => 2,
+        Color::Empty => 0,
+        Color::Black => 1,
+        Color::White => 2,
     }
 }
 
 /// Is the field empty or taken?
-public fun is_empty(p: &Colour): bool {
+public fun is_empty(p: &Color): bool {
     match (p) {
-        Colour::Empty => true,
+        Color::Empty => true,
         _ => false,
     }
 }
 
-/// Is the Colour black?
-public fun is_black(p: &Colour): bool {
+/// Is the Color black?
+public fun is_black(p: &Color): bool {
     match (p) {
-        Colour::Black => true,
+        Color::Black => true,
         _ => false,
     }
 }
 
-/// Is the Colour white?
-public fun is_white(p: &Colour): bool {
+/// Is the Color white?
+public fun is_white(p: &Color): bool {
     match (p) {
-        Colour::White => true,
+        Color::White => true,
         _ => false,
     }
 }
@@ -261,38 +261,38 @@ public fun switch(turn: &mut Turn) {
     }
 }
 
-/// Convert the turn to a colour.
-public fun to_colour(turn: &Turn): Colour {
+/// Convert the turn to a color.
+public fun to_color(turn: &Turn): Color {
     match (turn) {
-        Turn::Black => Colour::Black,
-        Turn::White => Colour::White,
+        Turn::Black => Color::Black,
+        Turn::White => Color::White,
     }
 }
 
 #[syntax(index)]
-public fun get(b: &Board, p: Point): &Colour {
+public fun get(b: &Board, p: Point): &Color {
     let Point(x, y) = p;
     &b.data[x as u64][y as u64]
 }
 
 /// Mutable accessor for the board data.
-fun get_mut(b: &mut Board, p: Point): &mut Colour {
+fun get_mut(b: &mut Board, p: Point): &mut Color {
     let Point(x, y) = p;
     &mut b.data[x as u64][y as u64]
 }
 
 /// Internal function to get the group of stones that a point belongs to.
-/// Uses a depth-first search to find all connected stones of the same colour.
+/// Uses a depth-first search to find all connected stones of the same color.
 /// Returns a vector of points that make up the group.
 fun get_group_int(b: &Board, p: Point, visited: &mut vector<Point>) {
     let mut stack = vector[];
-    let colour = b[p];
+    let color = b[p];
 
-    neighbours(b.size, p).destroy!(|neighbour| {
-        if (visited.contains(&neighbour)) return;
-        if (b[neighbour] == colour) {
-            visited.push_back(neighbour);
-            stack.push_back(neighbour);
+    neighbors(b.size, p).destroy!(|neighbor| {
+        if (visited.contains(&neighbor)) return;
+        if (b[neighbor] == color) {
+            visited.push_back(neighbor);
+            stack.push_back(neighbor);
         };
     });
 

@@ -21,7 +21,7 @@ fun test_invalid_move_fail() {
 }
 
 #[test, expected_failure(abort_code = go::EKoRule)]
-/// Scenario: symmetrical figure, p1 strikes, p2 attemps to strike back
+/// Scenario: symmetrical figure, p1 strikes, p2 attempts to strike back
 fun test_ko_rule_fail() {
     let mut board = go::from_vector(vector[
         vector[2, 0, 0, 0],
