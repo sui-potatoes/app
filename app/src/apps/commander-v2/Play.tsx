@@ -5,7 +5,6 @@ import * as THREE from "three";
 import JEASINGS from "jeasings";
 import { Stats } from "@react-three/drei";
 import { Loader } from "./Loader";
-import { NavLink } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -34,6 +33,8 @@ import { useGameRecruits } from "./hooks/useGameRecruits";
 import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 import { useNetworkVariable } from "../../networkConfig";
 import { useNameGenerator } from "./hooks/useNameGenerator";
+import { Footer } from "./Footer";
+import { NavLink } from "react-router-dom";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
@@ -219,40 +220,47 @@ export function Playground() {
         </div>
     );
 
-    if (isFetching || isExecuting && !map) return <Loader />;
+    if (isFetching || (isExecuting && !map)) return <Loader />;
     if (isFetched && !map) return centerDiv("Map not found");
     if (!modelsLoaded) return centerDiv("Models not loaded");
     if (!map)
-        return centerDiv(
-            <div className="block text-md" style={{ fontSize: "16px" }}>
-                <button
-                    className="block"
-                    onClick={() =>
-                        createDemo(1, [
-                            [0, 3],
-                            [6, 5],
-                        ])
-                    }
-                >
-                    create demo 1
-                </button>
-                <button
-                    className="block"
-                    onClick={() =>
-                        createDemo(2, [
-                            [8, 2],
-                            [7, 6],
-                            [1, 2],
-                            [1, 7],
-                        ])
-                    }
-                >
-                    create demo 2
-                </button>
-                <NavLink className="menu-control mt-10" to="/commander">
-                    Back
-                </NavLink>
-            </div>,
+        return (
+            <div className="flex justify-between align-middle h-screen flex-col w-full">
+                <div className="text-left text-uppercase text-lg p-10 max-w-xl">
+                    <h1 className="block p-1 mb-10 uppercase white page-heading">play</h1>
+                </div>
+                <div className="p-10 uppercase text-lg rounded max-w-3xl">
+                    <a
+                        className="options-row hover:cursor-pointer hover:no-underline"
+                        onClick={() =>
+                            createDemo(1, [
+                                [0, 3],
+                                [6, 5],
+                            ])
+                        }
+                    >
+                        Create demo 1
+                    </a>
+                    <a
+                        className="options-row hover:cursor-pointer hover:no-underline"
+                        style={{ border: "1px solid grey" }}
+                        onClick={() =>
+                            createDemo(2, [
+                                [8, 2],
+                                [7, 6],
+                                [1, 2],
+                                [1, 7],
+                            ])
+                        }
+                    >
+                        Create demo 2
+                    </a>
+                    <NavLink to="../editor" className="options-row mt-10 uppercase hover:no-underline">
+                        Level Editor
+                    </NavLink>
+                </div>
+                <Footer />
+            </div>
         );
 
     return (
@@ -602,7 +610,8 @@ export function UI({
         });
     }, []);
 
-    const reloadText = unit && "Reload " + unit.props.ammo.value + "/" + unit.props.ammo.max_value || "Reload";
+    const reloadText =
+        (unit && "Reload " + unit.props.ammo.value + "/" + unit.props.ammo.max_value) || "Reload";
 
     return (
         <div id="ui">

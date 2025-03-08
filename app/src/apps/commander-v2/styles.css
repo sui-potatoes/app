@@ -17,11 +17,20 @@ SPDX-License-Identifier: MIT
     font-family: monospace;
     z-index: 1;
     /* background: black; */
-    background-image: url('/images/background.png');
+    /* background-image: url('/images/bg-9.webp'); */
+    background-image: url('/images/bg-hr-1.png');
+    background-position: center;
+    background-color: black;
+    background-size: cover;
+    background-repeat: no-repeat;
     width: 100%;
     height: 100%;
     top: 0;
     left: 0;
+}
+
+#commander-v2 * {
+    color: white !important;
 }
 
 #menu-scene {
@@ -120,7 +129,7 @@ SPDX-License-Identifier: MIT
     padding: 10px;
     text-align: center;
     text-transform: uppercase;
-    font-size: 16px;
+    /* font-size: 16px; */
     color: white;
     cursor: pointer;
 }
@@ -169,4 +178,90 @@ SPDX-License-Identifier: MIT
     cursor: not-allowed;
     text-decoration: none;
     pointer-events: none;
+}
+
+/* === Navigation === */
+
+:root {
+    --l-pad: 20px;
+    --line-color: grey;
+}
+
+.main-menu-button {
+    display: block;
+    text-transform: uppercase;
+    border: 0.01em solid var(--line-color);
+    margin-bottom: 10px;
+    padding: 10px var(--l-pad);
+}
+
+.page-heading {
+    border-left: 0.01em solid var(--line-color);
+    padding-left: var(--l-pad);
+}
+
+.back-button {
+    border-left: 0.01em solid var(--line-color);
+    padding-left: var(--l-pad);
+}
+
+.card {
+    /* one of the images is 300px wide, all of them are square */
+    max-width: 300px;
+    margin: 0 30px;
+    padding: 100px 50px;
+    width: auto;
+}
+
+.card img {
+    width: 150px;
+    margin-bottom: 20px;
+}
+
+.card:hover {
+    cursor: pointer;
+    text-decoration: none;
+    /* border: 1px solid white; */
+    box-shadow: 0px 2px 3px 2px white;
+}
+
+/* === Options === */
+
+.options-row:last-child {
+    border-bottom: 0.01em solid var(--line-color);
+}
+
+.options-row {
+    text-transform: uppercase;
+    border: 0.01em solid var(--line-color);
+    border-bottom: none;
+    padding: 10px var(--l-pad);
+    display: flex;
+    justify-content: space-between;
+}
+
+.options-row:hover {
+    box-shadow: 0px 0px 3px 2px white;
+}
+
+.options-row:hover a {
+    text-decoration: none;
+}
+
+/* === Inputs === */
+
+.yes-no {
+    border: 1px solid grey;
+    padding: 0px 30px;
+    margin-left: 10px;
+}
+
+.yes-no:hover {
+    box-shadow: 0px 0px 1px 1px white;
+    cursor: pointer;
+}
+
+.yes-no.selected {
+    /* font-weight: bold; */
+    box-shadow: 0px 0px 3px 3px white;
 }
