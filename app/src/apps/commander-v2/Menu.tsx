@@ -3,17 +3,18 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { NavLink } from "react-router-dom";
-import { GOBACK_KEY } from "../../App";
+import { GO_BACK_KEY } from "../../App";
 import { useEffect } from "react";
+import { Footer } from "./Footer";
 
 export function Menu() {
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
     const disabled = !zkLogin.address;
-    const className = disabled ? "menu-control disabled" : "menu-control";
+    const className = disabled ? "main-menu-button disabled" : "main-menu-button";
 
     useEffect(() => {
         createMenuScene("menu-scene");
@@ -22,47 +23,49 @@ export function Menu() {
     return (
         <>
             <div id="menu-scene"></div>
-            <div className="flex justify-center align-middle h-screen flex-col">
-                {disabled && (
-                    <div
-                        className="menu-control"
-                        onClick={async () => {
-                            localStorage.setItem(GOBACK_KEY, window.location.href);
+            <div className="flex justify-between align-middle h-screen flex-col w-full">
+                <div className="text-left text-uppercase text-lg p-10 max-w-xl">
+                    <h1 className="block p-1 mb-10 uppercase white page-heading">&nbsp;</h1>
+                </div>
+                <div className="text-left text-uppercase text-lg rounded p-10 max-w-md">
+                    <div className="">
+                        {disabled && (
+                            <div
+                                className="main-menu-button"
+                                onClick={async () => {
+                                    localStorage.setItem(GO_BACK_KEY, window.location.href);
 
-                            // Refresh the page to go back to the root path, this is a
-                            // workaround for the issue where google auth doesn't work
-                            // when the app is hosted on a subpath.
-                            history.pushState({}, "", "/");
-                            window.location.href = await flow.createAuthorizationURL({
-                                provider: "google",
-                                clientId:
-                                    "591411088609-6kbt6b07a6np6mq2mnlq97i150amussh.apps.googleusercontent.com",
-                                redirectUrl: window.location.href.split("#")[0],
-                                network: "testnet",
-                            });
-                        }}
-                    >
-                        Sign in to play
+                                    // Refresh the page to go back to the root path, this is a
+                                    // workaround for the issue where google auth doesn't work
+                                    // when the app is hosted on a subpath.
+                                    history.pushState({}, "", "/");
+                                    window.location.href = await flow.createAuthorizationURL({
+                                        provider: "google",
+                                        clientId:
+                                            "591411088609-6kbt6b07a6np6mq2mnlq97i150amussh.apps.googleusercontent.com",
+                                        redirectUrl: window.location.href.split("#")[0],
+                                        network: "testnet",
+                                    });
+                                }}
+                            >
+                                Sign in to play
+                            </div>
+                        )}
+                        <NavLink to="play" className={className}>
+                            Play
+                        </NavLink>
+                        <NavLink to="headquaters" className={className}>
+                            Headquaters
+                        </NavLink>
+                        <NavLink to="options" className={className}>
+                            Options
+                        </NavLink>
                     </div>
-                )}
-                <NavLink to="playground" className={className}>
-                    Playground
-                </NavLink>
-                <NavLink to="crew" className={className}>
-                    My Crew
-                </NavLink>
-                <NavLink to="inventory" className={className}>
-                    Inventory
-                </NavLink>
-                <NavLink to="editor" className={className}>
-                    Level Editor
-                </NavLink>
-                <NavLink to="settings" className={className}>
-                    Settings
-                </NavLink>
-                <NavLink to="/" className="menu-control">
-                    Exit Game
-                </NavLink>
+                </div>
+                <Footer to="/" text="Exit Game" />
+                <div className="fixed bottom-0 right-0 text-sm p-10">
+                    Version: 0.0.5-big-round-head
+                </div>
             </div>
         </>
     );
@@ -79,23 +82,23 @@ export async function createMenuScene(element: string) {
         return;
     }
 
-    const witdh = window.innerWidth;
+    const width = window.innerWidth;
     const height = window.innerHeight;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(witdh, height);
+    renderer.setSize(width, height);
     renderer.setPixelRatio(window.devicePixelRatio);
     root.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
 
-    const texture = new THREE.TextureLoader().load("images/background.png");
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
+    // const texture = new THREE.TextureLoader().load("images/bg-3.webp");
+    // texture.wrapS = THREE.RepeatWrapping;
+    // texture.wrapT = THREE.RepeatWrapping;
     // texture.repeat.set( 4, 4 );
-    scene.background = texture;
+    // scene.background = texture;
 
-    const camera = new THREE.PerspectiveCamera(75, witdh / height, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100);
 
     camera.position.z = -1;
     camera.position.y = 2;
@@ -103,10 +106,10 @@ export async function createMenuScene(element: string) {
     camera.lookAt(0, 1, 0);
 
     window.addEventListener("resize", () => {
-        const witdh = window.innerWidth;
+        const width = window.innerWidth;
         const height = window.innerHeight;
-        renderer.setSize(witdh, height);
-        camera.aspect = witdh / height;
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
         camera.updateProjectionMatrix();
     });
 
@@ -134,7 +137,7 @@ export async function createMenuScene(element: string) {
         light.shadow.camera.near = 0.5; // default
         light.shadow.camera.far = 500; // default
         scene.add(light);
-    };
+    }
 
     // directional light from below
     {
@@ -143,7 +146,7 @@ export async function createMenuScene(element: string) {
         light.target.position.set(0, 1, 0);
         light.castShadow = true;
         scene.add(light);
-    };
+    }
 
     // directional light from below and behind
     {
@@ -152,7 +155,7 @@ export async function createMenuScene(element: string) {
         light.target.position.set(0, 1, 0);
         light.castShadow = true;
         scene.add(light);
-    };
+    }
 
     // scene.fog = new THREE.Fog(0x111111, 1, 10);
     // const ambientLight = new THREE.AmbientLight(0x404040);
@@ -169,7 +172,7 @@ export async function createMenuScene(element: string) {
         model.receiveShadow = false;
         action.setLoop(THREE.LoopRepeat, 1000);
         action.play();
-    };
+    }
 
     // place first unit
     model.position.set(0.5, 0, 0.5);
@@ -189,7 +192,7 @@ export async function createMenuScene(element: string) {
         model.castShadow = true;
         action.setLoop(THREE.LoopRepeat, 1000);
         action.play();
-    };
+    }
 
     // third unit
     const third = clone(model);
@@ -205,7 +208,7 @@ export async function createMenuScene(element: string) {
         model.castShadow = true;
         action.setLoop(THREE.LoopRepeat, 10000);
         action.play();
-    };
+    }
 
     function animate() {
         renderer.render(scene, camera);

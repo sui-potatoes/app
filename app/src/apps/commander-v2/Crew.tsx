@@ -12,6 +12,7 @@ import { normalizeSuiAddress } from "@mysten/sui/utils";
 import { useNameGenerator } from "./hooks/useNameGenerator";
 import { SuiObjectRef } from "@mysten/sui/client";
 import { Loader } from "./Loader";
+import { Footer } from "./Footer";
 
 export function Crew() {
     const flow = useEnokiFlow();
@@ -38,8 +39,14 @@ export function Crew() {
     const numRecruits = recruits?.length || 0;
 
     return (
-        <div className="flex flex-col justify-center h-full">
-            <h1 className="text-center">MY CREW ({numRecruits} / 3)</h1>
+        <div className="flex justify-between align-middle h-screen flex-col w-full">
+            <div className="text-left text-uppercase text-lg p-10 max-w-xl">
+                <h1 className="block p-1 mb-10 uppercase white page-heading">
+                    <NavLink to="../headquaters">HEADQUATERS</NavLink> / CREW
+                </h1>
+            </div>
+        {/* <div className="flex flex-col justify-center h-full">
+            <h1 className="text-center">MY CREW ({numRecruits} / 3)</h1> */}
             <div className="flex justify-center align-middle">
                 {(isFetching || isExecuting) && <Loader />}
                 {!isRefetching &&
@@ -102,11 +109,7 @@ export function Crew() {
                         </div>
                     ))}
             </div>
-            <div className="flex justify-center">
-                <NavLink to="/commander" className="menu-control">
-                    Back
-                </NavLink>
-            </div>
+            <Footer to="../headquaters" />
         </div>
     );
 

@@ -6,6 +6,7 @@ import { Camera, Game, loadModels, EditMode, Controls, EventBus } from "./engine
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
 import { fromHex } from "@mysten/bcs";
+import { Footer } from "./Footer";
 import { NavLink } from "react-router-dom";
 
 const STORAGE_KEY = "editor-state";
@@ -105,15 +106,19 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
                     Tool: {tool}; Direction: {direction}
                 </p>
             </div>
-            <div
-                id="panel-bottom"
-                className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10"
-            >
-                <p className="text-sm text-white">Click to place objects; right-click to remove</p>
-                <p className="text-sm text-white">Use WSAD keys to change direction</p>
-                <p className="text-sm text-white">
-                    C - Cover; H - High Cover; O - Object; U - Unwalkable
-                </p>
+            <div id="panel-bottom" className="fixed w-full text-xs bottom-0 left-0 p-0 text-center">
+                <div className="absolute" style={{ bottom: "0px" }}>
+                    <Footer to="../play" />
+                </div>
+                <div className="mb-10">
+                    <p className="text-sm text-white">
+                        Click to place objects; right-click to remove
+                    </p>
+                    <p className="text-sm text-white">Use WSAD keys to change direction</p>
+                    <p className="text-sm text-white">
+                        C - Cover; H - High Cover; O - Object; U - Unwalkable
+                    </p>
+                </div>
             </div>
         </div>
     );
@@ -138,19 +143,43 @@ export function SelectSize({
     };
 
     return (
-        <div className="flex justify-center align-middle h-screen flex-col text-center">
-            <div className="bg-black bg-opacity-70 p-5 text-md rounded">
-            <h1 className="block p-1 mb-10 text-center text-lg uppercase white">Level Editor</h1>
-            {preset && <button onClick={() => setSize(size)}>Continue with preset</button>}
-            {preset && <p className="my-10">Or select a new size:</p>}
-            {!preset && <p className="my-10">Select size:</p>}
-            <p><button onClick={() => startOver(10)}>Small (10x10)</button></p>
-            <p><button onClick={() => startOver(15)}>Medium (20x20)</button></p>
-            <p><button onClick={() => startOver(30)}>Large (30x30)</button></p>
-            <NavLink to="/commander" className="menu-control mt-10">
-                Back
-            </NavLink>
+        <div className="flex justify-between align-middle h-screen flex-col w-full">
+            <div className="text-left text-uppercase text-lg p-10 max-w-xl">
+                <h1 className="block p-1 mb-10 uppercase white page-heading">
+                    <NavLink to="../play">PLAY</NavLink> / editor
+                </h1>
             </div>
+            <div className="p-10 text-uppercase text-lg rounded max-w-3xl">
+                {/* continue the preset if there is one */}
+                {preset && (
+                    <button
+                        className="options-row uppercase hover:no-underline mb-10 w-full"
+                        style={{ border: "0.01em solid grey" }}
+                        onClick={() => setSize(size)}
+                    >
+                        Continue with preset
+                    </button>
+                )}
+                <button
+                    className="options-row w-full hover:no-underline"
+                    onClick={() => startOver(10)}
+                >
+                    SMALL (10x10)
+                </button>
+                <button
+                    className="options-row w-full hover:no-underline"
+                    onClick={() => startOver(15)}
+                >
+                    MEDIUM (20x20)
+                </button>
+                <button
+                    className="options-row w-full hover:no-underline"
+                    onClick={() => startOver(30)}
+                >
+                    LARGE (30x30)
+                </button>
+            </div>
+            <Footer to="../play" />
         </div>
     );
 }

@@ -10,7 +10,7 @@ import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
 import { models } from "./models";
 import { EventBus } from "./EventBus";
-import { AttackEvent } from "../Playground";
+import { AttackEvent } from "../Play";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }

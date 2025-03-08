@@ -15,7 +15,7 @@ import { normalizeSuiAddress, normalizeStructTag, SUI_TYPE_ARG } from "@mysten/s
 import { requestSuiFromFaucetV1, getFaucetHost } from "@mysten/sui/faucet";
 import { Toaster } from "react-hot-toast";
 
-export const GOBACK_KEY = "go_back";
+export const GO_BACK_KEY = "go_back";
 
 export function App() {
     const flow = useEnokiFlow();
@@ -27,11 +27,11 @@ export function App() {
         if (window.location.hash)
             flow.handleAuthCallback().then(() => {
                 // @ts-ignore
-                window.location = localStorage.getItem(GOBACK_KEY)
-                    ? localStorage.getItem(GOBACK_KEY)
+                window.location = localStorage.getItem(GO_BACK_KEY)
+                    ? localStorage.getItem(GO_BACK_KEY)
                     : window.location.href.split("#")[0];
 
-                localStorage.removeItem(GOBACK_KEY);
+                localStorage.removeItem(GO_BACK_KEY);
             });
     }, []);
 
@@ -61,7 +61,7 @@ export function App() {
                             <button
                                 className="connect"
                                 onClick={async () => {
-                                    localStorage.setItem(GOBACK_KEY, window.location.href);
+                                    localStorage.setItem(GO_BACK_KEY, window.location.href);
 
                                     // Refresh the page to go back to the root path, this is a
                                     // workaround for the issue where google auth doesn't work
