@@ -47,14 +47,14 @@ public fun y(p: &Point): u16 { p.1 }
 /// ```
 public fun range(p1: &Point, p2: &Point): u16 { p1.0.diff(p2.0) + p1.0.diff(p2.0) }
 
-/// Get all von Neumann neighbours of a point within a given range. Von Neumann
-/// neighbourhood is a set of points that are adjacent to the given point. In 2D
+/// Get all von Neumann neighbors of a point within a given range. Von Neumann
+/// neighborhood is a set of points that are adjacent to the given point. In 2D
 /// space, it's the point to the left, right, up, and down from the given point.
 ///
-/// The `size` parameter determines the range of the neighbourhood. For example,
-/// if `size` is 1, the function will return the immediate neighbours of the
-/// point. If `size` is 2, the function will return the neighbours of the
-/// neighbours, and so on.
+/// The `size` parameter determines the range of the neighborhood. For example,
+/// if `size` is 1, the function will return the immediate neighbors of the
+/// point. If `size` is 2, the function will return the neighbors of the
+/// neighbors, and so on.
 ///
 /// Note: does not include the point itself!
 /// ```
@@ -68,27 +68,27 @@ public fun range(p1: &Point, p2: &Point): u16 { p1.0.diff(p2.0) + p1.0.diff(p2.0
 public fun von_neumann(p: &Point, size: u16): vector<Point> {
     if (size == 0) return vector[];
 
-    let mut neighbours = vector[];
+    let mut neighbors = vector[];
     let Point(x, y) = *p;
 
     size.do!(|i| {
         let i = i + 1;
-        neighbours.push_back(Point(x + i, y));
-        neighbours.push_back(Point(x, y + i));
-        if (x >= i) neighbours.push_back(Point(x - i, y));
-        if (y >= i) neighbours.push_back(Point(x, y - i));
+        neighbors.push_back(Point(x + i, y));
+        neighbors.push_back(Point(x, y + i));
+        if (x >= i) neighbors.push_back(Point(x - i, y));
+        if (y >= i) neighbors.push_back(Point(x, y - i));
 
         // add diagonals if i > 1
         if (i > 1) {
             let i = i - 1;
-            neighbours.push_back(Point(x + i, y + i));
-            if (x >= i) neighbours.push_back(Point(x - i, y + i));
-            if (y >= i) neighbours.push_back(Point(x + i, y - i));
-            if (x >= i && y >= i) neighbours.push_back(Point(x - i, y - i));
+            neighbors.push_back(Point(x + i, y + i));
+            if (x >= i) neighbors.push_back(Point(x - i, y + i));
+            if (y >= i) neighbors.push_back(Point(x + i, y - i));
+            if (x >= i && y >= i) neighbors.push_back(Point(x - i, y - i));
         }
     });
 
-    neighbours
+    neighbors
 }
 
 // === Convenience & Compatibility ===
@@ -116,7 +116,7 @@ public fun to_string(p: &Point): String {
 }
 
 #[allow(unused_function)]
-/// Get all Moore neighbours of a point. Moore neighbourhood is a set of points
+/// Get all Moore neighbors of a point. Moore neighborhood is a set of points
 /// that are adjacent to the given point. In 2D space, it's the point to the
 /// left, right, up, down, and diagonals from the given point.
 ///

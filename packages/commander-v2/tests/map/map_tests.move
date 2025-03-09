@@ -20,7 +20,7 @@ fun demo_maps() {
         ]),
     ); // hop over low cover
     assert!(demo_1.check_path(vector[vector[6, 5], /* up */ vector[5, 5]])); // also low cover
-    assert!(!demo_1.check_path(vector[vector[0, 0], vector[1, 0]])); // unwalkable tile
+    assert!(!demo_1.check_path(vector[vector[0, 0], vector[1, 0]])); // un-walkable tile
     assert!(
         !demo_1.check_path(vector[
             /* start */ vector[0, 3],

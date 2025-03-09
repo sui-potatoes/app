@@ -25,7 +25,7 @@ export type Stats = {
     spread: number;
     plus_one: number;
     crit_chance: number;
-    is_dodgeable: boolean;
+    can_be_dodged: boolean;
     area_size: number;
     env_damage: boolean;
     range: number;
@@ -50,7 +50,7 @@ export const Stats = bcs.u128().transform({
             spread: Number((stats >> 56n) & 0xffn),
             plus_one: Number((stats >> 64n) & 0xffn),
             crit_chance: Number((stats >> 72n) & 0xffn),
-            is_dodgeable: Number((stats >> 80n) & 0xffn) == 1,
+            can_be_dodged: Number((stats >> 80n) & 0xffn) == 1,
             area_size: Number((stats >> 88n) & 0xffn),
             env_damage: Number((stats >> 96n) & 0xffn) == 1,
             range: Number((stats >> 104n) & 0xffn),

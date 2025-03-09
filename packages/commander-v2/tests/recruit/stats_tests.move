@@ -46,7 +46,7 @@ fun test_defaults() {
     assert_eq!(stats.spread(), 0);
     assert_eq!(stats.plus_one(), 0);
     assert_eq!(stats.crit_chance(), 0);
-    assert_eq!(stats.is_dodgeable(), 0);
+    assert_eq!(stats.can_be_dodged(), 0);
     assert_eq!(stats.area_size(), 0);
     assert_eq!(stats.env_damage(), 0);
     assert_eq!(stats.range(), 0);
@@ -58,7 +58,7 @@ fun test_defaults() {
     assert_eq!(weapon_stats.spread(), 2);
     assert_eq!(weapon_stats.plus_one(), 0);
     assert_eq!(weapon_stats.crit_chance(), 0);
-    assert_eq!(weapon_stats.is_dodgeable(), 1);
+    assert_eq!(weapon_stats.can_be_dodged(), 1);
     assert_eq!(weapon_stats.area_size(), 1);
     assert_eq!(weapon_stats.env_damage(), 0);
     assert_eq!(weapon_stats.range(), 4);
