@@ -39,7 +39,7 @@ export const Stats = bcs.u128().transform({
     },
     output(stats: string | bigint): Stats {
         stats = BigInt(stats);
-        return {
+        const asObject: { [key: string]: number | boolean } = {
             mobility: Number(stats & 0xffn),
             aim: Number((stats >> 8n) & 0xffn),
             health: Number((stats >> 16n) & 0xffn),
@@ -57,6 +57,15 @@ export const Stats = bcs.u128().transform({
             ammo: Number((stats >> 112n) & 0xffn),
             _: Number((stats >> 120n) & 0xffn),
         };
+
+        // additionally process i8 values encoded in the stats
+        for (let key in asObject) {
+            if (typeof asObject[key] == "number" && asObject[key] > 128) {
+                asObject[key] = 128 - asObject[key];
+            }
+        }
+
+        return asObject as Stats;
     },
 });
 

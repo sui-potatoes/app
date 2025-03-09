@@ -12,6 +12,8 @@ type Props = {
     enabled: boolean;
 };
 
+export type Recruit = typeof Recruit.$inferType & SuiObjectRef;
+
 /**
  * Hook to create a transaction executor
  */

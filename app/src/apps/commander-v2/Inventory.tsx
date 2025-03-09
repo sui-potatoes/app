@@ -10,7 +10,7 @@ import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 import { fromBase64 } from "@mysten/bcs";
 import { Armor, Stats, Weapon } from "./types/bcs";
 import { SuiObjectRef } from "@mysten/sui/client";
-import { Loader } from "./Loader";
+import { Loader } from "./Components";
 
 export function Inventory() {
     const flow = useEnokiFlow();

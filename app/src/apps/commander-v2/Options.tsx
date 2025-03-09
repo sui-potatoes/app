@@ -5,8 +5,8 @@ import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useZkLogin } from "@mysten/enoki/react";
 import { NavLink } from "react-router-dom";
 import { formatAddress } from "@mysten/sui/utils";
-import { Footer } from "./Footer";
 import { useState } from "react";
+import { YesOrNo, Footer } from "./Components";
 
 /**
  * Page that stores the options of the user.
@@ -24,11 +24,10 @@ import { useState } from "react";
 export function Options() {
     const zkLogin = useZkLogin();
     const [optModels, setOptModels] = useState(false);
+    // const [suinsModal, setSuinsModal] = useState(false);
     const { data: balanceQuery, isPending } = useSuiClientQuery(
         "getBalance",
-        {
-            owner: zkLogin.address!,
-        },
+        { owner: zkLogin.address! },
         { enabled: !!zkLogin.address },
     );
 
@@ -76,33 +75,20 @@ export function Options() {
                     </p>
                 </div>
                 <div className="options-row">
+                    <label>NAME</label>
+                    <div className="flex">
+                        <div className="yes-no">SET</div>
+                    </div>
+                    {/* <div className="flex">
+                        <TextInput value={optModels} onChange={() => {}} />
+                    </div> */}
+                </div>
+                <div className="options-row">
                     <label>OPTIMIZE MODELS</label>
                     <YesOrNo value={optModels} onChange={setOptModels} />
-                    {/* <div>
-                        <input type="checkbox" />
-                    </div> */}
                 </div>
             </div>
             <Footer></Footer>
-        </div>
-    );
-}
-
-function YesOrNo({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
-    return (
-        <div className="flex justify-between">
-            <div
-                className={"yes-no" + (value ? ' selected' : '')}
-                onClick={() => !value && onChange(true)}
-            >
-                YES
-            </div>
-            <div
-                className={"yes-no" + (!value ? ' selected' : '')}
-                onClick={() => value && onChange(false)}
-            >
-                NO
-            </div>
         </div>
     );
 }
