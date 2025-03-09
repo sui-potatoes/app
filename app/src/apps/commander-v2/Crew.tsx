@@ -6,23 +6,25 @@ import { Transaction } from "@mysten/sui/transactions";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useNetworkVariable } from "../../networkConfig";
 import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
-import { useRecruits } from "./hooks/useRecruits";
+import { useRecruits, Recruit } from "./hooks/useRecruits";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
 import { useNameGenerator } from "./hooks/useNameGenerator";
 import { SuiObjectRef } from "@mysten/sui/client";
-import { Loader } from "./Loader";
-import { Footer } from "./Footer";
+import { Footer } from "./Components";
+import { useState } from "react";
+import { Slider } from "./Components";
 
 export function Crew() {
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
     const client = useSuiClient();
+    const [selected, setSelected] = useState<Recruit | undefined>();
     const packageId = useNetworkVariable("commanderV2PackageId");
     const {
         data: recruits,
-        isRefetching,
-        isFetching,
+        // isRefetching,
+        // isFetching,
         refetch,
     } = useRecruits({ owner: zkLogin.address!, enabled: !!zkLogin.address });
     const { executeTransaction, isExecuting } = useTransactionExecutor({
@@ -36,78 +38,145 @@ export function Crew() {
         return "no zkLogin address";
     }
 
-    const numRecruits = recruits?.length || 0;
-
     return (
         <div className="flex justify-between align-middle h-screen flex-col w-full">
-            <div className="text-left text-uppercase text-lg p-10 max-w-xl">
+            <div className="text-left text-uppercase text-lg p-10">
                 <h1 className="block p-1 mb-10 uppercase white page-heading">
                     <NavLink to="../headquaters">HEADQUATERS</NavLink> / CREW
                 </h1>
-            </div>
-        {/* <div className="flex flex-col justify-center h-full">
-            <h1 className="text-center">MY CREW ({numRecruits} / 3)</h1> */}
-            <div className="flex justify-center align-middle">
-                {(isFetching || isExecuting) && <Loader />}
-                {!isRefetching &&
-                    recruits &&
-                    recruits.concat(blanks(3 - numRecruits)).map((recruit) => (
-                        <div
-                            key={recruit.id}
-                            className="col col-3 align-middle w-60 p-4 m-4 rounded"
-                        >
-                            {recruit.metadata.name == "Blank" ? (
-                                <>
-                                    <p
-                                        title="Hire a new recruit"
-                                        className="text-center recruit-blank"
-                                        onClick={() => hireRecruit()}
+                <div className="flex justify-start">
+                    <div className="text-uppercase text-lg w-96 rounded max-w-md hover:cursor-pointer h-500">
+                        <div>
+                            {recruits?.map((r) => {
+                                return (
+                                    <div
+                                        key={r.objectId}
+                                        className={
+                                            "options-row " +
+                                            (selected?.objectId == r.objectId ? "selected" : "")
+                                        }
+                                        onClick={() => setSelected(r)}
                                     >
-                                        +
-                                    </p>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="image-card">
-                                        <img src="/images/recruit.webp" alt="recruit" />
-                                        <div className="card-image-overlay">
-                                            <h2 className="text-center">
-                                                {recruit.metadata.name} | {recruit.rank.$kind}
-                                            </h2>
-                                        </div>
-                                        <div
-                                            title="Dismiss recruit"
-                                            className="card-dismiss-cross"
-                                            onClick={() => dismissRecruit(recruit)}
-                                        >
-                                            &#10005;
-                                        </div>
+                                        <div>{r.metadata.name}</div>
+                                        <div>({r.rank.$kind})</div>
                                     </div>
-                                    {/* <p className="text-center mt-3">{recruit.metadata.backstory}</p>
-                                    <p className="text-center italic">
-                                        Unlock full backstory by completing missions
-                                    </p> */}
-                                    <br />
-                                    {/* <div className="flex justify-between">
-                                        <p>Aim: {recruit.stats.aim}</p>
-                                        <p>Health: {recruit.stats.health}</p>
-                                        <p>Mobility: {recruit.stats.mobility}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p>Dodge: {recruit.stats.dodge}</p>
-                                    </div>
-                                    <hr className="my-4" />
-                                    <div className="flex">
-                                        <p>Weapon: {recruit.weapon?.name || "Automatic Rifle"}</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p>Damage: {recruit.weapon?.stats.damage || 5}</p>
-                                        <p>Crit Chance: {recruit.weapon?.stats.damage || 0}</p>
-                                    </div> */}
-                                </>
-                            )}
+                                );
+                            })}
                         </div>
-                    ))}
+                        <div
+                            key="new-recruit"
+                            className={`options-row text-center ${(recruits?.length || 0) > 1 ? "mt-10" : ""}`}
+                            onClick={hireRecruit}
+                        >
+                            <div>NEW HIRE</div>
+                            <div>+</div>
+                        </div>
+                    </div>
+                    {selected && (
+                        <div className="size-max ml-10 text-lg max-w-3xl">
+                            <div className="mb-10">
+                                <h2 className="mb-2">BACKSTORY</h2>
+                                <p>
+                                    {selected.metadata.backstory == "Story locked"
+                                        ? "Get more experience to unlock character backstory and traits."
+                                        : selected.metadata.backstory}
+                                </p>
+                            </div>
+                            <div>
+                                <h2 className="mb-2">STATS</h2>
+                                <div
+                                    className="options-row"
+                                    title="Rank is based on experience the unit has and progresses"
+                                >
+                                    <label>RANK</label>
+                                    <p>{selected.rank.$kind}</p>
+                                </div>
+                                <div
+                                    className="options-row"
+                                    title="Change of hitting the target at effective range"
+                                >
+                                    <label>AIM</label>
+                                    <div className="ml-24">
+                                        <Slider value={selected.stats.aim} maxValue={100} />
+                                    </div>
+                                </div>
+                                <div
+                                    className="options-row"
+                                    title="Number of health points a recruit has"
+                                >
+                                    <label>HEALTH</label>
+                                    <div className="ml-24">
+                                        <Slider value={selected.stats.health} maxValue={20} />
+                                    </div>
+                                </div>
+                                <div
+                                    className="options-row"
+                                    title="How many tiles Unit can move in a single action"
+                                >
+                                    <label>MOBILITY</label>
+                                    <div className="ml-24">
+                                        <Slider value={selected.stats.mobility} maxValue={10} />
+                                    </div>
+                                </div>
+                                <div className="options-row" title="Incoming damage negation value">
+                                    <label>ARMOR</label>
+                                    <div className="ml-24">
+                                        <Slider value={selected.stats.armor} maxValue={5} />
+                                    </div>
+                                </div>
+                                <div className="options-row" title="Chance of dodging the ">
+                                    <label>DODGE</label>
+                                    <div className="ml-24">
+                                        <Slider value={selected.stats.dodge} maxValue={100} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-10 w-full flex justify-between">
+                                <div className="my-auto">
+                                    <h3 className="text-left mb-4">WEAPON</h3>
+                                    {(selected.weapon && <></>) || (
+                                        <div
+                                            className="h-30 border border-grey px-20 py-10 uppercase text-center hover:cursor-pointer"
+                                            style={{ borderWidth: "0.01em" }}
+                                        >
+                                            +
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="my-auto">
+                                    <h3 className="text-left mb-4">ARMOR</h3>
+                                    {(selected.armor && <></>) || (
+                                        <div
+                                            className="h-30 border border-grey px-20 py-10 uppercase text-center hover:cursor-pointer"
+                                            style={{ borderWidth: "0.01em" }}
+                                        >
+                                            +
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="my-auto">
+                                    <h3 className="text-left mb-4">UTILITY</h3>
+                                    {(selected.armor && <></>) || (
+                                        <div
+                                            className="h-30 w-30 border border-grey px-20 py-10 uppercase text-center hover:cursor-pointer"
+                                            style={{ borderWidth: "0.01em" }}
+                                        >
+                                            +
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div
+                                className="mt-10 py-10 yes-no"
+                                style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
+                                onClick={() => dismissRecruit(selected)}
+                            >
+                                DISMISS
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
             <Footer to="../headquaters" />
         </div>
@@ -169,21 +238,7 @@ export function Crew() {
         await executeTransaction(tx).then(console.log);
         const removedIdx = recruits?.findIndex((r) => r.id == recruit.objectId);
         removedIdx && recruits?.splice(removedIdx, 1);
+        setSelected(undefined);
         setTimeout(() => refetch(), 1000);
     }
-}
-
-function blanks(n: number): any[] {
-    let recruits = [];
-    for (let i = 0; i < n; i++) {
-        recruits.push({
-            id: (i + 100).toString(),
-            stats: { aim: 0, dodge: 0, health: 0, mobility: 0 },
-            rank: { Rookie: true },
-            metadata: { name: "Blank", backstory: "Blank" },
-            weapon: null,
-            armor: null,
-        });
-    }
-    return recruits;
 }

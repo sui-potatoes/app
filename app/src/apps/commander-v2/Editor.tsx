@@ -6,7 +6,7 @@ import { Camera, Game, loadModels, EditMode, Controls, EventBus } from "./engine
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
 import { fromHex } from "@mysten/bcs";
-import { Footer } from "./Footer";
+import { Footer } from "./Components";
 import { NavLink } from "react-router-dom";
 
 const STORAGE_KEY = "editor-state";
@@ -157,7 +157,7 @@ export function SelectSize({
                         style={{ border: "0.01em solid grey" }}
                         onClick={() => setSize(size)}
                     >
-                        Continue with preset
+                        Continue last session
                     </button>
                 )}
                 <button

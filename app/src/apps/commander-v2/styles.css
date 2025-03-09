@@ -29,10 +29,6 @@ SPDX-License-Identifier: MIT
     left: 0;
 }
 
-#commander-v2 * {
-    color: white !important;
-}
-
 #menu-scene {
     z-index: -1;
     position: absolute;
@@ -195,6 +191,21 @@ SPDX-License-Identifier: MIT
     padding: 10px var(--l-pad);
 }
 
+.main-menu-button.disabled {
+    color: grey !important;
+}
+
+.main-menu-button:not(.disabled):hover {
+    box-shadow: 0px 0px 3px 2px white;
+}
+
+.main-menu-button.disabled:hover {
+    color: grey !important;
+    text-decoration: none;
+    cursor: default;
+}
+
+
 .page-heading {
     border-left: 0.01em solid var(--line-color);
     padding-left: var(--l-pad);
@@ -240,7 +251,7 @@ SPDX-License-Identifier: MIT
     justify-content: space-between;
 }
 
-.options-row:hover {
+.options-row:hover, .options-row.selected, .main-menu-button:not(.disabled):hover {
     box-shadow: 0px 0px 3px 2px white;
 }
 
@@ -251,6 +262,8 @@ SPDX-License-Identifier: MIT
 /* === Inputs === */
 
 .yes-no {
+    width: 100px;
+    text-align: center;
     border: 1px solid grey;
     padding: 0px 30px;
     margin-left: 10px;
@@ -264,4 +277,39 @@ SPDX-License-Identifier: MIT
 .yes-no.selected {
     /* font-weight: bold; */
     box-shadow: 0px 0px 3px 3px white;
+}
+
+.slider-outer {
+    position: relative;
+    min-width: 300px;
+    padding: 0 4px;
+    margin-left: 10px;
+    height: 28px;
+    border: 1px solid grey;
+}
+
+.slider-inner {
+    position: absolute;
+    height: 20px;
+    top: 3px;
+    left: 2px;
+    background: grey;
+}
+
+.slider-inner-negative {
+    position: absolute;
+    height: 20px;
+    top: 3px;
+    right: 2px;
+    background: rgb(140, 29, 29);
+}
+
+.slider-value {
+    position: absolute;
+    top: 0;
+    line-height: 28px;
+    font-size: 14px;
+    width: 100%;
+    height: 28px;
+    text-align: center;
 }
