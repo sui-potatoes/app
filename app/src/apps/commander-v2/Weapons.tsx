@@ -332,11 +332,11 @@ function nameToDescription(name: string): string {
     return (
         {
             ["standard rifle"]:
-                "Standard issue rifle - a sturdy option for any encounter, not too good - not too bad. A couple upgrades, and it becomes as good as any other.",
+                "Standard issue rifle - a sturdy option for any encounter, not too good - not too bad. A couple upgrades won't hurt",
             ["plasma rifle"]:
                 "Plasma rifle - the best in class, uses bleeding edge technology to provide maximum damage at significant range.",
             ["sharpshooter rifle"]:
-                "Sharpshooter rifle delivers best damage at high range. A choice for a marksman skilled enough to score critical hits.",
+                "Sharpshooter rifle delivers best damage at long range. A choice for a marksman skilled enough to score critical hits.",
         }[name.toLowerCase()] || "Add description."
     );
 }
@@ -345,18 +345,19 @@ function nameToImage(name: string): string {
     return (
         {
             ["standard rifle"]: "/images/standard_rifle.svg",
-            ["sharpshooter rifle"]: "/images/marksman.svg",
+            ["sharpshooter rifle"]: "/images/marksman_rifle.svg",
+            ["plasma rifle"]: "/images/plasma_rifle.svg",
         }[name.toLowerCase()] || "/images/standard_rifle.svg"
     );
 }
 
 function rngTier(): number {
-    return +((Math.random() * 10000) % 2).toFixed(0);
+    return +((Math.random() * 10000) % 3).toFixed(0);
 }
 
 function rngUpgrade(): { [key: string]: number } {
     let tier = +((Math.random() * 10000) % 2).toFixed(0);
-    let idx = +(((Math.random() * 10000) % 4) - 1).toFixed(0);
+    let idx = +(((Math.random() * 10000) % 4)).toFixed(0);
 
     return {
         [["scope", "laser_sight", "stock", "expanded_clip"][idx]]: tier,
