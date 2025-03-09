@@ -24,7 +24,6 @@ export function Headquaters() {
                     <h2>WEAPONS</h2>
                 </NavLink>
             </div>
-            <div></div>
             <Footer />
         </div>
     );

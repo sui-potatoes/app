@@ -6,11 +6,15 @@ import { NavLink } from "react-router-dom";
 
 export function Footer({ to, text }: { to?: string; text?: string }) {
     return (
-        <div className="fixed w-full flex justify-between bottom-0 left-0 p-10 flex text-lg">
-            <NavLink to={to || ".."} className="menu-control back-button">
-                {text || "Back"}
-            </NavLink>
-        </div>
+        <>
+            {/* this div is for justify between.. */}
+            <div></div>
+            <div className="fixed w-full flex justify-between bottom-0 left-0 p-10 flex text-lg">
+                <NavLink to={to || ".."} className="menu-control back-button">
+                    {text || "Back"}
+                </NavLink>
+            </div>
+        </>
     );
 }
 
