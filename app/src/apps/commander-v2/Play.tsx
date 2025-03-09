@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import JEASINGS from "jeasings";
 import { Stats } from "@react-three/drei";
-import { Loader } from "./Loader";
+import { Loader, Footer } from "./Components";
 import { useEffect, useMemo, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -33,7 +33,6 @@ import { useGameRecruits } from "./hooks/useGameRecruits";
 import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
 import { useNetworkVariable } from "../../networkConfig";
 import { useNameGenerator } from "./hooks/useNameGenerator";
-import { Footer } from "./Footer";
 import { NavLink } from "react-router-dom";
 
 export const SIZE = 10;
