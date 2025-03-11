@@ -3,15 +3,15 @@
 
 import { useSuiClient } from "@mysten/dapp-kit";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
-import { useNetworkVariable } from "../../networkConfig";
+import { useNetworkVariable } from "../../../networkConfig";
 import { NavLink } from "react-router-dom";
-import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
+import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
 import { Transaction } from "@mysten/sui/transactions";
 import { Loader, Footer, StatRecord } from "./Components";
 import { SuiObjectRef } from "@mysten/sui/client";
 import { useState } from "react";
-import { type Weapon, useWeapons } from "./hooks/useWeapons";
-import { weaponMetadata } from "./types/metadata";
+import { type Weapon, useWeapons } from "../hooks/useWeapons";
+import { weaponMetadata } from "../types/metadata";
 
 export const WEAPON_STATS: StatRecord[] = [
     {
@@ -75,7 +75,7 @@ export function Weapons() {
         <div className="flex justify-between align-middle h-screen flex-col w-full">
             <div className="text-left p-10">
                 <h1 className="p-1 mb-10 white page-heading">
-                    <NavLink to="../headquaters">HEADQUATERS</NavLink> / WEAPONS
+                    <NavLink to="../headquarters">HEADQUATERS</NavLink> / WEAPONS
                 </h1>
                 <div className="flex justify-start">
                     <div className="w-96 max-w-md">
@@ -174,7 +174,7 @@ export function Weapons() {
                     )}
                 </div>
             </div>
-            <Footer to="../headquaters" />
+            <Footer to="../headquarters" />
         </div>
     );
 

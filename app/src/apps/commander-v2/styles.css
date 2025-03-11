@@ -27,7 +27,7 @@ SPDX-License-Identifier: MIT
 }
 
 /* Take full screen */
-#commander-v2 {
+.commander-v2 {
     position: absolute;
     color: white !important;
     font-family: monospace;
@@ -45,12 +45,19 @@ SPDX-License-Identifier: MIT
     left: 0;
 }
 
-#commander-v2 a,
-button, * {
+.commander-v2 *, .commander-v2 a {
     color: var(--color-white);
     font-size: 18px;
     text-transform: uppercase;
     text-decoration: none;
+}
+
+.lowercase {
+    text-transform: lowercase;
+}
+
+.normal-case {
+    text-transform: none;
 }
 
 #menu-scene {
@@ -336,7 +343,7 @@ button, * {
     border: var(--border);
 }
 
-.interactive:hover {
+.interactive:hover, .interactive:hover .interactive {
     box-shadow: var(--shadow);
     cursor: pointer;
 }

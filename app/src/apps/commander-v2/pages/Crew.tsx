@@ -4,17 +4,20 @@
 import { NavLink } from "react-router-dom";
 import { Transaction } from "@mysten/sui/transactions";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
-import { useNetworkVariable } from "../../networkConfig";
-import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
-import { useRecruits, Recruit } from "./hooks/useRecruits";
+import { useNetworkVariable } from "../../../networkConfig";
+import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
+import { useRecruits, Recruit } from "../hooks/useRecruits";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
-import { useNameGenerator } from "./hooks/useNameGenerator";
+import { useNameGenerator } from "../hooks/useNameGenerator";
 import { SuiObjectRef } from "@mysten/sui/client";
 import { Footer, Modal, StatRecord } from "./Components";
 import { useState } from "react";
-import { Armor, useArmor } from "./hooks/useArmor";
-import { armorMetadata } from "./types/metadata";
+import { Armor, useArmor } from "../hooks/useArmor";
+import { armorMetadata, weaponMetadata } from "../types/metadata";
+import { useWeapons, Weapon } from "../hooks/useWeapons";
+import { WEAPON_STATS } from "./Weapons";
+import { mergeStats } from "../types/bcs";
 
 /** Main stats of the Recruit with descriptions */
 export const RECRUIT_STATS: StatRecord[] = [
@@ -57,7 +60,10 @@ export function Crew() {
         enabled: !!zkLogin.address,
     });
 
-    // const { data: weapons, isPending: weaponsFetching } = useWeapons({ address: zkLogin.address });
+    const { data: weapons, isPending: _weaponsFetching } = useWeapons({
+        address: zkLogin.address,
+        unique: true,
+    });
     const { data: armors, isPending: _armorsFetching } = useArmor({
         address: zkLogin.address,
         unique: true,
@@ -70,11 +76,16 @@ export function Crew() {
         enabled: !!zkLogin.address,
     });
 
+    if (weapons && selected?.weapon) weapons.unshift(selected.weapon as Weapon);
+    if (armors && selected?.armor && !armors.some((a) => a.name == selected.armor?.name)) {
+        armors.unshift(selected.armor as Armor);
+    }
+
     return (
         <div className="flex justify-between align-middle h-screen flex-col w-full">
             <div className="text-left text-uppercase text-lg p-10">
                 <h1 className="p-1 mb-10 uppercase white page-heading">
-                    <NavLink to="../headquaters">HEADQUATERS</NavLink> / CREW
+                    <NavLink to="../HEADQUARTERS">HEADQUARTERS</NavLink> / CREW
                 </h1>
                 <div className="flex justify-start">
                     <div className="w-96 rounded max-w-md">
@@ -108,7 +119,7 @@ export function Crew() {
                         <div className="size-max ml-10 text-lg max-w-3xl">
                             <div className="mb-10">
                                 <h2 className="mb-2">BACKSTORY</h2>
-                                <p>
+                                <p className="normal-case">
                                     {selected.metadata.backstory == "Story locked"
                                         ? "Get more experience to unlock character backstory and traits."
                                         : selected.metadata.backstory}
@@ -128,60 +139,81 @@ export function Crew() {
                                         key={record.key}
                                         record={record}
                                         stats={selected.stats}
-                                        modifier={selected.armor?.stats}
+                                        modifier={mergeStats(
+                                            selected.armor?.stats,
+                                            selected.weapon?.stats,
+                                        )}
                                         className="options-row"
                                     />
                                 ))}
                             </div>
 
                             <div className="mt-10 w-full flex justify-between">
+                                {/* Weapon selection */}
                                 <div className="my-auto">
                                     <h3 className="text-left mb-4">WEAPON</h3>
-                                    {(selected.weapon && <></>) || (
-                                        <div className="px-20 py-10 text-center interactive">
-                                            +
+                                    {(selected.weapon && (
+                                        <div
+                                            style={{
+                                                height: "200px",
+                                                minWidth: "200px",
+                                                maxWidth: "400px",
+                                            }}
+                                            className="h-full text-center flex flex-col interactive"
+                                            onClick={() => setShowModal("weapon")}
+                                        >
+                                            <img
+                                                src={weaponMetadata(selected.weapon.name).image}
+                                                style={{ maxHeight: "150px" }}
+                                            />
+                                            <label className="mt-2">
+                                                {selected.weapon.name}
+                                                {selected.weapon.upgrades.length > 0 && "+"}
+                                            </label>
                                         </div>
-                                    )}
-                                </div>
-                                <div className="my-auto">
-                                    <h3 className="text-left mb-4">ARMOR</h3>
-                                    {(selected.armor && (
-                                        <>
-                                            <div
-                                                className="h-30 px-2 py-2 text-center interactive"
-                                                style={{ maxWidth: "150px" }}
-                                            >
-                                                <img
-                                                    src={armorMetadata(selected.armor.name).image}
-                                                />
-                                                <label className="mt-2">
-                                                    {selected.armor.name}
-                                                </label>
-                                                {/* {["armor", "dodge", "mobility"].map((stat) => (
-                                                    <div className="flex justify-between">
-                                                        <div>{stat.toUpperCase()}</div>
-                                                        <div>
-                                                            {(selected.armor!.stats as any)[stat]}
-                                                        </div>
-                                                    </div>
-                                                ))} */}
-                                            </div>
-                                        </>
                                     )) || (
                                         <div
-                                            className="px-20 py-10 text-center interactive"
-                                            onClick={() => setShowModal("armor")}
+                                            style={{ height: "200px", width: "375px" }}
+                                            className="text-center flex flex-col interactive"
+                                            onClick={() => setShowModal("weapon")}
                                         >
-                                            +
+                                            <div className="my-auto">
+                                                Select
+                                                <br />
+                                                weapon
+                                            </div>
                                         </div>
                                     )}
                                 </div>
-                                {/* Utility slot  */}
-                                <div className="my-auto">
-                                    <h3 className="text-left mb-4">UTILITY</h3>
-                                    <div className="px-20 py-10 text-center interactive">
-                                        +
-                                    </div>
+                                {/* Armor selection */}
+                                {/* max width is 30% of the container */}
+                                <div className="my-auto max-w-1/3 ml-10">
+                                    <h3 className="text-left mb-4">ARMOR</h3>
+                                    {(selected.armor && (
+                                        <div
+                                            style={{ height: "200px", width: "200px" }}
+                                            className="text-center flex flex-col interactive"
+                                            onClick={() => setShowModal("armor")}
+                                        >
+                                            <img
+                                                src={armorMetadata(selected.armor.name).image}
+                                                style={{ maxHeight: "150px" }}
+                                            />
+                                            <label>{selected.armor.name}</label>
+                                        </div>
+                                    )) || (
+                                        <div
+                                            style={{ height: "200px", width: "200px" }}
+                                            className="text-center flex flex-col interactive"
+                                            onClick={() => setShowModal("armor")}
+                                        >
+                                            <div className="my-auto">
+                                                Select
+                                                <br />
+                                                armor
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div
@@ -200,29 +232,90 @@ export function Crew() {
                 {showModal === "armor" && (
                     <div className="flex justify-between" onClick={(e) => e.preventDefault()}>
                         {armors?.reverse().map((a) => {
+                            const isSelected = a.name == selected?.armor?.name;
                             return (
                                 <div
-                                    className="text-xl m-10 p-10 option-row interactive"
                                     key={a.name}
+                                    onClick={() =>
+                                        isSelected ? removeArmor(selected!) : addArmor(selected!, a)
+                                    }
+                                    className={
+                                        "m-10 p-10 option-row interactive" +
+                                        (isSelected ? " selected" : "")
+                                    }
                                 >
                                     <label className="text-xl mb-10">{a.name}</label>
                                     <img src={armorMetadata(a.name).image} />
                                     {["armor", "dodge", "mobility"].map((stat) => (
-                                        <div className="flex justify-between">
+                                        <div className="flex justify-between" key={stat}>
                                             <div>{stat.toUpperCase()}</div>
                                             <div>{(a.stats as any)[stat]}</div>
                                         </div>
                                     ))}
                                     <button
-                                        className="yes-no"
+                                        className="yes-no interactive"
                                         style={{
                                             width: "100%",
                                             margin: "20px 0 0 0",
                                             padding: "10px 15px",
                                         }}
-                                        onClick={() => addArmor(selected!, a)}
                                     >
-                                        select
+                                        {isSelected ? "remove" : "select"}
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+                {showModal === "weapon" && (
+                    <div
+                        onClick={(e) => e.preventDefault()}
+                        style={{ height: "95vh", marginTop: "5vh" }}
+                    >
+                        {/* weapon selection modal */}
+                        <div className="mt-10"></div>
+                        {weapons?.map((w) => {
+                            const isSelected = selected?.weapon?.id == w.id;
+
+                            return (
+                                <div
+                                    className={
+                                        "p-10 mb-2 mx-2 option-row interactive" +
+                                        (isSelected ? " selected" : "")
+                                    }
+                                    key={w.objectId}
+                                    onClick={() => addWeapon(selected!, w)}
+                                >
+                                    <label className="text-xl mb-10">
+                                        {w.name}
+                                        {w.hasUpgrades && "+"}
+                                    </label>
+                                    <img src={weaponMetadata(w.name).image} />
+                                    {WEAPON_STATS.map((record) => (
+                                        <StatRecord
+                                            key={record.key}
+                                            record={record}
+                                            stats={w.stats}
+                                            className="flex justify-between"
+                                        />
+                                    ))}
+                                    {w.hasUpgrades && (
+                                        <></>
+                                        // <div className="flex justify-between">
+                                        //     {w.upgrades.map((u) => (
+                                        //         <div key={u.name}>{u.name}</div>
+                                        //     ))}
+                                        // </div>
+                                    )}
+                                    <button
+                                        className="yes-no interactive"
+                                        style={{
+                                            width: "100%",
+                                            margin: "20px 0 0 0",
+                                            padding: "10px 15px",
+                                        }}
+                                    >
+                                        {isSelected ? "remove" : "select"}
                                     </button>
                                 </div>
                             );
@@ -230,7 +323,7 @@ export function Crew() {
                     </div>
                 )}
             </Modal>
-            <Footer to="../headquaters" />
+            <Footer to="../headquarters" />
         </div>
     );
 
@@ -302,15 +395,76 @@ export function Crew() {
         if (!selected) throw new Error("Recruit has to be selected");
 
         const tx = new Transaction();
+        const recruitArg = tx.objectRef(r);
+
+        if (selected.armor) {
+            const armor = tx.moveCall({
+                target: `${packageId}::recruit::remove_armor`,
+                arguments: [recruitArg],
+            });
+
+            tx.transferObjects([armor], zkLogin.address);
+        }
 
         tx.moveCall({
             target: `${packageId}::recruit::add_armor`,
-            arguments: [tx.objectRef(r), tx.objectRef(a)],
+            arguments: [recruitArg, tx.objectRef(a)],
         });
 
         await executeTransaction(tx).then(console.log);
         setTimeout(() => refetch(), 1000);
         selected.armor = a;
+        setShowModal(false);
+    }
+
+    /** Removes Armor from the Recruit */
+    async function removeArmor(r: Recruit) {
+        if (!zkLogin.address) throw new Error("Not signed in");
+        if (!executeTransaction) throw new Error("No transaction executor");
+        if (isExecuting) throw new Error("Already executing a transaction");
+        if (!selected) throw new Error("Recruit has to be selected");
+
+        const tx = new Transaction();
+        const armor = tx.moveCall({
+            target: `${packageId}::recruit::remove_armor`,
+            arguments: [tx.objectRef(r)],
+        });
+
+        tx.transferObjects([armor], zkLogin.address);
+
+        await executeTransaction(tx).then(console.log);
+        setTimeout(() => refetch(), 1000);
+        selected.armor = null;
+        setShowModal(false);
+    }
+
+    /** Adds Weapon to the Recruit */
+    async function addWeapon(r: Recruit, w: Weapon) {
+        if (!zkLogin.address) throw new Error("Not signed in");
+        if (!executeTransaction) throw new Error("No transaction executor");
+        if (isExecuting) throw new Error("Already executing a transaction");
+        if (!selected) throw new Error("Recruit has to be selected");
+
+        const tx = new Transaction();
+        const recruitArg = tx.objectRef(r);
+
+        if (selected.weapon) {
+            const weapon = tx.moveCall({
+                target: `${packageId}::recruit::remove_weapon`,
+                arguments: [recruitArg],
+            });
+
+            tx.transferObjects([weapon], zkLogin.address);
+        }
+
+        tx.moveCall({
+            target: `${packageId}::recruit::add_weapon`,
+            arguments: [recruitArg, tx.objectRef(w)],
+        });
+
+        await executeTransaction(tx).then(console.log);
+        setTimeout(() => refetch(), 1000);
+        selected.weapon = w;
         setShowModal(false);
     }
 }

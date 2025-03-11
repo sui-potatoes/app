@@ -22,17 +22,17 @@ import {
     ReloadMode,
     models,
     loadModels,
-} from "./engine";
+} from "../engine";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { Transaction } from "@mysten/sui/transactions";
 import { useSuiClient } from "@mysten/dapp-kit";
 
-import { bcs, Recruit } from "./types/bcs";
-import { GameMap, useGame } from "./hooks/useGame";
-import { useGameRecruits } from "./hooks/useGameRecruits";
-import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
-import { useNetworkVariable } from "../../networkConfig";
-import { useNameGenerator } from "./hooks/useNameGenerator";
+import { bcs, Recruit } from "../types/bcs";
+import { GameMap, useGame } from "../hooks/useGame";
+import { useGameRecruits } from "../hooks/useGameRecruits";
+import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
+import { useNetworkVariable } from "../../../networkConfig";
+import { useNameGenerator } from "../hooks/useNameGenerator";
 import { NavLink } from "react-router-dom";
 
 export const SIZE = 10;
@@ -534,7 +534,7 @@ type Recruit = typeof Recruit.$inferType;
 export function UI({
     eventBus,
     isExecuting,
-    turn: initilTurn,
+    turn: initialTurn,
     recruits,
 }: {
     eventBus: EventBus;
@@ -544,7 +544,7 @@ export function UI({
 }) {
     const [panelDisabled, setPanelDisabled] = useState(true);
     const [shootMode, setShootMode] = useState(false);
-    const [turn, setTurn] = useState(initilTurn);
+    const [turn, setTurn] = useState(initialTurn);
     const [mode, setMode] = useState<string | null>(null);
     const [log, setLog] = useState<string[]>([]);
     const [unit, setUnit] = useState<Unit | null>(null);
@@ -613,7 +613,7 @@ export function UI({
         (unit && "Reload " + unit.props.ammo.value + "/" + unit.props.ammo.max_value) || "Reload";
 
     return (
-        <div id="ui">
+        <div id="ui" className="normal-case">
             {unit && recruit && (
                 <div
                     id="panel-top"

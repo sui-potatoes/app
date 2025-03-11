@@ -3,7 +3,7 @@
 
 import { ReactNode, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { Stats } from "./types/bcs";
+import { Stats } from "../types/bcs";
 
 export type StatRecord = {
     key: keyof Stats;
@@ -20,6 +20,9 @@ type StatRecordProps = {
     className?: string;
 };
 
+/**
+ * Used in stat display for `Armor`, `Weapon` and `Recruit`
+ */
 export function StatRecord({
     stats,
     className,
@@ -160,7 +163,7 @@ type ModalProps = {
 export function Modal({ children, show, onClose }: ModalProps) {
     return (
         <div
-            className="absolute h-screen w-full bg-black bg-opacity-90"
+            className="absolute h-screen w-full bg-black bg-opacity-90 overflow-auto"
             style={{ display: show ? "flex" : "none" }}
             onClick={onClose}
         >

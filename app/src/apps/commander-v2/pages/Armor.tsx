@@ -4,13 +4,13 @@
 import { useSuiClient } from "@mysten/dapp-kit";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { Transaction } from "@mysten/sui/transactions";
-import { useNetworkVariable } from "../../networkConfig";
+import { useNetworkVariable } from "../../../networkConfig";
 import { NavLink } from "react-router-dom";
-import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
+import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
 import { Footer, Loader, StatRecord } from "./Components";
 import { useState } from "react";
-import { type Armor, useArmor } from "./hooks/useArmor";
-import { armorMetadata } from "./types/metadata";
+import { type Armor, useArmor } from "../hooks/useArmor";
+import { armorMetadata } from "../types/metadata";
 
 export const ARMOR_STATS: StatRecord[] = [
     {
@@ -71,7 +71,7 @@ export function Armor() {
         <div className="flex justify-between align-middle h-screen flex-col w-full">
             <div className="text-left p-10">
                 <h1 className="block p-1 mb-10 page-heading">
-                    <NavLink to="../headquaters">HEADQUATERS</NavLink> / ARMOR
+                    <NavLink to="../headquarters">HEADQUATERS</NavLink> / ARMOR
                 </h1>
                 <div className="flex justify-start">
                     <div className="w-96 max-w-md">
@@ -124,7 +124,7 @@ export function Armor() {
                     )}
                 </div>
             </div>
-            <Footer to="../headquaters" />
+            <Footer to="../headquarters" />
         </div>
     );
 

@@ -14,6 +14,27 @@ export const Rank = bcs.enum("Rank", {
     Colonel: null,
 });
 
+export function mergeStats(a?: Stats, b?: Stats): Stats {
+    return {
+        mobility: (a?.mobility || 0) + (b?.mobility || 0),
+        aim: (a?.aim || 0) + (b?.aim || 0),
+        health: (a?.health || 0) + (b?.health || 0),
+        armor: (a?.armor || 0) + (b?.armor || 0),
+        dodge: (a?.dodge || 0) + (b?.dodge || 0),
+        defense: (a?.defense || 0) + (b?.defense || 0),
+        damage: (a?.damage || 0) + (b?.damage || 0),
+        spread: (a?.spread || 0) + (b?.spread || 0),
+        plus_one: (a?.plus_one || 0) + (b?.plus_one || 0),
+        crit_chance: (a?.crit_chance || 0) + (b?.crit_chance || 0),
+        can_be_dodged: !!a?.can_be_dodged || !!b?.can_be_dodged,
+        area_size: (a?.area_size || 0) + (b?.area_size || 0),
+        env_damage: !!a?.env_damage || !!b?.env_damage,
+        range: (a?.range || 0) + (b?.range || 0),
+        ammo: (a?.ammo || 0) + (b?.ammo || 0),
+        _: (a?._ || 0) + (b?._ || 0),
+    };
+}
+
 export type Stats = {
     mobility: number;
     aim: number;
