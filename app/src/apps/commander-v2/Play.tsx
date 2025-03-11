@@ -224,13 +224,13 @@ export function Playground() {
     if (!modelsLoaded) return centerDiv("Models not loaded");
     if (!map)
         return (
-            <div className="flex justify-between align-middle h-screen flex-col w-full">
-                <div className="text-left text-uppercase text-lg p-10 max-w-xl">
-                    <h1 className="block p-1 mb-10 uppercase white page-heading">play</h1>
+            <div className="flex justify-between flex-col w-full">
+                <div className="text-left p-10 max-w-xl">
+                    <h1 className="p-1 mb-10 page-heading">play</h1>
                 </div>
-                <div className="p-10 uppercase text-lg rounded max-w-3xl">
+                <div className="p-10 max-w-3xl">
                     <a
-                        className="options-row hover:cursor-pointer hover:no-underline"
+                        className="options-row interactive"
                         onClick={() =>
                             createDemo(1, [
                                 [0, 3],
@@ -241,7 +241,7 @@ export function Playground() {
                         Create demo 1
                     </a>
                     <a
-                        className="options-row hover:cursor-pointer hover:no-underline"
+                        className="options-row interactive"
                         style={{ border: "1px solid grey" }}
                         onClick={() =>
                             createDemo(2, [
@@ -254,7 +254,7 @@ export function Playground() {
                     >
                         Create demo 2
                     </a>
-                    <NavLink to="../editor" className="options-row mt-10 uppercase hover:no-underline">
+                    <NavLink to="../editor" className="options-row mt-10 interactive">
                         Level Editor
                     </NavLink>
                 </div>

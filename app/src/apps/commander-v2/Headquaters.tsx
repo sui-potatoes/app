@@ -11,15 +11,15 @@ export function Headquaters() {
                 <h1 className="block p-1 mb-10 uppercase white page-heading">headquaters</h1>
             </div>
             <div className="px-20 justify-center text-uppercase text-2xl flex max-w-full">
-                <NavLink to="armor" className="p-10 text-center card">
+                <NavLink to="armor" className="p-10 text-center card hover-shadow with-border">
                     <img className="" src="/images/armor.svg" />
                     <h2>ARMOR</h2>
                 </NavLink>
-                <NavLink to="crew" className="p-10 text-center card">
+                <NavLink to="crew" className="p-10 text-center card hover-shadow with-border">
                     <img className="" src="/images/crew.svg" />
                     <h2>CREW</h2>
                 </NavLink>
-                <NavLink to="weapons" className="p-10 text-center card">
+                <NavLink to="weapons" className="p-10 text-center card hover-shadow with-border">
                     <img className="" src="/images/weapons.svg" />
                     <h2>WEAPONS</h2>
                 </NavLink>

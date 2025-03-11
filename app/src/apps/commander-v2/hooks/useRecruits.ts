@@ -14,9 +14,6 @@ type Props = {
 
 export type Recruit = typeof Recruit.$inferType & SuiObjectRef;
 
-/**
- * Hook to create a transaction executor
- */
 export function useRecruits({ owner, enabled }: Props) {
     const packageId = useNetworkVariable("commanderV2PackageId");
     const result = useSuiClientQuery(

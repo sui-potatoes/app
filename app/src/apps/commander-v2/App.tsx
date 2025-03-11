@@ -17,7 +17,7 @@ export default function App() {
     const zkLogin = useZkLogin();
 
     return (
-        <div id="commander-v2" className="items-start">
+        <div id="commander-v2">
             <div className="w-full h-full bg-opacity-70 bg-black">
                 <Routes>
                     <Route path="/" element={<Menu />} />

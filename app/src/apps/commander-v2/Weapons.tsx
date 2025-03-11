@@ -1,19 +1,36 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
+import { useSuiClient } from "@mysten/dapp-kit";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useNetworkVariable } from "../../networkConfig";
 import { NavLink } from "react-router-dom";
 import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
-import { fromBase64 } from "@mysten/bcs";
 import { Transaction } from "@mysten/sui/transactions";
-import { Weapon as WeaponBcs } from "./types/bcs";
-import { Loader, Footer, Slider, SliderRange } from "./Components";
+import { Loader, Footer, StatRecord } from "./Components";
 import { SuiObjectRef } from "@mysten/sui/client";
 import { useState } from "react";
+import { type Weapon, useWeapons } from "./hooks/useWeapons";
+import { weaponMetadata } from "./types/metadata";
 
-type Weapon = typeof WeaponBcs.$inferType & SuiObjectRef & { hasUpgrades: boolean };
+export const WEAPON_STATS: StatRecord[] = [
+    {
+        key: "damage",
+        name: "DAMAGE",
+        maxValue: 10,
+        description: "Damage range of the weapon",
+        process: (s) => [s.damage - s.spread, s.damage + s.spread],
+    },
+    { key: "range", name: "RANGE", maxValue: 10, description: "Effective range of the weapon" },
+    { key: "ammo", name: "AMMO", maxValue: 6, description: "Ammo capacity of the weapon" },
+    {
+        key: "crit_chance",
+        name: "CRIT CHANCE",
+        maxValue: 100,
+        description: "Chance of dealing critical damage",
+    },
+    { key: "aim", name: "AIM BONUS", maxValue: 100, description: "Aim stat bonus when equipped" },
+];
 
 export function Weapons() {
     const flow = useEnokiFlow();
@@ -21,48 +38,13 @@ export function Weapons() {
     const zkLogin = useZkLogin();
     const [selected, setSelected] = useState<Weapon | undefined>();
     const packageId = useNetworkVariable("commanderV2PackageId");
+    const { data, isPending, isError, error, refetch } = useWeapons({ address: zkLogin.address });
     const { executeTransaction, isExecuting } = useTransactionExecutor({
         // @ts-ignore
         client,
         signer: () => flow.getKeypair({ network: "testnet" }),
         enabled: !!zkLogin.address,
     });
-
-    if (!zkLogin.address) {
-        return <></>;
-    }
-
-    const {
-        data: weapons,
-        isPending,
-        isError,
-        error,
-        refetch,
-    } = useSuiClientQuery(
-        "getOwnedObjects",
-        {
-            owner: zkLogin.address,
-            filter: { MoveModule: { package: packageId, module: "weapon" } },
-            options: { showBcs: true, showType: true },
-        },
-        {
-            enabled: !!zkLogin.address,
-            gcTime: 10000,
-            select(data) {
-                return data.data.map((obj) => {
-                    // @ts-ignore
-                    const weapon = WeaponBcs.parse(fromBase64(obj.data?.bcs!.bcsBytes));
-                    return {
-                        ...weapon,
-                        hasUpgrades: Object.keys(weapon.upgrades).length > 0,
-                        objectId: obj.data?.objectId,
-                        version: obj.data?.version,
-                        digest: obj.data?.digest,
-                    } as Weapon & SuiObjectRef;
-                });
-            },
-        },
-    );
 
     if (isPending || isExecuting) return <Loader />;
     if (isError) {
@@ -76,7 +58,7 @@ export function Weapons() {
     // count identical weapons; weapons with upgrades are not counted
     // and considered unique
     const count: { [key: string]: number } = {};
-    const displayed = weapons
+    const displayed = data
         .sort((a, b) => a.name.localeCompare(b.name))
         .filter((w) => {
             if (w.name in count && !w.hasUpgrades) {
@@ -91,35 +73,33 @@ export function Weapons() {
 
     return (
         <div className="flex justify-between align-middle h-screen flex-col w-full">
-            <div className="text-left text-uppercase text-lg p-10">
-                <h1 className="block p-1 mb-10 uppercase white page-heading">
+            <div className="text-left p-10">
+                <h1 className="p-1 mb-10 white page-heading">
                     <NavLink to="../headquaters">HEADQUATERS</NavLink> / WEAPONS
                 </h1>
                 <div className="flex justify-start">
-                    <div className="text-uppercase text-lg w-96 rounded max-w-md hover:cursor-pointer">
+                    <div className="w-96 max-w-md">
                         <div>
                             {displayed.map((w) => (
                                 <div
                                     className={
-                                        "options-row " +
+                                        "options-row interactive " +
                                         (selected?.objectId == w.objectId ? "selected" : "")
                                     }
                                     key={w.objectId}
                                     onClick={() => setSelected(w)}
                                 >
-                                    <label>
+                                    <a>
                                         {w.name}
                                         {w.hasUpgrades ? "+" : ""}
-                                    </label>
+                                    </a>
                                     <p>{!w.hasUpgrades && count[w.name]}</p>
                                 </div>
                             ))}
                         </div>
                         <div
-                            className="options-row mt-10"
-                            onClick={() =>
-                                mintWeapon(rngTier(), { ...rngUpgrade(), ...rngUpgrade() })
-                            }
+                            className="options-row mt-10 interactive"
+                            onClick={() => mintWeapon(rngTier(), { ...rngUpgrade() })}
                         >
                             <div>New random weapon</div>
                             <div>+</div>
@@ -127,46 +107,26 @@ export function Weapons() {
                     </div>
                     {selected && (
                         <div
-                            className="ml-10 pr-10 text-lg max-w-3xl overflow-auto"
+                            className="ml-10 px-10 pb-10 max-w-3xl overflow-auto"
                             style={{ maxHeight: "80vh" }}
                         >
                             <div className="mb-10">
                                 <h2 className="mb-2">DESCRIPTION</h2>
-                                <p>{nameToDescription(selected.name)}</p>
-                                <h2></h2>
-                                <img src={nameToImage(selected.name)} />
+                                <p className="normal-case">
+                                    {weaponMetadata(selected.name).description}
+                                </p>
+                                <img src={weaponMetadata(selected.name).image} />
                             </div>
                             <div>
                                 <h2 className="mb-2">STATS</h2>
-                                <div className="options-row" title="Base damage stat of the weapon">
-                                    <label>DAMAGE</label>
-                                    <SliderRange
-                                        range={[
-                                            selected.stats.damage - selected.stats.spread,
-                                            selected.stats.damage,
-                                        ]}
-                                        maxValue={10}
+                                {WEAPON_STATS.map((record) => (
+                                    <StatRecord
+                                        key={record.key}
+                                        record={record}
+                                        stats={selected.stats}
+                                        className="options-row"
                                     />
-                                </div>
-                                <div className="options-row" title="Effective range of the weapon">
-                                    <label>RANGE</label>
-                                    <Slider value={selected.stats.range} maxValue={10} />
-                                </div>
-                                <div className="options-row" title="Ammo capacity of the weapon">
-                                    <label>AMMO</label>
-                                    <Slider value={selected.stats.ammo} maxValue={6} />
-                                </div>
-                                <div
-                                    className="options-row"
-                                    title="Chance of dealing critical damage"
-                                >
-                                    <label>CRIT CHANCE</label>
-                                    <Slider value={selected.stats.crit_chance} maxValue={100} />
-                                </div>
-                                <div className="options-row" title="Aim stat bonus when equipped">
-                                    <label>AIM BONUS</label>
-                                    <Slider value={selected.stats.aim} maxValue={100} />
-                                </div>
+                                ))}
                             </div>
 
                             <h2 className="mb-2 mt-10">UPGRADES</h2>
@@ -176,47 +136,39 @@ export function Weapons() {
                                         const upgrade = selected.upgrades[i];
                                         return (
                                             <div
-                                                className="my-auto options-row hover:cursor-default"
+                                                className="my-auto options-row interactive"
                                                 key={i}
                                             >
-                                                <div className="text-left">{upgrade.name}</div>
-                                                {/* <div>{upgradeStatDescription(upgrade.stats)}</div> */}
-                                                {/* <div className="yes-no bold">⨉</div> */}
-                                                {/* <div className="yes-no">remove</div> */}
+                                                <a>{upgrade.name}</a>
                                                 <div>⨉</div>
                                             </div>
                                         );
                                     } else {
                                         return (
                                             <div
-                                                className="my-auto options-row hover:cursor-pointer"
+                                                className="my-auto options-row interactive"
                                                 key={i}
                                             >
-                                                <div className="text-left uppercase">
-                                                    Empty upgrade slot
-                                                </div>
+                                                <div className="text-left">Empty upgrade slot</div>
                                                 <div>+</div>
-                                                {/* <div className="yes-no bold">+</div> */}
                                             </div>
                                         );
                                     }
                                 })}
-                                <div className="my-auto options-row hover:cursor-default">
-                                    <div className="text-left uppercase" style={{ color: "grey" }}>
-                                        Upgrade slot unavailable
-                                    </div>
+                                <div className="my-auto options-row non-interactive">
+                                    <div className="text-left">Upgrade slot unavailable</div>
                                 </div>
                             </div>
-                            <p className="mt-2">
+                            <p className="mt-2 normal-case">
                                 An upgrade can only be used once. Once installed, it can be removed
                                 and thrown out or replaced with another upgrade.
                             </p>
                             <div
-                                className="mt-10 py-10 yes-no"
+                                className="mt-10 py-10 text-center interactive"
                                 style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
                                 onClick={() => throwAway(selected)}
                             >
-                                THROW AWAY
+                                throw away
                             </div>
                         </div>
                     )}
@@ -316,6 +268,8 @@ export function Weapons() {
         if (!zkLogin.address) throw new Error("Not logged in");
         if (!executeTransaction) throw new Error("No transaction executor");
         if (isExecuting) throw new Error("Already executing a transaction");
+        if (!confirm("Are you sure you want to throw away this weapon? It will be gone forever!"))
+            throw new Error("User refused");
 
         const tx = new Transaction();
         tx.moveCall({
@@ -323,32 +277,10 @@ export function Weapons() {
             arguments: [tx.objectRef(ref)],
         });
 
-        await executeTransaction(tx);
+        await executeTransaction(tx).then(console.log);
+        setTimeout(() => refetch(), 1000);
         refetch();
     }
-}
-
-function nameToDescription(name: string): string {
-    return (
-        {
-            ["standard rifle"]:
-                "Standard issue rifle - a sturdy option for any encounter, not too good - not too bad. A couple upgrades won't hurt",
-            ["plasma rifle"]:
-                "Plasma rifle - the best in class, uses bleeding edge technology to provide maximum damage at significant range.",
-            ["sharpshooter rifle"]:
-                "Sharpshooter rifle delivers best damage at long range. A choice for a marksman skilled enough to score critical hits.",
-        }[name.toLowerCase()] || "Add description."
-    );
-}
-
-function nameToImage(name: string): string {
-    return (
-        {
-            ["standard rifle"]: "/images/standard_rifle.svg",
-            ["sharpshooter rifle"]: "/images/marksman_rifle.svg",
-            ["plasma rifle"]: "/images/plasma_rifle.svg",
-        }[name.toLowerCase()] || "/images/standard_rifle.svg"
-    );
 }
 
 function rngTier(): number {
@@ -357,7 +289,7 @@ function rngTier(): number {
 
 function rngUpgrade(): { [key: string]: number } {
     let tier = +((Math.random() * 10000) % 2).toFixed(0);
-    let idx = +(((Math.random() * 10000) % 4)).toFixed(0);
+    let idx = +((Math.random() * 10000) % 4).toFixed(0);
 
     return {
         [["scope", "laser_sight", "stock", "expanded_clip"][idx]]: tier,

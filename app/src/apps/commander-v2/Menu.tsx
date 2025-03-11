@@ -13,9 +13,8 @@ import { Footer } from "./Components";
 export function Menu() {
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
-    // const suins = new SuinsClient({ client, network: "testnet" });
     const disabled = !zkLogin.address;
-    const className = disabled ? "main-menu-button disabled" : "main-menu-button";
+    const className = disabled ? "options-row disabled interactive" : "options-row interactive";
 
     useEffect(() => {
         createMenuScene("menu-scene");
@@ -25,16 +24,15 @@ export function Menu() {
     return (
         <>
             <div id="menu-scene"></div>
-            {/* <SuinsModal show={showModal} onClose={() => setShowModal(false)} /> */}
-            <div className="flex justify-between align-middle h-screen flex-col w-full">
-                <div className="text-left text-uppercase text-lg p-10 max-w-xl">
-                    <h1 className="block p-1 mb-10 uppercase white page-heading"></h1>
+            <div className="flex justify-between flex-col w-full">
+                <div className="text-left p-10 max-w-xl">
+                    <h1 className="p-1 mb-10 white page-heading">&nbsp;</h1>
                 </div>
-                <div className="text-left text-uppercase text-lg rounded p-10 max-w-md">
+                <div className="text-left p-10 max-w-md">
                     <div className="">
                         {disabled && (
                             <div
-                                className="main-menu-button hover:cursor-pointer"
+                                className="main-menu-button interactive"
                                 onClick={async () => {
                                     localStorage.setItem(GO_BACK_KEY, window.location.href);
 

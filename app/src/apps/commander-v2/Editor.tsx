@@ -102,7 +102,7 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
     return (
         <div id="ui">
             <div id="panel-top" className="fixed w-full text-xs top-0 left-0 p-0 text-center mt-10">
-                <p className="text-sm text-white">
+                <p className="text-sm">
                     Tool: {tool}; Direction: {direction}
                 </p>
             </div>
@@ -111,13 +111,9 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
                     <Footer to="../play" />
                 </div>
                 <div className="mb-10">
-                    <p className="text-sm text-white">
-                        Click to place objects; right-click to remove
-                    </p>
-                    <p className="text-sm text-white">Use WSAD keys to change direction</p>
-                    <p className="text-sm text-white">
-                        C - Cover; H - High Cover; O - Object; U - Unwalkable
-                    </p>
+                    <p className="text-sm">Click to place objects; right-click to remove</p>
+                    <p className="text-sm">Use WSAD keys to change direction</p>
+                    <p className="text-sm">C - Cover; H - High Cover; O - Object; U - Unwalkable</p>
                 </div>
             </div>
         </div>
@@ -143,41 +139,31 @@ export function SelectSize({
     };
 
     return (
-        <div className="flex justify-between align-middle h-screen flex-col w-full">
-            <div className="text-left text-uppercase text-lg p-10 max-w-xl">
-                <h1 className="block p-1 mb-10 uppercase white page-heading">
+        <div className="flex justify-between flex-col w-full">
+            <div className="p-10 max-w-xl">
+                <h1 className="p-1 mb-10 page-heading">
                     <NavLink to="../play">PLAY</NavLink> / editor
                 </h1>
             </div>
-            <div className="p-10 text-uppercase text-lg rounded max-w-3xl">
+            <div className="p-10 max-w-3xl">
                 {/* continue the preset if there is one */}
                 {preset && (
-                    <button
-                        className="options-row uppercase hover:no-underline mb-10 w-full"
-                        style={{ border: "0.01em solid grey" }}
+                    <div
+                        className="options-row interactive mb-10 w-full"
                         onClick={() => setSize(size)}
                     >
-                        Continue last session
-                    </button>
+                        <a>Continue last session</a>
+                    </div>
                 )}
-                <button
-                    className="options-row w-full hover:no-underline"
-                    onClick={() => startOver(10)}
-                >
-                    SMALL (10x10)
-                </button>
-                <button
-                    className="options-row w-full hover:no-underline"
-                    onClick={() => startOver(15)}
-                >
-                    MEDIUM (20x20)
-                </button>
-                <button
-                    className="options-row w-full hover:no-underline"
-                    onClick={() => startOver(30)}
-                >
-                    LARGE (30x30)
-                </button>
+                <div className="options-row interactive w-full" onClick={() => startOver(10)}>
+                    <a>SMALL (10x10)</a>
+                </div>
+                <div className="options-row interactive w-full" onClick={() => startOver(15)}>
+                    <a>MEDIUM (20x20)</a>
+                </div>
+                <div className="options-row interactive w-full" onClick={() => startOver(30)}>
+                    <a>LARGE (30x30)</a>
+                </div>
             </div>
             <Footer to="../play" />
         </div>
