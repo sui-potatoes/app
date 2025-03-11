@@ -172,6 +172,7 @@ SPDX-License-Identifier: MIT
 }
 
 .action-button {
+    font-size: 14px;
     width: var(--button-size);
     height: var(--button-size);
     /* line-height: var(--button-size); */
