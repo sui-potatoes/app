@@ -10,7 +10,7 @@ import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
 import { models } from "./models";
 import { EventBus } from "./EventBus";
-import { AttackEvent } from "../Play";
+import { AttackEvent } from "../pages/Play";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
@@ -33,8 +33,7 @@ export type Tile =
  * - [x] implement Controls class
  * - [ ] implement Sound class
  * - [ ] implement Models and Textures classes
- * - [ ] behaviours for game interface
-
+ * - [ ] behaviors for game interface
  */
 export class Game extends THREE.Object3D {
     /** The Plane used for intersections */
@@ -67,7 +66,7 @@ export class Game extends THREE.Object3D {
     /** Flag to block execution any other action from being run in parallel */
     protected _isBlocked: boolean = false;
 
-    /** Contruct the `Game` instance from BCS representation (fetched Sui Object) */
+    /** Construct the `Game` instance from BCS representation (fetched Sui Object) */
     public static fromBCS(data: GameMap): Game {
         const map = data.map.map;
         const size = map.grid[0].length;
@@ -122,7 +121,7 @@ export class Game extends THREE.Object3D {
             this.add(helper);
         }
 
-        // create the intersectable plane
+        // create plane for intersections
         this.turn = 0;
         this.plane = this.initPlane(size);
         this.add(this.plane);

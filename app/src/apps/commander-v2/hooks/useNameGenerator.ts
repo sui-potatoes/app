@@ -24,7 +24,6 @@ export async function useNameGenerator() {
     });
     const assistantId = "asst_ESENwbgdYzcTnzuJ07kQcb7Q";
 
-
     const thread = await openai.beta.threads.create();
     const run = await openai.beta.threads.runs.create(thread.id, {
         assistant_id: assistantId,
@@ -36,7 +35,7 @@ export async function useNameGenerator() {
         let response = await openai.beta.threads.runs.retrieve(thread.id, run.id);
         if (response.status === "completed") {
             isComplete = true;
-            break
+            break;
         }
 
         if (response.status === "failed") {
@@ -46,7 +45,7 @@ export async function useNameGenerator() {
 
     const messages = await openai.beta.threads.messages.list(thread.id, {
         limit: 1,
-    })
+    });
 
     if (messages.data.length === 0) {
         throw new Error("Failed to generate name");

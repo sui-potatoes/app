@@ -3,22 +3,38 @@ Copyright (c) Sui Potatoes
 SPDX-License-Identifier: MIT
 */
 
+/* @import "tailwindcss"; */
+/* @theme {} */
+
 /* define variables for black and white */
 :root {
     --card-size-1: 40px;
     --main-color: #1df7cf;
     --button-size: 62px;
+
+    /* Colors */
+    --color-red: red;
+    --color-grey: grey;
+    --color-blue: blue;
+    --color-white: white;
+
+    /* Borders and Shadows */
+    --border: 0.01em solid var(--color-grey);
+    --shadow: 0px 0px 3px 3px var(--color-white);
+
+    /* Paddings and Margins */
+    --l-pad: 20px;
 }
 
 /* Take full screen */
-#commander-v2 {
+.commander-v2 {
     position: absolute;
     color: white !important;
     font-family: monospace;
     z-index: 1;
     /* background: black; */
     /* background-image: url('/images/bg-9.webp'); */
-    background-image: url('/images/bg-hr-1.png');
+    background-image: url("/images/bg-hr-2.png");
     background-position: center;
     background-color: black;
     background-size: cover;
@@ -27,6 +43,26 @@ SPDX-License-Identifier: MIT
     height: 100%;
     top: 0;
     left: 0;
+}
+
+.commander-v2 *, .commander-v2 a {
+    color: var(--color-white);
+    font-size: 18px;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.lowercase {
+    text-transform: lowercase;
+}
+
+.normal-case {
+    text-transform: none;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
 }
 
 #menu-scene {
@@ -141,6 +177,7 @@ SPDX-License-Identifier: MIT
 }
 
 .action-button {
+    font-size: 14px;
     width: var(--button-size);
     height: var(--button-size);
     /* line-height: var(--button-size); */
@@ -178,15 +215,9 @@ SPDX-License-Identifier: MIT
 
 /* === Navigation === */
 
-:root {
-    --l-pad: 20px;
-    --line-color: grey;
-}
-
 .main-menu-button {
     display: block;
-    text-transform: uppercase;
-    border: 0.01em solid var(--line-color);
+    border: var(--border);
     margin-bottom: 10px;
     padding: 10px var(--l-pad);
 }
@@ -205,14 +236,13 @@ SPDX-License-Identifier: MIT
     cursor: default;
 }
 
-
 .page-heading {
-    border-left: 0.01em solid var(--line-color);
+    border-left: 0.01em solid var(--color-grey);
     padding-left: var(--l-pad);
 }
 
 .back-button {
-    border-left: 0.01em solid var(--line-color);
+    border-left: 0.01em solid var(--color-grey);
     padding-left: var(--l-pad);
 }
 
@@ -238,25 +268,14 @@ SPDX-License-Identifier: MIT
 
 /* === Options === */
 
-.options-row:last-child {
-    border-bottom: 0.01em solid var(--line-color);
-}
-
 .options-row {
+    text-decoration: none;
     text-transform: uppercase;
-    border: 0.01em solid var(--line-color);
-    border-bottom: none;
+    border: var(--border);
+    cursor: default;
     padding: 10px var(--l-pad);
     display: flex;
     justify-content: space-between;
-}
-
-.options-row:hover, .options-row.selected, .main-menu-button:not(.disabled):hover {
-    box-shadow: 0px 0px 3px 2px white;
-}
-
-.options-row:hover a {
-    text-decoration: none;
 }
 
 /* === Inputs === */
@@ -269,14 +288,14 @@ SPDX-License-Identifier: MIT
     margin-left: 10px;
 }
 
-.yes-no:hover {
-    box-shadow: 0px 0px 1px 1px white;
+.yes-no:hover,
+.yes-no.selected {
+    box-shadow: var(--shadow);
     cursor: pointer;
 }
 
 .yes-no.selected {
-    /* font-weight: bold; */
-    box-shadow: 0px 0px 3px 3px white;
+    cursor: default;
 }
 
 .slider-outer {
@@ -285,7 +304,7 @@ SPDX-License-Identifier: MIT
     padding: 0 4px;
     margin-left: 10px;
     height: 28px;
-    border: 1px solid grey;
+    border: var(--border);
 }
 
 .slider-inner {
@@ -293,7 +312,7 @@ SPDX-License-Identifier: MIT
     height: 20px;
     top: 3px;
     left: 2px;
-    background: grey;
+    background: var(--color-grey);
 }
 
 .slider-inner-negative {
@@ -301,7 +320,7 @@ SPDX-License-Identifier: MIT
     height: 20px;
     top: 3px;
     right: 2px;
-    background: rgb(140, 29, 29);
+    background: var(--color-red);
 }
 
 .slider-value {
@@ -312,4 +331,35 @@ SPDX-License-Identifier: MIT
     width: 100%;
     height: 28px;
     text-align: center;
+}
+
+/* Defining application styles */
+
+/* Commonly used for Cards */
+.hover-shadow:hover {
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
+
+.with-border {
+    border: var(--border);
+}
+
+.interactive {
+    border: var(--border);
+}
+
+.interactive:hover, .interactive:hover .interactive {
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
+
+.interactive.selected {
+    box-shadow: var(--shadow);
+    cursor: default;
+}
+
+.non-interactive {
+    color: var(--color-grey);
+    cursor: not-allowed;
 }

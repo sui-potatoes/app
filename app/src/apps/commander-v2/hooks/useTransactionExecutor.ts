@@ -34,7 +34,7 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
     return {
         executor,
         isExecuting,
-        executeTransaction(tx: Transaction) {
+        async executeTransaction(tx: Transaction) {
             setIsExecuting(true);
             return executor!
                 .executeTransaction(tx, { showEffects: true, showObjectChanges: true, showEvents: true })

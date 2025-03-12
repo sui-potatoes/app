@@ -24,7 +24,7 @@ export async function loadModels() {
         barrier_steel,
         barrel_stack,
     ] = await Promise.all([
-        loader.loadAsync("/soldier_3.glb"),
+        loader.loadAsync("/models/soldier_3.glb"),
         loader.loadAsync("/models/base_tile.glb"),
         loader.loadAsync("/models/barrier_steel.glb"),
         loader.loadAsync("/models/barrel_stack.glb"),

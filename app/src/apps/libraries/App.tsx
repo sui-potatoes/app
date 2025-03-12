@@ -7,7 +7,7 @@ import "./libraries.css";
 
 export default function App() {
     return (
-        <div className="md:flex justify-center items-center">
+        <div className="md:flex justify-center items-center normal-case">
             <div className="markdown max-w-screen-sm">
                 <Libraries />
             </div>

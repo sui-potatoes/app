@@ -6,16 +6,17 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { NavLink } from "react-router-dom";
-import { GO_BACK_KEY } from "../../App";
+import { GO_BACK_KEY } from "../../../App";
 import { useEffect } from "react";
 import { Footer } from "./Components";
+import { useSuinsName } from "../hooks/useSuinsName";
 
 export function Menu() {
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
-    // const suins = new SuinsClient({ client, network: "testnet" });
     const disabled = !zkLogin.address;
-    const className = disabled ? "main-menu-button disabled" : "main-menu-button";
+    const className = disabled ? "options-row disabled interactive" : "options-row interactive";
+    const name = useSuinsName({ address: zkLogin.address });
 
     useEffect(() => {
         createMenuScene("menu-scene");
@@ -25,16 +26,15 @@ export function Menu() {
     return (
         <>
             <div id="menu-scene"></div>
-            {/* <SuinsModal show={showModal} onClose={() => setShowModal(false)} /> */}
-            <div className="flex justify-between align-middle h-screen flex-col w-full">
-                <div className="text-left text-uppercase text-lg p-10 max-w-xl">
-                    <h1 className="block p-1 mb-10 uppercase white page-heading"></h1>
+            <div className="flex justify-between flex-col w-full">
+                <div className="text-left p-10 max-w-xl">
+                    <h1 className="p-1 mb-10 white page-heading">{name && ('@' + name) || <>&nbsp;</>}</h1>
                 </div>
-                <div className="text-left text-uppercase text-lg rounded p-10 max-w-md">
+                <div className="text-left p-10 max-w-md">
                     <div className="">
                         {disabled && (
                             <div
-                                className="main-menu-button hover:cursor-pointer"
+                                className="main-menu-button interactive"
                                 onClick={async () => {
                                     localStorage.setItem(GO_BACK_KEY, window.location.href);
 
@@ -62,11 +62,11 @@ export function Menu() {
                             Play
                         </NavLink>
                         <NavLink
-                            to="headquaters"
+                            to="headquarters"
                             onClick={(e) => disabled && e.preventDefault()}
                             className={className}
                         >
-                            Headquaters
+                            Headquarters
                         </NavLink>
                         <NavLink
                             to="options"
@@ -78,7 +78,7 @@ export function Menu() {
                     </div>
                 </div>
                 <Footer to="/" text="Exit Game" />
-                <div className="fixed bottom-0 right-0 text-sm p-10">
+                <div className="fixed bottom-0 right-0 text-sm p-10 lowercase">
                     Version: 0.0.5-big-round-head
                 </div>
             </div>
@@ -176,7 +176,7 @@ export async function createMenuScene(element: string) {
     // const ambientLight = new THREE.AmbientLight(0x404040);
     // scene.add(ambientLight);
 
-    const gltf = await loader.loadAsync("/soldier_3.glb");
+    const gltf = await loader.loadAsync("/models/soldier_3.glb");
     console.log(gltf.animations);
     const model = gltf.scene;
     const mixer1 = new THREE.AnimationMixer(model);

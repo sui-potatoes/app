@@ -2,31 +2,31 @@
 // SPDX-License-Identifier: MIT
 
 import "./styles.css";
-import { Menu } from "./Menu";
-import { Options } from "./Options";
-import { Playground } from "./Play";
+import { Menu } from "./pages/Menu";
+import { Options } from "./pages/Options";
+import { Playground } from "./pages/Play";
 import { Route, Routes } from "react-router-dom";
-import { Armor } from "./Armor";
-import { Crew } from "./Crew";
-import { Headquaters } from "./Headquaters";
-import { Weapons } from "./Weapons";
-import { Editor } from "./Editor";
+import { Armor } from "./pages/Armor";
+import { Crew } from "./pages/Crew";
+import { Headquarters } from "./pages/Headquarters";
+import { Weapons } from "./pages/Weapons";
+import { Editor } from "./pages/Editor";
 import { useZkLogin } from "@mysten/enoki/react";
 
 export default function App() {
     const zkLogin = useZkLogin();
 
     return (
-        <div id="commander-v2" className="items-start">
+        <div className="commander-v2">
             <div className="w-full h-full bg-opacity-70 bg-black">
                 <Routes>
                     <Route path="/" element={<Menu />} />
                     {zkLogin && (
                         <>
-                            <Route path="headquaters/crew" element={<Crew />} />
-                            <Route path="headquaters/armor" element={<Armor />} />
-                            <Route path="headquaters/weapons" element={<Weapons />} />
-                            <Route path="headquaters" element={<Headquaters />} />
+                            <Route path="headquarters/crew" element={<Crew />} />
+                            <Route path="headquarters/armor" element={<Armor />} />
+                            <Route path="headquarters/weapons" element={<Weapons />} />
+                            <Route path="headquarters" element={<Headquarters />} />
                             <Route path="options" element={<Options />} />
                             <Route path="play" element={<Playground />} />
                             <Route path="editor" element={<Editor />} />

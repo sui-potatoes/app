@@ -22,17 +22,17 @@ import {
     ReloadMode,
     models,
     loadModels,
-} from "./engine";
+} from "../engine";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { Transaction } from "@mysten/sui/transactions";
 import { useSuiClient } from "@mysten/dapp-kit";
 
-import { bcs, Recruit } from "./types/bcs";
-import { GameMap, useGame } from "./hooks/useGame";
-import { useGameRecruits } from "./hooks/useGameRecruits";
-import { useTransactionExecutor } from "./hooks/useTransactionExecutor";
-import { useNetworkVariable } from "../../networkConfig";
-import { useNameGenerator } from "./hooks/useNameGenerator";
+import { bcs, Recruit } from "../types/bcs";
+import { GameMap, useGame } from "../hooks/useGame";
+import { useGameRecruits } from "../hooks/useGameRecruits";
+import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
+import { useNetworkVariable } from "../../../networkConfig";
+import { useNameGenerator } from "../hooks/useNameGenerator";
 import { NavLink } from "react-router-dom";
 
 export const SIZE = 10;
@@ -224,13 +224,13 @@ export function Playground() {
     if (!modelsLoaded) return centerDiv("Models not loaded");
     if (!map)
         return (
-            <div className="flex justify-between align-middle h-screen flex-col w-full">
-                <div className="text-left text-uppercase text-lg p-10 max-w-xl">
-                    <h1 className="block p-1 mb-10 uppercase white page-heading">play</h1>
+            <div className="flex justify-between flex-col w-full">
+                <div className="text-left p-10 max-w-xl">
+                    <h1 className="p-1 mb-10 page-heading">play</h1>
                 </div>
-                <div className="p-10 uppercase text-lg rounded max-w-3xl">
+                <div className="p-10 max-w-3xl">
                     <a
-                        className="options-row hover:cursor-pointer hover:no-underline"
+                        className="options-row interactive"
                         onClick={() =>
                             createDemo(1, [
                                 [0, 3],
@@ -241,7 +241,7 @@ export function Playground() {
                         Create demo 1
                     </a>
                     <a
-                        className="options-row hover:cursor-pointer hover:no-underline"
+                        className="options-row interactive"
                         style={{ border: "1px solid grey" }}
                         onClick={() =>
                             createDemo(2, [
@@ -254,7 +254,7 @@ export function Playground() {
                     >
                         Create demo 2
                     </a>
-                    <NavLink to="../editor" className="options-row mt-10 uppercase hover:no-underline">
+                    <NavLink to="../editor" className="options-row mt-10 interactive">
                         Level Editor
                     </NavLink>
                 </div>
@@ -534,7 +534,7 @@ type Recruit = typeof Recruit.$inferType;
 export function UI({
     eventBus,
     isExecuting,
-    turn: initilTurn,
+    turn: initialTurn,
     recruits,
 }: {
     eventBus: EventBus;
@@ -544,7 +544,7 @@ export function UI({
 }) {
     const [panelDisabled, setPanelDisabled] = useState(true);
     const [shootMode, setShootMode] = useState(false);
-    const [turn, setTurn] = useState(initilTurn);
+    const [turn, setTurn] = useState(initialTurn);
     const [mode, setMode] = useState<string | null>(null);
     const [log, setLog] = useState<string[]>([]);
     const [unit, setUnit] = useState<Unit | null>(null);
@@ -613,7 +613,7 @@ export function UI({
         (unit && "Reload " + unit.props.ammo.value + "/" + unit.props.ammo.max_value) || "Reload";
 
     return (
-        <div id="ui">
+        <div id="ui" className="normal-case">
             {unit && recruit && (
                 <div
                     id="panel-top"
@@ -642,10 +642,10 @@ export function UI({
             </div>
             <div
                 id="panel-bottom"
-                className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10"
+                className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10 normal-case"
             >
                 {log.map((entry, i) => (
-                    <p key={"log-" + i} className="text-sm text-white">
+                    <p key={"log-" + i} className="text-sm normal-case text-white">
                         {entry}
                     </p>
                 ))}
