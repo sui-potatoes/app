@@ -60,6 +60,11 @@ SPDX-License-Identifier: MIT
     text-transform: none;
 }
 
+.text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
 #menu-scene {
     z-index: -1;
     position: absolute;

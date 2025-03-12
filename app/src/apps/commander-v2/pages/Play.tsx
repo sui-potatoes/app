@@ -642,10 +642,10 @@ export function UI({
             </div>
             <div
                 id="panel-bottom"
-                className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10"
+                className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10 normal-case"
             >
                 {log.map((entry, i) => (
-                    <p key={"log-" + i} className="text-sm text-white">
+                    <p key={"log-" + i} className="text-sm normal-case text-white">
                         {entry}
                     </p>
                 ))}
