@@ -2,16 +2,15 @@
 
 [move]
 version = 3
-manifest_digest = "A9F9C5DFBFC0DDBA6912C691BC908F769D08D0376DA112EB40FC96FD17F8F13D"
-deps_digest = "CAFAD8A7CF51067FB4358215BECB86BD100DD64E57C2AC8A7AE7D74B688F5965"
+manifest_digest = "23B841CFA7759823817A57F2589C37B6EF0793F59F3B933BC74FE665ECB446F1"
+deps_digest = "52B406A7A21811BEF51751CF88DA0E76DAEFFEAC888D4F4060B1A72BBE7D8D35"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
-  { id = "Codec", name = "Codec" },
   { id = "DeepBook", name = "DeepBook" },
   { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "SVG", name = "SVG" },
   { id = "Sui", name = "Sui" },
   { id = "SuiSystem", name = "SuiSystem" },
+  { id = "suins", name = "suins" },
 ]
 
 [[move.package]]
@@ -19,18 +18,6 @@ id = "Bridge"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/bridge" }
 
 dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
-]
-
-[[move.package]]
-id = "Codec"
-source = { local = "../codec" }
-
-dependencies = [
-  { id = "Bridge", name = "Bridge" },
-  { id = "DeepBook", name = "DeepBook" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
   { id = "SuiSystem", name = "SuiSystem" },
@@ -50,23 +37,6 @@ id = "MoveStdlib"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
-id = "SVG"
-source = { local = "../svg" }
-
-dependencies = [
-  { id = "Bridge", name = "Bridge" },
-  { id = "Codec", name = "Codec" },
-  { id = "DeepBook", name = "DeepBook" },
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
-]
-
-dev-dependencies = [
-  { id = "suifrens", name = "Suifrens" },
-]
-
-[[move.package]]
 id = "Sui"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/sui-framework" }
 
@@ -83,11 +53,9 @@ dependencies = [
   { id = "Sui", name = "Sui" },
 ]
 
-[env]
-
 [[move.package]]
-id = "suifrens"
-source = { git = "https://github.com/MystenLabs/apps.git", rev = "main", subdir = "suifrens/suifrens" }
+id = "suins"
+source = { git = "https://github.com/MystenLabs/suins-contracts.git", rev = "main", subdir = "packages/suins" }
 
 dependencies = [
   { id = "Sui", name = "Sui" },
@@ -95,11 +63,13 @@ dependencies = [
 
 [move.toolchain-version]
 compiler-version = "1.45.2"
-edition = "2024.beta"
+edition = "2024"
 flavor = "sui"
+
+[env]
 
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
-latest-published-id = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
+original-published-id = "0x3ce2eea2b61d2185841bdb0b292c808bc60a27d7344cb9e743ea41b7ff768a64"
+latest-published-id = "0x3ce2eea2b61d2185841bdb0b292c808bc60a27d7344cb9e743ea41b7ff768a64"
 published-version = "1"

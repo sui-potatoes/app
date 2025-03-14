@@ -5,7 +5,10 @@ authors = ["Sui Potatoes"]
 
 [dependencies]
 SVG = { local = "../svg" }
-Codec = { local = "../codec" }
+codec = { r.mvr = "potatoes/codec" }
 
 [addresses]
 character = "0x0"
+
+[r.mvr]
+network = "testnet"

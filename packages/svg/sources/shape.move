@@ -8,7 +8,6 @@ use std::string::String;
 use sui::vec_map::{Self, VecMap};
 use svg::{animation::Animation, filter::Filter, point::{Self, Point}, print};
 
-#[test_only]
 /// Abort code for the `NotImplemented` error.
 const ENotImplemented: u64 = 264;
 
