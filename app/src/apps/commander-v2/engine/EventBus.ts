@@ -16,13 +16,33 @@ export interface BaseGameEvent<T extends string = string> {
  * - `all` events includes all events
  */
 export type GameEvent = {
-    all: { data: any };
-    ui: { action: string };
+    all: GameUIEvent;
+    ui: GameUIEvent;
     sui: { action: string } & any;
     game: { action: string } & any;
     three: { action: string };
     editor: { tool: string; direction: string };
     controls: { action: ControlsEvents };
+};
+
+const uiKeys = [
+    "shoot",
+    "reload",
+    "grenade",
+    "next_turn",
+    "next_target",
+    "prev_target",
+    "confirm",
+    "cancel",
+    "edit",
+] as const;
+
+/**
+ * UI events are simple text commands indicating selected action.
+ */
+export type GameUIEvent = {
+    action: (typeof uiKeys)[number];
+    data: any;
 };
 
 /**
@@ -38,7 +58,7 @@ export class EventBus extends THREE.EventDispatcher<GameEvent> {
      * Adds the `all` event type to all events.
      */
     public dispatchEvent<T extends keyof GameEvent>(
-        event: THREE.BaseEvent<T> & GameEvent[T] & BaseGameEvent,
+        event: THREE.BaseEvent<T> & GameEvent[T],
     ): void {
         super.dispatchEvent({ type: "all", data: event }); // all is always dispatched first
         super.dispatchEvent({ ...event });

@@ -4,6 +4,10 @@
 import { Game } from "./../Game";
 import { Controls } from "./../Controls";
 
+export type ModeEvents = {
+    mode: string;
+}
+
 /**
  * Each Mode defines a different way of interacting with the game. By default, the game mode is
  * `None`, however, when a `Unit` is selected, the game mode changes to `Move` by default. If

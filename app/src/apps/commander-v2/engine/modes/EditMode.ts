@@ -6,6 +6,14 @@ import { Game, Tile } from "./../Game";
 import { Controls } from "./../Controls";
 import { Mode } from "./Mode";
 
+export type EditModeEvents = {
+    editor: {
+        message: string;
+        tool: "Cover" | "High Cover" | "Object" | "Unwalkable";
+        direction: "up" | "down" | "left" | "right";
+    };
+};
+
 /**
  * The `Edit` mode allows the user to modify the map by adding, removing or modifying
  * obstacles, cover, and empty tiles.

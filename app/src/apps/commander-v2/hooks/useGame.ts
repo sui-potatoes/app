@@ -41,8 +41,6 @@ export function useGame({ id, enabled }: Props) {
                 if (data.data.bcs.dataType !== "moveObject") return null;
                 const map = Game.parse(fromBase64(data.data.bcs.bcsBytes));
 
-                console.log(map.history);
-
                 return {
                     objectId: data.data.objectId,
                     version: data.data.version,

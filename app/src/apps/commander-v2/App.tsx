@@ -34,7 +34,6 @@ export default function App() {
 
         setTimeout(() => {
             document.querySelectorAll(".interactive").forEach((e) => {
-                console.log(e.textContent)
                 e.addEventListener("mouseenter", (e) => {
                     if (
                         e.target &&

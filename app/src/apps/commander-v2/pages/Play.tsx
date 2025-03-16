@@ -7,18 +7,17 @@ import { Stats } from "@react-three/drei";
 import { Loader, Footer } from "./Components";
 import { useEffect, useMemo, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { UI } from "./play/UI";
 import {
     Game,
     Camera,
     Controls,
-    Unit,
     MoveMode,
     GameEvent,
     EventBus,
     GrenadeMode,
     ShootMode,
     EditMode,
-    NoneMode,
     ReloadMode,
     models,
     loadModels,
@@ -27,13 +26,14 @@ import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { Transaction } from "@mysten/sui/transactions";
 import { useSuiClient } from "@mysten/dapp-kit";
 
-import { bcs, Recruit } from "../types/bcs";
+import { bcs, HistoryRecord } from "../types/bcs";
 import { GameMap, useGame } from "../hooks/useGame";
 import { useGameRecruits } from "../hooks/useGameRecruits";
 import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
 import { useNetworkVariable } from "../../../networkConfig";
 import { useNameGenerator } from "../hooks/useNameGenerator";
 import { NavLink } from "react-router-dom";
+import { fromBase64 } from "@mysten/bcs";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
@@ -172,40 +172,45 @@ export function Playground() {
                         effects: res.effects,
                     });
 
-                    events.forEach((event) => {
-                        switch (event.type) {
-                            case `${packageId}::event::AttackEvent`:
-                                const data = event.parsedJson as AttackEvent;
-                                eventBus.dispatchEvent({
-                                    type: "sui",
-                                    action: "attack",
-                                    message: printAttackEvent(data),
-                                    data,
-                                });
-                                break;
-                            case `${packageId}::event::MoveEvent`: {
-                                const { path } = event.parsedJson as { path: [number, number][] };
-                                eventBus.dispatchEvent({
-                                    type: "sui",
-                                    action: "path",
-                                    path,
-                                    message:
-                                        "Unit moves: " +
-                                        path.map((p) => `(${p.toString()})`).join(", "),
-                                });
-                                break;
-                            }
-                            case `${packageId}::event::ReloadEvent`: {
-                                const { unit } = event.parsedJson as { unit: [number, number] };
-                                eventBus.dispatchEvent({
-                                    type: "sui",
-                                    action: "reload",
-                                    unit,
-                                    message: "Unit reloads: " + unit.toString(),
-                                });
-                            }
-                        }
-                    });
+                    const eventType = `${packageId}::history::HistoryUpdated`;
+                    const historyBcs = events.find((e) => e.type == eventType)?.bcs;
+
+                    if (!historyBcs) return;
+
+                    const decoded = bcs.vector(HistoryRecord).parse(fromBase64(historyBcs));
+                    const first = decoded[0]!; // the cannot be an empty History event
+
+                    // prettier-ignore
+                    switch (first.$kind) {
+                        case "Reload": return eventBus.dispatchEvent({
+                            type: "sui",
+                            action: "reload",
+                            unit: first.Reload as [number, number],
+                            message: `unit (${first.Reload}) reloads`
+                        });
+                        case "NextTurn": return eventBus.dispatchEvent({
+                            type: "sui",
+                            action: "next_turn",
+                            message: `next turn`
+                        });;
+                        case "Move": return eventBus.dispatchEvent({
+                            type: "sui",
+                            action: "path",
+                            path: first.Move,
+                            message:
+                                "unit moves: " +
+                                first.Move.map((p) => `(${p.toString()})`).join(", "),
+                        });
+                        case "Attack": return;
+                    }
+
+                    // const data = event.parsedJson as AttackEvent;
+                    // eventBus.dispatchEvent({
+                    //     type: "sui",
+                    //     action: "attack",
+                    //     message: printAttackEvent(data),
+                    //     data,
+                    // });
                 }
             }
 
@@ -267,7 +272,7 @@ export function Playground() {
     return (
         <>
             <Canvas camera={camera}>
-                {modelsLoaded && map && <GameApp map={map} eventBus={eventBus} camera={camera} />}
+                {modelsLoaded && <GameApp map={map} eventBus={eventBus} camera={camera} />}
                 <Stats />
             </Canvas>
             <UI
@@ -479,7 +484,7 @@ export function GameApp({
         });
 
         eventBus.addEventListener("sui", ({ action, data, unit }) => {
-            if (action == "attack") {
+            if (action == "attack" && data && unit) {
                 let params = data as AttackEvent;
                 game.applyAttackEvent(params);
             }
@@ -488,7 +493,7 @@ export function GameApp({
                 game.turn = game.turn + 1;
             }
 
-            if (action == "reload") {
+            if (action == "reload" && data && unit) {
                 game.applyReloadEvent(unit);
             }
         });
@@ -523,159 +528,6 @@ export function GameApp({
 }
 
 /**
- * The length of the log displayed in the UI.
- */
-const LOG_LENGTH = 5;
-
-type Recruit = typeof Recruit.$inferType;
-
-/**
- * UI Component which renders buttons and emits events in the `eventBus` under the `ui` type.
- * Listens to the in-game events to render additional buttons and log the actions.
- */
-export function UI({
-    eventBus,
-    isExecuting,
-    turn: initialTurn,
-    recruits,
-}: {
-    eventBus: EventBus;
-    isExecuting?: boolean;
-    turn: number;
-    recruits: { [key: string]: Recruit } | undefined;
-}) {
-    const [panelDisabled, setPanelDisabled] = useState(true);
-    const [shootMode, setShootMode] = useState(false);
-    const [turn, setTurn] = useState(initialTurn);
-    const [mode, setMode] = useState<string | null>(null);
-    const [log, setLog] = useState<string[]>([]);
-    const [unit, setUnit] = useState<Unit | null>(null);
-    const [recruit, setRecruit] = useState<Recruit | null>(null);
-
-    const onAction = (action: string) => eventBus.dispatchEvent({ type: "ui", action });
-    const button = (id: string, disabled?: boolean, text?: string) => (
-        <button
-            onClick={() => onAction(id)}
-            className={
-                "action-button mb-2" +
-                (disabled || isExecuting ? " disabled" : "") +
-                (mode && mode.toLocaleLowerCase() == id ? " active" : "")
-            }
-        >
-            {text || id}
-        </button>
-    );
-
-    // Subscribe to the game events to update the UI.
-    useEffect(() => {
-        function gameEventsHandler(event: GameEvent["game"]) {
-            if (event.action === "mode_switch") {
-                setMode(event.mode.name);
-
-                if (event.mode instanceof ShootMode) setShootMode(true);
-                else setShootMode(false);
-
-                if (event.mode instanceof NoneMode) setPanelDisabled(true);
-                else setPanelDisabled(false);
-            }
-
-            if (event.action === "unit_selected" && recruits) {
-                let unit = event.unit as Unit;
-                let recruitId = unit.props.recruit;
-                if (recruitId in recruits) {
-                    setRecruit(recruits[recruitId]);
-                    setUnit(unit);
-                }
-            }
-        }
-
-        eventBus.addEventListener("game", gameEventsHandler);
-        return () => eventBus.removeEventListener("game", gameEventsHandler);
-    }, [recruits]);
-
-    // Subscribe to the SUI events + all events to update the log.
-    useEffect(() => {
-        eventBus.addEventListener("sui", (event) => {
-            if (event.action === "next_turn") {
-                setTurn(event.turn);
-            }
-        });
-
-        eventBus.all((event) => {
-            setLog((log) => {
-                let { type, action, message } = event;
-                let fullLog = [...log, `${type}: ${message || action || ""}`];
-                if (fullLog.length > LOG_LENGTH) fullLog = fullLog.slice(fullLog.length - 5);
-                return fullLog;
-            });
-        });
-    }, []);
-
-    const reloadText =
-        (unit && "Reload " + unit.props.ammo.value + "/" + unit.props.ammo.max_value) || "Reload";
-
-    return (
-        <div id="ui" className="normal-case">
-            {unit && recruit && (
-                <div
-                    id="panel-top"
-                    className="fixed w-full text-xs top-0 left-0 p-0 text-center mt-10"
-                >
-                    <p className="text-sm text-white">
-                        {recruit.metadata.name} ({recruit.rank.$kind}) HP: {unit.props.hp.value}/
-                        {unit.props.hp.max_value}; AP {unit.props.ap.value}/2; Ammo:{" "}
-                        {unit.props.ammo.value}/{unit.props.ammo.max_value}
-                    </p>
-                </div>
-            )}
-            <div
-                id="panel-left"
-                className="fixed h-full left-0 top-0 p-10 flex justify-end flex-col text-center"
-            >
-                {button("shoot")}
-                {button("reload", unit?.props.ammo.value == unit?.props.ammo.max_value, reloadText)}
-                {button("grenade", true)}
-                <button
-                    onClick={() => onAction("next_turn")}
-                    className={"action-button mt-40" + (isExecuting ? " disabled" : "")}
-                >
-                    End Turn ({turn + 1})
-                </button>
-            </div>
-            <div
-                id="panel-bottom"
-                className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10 normal-case"
-            >
-                {log.map((entry, i) => (
-                    <p key={"log-" + i} className="text-sm normal-case text-white">
-                        {entry}
-                    </p>
-                ))}
-            </div>
-            <div
-                id="panel-right"
-                className="fixed h-full right-0 top-0 p-10 flex justify-end flex-col text-center"
-            >
-                {shootMode && button("next_target", false, ">")}
-                {shootMode && button("prev_target", false, "<")}
-                {button("confirm", panelDisabled)}
-                {button("cancel", panelDisabled)}
-                {button("edit")}
-                <button
-                    onClick={() => {
-                        sessionStorage.removeItem(LS_KEY);
-                        window.location.reload();
-                    }}
-                    className={"action-button mt-40" + (isExecuting ? " disabled" : "")}
-                >
-                    Exit
-                </button>
-            </div>
-        </div>
-    );
-}
-
-/**
  * Load the camera for the game.
  * Happens just ones in `useMemo` and is used in the `Canvas` component.
  */
@@ -686,13 +538,13 @@ function loadCamera() {
     return camera;
 }
 
-/**
- * Print the attack event as a nice string.
- */
-function printAttackEvent(event: AttackEvent): string {
-    if (event.is_missed) return "Miss!";
-    if (event.is_dodged) return "Dodged!";
-    if (event.is_kia) return "Killed in action! Damage: " + event.damage;
-    if (event.is_crit) return `Critical hit! ${event.damage} damage`;
-    return `Dealt ${event.damage} damage`;
-}
+// /**
+//  * Print the attack event as a nice string.
+//  */
+// function printAttackEvent(event: AttackEvent): string {
+//     if (event.is_missed) return "Miss!";
+//     if (event.is_dodged) return "Dodged!";
+//     if (event.is_kia) return "Killed in action! Damage: " + event.damage;
+//     if (event.is_crit) return `Critical hit! ${event.damage} damage`;
+//     return `Dealt ${event.damage} damage`;
+// }

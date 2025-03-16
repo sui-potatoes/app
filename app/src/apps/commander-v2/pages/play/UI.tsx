@@ -1,0 +1,162 @@
+// Copyright (c) Sui Potatoes
+// SPDX-License-Identifier: MIT
+
+import { useEffect, useState } from "react";
+import { EventBus, GameEvent, NoneMode, ShootMode } from "../../engine";
+import { Recruit } from "../../types/bcs";
+import { type Unit } from "../../engine/Unit";
+import { GameUIEvent } from "../../engine/EventBus";
+
+type Recruit = typeof Recruit.$inferType;
+
+/**
+ * The length of the log displayed in the UI.
+ */
+const LOG_LENGTH = 5;
+const LS_KEY = "commander-v2";
+
+/**
+ * UI Component which renders buttons and emits events in the `eventBus` under the `ui` type.
+ * Listens to the in-game events to render additional buttons and log the actions.
+ */
+export function UI({
+    eventBus,
+    isExecuting,
+    turn: initialTurn,
+    recruits,
+}: {
+    eventBus: EventBus;
+    isExecuting?: boolean;
+    turn: number;
+    recruits: { [key: string]: Recruit } | undefined;
+}) {
+    const [panelDisabled, setPanelDisabled] = useState(true);
+    const [shootMode, setShootMode] = useState(false);
+    const [turn, setTurn] = useState(initialTurn);
+    const [mode, setMode] = useState<string | null>(null);
+    const [log, setLog] = useState<string[]>([]);
+    const [unit, setUnit] = useState<Unit | null>(null);
+    const [recruit, setRecruit] = useState<Recruit | null>(null);
+
+    const onAction = (action: GameUIEvent['action']) => eventBus.dispatchEvent({ type: "ui", action });
+    const button = (id: GameUIEvent['action'], disabled?: boolean, text?: string) => (
+        <button
+            onClick={() => onAction(id)}
+            className={
+                "action-button mb-2" +
+                (disabled || isExecuting ? " disabled" : "") +
+                (mode && mode.toLocaleLowerCase() == id ? " active" : "")
+            }
+        >
+            {text || id}
+        </button>
+    );
+
+    // Subscribe to the game events to update the UI.
+    useEffect(() => {
+        function gameEventsHandler(event: GameEvent["game"]) {
+            if (event.action === "mode_switch") {
+                setMode(event.mode.name);
+
+                if (event.mode instanceof ShootMode) setShootMode(true);
+                else setShootMode(false);
+
+                if (event.mode instanceof NoneMode) setPanelDisabled(true);
+                else setPanelDisabled(false);
+            }
+
+            if (event.action === "unit_selected" && recruits) {
+                let unit = event.unit as Unit;
+                let recruitId = unit.props.recruit;
+                if (recruitId in recruits) {
+                    setRecruit(recruits[recruitId]);
+                    setUnit(unit);
+                }
+            }
+        }
+
+        eventBus.addEventListener("game", gameEventsHandler);
+        return () => eventBus.removeEventListener("game", gameEventsHandler);
+    }, [recruits]);
+
+    // Subscribe to the SUI events + all events to update the log.
+    useEffect(() => {
+        eventBus.addEventListener("sui", (event) => {
+            if (event.action === "next_turn") {
+                setTurn(event.turn);
+            }
+        });
+
+        eventBus.all((event) => {
+            setLog((log) => {
+                let { type, action, message } = event;
+                let fullLog = [...log, `${type}: ${message || action || ""}`];
+                if (fullLog.length > LOG_LENGTH) fullLog = fullLog.slice(fullLog.length - 5);
+                return fullLog;
+            });
+        });
+    }, []);
+
+    const reloadText =
+        (unit && "Reload " + unit.props.ammo.value + "/" + unit.props.ammo.max_value) || "Reload";
+
+    return (
+        <div id="ui" className="normal-case">
+            {unit && recruit && (
+                <div
+                    id="panel-top"
+                    className="fixed w-full text-xs top-0 left-0 p-0 text-center mt-10"
+                >
+                    <p className="text-sm text-white">
+                        {recruit.metadata.name} ({recruit.rank.$kind}) HP: {unit.props.hp.value}/
+                        {unit.props.hp.max_value}; AP {unit.props.ap.value}/2; Ammo:{" "}
+                        {unit.props.ammo.value}/{unit.props.ammo.max_value}
+                    </p>
+                </div>
+            )}
+            <div
+                id="panel-left"
+                className="fixed h-full left-0 top-0 p-10 flex justify-end flex-col text-center"
+            >
+                {button("shoot")}
+                {button("reload", unit?.props.ammo.value == unit?.props.ammo.max_value, reloadText)}
+                {button("grenade", true)}
+                <button
+                    onClick={() => onAction("next_turn")}
+                    className={"action-button mt-40" + (isExecuting ? " disabled" : "")}
+                >
+                    End Turn ({turn + 1})
+                </button>
+            </div>
+            <div
+                id="panel-bottom"
+                className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10 normal-case"
+            >
+                {log.map((entry, i) => (
+                    <p key={"log-" + i} className="text-sm normal-case text-white">
+                        {entry}
+                    </p>
+                ))}
+            </div>
+            <div
+                id="panel-right"
+                className="fixed h-full right-0 top-0 p-10 flex justify-end flex-col text-center"
+            >
+                {shootMode && button("next_target", false, ">")}
+                {shootMode && button("prev_target", false, "<")}
+                {button("confirm", panelDisabled)}
+                {button("cancel", panelDisabled)}
+                {button("edit")}
+                <button
+                    onClick={() => {
+                        sessionStorage.removeItem(LS_KEY);
+                        window.location.reload();
+                    }}
+                    className={"action-button mt-40" + (isExecuting ? " disabled" : "")}
+                >
+                    Exit
+                </button>
+            </div>
+        </div>
+    );
+}
