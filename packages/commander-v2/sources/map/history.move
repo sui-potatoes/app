@@ -8,14 +8,16 @@
 /// minimalistic representation.
 module commander::history;
 
-/// Only store last 20 records.
-const LENGTH: u64 = 20;
+use sui::event;
 
 /// Stores history of actions.
 public struct History(vector<Record>) has drop, store;
 
+/// Event that marks an update in `History` for tx sender.
+public struct HistoryUpdated(vector<Record>) has copy, drop;
+
 /// A single record in the history.
-public enum Record has drop, store {
+public enum Record has drop, copy, store {
     /// Block header for attack action.
     Reload(vector<u16>),
     /// Next turn action.
@@ -39,11 +41,20 @@ public enum Record has drop, store {
 /// Create empty history.
 public fun empty(): History { History(vector[]) }
 
+/// Add a single record.
+/// WARNING: if you're adding multiple record in the same transaction,
+///     use `append` to emit a single event!
+public fun add(h: &mut History, record: Record) {
+    let History(history) = h;
+    event::emit(HistoryUpdated(vector[record]));
+    history.push_back(record);
+}
+
 /// Add a new `Record` to the `History` log.
-public fun add_record(h: &mut History, action: Record) {
-    let History(records) = h;
-    if (records.length() == LENGTH) { records.remove(0); }; // remove oldest record;
-    records.push_back(action)
+public fun append(h: &mut History, records: vector<Record>) {
+    let History(history) = h;
+    event::emit(HistoryUpdated(records));
+    history.append(records);
 }
 
 /// Get the length of the `History` log.

@@ -4,7 +4,7 @@
 /// Module: commander
 module commander::commander;
 
-use commander::{history, map::{Self, Map}, recruit::Recruit};
+use commander::{history::{Self, History}, map::{Self, Map}, recruit::Recruit};
 use sui::{object_table::{Self, ObjectTable}, random::Random};
 
 /// The main object of the game, controls the game state, configuration and
@@ -18,6 +18,7 @@ public struct Commander has key {
 public struct Game has key {
     id: UID,
     map: Map,
+    history: History,
     /// Temporarily stores recruits for the duration of the game.
     /// If recruits are KIA, they're "killed" upon removal from this table.
     recruits: ObjectTable<ID, Recruit>,
@@ -28,6 +29,7 @@ public fun new(ctx: &mut TxContext): Game {
     let id = object::new(ctx);
     Game {
         map: map::default(id.to_inner()),
+        history: history::empty(),
         recruits: object_table::new(ctx),
         id,
     }
@@ -38,6 +40,7 @@ public fun new_with_map(map: vector<u8>, ctx: &mut TxContext): Game {
     let id = object::new(ctx);
     Game {
         map: map::from_bytes(map),
+        history: history::empty(),
         recruits: object_table::new(ctx),
         id,
     }
@@ -48,6 +51,7 @@ public fun demo_1(ctx: &mut TxContext): Game {
     let id = object::new(ctx);
     Game {
         map: map::demo_1(id.to_inner()),
+        history: history::empty(),
         recruits: object_table::new(ctx),
         id,
     }
@@ -58,6 +62,7 @@ public fun demo_2(ctx: &mut TxContext): Game {
     let id = object::new(ctx);
     Game {
         map: map::demo_2(id.to_inner()),
+        history: history::empty(),
         recruits: object_table::new(ctx),
         id,
     }
@@ -99,6 +104,8 @@ entry fun perform_attack(
         let leader = recruit.leader();
         transfer::public_transfer(recruit.kill(ctx), leader);
     });
+
+    game.history.append(history)
 }
 
 /// Switch to the next turn.
