@@ -6,10 +6,7 @@ authors = ["Sui Potatoes"]
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet", override = true }
 SVG = { local = "../svg" }
-codec = { r.mvr = "potatoes/codec" }
+Codec = { local = "../codec" }
 
 [addresses]
 character = "0x0"
-
-[r.mvr]
-network = "testnet"
