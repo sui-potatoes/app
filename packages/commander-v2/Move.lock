@@ -2,7 +2,7 @@
 
 [move]
 version = 3
-manifest_digest = "1A6F0F514A0931D5E0B7B0D2D6528EE9C5AE90B7138651A8EDE55E82DBC3FAC1"
+manifest_digest = "41DBE473CDC92B9593C398E9315D61ED83058D74957E59AFC8A11D1210F31671"
 deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
 dependencies = [
   { id = "BitField", name = "BitField" },
@@ -22,7 +22,7 @@ dependencies = [
 
 [[move.package]]
 id = "Codec"
-source = { git = "https://github.com/sui-potatoes/app.git", rev = "codec@testnet-v2", subdir = "packages/codec" }
+source = { local = "../codec" }
 
 dependencies = [
   { id = "Sui", name = "Sui" },
@@ -57,7 +57,7 @@ dependencies = [
 ]
 
 [move.toolchain-version]
-compiler-version = "1.44.3"
+compiler-version = "1.40.3"
 edition = "2024.beta"
 flavor = "sui"
 

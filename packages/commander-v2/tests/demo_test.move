@@ -3,7 +3,7 @@
 
 module commander::demo_test;
 
-use commander::{items, map, recruit::{Self, Recruit}};
+use commander::{history, items, map, recruit::{Self, Recruit}};
 use std::unit_test::assert_eq;
 use sui::{random, test_utils::destroy};
 
@@ -75,36 +75,43 @@ fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
 
     map.next_turn();
 
+    // prettier-ignore
     let result = 'crossfire: loop {
-            map.unit(4, 1).do_ref!(|unit| if (unit.ammo() == 0) map.perform_reload(4, 1));
-            let (is_hit, is_dead) = map.perform_attack(&mut rng, 4, 1, 0, 3);
-            is_dead.do!(|_| break 'crossfire vector[map.turn(), 2]);
-            map.unit(0, 3).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
-            map.unit(4, 1).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // no more AP
-
-            // Unit 2 is in a good position already and chooses to perform an attack
-            // Depending on the RNG seed, we want to check different outcomes
-            map.unit(0, 3).do_ref!(|unit| if (unit.ammo() == 0) map.perform_reload(0, 3));
-            let (is_hit, is_dead) = map.perform_attack(&mut rng, 0, 3, 4, 1);
-            is_dead.do!(|_| break 'crossfire vector[map.turn(), 1]);
-            map.unit(4, 1).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
-            map.unit(0, 3).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // depleted AP
-
-            // Reset the Map turn
-            map.next_turn();
+        map.unit(4, 1).do_ref!(|unit| if (unit.ammo() == 0) { map.perform_reload(4, 1); });
+        let history = map.perform_attack(&mut rng, 4, 1, 0, 3);
+        if (history::list_kia(&history).length() > 0) {
+            break 'crossfire vector[map.turn(), 2]
         };
 
-    // print the result
-    {
-        let mut res = b"seed: ".to_string();
-        res.append(seed.to_string());
-        res.append_utf8(b"; crossfire over at turn ");
-        res.append(result[0].to_string());
-        res.append_utf8(b"; Unit ");
-        res.append(result[1].to_string());
-        res.append_utf8(b" is dead");
-        std::debug::print(&res);
+        // map.unit(0, 3).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
+        map.unit(4, 1).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // no more AP
+
+        // Unit 2 is in a good position already and chooses to perform an attack
+        // Depending on the RNG seed, we want to check different outcomes
+        map.unit(0, 3).do_ref!(|unit| if (unit.ammo() == 0) { map.perform_reload(0, 3); });
+        let history = map.perform_attack(&mut rng, 0, 3, 4, 1);
+        if (history::list_kia(&history).length() > 0) {
+            break 'crossfire vector[map.turn(), 1]
+        };
+
+        // map.unit(4, 1).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
+        map.unit(0, 3).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // depleted AP
+
+        // Reset the Map turn
+        map.next_turn();
     };
+
+    // print the result (uncomment if results are needed)
+    // {
+    //     let mut res = b"seed: ".to_string();
+    //     res.append(seed.to_string());
+    //     res.append_utf8(b"; crossfire over at turn ");
+    //     res.append(result[0].to_string());
+    //     res.append_utf8(b"; Unit ");
+    //     res.append(result[1].to_string());
+    //     res.append_utf8(b" is dead");
+    //     std::debug::print(&res);
+    // };
 
     destroy(vector[r1, r3]);
     map.destroy();

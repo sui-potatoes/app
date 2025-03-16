@@ -4,7 +4,7 @@
 /// Module: commander
 module commander::commander;
 
-use commander::{map::{Self, Map}, recruit::Recruit};
+use commander::{history, map::{Self, Map}, recruit::Recruit};
 use sui::{object_table::{Self, ObjectTable}, random::Random};
 
 /// The main object of the game, controls the game state, configuration and
@@ -92,9 +92,9 @@ entry fun perform_attack(
     ctx: &mut TxContext,
 ) {
     let mut rng = rng.new_generator(ctx);
-    let (_, is_dead) = game.map.perform_attack(&mut rng, x0, y0, x1, y1);
+    let history = game.map.perform_attack(&mut rng, x0, y0, x1, y1);
 
-    is_dead.do!(|id| {
+    history::list_kia(&history).do!(|id| {
         let recruit = game.recruits.remove(id);
         let leader = recruit.leader();
         transfer::public_transfer(recruit.kill(ctx), leader);

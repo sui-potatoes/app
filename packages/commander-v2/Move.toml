@@ -6,13 +6,10 @@ edition = "2024.beta" # edition = "legacy" to use legacy (pre-2024) Move
 
 [dependencies]
 Sui = { override = true, git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "releases/sui-v1.41.0-release" }
-Grid = { local = "../grid" }
 BitField = { local = "../bit_field" }
+Codec = { local = "../codec" }
+Grid = { local = "../grid" }
 NameGenerator = { local = "../name-gen" }
-codec = { r.mvr = "potatoes/codec" }
 
 [addresses]
 commander = "0x0"
-
-[r.mvr]
-network = "testnet"
