@@ -39,15 +39,18 @@ export function armorMetadata(name: string): Metadata {
         {
             ["light armor"]: {
                 image: "/images/light_armor.svg",
-                description: "",
+                description:
+                    "Modest protection, but light and easy to move in. Increases chance of dodging incoming damage.",
             },
             ["heavy armor"]: {
                 image: "/images/heavy_armor.svg",
-                description: "",
+                description:
+                    "Heavy armor provides maximum protection, but at the cost of mobility. A good choice for a tank.",
             },
             ["medium armor"]: {
                 image: "/images/medium_armor.svg",
-                description: "",
+                description:
+                    "Medium armor is the most balanced choice - a good compromise between protection and mobility.",
             },
         }[name.toLowerCase()] || {
             image: "",

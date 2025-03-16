@@ -99,6 +99,8 @@ export function Playground() {
                 const { x: x0, y: y0 } = event.unit.gridPosition as THREE.Vector2;
                 const { x: x1, y: y1 } = event.targetUnit.gridPosition as THREE.Vector2;
 
+                console.log(x0, y0, x1, y1);
+
                 const result = await performAttack([x0, y0], [x1, y1]);
                 if (!result) return console.log("unable to perform attack");
                 setLockedTx(result.tx);

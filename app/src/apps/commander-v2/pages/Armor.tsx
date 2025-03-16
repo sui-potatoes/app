@@ -103,11 +103,7 @@ export function Armor() {
                             <div className="mb-10">
                                 <h2 className="mb-2">DESCRIPTION</h2>
                                 <img src={armorMetadata(selected.name).image} />
-                                <p>
-                                    Armor protects the wearer and decreases incoming damage.
-                                    Depending on the type it may provide additional stat benefits or
-                                    decreases.
-                                </p>
+                                <p className="normal-case">{armorMetadata(selected.name).description}</p>
                             </div>
                             <div>
                                 <h2 className="mb-2">STATS</h2>

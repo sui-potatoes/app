@@ -96,26 +96,26 @@ public fun new(id: ID, size: u16): Map {
     }
 }
 
-/// Maps will be 30x30 tiles for now. Initially empty.
-public fun default(id: ID): Map {
-    new(id, 30)
-}
+/// Default Map is 30x30 tiles for now. Initially empty.
+public fun default(id: ID): Map { new(id, 30) }
 
 // === Actions ===
 
-/// Proceed to the next turn.
-public fun next_turn(map: &mut Map) {
-    map.turn = map.turn + 1;
-}
-
 /// Place a `Recruit` on the map at the given position.
-public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
+public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16): Record {
     let target_tile = &map.grid[x, y];
 
     assert!(target_tile.unit.is_none(), EUnitAlreadyOnTile);
     assert!(target_tile.tile_type != TileType::Unwalkable, ETileIsUnwalkable);
 
-    map.grid[x, y].unit.fill(recruit.to_unit())
+    map.grid[x, y].unit.fill(recruit.to_unit());
+    history::new_recruit_placed(x, y)
+}
+
+/// Proceed to the next turn.
+public fun next_turn(map: &mut Map): Record {
+    map.turn = map.turn + 1;
+    history::new_next_turn()
 }
 
 /// Reload the unit's weapon. It costs 1 AP.
@@ -167,7 +167,6 @@ public fun perform_attack(
     let mut history = vector[history::new_attack(vector[x0, y0], vector[x1, y1])];
     let attacker = &mut map.grid[x0, y0].unit;
     assert!(attacker.is_some(), ENoUnit);
-    assert!(x0 != x1 && y0 != y1, ENoUnit); // TODO: change error code
 
     let unit = attacker.borrow_mut();
     unit.try_reset_ap(map.turn);
@@ -183,10 +182,12 @@ public fun perform_attack(
     } else (false, 0, false);
 
     if (is_dodged) history.push_back(history::new_dodged());
-    if (is_hit) history.push_back({
-        if (is_crit) history::new_crit(damage)
-        else history::new_damage(x1, y1, damage)
-    }) else history.push_back(history::new_missed());
+    if (is_hit) {
+        history.push_back({
+            if (is_crit) history::new_crit(damage)
+            else history::new_damage(x1, y1, damage)
+        })
+    } else history.push_back(history::new_missed());
 
     if (is_kia) history.push_back(history::new_kia(target.destroy()))
     else map.grid[x1, y1].unit.fill(target);

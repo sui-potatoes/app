@@ -12,6 +12,7 @@ import { SuinsClient, SuinsTransaction } from "@mysten/suins";
 import { useNetworkVariable } from "../../../networkConfig";
 import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
 import { useSuinsName } from "../hooks/useSuinsName";
+import { COMMANDER_BASE_NAME } from "../../../constants";
 
 /**
  * Page that stores the options of the user.
@@ -27,23 +28,11 @@ import { useSuinsName } from "../hooks/useSuinsName";
  * - UI size options
  */
 export function Options() {
-    const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
-    const client = useSuiClient();
-    const packageId = useNetworkVariable("commanderRegistryPackageId");
-    const registry = useNetworkVariable("commanderNamesObjectId");
-    const name = useSuinsName({ address: zkLogin.address });
-
-    const { executeTransaction } = useTransactionExecutor({
-        // @ts-ignore
-        client,
-        signer: () => flow.getKeypair({ network: "testnet" }),
-        enabled: !!zkLogin.address,
-    });
-    const nsClient = new SuinsClient({ client, network: "testnet" });
-    const [suinsName, setSuinsName] = useState("");
-    const [showModal, setShowModal] = useState(false);
-    const [optModels, setOptModels] = useState(false);
+    const checkIsFullscreen = window.innerHeight == screen.height;
+    const [isFullscreen, setIsFullscreen] = useState(checkIsFullscreen);
+    const [optModels, setOptModels] = useState(true);
+    const { name, modal: suinsModal, showNameModal } = suinsSetting();
 
     const { data: balanceQuery, isPending } = useSuiClientQuery(
         "getBalance",
@@ -98,18 +87,54 @@ export function Options() {
                     <label>NAME</label>
                     {!name && (
                         <div className="flex">
-                            <div className="yes-no" onClick={() => setShowModal(true)}>
+                            <div className="yes-no" onClick={() => showNameModal()}>
                                 SET
                             </div>
                         </div>
                     )}
-                    {name && <div className="flex">{name}</div>}
+                    {name && <div className="flex">{name}.{COMMANDER_BASE_NAME}.sui</div>}
                 </div>
                 <div className="options-row">
                     <label>OPTIMIZE MODELS</label>
                     <YesOrNo value={optModels} onChange={setOptModels} />
                 </div>
+                <div className="options-row">
+                    <label>FULLSCREEN</label>
+                    <YesOrNo value={isFullscreen} onChange={(v) => {
+                        if (v) document.documentElement.requestFullscreen();
+                        else document.exitFullscreen();
+                        setIsFullscreen(v);
+                    }} />
+                </div>
             </div>
+            {!name && suinsModal}
+            <Footer />
+        </div>
+    );
+}
+
+function suinsSetting() {
+    const zkLogin = useZkLogin();
+    const flow = useEnokiFlow();
+    const client = useSuiClient();
+    const name = useSuinsName({ address: zkLogin.address });
+    const packageId = useNetworkVariable("commanderRegistryPackageId");
+    const registry = useNetworkVariable("commanderNamesObjectId");
+    const [showModal, setShowModal] = useState(false);
+    const { executeTransaction } = useTransactionExecutor({
+        // @ts-ignore
+        client,
+        signer: () => flow.getKeypair({ network: "testnet" }),
+        enabled: !!zkLogin.address,
+    });
+    const nsClient = new SuinsClient({ client, network: "testnet" });
+    const [suinsName, setSuinsName] = useState("");
+
+
+    return {
+        name,
+        showNameModal: () => setShowModal(true),
+        modal: (
             <Modal show={showModal} onClose={() => setShowModal(false)}>
                 <div
                     className="m-auto border border-grey p-10 w-2xl"
@@ -132,9 +157,8 @@ export function Options() {
                     </button>
                 </div>
             </Modal>
-            <Footer />
-        </div>
-    );
+        )
+    };
 
     async function createSuinsName(name: string) {
         if (name.length < 3) throw new Error("Name must be at least 3 characters long.");
@@ -152,7 +176,7 @@ export function Options() {
         const nsTx = new SuinsTransaction(nsClient, tx);
         const subname = nsTx.createSubName({
             parentNft: ns,
-            name: `${name}@commanderthegame`,
+            name: `${name}@${COMMANDER_BASE_NAME}`,
             expirationTimestampMs: 1759957200000,
             allowChildCreation: false,
             allowTimeExtension: false,
@@ -164,7 +188,7 @@ export function Options() {
             isSubname: true,
         });
 
-        nsTx.setDefault(`${name}@commanderthegame`);
+        nsTx.setDefault(`${name}@${COMMANDER_BASE_NAME}`);
 
         tx.moveCall({
             target: `${packageId}::commander_names::put_back`,

@@ -17,7 +17,7 @@ public struct History(vector<Record>) has drop, store;
 public struct HistoryUpdated(vector<Record>) has copy, drop;
 
 /// A single record in the history.
-public enum Record has drop, copy, store {
+public enum Record has copy, drop, store {
     /// Block header for attack action.
     Reload(vector<u16>),
     /// Next turn action.
@@ -26,6 +26,8 @@ public enum Record has drop, copy, store {
     Move(vector<vector<u16>>),
     /// Block header for attack action.
     Attack { origin: vector<u16>, target: vector<u16> },
+    /// Recruit is placed on the map.
+    RecruitPlaced(u16, u16),
     // === Sub events ===
     Damage(u8),
     Miss,
@@ -61,6 +63,9 @@ public fun append(h: &mut History, records: vector<Record>) {
 public fun length(h: &History): u64 { h.0.length() }
 
 // === Record Records ===
+
+/// Create new `Record::RecruitPlaced`
+public fun new_recruit_placed(x: u16, y: u16): Record { Record::RecruitPlaced(x, y) }
 
 /// Create new `Record::Attack` history record.
 public fun new_attack(origin: vector<u16>, target: vector<u16>): Record {

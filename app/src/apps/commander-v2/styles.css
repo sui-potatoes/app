@@ -359,7 +359,7 @@ SPDX-License-Identifier: MIT
     cursor: default;
 }
 
-.non-interactive {
+.non-interactive, .non-interactive * {
     color: var(--color-grey);
     cursor: not-allowed;
 }

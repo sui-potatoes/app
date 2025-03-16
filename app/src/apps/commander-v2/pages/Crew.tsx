@@ -11,7 +11,7 @@ import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
 import { useNameGenerator } from "../hooks/useNameGenerator";
 import { SuiObjectRef } from "@mysten/sui/client";
-import { Footer, Modal, StatRecord } from "./Components";
+import { Footer, Modal, StatRecord, Loader } from "./Components";
 import { useState } from "react";
 import { Armor, useArmor } from "../hooks/useArmor";
 import { armorMetadata, weaponMetadata } from "../types/metadata";
@@ -55,16 +55,28 @@ export function Crew() {
     const [showModal, setShowModal] = useState<"armor" | "weapon" | false>(false);
     const [selected, setSelected] = useState<Recruit | undefined>();
     const packageId = useNetworkVariable("commanderV2PackageId");
-    const { data: recruits, refetch } = useRecruits({
+    const {
+        data: recruits,
+        refetch,
+        isPending,
+    } = useRecruits({
         owner: zkLogin.address!,
         enabled: !!zkLogin.address,
     });
 
-    const { data: weapons, isPending: _weaponsFetching } = useWeapons({
+    const {
+        data: weapons,
+        refetch: refetchWeapons,
+        isPending: _weaponsFetching,
+    } = useWeapons({
         address: zkLogin.address,
         unique: true,
     });
-    const { data: armors, isPending: _armorsFetching } = useArmor({
+    const {
+        data: armors,
+        refetch: refetchArmors,
+        isPending: _armorsFetching,
+    } = useArmor({
         address: zkLogin.address,
         unique: true,
     });
@@ -80,6 +92,8 @@ export function Crew() {
     if (armors && selected?.armor && !armors.some((a) => a.name == selected.armor?.name)) {
         armors.unshift(selected.armor as Armor);
     }
+
+    if (isPending || isExecuting) return <Loader />;
 
     return (
         <div className="flex justify-between align-middle h-screen flex-col w-full">
@@ -231,40 +245,44 @@ export function Crew() {
                 {/* armor selection modal */}
                 {showModal === "armor" && (
                     <div className="flex justify-between" onClick={(e) => e.preventDefault()}>
-                        {armors?.reverse().map((a) => {
-                            const isSelected = a.name == selected?.armor?.name;
-                            return (
-                                <div
-                                    key={a.name}
-                                    onClick={() =>
-                                        isSelected ? removeArmor(selected!) : addArmor(selected!, a)
-                                    }
-                                    className={
-                                        "m-10 p-10 option-row interactive" +
-                                        (isSelected ? " selected" : "")
-                                    }
-                                >
-                                    <label className="text-xl mb-10">{a.name}</label>
-                                    <img src={armorMetadata(a.name).image} />
-                                    {["armor", "dodge", "mobility"].map((stat) => (
-                                        <div className="flex justify-between" key={stat}>
-                                            <div>{stat.toUpperCase()}</div>
-                                            <div>{(a.stats as any)[stat]}</div>
-                                        </div>
-                                    ))}
-                                    <button
-                                        className="yes-no interactive"
-                                        style={{
-                                            width: "100%",
-                                            margin: "20px 0 0 0",
-                                            padding: "10px 15px",
-                                        }}
+                        {_armorsFetching && <Loader />}
+                        {!_armorsFetching &&
+                            armors?.reverse().map((a) => {
+                                const isSelected = a.name == selected?.armor?.name;
+                                return (
+                                    <div
+                                        key={a.name}
+                                        onClick={() =>
+                                            isSelected
+                                                ? removeArmor(selected!)
+                                                : addArmor(selected!, a)
+                                        }
+                                        className={
+                                            "m-10 p-10 option-row interactive" +
+                                            (isSelected ? " selected" : "")
+                                        }
                                     >
-                                        {isSelected ? "remove" : "select"}
-                                    </button>
-                                </div>
-                            );
-                        })}
+                                        <label className="text-xl mb-10">{a.name}</label>
+                                        <img src={armorMetadata(a.name).image} />
+                                        {["armor", "dodge", "mobility"].map((stat) => (
+                                            <div className="flex justify-between" key={stat}>
+                                                <div>{stat.toUpperCase()}</div>
+                                                <div>{(a.stats as any)[stat]}</div>
+                                            </div>
+                                        ))}
+                                        <button
+                                            className="yes-no interactive"
+                                            style={{
+                                                width: "100%",
+                                                margin: "20px 0 0 0",
+                                                padding: "10px 15px",
+                                            }}
+                                        >
+                                            {isSelected ? "remove" : "select"}
+                                        </button>
+                                    </div>
+                                );
+                            })}
                     </div>
                 )}
                 {showModal === "weapon" && (
@@ -272,54 +290,59 @@ export function Crew() {
                         onClick={(e) => e.preventDefault()}
                         style={{ height: "95vh", marginTop: "5vh" }}
                     >
-                        {/* weapon selection modal */}
+                        {_weaponsFetching && <Loader />}
                         <div className="mt-10"></div>
-                        {weapons?.map((w) => {
-                            const isSelected = selected?.weapon?.id == w.id;
+                        {!_weaponsFetching &&
+                            weapons?.map((w) => {
+                                const isSelected = selected?.weapon?.id == w.id;
 
-                            return (
-                                <div
-                                    className={
-                                        "p-10 mb-2 mx-2 option-row interactive" +
-                                        (isSelected ? " selected" : "")
-                                    }
-                                    key={w.objectId}
-                                    onClick={() => addWeapon(selected!, w)}
-                                >
-                                    <label className="text-xl mb-10">
-                                        {w.name}
-                                        {w.hasUpgrades && "+"}
-                                    </label>
-                                    <img src={weaponMetadata(w.name).image} />
-                                    {WEAPON_STATS.map((record) => (
-                                        <StatRecord
-                                            key={record.key}
-                                            record={record}
-                                            stats={w.stats}
-                                            className="flex justify-between"
-                                        />
-                                    ))}
-                                    {w.hasUpgrades && (
-                                        <></>
-                                        // <div className="flex justify-between">
-                                        //     {w.upgrades.map((u) => (
-                                        //         <div key={u.name}>{u.name}</div>
-                                        //     ))}
-                                        // </div>
-                                    )}
-                                    <button
-                                        className="yes-no interactive"
-                                        style={{
-                                            width: "100%",
-                                            margin: "20px 0 0 0",
-                                            padding: "10px 15px",
+                                return (
+                                    <div
+                                        className={
+                                            "p-10 mb-2 mx-2 option-row interactive" +
+                                            (isSelected ? " selected" : "")
+                                        }
+                                        key={w.objectId}
+                                        onClick={() => {
+                                            isSelected
+                                                ? removeWeapon(selected!)
+                                                : addWeapon(selected!, w);
                                         }}
                                     >
-                                        {isSelected ? "remove" : "select"}
-                                    </button>
-                                </div>
-                            );
-                        })}
+                                        <label className="text-xl mb-10">
+                                            {w.name}
+                                            {w.hasUpgrades && "+"}
+                                        </label>
+                                        <img src={weaponMetadata(w.name).image} />
+                                        {WEAPON_STATS.map((record) => (
+                                            <StatRecord
+                                                key={record.key}
+                                                record={record}
+                                                stats={w.stats}
+                                                className="flex justify-between"
+                                            />
+                                        ))}
+                                        {w.hasUpgrades && (
+                                            <></>
+                                            // <div className="flex justify-between">
+                                            //     {w.upgrades.map((u) => (
+                                            //         <div key={u.name}>{u.name}</div>
+                                            //     ))}
+                                            // </div>
+                                        )}
+                                        <button
+                                            className="yes-no interactive"
+                                            style={{
+                                                width: "100%",
+                                                margin: "20px 0 0 0",
+                                                padding: "10px 15px",
+                                            }}
+                                        >
+                                            {isSelected ? "remove" : "select"}
+                                        </button>
+                                    </div>
+                                );
+                            })}
                     </div>
                 )}
             </Modal>
@@ -412,7 +435,10 @@ export function Crew() {
         });
 
         await executeTransaction(tx).then(console.log);
-        setTimeout(() => refetch(), 1000);
+        setTimeout(() => {
+            refetchArmors();
+            refetch();
+        }, 1000);
         selected.armor = a;
         setShowModal(false);
     }
@@ -433,7 +459,10 @@ export function Crew() {
         tx.transferObjects([armor], zkLogin.address);
 
         await executeTransaction(tx).then(console.log);
-        setTimeout(() => refetch(), 1000);
+        setTimeout(() => {
+            refetchArmors();
+            refetch();
+        }, 1000);
         selected.armor = null;
         setShowModal(false);
     }
@@ -463,8 +492,34 @@ export function Crew() {
         });
 
         await executeTransaction(tx).then(console.log);
-        setTimeout(() => refetch(), 1000);
+        setTimeout(() => {
+            refetchWeapons();
+            refetch();
+        }, 1000);
         selected.weapon = w;
+        setShowModal(false);
+    }
+
+    async function removeWeapon(r: Recruit) {
+        if (!zkLogin.address) throw new Error("Not signed in");
+        if (!executeTransaction) throw new Error("No transaction executor");
+        if (isExecuting) throw new Error("Already executing a transaction");
+        if (!selected) throw new Error("Recruit has to be selected");
+
+        const tx = new Transaction();
+        const weapon = tx.moveCall({
+            target: `${packageId}::recruit::remove_weapon`,
+            arguments: [tx.objectRef(r)],
+        });
+
+        tx.transferObjects([weapon], zkLogin.address);
+
+        await executeTransaction(tx).then(console.log);
+        setTimeout(() => {
+            refetchWeapons();
+            refetch();
+        }, 1000);
+        selected.weapon = null;
         setShowModal(false);
     }
 }

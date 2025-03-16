@@ -72,18 +72,19 @@ public fun demo_2(ctx: &mut TxContext): Game {
 public fun place_recruit(game: &mut Game, recruit: Recruit, x: u16, y: u16, ctx: &mut TxContext) {
     assert!(recruit.leader() == ctx.sender()); // make sure the sender owns the recruit
 
-    game.map.place_recruit(&recruit, x, y);
+    let history = game.map.place_recruit(&recruit, x, y);
     game.recruits.add(object::id(&recruit), recruit);
+    game.history.add(history);
 }
 
 /// Move a unit along the path, the first point is the current position of the unit.
 public fun move_unit(game: &mut Game, path: vector<vector<u16>>, _ctx: &mut TxContext) {
-    game.map.move_unit(path);
+    game.history.add(game.map.move_unit(path))
 }
 
 /// Perform a reload action, replenishing ammo.
 public fun perform_reload(game: &mut Game, x: u16, y: u16, _ctx: &mut TxContext) {
-    game.map.perform_reload(x, y);
+    game.history.add(game.map.perform_reload(x, y))
 }
 
 /// Perform an attack action.
@@ -110,7 +111,7 @@ entry fun perform_attack(
 
 /// Switch to the next turn.
 public fun next_turn(game: &mut Game) {
-    game.map.next_turn();
+    game.history.add(game.map.next_turn());
 }
 
 /// Share the `key`-only object after placing Recruits on the map.
