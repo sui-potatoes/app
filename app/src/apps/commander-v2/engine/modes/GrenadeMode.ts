@@ -74,7 +74,7 @@ export class GrenadeMode implements Mode {
                 return;
             }
 
-            this.tryDispatch({ action: "grenade_target", x, y });
+            this.tryDispatch({ action: "grenade_target", unit: this.selectedUnit, x, y });
             mode.targetTile = new THREE.Vector2(x, y);
             mode.drawBlastArea.call(this, mode.targetTile);
         }

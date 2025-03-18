@@ -45,7 +45,8 @@ SPDX-License-Identifier: MIT
     left: 0;
 }
 
-.commander-v2 *, .commander-v2 a {
+.commander-v2 *,
+.commander-v2 a {
     color: var(--color-white);
     font-size: 18px;
     text-transform: uppercase;
@@ -180,29 +181,15 @@ SPDX-License-Identifier: MIT
     font-size: 14px;
     width: var(--button-size);
     height: var(--button-size);
-    /* line-height: var(--button-size); */
-    /* margin: 10px 10px 0px 10px; */
+    text-decoration: none !important;
     margin: 10px auto;
     background: black;
-    border: 1px solid var(--main-color);
-    color: var(--main-color);
-    cursor: pointer;
 }
 
 .action-button.disabled {
     color: grey !important;
     cursor: not-allowed !important;
     pointer-events: none !important;
-}
-
-.action-button:hover {
-    background: white;
-    color: black;
-}
-
-.action-button.active {
-    background: var(--main-color);
-    color: black;
 }
 
 .action-button.active:hover {
@@ -349,7 +336,8 @@ SPDX-License-Identifier: MIT
     border: var(--border);
 }
 
-.interactive:hover, .interactive:hover .interactive {
+.interactive:hover,
+.interactive:hover .interactive {
     box-shadow: var(--shadow);
     cursor: pointer;
 }
@@ -359,7 +347,8 @@ SPDX-License-Identifier: MIT
     cursor: default;
 }
 
-.non-interactive, .non-interactive * {
+.non-interactive,
+.non-interactive * {
     color: var(--color-grey);
     cursor: not-allowed;
 }

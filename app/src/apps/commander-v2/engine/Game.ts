@@ -9,8 +9,7 @@ import { Mode } from "./modes/Mode";
 import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
 import { models } from "./models";
-import { EventBus } from "./EventBus";
-import { AttackEvent } from "../pages/Play";
+import { EventBus, GameEvent } from "./EventBus";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
@@ -137,20 +136,14 @@ export class Game extends THREE.Object3D {
     }
 
     /** Apply event received from Sui */
-    applyAttackEvent(event: AttackEvent) {
-        const {
-            attacker: _,
-            target: [x1, y1],
-            damage,
-            is_kia,
-        } = event;
+    applyAttackEvent({ damage, unit: [x1, y1] }: Extract<GameEvent["sui"], { action: "attack" }>) {
         const unitId = this.grid.grid[x1][y1].unit;
 
         if (unitId === null) return; // ignore, fetched event too late
 
         this.units[unitId]!.props.hp.value -= damage;
 
-        if (is_kia) {
+        if (this.units[unitId]!.props.hp.value <= 0) {
             this.grid.grid[x1][y1].unit = null;
             this.remove(this.units[unitId]!);
             delete this.units[unitId];
@@ -162,8 +155,6 @@ export class Game extends THREE.Object3D {
         const unitId = this.grid.grid[x][z].unit;
 
         if (unitId === null) return; // ignore, fetched event too late
-
-        console.log("reloading unit", unitId);
 
         this.units[unitId]!.props.ammo.value = this.units[unitId]!.props.ammo.max_value;
     }

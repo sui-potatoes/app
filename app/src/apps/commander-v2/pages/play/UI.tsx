@@ -15,6 +15,18 @@ type Recruit = typeof Recruit.$inferType;
 const LOG_LENGTH = 5;
 const LS_KEY = "commander-v2";
 
+const BUTTON_CONTENTS: Record<GameUIEvent["action"], string | JSX.Element> = {
+    shoot: <img src="/images/target.svg" />,
+    reload: <img src="/images/reload.svg" />,
+    grenade: <img src="/images/grenade.svg" />,
+    cancel: <img src="/images/cancel.svg" />,
+    confirm: <img src="/images/confirm.svg" />,
+    next_target: ">",
+    prev_target: "<",
+    edit: "edit",
+    next_turn: <img src="/images/clock.svg" />,
+};
+
 /**
  * UI Component which renders buttons and emits events in the `eventBus` under the `ui` type.
  * Listens to the in-game events to render additional buttons and log the actions.
@@ -22,7 +34,6 @@ const LS_KEY = "commander-v2";
 export function UI({
     eventBus,
     isExecuting,
-    turn: initialTurn,
     recruits,
 }: {
     eventBus: EventBus;
@@ -32,23 +43,25 @@ export function UI({
 }) {
     const [panelDisabled, setPanelDisabled] = useState(true);
     const [shootMode, setShootMode] = useState(false);
-    const [turn, setTurn] = useState(initialTurn);
     const [mode, setMode] = useState<string | null>(null);
     const [log, setLog] = useState<string[]>([]);
     const [unit, setUnit] = useState<Unit | null>(null);
     const [recruit, setRecruit] = useState<Recruit | null>(null);
 
-    const onAction = (action: GameUIEvent['action']) => eventBus.dispatchEvent({ type: "ui", action });
-    const button = (id: GameUIEvent['action'], disabled?: boolean, text?: string) => (
+    const onAction = (action: GameUIEvent["action"]) =>
+        eventBus.dispatchEvent({ type: "ui", action });
+
+    const button = (id: GameUIEvent["action"], disabled?: boolean, text?: string) => (
         <button
             onClick={() => onAction(id)}
+            onMouseEnter={(e) => e.stopPropagation()}
             className={
-                "action-button mb-2" +
+                "action-button interactive mb-4" +
                 (disabled || isExecuting ? " disabled" : "") +
-                (mode && mode.toLocaleLowerCase() == id ? " active" : "")
+                (mode && mode.toLocaleLowerCase() == id ? " selected" : "")
             }
         >
-            {text || id}
+            {BUTTON_CONTENTS[id] || text || id}
         </button>
     );
 
@@ -66,7 +79,7 @@ export function UI({
             }
 
             if (event.action === "unit_selected" && recruits) {
-                let unit = event.unit as Unit;
+                let unit = event.unit;
                 let recruitId = unit.props.recruit;
                 if (recruitId in recruits) {
                     setRecruit(recruits[recruitId]);
@@ -83,13 +96,14 @@ export function UI({
     useEffect(() => {
         eventBus.addEventListener("sui", (event) => {
             if (event.action === "next_turn") {
-                setTurn(event.turn);
+                // mark next turn
             }
         });
 
-        eventBus.all((event) => {
+        eventBus.all(({ data }) => {
             setLog((log) => {
-                let { type, action, message } = event;
+                // @ts-ignore
+                let { type, action, message } = data;
                 let fullLog = [...log, `${type}: ${message || action || ""}`];
                 if (fullLog.length > LOG_LENGTH) fullLog = fullLog.slice(fullLog.length - 5);
                 return fullLog;
@@ -120,12 +134,12 @@ export function UI({
             >
                 {button("shoot")}
                 {button("reload", unit?.props.ammo.value == unit?.props.ammo.max_value, reloadText)}
-                {button("grenade", true)}
+                {button("grenade")}
                 <button
                     onClick={() => onAction("next_turn")}
-                    className={"action-button mt-40" + (isExecuting ? " disabled" : "")}
+                    className={"action-button interactive mt-40" + (isExecuting ? " disabled" : "")}
                 >
-                    End Turn ({turn + 1})
+                    {BUTTON_CONTENTS["next_turn"]}
                 </button>
             </div>
             <div
@@ -152,7 +166,7 @@ export function UI({
                         sessionStorage.removeItem(LS_KEY);
                         window.location.reload();
                     }}
-                    className={"action-button mt-40" + (isExecuting ? " disabled" : "")}
+                    className={"action-button interactive mt-40" + (isExecuting ? " disabled" : "")}
                 >
                     Exit
                 </button>

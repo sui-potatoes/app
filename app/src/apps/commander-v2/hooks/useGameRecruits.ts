@@ -15,10 +15,7 @@ type Props = {
 export function useGameRecruits({ recruits }: Props) {
     return useSuiClientQuery(
         "multiGetObjects",
-        {
-            ids: recruits,
-            options: { showBcs: true },
-        },
+        { ids: recruits, options: { showBcs: true } },
         {
             enabled: recruits.length > 0,
             select(data) {

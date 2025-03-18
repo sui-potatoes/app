@@ -206,7 +206,7 @@ public fun perform_grenade(
     x1: u16,
     y1: u16,
 ): vector<Record> {
-    let radius = 3;
+    let radius = 2; // 5x5 area of effect
     let unit = &mut map.grid[x, y].unit;
     assert!(grid::range!(x, y, x1, y1) <= GRENADE_RANGE, EPathTooShort);
     assert!(unit.is_some(), ENoUnit);
