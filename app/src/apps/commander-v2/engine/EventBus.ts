@@ -63,7 +63,7 @@ export type InGameEvent = { message?: string } & (
  */
 export type GameEvent = {
     all: {
-        type: keyof GameEvent;
+        type: "all";
         data: { type: keyof GameEvent } & GameEvent[Exclude<keyof GameEvent, "all">];
     };
     ui: GameUIEvent;
