@@ -6,12 +6,12 @@ import { Game, Tile } from "./../Game";
 import { Controls } from "./../Controls";
 import { Mode } from "./Mode";
 
-export type EditModeEvents = {
-    editor: {
-        message: string;
-        tool: "Cover" | "High Cover" | "Object" | "Unwalkable";
-        direction: "up" | "down" | "left" | "right";
-    };
+type Direction = "up" | "down" | "left" | "right";
+
+export type EditModeEvent = {
+    message: { message: string };
+    tool: { tool: "Cover" | "High Cover" | "Object" | "Unwalkable"; direction: Direction };
+    direction: { direction: Direction };
 };
 
 /**
@@ -24,7 +24,7 @@ export type EditModeEvents = {
 export class EditMode extends Mode {
     pointerMesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial> | null = null;
 
-    public readonly name = "Edit";
+    public readonly name = "editor";
     public coverDirection: "up" | "down" | "left" | "right" = "up";
     public tool: "Cover" | "High Cover" | "Object" | "Unwalkable" = "Cover";
     private _clickCb: ((_: any) => void) | null = null;
@@ -92,10 +92,10 @@ export class EditMode extends Mode {
         const mode = this.mode as EditMode;
 
         if (button === THREE.MOUSE.RIGHT) {
-            this.tryDispatch({
-                type: "editor",
+            this.eventBus?.dispatchEvent({
+                type: "game:editor:message",
                 message: `clear cell at (${x},${y})`,
-            })
+            });
             return this.grid.clearCell(x, y);
         }
 
@@ -130,7 +130,6 @@ export class EditMode extends Mode {
         const mode = this.mode as EditMode;
 
         switch (key) {
-
             // === Tool Selection ===
             case "c":
                 mode.tool = "Cover";
@@ -160,13 +159,10 @@ export class EditMode extends Mode {
                 break;
         }
 
-        this.tryDispatch({
-            type: "editor",
-            message: `tool change: ${mode.tool}; direction: ${mode.coverDirection}`,
+        this.eventBus?.dispatchEvent({
+            type: "game:editor:tool",
             tool: mode.tool,
             direction: mode.coverDirection,
         });
-
-        console.log((this.mode as EditMode).coverDirection)
     }
 }

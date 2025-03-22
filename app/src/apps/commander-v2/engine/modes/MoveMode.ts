@@ -9,14 +9,13 @@ import { NoneMode } from "./NoneMode";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
-import { BaseGameEvent } from "../EventBus";
 import { Unit } from "../Unit";
 
 const COLOR = 0x1ae7bf;
-const DARKER_COLOR = 0x568882; //0x369e90;
+const DARKER_COLOR = 0x568882;
 
-export type MoveModeEvent<T extends string> = BaseGameEvent<T> & {
-    move: { unit: Unit; path: THREE.Vector2[] };
+export type MoveModeEvent = {
+    perform: { unit: Unit; path: THREE.Vector2[] };
     trace: { path: THREE.Vector2[] };
 };
 
@@ -28,7 +27,7 @@ export type MoveModeEvent<T extends string> = BaseGameEvent<T> & {
  */
 export class MoveMode implements Mode {
     /** Name of the Mode */
-    public readonly name = "Move";
+    public readonly name = "move";
     /** Mode action cost */
     public readonly cost = 1;
     /** Target tile position */
@@ -97,7 +96,11 @@ export class MoveMode implements Mode {
         unit.spendAp(mode.cost);
         await unit.walk(path);
 
-        this.tryDispatch({ action: "move", unit, path });
+        this.eventBus?.dispatchEvent({
+            type: "game:move:perform",
+            unit,
+            path,
+        });
 
         unit.gridPosition.set(mode.target.x, mode.target.y);
         mode.path = [];
@@ -160,8 +163,9 @@ export class MoveMode implements Mode {
         const mode = this.mode as MoveMode;
         const tile = this.grid.grid[x][z];
 
-        if (!(this.mode instanceof MoveMode))
+        if (!(this.mode instanceof MoveMode)) {
             return console.error(`Invalid mode ${this.mode.name}`);
+        }
 
         if (this.selectedUnit === null) return;
 
@@ -185,7 +189,8 @@ export class MoveMode implements Mode {
             mode.path = path.map(([x, z]) => new THREE.Vector2(x, -z));
             mode.target = path[path.length - 1]; // update target to the last step of the path
             mode.drawPath(path);
-            this.tryDispatch({ action: "trace", path, message: "path traced" });
+
+            this.eventBus?.dispatchEvent({ type: "game:move:trace", path });
         }
     }
 }

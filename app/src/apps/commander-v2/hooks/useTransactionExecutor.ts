@@ -19,7 +19,9 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
     const [signer, setSigner] = useState<Signer | null>(null);
     const [isExecuting, setIsExecuting] = useState(false);
     const executor = useMemo(
-        () => signer && new SerialTransactionExecutor({ client, signer, defaultGasBudget: 1_000_000_000n }),
+        () =>
+            signer &&
+            new SerialTransactionExecutor({ client, signer, defaultGasBudget: 1_000_000_000n }),
         [signer],
     );
 
@@ -37,7 +39,11 @@ export function useTransactionExecutor({ client, signer: getSigner, enabled }: P
         async executeTransaction(tx: Transaction) {
             setIsExecuting(true);
             return executor!
-                .executeTransaction(tx, { showEffects: true, showObjectChanges: true, showEvents: true })
+                .executeTransaction(tx, {
+                    showEffects: true,
+                    showObjectChanges: true,
+                    showEvents: true,
+                })
                 .then((res) => {
                     setIsExecuting(false);
                     return res;

@@ -17,7 +17,7 @@ import {
     ReloadMode,
 } from "../../engine";
 import { GameMap } from "../../hooks/useGame";
-import { SuiEvent } from "../../engine/EventBus";
+import { SuiAction } from "../../engine/EventBus";
 
 type GameAppProps = {
     map: GameMap;
@@ -70,14 +70,26 @@ function App({ map, camera, eventBus }: { map: GameMap; camera: Camera; eventBus
 
         controls.addEventListener("scroll", onScroll);
         controls.addEventListener("zoom", onZoom);
-        eventBus.addEventListener("sui", onSuiEvent);
-        eventBus.addEventListener("ui", onUIEvent);
+
+        // sui event handlers
+        eventBus.addEventListener("sui:attack", onSuiAttack);
+        eventBus.addEventListener("sui:reload", onSuiReload);
+        eventBus.addEventListener("sui:next_turn", onSuiNextTurn);
+
+        // ui event handler
+        eventBus.addEventListener("ui:cancel", onUICancel);
+        eventBus.addEventListener("ui:confirm", onUIConfirm);
+        eventBus.addEventListener("ui:grenade", onGrenadeMode);
+        eventBus.addEventListener("ui:shoot", onShootMode);
+        eventBus.addEventListener("ui:reload", onReloadMode);
+        eventBus.addEventListener("ui:edit", onEditMode);
 
         return () => {
             controls.removeEventListener("scroll", onScroll);
             controls.removeEventListener("zoom", onZoom);
-            eventBus.removeEventListener("sui", onSuiEvent);
-            eventBus.removeEventListener("ui", onUIEvent);
+            eventBus.removeEventListener("sui:attack", onSuiAttack);
+            eventBus.removeEventListener("sui:reload", onSuiReload);
+            eventBus.removeEventListener("sui:next_turn", onSuiNextTurn);
         };
     }, []);
 
@@ -91,29 +103,40 @@ function App({ map, camera, eventBus }: { map: GameMap; camera: Camera; eventBus
 
     // === Event Handlers ===
 
-    // prettier-ignore
-    function onSuiEvent(evt: SuiEvent) {
-        switch (evt.action) {
-            case "attack": return game.applyAttackEvent(evt);
-            case "reload": return game.applyReloadEvent(evt.unit);
-            case "next_turn": return game.turn = evt.turn;
-        }
+    function onSuiAttack(event: SuiAction["attack"]) {
+        game.applyAttackEvent(event);
     }
 
-    // prettier-ignore
-    function onUIEvent({ action }: { action: string }) {
-        switch (action) {
-            // in-game actions / modesx
-            // case "move": return game.switchMode(new MoveMode(controls));
-            case "edit": return game.switchMode(new EditMode(controls));
-            case "shoot": return game.switchMode(new ShootMode(camera, controls));
-            case "reload": return game.switchMode(new ReloadMode());
-            case "grenade": return game.switchMode(new GrenadeMode(controls));
+    function onSuiReload(event: SuiAction["reload"]) {
+        game.applyReloadEvent(event);
+    }
 
-            // confirm / cancel
-            case "confirm": return game.performAction();
-            case "cancel": return game.switchMode(new MoveMode(controls));
-        }
+    function onSuiNextTurn(event: SuiAction["next_turn"]) {
+        game.turn = event.turn;
+    }
+
+    function onEditMode() {
+        game.switchMode(new EditMode(controls));
+    }
+
+    function onReloadMode() {
+        game.switchMode(new ReloadMode());
+    }
+
+    function onShootMode() {
+        game.switchMode(new ShootMode(camera, controls));
+    }
+
+    function onGrenadeMode() {
+        game.switchMode(new GrenadeMode(controls));
+    }
+
+    function onUIConfirm() {
+        game.performAction();
+    }
+
+    function onUICancel() {
+        game.switchMode(new MoveMode(controls));
     }
 
     function onZoom({ delta }: { delta: number }) {

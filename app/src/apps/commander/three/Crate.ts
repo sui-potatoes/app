@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import * as THREE from "three";
-import { GameObject} from "./GameObject";
+import { GameObject } from "./GameObject";
 
 /**
  * Simple `Crate` object which has a texture.

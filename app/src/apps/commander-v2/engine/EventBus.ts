@@ -5,98 +5,94 @@ import * as THREE from "three";
 import { ControlsEvents } from "./Controls";
 import { HistoryRecord } from "../types/bcs";
 import { Unit } from "./Unit";
-import { Mode } from "./modes/Mode";
-
-export interface BaseGameEvent<T extends string = string> {
-    readonly action: T;
-}
-
-const uiKeys = [
-    "shoot",
-    "reload",
-    "grenade",
-    "next_turn",
-    "next_target",
-    "prev_target",
-    "confirm",
-    "cancel",
-    "edit",
-] as const;
-
-/** UI events are simple text commands indicating selected action. */
-export type GameUIEvent = { action: (typeof uiKeys)[number] };
+import { Mode, ModeEvent } from "./modes/Mode";
+import { Prefixed, UnPrefixed } from "../types/utils";
 
 /** Events emitted by transaction sender, post network requests */
-export type SuiEvent = { message?: string } & (
-    | {
-          action: "attack";
-          damage: number;
-          kind: typeof HistoryRecord.$inferType.$kind;
-          unit: [number, number];
-      }
-    | { action: "next_turn"; turn: number }
-    | { action: "reload"; unit: [number, number]; success: boolean }
-    | { action: "path"; path: [number, number][] }
-    | { action: "trace"; success: boolean }
-    | { action: "aim"; success: boolean }
-    | { action: "map_created" }
-    | { action: "grenade"; success: boolean }
-    | { action: "tx:success"; history: (typeof HistoryRecord.$inferType)[] }
-);
+export type SuiAction = {
+    next_turn: { turn: number };
+    reload: { unit: [number, number]; success: boolean };
+    path: { path: [number, number][] };
+    trace: { success: boolean };
+    aim: { success: boolean };
+    map_created: {};
+    grenade: { success: boolean };
+    tx_success: { history: HistoryRecord[] };
+    attack: {
+        unit: [number, number];
+        target: [number, number];
+        result: "CriticalHit" | "Damage" | "Miss";
+        damage: number;
+    };
+};
 
 /** Events emitted by the `Game` instance during the gameplay */
-export type InGameEvent = { message?: string } & (
-    | { action: "trace"; path: THREE.Vector2[] }
-    | { action: "aim"; unit: Unit; targetUnit: Unit }
-    | { action: "reload"; unit: Unit }
-    | { action: "mode_switch"; mode: Mode }
-    | { action: "unit_selected"; unit: Unit }
-    | { action: "grenade_target"; unit: Unit, x: number, y: number }
-);
+export type GameAction = {
+    mode_action: { mode: Mode };
+    mode_switch: { mode: Mode };
+    unit_selected: { unit: Unit };
+} & ModeEvent;
+
+export type UIKey =
+    | "shoot"
+    | "reload"
+    | "grenade"
+    | "next_turn"
+    | "next_target"
+    | "prev_target"
+    | "confirm"
+    | "cancel"
+    | "edit";
+
+type HistoryRecord = typeof HistoryRecord.$inferType;
+type HistoryKey = Exclude<keyof HistoryRecord, "$kind">;
 
 /**
- * Game events are divided into categories:
- * - `ui` events are related to the user interface
- * - `controls` events are related to the game controls
- * - `sui` events are related to the SUI transactions
- * - `all` events includes all events
+ * Observer events are constructed from the history records.
+ * All of them are prefixed with `observer:` and the type of the record.
  */
-export type GameEvent = {
-    all: {
-        type: "all";
-        data: { type: keyof GameEvent } & GameEvent[Exclude<keyof GameEvent, "all">];
-    };
-    ui: GameUIEvent;
-    sui: SuiEvent;
-    game: InGameEvent;
-    three: { action: string };
-    editor: { tool: string; direction: string };
-} & ControlsEvents;
+export type ObserverEvent<T extends HistoryKey> = {
+    [U in Prefixed<"observer", T>]: { data: HistoryRecord[UnPrefixed<U>] };
+};
+
+export type GameUIEvent<T extends UIKey> = {
+    [U in Prefixed<"ui", T>]: { name: UnPrefixed<U> };
+};
+
+export type SuiEvent<T extends keyof SuiAction> = {
+    [U in Prefixed<"sui", T>]: SuiAction[UnPrefixed<U>];
+};
+
+export type GameEvent<T extends keyof GameAction> = {
+    [U in Prefixed<"game", T>]: GameAction[UnPrefixed<U>];
+};
+
+export type InputEvent<T extends keyof ControlsEvents> = {
+    [U in Prefixed<"input", T>]: ControlsEvents[UnPrefixed<U>];
+};
+
+/** All events emitted by the EventBus */
+// prettier-ignore
+type EventMap =
+    & GameUIEvent<UIKey>
+    & SuiEvent<keyof SuiAction>
+    & GameEvent<keyof GameAction>
+    & InputEvent<keyof ControlsEvents>
+    & ObserverEvent<HistoryKey>
+    & { all: { type: keyof EventMap; data: EventMap[Exclude<keyof EventMap, "all">] } };
 
 /**
  * Custom event dispatcher for the game. Handles the interaction between the
  * game, UI and transactional events.
- *
- * Extends the `EventDispatcher` class from `three.js`, and adds a custom
- * subscription option to all events.
  */
-export class EventBus extends THREE.EventDispatcher<GameEvent> {
-    /**
-     * Overrides the `dispatchEvent` method from the `EventDispatcher` class.
-     * Adds the `all` event type to all events.
-     */
-    public dispatchEvent<T extends keyof GameEvent>(
-        event: THREE.BaseEvent<T> & GameEvent[T],
-    ): void {
-        // @ts-ignore
-        super.dispatchEvent({ type: "all", data: event }); // all is always dispatched first
-        super.dispatchEvent({ ...event });
+export class EventBus extends THREE.EventDispatcher<EventMap> {
+    /** Subscribe to all events. */
+    public all(callback: (event: EventMap["all"]) => void): void {
+        this.addEventListener("all", ({ type, data }) => callback({ type, data }));
     }
 
-    /** Subscribe to all events. */
-    public all(callback: (event: GameEvent["all"]) => void): void {
-        this.addEventListener("all", (event) =>
-            callback({ type: event.data.type, data: event.data }),
-        );
+    public dispatchEvent<T extends keyof EventMap>(event: THREE.BaseEvent<T> & EventMap[T]): void {
+        super.dispatchEvent(event);
+        super.dispatchEvent({ type: "all", data: event }); // all is always dispatched first
     }
 }

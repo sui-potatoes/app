@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect, useMemo, useState } from "react";
-import { Camera, Game, loadModels, EditMode, Controls, EventBus } from "./../engine";
+import { Camera, Game, loadModels, EditMode, Controls, EventBus, GameAction } from "./../engine";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
 import { fromHex } from "@mysten/bcs";
@@ -90,13 +90,13 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
     const [tool, setTool] = useState("object");
 
     useEffect(() => {
-        function onEditorEvent(event: any) {
+        function onEditorToolChange(event: GameAction["editor:tool"]) {
             setDirection(event.direction);
             setTool(event.tool);
         }
 
-        eventBus.addEventListener("editor", onEditorEvent);
-        return () => eventBus.removeEventListener("editor", onEditorEvent);
+        eventBus.addEventListener("game:editor:tool", onEditorToolChange);
+        return () => eventBus.removeEventListener("game:editor:tool", onEditorToolChange);
     }, []);
 
     return (

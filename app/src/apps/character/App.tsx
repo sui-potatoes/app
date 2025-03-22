@@ -112,9 +112,7 @@ export default function App() {
         accentColour: "ead4aa",
     });
 
-    const [initialCharacter, setInitialCharacter] = useState<string | null>(
-        null,
-    );
+    const [initialCharacter, setInitialCharacter] = useState<string | null>(null);
 
     useEffect(() => {
         if (!characters) return;
@@ -136,8 +134,7 @@ export default function App() {
     }, [characters]);
 
     if (isPending) return <div>Loading...</div>;
-    if (!zkLogin.address && !characterId)
-        return <div>Sign in to use the app</div>;
+    if (!zkLogin.address && !characterId) return <div>Sign in to use the app</div>;
 
     // use for fetching the character
     // useEffect(() => {
@@ -161,9 +158,7 @@ export default function App() {
                         JSON.stringify(char) === initialCharacter
                     }
                     onClick={() => {
-                        characterId
-                            ? updateCharacter(char)
-                            : createCharacter(char);
+                        characterId ? updateCharacter(char) : createCharacter(char);
                     }}
                 >
                     {characterId ? "Update" : "Create"} Character{" "}
@@ -177,18 +172,14 @@ export default function App() {
                         defaultValue={char.hair_type}
                         disabled={!canInteract}
                         values={["wind", "flat", "bang", "punk"]}
-                        onChange={(hair_type) =>
-                            setChar({ ...char, hair_type })
-                        }
+                        onChange={(hair_type) => setChar({ ...char, hair_type })}
                     />
                     <Param
                         name="body type"
                         defaultValue={char.body_type}
                         disabled={!canInteract}
                         values={["office", "blazer", "tshirt"]}
-                        onChange={(body_type) =>
-                            setChar({ ...char, body_type })
-                        }
+                        onChange={(body_type) => setChar({ ...char, body_type })}
                     />
                     <Param
                         isColour
@@ -196,9 +187,7 @@ export default function App() {
                         defaultValue={char.hairColour}
                         disabled={!canInteract}
                         values={COLOURS}
-                        onChange={(hairColour) =>
-                            setChar({ ...char, hairColour })
-                        }
+                        onChange={(hairColour) => setChar({ ...char, hairColour })}
                     />
                     <Param
                         isColour
@@ -206,9 +195,7 @@ export default function App() {
                         defaultValue={char.eyesColour}
                         disabled={!canInteract}
                         values={COLOURS}
-                        onChange={(eyesColour) =>
-                            setChar({ ...char, eyesColour })
-                        }
+                        onChange={(eyesColour) => setChar({ ...char, eyesColour })}
                     />
                     <Param
                         isColour
@@ -216,9 +203,7 @@ export default function App() {
                         defaultValue={char.skinColour}
                         disabled={!canInteract}
                         values={COLOURS}
-                        onChange={(skinColour) =>
-                            setChar({ ...char, skinColour })
-                        }
+                        onChange={(skinColour) => setChar({ ...char, skinColour })}
                     />
                     <Param
                         isColour
@@ -226,9 +211,7 @@ export default function App() {
                         defaultValue={char.baseColour}
                         disabled={!canInteract}
                         values={COLOURS}
-                        onChange={(baseColour) =>
-                            setChar({ ...char, baseColour })
-                        }
+                        onChange={(baseColour) => setChar({ ...char, baseColour })}
                     />
                     <Param
                         isColour
@@ -236,9 +219,7 @@ export default function App() {
                         defaultValue={char.pantsColour}
                         disabled={!canInteract}
                         values={COLOURS}
-                        onChange={(pantsColour) =>
-                            setChar({ ...char, pantsColour })
-                        }
+                        onChange={(pantsColour) => setChar({ ...char, pantsColour })}
                     />
                     <Param
                         isColour
@@ -246,9 +227,7 @@ export default function App() {
                         defaultValue={char.accentColour}
                         disabled={!canInteract}
                         values={COLOURS}
-                        onChange={(accentColour) =>
-                            setChar({ ...char, accentColour })
-                        }
+                        onChange={(accentColour) => setChar({ ...char, accentColour })}
                     />
                     <div className="md-show param">
                         <button
@@ -259,9 +238,7 @@ export default function App() {
                                 JSON.stringify(char) === initialCharacter
                             }
                             onClick={() => {
-                                characterId
-                                    ? updateCharacter(char)
-                                    : createCharacter(char);
+                                characterId ? updateCharacter(char) : createCharacter(char);
                             }}
                         >
                             {characterId ? "Update" : "Create"} Character{" "}
@@ -269,10 +246,7 @@ export default function App() {
                         </button>
                     </div>
                     {characterId && (
-                        <div
-                            className="param"
-                            style={{ display: "block", margin: "10px 0" }}
-                        >
+                        <div className="param" style={{ display: "block", margin: "10px 0" }}>
                             <a
                                 href={`https://suiscan.xyz/testnet/object/${characterId}`}
                                 target="_blank"
@@ -314,7 +288,7 @@ export default function App() {
         tx.transferObjects([char], zkLogin.address!);
 
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }) as any,
+            signer: (await flow.getKeypair({ network: "testnet" })) as any,
             transaction: tx as any,
         });
 
@@ -355,7 +329,7 @@ export default function App() {
         });
 
         const result = await client.signAndExecuteTransaction({
-            signer: await flow.getKeypair({ network: "testnet" }) as any,
+            signer: (await flow.getKeypair({ network: "testnet" })) as any,
             transaction: tx as any,
         });
 

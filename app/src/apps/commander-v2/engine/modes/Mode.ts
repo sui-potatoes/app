@@ -3,10 +3,32 @@
 
 import { Game } from "./../Game";
 import { Controls } from "./../Controls";
+import { Prefixed, UnPrefixed } from "../../types/utils";
+import { ShootModeEvent } from "./ShootMode";
+import { EditModeEvent } from "./EditMode";
+import { MoveModeEvent } from "./MoveMode";
+import { ReloadModeEvent } from "./ReloadMode";
+import { GrenadeModeEvent } from "./GrenadeMode";
 
-export type ModeEvents = {
-    mode: string;
-}
+type PrefixedModeEvent<P extends string, K extends {}, T extends Extract<keyof K, string>> = {
+    [U in Prefixed<P, T>]: K[Extract<UnPrefixed<U>, T>];
+};
+
+type ModeName = "grenade" | "reload" | "shoot" | "editor" | "move" | "none";
+
+type BaseModeEvents = {
+    switch: { mode: Mode };
+    perform: { mode: Mode };
+};
+
+// prettier-ignore
+export type ModeEvent =
+    & PrefixedModeEvent<"mode", BaseModeEvents, keyof BaseModeEvents>
+    & PrefixedModeEvent<"grenade", GrenadeModeEvent, keyof GrenadeModeEvent>
+    & PrefixedModeEvent<"reload", ReloadModeEvent, keyof ReloadModeEvent>
+    & PrefixedModeEvent<"shoot", ShootModeEvent, keyof ShootModeEvent>
+    & PrefixedModeEvent<"editor", EditModeEvent, keyof EditModeEvent>
+    & PrefixedModeEvent<"move", MoveModeEvent, keyof MoveModeEvent>;
 
 /**
  * Each Mode defines a different way of interacting with the game. By default, the game mode is
@@ -22,7 +44,7 @@ export type ModeEvents = {
  */
 export abstract class Mode {
     /** Name of the Mode */
-    public abstract readonly name: string;
+    public abstract readonly name: ModeName;
     /** Connection handler, called when the mode is connected */
     abstract connect(this: Game, mode: this): void;
     /** Disconnection handler, called when the mode is disconnected */

@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 import * as THREE from "three";
-import { Mode } from "./Mode";
-import { Game } from "../Game";
-import { Controls } from "../Controls";
+import { Game, Controls, Mode, Unit } from "..";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { NoneMode } from "./NoneMode";
+
+export type GrenadeModeEvent = {
+    target: { unit: Unit; x: number; y: number };
+};
 
 /**
  * Not available yet.
@@ -17,7 +19,7 @@ export class GrenadeMode implements Mode {
     /** Mode action cost */
     public readonly cost = 1;
     /** Name of the Mode */
-    public readonly name = "Grenade";
+    public readonly name = "grenade";
     /** The Group used for highlighting tiles */
     public readonly elements = new THREE.Group();
     /** Click callback  */
@@ -73,8 +75,12 @@ export class GrenadeMode implements Mode {
                 console.log("Target is out of range.");
                 return;
             }
-
-            this.tryDispatch({ action: "grenade_target", unit: this.selectedUnit, x, y });
+            this.eventBus?.dispatchEvent({
+                type: "game:grenade:target",
+                unit: this.selectedUnit,
+                x,
+                y,
+            });
             mode.targetTile = new THREE.Vector2(x, y);
             mode.drawBlastArea.call(this, mode.targetTile);
         }

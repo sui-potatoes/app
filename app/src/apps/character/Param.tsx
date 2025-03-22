@@ -20,14 +20,7 @@ export type ParamOptions = {
  * And shows the current param value in the middle. For colours it shows the
  * colour as a coloured square, for other params it shows the value as text.
  */
-export function Param({
-    name,
-    disabled,
-    defaultValue,
-    values,
-    isColour,
-    onChange,
-}: ParamOptions) {
+export function Param({ name, disabled, defaultValue, values, isColour, onChange }: ParamOptions) {
     const [idx, setIdx] = useState(0);
 
     // must be here to re-render when defaultValue changes
@@ -50,10 +43,7 @@ export function Param({
                     {"‹"}
                 </button>
                 {isColour ? (
-                    <div
-                        className="h-5 w-5"
-                        style={{ backgroundColor: "#" + values[idx] }}
-                    />
+                    <div className="h-5 w-5" style={{ backgroundColor: "#" + values[idx] }} />
                 ) : (
                     values[idx]
                 )}

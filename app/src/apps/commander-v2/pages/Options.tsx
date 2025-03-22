@@ -92,7 +92,11 @@ export function Options() {
                             </div>
                         </div>
                     )}
-                    {name && <div className="flex">{name}.{COMMANDER_BASE_NAME}.sui</div>}
+                    {name && (
+                        <div className="flex">
+                            {name}.{COMMANDER_BASE_NAME}.sui
+                        </div>
+                    )}
                 </div>
                 <div className="options-row">
                     <label>OPTIMIZE MODELS</label>
@@ -100,11 +104,14 @@ export function Options() {
                 </div>
                 <div className="options-row">
                     <label>FULLSCREEN</label>
-                    <YesOrNo value={isFullscreen} onChange={(v) => {
-                        if (v) document.documentElement.requestFullscreen();
-                        else document.exitFullscreen();
-                        setIsFullscreen(v);
-                    }} />
+                    <YesOrNo
+                        value={isFullscreen}
+                        onChange={(v) => {
+                            if (v) document.documentElement.requestFullscreen();
+                            else document.exitFullscreen();
+                            setIsFullscreen(v);
+                        }}
+                    />
                 </div>
             </div>
             {!name && suinsModal}
@@ -129,7 +136,6 @@ function suinsSetting() {
     });
     const nsClient = new SuinsClient({ client, network: "testnet" });
     const [suinsName, setSuinsName] = useState("");
-
 
     return {
         name,
@@ -157,7 +163,7 @@ function suinsSetting() {
                     </button>
                 </div>
             </Modal>
-        )
+        ),
     };
 
     async function createSuinsName(name: string) {
@@ -177,7 +183,7 @@ function suinsSetting() {
         const subname = nsTx.createSubName({
             parentNft: ns,
             name: `${name}@${COMMANDER_BASE_NAME}`,
-            expirationTimestampMs: 1759957200000,
+            expirationTimestampMs: 1759957200000, // quite random
             allowChildCreation: false,
             allowTimeExtension: false,
         });

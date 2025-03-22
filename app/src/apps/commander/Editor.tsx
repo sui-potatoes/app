@@ -59,7 +59,10 @@ export function Editor({ game, refetch }: Props) {
             <div className="flex flex-col justify-center">
                 <div>
                     <h2 className="text-lg my-2">Texture</h2>
-                    <p>{"> "}<button>Sand</button></p>
+                    <p>
+                        {"> "}
+                        <button>Sand</button>
+                    </p>
                     <h2 className="text-lg my-2">Selected Tile</h2>
                     <p>Type: {!isEmpty ? kind : "None"}</p>
                     <h2 className="text-xl my-2">Tools</h2>
@@ -169,7 +172,7 @@ export function Editor({ game, refetch }: Props) {
                     tx.pure.u16(10), // health
                     tx.pure.u16(0), // ap
                 ],
-            })
+            });
         }
 
         if (inventory == "heavy") {

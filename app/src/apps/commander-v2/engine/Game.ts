@@ -9,7 +9,7 @@ import { Mode } from "./modes/Mode";
 import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
 import { models } from "./models";
-import { EventBus, GameEvent } from "./EventBus";
+import { EventBus, SuiAction } from "./EventBus";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
@@ -31,8 +31,8 @@ export type Tile =
  * TODO:
  * - [x] implement Controls class
  * - [ ] implement Sound class
- * - [ ] implement Models and Textures classes
- * - [ ] behaviors for game interface
+ * - [x] implement Models and Textures classes
+ * - x ] behaviors for game interface
  */
 export class Game extends THREE.Object3D {
     /** The Plane used for intersections */
@@ -98,7 +98,7 @@ export class Game extends THREE.Object3D {
                         unit.ap.value = unit.ap.max_value;
                     }
 
-                    let unitObj = new Unit(unit, models.soldier, x, z);
+                    let unitObj = new Unit(unit, models.soldier!, x, z);
                     game.addUnit(unitObj);
                 }
             }
@@ -136,7 +136,7 @@ export class Game extends THREE.Object3D {
     }
 
     /** Apply event received from Sui */
-    applyAttackEvent({ damage, unit: [x1, y1] }: Extract<GameEvent["sui"], { action: "attack" }>) {
+    applyAttackEvent({ damage, target: [x1, y1] }: SuiAction["attack"]) {
         const unitId = this.grid.grid[x1][y1].unit;
 
         if (unitId === null) return; // ignore, fetched event too late
@@ -150,7 +150,7 @@ export class Game extends THREE.Object3D {
         }
     }
 
-    applyReloadEvent(unit: [number, number]) {
+    applyReloadEvent({ unit }: SuiAction["reload"]) {
         const [x, z] = unit;
         const unitId = this.grid.grid[x][z].unit;
 
@@ -166,11 +166,6 @@ export class Game extends THREE.Object3D {
         this.eventBus = eventBus;
     }
 
-    /** Try dispatching an event if the EventBus is present */
-    tryDispatch(event: { action: string } & any) {
-        this.eventBus?.dispatchEvent({ type: "game", ...event });
-    }
-
     // === Animation Loop & Controls
 
     selectUnit(x: number, z: number) {
@@ -184,8 +179,7 @@ export class Game extends THREE.Object3D {
         this.selectedUnit = this.units[this.grid.grid[x][z].unit];
         this.selectedUnit.markSelected(this, true);
         this.eventBus?.dispatchEvent({
-            type: "game",
-            action: "unit_selected",
+            type: "game:unit_selected",
             unit: this.selectedUnit,
         });
     }
@@ -240,12 +234,7 @@ export class Game extends THREE.Object3D {
         this.mode.disconnect.call(this, this.mode);
         this.mode = mode;
         this.mode.connect.call(this, this.mode);
-        this.tryDispatch({
-            action: "mode_switch",
-            game: this,
-            mode: this.mode,
-            message: `mode switched to ${this.mode.name}`,
-        });
+        this.eventBus?.dispatchEvent({ type: "game:mode:switch", mode: this.mode });
     }
 
     /**
@@ -254,7 +243,7 @@ export class Game extends THREE.Object3D {
      */
     async performAction() {
         if (this._isBlocked) return;
-        this.tryDispatch({ action: "action", game: this, mode: this.mode });
+        this.eventBus?.dispatchEvent({ type: "game:mode_action", mode: this.mode });
         await this.mode.performAction.call(this, this.mode);
         this.switchMode(new NoneMode());
     }

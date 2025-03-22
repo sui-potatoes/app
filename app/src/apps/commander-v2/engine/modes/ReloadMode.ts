@@ -5,13 +5,18 @@ import { Game } from "./../Game";
 import { Controls } from "./../Controls";
 import { Mode } from "./Mode";
 import { NoneMode } from "./NoneMode";
+import { Unit } from "../Unit";
+
+export type ReloadModeEvent = {
+    perform: { unit: Unit };
+};
 
 /**
  * Perform a reload action.
  */
 export class ReloadMode implements Mode {
     /** Name of the Mode */
-    public readonly name = "Reload";
+    public readonly name = "reload";
     /** Mode action cost */
     public readonly cost = 1;
 
@@ -23,7 +28,10 @@ export class ReloadMode implements Mode {
             return this.switchMode(new NoneMode());
         }
 
-        this.tryDispatch({ action: "reload", unit: this.selectedUnit });
+        this.eventBus?.dispatchEvent({
+            type: "game:reload:perform",
+            unit: this.selectedUnit,
+        });
     }
 
     disconnect(this: Game, _mode: this) {}

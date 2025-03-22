@@ -93,16 +93,16 @@ export const Game = bcs.struct("Game", {
 });
 
 type CommanderBcs = typeof bcs & {
-    Game: typeof Game.$inferType,
-    Grid: typeof Grid.$inferType,
-    Tile: typeof Tile.$inferType,
-    Unit: typeof Unit.$inferType,
-    Param: typeof Param.$inferType,
-    Action: typeof Action.$inferType,
-    Armor: typeof Armor.$inferType,
-    AttackType: typeof AttackType.$inferType,
-    ActionType: typeof ActionType.$inferType,
-    TracedPath: typeof TracedPath.$inferType,
-}
+    Game: typeof Game.$inferType;
+    Grid: typeof Grid.$inferType;
+    Tile: typeof Tile.$inferType;
+    Unit: typeof Unit.$inferType;
+    Param: typeof Param.$inferType;
+    Action: typeof Action.$inferType;
+    Armor: typeof Armor.$inferType;
+    AttackType: typeof AttackType.$inferType;
+    ActionType: typeof ActionType.$inferType;
+    TracedPath: typeof TracedPath.$inferType;
+};
 
 export { commanderBcs as bcs };

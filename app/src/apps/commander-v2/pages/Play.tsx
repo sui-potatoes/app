@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { Loader, Footer } from "./Components";
 import { useEffect, useMemo, useState } from "react";
 import { UI } from "./play/UI";
-import { Camera, GameEvent, EventBus, models, loadModels } from "../engine";
+import { Camera, EventBus, models, loadModels, GameAction } from "../engine";
 import { bcs, HistoryRecord } from "../types/bcs";
 import { useGame } from "../hooks/useGame";
 import { useGameRecruits } from "../hooks/useGameRecruits";
@@ -33,19 +33,27 @@ export function Playground() {
 
     useEffect(() => {
         loadModels().then(() => setModelsLoaded(true));
-        eventBus.dispatchEvent({ type: "three", action: "models_loaded" });
+        // eventBus.dispatchEvent({ type: "three", action: "models_loaded" });
         eventBus.all((_event) => {}); // subscribe to all events if needed
     }, [models]);
 
     useEffect(() => {
         if (!map) return;
 
-        eventBus.addEventListener("game", onGameEvent);
-        eventBus.addEventListener("ui", onNextTurn);
+        eventBus.addEventListener("game:shoot:aim", onGameAim);
+        eventBus.addEventListener("game:move:trace", onGameTrace);
+        eventBus.addEventListener("game:reload:perform", onGameReload);
+        eventBus.addEventListener("game:grenade:target", onGameGrenade);
+        eventBus.addEventListener("ui:next_turn", onNextTurn);
+
+        console.log("game", map.objectId);
 
         return () => {
-            eventBus.removeEventListener("game", onGameEvent);
-            eventBus.removeEventListener("ui", onNextTurn);
+            eventBus.removeEventListener("game:shoot:aim", onGameAim);
+            eventBus.removeEventListener("game:move:trace", onGameTrace);
+            eventBus.removeEventListener("game:reload:perform", onGameReload);
+            eventBus.removeEventListener("game:grenade:target", onGameGrenade);
+            eventBus.removeEventListener("ui:next_turn", onNextTurn);
         };
     }, [map, tx, tx.lockedTx]); // mind the `tx` dependency here!
 
@@ -54,8 +62,8 @@ export function Playground() {
      * This event listener is reset every time a transaction is executed.
      */
     useEffect(() => {
-        eventBus.addEventListener("ui", onConfirm);
-        return () => eventBus.removeEventListener("ui", onConfirm);
+        eventBus.addEventListener("ui:confirm", onConfirm);
+        return () => eventBus.removeEventListener("ui:confirm", onConfirm);
     }, [tx.lockedTx, map]);
 
     const centerDiv = (children: any) => (
@@ -65,15 +73,20 @@ export function Playground() {
     );
 
     if (isFetching || (tx.isExecuting && !map)) return <Loader />;
-    if (isFetched && !map) return centerDiv((
-        <>
-            <p>Map not found</p>
-            <button onClick={() => {
-                sessionStorage.removeItem(LS_KEY);
-                setMapKey(null);
-            }}>Back</button>
-        </>
-    ));
+    if (isFetched && !map)
+        return centerDiv(
+            <>
+                <p>Map not found</p>
+                <button
+                    onClick={() => {
+                        sessionStorage.removeItem(LS_KEY);
+                        setMapKey(null);
+                    }}
+                >
+                    Back
+                </button>
+            </>,
+        );
     if (!modelsLoaded) return centerDiv("Models not loaded");
     if (!map)
         return (
@@ -89,7 +102,7 @@ export function Playground() {
                                 [0, 3],
                                 [6, 5],
                             ]);
-                            eventBus.dispatchEvent({ type: "sui", action: "map_created" });
+                            eventBus.dispatchEvent({ type: "sui:map_created" });
                             setTimeout(() => map && setMapKey(map.objectId), 1000);
                         }}
                     >
@@ -105,7 +118,7 @@ export function Playground() {
                                 [1, 2],
                                 [1, 7],
                             ]);
-                            eventBus.dispatchEvent({ type: "sui", action: "map_created" });
+                            eventBus.dispatchEvent({ type: "sui:map_created" });
                             setTimeout(() => map && setMapKey(map.objectId), 1000);
                         }}
                     >
@@ -134,149 +147,135 @@ export function Playground() {
     // === Events Handling ===
 
     /** Listen to the ui:confirm event, trigger tx sending */
-    async function onConfirm(event: GameEvent["ui"]) {
-        if (event.action === "confirm" && tx.lockedTx) {
-            const res = await tx.executeLocked();
-            const events = res.data.events || [];
-            const eventType = `${packageId}::history::HistoryUpdated`;
-            const historyBcs = events.find((e) => e.type == eventType)?.bcs;
-            if (!historyBcs) return;
-            const history = bcs.vector(HistoryRecord).parse(fromBase64(historyBcs));
-            if (!history) return;
+    async function onConfirm() {
+        if (!tx.lockedTx) return;
+        const res = await tx.executeLocked();
+        const events = res.data.events || [];
+        const eventType = `${packageId}::history::HistoryUpdated`;
+        const historyBcs = events.find((e) => e.type == eventType)?.bcs;
+        if (!historyBcs) return;
+        const history = bcs.vector(HistoryRecord).parse(fromBase64(historyBcs));
+        if (!history) return;
 
-            eventBus.dispatchEvent({ type: "sui", action: "tx:success", history });
+        eventBus.dispatchEvent({ type: "sui:tx_success", history });
 
-            const first = history[0]!; // the first record cannot be an empty
+        const first = history[0]!; // the first record cannot be an empty
 
-            // prettier-ignore
-            switch (first.$kind) {
-                case "Reload": return eventBus.dispatchEvent<"sui">({
-                    type: "sui",
-                    action: "reload",
+        switch (first.$kind) {
+            case "Reload":
+                return eventBus.dispatchEvent({
+                    type: "sui:reload",
                     success: true,
                     unit: first.Reload as [number, number],
-                    message: `unit (${first.Reload}) reloads`
                 });
-                case "NextTurn": return eventBus.dispatchEvent({
-                    type: "sui",
+
+            case "NextTurn":
+                return eventBus.dispatchEvent({
+                    type: "sui:next_turn",
                     turn: map!.map.map.turn,
-                    action: "next_turn",
-                    message: `next turn`
-                });;
-                case "Move": return eventBus.dispatchEvent<"sui">({
-                    type: "sui",
-                    action: "path",
-                    path: first.Move as [number, number][],
-                    message:
-                        "unit moves: " +
-                        first.Move.map((p) => `(${p.toString()})`).join(", "),
                 });
-                case "Attack": {
-                    const target = first.Attack.target as [number, number];
-                    const result = history[1];
-                    if (!result) throw new Error("History log is incorrect, only one attack record is present");
-                    let message = "";
-                    let damage = 0;
 
-                    if (result.$kind === "Miss") message = `Miss!`;
-                    if (result.$kind === "Damage") {
-                        message = `Damage: ${result.Damage}`;
-                        damage = result.Damage;
-                    }
+            case "Move":
+                return eventBus.dispatchEvent({
+                    type: "sui:path",
+                    path: first.Move as [number, number][],
+                });
+            case "Attack": {
+                const unit = first.Attack.origin as [number, number];
+                const target = first.Attack.target as [number, number];
+                const result = history[1];
+                if (!result)
+                    throw new Error("History log is incorrect, only one attack record is present");
 
-                    if (result.$kind === "CriticalHit") {
-                        message = `Critical Hit! ${result.CriticalHit}`;
-                        damage = result.CriticalHit;
-                    }
-
-                    return eventBus.dispatchEvent<"sui">({
-                        type: "sui",
-                        action: "attack",
-                        damage,
-                        kind: "Attack",
-                        unit: target,
-                        message,
+                if (result.$kind === "Miss") {
+                    return eventBus.dispatchEvent({
+                        type: "sui:attack",
+                        unit,
+                        target,
+                        result: "Miss",
+                        damage: 0,
                     });
                 }
-                case "Grenade": {
-                    const result = history[1];
-                    console.log(history);
-                    if (!result) throw new Error("History log is incorrect, only one grenade record is present");
-                    return eventBus.dispatchEvent<"sui">({
-                        type: "sui",
-                        action: "grenade",
-                        success: true,
-                        message: `grenade thrown, check: ${!!result ? "success" : "failed"}`,
+
+                if (result.$kind === "Damage") {
+                    return eventBus.dispatchEvent({
+                        type: "sui:attack",
+                        unit,
+                        target,
+                        result: "Damage",
+                        damage: result[result.$kind],
                     });
                 }
+
+                if (result.$kind === "CriticalHit") {
+                    return eventBus.dispatchEvent({
+                        type: "sui:attack",
+                        unit,
+                        target,
+                        result: "CriticalHit",
+                        damage: result[result.$kind],
+                    });
+                }
+
+                throw new Error(`Unexpected record in the history log: ${result.$kind}`);
+            }
+            case "Grenade": {
+                const result = history[1];
+                console.log(history);
+                if (!result)
+                    throw new Error("History log is incorrect, only one grenade record is present");
+                return eventBus.dispatchEvent({ type: "sui:grenade", success: true });
             }
         }
     }
 
-    /** Listen to move performed event */
-    async function onGameEvent(event: GameEvent["game"]) {
-        if (event.action === "trace") {
-            const result = await tx.moveUnit(event.path.map((p: THREE.Vector2) => [p.x, p.y]));
-            eventBus.dispatchEvent({
-                type: "sui",
-                action: "trace",
-                success: !!result,
-                message: `path checked: ${!!result ? "success" : "failed"}`,
-            });
-        }
+    async function onGameTrace({ path }: GameAction["move:trace"]) {
+        const result = await tx.moveUnit(path.map((p: THREE.Vector2) => [p.x, p.y]));
+        eventBus.dispatchEvent({
+            type: "sui:trace",
+            success: !!result,
+        });
+    }
 
-        if (event.action == "grenade_target") {
-            const { x: x0, y: y0 } = event.unit.gridPosition;
-            const { x: x1, y: y1 } = event;
-            const result = await tx.performGrenade([x0, y0], [x1, y1]);
-            eventBus.dispatchEvent({
-                type: "sui",
-                action: "grenade",
-                success: !!result,
-                message: `grenade thrown, check: ${!!result ? "success" : "failed"}`,
-            });
-        }
+    async function onGameGrenade({ unit, x: x1, y: y1 }: GameAction["grenade:target"]) {
+        const { x: x0, y: y0 } = unit.gridPosition;
+        const result = await tx.performGrenade([x0, y0], [x1, y1]);
+        eventBus.dispatchEvent({
+            type: "sui:grenade",
+            success: !!result,
+        });
+    }
 
-        if (event.action === "aim") {
-            const { x: x0, y: y0 } = event.unit.gridPosition as THREE.Vector2;
-            const { x: x1, y: y1 } = event.targetUnit.gridPosition as THREE.Vector2;
+    async function onGameReload({ unit }: GameAction["reload:perform"]) {
+        const { x, y } = unit.gridPosition as THREE.Vector2;
+        const result = await tx.performReload([x, y]);
+        eventBus.dispatchEvent({
+            type: "sui:reload",
+            unit: [x, y],
+            success: !!result,
+        });
+    }
 
-            const result = await tx.performAttack([x0, y0], [x1, y1]);
-            eventBus.dispatchEvent({
-                type: "sui",
-                action: "aim",
-                success: !!result,
-                message: `target within range, check: ${!!result ? "success" : "failed"}`,
-            });
-        }
+    async function onGameAim({ unit, target }: GameAction["shoot:aim"]) {
+        const { x: x0, y: y0 } = unit.gridPosition as THREE.Vector2;
+        const { x: x1, y: y1 } = target.gridPosition as THREE.Vector2;
 
-        if (event.action === "reload") {
-            const { x, y } = event.unit.gridPosition as THREE.Vector2;
-            const result = await tx.performReload([x, y]);
-            eventBus.dispatchEvent({
-                type: "sui",
-                action: "reload",
-                unit: [x, y],
-                success: !!result,
-                message: "unit can reload, check: " + (!!result ? "success" : "failed"),
-            });
-        }
+        const result = await tx.performAttack([x0, y0], [x1, y1]);
+        eventBus.dispatchEvent({
+            type: "sui:aim",
+            success: !!result,
+        });
     }
 
     /** Next turn button is clicked in the UI */
-    async function onNextTurn(event: GameEvent["ui"]) {
-        if (event.action === "next_turn") {
-            const res = await tx.nextTurn();
-            if (!res) return console.log("unable to end turn");
-            if (map) {
-                const turn = ++map.map.map.turn;
-                eventBus.dispatchEvent({
-                    type: "sui",
-                    action: "next_turn",
-                    message: "next turn: " + (turn + 1),
-                    turn,
-                });
-            }
+    async function onNextTurn() {
+        const res = await tx.nextTurn();
+        if (!res) console.error("Failed to execute next turn transaction");
+        if (map) {
+            eventBus.dispatchEvent({
+                type: "sui:next_turn",
+                turn: ++map.map.map.turn,
+            });
         }
     }
 }

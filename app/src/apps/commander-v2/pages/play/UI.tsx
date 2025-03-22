@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect, useState } from "react";
-import { EventBus, GameEvent, NoneMode, ShootMode } from "../../engine";
+import { EventBus, GameAction, NoneMode, ShootMode, SuiAction, UIKey } from "../../engine";
 import { Recruit } from "../../types/bcs";
 import { type Unit } from "../../engine/Unit";
-import { GameUIEvent } from "../../engine/EventBus";
 
 type Recruit = typeof Recruit.$inferType;
 
@@ -15,7 +14,7 @@ type Recruit = typeof Recruit.$inferType;
 const LOG_LENGTH = 5;
 const LS_KEY = "commander-v2";
 
-const BUTTON_CONTENTS: Record<GameUIEvent["action"], string | JSX.Element> = {
+const BUTTON_CONTENTS: Record<UIKey, string | JSX.Element> = {
     shoot: <img src="/images/target.svg" />,
     reload: <img src="/images/reload.svg" />,
     grenade: <img src="/images/grenade.svg" />,
@@ -48,10 +47,9 @@ export function UI({
     const [unit, setUnit] = useState<Unit | null>(null);
     const [recruit, setRecruit] = useState<Recruit | null>(null);
 
-    const onAction = (action: GameUIEvent["action"]) =>
-        eventBus.dispatchEvent({ type: "ui", action });
-
-    const button = (id: GameUIEvent["action"], disabled?: boolean, text?: string) => (
+    const onAction = (action: UIKey) =>
+        eventBus.dispatchEvent({ type: `ui:${action}`, name: action });
+    const button = (id: UIKey, disabled?: boolean, text?: string) => (
         <button
             onClick={() => onAction(id)}
             onMouseEnter={(e) => e.stopPropagation()}
@@ -67,39 +65,41 @@ export function UI({
 
     // Subscribe to the game events to update the UI.
     useEffect(() => {
-        function gameEventsHandler(event: GameEvent["game"]) {
-            if (event.action === "mode_switch") {
-                setMode(event.mode.name);
+        function onGameModeSwitch(event: GameAction["mode_switch"]) {
+            setMode(event.mode.name);
 
-                if (event.mode instanceof ShootMode) setShootMode(true);
-                else setShootMode(false);
+            if (event.mode instanceof ShootMode) setShootMode(true);
+            else setShootMode(false);
 
-                if (event.mode instanceof NoneMode) setPanelDisabled(true);
-                else setPanelDisabled(false);
-            }
+            if (event.mode instanceof NoneMode) setPanelDisabled(true);
+            else setPanelDisabled(false);
+        }
 
-            if (event.action === "unit_selected" && recruits) {
-                let unit = event.unit;
-                let recruitId = unit.props.recruit;
-                if (recruitId in recruits) {
-                    setRecruit(recruits[recruitId]);
-                    setUnit(unit);
-                }
+        function onGameUnitSelected(event: GameAction["unit_selected"]) {
+            if (!recruits) return;
+            let unit = event.unit;
+            let recruitId = unit.props.recruit;
+            if (recruitId in recruits) {
+                setRecruit(recruits[recruitId]);
+                setUnit(unit);
             }
         }
 
-        eventBus.addEventListener("game", gameEventsHandler);
-        return () => eventBus.removeEventListener("game", gameEventsHandler);
+        eventBus.addEventListener("game:mode_switch", onGameModeSwitch);
+        eventBus.addEventListener("game:unit_selected", onGameUnitSelected);
+        return () => {
+            eventBus.removeEventListener("game:mode_switch", onGameModeSwitch);
+            eventBus.removeEventListener("game:unit_selected", onGameUnitSelected);
+        };
     }, [recruits]);
 
     // Subscribe to the SUI events + all events to update the log.
     useEffect(() => {
-        eventBus.addEventListener("sui", (event) => {
-            if (event.action === "next_turn") {
-                // mark next turn
-            }
-        });
+        function onNextTurn(_event: SuiAction["next_turn"]) {
+            // ... mark next turn ?
+        }
 
+        eventBus.addEventListener("sui:next_turn", onNextTurn);
         eventBus.all(({ data }) => {
             setLog((log) => {
                 // @ts-ignore
@@ -109,6 +109,8 @@ export function UI({
                 return fullLog;
             });
         });
+
+        return () => eventBus.removeEventListener("sui:next_turn", onNextTurn);
     }, []);
 
     const reloadText =
