@@ -37,8 +37,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Use Node.js
         uses: actions/setup-node@v4
-      - run: npm i prettier
-      - run: npx prettier -c src/**/*.ts
+      - run: npm i -g prettier
+      - run: npx -g prettier -c src/**/*.ts
 
   prettier-move:
     name: Check Move files formatting

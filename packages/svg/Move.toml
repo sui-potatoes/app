@@ -5,14 +5,10 @@ license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet", override = true }
-codec = { r.mvr = "potatoes/codec" }
+Codec = { local = "../codec" }
 
 [addresses]
 svg = "0x0"
 
 [dev-dependencies]
 Suifrens = { git = "https://github.com/MystenLabs/apps.git", subdir = "suifrens/suifrens", rev = "main" }
-
-[r.mvr]
-network = "testnet"
