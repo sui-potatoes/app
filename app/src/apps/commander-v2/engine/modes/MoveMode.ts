@@ -88,6 +88,8 @@ export class MoveMode implements Mode {
         const unit = this.selectedUnit;
         const path = mode.path;
 
+        console.log(path);
+
         this.grid.grid[unit.gridPosition.x][unit.gridPosition.y].unit = null;
         this.grid.grid[mode.target.x][mode.target.y].unit = unitId;
 
@@ -163,11 +165,10 @@ export class MoveMode implements Mode {
         const mode = this.mode as MoveMode;
         const tile = this.grid.grid[x][z];
 
+        if (this.selectedUnit === null) return;
         if (!(this.mode instanceof MoveMode)) {
             return console.error(`Invalid mode ${this.mode.name}`);
         }
-
-        if (this.selectedUnit === null) return;
 
         if (button === THREE.MOUSE.LEFT) {
             if (tile.type === "Unwalkable") return;
@@ -192,6 +193,14 @@ export class MoveMode implements Mode {
 
             this.eventBus?.dispatchEvent({ type: "game:move:trace", path });
         }
+    }
+
+    // === Spectator Mode ===
+
+    forceTriggerAction(path: THREE.Vector2[]) {
+        this.target = path[path.length - 1];
+        this.path = path.map(([x, z]) => new THREE.Vector2(x, -z));
+        this.drawPath(path);
     }
 }
 

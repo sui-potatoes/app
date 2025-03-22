@@ -36,6 +36,10 @@ export function Playground() {
     }, [models]);
 
     useEffect(() => {
+        if (map) console.log("game", map.objectId);
+    }, [!!map]);
+
+    useEffect(() => {
         if (!map) return;
 
         eventBus.addEventListener("game:shoot:aim", onGameAim);
@@ -43,8 +47,6 @@ export function Playground() {
         eventBus.addEventListener("game:reload:perform", onGameReload);
         eventBus.addEventListener("game:grenade:target", onGameGrenade);
         eventBus.addEventListener("ui:next_turn", onNextTurn);
-
-        console.log("game", map.objectId);
 
         return () => {
             eventBus.removeEventListener("game:shoot:aim", onGameAim);
@@ -212,6 +214,16 @@ export function Playground() {
                         targetUnit,
                         result: "CriticalHit",
                         damage: result[result.$kind],
+                    });
+                }
+
+                if (result.$kind === "Dodged") {
+                    return eventBus.dispatchEvent({
+                        type: "sui:attack",
+                        unit,
+                        targetUnit,
+                        result: "Dodged",
+                        damage: 0,
                     });
                 }
 

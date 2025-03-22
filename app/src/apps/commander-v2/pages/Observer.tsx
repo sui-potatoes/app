@@ -29,33 +29,18 @@ export function Observer() {
         setInitialGame(game);
     }, [game]);
 
-    useEffect(() => {
-        if (!history) return;
-        if (!initialGame) return;
-
-        // const newRecords = history.slice(historyIdx - 1);
-        // newRecords.forEach((record) => {
-        //     eventBus.dispatchEvent({
-        //         type: `observer:${record.$kind}`,
-        //         data: record[record.$kind],
-        //     });
-        // });
-        //
-        // setHistoryIdx(history.length);
-    }, [history]);
-
     if (!initialGame) return "can't find the game";
     if (!modelsLoaded) return "models not loaded";
 
     return (
         <>
-            <GameApp map={initialGame} camera={camera} eventBus={eventBus} />
+            <GameApp map={initialGame} camera={camera} eventBus={eventBus} history={history} orbit={true} />
             <div id="ui">
                 <div
                     id="panel-bottom"
                     className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10 normal-case overflow-auto h-20"
                 >
-                    {game?.map.history.reverse().map((history, i) => (
+                    {game?.map.history.map((history, i) => (
                         <p key={"log-" + i} className="text-sm normal-case text-white">
                             {history.$kind}: {JSON.stringify(history[history.$kind])}
                         </p>

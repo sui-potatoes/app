@@ -224,6 +224,12 @@ export class ShootMode implements Mode {
             mode.aimAtTarget.call(this, mode);
         }
     }
+
+    // === Spectator Mode ===
+
+    forceTriggerAction(target: Unit) {
+        this.currentTarget = target;
+    }
 }
 
 const CLOSE_DISTANCE_MODIFIER = 5;

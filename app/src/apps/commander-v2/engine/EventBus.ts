@@ -21,7 +21,7 @@ export type SuiAction = {
     attack: {
         unit: [number, number];
         targetUnit: [number, number];
-        result: "CriticalHit" | "Damage" | "Miss";
+        result: "CriticalHit" | "Damage" | "Miss" | "Dodged";
         damage: number;
     };
 };

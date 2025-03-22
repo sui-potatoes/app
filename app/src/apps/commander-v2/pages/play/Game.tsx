@@ -1,8 +1,9 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+import * as THREE from "three";
 import JEASINGS from "jeasings";
-import { Stats } from "@react-three/drei";
+import { OrbitControls, Stats } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -16,6 +17,7 @@ import {
     EditMode,
     ReloadMode,
 } from "../../engine";
+import { HistoryRecord } from "../../types/bcs";
 import { GameMap } from "../../hooks/useGame";
 import { SuiAction } from "../../engine/EventBus";
 
@@ -23,23 +25,43 @@ type GameAppProps = {
     map: GameMap;
     camera: Camera;
     eventBus: EventBus;
+    history?: (typeof HistoryRecord.$inferType)[];
+    orbit?: boolean;
 };
 
 /**
  * The Game itself, rendered inside the `Canvas` component.
  */
-export function GameApp({ map, camera, eventBus }: GameAppProps) {
+export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps) {
     return (
         <>
             <Canvas camera={camera}>
-                <App map={map} camera={camera} eventBus={eventBus} />
+                {orbit && (
+                    <OrbitControls
+                        target={new THREE.Vector3(3, 0, -3)}
+
+                        // position={}
+                        position0={new THREE.Vector3(5, 5, -5)}
+                        // maxAzimuthAngle={1}
+                        minDistance={4}
+                        maxDistance={12}
+                    />
+                )}
+                <App map={map} camera={camera} eventBus={eventBus} history={history} />
                 <Stats />
             </Canvas>
         </>
     );
 }
 
-function App({ map, camera, eventBus }: { map: GameMap; camera: Camera; eventBus: EventBus }) {
+type AppProps = {
+    map: GameMap;
+    camera: Camera;
+    eventBus: EventBus;
+    history?: (typeof HistoryRecord.$inferType)[];
+};
+
+function App({ map, camera, eventBus, history }: AppProps) {
     const { gl } = useThree();
     const game = useMemo(() => Game.fromBCS(map), []);
     const controls = useMemo(() => new Controls(game, gl.domElement), []);
@@ -64,9 +86,10 @@ function App({ map, camera, eventBus }: { map: GameMap; camera: Camera; eventBus
     // - listen to Sui events
     // - listen to UI events
     useEffect(() => {
+        controls.connect();
         camera.resetForSize(game.size);
         game.registerEventBus(eventBus);
-        controls.connect();
+        game.registerControls(controls);
 
         controls.addEventListener("scroll", onScroll);
         controls.addEventListener("zoom", onZoom);
@@ -92,6 +115,11 @@ function App({ map, camera, eventBus }: { map: GameMap; camera: Camera; eventBus
             eventBus.removeEventListener("sui:next_turn", onSuiNextTurn);
         };
     }, []);
+
+    // track history updates, send them to the game
+    useEffect(() => {
+        game.applyHistory(history || []);
+    }, [history]);
 
     return (
         <>

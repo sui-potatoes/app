@@ -10,6 +10,11 @@ import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
 import { models } from "./models";
 import { EventBus, SuiAction } from "./EventBus";
+import { HistoryRecord } from "../types/bcs";
+import { MoveMode } from "./modes/MoveMode";
+import { ShootMode } from "./modes/ShootMode";
+import { Camera } from "./Camera";
+import { ReloadMode } from "./modes/ReloadMode";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
@@ -56,6 +61,8 @@ export class Game extends THREE.Object3D {
     public mode: Mode = new NoneMode();
     /** Optionally registered EventBus */
     protected eventBus: EventBus | null = null;
+    /** Controls instance */
+    protected controls: Controls | null = null;
     /** Selected Unit */
     protected selectedUnit: Unit | null = null;
     /** Active pointer based on input */
@@ -64,6 +71,8 @@ export class Game extends THREE.Object3D {
     protected units: { [key: number]: Unit } = {};
     /** Flag to block execution any other action from being run in parallel */
     protected _isBlocked: boolean = false;
+    /** Index of the current history record */
+    protected historyIdx: number = 0;
 
     /** Construct the `Game` instance from BCS representation (fetched Sui Object) */
     public static fromBCS(data: GameMap): Game {
@@ -71,6 +80,7 @@ export class Game extends THREE.Object3D {
         const size = map.grid[0].length;
         const game = new Game(size, true);
 
+        game.historyIdx = data.map.history.length;
         game.turn = map.turn;
 
         for (let x = 0; x < size; x++) {
@@ -159,11 +169,107 @@ export class Game extends THREE.Object3D {
         this.units[unitId]!.props.ammo.value = this.units[unitId]!.props.ammo.max_value;
     }
 
+    // === History API ===
+
+    async applyHistory(history: (typeof HistoryRecord.$inferType)[]) {
+        console.log("Applying history", this.historyIdx, history.length);
+        let i = this.historyIdx;
+        while (i < history.length) {
+            const record = history[i];
+            if (record.$kind === "Move") {
+                const path = record.Move;
+                this.selectUnit(path[0][0], path[0][1]);
+                this.switchMode(new MoveMode(this.controls!));
+
+                if (!(this.mode instanceof MoveMode)) {
+                    throw new Error(`Invalid mode ${this.mode.name}`);
+                }
+
+                (this.mode as MoveMode).forceTriggerAction(
+                    path.map(([x, z]) => new THREE.Vector2(x, z)),
+                );
+                await this.performAction();
+            } else if (record.$kind === "NextTurn") {
+                this.nextTurn();
+            } else if (record.$kind === "Attack") {
+                const { origin, target } = record.Attack;
+                const nextRecord = history[i + 1];
+                i += 1; // skip next record, we're handling it here
+
+                if (
+                    !nextRecord ||
+                    !["CriticalHit", "Miss", "Dodged", "Damage"].includes(nextRecord.$kind)
+                ) {
+                    throw new Error(
+                        "Incorrect History log, expected Damage, CriticalHit, Miss or Dodged",
+                    );
+                }
+
+                this.selectUnit(origin[0], origin[1]);
+                this.switchMode(
+                    new ShootMode(
+                        {
+                            moveBack: () => {},
+                            moveToUnit: () => {},
+                            resetForSize: () => {},
+                        } as unknown as Camera,
+                        this.controls!,
+                    ),
+                );
+
+                if (!(this.mode instanceof ShootMode)) {
+                    throw new Error(`Invalid mode ${this.mode.name}`);
+                }
+
+                const targetObject = this.units[this.grid.grid[target[0]][target[1]].unit!]!;
+                (this.mode as ShootMode).forceTriggerAction(targetObject);
+                await this.performAction();
+
+                const unit = [origin[0], origin[1]] as [number, number];
+                const targetUnit = [target[0], target[1]] as [number, number];
+
+                if (nextRecord.$kind === "Miss") {
+                    this.applyAttackEvent({ unit, targetUnit, result: "Miss", damage: 0 });
+                } else if (nextRecord.$kind === "Dodged") {
+                    this.applyAttackEvent({ unit, targetUnit, result: "Dodged", damage: 0 });
+                } else if (nextRecord.$kind === "Damage") {
+                    this.applyAttackEvent({
+                        unit,
+                        targetUnit,
+                        result: "Damage",
+                        damage: nextRecord.Damage,
+                    });
+                } else if (nextRecord.$kind === "CriticalHit") {
+                    this.applyAttackEvent({
+                        unit,
+                        targetUnit,
+                        result: "CriticalHit",
+                        damage: nextRecord.CriticalHit,
+                    });
+                } else throw new Error(`Unsupported event ${nextRecord.$kind}`);
+            } else if (record.$kind === "Reload") {
+                const [x, y] = record.Reload;
+                this.selectUnit(x, y);
+                this.switchMode(new ReloadMode());
+                await this.performAction();
+            } else {
+                console.log("Unsupported event", record);
+            }
+
+            i++;
+        }
+        this.historyIdx = i;
+    }
+
     // === Component integration ===
 
     /** Register an EventBus to the Game */
     registerEventBus(eventBus: EventBus) {
         this.eventBus = eventBus;
+    }
+
+    registerControls(controls: Controls) {
+        this.controls = controls;
     }
 
     // === Animation Loop & Controls
