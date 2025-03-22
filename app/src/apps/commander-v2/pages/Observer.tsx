@@ -13,7 +13,7 @@ export function Observer() {
     const eventBus = useMemo(() => new EventBus(), []);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [initialGame, setInitialGame] = useState<GameMap>();
-    const [historyIdx, setHistoryIdx] = useState(0);
+    const [_historyIdx, setHistoryIdx] = useState(0);
     const { data: game } = useGame({ id: gameId!, refetchInterval: 1000 });
     const history = game?.map.history;
 
@@ -33,14 +33,15 @@ export function Observer() {
         if (!history) return;
         if (!initialGame) return;
 
-        const newRecords = history.slice(historyIdx);
-        console.log(newRecords);
-        newRecords.forEach((record) => {
-            eventBus.dispatchEvent({
-                type: `observer:${record.$kind}`,
-                data: record[record.$kind],
-            });
-        });
+        // const newRecords = history.slice(historyIdx - 1);
+        // newRecords.forEach((record) => {
+        //     eventBus.dispatchEvent({
+        //         type: `observer:${record.$kind}`,
+        //         data: record[record.$kind],
+        //     });
+        // });
+        //
+        // setHistoryIdx(history.length);
     }, [history]);
 
     if (!initialGame) return "can't find the game";

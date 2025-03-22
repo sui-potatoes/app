@@ -3,16 +3,12 @@
 
 import { Game } from "./../Game";
 import { Controls } from "./../Controls";
-import { Prefixed, UnPrefixed } from "../../types/utils";
 import { ShootModeEvent } from "./ShootMode";
 import { EditModeEvent } from "./EditMode";
 import { MoveModeEvent } from "./MoveMode";
 import { ReloadModeEvent } from "./ReloadMode";
 import { GrenadeModeEvent } from "./GrenadeMode";
-
-type PrefixedModeEvent<P extends string, K extends {}, T extends Extract<keyof K, string>> = {
-    [U in Prefixed<P, T>]: K[Extract<UnPrefixed<U>, T>];
-};
+import { PrefixedEventMap } from "./../../types/utils";
 
 type ModeName = "grenade" | "reload" | "shoot" | "editor" | "move" | "none";
 
@@ -23,12 +19,12 @@ type BaseModeEvents = {
 
 // prettier-ignore
 export type ModeEvent =
-    & PrefixedModeEvent<"mode", BaseModeEvents, keyof BaseModeEvents>
-    & PrefixedModeEvent<"grenade", GrenadeModeEvent, keyof GrenadeModeEvent>
-    & PrefixedModeEvent<"reload", ReloadModeEvent, keyof ReloadModeEvent>
-    & PrefixedModeEvent<"shoot", ShootModeEvent, keyof ShootModeEvent>
-    & PrefixedModeEvent<"editor", EditModeEvent, keyof EditModeEvent>
-    & PrefixedModeEvent<"move", MoveModeEvent, keyof MoveModeEvent>;
+    & PrefixedEventMap<"mode", BaseModeEvents, keyof BaseModeEvents>
+    & PrefixedEventMap<"grenade", GrenadeModeEvent, keyof GrenadeModeEvent>
+    & PrefixedEventMap<"reload", ReloadModeEvent, keyof ReloadModeEvent>
+    & PrefixedEventMap<"shoot", ShootModeEvent, keyof ShootModeEvent>
+    & PrefixedEventMap<"editor", EditModeEvent, keyof EditModeEvent>
+    & PrefixedEventMap<"move", MoveModeEvent, keyof MoveModeEvent>;
 
 /**
  * Each Mode defines a different way of interacting with the game. By default, the game mode is

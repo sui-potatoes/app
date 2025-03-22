@@ -12,6 +12,7 @@ export type EditModeEvent = {
     message: { message: string };
     tool: { tool: "Cover" | "High Cover" | "Object" | "Unwalkable"; direction: Direction };
     direction: { direction: Direction };
+    change: { tool: "Cover" | "High Cover" | "Object" | "Unwalkable"; location: [number, number] };
 };
 
 /**
@@ -101,6 +102,11 @@ export class EditMode extends Mode {
 
         if (button === THREE.MOUSE.LEFT) {
             if (mode.tool === "Object") {
+                this.eventBus?.dispatchEvent({
+                    type: "game:editor:change",
+                    tool: mode.tool,
+                    location: [x, y],
+                });
                 return this.grid.setCell(x, y, { type: "Unwalkable", unit: null });
             }
 
@@ -116,6 +122,12 @@ export class EditMode extends Mode {
                 };
 
                 const value = mode.tool === "Cover" ? 1 : 2;
+
+                this.eventBus?.dispatchEvent({
+                    type: "game:editor:change",
+                    tool: mode.tool,
+                    location: [x, y],
+                });
 
                 if (curr.type === "Cover") {
                     return this.grid.setCell(x, y, { ...curr, [mode.coverDirection]: value });

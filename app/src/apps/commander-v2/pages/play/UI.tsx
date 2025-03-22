@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { EventBus, GameAction, NoneMode, ShootMode, SuiAction, UIKey } from "../../engine";
 import { Recruit } from "../../types/bcs";
 import { type Unit } from "../../engine/Unit";
+import { printEvent } from "../../types/log";
 
 type Recruit = typeof Recruit.$inferType;
 
@@ -65,13 +66,13 @@ export function UI({
 
     // Subscribe to the game events to update the UI.
     useEffect(() => {
-        function onGameModeSwitch(event: GameAction["mode_switch"]) {
-            setMode(event.mode.name);
+        function onGameModeSwitch({ mode }: GameAction["mode:switch"]) {
+            setMode(mode.name);
 
-            if (event.mode instanceof ShootMode) setShootMode(true);
+            if (mode instanceof ShootMode) setShootMode(true);
             else setShootMode(false);
 
-            if (event.mode instanceof NoneMode) setPanelDisabled(true);
+            if (mode instanceof NoneMode) setPanelDisabled(true);
             else setPanelDisabled(false);
         }
 
@@ -85,10 +86,10 @@ export function UI({
             }
         }
 
-        eventBus.addEventListener("game:mode_switch", onGameModeSwitch);
+        eventBus.addEventListener("game:mode:switch", onGameModeSwitch);
         eventBus.addEventListener("game:unit_selected", onGameUnitSelected);
         return () => {
-            eventBus.removeEventListener("game:mode_switch", onGameModeSwitch);
+            eventBus.removeEventListener("game:mode:switch", onGameModeSwitch);
             eventBus.removeEventListener("game:unit_selected", onGameUnitSelected);
         };
     }, [recruits]);
@@ -100,11 +101,9 @@ export function UI({
         }
 
         eventBus.addEventListener("sui:next_turn", onNextTurn);
-        eventBus.all(({ data }) => {
+        eventBus.addEventListener("all", (map) => {
             setLog((log) => {
-                // @ts-ignore
-                let { type, action, message } = data;
-                let fullLog = [...log, `${type}: ${message || action || ""}`];
+                let fullLog = [...log, printEvent(map.eventType, map)];
                 if (fullLog.length > LOG_LENGTH) fullLog = fullLog.slice(fullLog.length - 5);
                 return fullLog;
             });
@@ -164,11 +163,11 @@ export function UI({
                 {button("cancel", panelDisabled)}
                 {button("edit")}
                 <button
+                    className={"action-button interactive mt-40" + (isExecuting ? " disabled" : "")}
                     onClick={() => {
                         sessionStorage.removeItem(LS_KEY);
                         window.location.reload();
                     }}
-                    className={"action-button interactive mt-40" + (isExecuting ? " disabled" : "")}
                 >
                     Exit
                 </button>

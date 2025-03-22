@@ -33,8 +33,6 @@ export function Playground() {
 
     useEffect(() => {
         loadModels().then(() => setModelsLoaded(true));
-        // eventBus.dispatchEvent({ type: "three", action: "models_loaded" });
-        eventBus.all((_event) => {}); // subscribe to all events if needed
     }, [models]);
 
     useEffect(() => {
@@ -55,7 +53,7 @@ export function Playground() {
             eventBus.removeEventListener("game:grenade:target", onGameGrenade);
             eventBus.removeEventListener("ui:next_turn", onNextTurn);
         };
-    }, [map, tx, tx.lockedTx]); // mind the `tx` dependency here!
+    }, [map, tx, eventBus, tx.lockedTx]); // mind the `tx` dependency here!
 
     /**
      * Submit the locked transaction when the user clicks the confirm button.
@@ -182,7 +180,7 @@ export function Playground() {
                 });
             case "Attack": {
                 const unit = first.Attack.origin as [number, number];
-                const target = first.Attack.target as [number, number];
+                const targetUnit = first.Attack.target as [number, number];
                 const result = history[1];
                 if (!result)
                     throw new Error("History log is incorrect, only one attack record is present");
@@ -191,7 +189,7 @@ export function Playground() {
                     return eventBus.dispatchEvent({
                         type: "sui:attack",
                         unit,
-                        target,
+                        targetUnit,
                         result: "Miss",
                         damage: 0,
                     });
@@ -201,7 +199,7 @@ export function Playground() {
                     return eventBus.dispatchEvent({
                         type: "sui:attack",
                         unit,
-                        target,
+                        targetUnit,
                         result: "Damage",
                         damage: result[result.$kind],
                     });
@@ -211,7 +209,7 @@ export function Playground() {
                     return eventBus.dispatchEvent({
                         type: "sui:attack",
                         unit,
-                        target,
+                        targetUnit,
                         result: "CriticalHit",
                         damage: result[result.$kind],
                     });
@@ -230,7 +228,10 @@ export function Playground() {
     }
 
     async function onGameTrace({ path }: GameAction["move:trace"]) {
-        const result = await tx.moveUnit(path.map((p: THREE.Vector2) => [p.x, p.y]));
+        const result = await tx.moveUnit(path.map((p: THREE.Vector2) => [p.x, p.y])).catch((e) => {
+            console.error(e);
+            return false;
+        });
         eventBus.dispatchEvent({
             type: "sui:trace",
             success: !!result,
@@ -256,9 +257,9 @@ export function Playground() {
         });
     }
 
-    async function onGameAim({ unit, target }: GameAction["shoot:aim"]) {
+    async function onGameAim({ unit, targetUnit }: GameAction["shoot:aim"]) {
         const { x: x0, y: y0 } = unit.gridPosition as THREE.Vector2;
-        const { x: x1, y: y1 } = target.gridPosition as THREE.Vector2;
+        const { x: x1, y: y1 } = targetUnit.gridPosition as THREE.Vector2;
 
         const result = await tx.performAttack([x0, y0], [x1, y1]);
         eventBus.dispatchEvent({

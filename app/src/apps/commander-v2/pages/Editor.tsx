@@ -63,7 +63,8 @@ export function Field({ size, eventBus, camera, preset }: FieldProps) {
             camera.lookAt(...center);
         });
 
-        eventBus.all(function saveState() {
+        // save the state of the editor on any event
+        eventBus.addEventListener("all", function saveState() {
             sessionStorage.setItem(STORAGE_KEY, game.grid.toBytes().toHex());
         });
     }, []);

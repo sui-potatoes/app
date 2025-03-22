@@ -3,10 +3,10 @@
 
 import * as THREE from "three";
 import { ControlsEvents } from "./Controls";
-import { HistoryRecord } from "../types/bcs";
+import { ModeEvent } from "./modes/Mode";
 import { Unit } from "./Unit";
-import { Mode, ModeEvent } from "./modes/Mode";
-import { Prefixed, UnPrefixed } from "../types/utils";
+import { HistoryRecord } from "../types/bcs";
+import { PrefixedEventMap } from "../types/utils";
 
 /** Events emitted by transaction sender, post network requests */
 export type SuiAction = {
@@ -20,18 +20,14 @@ export type SuiAction = {
     tx_success: { history: HistoryRecord[] };
     attack: {
         unit: [number, number];
-        target: [number, number];
+        targetUnit: [number, number];
         result: "CriticalHit" | "Damage" | "Miss";
         damage: number;
     };
 };
 
 /** Events emitted by the `Game` instance during the gameplay */
-export type GameAction = {
-    mode_action: { mode: Mode };
-    mode_switch: { mode: Mode };
-    unit_selected: { unit: Unit };
-} & ModeEvent;
+export type GameAction = { unit_selected: { unit: Unit } } & ModeEvent;
 
 export type UIKey =
     | "shoot"
@@ -51,48 +47,43 @@ type HistoryKey = Exclude<keyof HistoryRecord, "$kind">;
  * Observer events are constructed from the history records.
  * All of them are prefixed with `observer:` and the type of the record.
  */
-export type ObserverEvent<T extends HistoryKey> = {
-    [U in Prefixed<"observer", T>]: { data: HistoryRecord[UnPrefixed<U>] };
-};
 
-export type GameUIEvent<T extends UIKey> = {
-    [U in Prefixed<"ui", T>]: { name: UnPrefixed<U> };
-};
+export type GameUIEvent = PrefixedEventMap<"ui", { [U in UIKey]: { name: U } }, UIKey>;
+export type SuiEvent = PrefixedEventMap<"sui", SuiAction, keyof SuiAction>;
+export type GameEvent = PrefixedEventMap<"game", GameAction, keyof GameAction>;
+export type InputEvent = PrefixedEventMap<"input", ControlsEvents, keyof ControlsEvents>;
+export type ObserverEvent = PrefixedEventMap<
+    "observer",
+    { [U in HistoryKey]: { data: NonNullable<HistoryRecord[U]> } },
+    HistoryKey
+>;
 
-export type SuiEvent<T extends keyof SuiAction> = {
-    [U in Prefixed<"sui", T>]: SuiAction[UnPrefixed<U>];
-};
+type AllEvent<T extends Exclude<keyof EventMap, "all">> = THREE.BaseEvent<T> &
+    (GameUIEvent & SuiEvent & GameEvent & InputEvent & ObserverEvent)[T];
 
-export type GameEvent<T extends keyof GameAction> = {
-    [U in Prefixed<"game", T>]: GameAction[UnPrefixed<U>];
-};
-
-export type InputEvent<T extends keyof ControlsEvents> = {
-    [U in Prefixed<"input", T>]: ControlsEvents[UnPrefixed<U>];
-};
+export type EventKey = Exclude<keyof EventMap, "all">;
 
 /** All events emitted by the EventBus */
 // prettier-ignore
-type EventMap =
-    & GameUIEvent<UIKey>
-    & SuiEvent<keyof SuiAction>
-    & GameEvent<keyof GameAction>
-    & InputEvent<keyof ControlsEvents>
-    & ObserverEvent<HistoryKey>
-    & { all: { type: keyof EventMap; data: EventMap[Exclude<keyof EventMap, "all">] } };
+export type EventMap =
+    & GameUIEvent
+    & ObserverEvent
+    & SuiEvent
+    & GameEvent
+    & InputEvent
+    & { all: Partial<{ [K in EventKey]: AllEvent<K> }> & { eventType: EventKey } };
 
 /**
  * Custom event dispatcher for the game. Handles the interaction between the
  * game, UI and transactional events.
  */
 export class EventBus extends THREE.EventDispatcher<EventMap> {
-    /** Subscribe to all events. */
-    public all(callback: (event: EventMap["all"]) => void): void {
-        this.addEventListener("all", ({ type, data }) => callback({ type, data }));
-    }
-
     public dispatchEvent<T extends keyof EventMap>(event: THREE.BaseEvent<T> & EventMap[T]): void {
         super.dispatchEvent(event);
-        super.dispatchEvent({ type: "all", data: event }); // all is always dispatched first
+        super.dispatchEvent({
+            type: "all",
+            [event.type]: event,
+            eventType: event.type as Exclude<keyof EventMap, "all">,
+        });
     }
 }

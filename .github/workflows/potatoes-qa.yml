@@ -27,6 +27,19 @@ jobs:
       # each of them
       - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
 
+  prettier-ts:
+    name: Check TypeScript files formatting
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.APP_PATH }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+      - run: npm i prettier
+      - run: npx prettier -c **/*.ts
+
   prettier-move:
     name: Check Move files formatting
     runs-on: ubuntu-latest

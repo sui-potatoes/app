@@ -190,8 +190,8 @@ export class Grid extends THREE.Object3D {
                     const from = this.grid[nx][ny];
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
+                    if (to.unit !== null) continue;
                     if (to.type === "Unwalkable") continue;
-
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.down) continue;
                         if (direction === "DOWN" && to.up) continue;
@@ -341,6 +341,7 @@ export class Grid extends THREE.Object3D {
                     const from = this.grid[nx][ny];
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
+                    if (to.unit !== null) continue;
                     if (to.type === "Unwalkable") continue;
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.down) continue;

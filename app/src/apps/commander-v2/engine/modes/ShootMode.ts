@@ -11,8 +11,8 @@ import { Unit } from "../Unit";
 import { ReloadMode } from "./ReloadMode";
 
 export type ShootModeEvent = {
-    aim: { unit: Unit; target: Unit };
-    shoot: { unit: Unit; target: Unit };
+    aim: { unit: Unit; targetUnit: Unit };
+    shoot: { unit: Unit; targetUnit: Unit };
     no_ammo: {};
     no_targets: {};
 };
@@ -138,7 +138,7 @@ export class ShootMode implements Mode {
         this.eventBus?.dispatchEvent({
             type: "game:shoot:shoot",
             unit: selectedUnit,
-            target: target,
+            targetUnit: target,
         });
     }
 
@@ -155,7 +155,7 @@ export class ShootMode implements Mode {
         this.eventBus?.dispatchEvent({
             type: "game:shoot:aim",
             unit: selectedUnit,
-            target: mode.currentTarget,
+            targetUnit: mode.currentTarget,
         });
 
         // using this object to get the position of the camera

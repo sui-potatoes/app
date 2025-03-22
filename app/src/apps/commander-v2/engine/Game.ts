@@ -136,7 +136,7 @@ export class Game extends THREE.Object3D {
     }
 
     /** Apply event received from Sui */
-    applyAttackEvent({ damage, target: [x1, y1] }: SuiAction["attack"]) {
+    applyAttackEvent({ damage, targetUnit: [x1, y1] }: SuiAction["attack"]) {
         const unitId = this.grid.grid[x1][y1].unit;
 
         if (unitId === null) return; // ignore, fetched event too late
@@ -243,7 +243,7 @@ export class Game extends THREE.Object3D {
      */
     async performAction() {
         if (this._isBlocked) return;
-        this.eventBus?.dispatchEvent({ type: "game:mode_action", mode: this.mode });
+        this.eventBus?.dispatchEvent({ type: "game:mode:perform", mode: this.mode });
         await this.mode.performAction.call(this, this.mode);
         this.switchMode(new NoneMode());
     }
