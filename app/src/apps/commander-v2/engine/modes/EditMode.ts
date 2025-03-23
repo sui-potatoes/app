@@ -50,8 +50,8 @@ export class EditMode extends Mode {
         mode.pointerMesh?.clear();
         mode.pointerMesh && this.remove(mode.pointerMesh);
         mode.pointerMesh = null;
-        mode.controls.removeEventListener("click", mode.onClick.bind(this));
         mode._clickCb !== null && mode.controls.removeEventListener("click", mode._clickCb);
+        mode._keyupCb !== null && mode.controls.removeEventListener("keyup", mode._keyupCb);
     }
 
     input(this: Game, controls: Controls, mode: this) {
@@ -169,6 +169,8 @@ export class EditMode extends Mode {
             case "d":
                 mode.coverDirection = "right";
                 break;
+            default:
+                return;
         }
 
         this.eventBus?.dispatchEvent({

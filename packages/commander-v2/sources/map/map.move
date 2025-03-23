@@ -184,10 +184,10 @@ public fun perform_attack(
     if (is_dodged) history.push_back(history::new_dodged());
     if (is_hit) {
         history.push_back({
-            if (is_crit) history::new_crit(damage)
-            else history::new_damage(x1, y1, damage)
+            if (is_crit) history::new_critical_hit(damage)
+            else history::new_damage(damage)
         })
-    } else history.push_back(history::new_missed());
+    } else history.push_back(history::new_miss());
 
     if (is_kia) history.push_back(history::new_kia(target.destroy()))
     else map.grid[x1, y1].unit.fill(target);
@@ -229,7 +229,7 @@ public fun perform_grenade(
             let mut unit = tile.unit.extract();
             let (_, dmg, is_kia) = unit.apply_damage(rng, 4, false);
 
-            history.push_back(history::new_damage(x, y, dmg));
+            history.push_back(history::new_damage(dmg));
 
             if (!is_kia) tile.unit.fill(unit)
             else history.push_back(history::new_kia(unit.destroy()));
