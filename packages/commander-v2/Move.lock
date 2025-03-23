@@ -2,14 +2,18 @@
 
 [move]
 version = 3
-manifest_digest = "41DBE473CDC92B9593C398E9315D61ED83058D74957E59AFC8A11D1210F31671"
-deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
+manifest_digest = "26C895D0DB129B935C926BD2B262677548919821E3D431DCACFFB22B0FF2EF20"
+deps_digest = "8227D341C0550A37580C10FA45FE148A465225149C69D179737E0FE454AD6AEC"
 dependencies = [
   { id = "BitField", name = "BitField" },
+  { id = "Bridge", name = "Bridge" },
   { id = "Codec", name = "Codec" },
+  { id = "DeepBook", name = "DeepBook" },
   { id = "Grid", name = "Grid" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "NameGenerator", name = "NameGenerator" },
   { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
@@ -17,7 +21,21 @@ id = "BitField"
 source = { local = "../bit_field" }
 
 dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "DeepBook", name = "DeepBook" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+]
+
+[[move.package]]
+id = "Bridge"
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/bridge" }
+
+dependencies = [
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
@@ -25,6 +43,19 @@ id = "Codec"
 source = { local = "../codec" }
 
 dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "DeepBook", name = "DeepBook" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+]
+
+[[move.package]]
+id = "DeepBook"
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/deepbook" }
+
+dependencies = [
+  { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
 ]
 
@@ -33,31 +64,48 @@ id = "Grid"
 source = { local = "../grid" }
 
 dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "DeepBook", name = "DeepBook" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
 id = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "releases/sui-v1.41.0-release", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
 id = "NameGenerator"
 source = { local = "../name-gen" }
 
 dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "DeepBook", name = "DeepBook" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
 id = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "releases/sui-v1.41.0-release", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
 ]
 
+[[move.package]]
+id = "SuiSystem"
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "9c04e1840eb5", subdir = "crates/sui-framework/packages/sui-system" }
+
+dependencies = [
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+]
+
 [move.toolchain-version]
-compiler-version = "1.46.0"
+compiler-version = "1.45.2"
 edition = "2024.beta"
 flavor = "sui"
 
@@ -65,6 +113,6 @@ flavor = "sui"
 
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0x4a348e32d2abd2552218c0adc46faed81c2ac5d3aa13dcae1c6ea23dd1118091"
-latest-published-id = "0x4a348e32d2abd2552218c0adc46faed81c2ac5d3aa13dcae1c6ea23dd1118091"
+original-published-id = "0x66e5b5d3a74f72f5833fb586992ae3050e86e57f994c8795b01cca1b6ccedae2"
+latest-published-id = "0x66e5b5d3a74f72f5833fb586992ae3050e86e57f994c8795b01cca1b6ccedae2"
 published-version = "1"

@@ -15,7 +15,7 @@ export function Menu() {
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
     const disabled = !zkLogin.address;
-    const className = disabled ? "options-row disabled interactive" : "options-row interactive";
+    const className = disabled ? "options-row non-interactive" : "options-row interactive";
     const name = useSuinsName({ address: zkLogin.address });
 
     useEffect(() => {
@@ -62,6 +62,9 @@ export function Menu() {
                             className={className}
                         >
                             Play
+                        </NavLink>
+                        <NavLink to="spectate" className="options-row interactive">
+                            Spectate
                         </NavLink>
                         <NavLink
                             to="headquarters"

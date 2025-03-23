@@ -10,6 +10,7 @@ import {
     COMMANDER_V2_PACKAGE_ID,
     COMMANDER_NAMES_PACKAGE_ID,
     COMMANDER_NAMES_OBJECT_ID,
+    COMMANDER_V2_REGISTRY_ID,
 } from "./constants";
 import { createNetworkConfig } from "@mysten/dapp-kit";
 
@@ -23,6 +24,7 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } = createNetwork
             characterBuilderId: CHARACTER_BUILDER_ID,
             commanderPackageId: COMMANDER_PACKAGE_ID,
             commanderV2PackageId: COMMANDER_V2_PACKAGE_ID,
+            commanderV2RegistryId: COMMANDER_V2_REGISTRY_ID,
 
             commanderRegistryPackageId: COMMANDER_NAMES_PACKAGE_ID,
             commanderNamesObjectId: COMMANDER_NAMES_OBJECT_ID,

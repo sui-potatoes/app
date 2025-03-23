@@ -8,7 +8,7 @@
 /// minimalistic representation.
 module commander::history;
 
-use sui::event;
+use sui::{bcs::{Self, BCS}, event};
 
 /// Stores history of actions.
 public struct History(vector<Record>) has drop, store;
@@ -76,13 +76,13 @@ public fun new_attack(origin: vector<u16>, target: vector<u16>): Record {
 public fun new_dodged(): Record { Record::Dodged }
 
 /// Create new `Record::Missed` history record.
-public fun new_missed(): Record { Record::Miss }
+public fun new_miss(): Record { Record::Miss }
 
 /// Create new `Record::CriticalHit` history record.
-public fun new_crit(dmg: u8): Record { Record::CriticalHit(dmg) }
+public fun new_critical_hit(dmg: u8): Record { Record::CriticalHit(dmg) }
 
 /// Create new `Record::Damage` history record.
-public fun new_damage(_x: u16, _y: u16, dmg: u8): Record { Record::Damage(dmg) }
+public fun new_damage(dmg: u8): Record { Record::Damage(dmg) }
 
 /// Create new `Record::UnitKIA` history record.
 public fun new_kia(id: ID): Record { Record::UnitKIA(id) }
@@ -101,6 +101,10 @@ public fun new_reload(x: u16, y: u16): Record { Record::Reload(vector[x, y]) }
 
 // === Reads ===
 
+/// Read inner records vector.
+public fun inner(r: &History): &vector<Record> { &r.0 }
+
+/// List all `Record::UnitKIA` records.
 public fun list_kia(r: &vector<Record>): vector<ID> {
     let mut kias = vector[];
     r.do_ref!(
@@ -110,4 +114,37 @@ public fun list_kia(r: &vector<Record>): vector<ID> {
         },
     );
     kias
+}
+
+// === Compatibility / Conversion ===
+
+/// Deserialize `History` from bytes.
+public fun from_bytes(bytes: vector<u8>): History {
+    from_bcs(&mut bcs::new(bytes))
+}
+
+/// Serialize `History` to bytes.
+public(package) fun from_bcs(bcs: &mut BCS): History {
+    let records = bcs.peel_vec!(|bcs| {
+        match (bcs.peel_enum_tag()) {
+            0 => Record::Reload(bcs.peel_vec!(|bcs| bcs.peel_u16())),
+            1 => Record::NextTurn,
+            2 => Record::Move(bcs.peel_vec!(|bcs| bcs.peel_vec!(|bcs| bcs.peel_u16()))),
+            3 => Record::Attack {
+                origin: bcs.peel_vec!(|bcs| bcs.peel_u16()),
+                target: bcs.peel_vec!(|bcs| bcs.peel_u16()),
+            },
+            4 => Record::RecruitPlaced(bcs.peel_u16(), bcs.peel_u16()),
+            5 => Record::Damage(bcs.peel_u8()),
+            6 => Record::Miss,
+            7 => Record::Explosion,
+            8 => Record::CriticalHit(bcs.peel_u8()),
+            9 => Record::Grenade(bcs.peel_u16(), bcs.peel_u16(), bcs.peel_u16()),
+            10 => Record::UnitKIA(bcs.peel_address().to_id()),
+            11 => Record::Dodged,
+            _ => abort,
+        }
+    });
+
+    History(records)
 }

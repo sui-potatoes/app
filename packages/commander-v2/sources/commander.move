@@ -5,12 +5,17 @@
 module commander::commander;
 
 use commander::{history::{Self, History}, map::{Self, Map}, recruit::Recruit};
-use sui::{object_table::{Self, ObjectTable}, random::Random};
+use sui::{clock::Clock, object_table::{Self, ObjectTable}, random::Random, vec_map::{Self, VecMap}};
+
+/// Stack limit of public games in the `Commander` object.
+const PUBLIC_GAMES_LIMIT: u64 = 20;
 
 /// The main object of the game, controls the game state, configuration and
 /// serves as the registry for all users and their recruits.
 public struct Commander has key {
     id: UID,
+    /// List of the 10 most recent games.
+    games: VecMap<ID, u64>,
 }
 
 /// A single instance of the game. A `Game` object is created when a new game is
@@ -33,6 +38,16 @@ public fun new(ctx: &mut TxContext): Game {
         recruits: object_table::new(ctx),
         id,
     }
+}
+
+/// Create a new public game, allowing anyone to spectate.
+public fun register_game(cmd: &mut Commander, clock: &Clock, game: &Game, _ctx: &mut TxContext) {
+    if (cmd.games.size() == PUBLIC_GAMES_LIMIT) {
+        // remove the oldest game, given that the VecMap is following the insertion order
+        let (_, _) = cmd.games.remove_entry_by_idx(0);
+    };
+
+    cmd.games.insert(game.id.to_inner(), clock.timestamp_ms());
 }
 
 /// Start a new game with a custom map passed directly as a byte array.
@@ -139,4 +154,12 @@ public fun next_turn(game: &mut Game) {
 /// Share the `key`-only object after placing Recruits on the map.
 public fun share(game: Game) {
     transfer::share_object(game)
+}
+
+/// On publish, share the `Commander` object.
+fun init(ctx: &mut TxContext) {
+    transfer::share_object(Commander {
+        id: object::new(ctx),
+        games: vec_map::empty(),
+    });
 }

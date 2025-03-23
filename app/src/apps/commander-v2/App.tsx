@@ -15,6 +15,7 @@ import { useZkLogin } from "@mysten/enoki/react";
 import * as Tone from "tone";
 import { useEffect } from "react";
 import { Observer } from "./pages/Observer";
+import { Spectate } from "./pages/Spectate";
 
 export default function App() {
     const zkLogin = useZkLogin();
@@ -54,7 +55,8 @@ export default function App() {
             <div className="w-full h-full bg-opacity-70 bg-black">
                 <Routes>
                     <Route path="/" element={<Menu />} />
-                    <Route path="/observe/:gameId" element={<Observer />} />
+                    <Route path="/spectate" element={<Spectate />} />
+                    <Route path="/spectate/:gameId" element={<Observer />} />
                     {zkLogin && (
                         <>
                             <Route path="headquarters/crew" element={<Crew />} />
