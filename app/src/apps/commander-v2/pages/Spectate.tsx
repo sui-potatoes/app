@@ -12,6 +12,7 @@ export function Spectate() {
     const { data: games } = useRecentGames({});
     const [selected, setSelected] = useState<string>();
     const { data: game } = useGame({ id: selected!, enabled: !!selected });
+    const [historyDirection, setHistoryDirection] = useState<"up" | "down">("down");
 
     if (!games) return "loading...";
     if (games.length === 0) return "no games found";
@@ -23,7 +24,7 @@ export function Spectate() {
                 <div className="flex justify-start">
                     <div className="w-96 max-w-md">
                         <h2 className="mb-2">Recent games</h2>
-                        {games.map((game) => {
+                        {games.reverse().map((game) => {
                             return (
                                 <div
                                     className={
@@ -41,27 +42,61 @@ export function Spectate() {
                     </div>
                     {selected && !game && <Loader />}
                     {selected && (
-                        <div className="size-max ml-10 max-w-3xl">
-                            <div className="mb-10">
+                        <div
+                            className="ml-10 w-full max-w-3xl overflow-auto"
+                            style={{ maxHeight: "80vh" }}
+                        >
+                            <div className="mb-10 mx-2">
                                 <h2 className="mb-2">Game</h2>
                                 <div className="options-row">
                                     <div>Recruits</div>
                                     <div>{game?.map.recruits.length}</div>
                                 </div>
-                                <h2 className="mb-2 mt-10">History log</h2>
-                                {game?.map.history.map((record, i) => (
-                                    <div className="options-row flex min-w-96" key={i}>
-                                        <div className="normal-case">{record.$kind}</div>
-                                        <div>{JSON.stringify(record[record.$kind])}</div>
+                                <div className="options-row w-full">
+                                    <div>Size</div>
+                                    <div>
+                                        {game?.map.map.grid.length}x{game?.map.map.grid[0].length}
                                     </div>
-                                ))}
+                                </div>
+                                <NavLink
+                                    className="block mt-10 py-2 text-center interactive w-full"
+                                    to={`../spectate/${selected}`}
+                                >
+                                    spectate
+                                </NavLink>
+
+                                {/* rotate circle symbol unicode */}
+                                <div className="flex justify-between mb-2 mt-10">
+                                    <h2>History log</h2>
+                                    {/* up and down arrow symbols */}
+                                    <div
+                                        className="hover:cursor-pointer"
+                                        onClick={() =>
+                                            setHistoryDirection(
+                                                historyDirection === "up" ? "down" : "up",
+                                            )
+                                        }
+                                    >
+                                        {historyDirection === "up" ? <>&#x25B2;</> : <>&#x25BC;</>}
+                                    </div>
+                                </div>
+
+                                <div className="overflow-auto" style={{ maxHeight: "40vh" }}>
+                                    {(historyDirection === "up"
+                                        ? game?.map.history.reverse()
+                                        : game?.map.history
+                                    )?.map((record, i) => (
+                                        <div className="options-row flex w-full" key={i}>
+                                            <div className="normal-case mr-10">{record.$kind}</div>
+                                            <div>
+                                                {record.$kind === "UnitKIA"
+                                                    ? formatAddress(record.UnitKIA)
+                                                    : JSON.stringify(record[record.$kind])}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <NavLink
-                                className="block mt-10 py-2 text-center interactive w-full"
-                                to={`../spectate/${selected}`}
-                            >
-                                spectate
-                            </NavLink>
                         </div>
                     )}
                 </div>
