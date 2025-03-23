@@ -17,6 +17,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     const zkLogin = useZkLogin();
     const client = useSuiClient();
     const flow = useEnokiFlow();
+    const registryId = useNetworkVariable("commanderV2RegistryId");
     const packageId = useNetworkVariable("commanderV2PackageId");
     const [lockedTx, setLockedTx] = useState<Transaction | null>(null);
     const { executeTransaction, isExecuting } = useTransactionExecutor({
@@ -72,6 +73,12 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
                 arguments: [game, recruit, tx.pure.u16(x), tx.pure.u16(y)],
             });
         }
+
+        // register the game in the Commander object.
+        tx.moveCall({
+            target: `${packageId}::commander::register_game`,
+            arguments: [tx.object(registryId), tx.object.clock(), game],
+        });
 
         tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
 

@@ -39,7 +39,6 @@ export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps)
                 {orbit && (
                     <OrbitControls
                         target={new THREE.Vector3(3, 0, -3)}
-
                         // position={}
                         position0={new THREE.Vector3(5, 5, -5)}
                         // maxAzimuthAngle={1}

@@ -6,6 +6,7 @@ import { GameMap, useGame } from "../hooks/useGame";
 import { useEffect, useMemo, useState } from "react";
 import { GameApp } from "./play/Game";
 import { Camera, EventBus, loadModels } from "../engine";
+import { Footer } from "./Components";
 
 export function Observer() {
     const { gameId } = useParams();
@@ -34,7 +35,13 @@ export function Observer() {
 
     return (
         <>
-            <GameApp map={initialGame} camera={camera} eventBus={eventBus} history={history} orbit={true} />
+            <GameApp
+                map={initialGame}
+                camera={camera}
+                eventBus={eventBus}
+                history={history}
+                orbit={true}
+            />
             <div id="ui">
                 <div
                     id="panel-bottom"
@@ -47,6 +54,7 @@ export function Observer() {
                     ))}
                 </div>
             </div>
+            <Footer to="../spectate" />
         </>
     );
 }

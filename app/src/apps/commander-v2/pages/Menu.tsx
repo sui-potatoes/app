@@ -64,6 +64,13 @@ export function Menu() {
                             Play
                         </NavLink>
                         <NavLink
+                            to="spectate"
+                            onClick={(e) => disabled && e.preventDefault()}
+                            className={className}
+                        >
+                            Spectate
+                        </NavLink>
+                        <NavLink
                             to="headquarters"
                             onClick={(e) => disabled && e.preventDefault()}
                             className={className}

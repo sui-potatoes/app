@@ -20,8 +20,6 @@ export class ReloadMode implements Mode {
     /** Mode action cost */
     public readonly cost = 1;
 
-    constructor() {}
-
     connect(this: Game, _mode: this) {
         if (!this.selectedUnit) return this.switchMode(new NoneMode());
         if (this.selectedUnit.props.ap.value == 0) {
