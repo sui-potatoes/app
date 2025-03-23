@@ -19,12 +19,12 @@ assert!(decoded == b"Hello, World!");
 
 Full list of supported encodings in v1:
 
--   `codec::hex`
--   `codec::base64`
--   `codec::potatoes`
--   `codec::urlencode`
+- `codec::hex`
+- `codec::base64`
+- `codec::potatoes`
+- `codec::urlencode`
 
 Usage on this website:
 
--   [Character](/character) - uses this library to create "data URLs" for inscribed images.</p>
--   [Go Game](/go) - uses this library to encode the game state as a Data URL too.</p>
+- [Character](/character) - uses this library to create "data URLs" for inscribed images.</p>
+- [Go Game](/go) - uses this library to encode the game state as a Data URL too.</p>

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useSuiClientQuery } from "@mysten/dapp-kit";
+import { COMMANDER_BASE_NAME } from "../../../constants";
 
 export function useSuinsName({ address }: { address?: string }) {
     const { data: names } = useSuiClientQuery(
@@ -10,5 +11,5 @@ export function useSuinsName({ address }: { address?: string }) {
         { enabled: !!address },
     );
 
-    return names?.data[0];
+    return names?.data.find((n) => n.includes(COMMANDER_BASE_NAME))?.split(".")[0];
 }

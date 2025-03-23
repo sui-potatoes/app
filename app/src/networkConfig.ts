@@ -13,22 +13,21 @@ import {
 } from "./constants";
 import { createNetworkConfig } from "@mysten/dapp-kit";
 
-const { networkConfig, useNetworkVariable, useNetworkVariables } =
-    createNetworkConfig({
-        testnet: {
-            url: getFullnodeUrl("testnet"),
-            variables: {
-                goPackageId: GOGAME_PACKAGE_ID,
-                characterPackageId: CHARACTER_PACKAGE_ID,
-                /** The ID of the Builder object from `character` package */
-                characterBuilderId: CHARACTER_BUILDER_ID,
-                commanderPackageId: COMMANDER_PACKAGE_ID,
-                commanderV2PackageId: COMMANDER_V2_PACKAGE_ID,
+const { networkConfig, useNetworkVariable, useNetworkVariables } = createNetworkConfig({
+    testnet: {
+        url: getFullnodeUrl("testnet"),
+        variables: {
+            goPackageId: GOGAME_PACKAGE_ID,
+            characterPackageId: CHARACTER_PACKAGE_ID,
+            /** The ID of the Builder object from `character` package */
+            characterBuilderId: CHARACTER_BUILDER_ID,
+            commanderPackageId: COMMANDER_PACKAGE_ID,
+            commanderV2PackageId: COMMANDER_V2_PACKAGE_ID,
 
-                commanderRegistryPackageId: COMMANDER_NAMES_PACKAGE_ID,
-                commanderNamesObjectId: COMMANDER_NAMES_OBJECT_ID,
-            },
+            commanderRegistryPackageId: COMMANDER_NAMES_PACKAGE_ID,
+            commanderNamesObjectId: COMMANDER_NAMES_OBJECT_ID,
         },
-    });
+    },
+});
 
 export { useNetworkVariable, useNetworkVariables, networkConfig };

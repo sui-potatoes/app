@@ -110,7 +110,7 @@ export function newScene(
      */
     function animate(time: number) {
         raycaster.setFromCamera(pointer, camera);
-        const intersections = raycaster.intersectObjects([ grid ], false);
+        const intersections = raycaster.intersectObjects([grid], false);
 
         for (let intersection of intersections) {
             if (intersection.object instanceof GameObject) {

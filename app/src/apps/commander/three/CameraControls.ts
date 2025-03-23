@@ -11,7 +11,7 @@ export class CameraControls extends THREE.Controls<ControlsEvents> {
     }
 
     update(_delta: number) {
-        console.log('update');
+        console.log("update");
         this.update(0.001);
     }
 }

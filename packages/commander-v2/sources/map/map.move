@@ -10,8 +10,8 @@
 /// - to_string
 module commander::map;
 
-use commander::{event, recruit::Recruit, unit::{Self, Unit}};
-use grid::grid::{Self, Grid};
+use commander::{history::{Self, Record}, recruit::Recruit, unit::{Self, Unit}};
+use grid::{grid::{Self, Grid}, point};
 use std::string::String;
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
@@ -38,6 +38,9 @@ const NO_COVER: u8 = 0;
 const LOW_COVER: u8 = 1;
 /// Constant for high cover in the `TileType::Cover`.
 const HIGH_COVER: u8 = 2;
+
+/// The range of the grenade.
+const GRENADE_RANGE: u16 = 5;
 
 /// Defines a single Tile in the game `Map`. Tiles can be empty, provide cover
 /// or be unwalkable. Additionally, a unit standing on a tile effectively makes
@@ -93,40 +96,40 @@ public fun new(id: ID, size: u16): Map {
     }
 }
 
-/// Maps will be 30x30 tiles for now. Initially empty.
-public fun default(id: ID): Map {
-    new(id, 30)
-}
+/// Default Map is 30x30 tiles for now. Initially empty.
+public fun default(id: ID): Map { new(id, 30) }
 
 // === Actions ===
 
-/// Proceed to the next turn.
-public fun next_turn(map: &mut Map) {
-    map.turn = map.turn + 1;
-}
-
 /// Place a `Recruit` on the map at the given position.
-public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16) {
+public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16): Record {
     let target_tile = &map.grid[x, y];
 
     assert!(target_tile.unit.is_none(), EUnitAlreadyOnTile);
     assert!(target_tile.tile_type != TileType::Unwalkable, ETileIsUnwalkable);
 
-    map.grid[x, y].unit.fill(recruit.to_unit())
+    map.grid[x, y].unit.fill(recruit.to_unit());
+    history::new_recruit_placed(x, y)
+}
+
+/// Proceed to the next turn.
+public fun next_turn(map: &mut Map): Record {
+    map.turn = map.turn + 1;
+    history::new_next_turn()
 }
 
 /// Reload the unit's weapon. It costs 1 AP.
-public fun perform_reload(map: &mut Map, x: u16, y: u16) {
+public fun perform_reload(map: &mut Map, x: u16, y: u16): Record {
     assert!(map.grid[x, y].unit.is_some(), ENoUnit);
     let unit = map.grid[x, y].unit.borrow_mut();
     unit.try_reset_ap(map.turn);
     unit.perform_reload();
 
-    event::emit_reload_event(map.id, vector[x, y])
+    history::new_reload(x, y)
 }
 
 /// Move a unit along the path. The first point is the current position of the unit.
-public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
+public fun move_unit(map: &mut Map, path: vector<vector<u16>>): Record {
     assert!(path.length() > 1, EPathTooShort);
 
     let distance = path.length() - 1;
@@ -145,8 +148,7 @@ public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
     unit.perform_move(distance as u8);
     map.grid[x1, y1].unit.fill(unit);
 
-    // emit the move event,
-    event::emit_move_event(map.id, path)
+    history::new_move(path)
 }
 
 #[allow(lint(public_random))]
@@ -154,8 +156,6 @@ public fun move_unit(map: &mut Map, path: vector<vector<u16>>) {
 ///
 /// TODO: cover mechanic, provide `DEF` stat based on the direction of the
 ///     attack and the relative position of the attacker and the target.
-/// TODO: come up with valuable return values which indicate what exactly
-///     happened during the attack.
 public fun perform_attack(
     map: &mut Map,
     rng: &mut RandomGenerator,
@@ -163,7 +163,8 @@ public fun perform_attack(
     y0: u16,
     x1: u16,
     y1: u16,
-): (bool, Option<ID>) {
+): vector<Record> {
+    let mut history = vector[history::new_attack(vector[x0, y0], vector[x1, y1])];
     let attacker = &mut map.grid[x0, y0].unit;
     assert!(attacker.is_some(), ENoUnit);
 
@@ -171,7 +172,7 @@ public fun perform_attack(
     unit.try_reset_ap(map.turn);
 
     let range = grid::range!(x0, y0, x1, y1) as u8;
-    let (is_hit, is_plus_one, is_crit, damage, hit_chance) = unit.perform_attack(rng, range);
+    let (is_hit, _, is_crit, damage, _) = unit.perform_attack(rng, range);
     let target = &mut map.grid[x1, y1].unit;
     assert!(target.is_some(), ENoUnit);
 
@@ -180,25 +181,67 @@ public fun perform_attack(
         target.apply_damage(rng, damage, true)
     } else (false, 0, false);
 
-    event::emit_attack_event(
-        map.id,
-        vector[x0, y0],
-        vector[x1, y1],
-        damage,
-        hit_chance,
-        is_dodged,
-        !is_hit,
-        is_plus_one,
-        is_crit,
-        is_kia,
-    );
+    if (is_dodged) history.push_back(history::new_dodged());
+    if (is_hit) {
+        history.push_back({
+            if (is_crit) history::new_crit(damage)
+            else history::new_damage(x1, y1, damage)
+        })
+    } else history.push_back(history::new_missed());
 
-    if (is_kia) {
-        (true, option::some(target.destroy()))
-    } else {
-        map.grid[x1, y1].unit.fill(target);
-        (is_hit && !is_dodged, option::none())
-    }
+    if (is_kia) history.push_back(history::new_kia(target.destroy()))
+    else map.grid[x1, y1].unit.fill(target);
+
+    history
+}
+
+#[allow(lint(public_random))]
+/// Throw a grenade. This action costs 1AP, deals area damage and destroys
+/// covers in the area of effect (currently 3x3).
+public fun perform_grenade(
+    map: &mut Map,
+    rng: &mut RandomGenerator,
+    x: u16,
+    y: u16,
+    x1: u16,
+    y1: u16,
+): vector<Record> {
+    let radius = 2; // 5x5 area of effect
+    let unit = &mut map.grid[x, y].unit;
+    assert!(grid::range!(x, y, x1, y1) <= GRENADE_RANGE, EPathTooShort);
+    assert!(unit.is_some(), ENoUnit);
+
+    // update unit's stats
+    let unit = unit.borrow_mut();
+    unit.try_reset_ap(map.turn);
+    unit.perform_grenade();
+
+    // update each tile: Cover -> Empty
+    let mut history = vector[history::new_grenade(x1, y1, radius)];
+    let mut points = map.grid.von_neumann!(point::new(x1, y1), radius);
+
+    points.push_back(point::new(x1, y1));
+    points.do!(|p| {
+        let (x, y) = p.to_values();
+        let tile = &mut map.grid[x, y];
+
+        if (tile.unit.is_some()) {
+            let mut unit = tile.unit.extract();
+            let (_, dmg, is_kia) = unit.apply_damage(rng, 4, false);
+
+            history.push_back(history::new_damage(x, y, dmg));
+
+            if (!is_kia) tile.unit.fill(unit)
+            else history.push_back(history::new_kia(unit.destroy()));
+        };
+
+        match (tile.tile_type) {
+            TileType::Cover { .. } => tile.tile_type = TileType::Empty,
+            _ => (),
+        };
+    });
+
+    history
 }
 
 /// Get the current turn number.

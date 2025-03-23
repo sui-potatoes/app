@@ -2,36 +2,42 @@
 // SPDX-License-Identifier: MIT
 
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+
+const modelsList = {
+    soldier: "/models/soldier_3.glb",
+    base_tile: "/models/base_tile.glb",
+    barrier_steel: "/models/barrier_steel.glb",
+    barrel_stack: "/models/barrel_stack.glb",
+} as const;
+
+export type ModelName = keyof typeof modelsList;
 
 /**
  * Contains all loaded models.
  * Required to be loaded before the game starts.
  */
-export const models: { [key: string]: GLTF } = {};
+export const models: Record<ModelName, GLTF | null> & { loaded: boolean } = {
+    soldier: null,
+    base_tile: null,
+    barrier_steel: null,
+    barrel_stack: null,
+    loaded: false,
+};
 
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.6/");
 
 const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 
 /** Trigger loading of all models. */
 export async function loadModels() {
-    let [
-        soldier,
-        base_tile,
-        barrier_steel,
-        barrel_stack,
-    ] = await Promise.all([
-        loader.loadAsync("/models/soldier_3.glb"),
-        loader.loadAsync("/models/base_tile.glb"),
-        loader.loadAsync("/models/barrier_steel.glb"),
-        loader.loadAsync("/models/barrel_stack.glb"),
-    ]);
+    await Promise.all(
+        Object.entries(modelsList).map(async ([key, url]) => {
+            models[key as ModelName] = await loader.loadAsync(url);
+        }),
+    );
 
-    models.soldier = soldier;
-    models.base_tile = base_tile;
-    models.barrier_steel = barrier_steel;
-    models.barrel_stack = barrel_stack;
+    models.loaded = true;
 }

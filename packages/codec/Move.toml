@@ -1,14 +1,12 @@
 [package]
 name = "Codec"
-edition = "2024.beta"
+edition = "2024"
 authors = ["Sui Potatoes"]
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "releases/sui-v1.40.0-release" }
 
 [addresses]
 codec = "0x0"
-
 
 # testnet
 # v1: 0xa11d4e236d3456c14edd263859c475bc539b43afb8b41fa10974ca0abca6a1c0

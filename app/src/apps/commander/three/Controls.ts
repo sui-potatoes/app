@@ -89,7 +89,7 @@ export class Controls extends THREE.Controls<ControlsEvents> {
                     break;
             }
         }
-        
+
         if (event instanceof KeyboardEvent) {
         }
         if (event instanceof WheelEvent) {

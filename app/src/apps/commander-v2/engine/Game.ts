@@ -9,8 +9,12 @@ import { Mode } from "./modes/Mode";
 import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
 import { models } from "./models";
-import { EventBus } from "./EventBus";
-import { AttackEvent } from "../pages/Play";
+import { EventBus, SuiAction } from "./EventBus";
+import { HistoryRecord } from "../types/bcs";
+import { MoveMode } from "./modes/MoveMode";
+import { ShootMode } from "./modes/ShootMode";
+import { Camera } from "./Camera";
+import { ReloadMode } from "./modes/ReloadMode";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
@@ -32,8 +36,8 @@ export type Tile =
  * TODO:
  * - [x] implement Controls class
  * - [ ] implement Sound class
- * - [ ] implement Models and Textures classes
- * - [ ] behaviors for game interface
+ * - [x] implement Models and Textures classes
+ * - x ] behaviors for game interface
  */
 export class Game extends THREE.Object3D {
     /** The Plane used for intersections */
@@ -57,6 +61,8 @@ export class Game extends THREE.Object3D {
     public mode: Mode = new NoneMode();
     /** Optionally registered EventBus */
     protected eventBus: EventBus | null = null;
+    /** Controls instance */
+    protected controls: Controls | null = null;
     /** Selected Unit */
     protected selectedUnit: Unit | null = null;
     /** Active pointer based on input */
@@ -65,6 +71,8 @@ export class Game extends THREE.Object3D {
     protected units: { [key: number]: Unit } = {};
     /** Flag to block execution any other action from being run in parallel */
     protected _isBlocked: boolean = false;
+    /** Index of the current history record */
+    protected historyIdx: number = 0;
 
     /** Construct the `Game` instance from BCS representation (fetched Sui Object) */
     public static fromBCS(data: GameMap): Game {
@@ -72,6 +80,7 @@ export class Game extends THREE.Object3D {
         const size = map.grid[0].length;
         const game = new Game(size, true);
 
+        game.historyIdx = data.map.history.length;
         game.turn = map.turn;
 
         for (let x = 0; x < size; x++) {
@@ -99,7 +108,7 @@ export class Game extends THREE.Object3D {
                         unit.ap.value = unit.ap.max_value;
                     }
 
-                    let unitObj = new Unit(unit, models.soldier, x, z);
+                    let unitObj = new Unit(unit, models.soldier!, x, z);
                     game.addUnit(unitObj);
                 }
             }
@@ -137,35 +146,119 @@ export class Game extends THREE.Object3D {
     }
 
     /** Apply event received from Sui */
-    applyAttackEvent(event: AttackEvent) {
-        const {
-            attacker: _,
-            target: [x1, y1],
-            damage,
-            is_kia,
-        } = event;
+    applyAttackEvent({ damage, targetUnit: [x1, y1] }: SuiAction["attack"]) {
         const unitId = this.grid.grid[x1][y1].unit;
 
         if (unitId === null) return; // ignore, fetched event too late
 
         this.units[unitId]!.props.hp.value -= damage;
 
-        if (is_kia) {
+        if (this.units[unitId]!.props.hp.value <= 0) {
             this.grid.grid[x1][y1].unit = null;
             this.remove(this.units[unitId]!);
             delete this.units[unitId];
         }
     }
 
-    applyReloadEvent(unit: [number, number]) {
+    applyReloadEvent({ unit }: SuiAction["reload"]) {
         const [x, z] = unit;
         const unitId = this.grid.grid[x][z].unit;
 
         if (unitId === null) return; // ignore, fetched event too late
 
-        console.log("reloading unit", unitId);
-
         this.units[unitId]!.props.ammo.value = this.units[unitId]!.props.ammo.max_value;
+    }
+
+    // === History API ===
+
+    async applyHistory(history: (typeof HistoryRecord.$inferType)[]) {
+        console.log("Applying history", this.historyIdx, history.length);
+        let i = this.historyIdx;
+        while (i < history.length) {
+            const record = history[i];
+            if (record.$kind === "Move") {
+                const path = record.Move;
+                this.selectUnit(path[0][0], path[0][1]);
+                this.switchMode(new MoveMode(this.controls!));
+
+                if (!(this.mode instanceof MoveMode)) {
+                    throw new Error(`Invalid mode ${this.mode.name}`);
+                }
+
+                (this.mode as MoveMode).forceTriggerAction(
+                    path.map(([x, z]) => new THREE.Vector2(x, z)),
+                );
+                await this.performAction();
+            } else if (record.$kind === "NextTurn") {
+                this.nextTurn();
+            } else if (record.$kind === "Attack") {
+                const { origin, target } = record.Attack;
+                const nextRecord = history[i + 1];
+                i += 1; // skip next record, we're handling it here
+
+                if (
+                    !nextRecord ||
+                    !["CriticalHit", "Miss", "Dodged", "Damage"].includes(nextRecord.$kind)
+                ) {
+                    throw new Error(
+                        "Incorrect History log, expected Damage, CriticalHit, Miss or Dodged",
+                    );
+                }
+
+                this.selectUnit(origin[0], origin[1]);
+                this.switchMode(
+                    new ShootMode(
+                        {
+                            moveBack: () => {},
+                            moveToUnit: () => {},
+                            resetForSize: () => {},
+                        } as unknown as Camera,
+                        this.controls!,
+                    ),
+                );
+
+                if (!(this.mode instanceof ShootMode)) {
+                    throw new Error(`Invalid mode ${this.mode.name}`);
+                }
+
+                const targetObject = this.units[this.grid.grid[target[0]][target[1]].unit!]!;
+                (this.mode as ShootMode).forceTriggerAction(targetObject);
+                await this.performAction();
+
+                const unit = [origin[0], origin[1]] as [number, number];
+                const targetUnit = [target[0], target[1]] as [number, number];
+
+                if (nextRecord.$kind === "Miss") {
+                    this.applyAttackEvent({ unit, targetUnit, result: "Miss", damage: 0 });
+                } else if (nextRecord.$kind === "Dodged") {
+                    this.applyAttackEvent({ unit, targetUnit, result: "Dodged", damage: 0 });
+                } else if (nextRecord.$kind === "Damage") {
+                    this.applyAttackEvent({
+                        unit,
+                        targetUnit,
+                        result: "Damage",
+                        damage: nextRecord.Damage,
+                    });
+                } else if (nextRecord.$kind === "CriticalHit") {
+                    this.applyAttackEvent({
+                        unit,
+                        targetUnit,
+                        result: "CriticalHit",
+                        damage: nextRecord.CriticalHit,
+                    });
+                } else throw new Error(`Unsupported event ${nextRecord.$kind}`);
+            } else if (record.$kind === "Reload") {
+                const [x, y] = record.Reload;
+                this.selectUnit(x, y);
+                this.switchMode(new ReloadMode());
+                await this.performAction();
+            } else {
+                console.log("Unsupported event", record);
+            }
+
+            i++;
+        }
+        this.historyIdx = i;
     }
 
     // === Component integration ===
@@ -175,9 +268,8 @@ export class Game extends THREE.Object3D {
         this.eventBus = eventBus;
     }
 
-    /** Try dispatching an event if the EventBus is present */
-    tryDispatch(event: { action: string } & any) {
-        this.eventBus?.dispatchEvent({ type: "game", ...event });
+    registerControls(controls: Controls) {
+        this.controls = controls;
     }
 
     // === Animation Loop & Controls
@@ -193,8 +285,7 @@ export class Game extends THREE.Object3D {
         this.selectedUnit = this.units[this.grid.grid[x][z].unit];
         this.selectedUnit.markSelected(this, true);
         this.eventBus?.dispatchEvent({
-            type: "game",
-            action: "unit_selected",
+            type: "game:unit_selected",
             unit: this.selectedUnit,
         });
     }
@@ -249,12 +340,7 @@ export class Game extends THREE.Object3D {
         this.mode.disconnect.call(this, this.mode);
         this.mode = mode;
         this.mode.connect.call(this, this.mode);
-        this.tryDispatch({
-            action: "mode_switch",
-            game: this,
-            mode: this.mode,
-            message: `mode switched to ${this.mode.name}`,
-        });
+        this.eventBus?.dispatchEvent({ type: "game:mode:switch", mode: this.mode });
     }
 
     /**
@@ -263,7 +349,7 @@ export class Game extends THREE.Object3D {
      */
     async performAction() {
         if (this._isBlocked) return;
-        this.tryDispatch({ action: "action", game: this, mode: this.mode });
+        this.eventBus?.dispatchEvent({ type: "game:mode:perform", mode: this.mode });
         await this.mode.performAction.call(this, this.mode);
         this.switchMode(new NoneMode());
     }

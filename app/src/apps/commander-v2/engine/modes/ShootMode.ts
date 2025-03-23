@@ -8,11 +8,13 @@ import { Controls } from "./../Controls";
 import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
-import { BaseGameEvent, GameEvent } from "../EventBus";
 import { ReloadMode } from "./ReloadMode";
 
-export type ShootModeEvents = BaseGameEvent & {
-    aim: { unit: Unit; target: Unit };
+export type ShootModeEvent = {
+    aim: { unit: Unit; targetUnit: Unit };
+    shoot: { unit: Unit; targetUnit: Unit };
+    no_ammo: {};
+    no_targets: {};
 };
 
 /**
@@ -21,7 +23,7 @@ export type ShootModeEvents = BaseGameEvent & {
  */
 export class ShootMode implements Mode {
     /** Name of the Mode */
-    public readonly name = "Shoot";
+    public readonly name = "shoot";
     /** Mode action cost */
     public readonly cost = 2;
     /** List of targets for the action to choose between */
@@ -31,7 +33,8 @@ export class ShootMode implements Mode {
     /** Whether the camera is already in the aiming mode */
     private isAiming = false;
     /** Store listener cb to unsubscribe later */
-    private _cb: ((_: GameEvent["ui"]) => void) | null = null;
+    private _prevCb: ((_: {}) => void) | null = null;
+    private _nextCb: ((_: {}) => void) | null = null;
 
     /** Shoot Mode takes control of the Camera while active */
     constructor(
@@ -58,28 +61,23 @@ export class ShootMode implements Mode {
         }
 
         if (this.selectedUnit.props.ammo.value == 0) {
-            this.tryDispatch({
-                type: "game",
-                action: "no_ammo",
-                message: "no ammo available",
-            });
-
+            this.eventBus?.dispatchEvent({ type: "game:shoot:no_ammo" });
             return this.switchMode(new ReloadMode());
         }
 
         if (targets.length === 0) {
-            this.tryDispatch({
-                type: "game",
-                action: "no_targets",
-                message: "no targets available",
+            this.eventBus?.dispatchEvent({
+                type: "game:shoot:no_targets",
             });
 
             return this.switchMode(new MoveMode(mode.controls));
         }
 
         // subscribe to the UI events
-        mode._cb = mode._uiEventListener.bind(this);
-        this.eventBus?.addEventListener("ui", mode._cb);
+        mode._nextCb = mode._uiEventListener.bind(this, "next_target");
+        mode._prevCb = mode._uiEventListener.bind(this, "prev_target");
+        this.eventBus?.addEventListener("ui:prev_target", mode._prevCb);
+        this.eventBus?.addEventListener("ui:next_target", mode._nextCb);
 
         // set the targets and the current target
         mode.targets = targets;
@@ -95,8 +93,10 @@ export class ShootMode implements Mode {
 
         // unsubscribe from the UI events
         (this.mode as ShootMode).currentTarget?.removeTarget();
-        mode._cb && this.eventBus?.removeEventListener("ui", mode._cb);
-        mode._cb = null;
+        mode._nextCb && this.eventBus?.removeEventListener("ui:next_target", mode._nextCb);
+        mode._prevCb && this.eventBus?.removeEventListener("ui:prev_target", mode._prevCb);
+        mode._nextCb = null;
+        mode._prevCb = null;
 
         mode.targets = [];
         mode.isAiming = false;
@@ -135,7 +135,11 @@ export class ShootMode implements Mode {
         await selectedUnit.shoot(target);
         selectedUnit.props.ammo.value -= 1;
 
-        this.tryDispatch({ type: "game", action: "shoot", unit: selectedUnit, targetUnit: target });
+        this.eventBus?.dispatchEvent({
+            type: "game:shoot:shoot",
+            unit: selectedUnit,
+            targetUnit: target,
+        });
     }
 
     async aimAtTarget(this: Game, mode: this) {
@@ -148,9 +152,8 @@ export class ShootMode implements Mode {
         // move camera to the selected unit aiming at the target
         selectedUnit.playAnimation("SniperShot", 0.1).play();
 
-        this.tryDispatch({
-            type: "game",
-            action: "aim",
+        this.eventBus?.dispatchEvent({
+            type: "game:shoot:aim",
             unit: selectedUnit,
             targetUnit: mode.currentTarget,
         });
@@ -209,7 +212,7 @@ export class ShootMode implements Mode {
     }
 
     /** Listen to UI events, expecting `next_target` or `prev_target` action */
-    protected _uiEventListener(this: Game, { action }: GameEvent["ui"]) {
+    protected _uiEventListener(this: Game, action: "next_target" | "prev_target") {
         const mode = this.mode as this;
         if (action == "next_target") {
             mode.nextTarget.call(this, mode);
@@ -220,6 +223,12 @@ export class ShootMode implements Mode {
             mode.nextTarget.call(this, mode);
             mode.aimAtTarget.call(this, mode);
         }
+    }
+
+    // === Spectator Mode ===
+
+    forceTriggerAction(target: Unit) {
+        this.currentTarget = target;
     }
 }
 

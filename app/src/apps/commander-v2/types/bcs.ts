@@ -100,6 +100,7 @@ export const Unit = bcs.struct("Unit", {
     ap: Param,
     hp: Param,
     ammo: Param,
+    grenade_used: bcs.bool(),
     stats: Stats,
     last_turn: bcs.u16(),
 });
@@ -133,10 +134,36 @@ export const Metadata = bcs.struct("Metadata", {
     backstory: bcs.string(),
 });
 
+export const HistoryRecord = bcs.enum("HistoryRecord", {
+    Reload: bcs.vector(bcs.U16),
+    NextTurn: null,
+    Move: bcs.vector(bcs.vector(bcs.U16)),
+    Attack: bcs.struct("Attack", {
+        origin: bcs.vector(bcs.U16),
+        target: bcs.vector(bcs.U16),
+    }),
+    RecruitPlaced: bcs.struct("Placed", {
+        x: bcs.U16,
+        y: bcs.U16,
+    }),
+    Damage: bcs.U8,
+    Miss: null,
+    Explosion: null,
+    CriticalHit: bcs.U8,
+    Grenade: bcs.struct("Grenade", {
+        radius: bcs.U16,
+        x: bcs.U16,
+        y: bcs.U16,
+    }),
+    UnitKIA: bcs.Address,
+    Dodged: null,
+});
+
 export const Game = bcs
     .struct("Game", {
         id: bcs.Address,
         map: Map,
+        history: bcs.vector(HistoryRecord),
     })
     .transform({
         output(game) {

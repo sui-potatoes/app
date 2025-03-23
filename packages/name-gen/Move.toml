@@ -1,0 +1,12 @@
+[package]
+name = "NameGenerator"
+edition = "2024"
+license = "MIT"
+authors = ["Damir Shamanaev (damirka.ru@gmail.com"]
+
+[dependencies]
+
+[addresses]
+name_gen = "0x0"
+
+# upgrade_cap = 0xa44c672ee925d67254c0be9e89136e2c78de88e4a8bb15a353065197afa62332

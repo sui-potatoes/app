@@ -37,7 +37,7 @@ export type MapProps = {
  * Flips the X and Y coordinates to match the ThreeJS scene.
  */
 export function Map({ grid: gameGrid, highlight, onTarget, onSelect, onDeselect }: MapProps) {
-    const [scene, setScene] = useState<{ grid: Grid, camera: ControllableCamera } | null>(null);
+    const [scene, setScene] = useState<{ grid: Grid; camera: ControllableCamera } | null>(null);
 
     useEffect(() => {
         if (!scene) return;
@@ -80,7 +80,10 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect, onDeselect 
         async performAttack(from: { x: number; y: number }, to: { x: number; y: number }) {
             if (!scene) return;
 
-            await scene.camera.moveToUnit(new THREE.Vector2(from.y, from.x), new THREE.Vector2(to.y, to.x));
+            await scene.camera.moveToUnit(
+                new THREE.Vector2(from.y, from.x),
+                new THREE.Vector2(to.y, to.x),
+            );
             await scene.grid.unitPerformRangedAttack(
                 new THREE.Vector2(from.y, from.x),
                 new THREE.Vector2(to.y, to.x),
@@ -92,7 +95,7 @@ export function Map({ grid: gameGrid, highlight, onTarget, onSelect, onDeselect 
             if (!scene) return;
 
             return scene.grid.unitDeath(new THREE.Vector2(at.y, at.x));
-        }
+        },
     };
 
     function initialize(grid: Grid) {

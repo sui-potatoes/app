@@ -114,7 +114,14 @@ export function Play({ game, refetch, setGame }: Props) {
 
     async function performSelectedAction(x: number, y: number) {
         console.log("performSelectedAction", x, y);
-        console.log("values are: %s, %s, %s, %s, %s", !!zkLogin.address, !!action, !!unitRef.current, !!game, !wait);
+        console.log(
+            "values are: %s, %s, %s, %s, %s",
+            !!zkLogin.address,
+            !!action,
+            !!unitRef.current,
+            !!game,
+            !wait,
+        );
 
         if (!zkLogin.address) return;
         if (!action?.action) return;

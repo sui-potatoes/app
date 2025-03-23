@@ -2,12 +2,13 @@
 
 [move]
 version = 3
-manifest_digest = "F11C8A47514E5D51B0BD6208E1CA9BAAF84B565045DE86CAAED1B6AFD623B4B4"
-deps_digest = "F9B494B64F0615AED0E98FC12A85B85ECD2BC5185C22D30E7F67786BB52E507C"
+manifest_digest = "41DBE473CDC92B9593C398E9315D61ED83058D74957E59AFC8A11D1210F31671"
+deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
 dependencies = [
   { id = "BitField", name = "BitField" },
   { id = "Codec", name = "Codec" },
   { id = "Grid", name = "Grid" },
+  { id = "NameGenerator", name = "NameGenerator" },
   { id = "Sui", name = "Sui" },
 ]
 
@@ -21,7 +22,7 @@ dependencies = [
 
 [[move.package]]
 id = "Codec"
-source = { git = "https://github.com/sui-potatoes/app.git", rev = "codec@testnet-v2", subdir = "packages/codec" }
+source = { local = "../codec" }
 
 dependencies = [
   { id = "Sui", name = "Sui" },
@@ -40,6 +41,14 @@ id = "MoveStdlib"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "releases/sui-v1.41.0-release", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
+id = "NameGenerator"
+source = { local = "../name-gen" }
+
+dependencies = [
+  { id = "Sui", name = "Sui" },
+]
+
+[[move.package]]
 id = "Sui"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "releases/sui-v1.41.0-release", subdir = "crates/sui-framework/packages/sui-framework" }
 
@@ -48,7 +57,7 @@ dependencies = [
 ]
 
 [move.toolchain-version]
-compiler-version = "1.41.1"
+compiler-version = "1.46.0"
 edition = "2024.beta"
 flavor = "sui"
 
@@ -56,6 +65,6 @@ flavor = "sui"
 
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0xb7567c255c3e8390e23247284b60a8602f92c7cda4e2e59dbe2135b43f634f5b"
-latest-published-id = "0xb7567c255c3e8390e23247284b60a8602f92c7cda4e2e59dbe2135b43f634f5b"
+original-published-id = "0x4a348e32d2abd2552218c0adc46faed81c2ac5d3aa13dcae1c6ea23dd1118091"
+latest-published-id = "0x4a348e32d2abd2552218c0adc46faed81c2ac5d3aa13dcae1c6ea23dd1118091"
 published-version = "1"

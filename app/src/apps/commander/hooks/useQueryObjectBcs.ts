@@ -15,7 +15,11 @@ type Props<T> = {
 /**
  * Hook to create a transaction executor
  */
-export function useQueryObjectBcs<T>({ objectId, parser, enabled }: Props<T>): QueryObserverBaseResult<T | null, Error> {
+export function useQueryObjectBcs<T>({
+    objectId,
+    parser,
+    enabled,
+}: Props<T>): QueryObserverBaseResult<T | null, Error> {
     const [parsed, setParsed] = useState<T | null>(null);
     const result = useSuiClientQuery(
         "getObject",

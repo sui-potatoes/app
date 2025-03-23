@@ -32,9 +32,7 @@ export function Board({
     return (
         <svg
             style={{ zoom, display: "inline-flex" }}
-            className={
-                (disabled ? "disabled " : " ") + (turn == 1 ? "black" : "white")
-            }
+            className={(disabled ? "disabled " : " ") + (turn == 1 ? "black" : "white")}
             width={width}
             height={width}
         >
@@ -47,12 +45,7 @@ export function Board({
                     height={cellSize + padding}
                     patternUnits="userSpaceOnUse"
                 >
-                    <path
-                        d="M 40 0 L 0 0 0 40"
-                        fill="none"
-                        stroke="gray"
-                        strokeWidth="1"
-                    />
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="gray" strokeWidth="1" />
                 </pattern>
             </defs>
             <rect
@@ -72,15 +65,9 @@ export function Board({
                             cy={j * cellSize + j * padding + cellSize / 2}
                             r={cellSize / 2}
                             className={
-                                (el === 1
-                                    ? "black"
-                                    : el === 2
-                                      ? "white"
-                                      : "empty") +
+                                (el === 1 ? "black" : el === 2 ? "white" : "empty") +
                                 " cell" +
-                                (lastMove &&
-                                lastMove.x === i &&
-                                lastMove.y === j
+                                (lastMove && lastMove.x === i && lastMove.y === j
                                     ? " last-move"
                                     : "")
                             }

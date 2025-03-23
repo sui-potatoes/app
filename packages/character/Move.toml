@@ -1,10 +1,9 @@
 [package]
 name = "Character"
-edition = "2024.beta"
+edition = "2024"
 authors = ["Sui Potatoes"]
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet", override = true }
 SVG = { local = "../svg" }
 Codec = { local = "../codec" }
 

@@ -46,6 +46,10 @@ export class Grid extends THREE.Object3D {
     }
 
     initFloorTiles(size: number) {
+        if (models.base_tile === null) {
+            throw new Error("Base tile model is not loaded!");
+        }
+
         const mesh = models.base_tile.scene.children[0] as THREE.Mesh;
         const tileMaterial = mesh.material as THREE.MeshStandardMaterial;
         const material = tileMaterial.clone();
@@ -90,6 +94,10 @@ export class Grid extends THREE.Object3D {
 
         if (tile.type === "Unwalkable") {
             this.grid[x][z] = { type: "Unwalkable", unit: null };
+
+            if (models.barrel_stack === null) {
+                throw new Error("Barrel stack model is not loaded!");
+            }
 
             const barrels = clone(models.barrel_stack.scene);
             barrels.scale.set(0.5, 0.5, 0.5);
@@ -182,8 +190,8 @@ export class Grid extends THREE.Object3D {
                     const from = this.grid[nx][ny];
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
+                    if (to.unit !== null) continue;
                     if (to.type === "Unwalkable") continue;
-
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.down) continue;
                         if (direction === "DOWN" && to.up) continue;
@@ -263,35 +271,40 @@ export class Grid extends THREE.Object3D {
         map.grid.forEach((row, x) => {
             row.forEach((cell, y) => {
                 switch (cell.tile_type.$kind) {
-                    case "Empty": return this.setCell(x, y, { type: "Empty", unit: null });
-                    case "Unwalkable": return this.setCell(x, y, { type: "Unwalkable", unit: null });
+                    case "Empty":
+                        return this.setCell(x, y, { type: "Empty", unit: null });
+                    case "Unwalkable":
+                        return this.setCell(x, y, { type: "Unwalkable", unit: null });
                     case "Cover": {
                         const { left, right, up, down } = cell.tile_type.Cover;
                         this.setCell(x, y, { type: "Cover", left, right, up, down, unit: null });
                     }
                 }
             });
-        })
+        });
     }
 
     toBytes() {
         const grid = this.grid;
         return GameMap.serialize({
-            id: normalizeSuiObjectId('0x0'),
-            grid: grid.map((row) => row.map((cell) => {
-                switch (cell.type) {
-                    case "Empty":
-                        return { tile_type: { ["Empty"]: true }, unit: null, }
-                    case "Cover":
-                        return {
-                            tile_type: { ["Cover"]: { ...cell } },
-                            unit: null,
-                        }
-                    case "Unwalkable":
-                        return { tile_type: { ["Unwalkable"]: true }, unit: null, }
-                    default: throw new Error("Invalid tile type");
-                }
-            })),
+            id: normalizeSuiObjectId("0x0"),
+            grid: grid.map((row) =>
+                row.map((cell) => {
+                    switch (cell.type) {
+                        case "Empty":
+                            return { tile_type: { ["Empty"]: true }, unit: null };
+                        case "Cover":
+                            return {
+                                tile_type: { ["Cover"]: { ...cell } },
+                                unit: null,
+                            };
+                        case "Unwalkable":
+                            return { tile_type: { ["Unwalkable"]: true }, unit: null };
+                        default:
+                            throw new Error("Invalid tile type");
+                    }
+                }),
+            ),
             turn: 0,
         });
     }
@@ -328,6 +341,7 @@ export class Grid extends THREE.Object3D {
                     const from = this.grid[nx][ny];
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
+                    if (to.unit !== null) continue;
                     if (to.type === "Unwalkable") continue;
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.down) continue;

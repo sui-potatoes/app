@@ -20,6 +20,8 @@ const ERangeExceeded: u64 = 1;
 const EOutOfAmmo: u64 = 2;
 /// No AP left to perform an action.
 const ENoAP: u64 = 3;
+/// Trying to reload at full clip capacity.
+const EFullAmmo: u64 = 4;
 
 /// Weapon range can be exceeded by this value with aim penalty.
 const MAX_RANGE_OFFSET: u8 = 3;
@@ -40,6 +42,8 @@ public struct Unit has copy, store {
     hp: Param,
     /// The ammo of the `Unit`.
     ammo: Param,
+    /// If the `Unit` has used a grenade in the encounter.
+    grenade_used: bool,
     /// Stats of the `Recruit`.
     stats: Stats,
     /// The last turn the `Unit` has performed an action.
@@ -68,8 +72,18 @@ public fun perform_move(unit: &mut Unit, distance: u8) {
 /// Reload `Unit`'s weapon. It costs 1 AP.
 public fun perform_reload(unit: &mut Unit) {
     assert!(unit.ap.value() > 0, ENoAP);
+    assert!(!unit.ammo.is_full(), EFullAmmo);
     unit.ap.decrease(1);
     unit.ammo.reset();
+}
+
+/// Throw a grenade if there's one in the inventory. It costs 1 AP.
+public fun perform_grenade(unit: &mut Unit) {
+    assert!(unit.ap.value() > 0, ENoAP);
+    assert!(!unit.grenade_used, EOutOfAmmo);
+
+    unit.ap.decrease(1);
+    unit.grenade_used = true;
 }
 
 #[allow(lint(public_random))]
@@ -175,6 +189,7 @@ public fun from_recruit(recruit: &Recruit): Unit {
         ap: param::new(2),
         hp: param::new(stats.health() as u16),
         ammo: param::new(stats.ammo() as u16),
+        grenade_used: false,
         stats,
         last_turn: 0,
     }
@@ -202,6 +217,9 @@ public fun ap(unit: &Unit): u16 { unit.ap.value() }
 /// Get the `Unit`'s ammo.
 public fun ammo(unit: &Unit): u16 { unit.ammo.value() }
 
+/// Get whether a grenade was used.
+public fun grenade_used(unit: &Unit): bool { unit.grenade_used }
+
 /// Get the `Unit`'s stats.
 public fun stats(unit: &Unit): &Stats { &unit.stats }
 
@@ -219,6 +237,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Unit {
         ap: param::from_bcs(bcs),
         hp: param::from_bcs(bcs),
         ammo: param::from_bcs(bcs),
+        grenade_used: bcs.peel_bool(),
         stats: stats::from_bcs(bcs),
         last_turn: bcs.peel_u16(),
     }

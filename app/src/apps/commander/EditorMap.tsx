@@ -9,7 +9,7 @@ export function EditorMap({ grid, disabled, highlight, onTarget, onSelect }: Map
 
     // now the same thing but with divs
     return (
-        <div className={`game-grid w-full ${disabled ? 'disabled' : ''} sand`}>
+        <div className={`game-grid w-full ${disabled ? "disabled" : ""} sand`}>
             {grid.grid.map((row, x) => {
                 return (
                     <div className="row" key={`row-${x}`}>
@@ -61,7 +61,13 @@ export function EditorMap({ grid, disabled, highlight, onTarget, onSelect }: Map
                                     highlightClass,
                                 ].join(" ");
 
-                                const apBar = <div className="ap-bar">{Array.from({ length: ap }, (_, i) => i).map((i) => <div key={i} className="ap-pt"></div>)}</div>;
+                                const apBar = (
+                                    <div className="ap-bar">
+                                        {Array.from({ length: ap }, (_, i) => i).map((i) => (
+                                            <div key={i} className="ap-pt"></div>
+                                        ))}
+                                    </div>
+                                );
 
                                 return (
                                     <div

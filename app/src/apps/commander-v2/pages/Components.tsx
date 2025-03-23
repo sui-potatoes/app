@@ -50,7 +50,10 @@ export function Footer({ to, text }: { to?: string; text?: string }) {
         <>
             {/* this div is for justify between.. */}
             <div></div>
-            <NavLink to={to || ".."} className="fixed flex justify-between bottom-10 left-10 p-10 text-lg hover:underline menu-control back-button">
+            <NavLink
+                to={to || ".."}
+                className="fixed flex justify-between bottom-10 left-10 p-10 text-lg hover:underline menu-control back-button"
+            >
                 {text || "Back"}
             </NavLink>
         </>
@@ -76,7 +79,7 @@ export function Slider({
         <div className="slider-outer">
             <div
                 className={(value >= 0 && "slider-inner") || "slider-inner-negative"}
-                style={{ width: Math.max(+percentValue, 0)  + "%" }}
+                style={{ width: Math.max(+percentValue, 0) + "%" }}
             ></div>
             {modifier > 0 && (
                 <div
@@ -88,15 +91,15 @@ export function Slider({
                     }}
                 ></div>
             )}
-            {modifier < 0 && (value + modifier > 0) && (
+            {modifier < 0 && value + modifier > 0 && (
                 <div
-                className="slider-inner-negative"
-                style={{
-                    width: modifierValue + "%",
-                    left: (+percentValue - +modifierValue) + "%",
-                    background: "rgb(140, 29, 29)",
-                }}
-            ></div>
+                    className="slider-inner-negative"
+                    style={{
+                        width: modifierValue + "%",
+                        left: +percentValue - +modifierValue + "%",
+                        background: "rgb(140, 29, 29)",
+                    }}
+                ></div>
             )}
             <div className="slider-value">
                 {value + modifier}

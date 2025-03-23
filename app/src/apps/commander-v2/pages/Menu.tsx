@@ -28,7 +28,9 @@ export function Menu() {
             <div id="menu-scene"></div>
             <div className="flex justify-between flex-col w-full">
                 <div className="text-left p-10 max-w-xl">
-                    <h1 className="p-1 mb-10 white page-heading">{name && ('@' + name) || <>&nbsp;</>}</h1>
+                    <h1 className="p-1 mb-10 white page-heading">
+                        {(name && "@" + name) || <>&nbsp;</>}
+                    </h1>
                 </div>
                 <div className="text-left p-10 max-w-md">
                     <div className="">

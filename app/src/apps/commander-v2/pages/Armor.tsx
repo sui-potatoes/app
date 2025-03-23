@@ -103,10 +103,8 @@ export function Armor() {
                             <div className="mb-10">
                                 <h2 className="mb-2">DESCRIPTION</h2>
                                 <img src={armorMetadata(selected.name).image} />
-                                <p>
-                                    Armor protects the wearer and decreases incoming damage.
-                                    Depending on the type it may provide additional stat benefits or
-                                    decreases.
+                                <p className="normal-case">
+                                    {armorMetadata(selected.name).description}
                                 </p>
                             </div>
                             <div>
@@ -120,6 +118,13 @@ export function Armor() {
                                     />
                                 ))}
                             </div>
+                            <div
+                                className="mt-10 py-10 text-center interactive"
+                                style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
+                                onClick={() => throwAway(selected)}
+                            >
+                                throw away
+                            </div>
                         </div>
                     )}
                 </div>
@@ -128,9 +133,7 @@ export function Armor() {
         </div>
     );
 
-    /**w
-     * Mints an armor object of the given tier.
-     */
+    /** Mints a random armor object of the given tier. */
     async function mintArmor(tier: number) {
         if (!zkLogin.address) throw new Error("Not logged in");
         if (isExecuting) throw new Error("Already executing a transaction");
@@ -148,20 +151,23 @@ export function Armor() {
         setTimeout(() => refetch(), 1000);
     }
 
-    // async function throwAway(ref: SuiObjectRef) {
-    //     if (!zkLogin.address) throw new Error("Not logged in");
-    //     if (!executeTransaction) throw new Error("No transaction executor");
-    //     if (isExecuting) throw new Error("Already executing a transaction");
+    /** Destroys the given armor object. */
+    async function throwAway(ref: Armor) {
+        if (!zkLogin.address) throw new Error("Not logged in");
+        if (!executeTransaction) throw new Error("No transaction executor");
+        if (isExecuting) throw new Error("Already executing a transaction");
 
-    //     const tx = new Transaction();
-    //     tx.moveCall({
-    //         target: `${packageId}::armor::destroy`,
-    //         arguments: [tx.objectRef(ref)],
-    //     });
+        const tx = new Transaction();
+        tx.moveCall({
+            target: `${packageId}::armor::destroy`,
+            arguments: [tx.objectRef(ref)],
+        });
 
-    //     await executeTransaction(tx);
-    //     refetch();
-    // }
+        await executeTransaction(tx);
+        setTimeout(() => refetch(), 1000);
+        setSelected(undefined);
+        data && data.splice(data.indexOf(ref), 1);
+    }
 }
 
 function rngTier(): number {
