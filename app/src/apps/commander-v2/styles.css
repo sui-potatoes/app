@@ -29,7 +29,6 @@ SPDX-License-Identifier: MIT
 /* Take full screen */
 .commander-v2 {
     position: absolute;
-    color: white !important;
     font-family: monospace;
     z-index: 1;
     /* background: black; */
@@ -349,6 +348,6 @@ SPDX-License-Identifier: MIT
 
 .non-interactive,
 .non-interactive * {
-    color: var(--color-grey);
+    color: var(--color-grey) !important;
     cursor: not-allowed;
 }
