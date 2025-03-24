@@ -209,9 +209,23 @@ export function SuinsModal({ show, onClose }: { show: boolean; onClose: () => vo
 
 /** Modal window loader */
 export function Loader() {
+    const style = { stroke: "#ffffff", fill: "none" };
+
+    // animate the image by rotating it
+    useEffect(() => {
+        const rr = document.getElementById("rr");
+        let angle = 0;
+        const interval = setInterval(() => {
+            angle += 1;
+            rr?.setAttribute("style", `transform: rotate(${angle}deg); transform-origin: center; max-width: 150px`);
+        }, 10);
+        return () => clearInterval(interval);
+    }
+    , []);
+
     return (
         <div className="w-full h-full flex flex-col text-sm items-center justify-center bg-black bg-opacity-50 fixed top-0 left-0 z-50">
-            <div className="loader text-md"></div>
+            <img id="rr" src="/images/rotorelief.svg" />
             <div className="text-md mt-4">Loading...</div>
         </div>
     );
