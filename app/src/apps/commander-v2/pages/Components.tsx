@@ -208,11 +208,30 @@ export function SuinsModal({ show, onClose }: { show: boolean; onClose: () => vo
 }
 
 /** Modal window loader */
-export function Loader() {
+export function Loader({ text }: { text?: string }) {
+    // animate the image by rotating it
+    useEffect(() => {
+        const rr = document.getElementById("rr");
+        let angle = 0;
+        const interval = setInterval(() => {
+            angle += 1;
+            rr?.setAttribute(
+                "style",
+                `transform: rotate(${angle}deg); transform-origin: center; width: 150px`,
+            );
+        }, 10);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
-        <div className="w-full h-full flex flex-col text-sm items-center justify-center bg-black bg-opacity-50 fixed top-0 left-0 z-50">
-            <div className="loader text-md"></div>
-            <div className="text-md mt-4">Loading...</div>
-        </div>
+        <>
+            <div>
+                <Footer />
+            </div>
+            <div className="w-full h-full flex flex-col animate-pulse text-sm items-center justify-center bg-black bg-opacity-50 fixed top-0 left-0 z-50">
+                <img id="rr" src="/images/rotorelief.svg" style={{ width: "150px" }} />
+                <div className="text-md mt-4">{text || "Loading..."}</div>
+            </div>
+        </>
     );
 }

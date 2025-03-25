@@ -182,7 +182,6 @@ export async function createMenuScene(element: string) {
     // scene.add(ambientLight);
 
     const gltf = await loader.loadAsync("/models/soldier_3.glb");
-    console.log(gltf.animations);
     const model = gltf.scene;
     const mixer1 = new THREE.AnimationMixer(model);
     {

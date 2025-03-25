@@ -75,9 +75,7 @@ export class Controls extends THREE.Controls<ControlsEvents> {
         window.removeEventListener("keyup", this._inputCb, false);
     }
 
-    update(_d: number) {
-        // console.log(this.mouse);
-    }
+    update(_d: number) {}
 
     _input(event: MouseEvent | KeyboardEvent | WheelEvent | TouchEvent | PointerEvent): void {
         if (event.type === "pointermove" && event instanceof MouseEvent) {

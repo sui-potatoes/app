@@ -90,6 +90,8 @@ export function printEvent(eventKey: keyof EventMap, map: Partial<EventMap>): st
             return `Sui: reload ${map[eventKey].success ? "successful" : "failed"}`;
         case "sui:trace":
             return `Sui: path traced; ${map[eventKey].success}`;
+        case "sui:dry_run_failed":
+            return `Sui: ${map[eventKey].message}`;
         case "sui:tx_success":
             return `Sui: transaction successful`;
 

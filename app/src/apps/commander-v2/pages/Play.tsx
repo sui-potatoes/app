@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { Loader, Footer } from "./Components";
 import { useEffect, useMemo, useState } from "react";
 import { UI } from "./play/UI";
-import { Camera, EventBus, models, loadModels, GameAction } from "../engine";
+import { Camera, EventBus, loadModels, GameAction } from "../engine";
 import { bcs, HistoryRecord } from "../types/bcs";
 import { useGame } from "../hooks/useGame";
 import { useGameRecruits } from "../hooks/useGameRecruits";
@@ -14,6 +14,8 @@ import { fromBase64 } from "@mysten/bcs";
 import { GameApp } from "./play/Game";
 import { useGameTransactions } from "../hooks/useGameTransactions";
 import { useNetworkVariable } from "../../../networkConfig";
+import { DryRunTransactionBlockResponse } from "@mysten/sui/client";
+import { parseVMError, vmAbortCodeToMessage } from "../types/abort_codes";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
@@ -32,12 +34,11 @@ export function Playground() {
     const tx = useGameTransactions({ map });
 
     useEffect(() => {
-        loadModels().then(() => setModelsLoaded(true));
-    }, [models]);
+        if (modelsLoaded) return;
+        if (mapKey === null) return;
 
-    useEffect(() => {
-        if (map) console.log("game", map.objectId);
-    }, [!!map]);
+        loadModels().then(() => setModelsLoaded(true));
+    }, [mapKey]);
 
     useEffect(() => {
         if (!map) return;
@@ -72,7 +73,9 @@ export function Playground() {
         </div>
     );
 
-    if (isFetching || (tx.isExecuting && !map)) return <Loader />;
+    if (!modelsLoaded && mapKey) return <Loader text="loading models" />;
+    if (tx.isExecuting && !map) return <Loader text="creating game" />;
+    if (isFetching) return <Loader text="loading game" />;
     if (isFetched && !map)
         return centerDiv(
             <>
@@ -87,7 +90,6 @@ export function Playground() {
                 </button>
             </>,
         );
-    if (!modelsLoaded) return centerDiv("Models not loaded");
     if (!map)
         return (
             <div className="flex justify-between flex-col w-full">
@@ -231,7 +233,6 @@ export function Playground() {
             }
             case "Grenade": {
                 const result = history[1];
-                console.log(history);
                 if (!result)
                     throw new Error("History log is incorrect, only one grenade record is present");
                 return eventBus.dispatchEvent({ type: "sui:grenade", success: true });
@@ -240,10 +241,10 @@ export function Playground() {
     }
 
     async function onGameTrace({ path }: GameAction["move:trace"]) {
-        const result = await tx.moveUnit(path.map((p: THREE.Vector2) => [p.x, p.y])).catch((e) => {
-            console.error(e);
-            return false;
-        });
+        const result = await tx
+            .moveUnit(path.map((p: THREE.Vector2) => [p.x, p.y]))
+            .catch(catchDryRunError);
+
         eventBus.dispatchEvent({
             type: "sui:trace",
             success: !!result,
@@ -252,7 +253,8 @@ export function Playground() {
 
     async function onGameGrenade({ unit, x: x1, y: y1 }: GameAction["grenade:target"]) {
         const { x: x0, y: y0 } = unit.gridPosition;
-        const result = await tx.performGrenade([x0, y0], [x1, y1]);
+        const result = await tx.performGrenade([x0, y0], [x1, y1]).catch(catchDryRunError);
+
         eventBus.dispatchEvent({
             type: "sui:grenade",
             success: !!result,
@@ -261,7 +263,8 @@ export function Playground() {
 
     async function onGameReload({ unit }: GameAction["reload:perform"]) {
         const { x, y } = unit.gridPosition as THREE.Vector2;
-        const result = await tx.performReload([x, y]);
+        const result = await tx.performReload([x, y]).catch(catchDryRunError);
+
         eventBus.dispatchEvent({
             type: "sui:reload",
             unit: [x, y],
@@ -273,7 +276,8 @@ export function Playground() {
         const { x: x0, y: y0 } = unit.gridPosition as THREE.Vector2;
         const { x: x1, y: y1 } = targetUnit.gridPosition as THREE.Vector2;
 
-        const result = await tx.performAttack([x0, y0], [x1, y1]);
+        const result = await tx.performAttack([x0, y0], [x1, y1]).catch(catchDryRunError);
+
         eventBus.dispatchEvent({
             type: "sui:aim",
             success: !!result,
@@ -282,14 +286,32 @@ export function Playground() {
 
     /** Next turn button is clicked in the UI */
     async function onNextTurn() {
-        const res = await tx.nextTurn();
-        if (!res) console.error("Failed to execute next turn transaction");
+        const result = await tx.nextTurn().catch(catchDryRunError);
+
+        if (!result) console.error("Failed to execute next turn transaction");
         if (map) {
             eventBus.dispatchEvent({
                 type: "sui:next_turn",
                 turn: ++map.map.map.turn,
             });
         }
+    }
+
+    /** Universal try-catch mechanism for all dry runs */
+    function catchDryRunError(e: any): null {
+        const cause = e.cause as DryRunTransactionBlockResponse & { executionErrorSource: string };
+        const message = cause.executionErrorSource;
+        const [mod, fun, code] = parseVMError(message);
+
+        eventBus.dispatchEvent({
+            type: "sui:dry_run_failed",
+            message: vmAbortCodeToMessage(mod, fun, code),
+            function: fun,
+            module: mod,
+            code,
+        });
+
+        return null;
     }
 }
 

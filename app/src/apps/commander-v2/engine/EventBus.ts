@@ -10,6 +10,12 @@ import { PrefixedEventMap } from "../types/utils";
 
 /** Events emitted by transaction sender, post network requests */
 export type SuiAction = {
+    dry_run_failed: {
+        message: string;
+        code: number;
+        module: string;
+        function: string;
+    };
     next_turn: { turn: number };
     reload: { unit: [number, number]; success: boolean };
     path: { path: [number, number][] };

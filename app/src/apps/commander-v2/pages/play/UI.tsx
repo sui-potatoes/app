@@ -64,6 +64,13 @@ export function UI({
         </button>
     );
 
+    const unitButton = (id: UIKey, disabled?: boolean, text?: string) => {
+        if (!unit) return button(id, true, text);
+        if (unit && unit.props.ap.value == 0) return button(id, true, text);
+
+        return button(id, disabled, text);
+    };
+
     // Subscribe to the game events to update the UI.
     useEffect(() => {
         function onGameModeSwitch({ mode }: GameAction["mode:switch"]) {
@@ -133,9 +140,13 @@ export function UI({
                 id="panel-left"
                 className="fixed h-full left-0 top-0 p-10 flex justify-end flex-col text-center"
             >
-                {button("shoot")}
-                {button("reload", unit?.props.ammo.value == unit?.props.ammo.max_value, reloadText)}
-                {button("grenade")}
+                {unitButton("shoot")}
+                {unitButton(
+                    "reload",
+                    unit?.props.ammo.value == unit?.props.ammo.max_value,
+                    reloadText,
+                )}
+                {unitButton("grenade")}
                 <button
                     onClick={() => onAction("next_turn")}
                     className={"action-button interactive mt-40" + (isExecuting ? " disabled" : "")}
