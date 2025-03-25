@@ -9,21 +9,30 @@
 
 export type Metadata = { description: string; image: string };
 
+export function weaponImgUrls(): string[] {
+    return [
+        "/images/rifle_standard.svg",
+        "/images/rifle_sharpshooter.svg",
+        "/images/rifle_plasma.svg",
+    ];
+}
+
 export function weaponMetadata(name: string): Metadata {
+    const urls = weaponImgUrls();
     return (
         {
             ["standard rifle"]: {
-                image: "/images/standard_rifle.svg",
+                image: urls[0],
                 description:
                     "Standard issue rifle - a sturdy option for any encounter, not too good - not too bad. A couple upgrades won't hurt",
             },
             ["sharpshooter rifle"]: {
-                image: "/images/marksman_rifle.svg",
+                image: urls[1],
                 description:
                     "Sharpshooter rifle delivers best damage at long range. A choice for a marksman skilled enough to score critical hits.",
             },
             ["plasma rifle"]: {
-                image: "/images/plasma_rifle.svg",
+                image: urls[2],
                 description:
                     "Plasma rifle - the best in class, uses bleeding edge technology to provide maximum damage at significant range.",
             },
@@ -34,21 +43,26 @@ export function weaponMetadata(name: string): Metadata {
     );
 }
 
+export function armorImgUrls(): string[] {
+    return ["/images/armor_light.svg", "/images/armor_heavy.svg", "/images/armor_medium.svg"];
+}
+
 export function armorMetadata(name: string): Metadata {
+    const urls = armorImgUrls();
     return (
         {
             ["light armor"]: {
-                image: "/images/light_armor.svg",
+                image: urls[0],
                 description:
                     "Modest protection, but light and easy to move in. Increases chance of dodging incoming damage.",
             },
             ["heavy armor"]: {
-                image: "/images/heavy_armor.svg",
+                image: urls[1],
                 description:
                     "Heavy armor provides maximum protection, but at the cost of mobility. A good choice for a tank.",
             },
             ["medium armor"]: {
-                image: "/images/medium_armor.svg",
+                image: urls[2],
                 description:
                     "Medium armor is the most balanced choice - a good compromise between protection and mobility.",
             },

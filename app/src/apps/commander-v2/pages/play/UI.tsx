@@ -6,6 +6,7 @@ import { EventBus, GameAction, NoneMode, ShootMode, SuiAction, UIKey } from "../
 import { Recruit } from "../../types/bcs";
 import { type Unit } from "../../engine/Unit";
 import { printEvent } from "../../types/log";
+import { JSX } from "react";
 
 type Recruit = typeof Recruit.$inferType;
 
@@ -16,15 +17,15 @@ const LOG_LENGTH = 5;
 const LS_KEY = "commander-v2";
 
 const BUTTON_CONTENTS: Record<UIKey, string | JSX.Element> = {
-    shoot: <img src="/images/target.svg" />,
-    reload: <img src="/images/reload.svg" />,
-    grenade: <img src="/images/grenade.svg" />,
-    cancel: <img src="/images/cancel.svg" />,
-    confirm: <img src="/images/confirm.svg" />,
+    shoot: <img src="/images/icon_target.svg" />,
+    reload: <img src="/images/icon_reload.svg" />,
+    grenade: <img src="/images/icon_grenade.svg" />,
+    cancel: <img src="/images/icon_cancel.svg" />,
+    confirm: <img src="/images/icon_confirm.svg" />,
     next_target: ">",
     prev_target: "<",
     edit: "edit",
-    next_turn: <img src="/images/clock.svg" />,
+    next_turn: <img src="/images/icon_clock.svg" />,
 };
 
 /**

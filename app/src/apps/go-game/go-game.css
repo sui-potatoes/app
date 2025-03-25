@@ -2,6 +2,8 @@
  * Imports variables from `styles.css` and applies them to the Go Game components.
  */
 
+@reference "../../index.css";
+
 svg circle {
     stroke: #000;
 }

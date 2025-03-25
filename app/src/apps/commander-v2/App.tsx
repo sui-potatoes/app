@@ -16,11 +16,13 @@ import * as Tone from "tone";
 import { useEffect } from "react";
 import { Observer } from "./pages/Observer";
 import { Spectate } from "./pages/Spectate";
+import { preload } from "react-dom";
 
 export default function App() {
     const zkLogin = useZkLogin();
     const location = useLocation();
 
+    preload("/images/rotorelief.svg", { as: "image" });
     useEffect(() => {
         const filter = new Tone.Filter(300, "bandpass").toDestination();
         const player = new Tone.Player(
@@ -52,7 +54,7 @@ export default function App() {
 
     return (
         <div className="commander-v2">
-            <div className="w-full h-full bg-opacity-70 bg-black">
+            <div className="w-full h-full bg-black/75">
                 <Routes>
                     <Route path="/" element={<Menu />} />
                     <Route path="/spectate" element={<Spectate />} />
