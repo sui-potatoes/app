@@ -3,7 +3,6 @@
 
 import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
-import { NavLink } from "react-router-dom";
 import { formatAddress } from "@mysten/sui/utils";
 import { useState } from "react";
 import { Modal, YesOrNo, Footer } from "./Components";
@@ -40,39 +39,30 @@ export function Options() {
         { enabled: !!zkLogin.address },
     );
 
-    if (!zkLogin.address) {
-        return (
-            <div className="flex justify-center align-middle h-screen flex-col">
-                <h1 className="menu-control">options</h1>
-                <p className="text-center">Please login to view your options.</p>
-                <NavLink className="menu-control" to="/commander">
-                    Back
-                </NavLink>
-            </div>
-        );
-    }
-
     return (
-        <div className="flex justify-between align-middle h-screen flex-col w-full">
+        <div className="flex justify-between align-middle flex-col w-full">
             <div className="text-left text-uppercase text-lg p-10 max-w-xl">
                 <h1 className="block p-1 mb-10 uppercase white page-heading">options / general</h1>
             </div>
             <div className="p-10 text-uppercase text-lg rounded max-w-3xl">
                 <div className="options-row">
                     <label>ADDRESS</label>
-                    <a
-                        onClick={(e) => {
-                            e.preventDefault();
-                            const target = e.target as HTMLAnchorElement;
-                            navigator.clipboard.writeText(zkLogin.address!);
-                            target.textContent = `${formatAddress(zkLogin.address!)} (copied)`;
-                            setTimeout(() => {
-                                target.textContent = `${formatAddress(zkLogin.address!)}`;
-                            }, 1000);
-                        }}
-                    >
-                        {formatAddress(zkLogin.address)}
-                    </a>
+                    {zkLogin.address && (
+                        <a
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const target = e.target as HTMLAnchorElement;
+                                navigator.clipboard.writeText(zkLogin.address!);
+                                target.textContent = `${formatAddress(zkLogin.address!)} (copied)`;
+                                setTimeout(() => {
+                                    target.textContent = `${formatAddress(zkLogin.address!)}`;
+                                }, 1000);
+                            }}
+                        >
+                            {formatAddress(zkLogin.address)}
+                        </a>
+                    )}
+                    {!zkLogin.address && <div>NOT SIGNED IN</div>}
                 </div>
                 <div className="options-row">
                     <label>BALANCE</label>
@@ -85,13 +75,14 @@ export function Options() {
                 </div>
                 <div className="options-row">
                     <label>NAME</label>
-                    {!name && (
+                    {!name && zkLogin.address && (
                         <div className="flex">
                             <div className="yes-no" onClick={() => showNameModal()}>
                                 SET
                             </div>
                         </div>
                     )}
+                    {!name && !zkLogin.address && <div className="yes-no non-interactive">SET</div>}
                     {name && (
                         <div className="flex">
                             {name}.{COMMANDER_BASE_NAME}.sui
@@ -156,7 +147,7 @@ function suinsSetting() {
                         onKeyPress={(e) => e.key === "Enter" && createSuinsName(suinsName)}
                     />
                     <button
-                        className="interactive w-full mt-10 h-10"
+                        className="interactive w-full mt-10 §10"
                         onClick={() => createSuinsName(suinsName)}
                     >
                         Save

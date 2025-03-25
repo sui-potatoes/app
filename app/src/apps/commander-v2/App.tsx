@@ -57,6 +57,7 @@ export default function App() {
             <div className="w-full h-full bg-black/75">
                 <Routes>
                     <Route path="/" element={<Menu />} />
+                    <Route path="options" element={<Options />} />
                     <Route path="/spectate" element={<Spectate />} />
                     <Route path="/spectate/:gameId" element={<Observer />} />
                     {zkLogin && (
@@ -65,7 +66,6 @@ export default function App() {
                             <Route path="headquarters/armor" element={<Armor />} />
                             <Route path="headquarters/weapons" element={<Weapons />} />
                             <Route path="headquarters" element={<Headquarters />} />
-                            <Route path="options" element={<Options />} />
                             <Route path="play" element={<Playground />} />
                             <Route path="editor" element={<Editor />} />
                         </>

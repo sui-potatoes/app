@@ -13,7 +13,6 @@ import { useEffect } from "react";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiAddress, normalizeStructTag, SUI_TYPE_ARG } from "@mysten/sui/utils";
 import { requestSuiFromFaucetV1, getFaucetHost } from "@mysten/sui/faucet";
-import { Toaster } from "react-hot-toast";
 
 export const GO_BACK_KEY = "go_back";
 
@@ -53,10 +52,10 @@ export function App() {
     }, [zkLogin.address]);
 
     return (
-        <div className="md:flex flex-wrap gap-5 items-center min-h-[100vh]">
+        <div className="md:flex flex-wrap gap-5 items-center">
             <div className="sidebar">
-                <p className="wallet connect">
-                    <u>
+                <ul>
+                    <li>
                         {(!zkLogin.address && (
                             <button
                                 className="connect"
@@ -83,9 +82,7 @@ export function App() {
                                 Sign Out
                             </button>
                         )}
-                    </u>
-                </p>
-                <ul>
+                    </li>
                     <li>
                         <NavLink to="/go">go game</NavLink>
                     </li>
@@ -119,8 +116,6 @@ export function App() {
                     <Route path="/libraries" element={<Libraries />} />
                 </Routes>
             </div>
-
-            <Toaster position={"bottom-center"} />
         </div>
     );
 }

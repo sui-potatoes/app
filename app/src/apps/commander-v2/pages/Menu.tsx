@@ -73,11 +73,7 @@ export function Menu() {
                         >
                             Headquarters
                         </NavLink>
-                        <NavLink
-                            to="options"
-                            onClick={(e) => disabled && e.preventDefault()}
-                            className={className}
-                        >
+                        <NavLink to="options" className="options-row interactive">
                             Options
                         </NavLink>
                     </div>

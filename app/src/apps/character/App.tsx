@@ -13,7 +13,7 @@ import { Char } from "./Char";
 import { bcs } from "@mysten/sui/bcs";
 import { Param } from "./Param";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 
 const image = bcs.struct("Props", {
     body_type: bcs.String,
@@ -147,7 +147,7 @@ export default function App() {
 
     return (
         <div className="grid md:grid-cols-2 gap-5 items-center">
-            <div className="">
+            <div className="max-h-fit">
                 <Char {...char} />
             </div>
             <div className="text-center sm-show">
@@ -258,6 +258,7 @@ export default function App() {
                     )}
                 </div>
             </div>
+            <Toaster position="bottom-center" />
         </div>
     );
 

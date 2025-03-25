@@ -11,10 +11,8 @@ import { Transaction } from "@mysten/sui/transactions";
 import { bcs } from "@mysten/sui/bcs";
 import { fromB64 } from "@mysten/bcs";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { formatAddress, normalizeSuiAddress } from "@mysten/sui/utils";
+import { formatAddress } from "@mysten/sui/utils";
 import { toast } from "react-hot-toast";
-
-normalizeSuiAddress;
 
 const BOARD_SIZES = [9, 13, 19];
 
