@@ -34,7 +34,7 @@ type GameAppProps = {
  */
 export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps) {
     const size = map.map.map.grid.length;
-    const pos = (size / 2);
+    const pos = size / 2;
 
     return (
         <>

@@ -25,24 +25,24 @@ export function Spectate() {
                     <div className="w-96 max-w-md">
                         <h2 className="mb-2">Recent games</h2>
                         <div className="overflow-auto" style={{ maxHeight: "40vh" }}>
-                        {games.reverse().map((game) => {
-                            return (
-                                <div
-                                    className={
-                                        "options-row interactive " +
-                                        (selected == game.id ? "selected" : "")
-                                    }
-                                    key={game.id}
-                                    onClick={() => setSelected(game.id)}
-                                >
-                                    <a>{formatAddress(game.id)}</a>
-                                    <p>{timeAgo(+game.timestamp_ms)}</p>
-                                </div>
-                            );
-                        })}
+                            {games.reverse().map((game) => {
+                                return (
+                                    <div
+                                        className={
+                                            "options-row interactive " +
+                                            (selected == game.id ? "selected" : "")
+                                        }
+                                        key={game.id}
+                                        onClick={() => setSelected(game.id)}
+                                    >
+                                        <a>{formatAddress(game.id)}</a>
+                                        <p>{timeAgo(+game.timestamp_ms)}</p>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-                    {selected && !game && <Loader text="loading game"/>}
+                    {selected && !game && <Loader text="loading game" />}
                     {selected && (
                         <div
                             className="ml-10 w-full max-w-3xl overflow-auto"

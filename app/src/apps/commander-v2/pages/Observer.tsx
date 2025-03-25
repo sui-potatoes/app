@@ -34,13 +34,15 @@ export function Observer() {
 
     return (
         <>
-            {modelsLoaded && <GameApp
-                map={initialGame}
-                camera={camera}
-                eventBus={eventBus}
-                history={history}
-                orbit={true}
-            />}
+            {modelsLoaded && (
+                <GameApp
+                    map={initialGame}
+                    camera={camera}
+                    eventBus={eventBus}
+                    history={history}
+                    orbit={true}
+                />
+            )}
             {!modelsLoaded && <Loader text="loading models" />}
             <div id="ui">
                 <div

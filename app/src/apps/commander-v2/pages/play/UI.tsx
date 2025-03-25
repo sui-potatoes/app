@@ -141,7 +141,11 @@ export function UI({
                 className="fixed h-full left-0 top-0 p-10 flex justify-end flex-col text-center"
             >
                 {unitButton("shoot")}
-                {unitButton("reload", unit?.props.ammo.value == unit?.props.ammo.max_value, reloadText)}
+                {unitButton(
+                    "reload",
+                    unit?.props.ammo.value == unit?.props.ammo.max_value,
+                    reloadText,
+                )}
                 {unitButton("grenade")}
                 <button
                     onClick={() => onAction("next_turn")}

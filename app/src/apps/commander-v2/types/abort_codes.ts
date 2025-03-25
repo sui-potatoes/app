@@ -3,7 +3,7 @@
 
 /** Maps abort codes from each module to a text message */
 export function vmAbortCodeToMessage(mod: string, fun: string, code: number) {
-    let errorName = code.toString();;
+    let errorName = code.toString();
 
     // prettier-ignore
     switch (`${mod}:${code}`) {

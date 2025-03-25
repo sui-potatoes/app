@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { Loader, Footer } from "./Components";
 import { useEffect, useMemo, useState } from "react";
 import { UI } from "./play/UI";
-import { Camera, EventBus, models, loadModels, GameAction } from "../engine";
+import { Camera, EventBus, loadModels, GameAction } from "../engine";
 import { bcs, HistoryRecord } from "../types/bcs";
 import { useGame } from "../hooks/useGame";
 import { useGameRecruits } from "../hooks/useGameRecruits";
@@ -245,20 +245,20 @@ export function Playground() {
             .moveUnit(path.map((p: THREE.Vector2) => [p.x, p.y]))
             .catch(catchDryRunError);
 
-        // eventBus.dispatchEvent({
-        //     type: "sui:trace",
-        //     success: !!result,
-        // });
+        eventBus.dispatchEvent({
+            type: "sui:trace",
+            success: !!result,
+        });
     }
 
     async function onGameGrenade({ unit, x: x1, y: y1 }: GameAction["grenade:target"]) {
         const { x: x0, y: y0 } = unit.gridPosition;
         const result = await tx.performGrenade([x0, y0], [x1, y1]).catch(catchDryRunError);
 
-        // eventBus.dispatchEvent({
-        //     type: "sui:grenade",
-        //     success: !!result,
-        // });
+        eventBus.dispatchEvent({
+            type: "sui:grenade",
+            success: !!result,
+        });
     }
 
     async function onGameReload({ unit }: GameAction["reload:perform"]) {
