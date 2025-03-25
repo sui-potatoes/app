@@ -10,7 +10,7 @@ import { useRecruits, Recruit } from "../hooks/useRecruits";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
 import { useNameGenerator } from "../hooks/useNameGenerator";
-import { SuiObjectRef } from "@mysten/sui/client";
+import { SuiObjectRef, SuiTransactionBlockResponse } from "@mysten/sui/client";
 import { Footer, Modal, StatRecord, Loader } from "./Components";
 import { useState } from "react";
 import { Armor, useArmor } from "../hooks/useArmor";
@@ -403,7 +403,7 @@ export function Crew() {
             arguments: [armor],
         });
 
-        await executeTransaction(tx).then(console.log);
+        await executeTransaction(tx);
         const removedIdx = recruits?.findIndex((r) => r.id == recruit.objectId);
         removedIdx && recruits?.splice(removedIdx, 1);
         setSelected(undefined);
@@ -434,7 +434,9 @@ export function Crew() {
             arguments: [recruitArg, tx.objectRef(a)],
         });
 
-        await executeTransaction(tx).then(console.log);
+        const { data } = await executeTransaction(tx);
+        updateRef(data);
+
         setTimeout(() => {
             refetchArmors();
             refetch();
@@ -458,7 +460,9 @@ export function Crew() {
 
         tx.transferObjects([armor], zkLogin.address);
 
-        await executeTransaction(tx).then(console.log);
+        const { data } = await executeTransaction(tx);
+        updateRef(data);
+
         setTimeout(() => {
             refetchArmors();
             refetch();
@@ -491,7 +495,9 @@ export function Crew() {
             arguments: [recruitArg, tx.objectRef(w)],
         });
 
-        await executeTransaction(tx).then(console.log);
+        const { data } = await executeTransaction(tx);
+        updateRef(data);
+
         setTimeout(() => {
             refetchWeapons();
             refetch();
@@ -514,12 +520,31 @@ export function Crew() {
 
         tx.transferObjects([weapon], zkLogin.address);
 
-        await executeTransaction(tx).then(console.log);
+        const { data } = await executeTransaction(tx);
+        updateRef(data);
+
         setTimeout(() => {
             refetchWeapons();
             refetch();
         }, 1000);
         selected.weapon = null;
         setShowModal(false);
+    }
+
+    function updateRef(data?: SuiTransactionBlockResponse) {
+        if (!selected) return;
+        if (!data) throw new Error("Expected transaction data");
+        if (!data.objectChanges) throw new Error("Expected object changes");
+
+        const objectId = selected.objectId;
+        const newRef = data.objectChanges.find(
+            (c) => c.type === "mutated" && c.objectId == objectId,
+        ) as SuiObjectRef | undefined;
+
+        if (!newRef) throw new Error("Expected new object reference");
+
+        selected.objectId = newRef.objectId;
+        selected.version = newRef.version;
+        selected.digest = newRef.digest;
     }
 }

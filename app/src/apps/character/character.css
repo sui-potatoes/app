@@ -1,3 +1,5 @@
+@reference "../../index.css";
+
 .param .disabled {
     color: grey;
     cursor: not-allowed;

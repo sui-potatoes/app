@@ -11,7 +11,8 @@ import { Loader, Footer, StatRecord } from "./Components";
 import { SuiObjectRef } from "@mysten/sui/client";
 import { useState } from "react";
 import { type Weapon, useWeapons } from "../hooks/useWeapons";
-import { weaponMetadata } from "../types/metadata";
+import { weaponImgUrls, weaponMetadata } from "../types/metadata";
+import { preload } from "react-dom";
 
 export const WEAPON_STATS: StatRecord[] = [
     {
@@ -33,6 +34,8 @@ export const WEAPON_STATS: StatRecord[] = [
 ];
 
 export function Weapons() {
+    weaponImgUrls().map((url) => preload(url, { as: "image" }));
+
     const flow = useEnokiFlow();
     const client = useSuiClient();
     const zkLogin = useZkLogin();
@@ -46,7 +49,6 @@ export function Weapons() {
         enabled: !!zkLogin.address,
     });
 
-    if (isPending || isExecuting) return <Loader />;
     if (isError) {
         return (
             <div className="flex justify-center align-middle h-screen flex-col">
@@ -58,7 +60,7 @@ export function Weapons() {
     // count identical weapons; weapons with upgrades are not counted
     // and considered unique
     const count: { [key: string]: number } = {};
-    const displayed = data
+    const displayed = (data || [])
         .sort((a, b) => a.name.localeCompare(b.name))
         .filter((w) => {
             if (w.name in count && !w.hasUpgrades) {
@@ -80,6 +82,7 @@ export function Weapons() {
                 <div className="flex justify-start">
                     <div className="w-96 max-w-md">
                         <div>
+                            {(isPending || isExecuting) && <Loader />}
                             {displayed.map((w) => (
                                 <div
                                     className={

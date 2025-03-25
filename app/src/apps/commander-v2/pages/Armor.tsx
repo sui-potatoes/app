@@ -10,7 +10,8 @@ import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
 import { Footer, Loader, StatRecord } from "./Components";
 import { useState } from "react";
 import { type Armor, useArmor } from "../hooks/useArmor";
-import { armorMetadata } from "../types/metadata";
+import { armorImgUrls, armorMetadata } from "../types/metadata";
+import { preload } from "react-dom";
 
 export const ARMOR_STATS: StatRecord[] = [
     {
@@ -34,6 +35,8 @@ export const ARMOR_STATS: StatRecord[] = [
 ];
 
 export function Armor() {
+    armorImgUrls().map((url) => preload(url, { as: "image" }));
+
     const flow = useEnokiFlow();
     const client = useSuiClient();
     const zkLogin = useZkLogin();
@@ -47,7 +50,6 @@ export function Armor() {
         enabled: !!zkLogin.address,
     });
 
-    if (isPending || isExecuting) return <Loader />;
     if (isError) {
         return (
             <div className="flex justify-center align-middle h-screen flex-col">
@@ -58,7 +60,7 @@ export function Armor() {
 
     // count identical armor pieces, keep just one unique in the navigation set
     const count: { [key: string]: number } = {};
-    const displayed = data.filter((a) => {
+    const displayed = (data || []).filter((a) => {
         if (a.name in count) {
             count[a.name]++;
             return false;
@@ -76,6 +78,7 @@ export function Armor() {
                 <div className="flex justify-start">
                     <div className="w-96 max-w-md">
                         <div>
+                            {(isPending || isExecuting) && <Loader />}
                             {displayed.map((a) => (
                                 <div
                                     className={

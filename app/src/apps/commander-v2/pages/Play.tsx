@@ -98,7 +98,7 @@ export function Playground() {
                 </div>
                 <div className="p-10 max-w-3xl">
                     <a
-                        className={`options-row interactive ${tx.canTransact ? "" : "disabled"}`}
+                        className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
                         onClick={async () => {
                             const map = await tx.createDemo(1, [
                                 [0, 3],
@@ -111,7 +111,7 @@ export function Playground() {
                         Create demo 1
                     </a>
                     <a
-                        className={`options-row interactive ${tx.canTransact ? "" : "disabled"}`}
+                        className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
                         style={{ border: "1px solid grey" }}
                         onClick={async () => {
                             const map = await tx.createDemo(2, [

@@ -166,7 +166,7 @@ type ModalProps = {
 export function Modal({ children, show, onClose }: ModalProps) {
     return (
         <div
-            className="absolute h-screen w-full bg-black bg-opacity-90 overflow-auto"
+            className="absolute h-screen w-full bg-black/90 overflow-auto"
             style={{ display: show ? "flex" : "none" }}
             onClick={onClose}
         >
@@ -184,7 +184,7 @@ export function SuinsModal({ show, onClose }: { show: boolean; onClose: () => vo
 
     return (
         <div
-            className="absolute h-screen w-full bg-black bg-opacity-50"
+            className="absolute h-screen w-full bg-black/50"
             style={{ display: show ? "flex" : "none" }}
             onClick={onClose}
         >
@@ -225,10 +225,8 @@ export function Loader({ text }: { text?: string }) {
 
     return (
         <>
-            <div>
-                <Footer />
-            </div>
-            <div className="w-full h-full flex flex-col animate-pulse text-sm items-center justify-center bg-black bg-opacity-50 fixed top-0 left-0 z-50">
+            <Footer />
+            <div className="w-full h-full flex flex-col animate-pulse text-sm items-center justify-center bg-black/50 fixed top-0 left-0 z-50">
                 <img id="rr" src="/images/rotorelief.svg" style={{ width: "150px" }} />
                 <div className="text-md mt-4">{text || "Loading..."}</div>
             </div>

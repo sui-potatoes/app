@@ -1,3 +1,5 @@
+@reference "../../index.css";
+
 :root {
     --cell-size: 60px;
     --border-width: 1px;

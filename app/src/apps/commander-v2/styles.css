@@ -4,7 +4,10 @@ SPDX-License-Identifier: MIT
 */
 
 /* @import "tailwindcss"; */
-/* @theme {} */
+/* @import "tailwindcss/utilities"; */
+/* @reference "../../index.css" */
+
+@reference "../../index.css";
 
 /* define variables for black and white */
 :root {

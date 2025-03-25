@@ -1,16 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-button {
-    @apply disabled:opacity-30 disabled:!cursor-not-allowed;
+button.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 /* I want to create variables for colours, text color, navbar colour and so on */
 /* I want to create a global style for the body */
 :root {
     --text-color: #000;
-    --background-color: #fff;
+    --background-color: hsl(0, 0%, 100%);
     --button-color: #eee;
     --disabled-color: #aaa;
     --code-color: #eee;

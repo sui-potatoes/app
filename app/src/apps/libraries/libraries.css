@@ -1,5 +1,7 @@
 /* I want to use tailwind values like text-lg for elements */
 
+@reference "../../index.css";
+
 .markdown h1 {
     @apply text-2xl;
     @apply mb-10;
