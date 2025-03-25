@@ -88,8 +88,6 @@ export class MoveMode implements Mode {
         const unit = this.selectedUnit;
         const path = mode.path;
 
-        console.log(path);
-
         this.grid.grid[unit.gridPosition.x][unit.gridPosition.y].unit = null;
         this.grid.grid[mode.target.x][mode.target.y].unit = unitId;
 

@@ -6,7 +6,7 @@ import { GameMap, useGame } from "../hooks/useGame";
 import { useEffect, useMemo, useState } from "react";
 import { GameApp } from "./play/Game";
 import { Camera, EventBus, loadModels } from "../engine";
-import { Footer } from "./Components";
+import { Footer, Loader } from "./Components";
 
 export function Observer() {
     const { gameId } = useParams();
@@ -30,18 +30,18 @@ export function Observer() {
         setInitialGame(game);
     }, [game]);
 
-    if (!initialGame) return "can't find the game";
-    if (!modelsLoaded) return "models not loaded";
+    if (!initialGame) return <Loader text="loading game" />;
 
     return (
         <>
-            <GameApp
+            {modelsLoaded && <GameApp
                 map={initialGame}
                 camera={camera}
                 eventBus={eventBus}
                 history={history}
                 orbit={true}
-            />
+            />}
+            {!modelsLoaded && <Loader text="loading models" />}
             <div id="ui">
                 <div
                     id="panel-bottom"

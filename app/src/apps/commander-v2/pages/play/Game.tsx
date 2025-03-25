@@ -33,15 +33,15 @@ type GameAppProps = {
  * The Game itself, rendered inside the `Canvas` component.
  */
 export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps) {
+    const size = map.map.map.grid.length;
+    const pos = (size / 2);
+
     return (
         <>
             <Canvas camera={camera}>
                 {orbit && (
                     <OrbitControls
-                        target={new THREE.Vector3(3, 0, -3)}
-                        // position={}
-                        position0={new THREE.Vector3(5, 5, -5)}
-                        // maxAzimuthAngle={1}
+                        target={new THREE.Vector3(5, 0, -pos + 0.5)}
                         minDistance={4}
                         maxDistance={12}
                     />
