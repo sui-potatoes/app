@@ -30,11 +30,18 @@ jobs:
           cache: enable
       - name: Create config and environment
         run: |
-          echo "y\n\n0" | sui client;
-          sui keytool import ${{ secrets.SITES_PUBLISHER_KEY }} ed25519 --alias publisher;
-          sui client new-env --alias mainnet --rpc https://fullnode.mainnet.sui.io:443;
-          sui client switch --env mainnet --address publisher;
-          sui client balance
+          echo "
+          ---
+          envs:
+            - alias: mainnet
+              rpc: "https://fullnode.mainnet.sui.io:443"
+              ws: ~
+              basic_auth: ~
+          active_env: mainnet
+          " > client.yaml;
+          sui keytool import ${{ secrets.SUI_KEY }} --alias publisher;
+          sui client --client.config ./client.yaml switch --address publisher;
+          sui client --client.config objects;
       - name: Download walrus
         uses: jaxxstorm/action-install-gh-release@v1.12.0
         with:
