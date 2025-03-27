@@ -26,7 +26,7 @@ jobs:
         with:
           repo: MystenLabs/sui
           platform: ubuntu
-          tag: mainnet
+          version: mainnet
           cache: enable
       - name: Create config and environment
         run: |
