@@ -1,7 +1,7 @@
-name: Walrus (|"|)
+name: Walrus App Publish (|"|)
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -27,10 +27,9 @@ env:
       path: ./client.yaml
       active_env: mainnet
 
-
 jobs:
   frontend-app-build:
-    name: Install dependencies and upload to walrus sites
+    name: Upload to Walrus Sites
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -41,6 +40,7 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 9
+      # Downloads / Installs section
       - name: Download Sui
         uses: jaxxstorm/action-install-gh-release@v1.12.0
         with:
@@ -48,12 +48,7 @@ jobs:
           platform: ubuntu
           version: mainnet
           cache: enable
-      - name: Create config and environment
-        run: |
-          echo "${{ env.CLIENT_CONFIG }}" > client.yaml
-          sui keytool --keystore-path ./sui.keystore import ${{ secrets.SITES_PUBLISHER_KEY }} ed25519 --alias publisher;
-          sui client --client.config ./client.yaml switch --address publisher;
-          sui client --client.config ./client.yaml balance;
+      # For Walrus release fetching is enough
       - name: Download walrus
         uses: jaxxstorm/action-install-gh-release@v1.12.0
         with:
@@ -61,23 +56,30 @@ jobs:
           platform: ubuntu
           version: ${{ env.WALRUS_RELEASE }}
           cache: enable
-      - name: Check walrus configuration
-        run: |
-          echo "${{ env.WALRUS_CONFIG }}" > walrus.yaml
-          walrus --config walrus.yaml info
+      # Walrus sites currently require building from source
       - name: Install walrus sites
         uses: baptiste0928/cargo-install@v3
         with:
           crate: site-builder
           git: https://github.com/MystenLabs/walrus-sites
           branch: mainnet # todo: change this once site builder has releases
-          cache-key: ${{ env.WALRUS_RELEASE }} # make it depend on walrus
+          cache-key: ${{ env.WALRUS_RELEASE }}
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           cache-dependency-path: './${{ env.APP_PATH }}/package.json'
-      - name: Install dependencies & build
+      # Actions section
+      - name: Create configs and set up environments
+        run: |
+          echo "${{ env.CLIENT_CONFIG }}" > client.yaml
+          sui keytool --keystore-path ./sui.keystore import ${{ secrets.SITES_PUBLISHER_KEY }} ed25519 --alias publisher;
+          sui client --client.config ./client.yaml switch --address publisher;
+          sui client --client.config ./client.yaml balance;
+          echo "${{ env.WALRUS_CONFIG }}" > walrus.yaml
+          walrus --config walrus.yaml info
+      # Build & Publish section
+      - name: Install & Build app
         run: pnpm install; pnpm build
         env:
           VITE_ENOKI_API_KEY: ${{ secrets.ENOKI_PUBLIC_KEY }}

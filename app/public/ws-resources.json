@@ -4,13 +4,13 @@
     },
     "headers": {
         "/images/*": {
-            "Cache-Control": "public, max-age=86400"
+            "Cache-Control": "public, max-age=31536000"
         },
         "/models/*": {
             "Cache-Control": "public, max-age=86400"
         },
         "/samples/*": {
-            "Cache-Control": "public, max-age=86400"
+            "Cache-Control": "public, max-age=31536000"
         }
     }
 }
