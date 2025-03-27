@@ -3,7 +3,7 @@
 
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "../../../networkConfig";
-import { Weapon as WeaponBcs } from "./../types/bcs";
+import { Weapon as WeaponBcs } from "../types/bcs";
 import { fromBase64 } from "@mysten/bcs";
 import { SuiObjectRef } from "@mysten/sui/client";
 

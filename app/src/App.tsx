@@ -89,9 +89,6 @@ export function App() {
                     <li>
                         <NavLink to="/character">character</NavLink>
                     </li>
-                    {/* <li>
-                        <NavLink to="/commander">commander</NavLink>
-                    </li> */}
                     <li>
                         <NavLink to="/commander">commander</NavLink>
                     </li>
@@ -111,7 +108,6 @@ export function App() {
                     <Route path="/go" element={<GoGame />} />
                     <Route path="/go/:id" element={<GoGame />} />
                     <Route path="/character" element={<Character />} />
-                    {/* <Route path="/commander" element={<Commander />} /> */}
                     <Route path="/commander/*" element={<CommanderV2 />} />
                     <Route path="/libraries" element={<Libraries />} />
                 </Routes>

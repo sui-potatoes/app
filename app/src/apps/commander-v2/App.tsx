@@ -26,7 +26,7 @@ export default function App() {
     useEffect(() => {
         const filter = new Tone.Filter(300, "bandpass").toDestination();
         const player = new Tone.Player(
-            "/samples/Percussion/Chopsticks/Chopsticks_09.wav",
+            "/samples/selected/Chopsticks_09.wav",
             onLoad,
         ).connect(filter);
 

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 import * as THREE from "three";
-import { Game, Tile } from "./../Game";
-import { Controls } from "./../Controls";
+import { Game, Tile } from "../Game";
+import { Controls } from "../Controls";
 import { Mode } from "./Mode";
 
 type Direction = "up" | "down" | "left" | "right";

@@ -11,11 +11,10 @@ import { NavLink } from "react-router-dom";
 export function Spectate() {
     const { data: games } = useRecentGames({});
     const [selected, setSelected] = useState<string>();
-    const { data: game } = useGame({ id: selected!, enabled: !!selected });
+    const { data: game, isFetching } = useGame({ id: selected!, enabled: !!selected });
     const [historyDirection, setHistoryDirection] = useState<"up" | "down">("down");
 
-    if (!games) return "loading...";
-    if (games.length === 0) return "no games found";
+    if (!games) return <Loader text="fetching recent games" />;
 
     return (
         <div className="flex justify-between align-middle h-screen flex-col w-full">
@@ -42,7 +41,6 @@ export function Spectate() {
                             })}
                         </div>
                     </div>
-                    {selected && !game && <Loader text="loading game" />}
                     {selected && (
                         <div
                             className="ml-10 w-full max-w-3xl overflow-auto"
@@ -50,53 +48,67 @@ export function Spectate() {
                         >
                             <div className="mb-10 mx-2">
                                 <h2 className="mb-2">Game</h2>
-                                <div className="options-row">
-                                    <div>Recruits</div>
-                                    <div>{game?.map.recruits.length}</div>
-                                </div>
-                                <div className="options-row w-full">
-                                    <div>Size</div>
-                                    <div>
-                                        {game?.map.map.grid.length}x{game?.map.map.grid[0].length}
-                                    </div>
-                                </div>
-                                <NavLink
-                                    className="block mt-10 py-2 text-center interactive w-full"
-                                    to={`../spectate/${selected}`}
-                                >
-                                    spectate
-                                </NavLink>
-
-                                {/* rotate circle symbol unicode */}
-                                <div className="flex justify-between mb-2 mt-10">
-                                    <h2>History log</h2>
-                                    {/* up and down arrow symbols */}
-                                    <div
-                                        className="hover:cursor-pointer"
-                                        onClick={() =>
-                                            setHistoryDirection(
-                                                historyDirection === "up" ? "down" : "up",
-                                            )
-                                        }
-                                    >
-                                        {historyDirection === "up" ? <>&#x25B2;</> : <>&#x25BC;</>}
-                                    </div>
-                                </div>
-
-                                <div className="overflow-auto" style={{ maxHeight: "40vh" }}>
-                                    {(historyDirection === "up"
-                                        ? game?.map.history.reverse()
-                                        : game?.map.history
-                                    )?.map((record, i) => (
-                                        <div className="options-row flex w-full" key={i}>
-                                            <div className="normal-case mr-10">{record.$kind}</div>
-                                            <div>
-                                                {record.$kind === "UnitKIA"
-                                                    ? formatAddress(record.UnitKIA)
-                                                    : JSON.stringify(record[record.$kind])}
-                                            </div>
+                                <div className="">
+                                    {/* {!isFetching ? " animate-fade-in" : ""}> */}
+                                    <div className="options-row">
+                                        <div>Recruits</div>
+                                        <div className={!isFetching ? " animate-fade-in" : ""}>
+                                            {game?.map.recruits.length}
                                         </div>
-                                    ))}
+                                    </div>
+                                    <div className="options-row w-full">
+                                        <div>Size</div>
+                                        <div className={!isFetching ? " animate-fade-in" : ""}>
+                                            {game && `${game?.map.map.grid.length}x${game?.map.map.grid[0].length}`}
+                                        </div>
+                                    </div>
+                                    <NavLink
+                                        className="block mt-10 py-2 text-center interactive w-full"
+                                        to={`../spectate/${selected}`}
+                                    >
+                                        spectate
+                                    </NavLink>
+
+                                    {/* rotate circle symbol unicode */}
+                                    <div className="flex justify-between mb-2 mt-10">
+                                        <h2>History log</h2>
+                                        {/* up and down arrow symbols */}
+                                        <div
+                                            className="hover:cursor-pointer"
+                                            onClick={() =>
+                                                setHistoryDirection(
+                                                    historyDirection === "up" ? "down" : "up",
+                                                )
+                                            }
+                                        >
+                                            {historyDirection === "up" ? (
+                                                <>&#x25B2;</>
+                                            ) : (
+                                                <>&#x25BC;</>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        className={`overflow-auto${!isFetching ? " animate-fade-in" : ""}`}
+                                        style={{ maxHeight: "40vh" }}
+                                    >
+                                        {(historyDirection === "up"
+                                            ? game?.map.history.reverse()
+                                            : game?.map.history
+                                        )?.map((record, i) => (
+                                            <div className="options-row flex w-full" key={i}>
+                                                <div className="normal-case mr-10">
+                                                    {record.$kind}
+                                                </div>
+                                                <div>
+                                                    {record.$kind === "UnitKIA"
+                                                        ? formatAddress(record.UnitKIA)
+                                                        : JSON.stringify(record[record.$kind])}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -1,8 +1,8 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { Game } from "./../Game";
-import { Controls } from "./../Controls";
+import { Game } from "../Game";
+import { Controls } from "../Controls";
 import { Mode } from "./Mode";
 import { NoneMode } from "./NoneMode";
 import { Unit } from "../Unit";

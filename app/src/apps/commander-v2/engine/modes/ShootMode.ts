@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 import * as THREE from "three";
-import { Game } from "./../Game";
+import { Game } from "../Game";
 import { Camera } from "../Camera";
-import { Controls } from "./../Controls";
+import { Controls } from "../Controls";
 import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";

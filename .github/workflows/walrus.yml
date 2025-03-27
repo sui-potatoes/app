@@ -1,0 +1,87 @@
+name: Walrus
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  APP_PATH: app
+  DIST_PATH: app/dist
+  WALRUS_RELEASE: mainnet-v1.18.2
+  SITE_OBJECT_ID: "0x3513754d4f9c7f3a658887d828caebb5bc076b588688516a627c55b3fc016793"
+  CLIENT_CONFIG: |
+    ---
+    keystore:
+      File: ./sui.keystore
+    envs:
+      - alias: mainnet
+        rpc: "https://fullnode.mainnet.sui.io:443"
+        ws: ~
+        basic_auth: ~
+    active_env: mainnet
+  WALRUS_CONFIG: |
+    system_object: 0x2134d52768ea07e8c43570ef975eb3e4c27a39fa6396bef985b5abc58d03ddd2
+    staking_object: 0x10b9d30c28448939ce6c4d6c6e0ffce4a7f8a4ada8248bdad09ef8b70e4a3904
+    wallet_config:
+      path: ./client.yaml
+      active_env: mainnet
+
+jobs:
+  frontend-app-build:
+    name: Publish to Walrus Sites
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.APP_PATH }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      # Downloads / Installs section
+      - name: Download Sui
+        uses: jaxxstorm/action-install-gh-release@v1.12.0
+        with:
+          repo: MystenLabs/sui
+          platform: ubuntu
+          version: mainnet
+          cache: enable
+      # For Walrus release fetching is enough
+      - name: Download Walrus
+        uses: jaxxstorm/action-install-gh-release@v1.12.0
+        with:
+          repo: MystenLabs/walrus
+          platform: ubuntu
+          version: ${{ env.WALRUS_RELEASE }}
+          cache: enable
+      # Walrus sites currently require building from source
+      - name: Build site-builder
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: site-builder
+          git: https://github.com/MystenLabs/walrus-sites
+          branch: mainnet # todo: change this once site builder has releases
+          cache-key: ${{ env.WALRUS_RELEASE }}
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          cache-dependency-path: './${{ env.APP_PATH }}/package.json'
+      # Actions section
+      - name: Create configs and set up environments
+        run: |
+          echo "${{ env.CLIENT_CONFIG }}" > client.yaml
+          sui keytool --keystore-path ./sui.keystore import ${{ secrets.SITES_PUBLISHER_KEY }} ed25519 --alias publisher;
+          sui client --client.config ./client.yaml switch --address publisher;
+          sui client --client.config ./client.yaml balance;
+          echo "${{ env.WALRUS_CONFIG }}" > walrus.yaml
+          walrus --config walrus.yaml info;
+      # Build & Publish section
+      - name: Install & Build app
+        run: pnpm install; pnpm build
+        env:
+          VITE_ENOKI_API_KEY: ${{ secrets.ENOKI_PUBLIC_KEY }}
+      - name: Upload to walrus sites
+        run: site-builder --walrus-config walrus.yaml --config ../sites.yaml update --epochs 1 dist ${{ env.SITE_OBJECT_ID }}

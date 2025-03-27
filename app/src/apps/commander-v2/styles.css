@@ -3,10 +3,6 @@ Copyright (c) Sui Potatoes
 SPDX-License-Identifier: MIT
 */
 
-/* @import "tailwindcss"; */
-/* @import "tailwindcss/utilities"; */
-/* @reference "../../index.css" */
-
 @reference "../../index.css";
 
 /* define variables for black and white */
@@ -35,8 +31,6 @@ SPDX-License-Identifier: MIT
     font-family: monospace;
     overscroll-behavior: none;
     z-index: 1;
-    /* background: black; */
-    /* background-image: url('/images/bg-9.webp'); */
     background-image: url("/images/bg-hr-2.png");
     background-position: center;
     background-color: black;
@@ -44,7 +38,6 @@ SPDX-License-Identifier: MIT
     background-repeat: no-repeat;
     width: 100dvw;
     height: 100dvh;
-    /* height: 100%; */
     top: 0;
     left: 0;
 }
@@ -359,4 +352,40 @@ SPDX-License-Identifier: MIT
 .non-interactive * {
     color: var(--color-grey) !important;
     cursor: not-allowed;
+}
+
+/* === Anumations === */
+
+.animate-fade-in {
+    opacity: 1;
+    animation-name: fadeInOpacity;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 0.2s;
+}
+
+@keyframes fadeInOpacity {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.animate-fade-out {
+    opacity: 0;
+    animation-name: fadeOutOpacity;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-duration: 0.2s;
+}
+
+@keyframes fadeOutOpacity {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
