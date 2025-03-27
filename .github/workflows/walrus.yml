@@ -74,4 +74,4 @@ jobs:
       - name: Install dependencies & build
         run: pnpm install; pnpm build
       - name: Upload to walrus sites
-        run: site-builder --walrus-config walrus.yaml --config ../sites.yaml publish --epochs 1 dist --dry-run
+        run: site-builder --rpc-url "https://fullnode.mainnet.sui.io:443" --walrus-config walrus.yaml --config ../sites.yaml publish --epochs 1 dist --dry-run
