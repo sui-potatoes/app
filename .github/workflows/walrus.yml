@@ -1,7 +1,7 @@
 name: Walrus (|"|)
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -9,6 +9,7 @@ env:
   APP_PATH: app
   DIST_PATH: app/dist
   WALRUS_RELEASE: mainnet-v1.18.2
+  SITE_OBJECT_ID: "0x3513754d4f9c7f3a658887d828caebb5bc076b588688516a627c55b3fc016793"
   CLIENT_CONFIG: |
     ---
     keystore:
@@ -81,4 +82,4 @@ jobs:
         env:
           VITE_ENOKI_API_KEY: ${{ secrets.ENOKI_PUBLIC_KEY }}
       - name: Upload to walrus sites
-        run: site-builder --walrus-config walrus.yaml --config ../sites.yaml publish --epochs 1 dist
+        run: site-builder --walrus-config walrus.yaml --config ../sites.yaml update --epochs 1 dist ${{ env.SITE_OBJECT_ID }}
