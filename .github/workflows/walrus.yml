@@ -1,0 +1,52 @@
+name: Walrus (|"|)
+
+on:
+  pull_request:
+
+env:
+  APP_PATH: app
+  DIST_PATH: app/dist
+  WALRUS_RELEASE: mainnet-v1.18.2
+
+jobs:
+  frontend-app-build:
+    name: Build frontend application
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.APP_PATH }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Install walrus
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: walrus-service
+          git: https://github.com/MystenLabs/walrus
+          tag: ${{ WALRUS_RELEASE }}
+      - name: Install walrus sites
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: site-builder
+          git: https://github.com/MystenLabs/walrus-sites
+          branch: mainnet # todo: change this once site builder has releases
+          cache-key: ${{ WALRUS_RELEASE }} # make it depend on walrus
+      - name: Download Sui
+        uses: jaxxstorm/action-install-gh-release@v1.12.0
+        with:
+          repo: MystenLabs/sui
+          platform: ubuntu
+          version: testnet
+          cache: enable
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          cache-dependency-path: './${{ env.APP_PATH }}/package.json'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run build
+        run: pnpm build
