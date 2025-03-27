@@ -1,7 +1,7 @@
 name: Walrus App Publish (|"|)
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -77,7 +77,8 @@ jobs:
           sui client --client.config ./client.yaml switch --address publisher;
           sui client --client.config ./client.yaml balance;
           echo "${{ env.WALRUS_CONFIG }}" > walrus.yaml
-          walrus --config walrus.yaml info
+          walrus --config walrus.yaml info;
+          sui client balance
       # Build & Publish section
       - name: Install & Build app
         run: pnpm install; pnpm build
