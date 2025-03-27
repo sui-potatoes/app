@@ -10,7 +10,7 @@ env:
 
 jobs:
   frontend-app-build:
-    name: Build frontend application
+    name: Install dependencies and upload to walrus sites
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -21,12 +21,13 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 9
-      - name: Install walrus
-        uses: baptiste0928/cargo-install@v3
+      - name: Download walrus
+        uses: jaxxstorm/action-install-gh-release@v1.12.0
         with:
-          crate: walrus-service
-          git: https://github.com/MystenLabs/walrus
-          tag: ${{ env.WALRUS_RELEASE }}
+          repo: MystenLabs/walrus
+          platform: ubuntu
+          version: ${{ env.WALRUS_RELEASE }}
+          cache: enable
       - name: Install walrus sites
         uses: baptiste0928/cargo-install@v3
         with:
