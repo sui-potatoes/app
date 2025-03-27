@@ -1,7 +1,7 @@
-name: Publish Walrus App
+name: Walrus
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -29,7 +29,7 @@ env:
 
 jobs:
   frontend-app-build:
-    name: Upload to Walrus Sites
+    name: Publish to Walrus Sites
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -49,7 +49,7 @@ jobs:
           version: mainnet
           cache: enable
       # For Walrus release fetching is enough
-      - name: Download walrus
+      - name: Download Walrus
         uses: jaxxstorm/action-install-gh-release@v1.12.0
         with:
           repo: MystenLabs/walrus
@@ -57,7 +57,7 @@ jobs:
           version: ${{ env.WALRUS_RELEASE }}
           cache: enable
       # Walrus sites currently require building from source
-      - name: Install walrus sites
+      - name: Build site-builder
         uses: baptiste0928/cargo-install@v3
         with:
           crate: site-builder
