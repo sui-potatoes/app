@@ -71,7 +71,7 @@ jobs:
         with:
           cache: 'pnpm'
           cache-dependency-path: './${{ env.APP_PATH }}/package.json'
-      - name: Install dependencies
-        run: pnpm install
-      - name: Run build
-        run: pnpm build
+      - name: Install dependencies & build
+        run: pnpm install; pnpm build
+      - name: Upload to walrus sites
+        run: site-builder --config ../sites.yaml publish --epochs 1 dist --dry-run
