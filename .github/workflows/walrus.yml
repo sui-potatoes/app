@@ -30,7 +30,7 @@ jobs:
           cache: enable
       - name: Create config and environment
         run: |
-          yes | sui client;
+          yes no | sui client;
           sui keytool import ${{ secrets.SITES_PUBLISHER_KEY }} ed25519 --alias publisher;
           sui client new-env --alias mainnet --rpc https://fullnode.mainnet.sui.io:443;
           sui client switch --env mainnet --address publisher;
