@@ -1,7 +1,9 @@
 name: Walrus (|"|)
 
 on:
-  pull_request:
+  push:
+    branches:
+      - main
 
 env:
   APP_PATH: app
@@ -76,5 +78,7 @@ jobs:
           cache-dependency-path: './${{ env.APP_PATH }}/package.json'
       - name: Install dependencies & build
         run: pnpm install; pnpm build
+        env:
+          VITE_ENOKI_API_KEY: ${{ secrets.ENOKI_PUBLIC_KEY }}
       - name: Upload to walrus sites
         run: site-builder --walrus-config walrus.yaml --config ../sites.yaml publish --epochs 1 dist
