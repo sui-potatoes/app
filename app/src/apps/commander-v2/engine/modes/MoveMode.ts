@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 import * as THREE from "three";
-import { Game } from "./../Game";
-import { Controls } from "./../Controls";
+import { Game } from "../Game";
+import { Controls } from "../Controls";
 import { Mode } from "./Mode";
 import { NoneMode } from "./NoneMode";
 import { Line2 } from "three/addons/lines/Line2.js";

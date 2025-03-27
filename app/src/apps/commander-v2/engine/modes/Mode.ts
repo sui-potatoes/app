@@ -1,14 +1,14 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { Game } from "./../Game";
-import { Controls } from "./../Controls";
+import { Game } from "../Game";
+import { Controls } from "../Controls";
 import { ShootModeEvent } from "./ShootMode";
 import { EditModeEvent } from "./EditMode";
 import { MoveModeEvent } from "./MoveMode";
 import { ReloadModeEvent } from "./ReloadMode";
 import { GrenadeModeEvent } from "./GrenadeMode";
-import { PrefixedEventMap } from "./../../types/utils";
+import { PrefixedEventMap } from "../../types/utils";
 
 type ModeName = "grenade" | "reload" | "shoot" | "editor" | "move" | "none";
 
