@@ -39,7 +39,7 @@ jobs:
               basic_auth: ~
           active_env: mainnet
           " > client.yaml;
-          sui keytool import ${{ secrets.SUI_KEY }} --alias publisher;
+          sui keytool import ${{ secrets.SUI_KEY }} ed25519 --alias publisher;
           sui client --client.config ./client.yaml switch --address publisher;
           sui client --client.config objects;
       - name: Download walrus
