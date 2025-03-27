@@ -1,5 +1,19 @@
 {
-  "routes": {
-    "/*": "/index.html"
-  }
+    "routes": {
+        "/*": "/index.html"
+    },
+    "headers": {
+        "/images/*": {
+            "Cache-Control": "public, max-age=86400",
+            "ETag": "\"abc123\""
+        },
+        "/models/*": {
+            "Cache-Control": "public, max-age=86400",
+            "ETag": "\"abc123\""
+        },
+        "/samples/*": {
+            "Cache-Control": "public, max-age=86400",
+            "ETag": "\"abc123\""
+        }
+    }
 }
