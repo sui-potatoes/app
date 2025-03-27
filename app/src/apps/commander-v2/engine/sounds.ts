@@ -4,10 +4,10 @@
 import * as Tone from "tone";
 
 const sampleList = {
-    chop: "/samples/selected/Percussion/Chopsticks/Chopsticks_09.wav",
-    stab: "/samples/selected/Stab/Stab_08.wav",
-    kick: "/samples/selected/Kick/Kick_05.wav",
-    atmos: "/samples/selected/Atmos/Atmos_05.wav",
+    chop: "/samples/selected/Chopsticks_09.wav",
+    stab: "/samples/selected/Stab_08.wav",
+    kick: "/samples/selected/Kick_05.wav",
+    atmos: "/samples/selected/Atmos_05.wav",
 } as const;
 
 export type SampleName = keyof typeof sampleList;
