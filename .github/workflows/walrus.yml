@@ -1,4 +1,4 @@
-name: Walrus App Publish (|"|)
+name: Publish Walrus App
 
 on:
   pull_request:
@@ -78,7 +78,6 @@ jobs:
           sui client --client.config ./client.yaml balance;
           echo "${{ env.WALRUS_CONFIG }}" > walrus.yaml
           walrus --config walrus.yaml info;
-          sui client balance
       # Build & Publish section
       - name: Install & Build app
         run: pnpm install; pnpm build
