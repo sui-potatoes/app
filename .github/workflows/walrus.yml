@@ -41,7 +41,7 @@ jobs:
               basic_auth: ~
           active_env: mainnet
           " > client.yaml;
-          sui keytool import ${{ secrets.SITES_PUBLISHER_KEY }} ed25519 --alias publisher --keystore-path ./sui.keystore;
+          sui keytool --keystore-path ./sui.keystore import ${{ secrets.SITES_PUBLISHER_KEY }} ed25519 --alias publisher;
           sui client --client.config ./client.yaml switch --address publisher;
           sui client --client.config objects;
       - name: Download walrus
