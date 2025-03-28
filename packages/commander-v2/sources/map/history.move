@@ -21,7 +21,7 @@ public enum Record has copy, drop, store {
     /// Block header for attack action.
     Reload(vector<u16>),
     /// Next turn action.
-    NextTurn,
+    NextTurn(u16),
     /// Block header for move action.
     Move(vector<vector<u16>>),
     /// Block header for attack action.
@@ -94,7 +94,7 @@ public fun new_grenade(r: u16, x: u16, y: u16): Record { Record::Grenade(r, x, y
 public fun new_move(steps: vector<vector<u16>>): Record { Record::Move(steps) }
 
 /// Create new `Record::NextTurn` history record.
-public fun new_next_turn(): Record { Record::NextTurn }
+public fun new_next_turn(turn: u16): Record { Record::NextTurn(turn) }
 
 /// Create new `Record::Reload` history record.
 public fun new_reload(x: u16, y: u16): Record { Record::Reload(vector[x, y]) }
@@ -128,7 +128,7 @@ public(package) fun from_bcs(bcs: &mut BCS): History {
     let records = bcs.peel_vec!(|bcs| {
         match (bcs.peel_enum_tag()) {
             0 => Record::Reload(bcs.peel_vec!(|bcs| bcs.peel_u16())),
-            1 => Record::NextTurn,
+            1 => Record::NextTurn(bcs.peel_u16()),
             2 => Record::Move(bcs.peel_vec!(|bcs| bcs.peel_vec!(|bcs| bcs.peel_u16()))),
             3 => Record::Attack {
                 origin: bcs.peel_vec!(|bcs| bcs.peel_u16()),

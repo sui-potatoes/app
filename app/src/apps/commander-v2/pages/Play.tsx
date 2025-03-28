@@ -171,12 +171,6 @@ export function Playground() {
                     unit: first.Reload as [number, number],
                 });
 
-            case "NextTurn":
-                return eventBus.dispatchEvent({
-                    type: "sui:next_turn",
-                    turn: map!.map.map.turn,
-                });
-
             case "Move":
                 return eventBus.dispatchEvent({
                     type: "sui:path",
@@ -288,11 +282,24 @@ export function Playground() {
     async function onNextTurn() {
         const result = await tx.nextTurn().catch(catchDryRunError);
 
+        if (!result) throw new Error("Failed to execute next turn transaction");
+
+        const events = result.data.events || [];
+        const eventType = `${packageId}::history::HistoryUpdated`;
+        const historyBcs = events.find((e) => e.type == eventType)?.bcs;
+        if (!historyBcs) return;
+        const history = bcs.vector(HistoryRecord).parse(fromBase64(historyBcs));
+        if (!history) return;
+        const first = history[0]; // the first record cannot be an empty
+        if (!first?.NextTurn) throw new Error("NextTurn record is missing in the history log");
+
+        eventBus.dispatchEvent({ type: "sui:tx_success", history });
+
         if (!result) console.error("Failed to execute next turn transaction");
         if (map) {
             eventBus.dispatchEvent({
                 type: "sui:next_turn",
-                turn: ++map.map.map.turn,
+                turn: first.NextTurn,
             });
         }
     }

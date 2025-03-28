@@ -8,9 +8,6 @@ use std::string::String;
 use sui::vec_map::{Self, VecMap};
 use svg::{animation::Animation, desc::Desc, print, shape::Shape};
 
-/// Code for the `NotImplemented` error.
-// const ENotImplemented: u64 = 0;
-
 const TYPE_ROOT: u8 = 0;
 const TYPE_A: u8 = 1;
 const TYPE_DEFS: u8 = 2;
@@ -112,7 +109,7 @@ public fun a(href: String, shapes: vector<Shape>): Container {
 /// ## Description
 ///
 /// A `<defs>` container, to be used for reusable shapes. It's like a
-// dictionary of shapes.
+/// dictionary of shapes.
 ///
 /// - Element: `<defs>`.
 /// - Own properties: None.
