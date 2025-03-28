@@ -1,0 +1,9 @@
+{
+    "name": "Commander",
+    "start_url": "/commander",
+    "display": "standalone",
+    "short_name": "Commander",
+    "background_color": "#000000",
+    "theme_color": "#AAAAAA",
+    "icons": []
+}
