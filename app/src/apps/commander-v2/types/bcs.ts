@@ -136,7 +136,7 @@ export const Metadata = bcs.struct("Metadata", {
 
 export const HistoryRecord = bcs.enum("HistoryRecord", {
     Reload: bcs.vector(bcs.U16),
-    NextTurn: null,
+    NextTurn: bcs.U16,
     Move: bcs.vector(bcs.vector(bcs.U16)),
     Attack: bcs.struct("Attack", {
         origin: bcs.vector(bcs.U16),

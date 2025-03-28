@@ -2,7 +2,7 @@
 
 [move]
 version = 3
-manifest_digest = "26C895D0DB129B935C926BD2B262677548919821E3D431DCACFFB22B0FF2EF20"
+manifest_digest = "36AC368C61B12972ECF3FE419962AE1D5AFAD2599B3ECEFD39F15E5BCC6C2AF1"
 deps_digest = "8227D341C0550A37580C10FA45FE148A465225149C69D179737E0FE454AD6AEC"
 dependencies = [
   { id = "BitField", name = "BitField" },
@@ -18,7 +18,7 @@ dependencies = [
 
 [[move.package]]
 id = "BitField"
-source = { local = "../bit_field" }
+source = { local = "../bit-field" }
 
 dependencies = [
   { id = "Bridge", name = "Bridge" },
@@ -113,6 +113,6 @@ flavor = "sui"
 
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0x66e5b5d3a74f72f5833fb586992ae3050e86e57f994c8795b01cca1b6ccedae2"
-latest-published-id = "0x66e5b5d3a74f72f5833fb586992ae3050e86e57f994c8795b01cca1b6ccedae2"
+original-published-id = "0x496d2979d2611570e7dd6502fe5a69356f5a8ab8aed6eda0542c49e566f630db"
+latest-published-id = "0x496d2979d2611570e7dd6502fe5a69356f5a8ab8aed6eda0542c49e566f630db"
 published-version = "1"

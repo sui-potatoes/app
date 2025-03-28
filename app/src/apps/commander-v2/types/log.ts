@@ -75,7 +75,7 @@ export function printEvent(eventKey: keyof EventMap, map: Partial<EventMap>): st
 
         // Sui events
         case "sui:next_turn":
-            return `Sui: next turn started`;
+            return `Sui: next turn started - ${map[eventKey].turn}`;
         case "sui:aim":
             return `Sui: shot can${!map[eventKey].success ? "'t" : ""} be performed`;
         case "sui:attack":

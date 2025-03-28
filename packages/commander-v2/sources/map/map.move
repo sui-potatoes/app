@@ -115,7 +115,7 @@ public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16): Reco
 /// Proceed to the next turn.
 public fun next_turn(map: &mut Map): Record {
     map.turn = map.turn + 1;
-    history::new_next_turn()
+    history::new_next_turn(map.turn)
 }
 
 /// Reload the unit's weapon. It costs 1 AP.
