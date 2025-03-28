@@ -11,7 +11,7 @@ letters in "potatoes").
 
 ## Installing
 
-## [Move Registry CLI](https://docs.suins.io/move-registry)
+### [Move Registry CLI](https://docs.suins.io/move-registry)
 
 ```bash
 mvr add @potatoes/codec --network testnet
@@ -20,7 +20,7 @@ mvr add @potatoes/codec --network testnet
 mvr add @potatoes/codec --network mainnet
 ```
 
-## Manual
+### Manual
 
 To add this library to your project, add this to your `Move.toml` file under
 `[dependencies]` section:
