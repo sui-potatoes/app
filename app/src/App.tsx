@@ -7,7 +7,7 @@ import { NavLink } from "react-router-dom";
 import GoGame from "./apps/go-game/App.tsx";
 import Libraries from "./apps/libraries/App.tsx";
 import Character from "./apps/character/App.tsx";
-import CommanderV2 from "./apps/commander-v2/App.tsx";
+import CommanderV2 from "./apps/commander/App.tsx";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { useEffect } from "react";
 import { useSuiClient } from "@mysten/dapp-kit";
