@@ -1,76 +1,76 @@
 name: Potatoes QA
 
 on:
-  pull_request:
+    pull_request:
 
 env:
-  MOVE_PACKAGES_PATH: packages
-  APP_PATH: app
+    MOVE_PACKAGES_PATH: packages
+    APP_PATH: app
 
 jobs:
-  test-move-packages:
-    name: Test Move packages
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.MOVE_PACKAGES_PATH }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Download Sui
-        uses: jaxxstorm/action-install-gh-release@v1.12.0
-        with:
-          repo: MystenLabs/sui
-          platform: ubuntu
-          version: testnet
-          cache: enable
-      # List all directories in the packages folder, and run sui move test on
-      # each of them
-      - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
+    test-move-packages:
+        name: Test Move Packages
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ${{ env.MOVE_PACKAGES_PATH }}
+        steps:
+            - uses: actions/checkout@v2
+            - name: Download Sui
+              uses: jaxxstorm/action-install-gh-release@v1.12.0
+              with:
+                  repo: MystenLabs/sui
+                  platform: ubuntu
+                  version: testnet
+                  cache: enable
+            # List all directories in the packages folder, and run sui move test on
+            # each of them
+            - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
 
-  prettier-ts:
-    name: Check TypeScript files formatting
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.APP_PATH }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-      - run: npm i -g prettier
-      - run: npx -g prettier -c src/**/*.ts
+    prettier-move:
+        name: Check Move formatting
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ${{ env.MOVE_PACKAGES_PATH }}
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+            - run: npm i @mysten/prettier-plugin-move
+            - run: npx prettier-move -c **/*.move
 
-  prettier-move:
-    name: Check Move files formatting
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.MOVE_PACKAGES_PATH }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-      - run: npm i @mysten/prettier-plugin-move
-      - run: npx prettier-move -c **/*.move
+    prettier-ts:
+        name: Check TypeScript formatting
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ${{ env.APP_PATH }}
+        steps:
+            - uses: actions/checkout@v2
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+            - run: npm i -g prettier
+            - run: npx -g prettier -c src/**/*.ts
 
-  frontend-app-build:
-    name: Build frontend application
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.APP_PATH }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          cache-dependency-path: './${{ env.APP_PATH }}/package.json'
-      - name: Install dependencies
-        run: pnpm install
-      - name: Run build
-        run: pnpm build
+    frontend-app-build:
+        name: Build Web Application
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ${{ env.APP_PATH }}
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 9
+            - name: Use Node.js
+              uses: actions/setup-node@v4
+              with:
+                  cache: "pnpm"
+                  cache-dependency-path: "./${{ env.APP_PATH }}/package.json"
+            - name: Install dependencies
+              run: pnpm install
+            - name: Run build
+              run: pnpm build
