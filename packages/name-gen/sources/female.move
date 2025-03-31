@@ -41,7 +41,7 @@ const BUCKET_31: vector<vector<u8>> = vector[b"Tera", b"Tetra", b"Tiff", b"Tilde
 const BUCKET_32: vector<vector<u8>> = vector[b"Uma", b"Una", b"Vasa", b"Veekay", b"Veronica", b"Vira", b"Willamette", b"Winifred", b"Yotta", b"Zetta"];
 const BUCKET_33: vector<vector<u8>> = vector[b"Zinc", b"Zhora"];
 
-public fun select(num: u16): String {
+public(package) fun select(num: u16): String {
     let bucket_idx = num % 34;
     let bucket = match (bucket_idx) {
         0 => BUCKET_0,

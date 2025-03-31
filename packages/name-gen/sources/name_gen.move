@@ -1,13 +1,39 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Module: name_gen
+/// Cyberpunk Name Generator - a "stateless" solution for generating names,
+/// based on the `random` module.
+///
+/// ## Usage
+/// This package provides utility functions which must be integrated directly
+/// into an application's Move codebase, due to the use of `RandomGenerator`.
+///
+/// ## Example
+/// ```
+/// module my_package::hero;
+///
+/// use std::string::String;
+/// use sui::random::Random;
+/// use name_gen::name_gen;
+///
+/// /// Some object to hold the name.
+/// public struct Hero has key, store { id: UID, name: String }
+///
+/// /// The function MUST be an `entry` function for `Random` to work.
+/// /// See https://docs.sui.io/guides/developer/advanced/randomness-onchain
+/// entry fun new_hero(rng: &Random, ctx: &mut TxContext) {
+///     let mut gen = rng.new_generator(ctx); // acquire generator instance
+///     let name = name_gen::new_male_name(&mut gen); // also `new_female_name`
+///     transfer::transfer(Hero {
+///         id: object::new(ctx),
+///         name
+///     }, ctx.sender());
+/// }
+/// ```
 module name_gen::name_gen;
 
 use std::string::String;
 use sui::random::RandomGenerator;
-
-//
 
 const MALE_LIMIT: u16 = 343;
 const FEMALE_LIMIT: u16 = 341;
@@ -55,13 +81,27 @@ public fun new_female_name(g: &mut RandomGenerator): String {
     res
 }
 
+#[test]
+fun generate_male_name() {
+    use sui::random;
+    let mut gen = random::new_generator_for_testing();
+    new_male_name(&mut gen);
+}
+
+#[test]
+fun generate_female_name() {
+    use sui::random;
+    let mut gen = random::new_generator_for_testing();
+    new_female_name(&mut gen);
+}
+
 #[random_test]
 fun test_generator(seed: vector<u8>) {
     use sui::random;
 
     let mut gen = random::new_generator_from_seed_for_testing(seed);
-    10u8.do!(|_| std::debug::print(&new_male_name(&mut gen)));
+    100u16.do!(|_| new_male_name(&mut gen));
 
     let mut gen = random::new_generator_from_seed_for_testing(seed);
-    10u8.do!(|_| std::debug::print(&new_female_name(&mut gen)));
+    100u16.do!(|_| new_female_name(&mut gen));
 }
