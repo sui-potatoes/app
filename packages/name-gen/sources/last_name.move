@@ -155,7 +155,7 @@ const BUCKET_145: vector<vector<u8>> = vector[b"Wattface", b"Wattsmith", b"Wave"
 const BUCKET_146: vector<vector<u8>> = vector[b"Wireback", b"Wireman", b"Wiresmith", b"Wiremancer", b"Wires", b"Yamamoto", b"Yamaha", b"Zener", b"Zero", b"Zip"];
 const BUCKET_147: vector<vector<u8>> = vector[b"Zipface", b"Zipper"];
 
-public fun select(num: u16): String {
+public(package) fun select(num: u16): String {
     let bucket_idx = num % 146;
     let bucket = match (bucket_idx) {
         0 => BUCKET_0,

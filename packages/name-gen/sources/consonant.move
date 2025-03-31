@@ -74,7 +74,7 @@ const POST_CONSONANT: vector<vector<u8>> = vector[
 ];
 
 #[allow(implicit_const_copy)]
-public fun select(num: u8, num_2: u8): String {
+public(package) fun select(num: u8, num_2: u8): String {
     let consonant = (num % 30) as u64;
     let post_consonant = (num_2 % 30) as u64;
     let mut last_name = CONSONANTS[consonant].to_string();
