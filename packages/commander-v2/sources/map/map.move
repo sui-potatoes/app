@@ -184,8 +184,7 @@ public fun perform_attack(
     if (is_dodged) history.push_back(history::new_dodged());
     if (is_hit) {
         history.push_back({
-            if (is_crit) history::new_critical_hit(damage)
-            else history::new_damage(damage)
+            if (is_crit) history::new_critical_hit(damage) else history::new_damage(damage)
         })
     } else history.push_back(history::new_miss());
 
@@ -294,9 +293,7 @@ public fun tile_to_string(tile: &Tile): String {
             str.append(top.to_string());
             str.append(right.to_string());
             str.append(bottom.to_string());
-
-            if (tile.unit.is_some()) str.append_utf8(b"U")
-            else str.append_utf8(b"-");
+            str.append_utf8(if (tile.unit.is_some()) b"U" else b"-");
             str
         },
         TileType::Unwalkable => b" XXX ".to_string(),

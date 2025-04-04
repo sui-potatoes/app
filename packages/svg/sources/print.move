@@ -43,8 +43,7 @@ public fun print(
         svg.append(keys[i]);
         svg.append(b"='".to_string());
         svg.append(values[i]);
-        if (i < length - 1) svg.append(b"' ".to_string())
-        else svg.append(b"'".to_string())
+        svg.append(if (i < length - 1) { b"' " } else { b"'" }.to_string());
     });
 
     if (elements.is_none()) {
