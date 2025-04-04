@@ -81,11 +81,12 @@ public enum Op<T> has copy, drop, store {
 public struct Formula<T> has copy, drop, store {
     expressions: vector<Op<T>>,
     scaling: Option<T>,
+    optimize: bool,
 }
 
 /// Create a new formula.
 public fun new<T: drop>(): Formula<T> {
-    Formula { expressions: vector[], scaling: option::none() }
+    Formula { expressions: vector[], scaling: option::none(), optimize: true }
 }
 
 /// Set the scaling factor for the formula. When not set, the default
@@ -100,6 +101,13 @@ public fun new<T: drop>(): Formula<T> {
 /// ```
 public fun scale<T: drop>(mut self: Formula<T>, scaling: T): Formula<T> {
     self.scaling = option::some(scaling);
+    self
+}
+
+/// Disables operation order optimizations in the formula, effectively executing
+/// operations in the order they are registered.
+public fun disable_optimizations<T: drop>(mut self: Formula<T>): Formula<T> {
+    self.optimize = false;
     self
 }
 
@@ -279,31 +287,33 @@ macro fun calc<$N, $U>(
     $max: $N,
     $scale: u8,
 ): $N {
-    let Formula { mut expressions, scaling } = $self;
+    let Formula { mut expressions, scaling, optimize } = $self;
     let scaling = scaling.destroy_or!(1 << $scale) as $U;
     let mut is_scaled = false;
 
     // if there's a `div` followed by `mul`, swap them
     // if there's a `sub` followed by `add`, swap them too
-    expressions
-        .length()
-        .do!(
-            |i| match (&expressions[i]) {
-                Op::Div(_) => if ((i + 1) < expressions.length()) {
-                    match (&expressions[i + 1]) {
-                        Op::Mul(_) => expressions.swap(i, i + 1),
-                        _ => (),
-                    }
+    if (optimize) {
+        expressions
+            .length()
+            .do!(
+                |i| match (&expressions[i]) {
+                    Op::Div(_) => if ((i + 1) < expressions.length()) {
+                        match (&expressions[i + 1]) {
+                            Op::Mul(_) => expressions.swap(i, i + 1),
+                            _ => (),
+                        }
+                    },
+                    Op::Sub(_) => if ((i + 1) < expressions.length()) {
+                        match (&expressions[i + 1]) {
+                            Op::Add(_) => expressions.swap(i, i + 1),
+                            _ => (),
+                        }
+                    },
+                    _ => (),
                 },
-                Op::Sub(_) => if ((i + 1) < expressions.length()) {
-                    match (&expressions[i + 1]) {
-                        Op::Add(_) => expressions.swap(i, i + 1),
-                        _ => (),
-                    }
-                },
-                _ => (),
-            },
-        );
+            );
+    };
 
     let mut value = expressions.fold!($value as $U, |res, expr| {
         match (expr) {
@@ -432,4 +442,18 @@ macro fun sqrt_u256($x: u256): u256 {
     result = (result + x / result) >> 1;
 
     result.min(x / result)
+}
+
+public macro fun uint_max<$T>(): $T {
+    let tn = std::type_name::get<$T>();
+    assert!(tn.is_primitive());
+    match (*tn.into_string().as_bytes()) {
+        b"u8" => std::u8::max_value!() as $T,
+        b"u16" => std::u16::max_value!() as $T,
+        b"u32" => std::u32::max_value!() as $T,
+        b"u64" => std::u64::max_value!() as $T,
+        b"u128" => std::u128::max_value!() as $T,
+        b"u256" => std::u256::max_value!() as $T,
+        _ => abort,
+    }
 }

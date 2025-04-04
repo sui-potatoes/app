@@ -58,6 +58,10 @@ fun test_bps() {
     // f(x) = (x - 10) * 0.1
     let f = formula::new().sub(10).bps(10_00); // 10% from X - 10
     assert_eq!(f.calc_u64(100), 9);
+
+    let f = formula::new().mul(1000).bps(10_00);
+    let r = f.calc_u16(100);
+    assert_eq!(r, 10000); // 10% from X * 1000
 }
 
 #[test, expected_failure(abort_code = formula::EOverflow)]
@@ -92,4 +96,14 @@ fun test_formula() {
     );
 
     assert_eq!(test_scaling, 1);
+}
+
+#[test]
+fun test_uint_max() {
+    assert_eq!(formula::uint_max!(), std::u8::max_value!());
+    assert_eq!(formula::uint_max!(), std::u16::max_value!());
+    assert_eq!(formula::uint_max!(), std::u32::max_value!());
+    assert_eq!(formula::uint_max!(), std::u64::max_value!());
+    assert_eq!(formula::uint_max!(), std::u128::max_value!());
+    assert_eq!(formula::uint_max!(), std::u256::max_value!());
 }
