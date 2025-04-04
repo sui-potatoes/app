@@ -53,7 +53,9 @@ public fun new_male_name(g: &mut RandomGenerator): String {
             g.generate_u8_in_range(0, CONSONANT),
             g.generate_u8_in_range(0, POST_CONSONANT),
         )
-    } else name_gen::last_name::select(g.generate_u16_in_range(0, LAST_NAME_LIMIT));
+    } else {
+        name_gen::last_name::select(g.generate_u16_in_range(0, LAST_NAME_LIMIT))
+    };
 
     res.append(name);
     res.append_utf8(b" ");
@@ -73,7 +75,9 @@ public fun new_female_name(g: &mut RandomGenerator): String {
             g.generate_u8_in_range(0, CONSONANT),
             g.generate_u8_in_range(0, POST_CONSONANT),
         )
-    } else name_gen::last_name::select(g.generate_u16_in_range(0, LAST_NAME_LIMIT));
+    } else {
+        name_gen::last_name::select(g.generate_u16_in_range(0, LAST_NAME_LIMIT))
+    };
 
     res.append(name);
     res.append_utf8(b" ");
