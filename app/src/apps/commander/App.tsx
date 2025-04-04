@@ -25,10 +25,9 @@ export default function App() {
     preload("/images/rotorelief.svg", { as: "image" });
     useEffect(() => {
         const filter = new Tone.Filter(300, "bandpass").toDestination();
-        const player = new Tone.Player(
-            "/samples/selected/Chopsticks_09.wav",
-            onLoad,
-        ).connect(filter);
+        const player = new Tone.Player("/samples/selected/Chopsticks_09.wav", onLoad).connect(
+            filter,
+        );
 
         function onLoad() {
             const slice = player.buffer.slice(0.02, 0.1);

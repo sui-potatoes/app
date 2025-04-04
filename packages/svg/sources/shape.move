@@ -474,7 +474,16 @@ public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
         },
         ShapeType::Polygon(_points) => abort ENotImplemented,
         ShapeType::Polyline(_points) => abort ENotImplemented,
-        _ => {},
+        ShapeType::Path(_path, _length) => {
+            let mut value = b"translate(".to_string();
+            value.append(x.to_string());
+            value.append(b", ".to_string());
+            value.append(y.to_string());
+            value.append(b")".to_string());
+
+            shape.attributes_mut().insert(b"transform".to_string(), value);
+        },
+        _ => abort ENotImplemented,
     };
 
     shape

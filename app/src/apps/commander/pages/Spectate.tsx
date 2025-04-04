@@ -23,7 +23,7 @@ export function Spectate() {
                 <div className="flex justify-start">
                     <div className="w-96 max-w-md">
                         <h2 className="mb-2">Recent games</h2>
-                        <div className="overflow-auto" style={{ maxHeight: "40vh" }}>
+                        <div style={{ maxHeight: "40vh" }}>
                             {games.reverse().map((game) => {
                                 return (
                                     <div
@@ -59,7 +59,8 @@ export function Spectate() {
                                     <div className="options-row w-full">
                                         <div>Size</div>
                                         <div className={!isFetching ? " animate-fade-in" : ""}>
-                                            {game && `${game?.map.map.grid.length}x${game?.map.map.grid[0].length}`}
+                                            {game &&
+                                                `${game?.map.map.grid.length}x${game?.map.map.grid[0].length}`}
                                         </div>
                                     </div>
                                     <NavLink
