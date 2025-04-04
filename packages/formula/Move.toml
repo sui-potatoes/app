@@ -1,0 +1,8 @@
+[package]
+name = "formula"
+edition = "2024"
+license = "MIT"
+authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
+
+[addresses]
+formula = "0x0"
