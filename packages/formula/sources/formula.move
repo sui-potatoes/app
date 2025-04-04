@@ -49,6 +49,8 @@
 /// - `scale` - set the scaling factor for the formula manually
 module formula::formula;
 
+use formula::macros::sqrt_u256;
+
 const EOverflow: u64 = 0;
 const EUnderflow: u64 = 1;
 const EDivideByZero: u64 = 2;
@@ -59,6 +61,7 @@ const BPS_MAX: u16 = 100_00;
 /// Represents a single operation in a formula.
 public enum Op<T> has copy, drop, store {
     Div(T),
+    DivUp(T),
     Mul(T),
     Add(T),
     Sub(T),
@@ -124,6 +127,21 @@ public fun disable_optimizations<T: drop>(mut self: Formula<T>): Formula<T> {
 /// ```
 public fun div<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
     self.expressions.push_back(Op::Div(arg));
+    self
+}
+
+/// Register a division and round up operation to be executed in the `calc_*`
+/// functions. Value is upscaled to prevent precision loss. Aborts if the divisor
+/// is zero.
+///
+/// ```rust
+/// // f(x) = x / 10
+/// let f = formula::new().div_up(10);
+/// assert_eq!(f.calc_u8(10), 1);
+/// assert_eq!(f.calc_u8(100), 10);
+/// ```
+public fun div_up<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
+    self.expressions.push_back(Op::DivUp(arg));
     self
 }
 
@@ -287,6 +305,8 @@ macro fun calc<$N, $U>(
     $max: $N,
     $scale: u8,
 ): $N {
+    use std::macros::{num_divide_and_round_up, num_min, num_max};
+
     let Formula { mut expressions, scaling, optimize } = $self;
     let scaling = scaling.destroy_or!(1 << $scale) as $U;
     let mut is_scaled = false;
@@ -326,6 +346,15 @@ macro fun calc<$N, $U>(
                     res * scaling / (divisor as $U)
                 }
             },
+            Op::DivUp(divisor) => {
+                assert!(divisor != 0, EDivideByZero);
+                if (is_scaled) {
+                    num_divide_and_round_up!(res, divisor as $U)
+                } else {
+                    is_scaled = true;
+                    num_divide_and_round_up!(res * scaling, divisor as $U)
+                }
+            },
             Op::Mul(multiplier) => {
                 res * (multiplier as $U)
             },
@@ -354,10 +383,10 @@ macro fun calc<$N, $U>(
                 res * (bps as $U) / (BPS_MAX as $U)
             },
             Op::Min(min) => {
-                res.min(if (is_scaled) scaling else { 1 } * (min as $U))
+                num_min!(res, if (is_scaled) scaling else { 1 } * (min as $U))
             },
             Op::Max(max) => {
-                res.max(if (is_scaled) scaling else { 1 } * (max as $U))
+                num_max!(res, if (is_scaled) scaling else { 1 } * (max as $U))
             },
             Op::Sqrt => {
                 if (is_scaled) {
@@ -376,84 +405,4 @@ macro fun calc<$N, $U>(
 
     assert!(value <= $max as $U, EOverflow);
     value as $N
-}
-
-// === Polyfill ===
-
-macro fun log2_u256($x: u256): u8 {
-    let mut x = $x;
-    if (x == 0) return 0;
-    let mut result = 0;
-    if (x >> 128 > 0) {
-        x = x >> 128;
-        result = result + 128;
-    };
-
-    if (x >> 64 > 0) {
-        x = x >> 64;
-        result = result + 64;
-    };
-
-    if (x >> 32 > 0) {
-        x = x >> 32;
-        result = result + 32;
-    };
-
-    if (x >> 16 > 0) {
-        x = x >> 16;
-        result = result + 16;
-    };
-
-    if (x >> 8 > 0) {
-        x = x >> 8;
-        result = result + 8;
-    };
-
-    if (x >> 4 > 0) {
-        x = x >> 4;
-        result = result + 4;
-    };
-
-    if (x >> 2 > 0) {
-        x = x >> 2;
-        result = result + 2;
-    };
-
-    if (x >> 1 > 0) result = result + 1;
-
-    result
-}
-
-/// Implements a missing `sqrt` function for `u256` type.
-/// Implementation is based on various community projects, and suggested to
-/// this project by @kklas
-macro fun sqrt_u256($x: u256): u256 {
-    let x = $x;
-    if (x == 0) return 0;
-
-    let mut result = 1 << ((log2_u256!(x) >> 1) as u8);
-
-    result = (result + x / result) >> 1;
-    result = (result + x / result) >> 1;
-    result = (result + x / result) >> 1;
-    result = (result + x / result) >> 1;
-    result = (result + x / result) >> 1;
-    result = (result + x / result) >> 1;
-    result = (result + x / result) >> 1;
-
-    result.min(x / result)
-}
-
-public macro fun uint_max<$T>(): $T {
-    let tn = std::type_name::get<$T>();
-    assert!(tn.is_primitive());
-    match (*tn.into_string().as_bytes()) {
-        b"u8" => std::u8::max_value!() as $T,
-        b"u16" => std::u16::max_value!() as $T,
-        b"u32" => std::u32::max_value!() as $T,
-        b"u64" => std::u64::max_value!() as $T,
-        b"u128" => std::u128::max_value!() as $T,
-        b"u256" => std::u256::max_value!() as $T,
-        _ => abort,
-    }
 }
