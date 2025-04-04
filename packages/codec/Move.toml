@@ -1,9 +1,7 @@
 [package]
 name = "Codec"
 edition = "2024"
-authors = ["Sui Potatoes"]
-
-[dependencies]
+authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [addresses]
 codec = "0x0"

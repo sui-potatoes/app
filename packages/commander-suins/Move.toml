@@ -1,5 +1,5 @@
 [package]
-name = "commander_names"
+name = "CommanderSuins"
 edition = "2024"
 
 [dependencies]

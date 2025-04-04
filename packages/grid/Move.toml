@@ -4,7 +4,5 @@ edition = "2024.beta"
 license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
-[dependencies]
-
 [addresses]
 grid = "0x0"
