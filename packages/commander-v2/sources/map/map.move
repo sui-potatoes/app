@@ -184,8 +184,9 @@ public fun perform_attack(
     if (is_dodged) history.push_back(history::new_dodged());
     if (is_hit) {
         history.push_back({
-            if (is_crit) history::new_critical_hit(damage) else history::new_damage(damage)
-        })
+            if (is_crit) history::new_critical_hit(damage) // equally expensive
+            else history::new_damage(damage)
+        });
     } else history.push_back(history::new_miss());
 
     if (is_kia) history.push_back(history::new_kia(target.destroy()))
