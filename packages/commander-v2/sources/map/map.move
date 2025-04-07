@@ -199,21 +199,23 @@ public fun perform_attack(
 /// - LOW_COVER - 25
 /// - HIGH_COVER - 50
 public(package) fun cover_bonus(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16): u8 {
-    let direction = direction::direction!(x0, y0, x1, y1);
+    use grid::direction::{direction, up, down, left, right};
+
+    let direction = direction!(x0, y0, x1, y1);
     let (up, down, left, right) = match (map.grid[x1, y1].tile_type) {
         TileType::Cover { left, right, top, bottom } => (top, bottom, left, right),
         _ => (0, 0, 0, 0),
     };
 
     let cover_type = if (direction == direction::none!()) 0
-    else if (direction == direction::up!()) down
-    else if (direction == direction::down!()) up
-    else if (direction == direction::left!()) right
-    else if (direction == direction::right!()) left
-    else if (direction == direction::up_left!()) num_min!(down, right)
-    else if (direction == direction::up_right!()) num_min!(down, left)
-    else if (direction == direction::down_left!()) num_min!(up, right)
-    else if (direction == direction::down_right!()) num_min!(up, left)
+    else if (direction == up!()) down
+    else if (direction == down!()) up
+    else if (direction == left!()) right
+    else if (direction == right!()) left
+    else if (direction == up!() | left!()) num_min!(down, right)
+    else if (direction == up!() | right!()) num_min!(down, left)
+    else if (direction == down!() | left!()) num_min!(up, right)
+    else if (direction == down!() | right!()) num_min!(up, left)
     else abort; // unreachable
 
     // cover enum is 0, 1, 2, so by multiplying it by 25 we get the value we
@@ -334,6 +336,7 @@ public fun tile_to_string(tile: &Tile): String {
 /// of the path.
 public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
     use std::option::none;
+    use grid::direction::{up, down, left, right};
 
     path.reverse();
 
@@ -356,12 +359,10 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
                 TileType::Empty => (),
                 TileType::Unwalkable => return 'path none(),
                 TileType::Cover { left, right, top, bottom } => {
-                    if (direction == direction::left!() && left == HIGH_COVER) return 'path none();
-                    if (direction == direction::right!() && right == HIGH_COVER)
-                        return 'path none();
-                    if (direction == direction::up!() && top == HIGH_COVER) return 'path none();
-                    if (direction == direction::down!() && bottom == HIGH_COVER)
-                        return 'path none();
+                    if (direction == left!() && left == HIGH_COVER) return 'path none();
+                    if (direction == right!() && right == HIGH_COVER) return 'path none();
+                    if (direction == up!() && top == HIGH_COVER) return 'path none();
+                    if (direction == down!() && bottom == HIGH_COVER) return 'path none();
                 },
             };
 
@@ -369,10 +370,10 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
                 TileType::Empty => (),
                 TileType::Unwalkable => return 'path none(),
                 TileType::Cover { left, right, top, bottom } => {
-                    if (direction == direction::left!() && right == HIGH_COVER) return 'path none();
-                    if (direction == direction::right!() && left == HIGH_COVER) return 'path none();
-                    if (direction == direction::up!() && bottom == HIGH_COVER) return 'path none();
-                    if (direction == direction::down!() && top == HIGH_COVER) return 'path none();
+                    if (direction == left!() && right == HIGH_COVER) return 'path none();
+                    if (direction == right!() && left == HIGH_COVER) return 'path none();
+                    if (direction == up!() && bottom == HIGH_COVER) return 'path none();
+                    if (direction == down!() && top == HIGH_COVER) return 'path none();
                 },
             };
         });
