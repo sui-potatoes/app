@@ -58,3 +58,5 @@ TODOs:
 
 - [ ] cover system
 - [ ] multiplayer (random placement of units)
+- [ ] research redesign of the cover tile system, tiles as the second layer to main layout (?);
+the idea is to decrease load on cover system and not check 2 tiles at once.
