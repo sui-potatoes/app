@@ -10,6 +10,7 @@ import { GameMap } from "./useGame";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { bcs } from "@mysten/bcs";
 import { useTransactionExecutor } from "./useTransactionExecutor";
+import { coordinatesToPath } from "../types/cursor";
 
 export const LS_KEY = "commander-v2";
 
@@ -204,7 +205,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             mutable: true,
         });
 
-        const pathArg = tx.pure(bcs.vector(bcs.vector(bcs.u16())).serialize(path));
+        const pathArg = tx.pure(bcs.vector(bcs.u8()).serialize(coordinatesToPath(path)));
 
         tx.moveCall({ target: `${packageId}::commander::move_unit`, arguments: [game, pathArg] });
         tx.setSender(zkLogin.address!);

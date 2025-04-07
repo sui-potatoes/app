@@ -15,6 +15,7 @@ import { MoveMode } from "./modes/MoveMode";
 import { ShootMode } from "./modes/ShootMode";
 import { Camera } from "./Camera";
 import { ReloadMode } from "./modes/ReloadMode";
+import { pathToCoordinates } from "../types/cursor";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
@@ -176,7 +177,7 @@ export class Game extends THREE.Object3D {
         while (i < history.length) {
             const record = history[i];
             if (record.$kind === "Move") {
-                const path = record.Move;
+                const path = pathToCoordinates(record.Move);
                 this.selectUnit(path[0][0], path[0][1]);
                 this.switchMode(new MoveMode(this.controls!));
 

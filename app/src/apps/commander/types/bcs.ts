@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import { bcs } from "@mysten/sui/bcs";
+import { pathToCoordinates } from "./cursor";
 
 export const Rank = bcs.enum("Rank", {
     Rookie: null,
@@ -137,7 +138,7 @@ export const Metadata = bcs.struct("Metadata", {
 export const HistoryRecord = bcs.enum("HistoryRecord", {
     Reload: bcs.vector(bcs.U16),
     NextTurn: bcs.U16,
-    Move: bcs.vector(bcs.vector(bcs.U16)),
+    Move: bcs.vector(bcs.U8),
     Attack: bcs.struct("Attack", {
         origin: bcs.vector(bcs.U16),
         target: bcs.vector(bcs.U16),

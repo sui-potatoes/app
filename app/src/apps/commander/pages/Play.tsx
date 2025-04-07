@@ -16,6 +16,7 @@ import { useGameTransactions } from "../hooks/useGameTransactions";
 import { useNetworkVariable } from "../../../networkConfig";
 import { DryRunTransactionBlockResponse } from "@mysten/sui/client";
 import { parseVMError, vmAbortCodeToMessage } from "../types/abort_codes";
+import { pathToCoordinates } from "../types/cursor";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
@@ -174,7 +175,7 @@ export function Playground() {
             case "Move":
                 return eventBus.dispatchEvent({
                     type: "sui:path",
-                    path: first.Move as [number, number][],
+                    path: pathToCoordinates(first.Move),
                 });
             case "Attack": {
                 const unit = first.Attack.origin as [number, number];

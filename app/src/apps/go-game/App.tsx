@@ -303,8 +303,8 @@ export default function App() {
         const accArg = account
             ? tx.object(account.id)
             : tx.moveCall({
-                target: `${packageId}::game::new_account`,
-            });
+                  target: `${packageId}::game::new_account`,
+              });
 
         tx.moveCall({
             target: `${packageId}::game::new`,
@@ -358,8 +358,8 @@ export default function App() {
         const accArg = account
             ? tx.object(account.id)
             : tx.moveCall({
-                target: `${packageId}::game::new_account`,
-            });
+                  target: `${packageId}::game::new_account`,
+              });
 
         tx.moveCall({
             target: `${packageId}::game::join`,
