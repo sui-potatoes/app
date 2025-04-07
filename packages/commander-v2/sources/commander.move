@@ -93,7 +93,7 @@ public fun place_recruit(game: &mut Game, recruit: Recruit, x: u16, y: u16, ctx:
 }
 
 /// Move a unit along the path, the first point is the current position of the unit.
-public fun move_unit(game: &mut Game, path: vector<vector<u16>>, _ctx: &mut TxContext) {
+public fun move_unit(game: &mut Game, path: vector<u8>, _ctx: &mut TxContext) {
     game.history.add(game.map.move_unit(path))
 }
 
@@ -102,7 +102,7 @@ public fun perform_reload(game: &mut Game, x: u16, y: u16, _ctx: &mut TxContext)
     game.history.add(game.map.perform_reload(x, y))
 }
 
-/// Perform a grenade throw action.w
+/// Perform a grenade throw action.
 entry fun perform_grenade(
     game: &mut Game,
     rng: &Random,
@@ -138,6 +138,7 @@ entry fun perform_attack(
     let history = game.map.perform_attack(&mut rng, x0, y0, x1, y1);
 
     history::list_kia(&history).do!(|id| {
+        if (id.to_address() == @0) return; // skip empty addresses
         let recruit = game.recruits.remove(id);
         let leader = recruit.leader();
         transfer::public_transfer(recruit.kill(ctx), leader);
@@ -155,6 +156,16 @@ public fun next_turn(game: &mut Game) {
 public fun share(game: Game) {
     transfer::share_object(game)
 }
+
+// === Getters ===
+
+#[allow(unused_function)]
+/// Get the current turn of the game.
+fun turn(self: &Game): u16 {
+    self.map.turn()
+}
+
+// === Init ===
 
 /// On publish, share the `Commander` object.
 fun init(ctx: &mut TxContext) {

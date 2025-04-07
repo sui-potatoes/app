@@ -77,18 +77,6 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
 
 // === Macros ===
 
-/// Check if a point is above another point (decrease in X).
-public macro fun is_up($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 > $x1 && $y0 == $y1 }
-
-/// Check if a point is below another point (increase in X).
-public macro fun is_down($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 < $x1 && $y0 == $y1 }
-
-/// Check if a point is to the left of another point (decrease in Y).
-public macro fun is_left($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 == $x1 && $y0 > $y1 }
-
-/// Check if a point is to the right of another point (increase in Y).
-public macro fun is_right($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 == $x1 && $y0 < $y1 }
-
 /// Get a Manhattan distance between two points. Useful for calculating distances
 /// or ranges for ranged attacks or walking, for example.
 public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {

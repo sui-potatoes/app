@@ -10,11 +10,11 @@ use sui::{random, test_utils::destroy};
 #[test]
 fun play_test_demo_1() {
     assert_eq!(run_simulation_demo_1(b"demo_o1"), vector[5, 1]);
-    assert_eq!(run_simulation_demo_1(b"demo_o2"), vector[4, 2]);
+    assert_eq!(run_simulation_demo_1(b"demo_o2"), vector[9, 2]);
     assert_eq!(run_simulation_demo_1(b"demo_o3"), vector[3, 1]);
-    assert_eq!(run_simulation_demo_1(b"demo_o4"), vector[5, 2]);
-    assert_eq!(run_simulation_demo_1(b"demo_o5"), vector[4, 1]);
-    assert_eq!(run_simulation_demo_1(b"demo_o6"), vector[7, 1]);
+    assert_eq!(run_simulation_demo_1(b"demo_o4"), vector[7, 1]);
+    assert_eq!(run_simulation_demo_1(b"demo_o5"), vector[9, 2]);
+    assert_eq!(run_simulation_demo_1(b"demo_o6"), vector[8, 1]);
 }
 
 #[test]

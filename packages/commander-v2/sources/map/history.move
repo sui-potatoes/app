@@ -23,7 +23,7 @@ public enum Record has copy, drop, store {
     /// Next turn action.
     NextTurn(u16),
     /// Block header for move action.
-    Move(vector<vector<u16>>),
+    Move(vector<u8>),
     /// Block header for attack action.
     Attack { origin: vector<u16>, target: vector<u16> },
     /// Recruit is placed on the map.
@@ -91,7 +91,7 @@ public fun new_kia(id: ID): Record { Record::UnitKIA(id) }
 public fun new_grenade(r: u16, x: u16, y: u16): Record { Record::Grenade(r, x, y) }
 
 /// Create new `Record::Move` history record.
-public fun new_move(steps: vector<vector<u16>>): Record { Record::Move(steps) }
+public fun new_move(steps: vector<u8>): Record { Record::Move(steps) }
 
 /// Create new `Record::NextTurn` history record.
 public fun new_next_turn(turn: u16): Record { Record::NextTurn(turn) }
@@ -129,7 +129,7 @@ public(package) fun from_bcs(bcs: &mut BCS): History {
         match (bcs.peel_enum_tag()) {
             0 => Record::Reload(bcs.peel_vec!(|bcs| bcs.peel_u16())),
             1 => Record::NextTurn(bcs.peel_u16()),
-            2 => Record::Move(bcs.peel_vec!(|bcs| bcs.peel_vec!(|bcs| bcs.peel_u16()))),
+            2 => Record::Move(bcs.peel_vec!(|bcs| bcs.peel_u8())),
             3 => Record::Attack {
                 origin: bcs.peel_vec!(|bcs| bcs.peel_u16()),
                 target: bcs.peel_vec!(|bcs| bcs.peel_u16()),
