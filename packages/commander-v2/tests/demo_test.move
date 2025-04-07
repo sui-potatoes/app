@@ -41,6 +41,8 @@ fun play_test_demo_2() {
 // - Attack: (0, 3) -> (4, 1)
 // - Repeat attack until one unit dies
 fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
+    use grid::direction::{up, left};
+
     let ctx = &mut tx_context::dummy();
     let id = ctx.fresh_object_address().to_id();
     let mut rng = random::new_generator_from_seed_for_testing(seed);
@@ -53,15 +55,7 @@ fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
 
     // Unit 1 performs a move action and takes cover in the construction on
     // the left side (high cover + low cover mix)
-    map.move_unit(vector[
-        vector[6, 5],
-        vector[5, 5],
-        vector[4, 5],
-        vector[4, 4],
-        vector[4, 3],
-        vector[4, 2],
-        vector[4, 1],
-    ]);
+    map.move_unit(vector[6, 5, up!(), up!(), left!(), left!(), left!(), left!()]);
 
     map.unit(4, 1).do_ref!(|unit| {
         assert_eq!(unit.ap(), 1); // 1 AP used

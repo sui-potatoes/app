@@ -31,6 +31,8 @@ module grid::direction;
 
 use std::macros::{num_min, num_diff};
 
+const EOutOfBounds: u64 = 0;
+
 /// A point on the grid, represented by its X and Y coordinates.
 public struct Cursor(u16, u16) has copy, drop, store;
 
@@ -49,14 +51,14 @@ public fun cursor_to_values(c: &Cursor): (u16, u16) {
 public fun move_to(c: &mut Cursor, direction: u8) {
     let Cursor(x, y) = c;
     if (direction & up!() > 0) {
-        assert!(*x > 0);
+        assert!(*x > 0, EOutOfBounds);
         *x = *x - 1;
     } else if (direction & down!() > 0) {
         *x = *x + 1;
     };
 
     if (direction & left!() > 0) {
-        assert!(*y > 0);
+        assert!(*y > 0, EOutOfBounds);
         *y = *y - 1;
     } else if (direction & right!() > 0) {
         *y = *y + 1;
