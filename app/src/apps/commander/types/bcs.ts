@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 import { bcs } from "@mysten/sui/bcs";
-import { pathToCoordinates } from "./cursor";
 
 export const Rank = bcs.enum("Rank", {
     Rookie: null,
