@@ -45,7 +45,7 @@ const GRENADE_RANGE: u16 = 5;
 /// Defines a single Tile in the game `Map`. Tiles can be empty, provide cover
 /// or be unwalkable. Additionally, a unit standing on a tile effectively makes
 /// it unwalkable.
-public struct Tile has store {
+public struct Tile has copy, store {
     /// The type of the tile.
     tile_type: TileType,
     /// The position of the tile on the map.
@@ -98,6 +98,18 @@ public fun new(id: ID, size: u16): Map {
 
 /// Default Map is 30x30 tiles for now. Initially empty.
 public fun default(id: ID): Map { new(id, 30) }
+
+/// Destroy the `Map` struct.
+public fun destroy(map: Map) {
+    let Map { grid, .. } = map;
+    grid.destroy!(|Tile { unit, .. }| unit.destroy!(|unit| unit.destroy()));
+}
+
+/// Set the ID of the map.
+public(package) fun set_id(map: &mut Map, id: ID) { map.id = id; }
+
+/// Clone the `Map`.
+public(package) fun clone(map: &Map): Map { Map { id: map.id, turn: map.turn, grid: map.grid } }
 
 // === Actions ===
 
@@ -513,11 +525,6 @@ public fun to_string(map: &Map): String {
 #[test_only]
 public fun debug(map: &Map) {
     std::debug::print(&map.to_string())
-}
-
-#[test_only]
-public fun destroy(map: Map) {
-    sui::test_utils::destroy(map)
 }
 
 #[test]

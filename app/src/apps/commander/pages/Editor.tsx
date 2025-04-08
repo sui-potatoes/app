@@ -8,6 +8,7 @@ import { Stats } from "@react-three/drei";
 import { fromHex } from "@mysten/bcs";
 import { Footer } from "./Components";
 import { NavLink } from "react-router-dom";
+import { useGameTransactions } from "../hooks/useGameTransactions";
 
 const STORAGE_KEY = "editor-state";
 
@@ -88,6 +89,7 @@ export function Field({ size, eventBus, camera, preset }: FieldProps) {
 
 export function UI({ eventBus }: { eventBus: EventBus }) {
     const [direction, setDirection] = useState("up");
+    const { canTransact, publishMap } = useGameTransactions({ map: null });
     const [tool, setTool] = useState("object");
 
     useEffect(() => {
@@ -115,6 +117,15 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
                     <p className="text-sm">Click to place objects; right-click to remove</p>
                     <p className="text-sm">Use WSAD keys to change direction</p>
                     <p className="text-sm">C - Cover; H - High Cover; O - Object; U - Unwalkable</p>
+                </div>
+                <div className="absolute right-0 bottom-0">
+                    <button
+                        disabled={!canTransact}
+                        onClick={() => canTransact && publishMap(fromHex(sessionStorage.getItem(STORAGE_KEY) || ""))}
+                        className="text-center fixed flex justify-between bottom-10 right-10 p-4 text-lg border-2 border-gray-500 rounded-md"
+                    >
+                        publish
+                    </button>
                 </div>
             </div>
         </div>

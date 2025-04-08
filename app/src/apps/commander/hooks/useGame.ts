@@ -18,9 +18,6 @@ export type GameMap = SuiObjectRef & {
     map: typeof Game.$inferType;
 };
 
-/**
- * Hook to create a transaction executor
- */
 export function useGame({ id, enabled, refetchInterval }: Props) {
     const packageId = useNetworkVariable("commanderV2PackageId");
     return useSuiClientQuery(

@@ -9,6 +9,7 @@ import { Mode } from "./Mode";
 import { MoveMode } from "./MoveMode";
 import { Unit } from "../Unit";
 import { ReloadMode } from "./ReloadMode";
+import { Grid } from "../Grid";
 
 export type ShootModeEvent = {
     aim: { unit: Unit; targetUnit: Unit };
@@ -48,13 +49,21 @@ export class ShootMode implements Mode {
             return this.switchMode(new MoveMode(mode.controls));
 
         const selectedUnit = this.selectedUnit;
-        const targets = Object.values(this.units).filter(
-            (unit) =>
-                unit.id !== selectedUnit.id &&
-                chance(selectedUnit, unit) > 0 &&
-                distance(selectedUnit, unit) <=
-                    selectedUnit.props.stats.range + MAX_DISTANCE_OFFSET,
-        );
+        const targets = Object.values(this.units).filter((unit) => {
+            // can't aim at yourself
+            if (unit.id === selectedUnit.id) return false;
+
+            let hitChance = chance(selectedUnit, unit);
+            if (hitChance === 0) return false;
+
+            // TODO: in the future, add team tags
+            // if (unit.team === selectedUnit.team) return false;
+
+            const d = distance(selectedUnit, unit);
+            if (d > selectedUnit.props.stats.range + MAX_DISTANCE_OFFSET) return false;
+
+            return true;
+        });
 
         if (this.selectedUnit.props.ap.value == 0) {
             return this.switchMode(new MoveMode(mode.controls));
@@ -171,20 +180,17 @@ export class ShootMode implements Mode {
         fake.translateX(-0.3);
         selectedUnit.lookAt(mode.currentTarget.position);
 
-        if (!mode.isAiming) {
-            const [low, high] = damage(this.selectedUnit);
-            const chanceToHit = chance(this.selectedUnit, mode.currentTarget);
-            mode.currentTarget.lookAt(selectedUnit.position);
-            mode.currentTarget.drawTarget(chanceToHit, low, high);
+        const [low, high] = damage(this.selectedUnit);
+        const defenseBonus = coverBonus(this.grid, this.selectedUnit, mode.currentTarget);
+        let chanceToHit = chance(this.selectedUnit, mode.currentTarget);
+        chanceToHit = Math.max(0, chanceToHit - defenseBonus);
+        mode.currentTarget.lookAt(selectedUnit.position);
+        mode.currentTarget.drawTarget(chanceToHit, defenseBonus, low, high);
 
+        if (!mode.isAiming) {
             await mode.camera.moveToUnit(fake.position.clone(), mode.currentTarget.position);
             mode.isAiming = true;
         } else {
-            const [low, high] = damage(this.selectedUnit);
-            const chanceToHit = chance(this.selectedUnit, mode.currentTarget);
-            mode.currentTarget.lookAt(selectedUnit.position);
-            mode.currentTarget.drawTarget(chanceToHit, low, high);
-
             mode.camera.position.copy(fake.position);
             mode.camera.lookAt(mode.currentTarget.position);
         }
@@ -207,7 +213,13 @@ export class ShootMode implements Mode {
 
         const [low, high] = damage(this.selectedUnit);
         const chanceToHit = chance(this.selectedUnit, mode.currentTarget);
-        mode.currentTarget.drawTarget(chanceToHit, low, high);
+        const defenseBonus = coverBonus(this.grid, this.selectedUnit, mode.currentTarget);
+        mode.currentTarget.drawTarget(
+            Math.max(0, chanceToHit - defenseBonus),
+            defenseBonus,
+            low,
+            high,
+        );
         mode.currentTarget.lookAt(this.selectedUnit.position);
     }
 
@@ -256,6 +268,91 @@ function damage(unit: Unit | null): [number, number] {
     let damage_high = stats.damage + stats.spread + (stats.plus_one ? 1 : 0);
 
     return [damage_low, damage_high];
+}
+
+const DEFENSE_MULTIPLIER = 25;
+
+function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
+    if (!unit || !target) return 0;
+
+    const dY = Math.abs(target.gridPosition.y - unit.gridPosition.y);
+    const dX = Math.abs(target.gridPosition.x - unit.gridPosition.x);
+    const targetTile = grid.grid[target.gridPosition.x][target.gridPosition.y];
+
+    if (dY === 0 && dX === 0) return 0;
+
+    // horizontal position, either left or right
+    // direction = attack direction
+    if (dY > dX) {
+        const isLeft = target.gridPosition.y < unit.gridPosition.y;
+        const isRight = target.gridPosition.y > unit.gridPosition.y;
+
+        if (isLeft) {
+            const middleTile = grid.grid[target.gridPosition.x][unit.gridPosition.y + 1];
+
+            // try target tile first, or else -> middle tile
+            if (targetTile.type === "Cover") {
+                return targetTile.right * DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Cover") {
+                return middleTile.left * DEFENSE_MULTIPLIER;
+            } else return 0;
+        }
+
+        if (isRight) {
+            const middleTile = grid.grid[target.gridPosition.x][unit.gridPosition.y - 1];
+
+            // try target tile first, or else -> middle tile
+            if (targetTile.type === "Cover") {
+                return targetTile.left * DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Cover") {
+                return middleTile.right * DEFENSE_MULTIPLIER;
+            } else return 0;
+        }
+    }
+
+    // horizontal
+    if (dX > dY) {
+        const isUp = target.gridPosition.x < unit.gridPosition.x;
+        const isDown = target.gridPosition.x > unit.gridPosition.x;
+
+        if (isUp) {
+            const middleTile = grid.grid[target.gridPosition.x + 1][unit.gridPosition.y];
+
+            // try target tile first, or else -> middle tile
+            if (targetTile.type === "Cover") {
+                return targetTile.down * DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Cover") {
+                return middleTile.up * DEFENSE_MULTIPLIER;
+            } else return 0;
+        }
+        if (isDown) {
+            const middleTile = grid.grid[target.gridPosition.x - 1][unit.gridPosition.y];
+
+            // try target tile first, or else -> middle tile
+            if (targetTile.type === "Cover") {
+                return targetTile.up * DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Cover") {
+                return middleTile.down * DEFENSE_MULTIPLIER;
+            } else return 0;
+        }
+    }
+
+    // TODO: come back and add neighboring tiles' cover bonuses
+    if (dX === dY) {
+        const isUp = target.gridPosition.x < unit.gridPosition.x;
+        const isDown = target.gridPosition.x > unit.gridPosition.x;
+        const isLeft = target.gridPosition.y < unit.gridPosition.y;
+        const isRight = target.gridPosition.y > unit.gridPosition.y;
+
+        if (targetTile.type === "Cover") {
+            if (isUp && isLeft) return Math.min(targetTile.down, targetTile.right) * DEFENSE_MULTIPLIER;
+            if (isUp && isRight) return Math.min(targetTile.down, targetTile.left) * DEFENSE_MULTIPLIER;
+            if (isDown && isLeft) return Math.min(targetTile.up, targetTile.right) * DEFENSE_MULTIPLIER;
+            if (isDown && isRight) return Math.min(targetTile.up, targetTile.left) * DEFENSE_MULTIPLIER;
+        }
+    }
+
+    return 0;
 }
 
 function chance(unit: Unit | null, target: Unit | null): number {

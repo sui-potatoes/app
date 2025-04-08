@@ -17,6 +17,8 @@ import { useNetworkVariable } from "../../../networkConfig";
 import { DryRunTransactionBlockResponse } from "@mysten/sui/client";
 import { parseVMError, vmAbortCodeToMessage } from "../types/abort_codes";
 import { pathToCoordinates } from "../types/cursor";
+import { useMaps } from "../hooks/useMaps";
+import { formatAddress, normalizeSuiAddress } from "@mysten/sui/utils";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
@@ -32,6 +34,7 @@ export function Playground() {
     const [mapKey, setMapKey] = useState<string | null>(sessionStorage.getItem(LS_KEY));
     const { data: map, isFetching, isFetched } = useGame({ id: mapKey, enabled: true });
     const { data: recruits } = useGameRecruits({ recruits: map?.map.recruits || [] });
+    const { data: presets } = useMaps({ enabled: true });
     const tx = useGameTransactions({ map });
 
     useEffect(() => {
@@ -98,35 +101,23 @@ export function Playground() {
                     <h1 className="p-1 mb-10 page-heading">play</h1>
                 </div>
                 <div className="p-10 max-w-3xl">
-                    <a
-                        className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
-                        onClick={async () => {
-                            const map = await tx.createDemo(1, [
-                                [0, 3],
-                                [6, 5],
-                            ]);
-                            eventBus.dispatchEvent({ type: "sui:map_created" });
-                            setTimeout(() => map && setMapKey(map.objectId), 1000);
-                        }}
-                    >
-                        Create demo 1
-                    </a>
-                    <a
-                        className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
-                        style={{ border: "1px solid grey" }}
-                        onClick={async () => {
-                            const map = await tx.createDemo(2, [
-                                [8, 2],
-                                [7, 6],
-                                [1, 2],
-                                [1, 7],
-                            ]);
-                            eventBus.dispatchEvent({ type: "sui:map_created" });
-                            setTimeout(() => map && setMapKey(map.objectId), 1000);
-                        }}
-                    >
-                        Create demo 2
-                    </a>
+                    {presets?.map((preset) => (
+                        <a
+                            key={preset.id}
+                            className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
+                            onClick={async () => {
+                                const map = await tx.createDemo(preset, [
+                                    [0, 3],
+                                    [6, 5],
+                                ]);
+                                eventBus.dispatchEvent({ type: "sui:map_created" });
+                                setTimeout(() => map && setMapKey(map.objectId), 1000);
+                            }}
+                        >
+                            - {formatAddress(preset.id)} Played#: {preset.popularity} by{" "}
+                            {preset.author == normalizeSuiAddress("0x0") ? 'system' : 'community'}
+                        </a>
+                    ))}
                     <NavLink to="../editor" className="options-row mt-10 interactive">
                         Level Editor
                     </NavLink>

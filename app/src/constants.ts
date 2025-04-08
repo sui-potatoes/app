@@ -9,9 +9,9 @@ export const CHARACTER_PACKAGE_ID =
 export const CHARACTER_BUILDER_ID =
     "0x4574eaf3f1313b584d5004144cd6d6d57d516379d011d6d8e3248c54cfcf90a0";
 export const COMMANDER_V2_PACKAGE_ID =
-    "0xd6b89242c066a6b90ef3115feeae6724f4661cd1991c00f399910f7b2257369e";
+    "0x85d3668c2a3aff916324ab9287c53d0ec2edb172fb64573fb210b8626afb7e6f";
 export const COMMANDER_V2_REGISTRY_ID =
-    "0x65f8e39ebbec73c86a4aad49ae7ff3ec4f7a0f9c630d79b37bdcb6ea1461c436";
+    "0x5018797ccdd348c227cbe37bad21ad1e3bac88dfb86c2eabb0a93df7a883ec56";
 
 // SuiNS name
 

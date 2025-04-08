@@ -169,11 +169,12 @@ export class UnitModel extends THREE.Object3D {
     // === Visual Indicators ===
 
     /** Target is drawn on the currently targeted unit */
-    drawTarget(chance: number, damage_low: number, damage_high: number) {
+    drawTarget(chance: number, defenseBonus: number, damage_low: number, damage_high: number) {
         this.updateQueue = [];
 
         const text = (this.text = new Text());
-        text.text = `CHANCE: ${chance}%\nDAMAGE: ${damage_low}-${damage_high}\nHEALTH: ${this.props.hp.value}/${this.props.hp.max_value}`;
+        const defenseText = defenseBonus > 0 ? ` (-${defenseBonus}%)` : "";
+        text.text = `CHANCE: ${chance}%${defenseText}\nDAMAGE: ${damage_low}-${damage_high}\nHEALTH: ${this.props.hp.value}/${this.props.hp.max_value}`;
         text.fontSize = 0.1;
         text.color = 0x1ae7bf;
         text.sync();

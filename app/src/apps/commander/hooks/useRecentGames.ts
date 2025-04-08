@@ -22,9 +22,6 @@ const Commander = bcs.struct("Commander", {
     games: bcs.vector(bcs.struct("Entry", { id: bcs.Address, timestamp_ms: bcs.u64() })),
 });
 
-/**
- * Hook to create a transaction executor
- */
 export function useRecentGames({ enabled, refetchInterval }: Props) {
     const registryId = useNetworkVariable("commanderV2RegistryId");
 

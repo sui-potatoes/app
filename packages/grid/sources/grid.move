@@ -47,6 +47,12 @@ public fun from_vector_unchecked<T>(grid: vector<vector<T>>): Grid<T> {
     Grid { grid }
 }
 
+/// Unpack the `Grid` into its underlying vector.
+public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
+    let Grid { grid } = grid;
+    grid
+}
+
 /// Get the width of the grid.
 public fun width<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
 
@@ -104,6 +110,11 @@ public macro fun tabulate<$T>($width: u16, $height: u16, $f: |u16, u16| -> $T): 
     let height = $height as u64;
     let grid = vector::tabulate!(width, |x| vector::tabulate!(height, |y| $f(x as u16, y as u16)));
     from_vector_unchecked(grid)
+}
+
+/// Gracefully destroy the grid by consuming the elements in the passed function $f.
+public macro fun destroy<$T>($grid: Grid<$T>, $f: |$T|) {
+    into_vector($grid).destroy!(|row| row.destroy!(|cell| $f(cell)));
 }
 
 /// Finds a group of cells that satisfy the predicate `f`. The function receives
