@@ -1,12 +1,12 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-#[test_only]
-/// Currently a test-only module which can be used to build SVG paths.
-/// Paths are a standardized way to define shapes in SVG.
+/// Builder for SVG paths. Should be optimized or used once for a setup, rather
+/// than building paths on every step (unless absolutely necessary).
 module svg::path_builder;
 
-use std::{string::String, unit_test::assert_eq};
+use std::string::String;
+use svg::shape::{Self, Shape};
 
 /// The builder for the SVG path attribute.
 public struct Path has copy, drop {
@@ -102,6 +102,11 @@ public fun elliptical_arc(
             Command::EllipticalArc(rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, x, y),
         );
     path
+}
+
+/// Builds a `Shape` from the path.
+public fun build(path: Path, length: Option<u16>): Shape {
+    shape::path(path.to_string(), length)
 }
 
 /// Converts a path into a `String` that can be used as an SVG path attribute.
@@ -213,6 +218,8 @@ public fun command_to_string(cmd: &Command): String {
 
 #[test]
 fun test_path_builder() {
+    use std::unit_test::assert_eq;
+
     let str = new().move_to(10, 10).line_to(20, 20).to_string();
     assert_eq!(str, b"M10,10L20,20".to_string());
 

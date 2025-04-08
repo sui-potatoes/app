@@ -19,7 +19,7 @@ fun test_all_records() {
     history.add(history::new_damage(10));
     history.add(history::new_kia(@0.to_id()));
     history.add(history::new_grenade(2, 0, 0));
-    history.add(history::new_move(vector[vector[0, 0], vector[1, 1]]));
+    history.add(history::new_move(vector[0, 0, grid::direction::down!()]));
     history.add(history::new_next_turn(1));
     history.add(history::new_reload(0, 0));
 

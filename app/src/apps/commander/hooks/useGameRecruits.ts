@@ -9,9 +9,6 @@ type Props = {
     recruits: string[];
 };
 
-/**
- * Hook to create a transaction executor
- */
 export function useGameRecruits({ recruits }: Props) {
     return useSuiClientQuery(
         "multiGetObjects",

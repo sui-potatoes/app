@@ -8,7 +8,6 @@ use std::string::String;
 use sui::vec_map::{Self, VecMap};
 use svg::{animation::Animation, filter::Filter, point::{Self, Point}, print};
 
-#[test_only]
 /// Abort code for the `NotImplemented` error.
 const ENotImplemented: u64 = 264;
 
@@ -454,15 +453,13 @@ public fun add_stop(gradient: &mut Shape, offset: String, color: String) {
     stops.push_back(Stop { offset, color });
 }
 
-/// Move a shape.
+/// Move a shape, add `x` and `y` to the attributes of the shape.
 public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
     let shape_type = &mut shape.shape;
 
-    shape.position = option::some(point::point(x, y));
-
     match (shape_type) {
         ShapeType::Circle(_) => {
-            let (cx, cy) = shape.position.extract().to_values();
+            let (cx, cy) = point::point(x, y).to_values();
             shape.attributes.insert(b"cx".to_string(), cx.to_string());
             shape.attributes.insert(b"cy".to_string(), cy.to_string());
         },
@@ -475,7 +472,18 @@ public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
         },
         ShapeType::Polygon(_points) => abort ENotImplemented,
         ShapeType::Polyline(_points) => abort ENotImplemented,
-        _ => {},
+        ShapeType::Path(_path, _length) => {
+            let mut value = b"translate(".to_string();
+            value.append(x.to_string());
+            value.append(b", ".to_string());
+            value.append(y.to_string());
+            value.append(b")".to_string());
+
+            shape.attributes_mut().insert(b"transform".to_string(), value);
+        },
+        _ => {
+            shape.position = option::some(point::point(x, y));
+        },
     };
 
     shape

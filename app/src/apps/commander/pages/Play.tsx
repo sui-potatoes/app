@@ -14,8 +14,12 @@ import { fromBase64 } from "@mysten/bcs";
 import { GameApp } from "./play/Game";
 import { useGameTransactions } from "../hooks/useGameTransactions";
 import { useNetworkVariable } from "../../../networkConfig";
-import { DryRunTransactionBlockResponse } from "@mysten/sui/client";
+import { DryRunTransactionBlockResponse, SuiObjectRef } from "@mysten/sui/client";
 import { parseVMError, vmAbortCodeToMessage } from "../types/abort_codes";
+import { pathToCoordinates } from "../types/cursor";
+import { Preset, useMaps } from "../hooks/useMaps";
+import { normalizeSuiAddress } from "@mysten/sui/utils";
+import { useSuinsName } from "../hooks/useSuinsName";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
@@ -31,6 +35,7 @@ export function Playground() {
     const [mapKey, setMapKey] = useState<string | null>(sessionStorage.getItem(LS_KEY));
     const { data: map, isFetching, isFetched } = useGame({ id: mapKey, enabled: true });
     const { data: recruits } = useGameRecruits({ recruits: map?.map.recruits || [] });
+    const { data: presets } = useMaps({ enabled: true });
     const tx = useGameTransactions({ map });
 
     useEffect(() => {
@@ -97,35 +102,25 @@ export function Playground() {
                     <h1 className="p-1 mb-10 page-heading">play</h1>
                 </div>
                 <div className="p-10 max-w-3xl">
-                    <a
-                        className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
-                        onClick={async () => {
-                            const map = await tx.createDemo(1, [
-                                [0, 3],
-                                [6, 5],
-                            ]);
-                            eventBus.dispatchEvent({ type: "sui:map_created" });
-                            setTimeout(() => map && setMapKey(map.objectId), 1000);
-                        }}
-                    >
-                        Create demo 1
-                    </a>
-                    <a
-                        className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
-                        style={{ border: "1px solid grey" }}
-                        onClick={async () => {
-                            const map = await tx.createDemo(2, [
-                                [8, 2],
-                                [7, 6],
-                                [1, 2],
-                                [1, 7],
-                            ]);
-                            eventBus.dispatchEvent({ type: "sui:map_created" });
-                            setTimeout(() => map && setMapKey(map.objectId), 1000);
-                        }}
-                    >
-                        Create demo 2
-                    </a>
+                    {presets
+                        ?.sort((a, b) => a.map.id.localeCompare(b.map.id))
+                        .slice(0, 10)
+                        .map((preset) => (
+                            <a
+                                key={preset.objectId}
+                                className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
+                                onClick={async () => {
+                                    const map = await tx.createDemo(preset, [
+                                        [0, 3],
+                                        [6, 5],
+                                    ]);
+                                    eventBus.dispatchEvent({ type: "sui:map_created" });
+                                    setTimeout(() => map && setMapKey(map.objectId), 1000);
+                                }}
+                            >
+                                <MapItem preset={preset} />
+                            </a>
+                        ))}
                     <NavLink to="../editor" className="options-row mt-10 interactive">
                         Level Editor
                     </NavLink>
@@ -174,7 +169,7 @@ export function Playground() {
             case "Move":
                 return eventBus.dispatchEvent({
                     type: "sui:path",
-                    path: first.Move as [number, number][],
+                    path: pathToCoordinates(first.Move),
                 });
             case "Attack": {
                 const unit = first.Attack.origin as [number, number];
@@ -320,6 +315,34 @@ export function Playground() {
 
         return null;
     }
+}
+
+/**
+ * A map item in the list of maps.
+ * Displays the map name, popularity, and author.
+ */
+function MapItem({ preset }: { preset: Preset & SuiObjectRef }) {
+    const name = useSuinsName({ address: preset.author });
+    const size = preset.map.grid.length;
+
+    return (
+        <div className="flex flex-row justify-between w-full text-left">
+            <p style={{ width: `18ch` }}>
+                {preset.name.slice(0, 17)}
+                {preset.name.length > 17 && "..."}
+            </p>
+            {/* size is of varying length, so we need to set a fixed width */}
+            <p style={{ width: `18ch` }}>
+                Size: {size}x{size}
+            </p>
+            <p style={{ width: `14ch` }}>Score: {preset.popularity}</p>
+            <p style={{ width: `20ch` }}>
+                By:{" "}
+                {(name && `@${name}`) ||
+                    (preset.author == normalizeSuiAddress("0x0") ? "system" : "unknown")}
+            </p>
+        </div>
+    );
 }
 
 /**

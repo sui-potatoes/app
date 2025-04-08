@@ -2,14 +2,15 @@
 
 [move]
 version = 3
-manifest_digest = "64A8BFA71BA3B04591348A3646D320F494E7FF8CB37B2481EA134D0233846562"
-deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
+manifest_digest = "23B841CFA7759823817A57F2589C37B6EF0793F59F3B933BC74FE665ECB446F1"
+deps_digest = "52B406A7A21811BEF51751CF88DA0E76DAEFFEAC888D4F4060B1A72BBE7D8D35"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
   { id = "DeepBook", name = "DeepBook" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
   { id = "SuiSystem", name = "SuiSystem" },
+  { id = "suins", name = "suins" },
 ]
 
 [[move.package]]
@@ -52,6 +53,14 @@ dependencies = [
   { id = "Sui", name = "Sui" },
 ]
 
+[[move.package]]
+id = "suins"
+source = { git = "https://github.com/MystenLabs/suins-contracts.git", rev = "main", subdir = "packages/suins" }
+
+dependencies = [
+  { id = "Sui", name = "Sui" },
+]
+
 [move.toolchain-version]
 compiler-version = "1.45.2"
 edition = "2024"
@@ -61,6 +70,6 @@ flavor = "sui"
 
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0xc998c2321ecf4314547010116a189d130f3a37910049d3135ff2c97c8228acf1"
-latest-published-id = "0xc998c2321ecf4314547010116a189d130f3a37910049d3135ff2c97c8228acf1"
+original-published-id = "0x3ce2eea2b61d2185841bdb0b292c808bc60a27d7344cb9e743ea41b7ff768a64"
+latest-published-id = "0x3ce2eea2b61d2185841bdb0b292c808bc60a27d7344cb9e743ea41b7ff768a64"
 published-version = "1"

@@ -5,7 +5,16 @@
 module commander::commander;
 
 use commander::{history::{Self, History}, map::{Self, Map}, recruit::Recruit};
-use sui::{clock::Clock, object_table::{Self, ObjectTable}, random::Random, vec_map::{Self, VecMap}};
+use std::string::String;
+use sui::{
+    clock::Clock,
+    object_table::{Self, ObjectTable},
+    random::Random,
+    transfer::Receiving,
+    vec_map::{Self, VecMap}
+};
+
+const ENotAuthor: u64 = 0;
 
 /// Stack limit of public games in the `Commander` object.
 const PUBLIC_GAMES_LIMIT: u64 = 20;
@@ -16,6 +25,21 @@ public struct Commander has key {
     id: UID,
     /// List of the 10 most recent games.
     games: VecMap<ID, u64>,
+}
+
+/// A preset is a map that is required to start a new game.
+public struct Preset has key {
+    id: UID,
+    /// The map that will be cloned and used for the new game.
+    map: Map,
+    /// The name of the preset, purely for display purposes.
+    name: String,
+    /// Stores the spawn positions of recruits.
+    positions: vector<vector<u8>>,
+    /// The author of the preset.
+    author: address,
+    /// Popularity score.
+    popularity: u64,
 }
 
 /// A single instance of the game. A `Game` object is created when a new game is
@@ -29,15 +53,40 @@ public struct Game has key {
     recruits: ObjectTable<ID, Recruit>,
 }
 
-/// Start a new game.
-public fun new(ctx: &mut TxContext): Game {
-    let id = object::new(ctx);
+/// Start a new game with a custom map passed directly as a byte array.
+public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut TxContext): Game {
+    let mut preset = transfer::receive(&mut cmd.id, preset);
+    let map = preset.map.clone();
+
+    preset.popularity = preset.popularity + 1; // increment popularity
+    transfer::transfer(preset, cmd.id.to_address()); // transfer back
+
     Game {
-        map: map::default(id.to_inner()),
+        map,
+        id: object::new(ctx),
         history: history::empty(),
         recruits: object_table::new(ctx),
-        id,
     }
+}
+
+/// Register a new `Map` so it can be played.
+public fun register_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx: &mut TxContext) {
+    let mut map = map::from_bytes(bytes);
+    let id = object::new(ctx);
+
+    map.set_id(id.to_inner());
+    transfer::transfer(
+        Preset { id, name, map, positions: vector[], author: ctx.sender(), popularity: 0 },
+        cmd.id.to_address(),
+    );
+}
+
+/// Delete a map from the `Commander` object. Can only be done by the author.
+public fun delete_map(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut TxContext) {
+    let Preset { id, map, author, .. } = transfer::receive(&mut cmd.id, preset);
+    assert!(author == ctx.sender(), ENotAuthor);
+    map.destroy();
+    id.delete();
 }
 
 /// Create a new public game, allowing anyone to spectate.
@@ -50,39 +99,6 @@ public fun register_game(cmd: &mut Commander, clock: &Clock, game: &Game, _ctx: 
     cmd.games.insert(game.id.to_inner(), clock.timestamp_ms());
 }
 
-/// Start a new game with a custom map passed directly as a byte array.
-public fun new_with_map(map: vector<u8>, ctx: &mut TxContext): Game {
-    let id = object::new(ctx);
-    Game {
-        map: map::from_bytes(map),
-        history: history::empty(),
-        recruits: object_table::new(ctx),
-        id,
-    }
-}
-
-/// Create a new demo game.
-public fun demo_1(ctx: &mut TxContext): Game {
-    let id = object::new(ctx);
-    Game {
-        map: map::demo_1(id.to_inner()),
-        history: history::empty(),
-        recruits: object_table::new(ctx),
-        id,
-    }
-}
-
-/// Create a new demo game.
-public fun demo_2(ctx: &mut TxContext): Game {
-    let id = object::new(ctx);
-    Game {
-        map: map::demo_2(id.to_inner()),
-        history: history::empty(),
-        recruits: object_table::new(ctx),
-        id,
-    }
-}
-
 /// Place a Recruit on the map, store it in the `Game`.
 public fun place_recruit(game: &mut Game, recruit: Recruit, x: u16, y: u16, ctx: &mut TxContext) {
     assert!(recruit.leader() == ctx.sender()); // make sure the sender owns the recruit
@@ -93,7 +109,7 @@ public fun place_recruit(game: &mut Game, recruit: Recruit, x: u16, y: u16, ctx:
 }
 
 /// Move a unit along the path, the first point is the current position of the unit.
-public fun move_unit(game: &mut Game, path: vector<vector<u16>>, _ctx: &mut TxContext) {
+public fun move_unit(game: &mut Game, path: vector<u8>, _ctx: &mut TxContext) {
     game.history.add(game.map.move_unit(path))
 }
 
@@ -102,7 +118,7 @@ public fun perform_reload(game: &mut Game, x: u16, y: u16, _ctx: &mut TxContext)
     game.history.add(game.map.perform_reload(x, y))
 }
 
-/// Perform a grenade throw action.w
+/// Perform a grenade throw action.
 entry fun perform_grenade(
     game: &mut Game,
     rng: &Random,
@@ -138,6 +154,7 @@ entry fun perform_attack(
     let history = game.map.perform_attack(&mut rng, x0, y0, x1, y1);
 
     history::list_kia(&history).do!(|id| {
+        if (id.to_address() == @0) return; // skip empty addresses
         let recruit = game.recruits.remove(id);
         let leader = recruit.leader();
         transfer::public_transfer(recruit.kill(ctx), leader);
@@ -156,10 +173,54 @@ public fun share(game: Game) {
     transfer::share_object(game)
 }
 
-/// On publish, share the `Commander` object.
+// === Getters ===
+
+#[allow(unused_function)]
+/// Get the current turn of the game.
+fun turn(self: &Game): u16 {
+    self.map.turn()
+}
+
+// === Init ===
+
+/// On publish, share the `Commander` object with map presets. Demos have reserved IDs 0 and 1.
 fun init(ctx: &mut TxContext) {
-    transfer::share_object(Commander {
-        id: object::new(ctx),
-        games: vec_map::empty(),
-    });
+    let id = object::new(ctx);
+    let id_address = id.to_address();
+
+    // positions:
+    // [0, 3]
+    // [6, 5]
+
+    transfer::transfer(
+        Preset {
+            id: object::new(ctx),
+            name: b"Demo 1".to_string(),
+            map: map::demo_1(@0.to_id()),
+            positions: vector[],
+            author: @0,
+            popularity: 0,
+        },
+        id_address,
+    );
+
+    // positions:
+    // [8, 2],
+    // [7, 6],
+    // [1, 2],
+    // [1, 7],
+
+    transfer::transfer(
+        Preset {
+            id: object::new(ctx),
+            name: b"Demo 2".to_string(),
+            map: map::demo_2(@1.to_id()),
+            positions: vector[],
+            author: @0,
+            popularity: 0,
+        },
+        id_address,
+    );
+
+    transfer::share_object(Commander { id, games: vec_map::empty() });
 }

@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 /// Defines the `Param` component and its methods.
+///
+/// Traits:
+/// - from_bcs
+/// - to_string
 module commander::param;
 
 use std::string::String;

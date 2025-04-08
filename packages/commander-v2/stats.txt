@@ -47,3 +47,16 @@ Notes:
 - u128 fits 16 params
 - what about making a Weapon copy the stats of the Unit but apply offset?
 - so what if
+
+Matchmaking:
+
+- define random areas where units are placed; units limit is limited to 5, so the
+area is von neumann neighbourhood of 1, precisely 5 points; each map contains pointers
+to start locations, selected randomly;
+
+TODOs:
+
+- [ ] cover system
+- [ ] multiplayer (random placement of units)
+- [ ] research redesign of the cover tile system, tiles as the second layer to main layout (?);
+the idea is to decrease load on cover system and not check 2 tiles at once.

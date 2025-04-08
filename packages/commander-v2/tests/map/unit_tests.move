@@ -40,7 +40,7 @@ fun perform_reload() {
     let recruit = recruit::default(ctx);
     let mut unit = recruit.to_unit();
 
-    unit.perform_attack(&mut rng, 1);
+    unit.perform_attack(&mut rng, 1, 0);
     unit.try_reset_ap(1);
     unit.perform_reload();
 
@@ -59,7 +59,7 @@ fun perform_reload_no_ap_fail() {
     let recruit = recruit::default(ctx);
     let mut unit = recruit.to_unit();
 
-    unit.perform_attack(&mut rng, 1);
+    unit.perform_attack(&mut rng, 1, 0);
     unit.perform_reload();
 
     abort
@@ -124,7 +124,7 @@ fun perform_grenade_no_ap_fail() {
     let recruit = recruit::default(ctx);
     let mut unit = recruit.to_unit();
 
-    unit.perform_attack(&mut rng, 4);
+    unit.perform_attack(&mut rng, 4, 0);
     unit.perform_grenade();
 
     abort
@@ -141,39 +141,39 @@ fun perform_attack_distance_modifiers() {
     assert_eq!(unit.stats().aim(), 65);
 
     // 15% bonus
-    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 1);
+    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 1, 0);
     assert_eq!(hit_chance, 80);
     unit.try_reset_ap(1);
 
     // 10% bonus
-    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 2);
+    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 2, 0);
     assert_eq!(hit_chance, 75);
     unit.try_reset_ap(2);
 
     // 5% bonus
-    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 3);
+    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 3, 0);
     assert_eq!(hit_chance, 70);
     unit.try_reset_ap(3);
 
     // no bonus, no penalty
     unit.perform_reload();
-    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 4);
+    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 4, 0);
     assert_eq!(hit_chance, 65);
     unit.try_reset_ap(4);
 
     // 10% penalty
-    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 5);
+    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 5, 0);
     assert_eq!(hit_chance, 55);
     unit.try_reset_ap(5);
 
     // 20% penalty
-    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 6);
+    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 6, 0);
     assert_eq!(hit_chance, 45);
     unit.try_reset_ap(6);
 
     // 30% penalty
     unit.perform_reload();
-    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 7);
+    let (_, _, _, _, hit_chance) = unit.perform_attack(&mut rng, 7, 0);
     assert_eq!(hit_chance, 35);
     unit.try_reset_ap(7);
 
@@ -189,19 +189,19 @@ fun shoot_and_reload() {
     let mut unit = recruit.to_unit();
 
     assert_eq!(unit.ammo(), 3);
-    unit.perform_attack(&mut rng, 1);
+    unit.perform_attack(&mut rng, 1, 0);
     assert_eq!(unit.ammo(), 2);
     unit.try_reset_ap(1);
     unit.perform_reload();
     assert_eq!(unit.ammo(), 3);
     assert_eq!(unit.ap(), 1);
-    unit.perform_attack(&mut rng, 1);
+    unit.perform_attack(&mut rng, 1, 0);
     assert_eq!(unit.ammo(), 2);
     unit.try_reset_ap(2);
-    unit.perform_attack(&mut rng, 1);
+    unit.perform_attack(&mut rng, 1, 0);
     assert_eq!(unit.ammo(), 1);
     unit.try_reset_ap(3);
-    unit.perform_attack(&mut rng, 1);
+    unit.perform_attack(&mut rng, 1, 0);
     assert_eq!(unit.ammo(), 0);
 
     recruit.kill(ctx).throw_away();

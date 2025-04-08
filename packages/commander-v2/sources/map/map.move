@@ -11,8 +11,8 @@
 module commander::map;
 
 use commander::{history::{Self, Record}, recruit::Recruit, unit::{Self, Unit}};
-use grid::{grid::{Self, Grid}, point};
-use std::string::String;
+use grid::{direction, grid::{Self, Grid}, point};
+use std::{macros::{num_min, num_max}, string::String};
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
 /// Attempt to place a `Recruit` on a tile that already has a unit.
@@ -21,8 +21,6 @@ const EUnitAlreadyOnTile: u64 = 1;
 const ETileIsUnwalkable: u64 = 2;
 /// The path is unwalkable.
 const EPathUnwalkable: u64 = 3;
-/// The path is incorrect: skipping tiles or standing still.
-const EIncorrectPath: u64 = 4;
 /// The unit is not on the tile.
 const ENoUnit: u64 = 5;
 /// The path is too short.
@@ -38,6 +36,8 @@ const NO_COVER: u8 = 0;
 const LOW_COVER: u8 = 1;
 /// Constant for high cover in the `TileType::Cover`.
 const HIGH_COVER: u8 = 2;
+/// Constant for the defense bonus.
+const DEFENSE_BONUS: u8 = 25;
 
 /// The range of the grenade.
 const GRENADE_RANGE: u16 = 5;
@@ -45,7 +45,7 @@ const GRENADE_RANGE: u16 = 5;
 /// Defines a single Tile in the game `Map`. Tiles can be empty, provide cover
 /// or be unwalkable. Additionally, a unit standing on a tile effectively makes
 /// it unwalkable.
-public struct Tile has store {
+public struct Tile has copy, store {
     /// The type of the tile.
     tile_type: TileType,
     /// The position of the tile on the map.
@@ -99,6 +99,18 @@ public fun new(id: ID, size: u16): Map {
 /// Default Map is 30x30 tiles for now. Initially empty.
 public fun default(id: ID): Map { new(id, 30) }
 
+/// Destroy the `Map` struct.
+public fun destroy(map: Map) {
+    let Map { grid, .. } = map;
+    grid.destroy!(|Tile { unit, .. }| unit.destroy!(|unit| unit.destroy()));
+}
+
+/// Set the ID of the map.
+public(package) fun set_id(map: &mut Map, id: ID) { map.id = id; }
+
+/// Clone the `Map`.
+public(package) fun clone(map: &Map): Map { Map { id: map.id, turn: map.turn, grid: map.grid } }
+
 // === Actions ===
 
 /// Place a `Recruit` on the map at the given position.
@@ -129,20 +141,18 @@ public fun perform_reload(map: &mut Map, x: u16, y: u16): Record {
 }
 
 /// Move a unit along the path. The first point is the current position of the unit.
-public fun move_unit(map: &mut Map, path: vector<vector<u16>>): Record {
-    assert!(path.length() > 1, EPathTooShort);
+public fun move_unit(map: &mut Map, path: vector<u8>): Record {
+    assert!(path.length() > 2, EPathTooShort);
 
-    let distance = path.length() - 1;
-    let (first, last) = (path[0], path[distance]);
-    let (x0, y0) = (first[0], first[1]);
-    let (x1, y1) = (last[0], last[1]);
+    let distance = path.length() - 2;
+    let (x0, y0) = (path[0] as u16, path[1] as u16);
     let (width, height) = (map.grid.width(), map.grid.height());
 
     assert!(y0 < height && x0 < width, ETileOutOfBounds);
+    let search = map.check_path(path).destroy_or!(abort EPathUnwalkable);
+    let (x1, y1) = (search[0], search[1]);
     assert!(y1 < height && x1 < width, ETileOutOfBounds);
-    assert!(map.check_path(path), EPathUnwalkable);
 
-    // transfer the unit from one position to another
     let mut unit = map.grid[x0, y0].unit.extract();
     unit.try_reset_ap(map.turn);
     unit.perform_move(distance as u8);
@@ -165,14 +175,15 @@ public fun perform_attack(
     y1: u16,
 ): vector<Record> {
     let mut history = vector[history::new_attack(vector[x0, y0], vector[x1, y1])];
+    let range = grid::range!(x0, y0, x1, y1) as u8;
+    let defense_bonus = if (range > 0) map.cover_bonus(x0, y0, x1, y1) else 0;
     let attacker = &mut map.grid[x0, y0].unit;
     assert!(attacker.is_some(), ENoUnit);
 
     let unit = attacker.borrow_mut();
     unit.try_reset_ap(map.turn);
 
-    let range = grid::range!(x0, y0, x1, y1) as u8;
-    let (is_hit, _, is_crit, damage, _) = unit.perform_attack(rng, range);
+    let (is_hit, _, is_crit, damage, _) = unit.perform_attack(rng, range, defense_bonus);
     let target = &mut map.grid[x1, y1].unit;
     assert!(target.is_some(), ENoUnit);
 
@@ -184,7 +195,7 @@ public fun perform_attack(
     if (is_dodged) history.push_back(history::new_dodged());
     if (is_hit) {
         history.push_back({
-            if (is_crit) history::new_critical_hit(damage) // equally expensive
+            if (is_crit) history::new_critical_hit(damage) // same cost
             else history::new_damage(damage)
         });
     } else history.push_back(history::new_miss());
@@ -193,6 +204,93 @@ public fun perform_attack(
     else map.grid[x1, y1].unit.fill(target);
 
     history
+}
+
+/// Calculate the cover bonus for the given tile. The cover bonus is calculated
+/// based on the direction of the attack and the type of cover on the tile.
+///
+/// - no cover - 0
+/// - LOW_COVER - 25
+/// - HIGH_COVER - 50
+public(package) fun cover_bonus(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16): u8 {
+    use grid::direction::{direction, none, up, down, left, right};
+
+    let direction = direction!(x0, y0, x1, y1);
+    let (up, down, left, right) = map.tile_cover!(x1, y1);
+
+    // edge case: same tile, should never happen
+    if (direction == none!()) return 0;
+
+    // target tile cover type (does not check neighboring tiles with reverse defense)
+    let cover_type = if (direction == up!()) {
+        if (down != 0) down // target tile has cover
+        else {
+            let (top, _, _, _) = map.tile_cover!(x1 + 1, y1);
+            top
+        }
+    } else if (direction == down!()) {
+        if (up != 0) up
+        else {
+            let (_, bottom, _, _) = map.tile_cover!(x1 - 1, y1);
+            bottom
+        }
+    } else if (direction == left!()) {
+        if (right != 0) right
+        else {
+            let (_, _, left, _) = map.tile_cover!(x1, y1 + 1);
+            left
+        }
+    } else if (direction == right!()) {
+        if (left != 0) left
+        else {
+            let (_, _, _, right) = map.tile_cover!(x1, y1 - 1);
+            right
+        }
+    } else if (direction == up!() | left!()) {
+        let cover_type = num_max!(down, right);
+        if (cover_type  != 0) cover_type
+        else {
+            let (top, _, _, _) = map.tile_cover!(x1 + 1, y1);
+            let (_, _, left, _) = map.tile_cover!(x1, y1 + 1);
+            num_max!(top, left)
+        }
+    } else if (direction == up!() | right!()) {
+        let cover_type = num_max!(down, left);
+        if (cover_type != 0) cover_type
+        else {
+            let (top, _, _, _) = map.tile_cover!(x1 + 1, y1);
+            let (_, _, _, right) = map.tile_cover!(x1, y1 - 1);
+            num_max!(top, right)
+        }
+    } else if (direction == down!() | left!()) {
+        let cover_type = num_max!(up, right);
+        if (cover_type != 0) cover_type
+        else {
+            let (_, bottom, _, _) = map.tile_cover!(x1 - 1, y1);
+            let (_, _, left, _) = map.tile_cover!(x1, y1 + 1);
+            num_max!(bottom, left)
+        }
+    } else if (direction == down!() | right!()) {
+        let cover_type = num_max!(up, left);
+        if (cover_type != 0) cover_type
+        else {
+            let (_, bottom, _, _) = map.tile_cover!(x1 - 1, y1);
+            let (_, _, _, right) = map.tile_cover!(x1, y1 - 1);
+            num_max!(bottom, right)
+        }
+    } else abort; // unreachable
+
+    // cover enum is 0, 1, 2, so by multiplying it by 25 we get the value we
+    // need; same, as if we matched it to 0, 25, 50
+    cover_type * DEFENSE_BONUS
+}
+
+macro fun tile_cover($map: &Map, $x: u16, $y: u16): (u8, u8, u8, u8) {
+    let map = $map;
+    match (map.grid[$x, $y].tile_type) {
+        TileType::Cover { left, right, top, bottom } => (top, bottom, left, right),
+        _ => (0, 0, 0, 0),
+    }
 }
 
 #[allow(lint(public_random))]
@@ -303,81 +401,55 @@ public fun tile_to_string(tile: &Tile): String {
 
 /// Check if the given path is walkable. Can be an optimization for pathfinding,
 /// if the path is traced on the frontend.
-public fun check_path(map: &Map, path: vector<vector<u16>>): bool {
-    let mut prev = path[0];
-    let high_cover = HIGH_COVER;
+///
+/// Returns `None` if the path is not walkable, otherwise returns the end point
+/// of the path.
+public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
+    use std::option::none;
+    use grid::direction::{up, down, left, right};
+
+    path.reverse();
+
+    // first two values are X and Y coordinates, the rest are directions
+    let (x0, y0) = (path.pop_back(), path.pop_back());
+    let mut cursor = direction::new_cursor(x0 as u16, y0 as u16);
 
     'path: {
-        path.do!(|step| {
-            if (prev == step) return;
-            let (x0, y0) = (prev[0], prev[1]);
-            let (x1, y1) = (step[0], step[1]);
-
+        path.destroy!(|direction| {
+            let (x0, y0) = cursor.to_values();
             let source = &map.grid[x0, y0];
+            cursor.move_to(direction);
+
+            let (x1, y1) = cursor.to_values();
             let target = &map.grid[x1, y1];
-            if (target.unit.is_some()) return 'path false;
-            if (target.tile_type == TileType::Unwalkable) return 'path false;
 
-            // make sure that the path is not skipping tiles and is not repeating
-            // the same tile
-            assert!(x0.diff(x1) == 1 && y0 == y1 || y0.diff(y1) == 1 && x0 == x1, EIncorrectPath);
-
-            prev = step;
-
-            // UP
-            if (grid::is_up!(x0, y0, x1, y1)) {
-                match (&source.tile_type) {
-                    TileType::Cover { top, .. } if (top == &high_cover) => return 'path false,
-                    _ => (),
-                };
-
-                match (&target.tile_type) {
-                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'path false,
-                    _ => (),
-                };
+            // units, high covers and unwalkable tiles block the path
+            if (target.unit.is_some()) return 'path none();
+            match (source.tile_type) {
+                TileType::Empty => (),
+                TileType::Unwalkable => return 'path none(),
+                TileType::Cover { left, right, top, bottom } => {
+                    if (direction == left!() && left == HIGH_COVER) return 'path none();
+                    if (direction == right!() && right == HIGH_COVER) return 'path none();
+                    if (direction == up!() && top == HIGH_COVER) return 'path none();
+                    if (direction == down!() && bottom == HIGH_COVER) return 'path none();
+                },
             };
 
-            // DOWN
-            if (grid::is_down!(x0, y0, x1, y1)) {
-                match (&source.tile_type) {
-                    TileType::Cover { bottom, .. } if (bottom == &high_cover) => return 'path false,
-                    _ => (),
-                };
-
-                match (&target.tile_type) {
-                    TileType::Cover { top, .. } if (top == &high_cover) => return 'path false,
-                    _ => (),
-                };
+            match (target.tile_type) {
+                TileType::Empty => (),
+                TileType::Unwalkable => return 'path none(),
+                TileType::Cover { left, right, top, bottom } => {
+                    if (direction == left!() && right == HIGH_COVER) return 'path none();
+                    if (direction == right!() && left == HIGH_COVER) return 'path none();
+                    if (direction == up!() && bottom == HIGH_COVER) return 'path none();
+                    if (direction == down!() && top == HIGH_COVER) return 'path none();
+                },
             };
-
-            // LEFT
-            if (grid::is_left!(x0, y0, x1, y1)) {
-                match (&source.tile_type) {
-                    TileType::Cover { left, .. } if (left == &high_cover) => return 'path false,
-                    _ => (),
-                };
-
-                match (&target.tile_type) {
-                    TileType::Cover { right, .. } if (right == &high_cover) => return 'path false,
-                    _ => (),
-                };
-            };
-
-            // RIGHT
-            if (grid::is_right!(x0, y0, x1, y1)) {
-                match (&source.tile_type) {
-                    TileType::Cover { right, .. } if (right == &high_cover) => return 'path false,
-                    _ => (),
-                };
-
-                match (&target.tile_type) {
-                    TileType::Cover { left, .. } if (left == &high_cover) => return 'path false,
-                    _ => (),
-                };
-            }
         });
 
-        true
+        let (x, y) = cursor.to_values();
+        option::some(vector[x, y])
     }
 }
 
@@ -455,9 +527,104 @@ public fun debug(map: &Map) {
     std::debug::print(&map.to_string())
 }
 
-#[test_only]
-public fun destroy(map: Map) {
-    sui::test_utils::destroy(map)
+#[test]
+/// A - Attacker
+/// Top-left corner - Target
+/// ```
+///    0  1  2
+///  0 _|    A
+///  1
+///  2 A     A
+/// ```
+fun test_cover_system_a() {
+    use std::unit_test::assert_eq;
+
+    let (no, low, high) = (NO_COVER, LOW_COVER, HIGH_COVER);
+    let mut map = new(@0.to_id(), 3);
+
+    assert_eq!(map.cover_bonus(2, 0, 0, 0), 0); // attack up
+    assert_eq!(map.cover_bonus(0, 2, 0, 0), 0); // attack left
+    assert_eq!(map.cover_bonus(2, 2, 0, 0), 0); // attack up-right
+
+    // top-left corner, protected by covers
+    *&mut map.grid[0, 0].tile_type = TileType::Cover { right: low, bottom: low, left: no, top: no };
+
+    assert_eq!(map.cover_bonus(2, 0, 0, 0), DEFENSE_BONUS); // attack up
+    assert_eq!(map.cover_bonus(0, 2, 0, 0), DEFENSE_BONUS); // attack left
+    assert_eq!(map.cover_bonus(2, 2, 0, 0), DEFENSE_BONUS); // attack up-right
+
+    // replace the top-left cover with high cover
+    *&mut map.grid[0, 0].tile_type =
+        TileType::Cover { right: high, bottom: high, left: no, top: no };
+
+    assert_eq!(map.cover_bonus(2, 0, 0, 0), 2 * DEFENSE_BONUS); // attack up
+    assert_eq!(map.cover_bonus(0, 2, 0, 0), 2 * DEFENSE_BONUS); // attack left
+    assert_eq!(map.cover_bonus(2, 2, 0, 0), 2 * DEFENSE_BONUS); // attack up-right
+
+    // now remove the cover on the target tile, and place on neighboring tiles: to the right and bottom
+    *&mut map.grid[0, 0].tile_type = TileType::Empty;
+    *&mut map.grid[1, 0].tile_type = TileType::Cover { right: no, bottom: no, left: no, top: low };
+    *&mut map.grid[0, 1].tile_type = TileType::Cover { right: no, bottom: no, left: low, top: no };
+
+    assert_eq!(map.cover_bonus(2, 0, 0, 0), 1 * DEFENSE_BONUS); // attack up
+    assert_eq!(map.cover_bonus(0, 2, 0, 0), 1 * DEFENSE_BONUS); // attack left
+    assert_eq!(map.cover_bonus(2, 2, 0, 0), 1 * DEFENSE_BONUS); // attack up-right
+
+    // replace one of the covers with high cover and attack diagonally
+    *&mut map.grid[0, 1].tile_type = TileType::Cover { right: no, bottom: no, left: high, top: no };
+    assert_eq!(map.cover_bonus(2, 2, 0, 0), 2 * DEFENSE_BONUS); // attack up-right
+
+    map.destroy();
+}
+
+#[test]
+/// A - Attacker
+/// Bottom-right corner - Target
+/// ```
+///    0  1  2
+///  0 A     A
+///  1       _
+///  2 A    |
+/// ```
+fun test_cover_system_b() {
+    use std::unit_test::assert_eq;
+
+    let (no, low, high) = (NO_COVER, LOW_COVER, HIGH_COVER);
+    let mut map = new(@0.to_id(), 3);
+
+    assert_eq!(map.cover_bonus(0, 2, 2, 2), 0); // attack down
+    assert_eq!(map.cover_bonus(2, 0, 2, 2), 0); // attack right
+    assert_eq!(map.cover_bonus(0, 0, 2, 2), 0); // attack down-right
+
+    // top-left corner, protected by covers
+    *&mut map.grid[2, 2].tile_type = TileType::Cover { right: no, bottom: no, left: low, top: low };
+
+    assert_eq!(map.cover_bonus(0, 2, 2, 2), DEFENSE_BONUS); // attack down
+    assert_eq!(map.cover_bonus(2, 0, 2, 2), DEFENSE_BONUS); // attack right
+    assert_eq!(map.cover_bonus(0, 0, 2, 2), DEFENSE_BONUS); // attack down-right
+
+    // replace the top-left cover with high cover
+    *&mut map.grid[2, 2].tile_type =
+        TileType::Cover { right: no, bottom: no, left: high, top: high };
+
+    assert_eq!(map.cover_bonus(0, 2, 2, 2), 2 * DEFENSE_BONUS); // attack down
+    assert_eq!(map.cover_bonus(2, 0, 2, 2), 2 * DEFENSE_BONUS); // attack right
+    assert_eq!(map.cover_bonus(0, 0, 2, 2), 2 * DEFENSE_BONUS); // attack down-right
+
+    // now remove the cover on the target tile, and place on neighboring tiles: to the right and bottom
+    *&mut map.grid[2, 2].tile_type = TileType::Empty;
+    *&mut map.grid[1, 2].tile_type = TileType::Cover { right: no, bottom: low, left: no, top: no };
+    *&mut map.grid[2, 1].tile_type = TileType::Cover { right: low, bottom: no, left: no, top: no };
+
+    assert_eq!(map.cover_bonus(2, 0, 2, 2), 1 * DEFENSE_BONUS); // attack right
+    assert_eq!(map.cover_bonus(0, 2, 2, 2), 1 * DEFENSE_BONUS); // attack down
+    assert_eq!(map.cover_bonus(0, 0, 2, 2), 1 * DEFENSE_BONUS); // attack down-right
+
+    // replace one of the covers with high cover and attack diagonally
+    *&mut map.grid[2, 1].tile_type = TileType::Cover { right: high, bottom: no, left: no, top: no };
+    assert_eq!(map.cover_bonus(0, 0, 2, 2), 2 * DEFENSE_BONUS); // attack up-right
+
+    map.destroy();
 }
 
 #[test]
@@ -478,31 +645,19 @@ public fun destroy(map: Map) {
 // o| o |o
 // o| o |o
 fun test_check_path() {
+    use grid::direction::{up, down, left, right};
+
     let mut map = Self::new(@1.to_id(), 3);
     *&mut map.grid[0, 0].tile_type =
         TileType::Cover { left: NO_COVER, right: HIGH_COVER, top: NO_COVER, bottom: NO_COVER };
 
     // try going right and then back-left
-    assert!(!map.check_path(vector[vector[0, 0], vector[0, 1]]));
-    assert!(!map.check_path(vector[vector[0, 1], vector[0, 0]]));
+    assert!(map.check_path(vector[0, 0, right!()]).is_none());
+    assert!(map.check_path(vector[0, 1, left!()]).is_none());
 
     // try going down, right and then back-up; then reverse
-    assert!(
-        map.check_path(vector[
-            /* start */ vector[0, 0],
-            /* down  */ vector[1, 0],
-            /* right */ vector[1, 1],
-            /* left  */ vector[1, 0],
-        ]),
-    );
-    assert!(
-        map.check_path(vector[
-            /* start */ vector[0, 1],
-            /* down  */ vector[1, 1],
-            /* left  */ vector[1, 0],
-            /* up    */ vector[0, 0],
-        ]),
-    );
+    assert!(map.check_path(vector[0, 0, down!(), right!(), left!()]).is_some());
+    assert!(map.check_path(vector[0, 1, down!(), left!(), up!()]).is_some());
     map.destroy();
 
     let mut map = Self::new(@1.to_id(), 3);
@@ -510,27 +665,12 @@ fun test_check_path() {
         TileType::Cover { left: NO_COVER, right: NO_COVER, top: NO_COVER, bottom: HIGH_COVER };
 
     // try going down and then back-up
-    assert!(!map.check_path(vector[vector[0, 0], /* down */ vector[1, 0]]));
-    assert!(!map.check_path(vector[vector[1, 0], /* up   */ vector[0, 0]]));
+    assert!(map.check_path(vector[0, 0, down!()]).is_none());
+    assert!(map.check_path(vector[1, 0, up!()]).is_none());
 
     // try going right, down and then back-left; then reverse
-    assert!(
-        map.check_path(vector[
-            /* start */ vector[0, 0],
-            /* right */ vector[0, 1],
-            /* down  */ vector[1, 1],
-            /* left  */ vector[1, 0],
-        ]),
-    );
-
-    assert!(
-        map.check_path(vector[
-            /* start */ vector[1, 0],
-            /* right */ vector[1, 1],
-            /* up    */ vector[0, 1],
-            /* left  */ vector[0, 0],
-        ]),
-    );
+    assert!(map.check_path(vector[0, 0, right!(), down!(), left!()]).is_some());
+    assert!(map.check_path(vector[1, 0, right!(), up!(), left!()]).is_some());
 
     // crawl over the cover
     *&mut map.grid[0, 0].tile_type =
@@ -590,7 +730,7 @@ fun test_map_with_units() {
 
     // now try to attack another unit with the first one
     let mut damage = 0;
-    map.grid[3, 3].unit.do_mut!(|unit| (_, _, _, damage, _) = unit.perform_attack(&mut rng, 4));
+    map.grid[3, 3].unit.do_mut!(|unit| (_, _, _, damage, _) = unit.perform_attack(&mut rng, 4, 0));
 
     // apply the damage to the second unit
     map.grid[5, 2].unit.borrow_mut().apply_damage(&mut rng, damage, false);

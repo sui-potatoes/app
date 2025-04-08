@@ -8,6 +8,7 @@
 ///
 /// Traits:
 /// - from_bcs
+/// - to_string
 module commander::unit;
 
 use commander::{param::{Self, Param}, recruit::Recruit, stats::{Self, Stats}};
@@ -106,6 +107,7 @@ public fun perform_attack(
     unit: &mut Unit,
     rng: &mut RandomGenerator,
     range: u8,
+    target_defense: u8,
 ): (bool, bool, bool, u8, u8) {
     assert!(unit.ap.value() > 0, ENoAP);
     assert!(unit.ammo.value() > 0, EOutOfAmmo);
@@ -129,6 +131,9 @@ public fun perform_attack(
     } else {
         aim_stat - num_min!(DISTANCE_PENALTY * (range - eff_range), aim_stat)
     };
+
+    // adjust the hit chance by the target's defense, avoid underflow
+    let hit_chance = hit_chance - num_min!(hit_chance, target_defense);
 
     let is_hit = rng.generate_u8_in_range(0, 99) < hit_chance;
     if (!is_hit) return (false, false, false, 0, hit_chance);
@@ -159,11 +164,7 @@ public fun apply_damage(
 ): (bool, u8, bool) {
     let dodge_stat = unit.stats.dodge();
     let armor_stat = unit.stats.armor();
-
-    // prettier-ignore
-    let damage =
-        if (armor_stat >= damage) 1
-        else damage - armor_stat;
+    let damage = if (armor_stat >= damage) 1 else damage - armor_stat;
 
     // if attack can be dodged, spin the wheel and see if the unit dodges
     let rng = rng.generate_u8_in_range(0, 99);

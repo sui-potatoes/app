@@ -35,14 +35,6 @@ fun test_swap() {
 }
 
 #[test]
-fun test_directions() {
-    assert!(grid::is_up!(1, 1, 0, 1));
-    assert!(grid::is_down!(0, 0, 1, 0));
-    assert!(grid::is_left!(0, 1, 0, 0));
-    assert!(grid::is_right!(0, 0, 0, 1));
-}
-
-#[test]
 fun test_path_tracing() {
     let grid = grid::from_vector(vector[
         vector[1, 0, 0, 0, 0],

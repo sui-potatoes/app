@@ -10,6 +10,8 @@ import { GameMap } from "./useGame";
 import { useSuiClient } from "@mysten/dapp-kit";
 import { bcs } from "@mysten/bcs";
 import { useTransactionExecutor } from "./useTransactionExecutor";
+import { coordinatesToPath } from "../types/cursor";
+import type { SuiObjectRef } from "@mysten/sui/client";
 
 export const LS_KEY = "commander-v2";
 
@@ -32,6 +34,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         canTransact,
         lockedTx,
         createDemo,
+        publishMap,
         performAttack,
         performGrenade,
         performReload,
@@ -45,11 +48,15 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
      * Create a demo map (1 or 2) with the given positions.
      * Add recruits to the given positions.
      */
-    async function createDemo(num: 1 | 2, positions: [number, number][] = []) {
+    async function createDemo(preset: SuiObjectRef, positions: [number, number][] = []) {
         if (!canTransact) return;
 
         const tx = new Transaction();
-        const game = tx.moveCall({ target: `${packageId}::commander::demo_${num}` });
+        const registryArg = tx.object(registryId);
+        const game = tx.moveCall({
+            target: `${packageId}::commander::new_game`,
+            arguments: [registryArg, tx.receivingRef(preset)],
+        });
 
         for (let [x, y] of positions) {
             const { name, backstory } = await useNameGenerator();
@@ -77,7 +84,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         // register the game in the Commander object.
         tx.moveCall({
             target: `${packageId}::commander::register_game`,
-            arguments: [tx.object(registryId), tx.object.clock(), game],
+            arguments: [registryArg, tx.object.clock(), game],
         });
 
         tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
@@ -89,7 +96,8 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             );
         });
 
-        if (!map) throw new Error("Map not found, something is off");
+        if (!map)
+            throw new Error(`Map not found, something is off: ${res.data.effects?.status.error}`);
         if (map.type !== "created") throw new Error("Map not created, something is off");
 
         sessionStorage.setItem(LS_KEY, map.objectId);
@@ -204,7 +212,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             mutable: true,
         });
 
-        const pathArg = tx.pure(bcs.vector(bcs.vector(bcs.u16())).serialize(path));
+        const pathArg = tx.pure(bcs.vector(bcs.u8()).serialize(coordinatesToPath(path)));
 
         tx.moveCall({ target: `${packageId}::commander::move_unit`, arguments: [game, pathArg] });
         tx.setSender(zkLogin.address!);
@@ -234,6 +242,25 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         tx.setSender(zkLogin.address!);
 
         return await executeTransaction(tx);
+    }
+
+    /** Publish a map to the registry. */
+    async function publishMap(name: string, map: Uint8Array) {
+        if (!canTransact) return;
+
+        const tx = new Transaction();
+        const nameArg = tx.pure.string(name);
+        const mapBytesArg = tx.pure(bcs.vector(bcs.u8()).serialize(map));
+
+        tx.moveCall({
+            target: `${packageId}::commander::register_map`,
+            arguments: [tx.object(registryId), nameArg, mapBytesArg],
+        });
+        tx.setSender(zkLogin.address!);
+
+        const res = await executeTransaction(tx);
+        console.log("publishMap", res);
+        return res;
     }
 
     /** Execute locked transaction */

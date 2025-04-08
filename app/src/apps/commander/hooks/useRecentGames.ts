@@ -19,17 +19,9 @@ export type GameMap = SuiObjectRef & {
 
 const Commander = bcs.struct("Commander", {
     id: bcs.Address,
-    games: bcs.vector(
-        bcs.struct("Entry", {
-            id: bcs.Address,
-            timestamp_ms: bcs.u64(),
-        }),
-    ),
+    games: bcs.vector(bcs.struct("Entry", { id: bcs.Address, timestamp_ms: bcs.u64() })),
 });
 
-/**
- * Hook to create a transaction executor
- */
 export function useRecentGames({ enabled, refetchInterval }: Props) {
     const registryId = useNetworkVariable("commanderV2RegistryId");
 
@@ -44,8 +36,8 @@ export function useRecentGames({ enabled, refetchInterval }: Props) {
                 if (!data.data.bcs) return null;
                 if (data.data.bcs.dataType !== "moveObject") return null;
 
-                const map = Commander.parse(fromBase64(data.data.bcs.bcsBytes));
-                return map.games;
+                const { games } = Commander.parse(fromBase64(data.data.bcs.bcsBytes));
+                return games;
             },
         },
     );

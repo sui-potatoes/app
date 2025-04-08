@@ -47,6 +47,12 @@ public fun from_vector_unchecked<T>(grid: vector<vector<T>>): Grid<T> {
     Grid { grid }
 }
 
+/// Unpack the `Grid` into its underlying vector.
+public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
+    let Grid { grid } = grid;
+    grid
+}
+
 /// Get the width of the grid.
 public fun width<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
 
@@ -77,18 +83,6 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
 
 // === Macros ===
 
-/// Check if a point is above another point (decrease in X).
-public macro fun is_up($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 > $x1 && $y0 == $y1 }
-
-/// Check if a point is below another point (increase in X).
-public macro fun is_down($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 < $x1 && $y0 == $y1 }
-
-/// Check if a point is to the left of another point (decrease in Y).
-public macro fun is_left($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 == $x1 && $y0 > $y1 }
-
-/// Check if a point is to the right of another point (increase in Y).
-public macro fun is_right($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 == $x1 && $y0 < $y1 }
-
 /// Get a Manhattan distance between two points. Useful for calculating distances
 /// or ranges for ranged attacks or walking, for example.
 public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {
@@ -116,6 +110,11 @@ public macro fun tabulate<$T>($width: u16, $height: u16, $f: |u16, u16| -> $T): 
     let height = $height as u64;
     let grid = vector::tabulate!(width, |x| vector::tabulate!(height, |y| $f(x as u16, y as u16)));
     from_vector_unchecked(grid)
+}
+
+/// Gracefully destroy the grid by consuming the elements in the passed function $f.
+public macro fun destroy<$T>($grid: Grid<$T>, $f: |$T|) {
+    into_vector($grid).destroy!(|row| row.destroy!(|cell| $f(cell)));
 }
 
 /// Finds a group of cells that satisfy the predicate `f`. The function receives
