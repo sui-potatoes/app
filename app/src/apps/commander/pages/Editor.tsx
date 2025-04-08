@@ -7,8 +7,9 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
 import { fromHex } from "@mysten/bcs";
 import { Footer } from "./Components";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useGameTransactions } from "../hooks/useGameTransactions";
+import { Modal } from "./Components";
 
 const STORAGE_KEY = "editor-state";
 
@@ -89,7 +90,10 @@ export function Field({ size, eventBus, camera, preset }: FieldProps) {
 
 export function UI({ eventBus }: { eventBus: EventBus }) {
     const [direction, setDirection] = useState("up");
+    const [showPublishModal, setShowPublishModal] = useState(false);
     const { canTransact, publishMap } = useGameTransactions({ map: null });
+    const navigate = useNavigate();
+    const [name, setName] = useState("");
     const [tool, setTool] = useState("object");
 
     useEffect(() => {
@@ -121,13 +125,52 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
                 <div className="absolute right-0 bottom-0">
                     <button
                         disabled={!canTransact}
-                        onClick={() => canTransact && publishMap(fromHex(sessionStorage.getItem(STORAGE_KEY) || ""))}
+                        onClick={() => {
+                            if (canTransact) {
+                                setShowPublishModal(true);
+                                // silly hack to focus the input
+                                setTimeout(() => document.getElementById("name")?.focus(), 100);
+                            }
+                        }}
                         className="text-center fixed flex justify-between bottom-10 right-10 p-4 text-lg border-2 border-gray-500 rounded-md"
                     >
                         publish
                     </button>
                 </div>
             </div>
+            <Modal show={showPublishModal} onClose={() => setShowPublishModal(false)}>
+                <div className="flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex justify-between">
+                        <label htmlFor="name" className="p-6">
+                            Name:
+                        </label>
+                        <input
+                            type="text"
+                            id="name"
+                            style={{ borderBottom: "1px solid grey" }}
+                            className="focus:outline-none w-full m-4 gap-2"
+                            placeholder="Map Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                        <button
+                            className="p-4 focus:outline-none"
+                            onClick={() =>
+                                publishMap(
+                                    name,
+                                    fromHex(sessionStorage.getItem(STORAGE_KEY) || ""),
+                                ).then(() => {
+                                    sessionStorage.removeItem(STORAGE_KEY);
+                                    setShowPublishModal(false);
+                                    navigate("../play");
+                                })
+                            }
+                        >
+                            Publish
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

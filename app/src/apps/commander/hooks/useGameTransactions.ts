@@ -245,15 +245,16 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     }
 
     /** Publish a map to the registry. */
-    async function publishMap(map: Uint8Array) {
+    async function publishMap(name: string, map: Uint8Array) {
         if (!canTransact) return;
 
         const tx = new Transaction();
+        const nameArg = tx.pure.string(name);
         const mapBytesArg = tx.pure(bcs.vector(bcs.u8()).serialize(map));
 
         tx.moveCall({
             target: `${packageId}::commander::register_map`,
-            arguments: [tx.object(registryId), mapBytesArg],
+            arguments: [tx.object(registryId), nameArg, mapBytesArg],
         });
         tx.setSender(zkLogin.address!);
 

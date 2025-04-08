@@ -15,10 +15,13 @@ type Props = {
 const Preset = bcs.struct("Commander", {
     id: bcs.Address,
     map: Map,
+    name: bcs.String,
     positions: bcs.vector(bcs.vector(bcs.u8())),
     author: bcs.Address,
     popularity: bcs.u64(),
 });
+
+export type Preset = typeof Preset.$inferType;
 
 export function useMaps({ enabled, refetchInterval }: Props) {
     const registryId = useNetworkVariable("commanderV2RegistryId");

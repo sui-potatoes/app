@@ -84,7 +84,7 @@ export function Options() {
                     )}
                     {!name && !zkLogin.address && <div className="yes-no non-interactive">SET</div>}
                     {name && (
-                        <div className="flex">
+                        <div className="flex" onClick={() => showNameModal()}>
                             {name}.{COMMANDER_BASE_NAME}.sui
                         </div>
                     )}
@@ -105,7 +105,7 @@ export function Options() {
                     />
                 </div>
             </div>
-            {!name && suinsModal}
+            {suinsModal}
             <Footer />
         </div>
     );
@@ -116,6 +116,39 @@ function suinsSetting() {
     const flow = useEnokiFlow();
     const client = useSuiClient();
     const name = useSuinsName({ address: zkLogin.address });
+    // TODO: get this from the network config
+    const suinsAddress = "0x22fa05f21b1ad71442491220bb9338f7b7095fe35000ef88d5400d28523bdd93";
+    const { data: names } = useSuiClientQuery(
+        "getOwnedObjects",
+        {
+            owner: zkLogin.address || "",
+            options: { showType: true, showContent: true },
+            filter: {
+                StructType: `${suinsAddress}::subdomain_registration::SubDomainRegistration`,
+            },
+        },
+        {
+            enabled: !!zkLogin.address,
+            select: (data) => {
+                return data.data.map((obj) => {
+                    if (!obj.data?.content) return null;
+                    if (obj.data.content.dataType !== "moveObject") return null;
+
+                    const fields = obj.data.content.fields as any;
+
+                    return {
+                        ...fields.nft.fields,
+                        objectId: obj.data.objectId,
+                        digest: obj.data.digest,
+                        type: obj.data.type,
+                    };
+                });
+            },
+        },
+    );
+
+    console.log(names);
+
     const packageId = useNetworkVariable("commanderRegistryPackageId");
     const registry = useNetworkVariable("commanderNamesObjectId");
     const [showModal, setShowModal] = useState(false);
@@ -126,7 +159,7 @@ function suinsSetting() {
         enabled: !!zkLogin.address,
     });
     const nsClient = new SuinsClient({ client, network: "testnet" });
-    const [suinsName, setSuinsName] = useState("");
+    const [suinsName, setSuinsName] = useState(name || "");
 
     return {
         name,
@@ -137,10 +170,15 @@ function suinsSetting() {
                     className="m-auto border border-grey p-10 w-2xl"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <h1 className="text-xl uppercase mb-10 text-center">Choose an in-game name</h1>
+                    {
+                        <h1 className="text-xl uppercase mb-10 text-center">
+                            {name ? "Change" : "Choose"} an in-game name
+                        </h1>
+                    }
                     <input
                         id="suins"
                         type="text"
+                        value={suinsName}
                         className="bg-black w-full h-10 text-lg text-white border border-grey uppercase p-4"
                         placeholder="Enter name..."
                         onChange={(e) => setSuinsName(e.target.value)}
@@ -169,7 +207,6 @@ function suinsSetting() {
             arguments: [registryArg],
         });
 
-        // @ts-ignore
         const nsTx = new SuinsTransaction(nsClient, tx);
         const subname = nsTx.createSubName({
             parentNft: ns,

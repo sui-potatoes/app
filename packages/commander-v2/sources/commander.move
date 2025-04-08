@@ -5,6 +5,7 @@
 module commander::commander;
 
 use commander::{history::{Self, History}, map::{Self, Map}, recruit::Recruit};
+use std::string::String;
 use sui::{
     clock::Clock,
     object_table::{Self, ObjectTable},
@@ -31,6 +32,8 @@ public struct Preset has key {
     id: UID,
     /// The map that will be cloned and used for the new game.
     map: Map,
+    /// The name of the preset, purely for display purposes.
+    name: String,
     /// Stores the spawn positions of recruits.
     positions: vector<vector<u8>>,
     /// The author of the preset.
@@ -67,13 +70,13 @@ public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut Tx
 }
 
 /// Register a new `Map` so it can be played.
-public fun register_map(cmd: &mut Commander, bytes: vector<u8>, ctx: &mut TxContext) {
+public fun register_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx: &mut TxContext) {
     let mut map = map::from_bytes(bytes);
     let id = object::new(ctx);
 
     map.set_id(id.to_inner());
     transfer::transfer(
-        Preset { id, map, positions: vector[], author: ctx.sender(), popularity: 0 },
+        Preset { id, name, map, positions: vector[], author: ctx.sender(), popularity: 0 },
         cmd.id.to_address(),
     );
 }
@@ -188,10 +191,11 @@ fun init(ctx: &mut TxContext) {
     // positions:
     // [0, 3]
     // [6, 5]
-    
+
     transfer::transfer(
         Preset {
             id: object::new(ctx),
+            name: b"Demo 1".to_string(),
             map: map::demo_1(@0.to_id()),
             positions: vector[],
             author: @0,
@@ -209,6 +213,7 @@ fun init(ctx: &mut TxContext) {
     transfer::transfer(
         Preset {
             id: object::new(ctx),
+            name: b"Demo 2".to_string(),
             map: map::demo_2(@1.to_id()),
             positions: vector[],
             author: @0,

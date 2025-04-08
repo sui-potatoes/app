@@ -345,10 +345,14 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
         const isRight = target.gridPosition.y > unit.gridPosition.y;
 
         if (targetTile.type === "Cover") {
-            if (isUp && isLeft) return Math.min(targetTile.down, targetTile.right) * DEFENSE_MULTIPLIER;
-            if (isUp && isRight) return Math.min(targetTile.down, targetTile.left) * DEFENSE_MULTIPLIER;
-            if (isDown && isLeft) return Math.min(targetTile.up, targetTile.right) * DEFENSE_MULTIPLIER;
-            if (isDown && isRight) return Math.min(targetTile.up, targetTile.left) * DEFENSE_MULTIPLIER;
+            if (isUp && isLeft)
+                return Math.min(targetTile.down, targetTile.right) * DEFENSE_MULTIPLIER;
+            if (isUp && isRight)
+                return Math.min(targetTile.down, targetTile.left) * DEFENSE_MULTIPLIER;
+            if (isDown && isLeft)
+                return Math.min(targetTile.up, targetTile.right) * DEFENSE_MULTIPLIER;
+            if (isDown && isRight)
+                return Math.min(targetTile.up, targetTile.left) * DEFENSE_MULTIPLIER;
         }
     }
 

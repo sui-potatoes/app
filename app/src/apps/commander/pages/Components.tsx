@@ -166,7 +166,7 @@ type ModalProps = {
 export function Modal({ children, show, onClose }: ModalProps) {
     return (
         <div
-            className="absolute h-screen w-full bg-black/90 overflow-auto"
+            className="absolute top-0 left-0 h-screen w-full bg-black/90 overflow-auto"
             style={{ display: show ? "flex" : "none" }}
             onClick={onClose}
         >
