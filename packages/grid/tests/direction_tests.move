@@ -15,19 +15,6 @@ fun is_direction() {
 }
 
 #[test]
-fun direction_number() {
-    assert_eq!(direction::up!(), 1);
-    assert_eq!(direction::up_right!(), 2);
-    assert_eq!(direction::right!(), 3);
-    assert_eq!(direction::down_right!(), 4);
-    assert_eq!(direction::down!(), 5);
-    assert_eq!(direction::down_left!(), 6);
-    assert_eq!(direction::left!(), 7);
-    assert_eq!(direction::up_left!(), 8);
-    assert_eq!(direction::none!(), 0);
-}
-
-#[test]
 fun direction() {
     assert_eq!(direction::direction!(0, 0, 0, 0), direction::none!());
     assert_eq!(direction::direction!(0, 0, 1, 0), direction::down!());

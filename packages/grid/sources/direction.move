@@ -107,28 +107,28 @@ public macro fun is_same_tile($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool {
 // === Constants ===
 
 /// Direction: up
-public macro fun up(): u8 { 0 | 1 << 0 }
+public macro fun up(): u8 { 1 << 0 }
 
 /// Direction: right
-public macro fun right(): u8 { 0 | 1 << 1 }
+public macro fun right(): u8 { 1 << 1 }
 
 /// Direction: down
-public macro fun down(): u8 { 0 | 1 << 2 }
+public macro fun down(): u8 { 1 << 2 }
 
 /// Direction: left
-public macro fun left(): u8 { 0 | 1 << 3 }
+public macro fun left(): u8 { 1 << 3 }
 
 /// Direction: up & right
-public macro fun up_right(): u8 { 0 | 1 << 0 | 1 << 0 }
+public macro fun up_right(): u8 { up!() | right!() }
 
 /// Direction: down & right
-public macro fun down_right(): u8 { 0 | 1 << 2 | 1 << 1 }
+public macro fun down_right(): u8 { down!() | right!() }
 
 /// Direction: down & left
-public macro fun down_left(): u8 { 0 | 1 << 2 | 1 << 3 }
+public macro fun down_left(): u8 { down!() | left!() }
 
 /// Direction: up & left
-public macro fun up_left(): u8 { 0 | 1 << 0 | 1 << 3 }
+public macro fun up_left(): u8 { up!() | left!() }
 
 /// Direction: none
 public macro fun none(): u8 { 0 }
