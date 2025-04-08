@@ -457,11 +457,9 @@ public fun add_stop(gradient: &mut Shape, offset: String, color: String) {
 public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
     let shape_type = &mut shape.shape;
 
-    shape.position = option::some(point::point(x, y));
-
     match (shape_type) {
         ShapeType::Circle(_) => {
-            let (cx, cy) = shape.position.extract().to_values();
+            let (cx, cy) = point::point(x, y).to_values();
             shape.attributes.insert(b"cx".to_string(), cx.to_string());
             shape.attributes.insert(b"cy".to_string(), cy.to_string());
         },
@@ -483,7 +481,9 @@ public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
 
             shape.attributes_mut().insert(b"transform".to_string(), value);
         },
-        _ => (),
+        _ => {
+            shape.position = option::some(point::point(x, y));
+        },
     };
 
     shape
