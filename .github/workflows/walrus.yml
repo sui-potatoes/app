@@ -25,6 +25,7 @@ env:
     staking_object: 0x10b9d30c28448939ce6c4d6c6e0ffce4a7f8a4ada8248bdad09ef8b70e4a3904
     wallet_config:
       path: ./client.yaml
+      active_env: mainnet
 
 jobs:
   frontend-app-build:
@@ -83,4 +84,4 @@ jobs:
         env:
           VITE_ENOKI_API_KEY: ${{ secrets.ENOKI_PUBLIC_KEY }}
       - name: Upload to walrus sites
-        run: site-builder --walrus-config walrus.yaml --config ../sites.yaml update --epochs 1 dist ${{ env.SITE_OBJECT_ID }}
+        run: site-builder --walrus-config walrus.yaml --config ../sites.yaml update --epochs 5 dist ${{ env.SITE_OBJECT_ID }}
