@@ -453,7 +453,7 @@ public fun add_stop(gradient: &mut Shape, offset: String, color: String) {
     stops.push_back(Stop { offset, color });
 }
 
-/// Move a shape.
+/// Move a shape, add `x` and `y` to the attributes of the shape.
 public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
     let shape_type = &mut shape.shape;
 
@@ -483,7 +483,7 @@ public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
 
             shape.attributes_mut().insert(b"transform".to_string(), value);
         },
-        _ => abort ENotImplemented,
+        _ => (),
     };
 
     shape
