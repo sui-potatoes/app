@@ -5,7 +5,7 @@
 /// than building paths on every step (unless absolutely necessary).
 module svg::path_builder;
 
-use std::{string::String, unit_test::assert_eq};
+use std::string::String;
 use svg::shape::{Self, Shape};
 
 /// The builder for the SVG path attribute.
@@ -218,6 +218,8 @@ public fun command_to_string(cmd: &Command): String {
 
 #[test]
 fun test_path_builder() {
+    use std::unit_test::assert_eq;
+
     let str = new().move_to(10, 10).line_to(20, 20).to_string();
     assert_eq!(str, b"M10,10L20,20".to_string());
 
