@@ -87,4 +87,4 @@ jobs:
         env:
           VITE_ENOKI_API_KEY: ${{ secrets.ENOKI_PUBLIC_KEY }}
       - name: Upload to walrus sites
-        run: site-builder --walrus-config walrus.yaml --force --config ../sites.yaml update --epochs 5 dist ${{ env.SITE_OBJECT_ID }}
+        run: site-builder --walrus-config walrus.yaml --config ../sites.yaml update --force --epochs 5 dist ${{ env.SITE_OBJECT_ID }}
