@@ -59,6 +59,8 @@ fun test_encode_decode() {
         encode(annoying_str),
         b"YWJjIGRlZiBnaGkgamtsIG1ubyBwcXJzIHR1diB3eHl6IEFCQyBERUYgR0hJIEpLTCBNTk8gUFFSUyBUVVYgV1hZWiAvKCkgPT8qICcge30gYWJjIGRlZiBnaGkgamtsIG1ubyBwcXJzIHR1diB3eHl6IEFCQyBERUYgR0hJIEpLTCBNTk8gUFFSUyBUVVYgV1hZWiAh".to_string(),
     );
+
+    assert_eq!(encode(b"<<???>>"), b"PDw_Pz8-Pg".to_string());
 }
 
 #[random_test]
