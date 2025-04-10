@@ -23,12 +23,12 @@ const KEYS: vector<u8> = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0
 
 /// Encode the `str` to base64url.
 public fun encode(bytes: vector<u8>): String {
-    base64::encode_impl!(bytes, KEYS, false)
+    base64::encode_impl!(bytes, KEYS, true)
 }
 
 /// Decode the base64 `str`.
 public fun decode(str: String): vector<u8> {
-    base64::decode_impl!(str, KEYS)
+    base64::decode_impl!(str, KEYS, true)
 }
 
 #[test]
@@ -52,10 +52,20 @@ fun test_encode_decode() {
         decode(b"G_yJ1_4w0Cqtc5b4QqVlSxW2ejaOx4nDdn6SLEe_h48".to_string()),
         x"1bfc89d7fe30d02aad7396f842a5654b15b67a368ec789c3767e922c47bf878f",
     );
+
+    assert_eq!(
+        encode(x"1bfc89d7fe30d02aad7396f842a5654b15b67a368ec789c3767e922c47bf878f"),
+        b"G_yJ1_4w0Cqtc5b4QqVlSxW2ejaOx4nDdn6SLEe_h48".to_string(),
+    );
+
+    assert_eq!(
+        encode(annoying_str),
+        b"YWJjIGRlZiBnaGkgamtsIG1ubyBwcXJzIHR1diB3eHl6IEFCQyBERUYgR0hJIEpLTCBNTk8gUFFSUyBUVVYgV1hZWiAvKCkgPT8qICcge30gYWJjIGRlZiBnaGkgamtsIG1ubyBwcXJzIHR1diB3eHl6IEFCQyBERUYgR0hJIEpLTCBNTk8gUFFSUyBUVVYgV1hZWiAh".to_string(),
+    );
 }
 
-// // #[random_test]
-// // fun test_encode_random(bytes: vector<u8>) {
-// //     use std::unit_test::assert_eq;
-// //     assert_eq!(decode(encode(bytes)), bytes);
-// // }
+#[random_test]
+fun test_encode_random(bytes: vector<u8>) {
+    use std::unit_test::assert_eq;
+    assert_eq!(decode(encode(bytes)), bytes);
+}

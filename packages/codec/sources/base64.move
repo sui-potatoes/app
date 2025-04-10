@@ -20,12 +20,12 @@ const KEYS: vector<u8> = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0
 
 /// Encode the `str` to base64.
 public fun encode(bytes: vector<u8>): String {
-    encode_impl!(bytes, KEYS, true)
+    encode_impl!(bytes, KEYS, false)
 }
 
 /// Decode the base64 `str`.
 public fun decode(str: String): vector<u8> {
-    decode_impl!(str, KEYS)
+    decode_impl!(str, KEYS, false)
 }
 
 /// Internal macro for base64-based encodings, allows to use different dictionaries
@@ -33,7 +33,7 @@ public fun decode(str: String): vector<u8> {
 public(package) macro fun encode_impl(
     $bytes: vector<u8>,
     $dictionary: vector<u8>,
-    $pad: bool,
+    $url_safe: bool,
 ): String {
     let mut bytes = $bytes;
     let keys = $dictionary;
@@ -54,10 +54,8 @@ public(package) macro fun encode_impl(
 
         res.push_back(keys[c1 as u64]);
         res.push_back(keys[c2 as u64]);
-        res.push_back(keys[c3 as u64]);
-        res.push_back(keys[c4 as u64]);
-        // if ($pad || c3 != 64) res.push_back(keys[c3 as u64]);
-        // if ($pad || c4 != 64) res.push_back(keys[c4 as u64]);
+        if (!$url_safe || c3 != 64) res.push_back(keys[c3 as u64]);
+        if (!$url_safe || c4 != 64) res.push_back(keys[c4 as u64]);
 
         len = len - count;
     };
@@ -65,13 +63,17 @@ public(package) macro fun encode_impl(
     res.to_string()
 }
 
-public(package) macro fun decode_impl($str: String, $dictionary: vector<u8>): vector<u8> {
+public(package) macro fun decode_impl(
+    $str: String,
+    $dictionary: vector<u8>,
+    $url_safe: bool,
+): vector<u8> {
     let keys = $dictionary;
     let str = $str;
     let mut res = vector[];
 
     // Ensure the length is a multiple of 4.
-    // assert!(str.length() % 4 == 0, 1);
+    if (!$url_safe) assert!(str.length() % 4 == 0, 1);
 
     let mut buffer = 0u32;
     let mut bits_collected = 0;
