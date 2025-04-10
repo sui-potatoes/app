@@ -80,6 +80,12 @@ fun test_is_ascii_character() {
     x"F09F9098".to_string().into_bytes().do!(|c| assert!(!is_ascii(c)));
 }
 
+#[random_test]
+fun test_decode_random(bytes: vector<u8>) {
+    use std::unit_test::assert_eq;
+    assert_eq!(decode(encode(bytes)), bytes);
+}
+
 #[test]
 fun test_urlencode() {
     use std::unit_test::assert_eq;

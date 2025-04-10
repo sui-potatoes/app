@@ -1,13 +1,17 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Module: base64
+/// Base64 encoding.
+///
+/// See [RFC 4648; Section 4](https://datatracker.ietf.org/doc/html/rfc4648#section-4) for more details.
 module codec::base64;
 
 use std::string::String;
 
+#[allow(unused_const)]
 /// Error code for illegal character.
 const EIllegalCharacter: u64 = 0;
+#[allow(unused_const)]
 /// Error code for incorrect number of characters.
 const EIncorrectNumberOfCharacters: u64 = 1;
 
@@ -15,8 +19,24 @@ const EIncorrectNumberOfCharacters: u64 = 1;
 const KEYS: vector<u8> = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
 /// Encode the `str` to base64.
-public fun encode(mut bytes: vector<u8>): String {
-    let keys = KEYS;
+public fun encode(bytes: vector<u8>): String {
+    encode_impl!(bytes, KEYS, true)
+}
+
+/// Decode the base64 `str`.
+public fun decode(str: String): vector<u8> {
+    decode_impl!(str, KEYS)
+}
+
+/// Internal macro for base64-based encodings, allows to use different dictionaries
+/// and control padding.
+public(package) macro fun encode_impl(
+    $bytes: vector<u8>,
+    $dictionary: vector<u8>,
+    $pad: bool,
+): String {
+    let mut bytes = $bytes;
+    let keys = $dictionary;
     let mut res = vector[];
     let mut len = bytes.length();
     bytes.reverse();
@@ -36,8 +56,8 @@ public fun encode(mut bytes: vector<u8>): String {
 
         let c1 = b1 >> 2;
         let c2 = ((b1 & 3) << 4) | (b2 >> 4);
-        let c3 = if (b2 == 0) 64 else ((b2 & 15) << 2) | (b3 >> 6);
-        let c4 = if (b3 == 0) 64 else b3 & 63;
+        let c3 = if (len == 0 && b2 == 0) 64 else ((b2 & 15) << 2) | (b3 >> 6);
+        let c4 = if (len == 0 && b3 == 0) 64 else b3 & 63;
 
         res.append(vector[keys[c1 as u64], keys[c2 as u64], keys[c3 as u64], keys[c4 as u64]]);
     };
@@ -45,16 +65,16 @@ public fun encode(mut bytes: vector<u8>): String {
     res.to_string()
 }
 
-/// Decode the base64 `str`.
-public fun decode(str: String): vector<u8> {
-    let keys = KEYS;
+public(package) macro fun decode_impl($str: String, $dictionary: vector<u8>): vector<u8> {
+    let keys = $dictionary;
+    let str = $str;
     let mut res = vector[];
     let mut bytes = str.into_bytes();
     let mut len = bytes.length();
     bytes.reverse();
 
     // Ensure the length is a multiple of 4.
-    assert!(bytes.length() % 4 == 0, EIncorrectNumberOfCharacters);
+    assert!(len % 4 == 0, 1);
 
     while (len > 0) {
         let (res1, b1) = keys.index_of(&bytes.pop_back());
@@ -62,7 +82,7 @@ public fun decode(str: String): vector<u8> {
         let (res3, b3) = keys.index_of(&bytes.pop_back());
         let (res4, b4) = keys.index_of(&bytes.pop_back());
 
-        assert!(res1 && res2 && res3 && res4, EIllegalCharacter);
+        assert!(res1 && res2 && res3 && res4, 0); //
 
         let c1 = (b1 << 2) | (b2 >> 4);
         let c2 = ((b2 & 15) << 4) | (b3 >> 2);
@@ -90,6 +110,12 @@ fun test_encode() {
     assert_eq!(encode(b"/"), b"Lw==".to_string());
     assert_eq!(encode(b"//"), b"Ly8=".to_string());
     assert_eq!(encode(b"///"), b"Ly8v".to_string());
+}
+
+#[random_test]
+fun test_decode_random(bytes: vector<u8>) {
+    use std::unit_test::assert_eq;
+    assert_eq!(decode(encode(bytes)), bytes);
 }
 
 #[test]

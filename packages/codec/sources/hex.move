@@ -28,6 +28,12 @@ fun test_encode_decode() {
     encode_decode(b"🦄🦄🦄🦄🦄");
 }
 
+#[random_test]
+fun test_decode_random(bytes: vector<u8>) {
+    use std::unit_test::assert_eq;
+    assert_eq!(decode(encode(bytes)), bytes);
+}
+
 #[test_only]
 fun encode_decode(bytes: vector<u8>) {
     use std::unit_test::assert_eq;

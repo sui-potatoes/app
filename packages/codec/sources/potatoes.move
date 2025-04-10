@@ -88,6 +88,12 @@ fun test_check_character_set_length() {
     assert_eq!(set.length(), 256);
 }
 
+#[random_test]
+fun test_decode_random(bytes: vector<u8>) {
+    use std::unit_test::assert_eq;
+    assert_eq!(decode(encode(bytes)), bytes);
+}
+
 #[test]
 fun test_encode() {
     use std::unit_test::assert_eq;
