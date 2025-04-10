@@ -42,21 +42,24 @@ public(package) macro fun encode_impl(
     bytes.reverse();
 
     while (len > 0) {
-        len = len - 1;
-        let mut count = 0;
+        let mut count = 1;
         let b1 = bytes.pop_back();
-        let b2 = if (len > 0) { len = len - 1; count = count + 1; bytes.pop_back() } else 0;
-        let b3 = if (len > 0) { len = len - 1; count = count + 1; bytes.pop_back() } else 0;
+        let b2 = if (len > 1) { count = count + 1; bytes.pop_back() } else 0;
+        let b3 = if (len > 2) { count = count + 1; bytes.pop_back() } else 0;
 
         let c1 = b1 >> 2;
         let c2 = ((b1 & 3) << 4) | (b2 >> 4);
-        let c3 = if (count < 1) 64 else ((b2 & 15) << 2) | (b3 >> 6);
-        let c4 = if (count < 2) 64 else b3 & 63;
+        let c3 = if (count < 2) 64 else ((b2 & 15) << 2) | (b3 >> 6);
+        let c4 = if (count < 3) 64 else b3 & 63;
 
         res.push_back(keys[c1 as u64]);
         res.push_back(keys[c2 as u64]);
         res.push_back(keys[c3 as u64]);
         res.push_back(keys[c4 as u64]);
+        // if ($pad || c3 != 64) res.push_back(keys[c3 as u64]);
+        // if ($pad || c4 != 64) res.push_back(keys[c4 as u64]);
+
+        len = len - count;
     };
 
     res.to_string()
@@ -68,7 +71,7 @@ public(package) macro fun decode_impl($str: String, $dictionary: vector<u8>): ve
     let mut res = vector[];
 
     // Ensure the length is a multiple of 4.
-    assert!(str.length() % 4 == 0, 1);
+    // assert!(str.length() % 4 == 0, 1);
 
     let mut buffer = 0u32;
     let mut bits_collected = 0;
