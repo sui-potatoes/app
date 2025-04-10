@@ -14,7 +14,6 @@ type Recruit = typeof Recruit.$inferType;
  * The length of the log displayed in the UI.
  */
 const LOG_LENGTH = 5;
-const LS_KEY = "commander-v2";
 
 const BUTTON_CONTENTS: Record<UIKey, string | JSX.Element> = {
     shoot: <img src="/images/icon_target.svg" />,
@@ -25,6 +24,7 @@ const BUTTON_CONTENTS: Record<UIKey, string | JSX.Element> = {
     next_target: ">",
     prev_target: "<",
     edit: "edit",
+    exit: "exit",
     next_turn: <img src="/images/icon_clock.svg" />,
 };
 
@@ -174,15 +174,7 @@ export function UI({
                 {button("confirm", panelDisabled)}
                 {button("cancel", panelDisabled)}
                 {button("edit")}
-                <button
-                    className={"action-button interactive mt-40" + (isExecuting ? " disabled" : "")}
-                    onClick={() => {
-                        sessionStorage.removeItem(LS_KEY);
-                        window.location.reload();
-                    }}
-                >
-                    Exit
-                </button>
+                {button("exit")}
             </div>
         </div>
     );

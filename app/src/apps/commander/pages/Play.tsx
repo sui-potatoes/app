@@ -53,6 +53,7 @@ export function Playground() {
         eventBus.addEventListener("game:reload:perform", onGameReload);
         eventBus.addEventListener("game:grenade:target", onGameGrenade);
         eventBus.addEventListener("ui:next_turn", onNextTurn);
+        eventBus.addEventListener("ui:exit", onExit);
 
         return () => {
             eventBus.removeEventListener("game:shoot:aim", onGameAim);
@@ -297,6 +298,19 @@ export function Playground() {
                 turn: first.NextTurn,
             });
         }
+    }
+
+    async function onExit() {
+        if (!map) return;
+
+        const result = await tx.destroyGame(map.objectId).catch(catchDryRunError);
+
+        if (!result) throw new Error("Failed to execute destroy game transaction");
+
+        console.log("Game destroyed");
+
+        sessionStorage.removeItem(LS_KEY);
+        setMapKey(null);
     }
 
     /** Universal try-catch mechanism for all dry runs */

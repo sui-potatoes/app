@@ -28,6 +28,8 @@ export function printEvent(eventKey: keyof EventMap, map: Partial<EventMap>): st
             return `UI: Shoot mode activated`;
         case "ui:next_turn":
             return `UI: Next turn requested`;
+        case "ui:exit":
+            return `UI: Exiting...`;
 
         // Game events block
         case "game:unit_selected":

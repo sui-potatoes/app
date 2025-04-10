@@ -42,6 +42,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         nextTurn,
         isExecuting,
         executeLocked,
+        destroyGame,
     };
 
     /**
@@ -244,6 +245,19 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         return await executeTransaction(tx);
     }
 
+    async function destroyGame(gameId: string) {
+        if (!canTransact) return;
+
+        const tx = new Transaction();
+        tx.moveCall({
+            target: `${packageId}::commander::destroy_game`,
+            arguments: [tx.object(registryId), tx.object(gameId)],
+        });
+        tx.setSender(zkLogin.address!);
+
+        return await executeTransaction(tx);
+    }
+
     /** Publish a map to the registry. */
     async function publishMap(name: string, map: Uint8Array) {
         if (!canTransact) return;
@@ -253,7 +267,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         const mapBytesArg = tx.pure(bcs.vector(bcs.u8()).serialize(map));
 
         tx.moveCall({
-            target: `${packageId}::commander::register_map`,
+            target: `${packageId}::commander::publish_map`,
             arguments: [tx.object(registryId), nameArg, mapBytesArg],
         });
         tx.setSender(zkLogin.address!);
