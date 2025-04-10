@@ -14,7 +14,6 @@ type Recruit = typeof Recruit.$inferType;
  * The length of the log displayed in the UI.
  */
 const LOG_LENGTH = 5;
-const LS_KEY = "commander-v2";
 
 const BUTTON_CONTENTS: Record<UIKey, string | JSX.Element> = {
     shoot: <img src="/images/icon_target.svg" />,
