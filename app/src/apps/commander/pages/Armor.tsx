@@ -49,6 +49,7 @@ export function Armor() {
         signer: () => flow.getKeypair({ network: "testnet" }),
         enabled: !!zkLogin.address,
     });
+    const canTransact = !!zkLogin.address && !!executeTransaction;
 
     if (isError) {
         return (
@@ -94,7 +95,7 @@ export function Armor() {
                             ))}
                         </div>
                         <div
-                            className="options-row interactive mt-10"
+                            className={`options-row mt-10 ${!canTransact ? "non-interactive" : "interactive"}`}
                             onClick={() => mintArmor(rngTier())}
                         >
                             <div>New random piece</div>

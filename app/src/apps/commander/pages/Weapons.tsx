@@ -48,6 +48,7 @@ export function Weapons() {
         signer: () => flow.getKeypair({ network: "testnet" }),
         enabled: !!zkLogin.address,
     });
+    const canTransact = !!zkLogin.address && !!executeTransaction;
 
     if (isError) {
         return (
@@ -101,7 +102,7 @@ export function Weapons() {
                             ))}
                         </div>
                         <div
-                            className="options-row mt-10 interactive"
+                            className={`options-row mt-10 ${!canTransact ? "non-interactive" : "interactive"}`}
                             onClick={() => mintWeapon(rngTier(), { ...rngUpgrade() })}
                         >
                             <div>New random weapon</div>

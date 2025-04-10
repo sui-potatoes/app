@@ -44,7 +44,8 @@ export type UIKey =
     | "prev_target"
     | "confirm"
     | "cancel"
-    | "edit";
+    | "edit"
+    | "exit";
 
 type HistoryRecord = typeof HistoryRecord.$inferType;
 type HistoryKey = Exclude<keyof HistoryRecord, "$kind">;

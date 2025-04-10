@@ -59,27 +59,19 @@ export function Crew() {
         data: recruits,
         refetch,
         isPending,
-    } = useRecruits({
-        owner: zkLogin.address!,
-        enabled: !!zkLogin.address,
-    });
+    } = useRecruits({ owner: zkLogin.address!, enabled: !!zkLogin.address });
 
     const {
         data: weapons,
         refetch: refetchWeapons,
-        isPending: _weaponsFetching,
-    } = useWeapons({
-        address: zkLogin.address,
-        unique: true,
-    });
+        isPending: weaponsFetching,
+    } = useWeapons({ address: zkLogin.address, unique: true });
+
     const {
         data: armors,
         refetch: refetchArmors,
-        isPending: _armorsFetching,
-    } = useArmor({
-        address: zkLogin.address,
-        unique: true,
-    });
+        isPending: armorsFetching,
+    } = useArmor({ address: zkLogin.address, unique: true });
 
     const { executeTransaction, isExecuting } = useTransactionExecutor({
         // @ts-ignore
@@ -87,6 +79,7 @@ export function Crew() {
         signer: () => flow.getKeypair({ network: "testnet" }),
         enabled: !!zkLogin.address,
     });
+    const canTransact = !!zkLogin.address && !!executeTransaction;
 
     if (weapons && selected?.weapon) weapons.unshift(selected.weapon as Weapon);
     if (armors && selected?.armor && !armors.some((a) => a.name == selected.armor?.name)) {
@@ -122,7 +115,7 @@ export function Crew() {
                         </div>
                         <div
                             key="new-recruit"
-                            className={`options-row interactive text-center ${(recruits?.length || 0) > 1 ? "mt-10" : ""}`}
+                            className={`options-row text-center ${(recruits?.length || 0) > 1 ? "mt-10" : ""} ${!canTransact ? "non-interactive" : "interactive"}`}
                             onClick={hireRecruit}
                         >
                             <div>NEW HIRE</div>
@@ -245,8 +238,14 @@ export function Crew() {
                 {/* armor selection modal */}
                 {showModal === "armor" && (
                     <div className="flex justify-between" onClick={(e) => e.preventDefault()}>
-                        {_armorsFetching && <Loader />}
-                        {!_armorsFetching &&
+                        {armors?.length == 0 && (
+                            <div className="m-auto flex flex-col items-center">
+                                <p>Armor inventory is empty.</p>
+                                <p>Win armor by challenging other players</p>
+                            </div>
+                        )}
+                        {armorsFetching && <Loader />}
+                        {!armorsFetching &&
                             armors?.reverse().map((a) => {
                                 const isSelected = a.name == selected?.armor?.name;
                                 return (
@@ -288,11 +287,18 @@ export function Crew() {
                 {showModal === "weapon" && (
                     <div
                         onClick={(e) => e.preventDefault()}
+                        className="flex flex-col"
                         style={{ height: "95vh", marginTop: "5vh" }}
                     >
-                        {_weaponsFetching && <Loader />}
+                        {weapons?.length == 0 && (
+                            <div className="m-auto flex flex-col items-center">
+                                <p>Weapon inventory is empty.</p>
+                                <p>Win weapons by challenging other players</p>
+                            </div>
+                        )}
+                        {weaponsFetching && <Loader />}
                         <div className="mt-10"></div>
-                        {!_weaponsFetching &&
+                        {!weaponsFetching &&
                             weapons?.map((w) => {
                                 const isSelected = selected?.weapon?.id == w.id;
 

@@ -56,7 +56,7 @@ public struct Game has key {
 // === Map Registration & Removal ===
 
 /// Register a new `Map` so it can be played.
-public fun register_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx: &mut TxContext) {
+public fun publish_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx: &mut TxContext) {
     let mut map = map::from_bytes(bytes);
     let id = object::new(ctx);
 
@@ -113,6 +113,8 @@ public fun destroy_game(cmd: &mut Commander, game: Game, ctx: &mut TxContext) {
     recruits.destroy_empty();
     id.delete();
 }
+
+// === Game Actions ===
 
 /// Place a Recruit on the map, store it in the `Game`.
 public fun place_recruit(game: &mut Game, recruit: Recruit, x: u16, y: u16, ctx: &mut TxContext) {

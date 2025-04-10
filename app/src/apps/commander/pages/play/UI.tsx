@@ -25,6 +25,7 @@ const BUTTON_CONTENTS: Record<UIKey, string | JSX.Element> = {
     next_target: ">",
     prev_target: "<",
     edit: "edit",
+    exit: "exit",
     next_turn: <img src="/images/icon_clock.svg" />,
 };
 
@@ -174,15 +175,7 @@ export function UI({
                 {button("confirm", panelDisabled)}
                 {button("cancel", panelDisabled)}
                 {button("edit")}
-                <button
-                    className={"action-button interactive mt-40" + (isExecuting ? " disabled" : "")}
-                    onClick={() => {
-                        sessionStorage.removeItem(LS_KEY);
-                        window.location.reload();
-                    }}
-                >
-                    Exit
-                </button>
+                {button("exit")}
             </div>
         </div>
     );

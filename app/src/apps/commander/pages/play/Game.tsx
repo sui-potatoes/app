@@ -101,10 +101,10 @@ function App({ map, camera, eventBus, history }: AppProps) {
         // ui event handler
         eventBus.addEventListener("ui:cancel", onUICancel);
         eventBus.addEventListener("ui:confirm", onUIConfirm);
-        eventBus.addEventListener("ui:grenade", onGrenadeMode);
-        eventBus.addEventListener("ui:shoot", onShootMode);
-        eventBus.addEventListener("ui:reload", onReloadMode);
-        eventBus.addEventListener("ui:edit", onEditMode);
+        eventBus.addEventListener("ui:grenade", onUIGrenadeMode);
+        eventBus.addEventListener("ui:shoot", onUIShootMode);
+        eventBus.addEventListener("ui:reload", onUIReloadMode);
+        eventBus.addEventListener("ui:edit", onUIEditMode);
 
         return () => {
             controls.removeEventListener("scroll", onScroll);
@@ -142,19 +142,19 @@ function App({ map, camera, eventBus, history }: AppProps) {
         game.turn = event.turn;
     }
 
-    function onEditMode() {
+    function onUIEditMode() {
         game.switchMode(new EditMode(controls));
     }
 
-    function onReloadMode() {
+    function onUIReloadMode() {
         game.switchMode(new ReloadMode());
     }
 
-    function onShootMode() {
+    function onUIShootMode() {
         game.switchMode(new ShootMode(camera, controls));
     }
 
-    function onGrenadeMode() {
+    function onUIGrenadeMode() {
         game.switchMode(new GrenadeMode(controls));
     }
 
