@@ -43,14 +43,15 @@ public(package) macro fun encode_impl(
 
     while (len > 0) {
         len = len - 1;
+        let mut count = 0;
         let b1 = bytes.pop_back();
-        let b2 = if (len > 0) { len = len - 1; bytes.pop_back() } else 0;
-        let b3 = if (len > 0) { len = len - 1; bytes.pop_back() } else 0;
+        let b2 = if (len > 0) { len = len - 1; count = count + 1; bytes.pop_back() } else 0;
+        let b3 = if (len > 0) { len = len - 1; count = count + 1; bytes.pop_back() } else 0;
 
         let c1 = b1 >> 2;
         let c2 = ((b1 & 3) << 4) | (b2 >> 4);
-        let c3 = if (b2 == 0) 64 else ((b2 & 15) << 2) | (b3 >> 6);
-        let c4 = if (b3 == 0) 64 else b3 & 63;
+        let c3 = if (count < 1) 64 else ((b2 & 15) << 2) | (b3 >> 6);
+        let c4 = if (count < 2) 64 else b3 & 63;
 
         res.push_back(keys[c1 as u64]);
         res.push_back(keys[c2 as u64]);
@@ -73,9 +74,9 @@ public(package) macro fun decode_impl($str: String, $dictionary: vector<u8>): ve
     let mut bits_collected = 0;
 
     str.into_bytes().do!(|byte| {
+        if (byte == 61) return; // ascii for '='
         let (res1, val) = keys.index_of(&byte);
         assert!(res1, 0);
-        if (val == 64) return;
         buffer = (buffer << 6) | (val as u32);
         bits_collected = bits_collected + 6;
 
@@ -107,8 +108,6 @@ fun test_encode() {
 #[random_test]
 fun test_decode_random(bytes: vector<u8>) {
     use std::unit_test::assert_eq;
-    // std::debug::print(&encode(bytes));
-    let encoded = encode(bytes);
     assert_eq!(decode(encode(bytes)), bytes);
 }
 
