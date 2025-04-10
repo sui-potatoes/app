@@ -15,10 +15,10 @@ const EIllegalCharacter: u64 = 0;
 /// Error code for incorrect number of characters.
 const EIncorrectNumberOfCharacters: u64 = 1;
 
-/// Base64 keys.
+/// Dictionary for base64 encoding.
 const KEYS: vector<u8> = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
-/// Encode the `str` to base64.
+/// Encode the `bytes` into base64 String.
 public fun encode(bytes: vector<u8>): String {
     encode_impl!(bytes, KEYS, false)
 }
@@ -63,6 +63,8 @@ public(package) macro fun encode_impl(
     res.to_string()
 }
 
+/// Internal macro for base64-based decodings, allows to use different dictionaries
+/// and control padding (for url-safe encoding).
 public(package) macro fun decode_impl(
     $str: String,
     $dictionary: vector<u8>,

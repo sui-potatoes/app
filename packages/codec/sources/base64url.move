@@ -14,19 +14,16 @@ use std::string::String;
 #[allow(unused_const)]
 /// Error code for illegal character.
 const EIllegalCharacter: u64 = 0;
-#[allow(unused_const)]
-/// Error code for incorrect number of characters.
-const EIncorrectNumberOfCharacters: u64 = 1;
 
 /// Base64url keys
 const KEYS: vector<u8> = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-/// Encode the `str` to base64url.
+/// Encode the `bytes` into base64url String.
 public fun encode(bytes: vector<u8>): String {
     base64::encode_impl!(bytes, KEYS, true)
 }
 
-/// Decode the base64 `str`.
+/// Decode the base64url `str` into bytes.
 public fun decode(str: String): vector<u8> {
     base64::decode_impl!(str, KEYS, true)
 }
@@ -67,5 +64,12 @@ fun test_encode_decode() {
 #[random_test]
 fun test_encode_random(bytes: vector<u8>) {
     use std::unit_test::assert_eq;
+    assert_eq!(decode(encode(bytes)), bytes);
+}
+
+#[random_test]
+fun test_encode_random_u256(value: u256) {
+    use std::unit_test::assert_eq;
+    let bytes = std::bcs::to_bytes(&value);
     assert_eq!(decode(encode(bytes)), bytes);
 }
