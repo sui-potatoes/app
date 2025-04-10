@@ -99,10 +99,12 @@ public fun new(id: ID, size: u16): Map {
 /// Default Map is 30x30 tiles for now. Initially empty.
 public fun default(id: ID): Map { new(id, 30) }
 
-/// Destroy the `Map` struct.
-public fun destroy(map: Map) {
+/// Destroy the `Map` struct, returning the IDs of the units on the map.
+public fun destroy(map: Map): vector<ID> {
     let Map { grid, .. } = map;
-    grid.destroy!(|Tile { unit, .. }| unit.destroy!(|unit| unit.destroy()));
+    let mut units = vector[];
+    grid.destroy!(|Tile { unit, .. }| unit.destroy!(|unit| units.push_back(unit.destroy())));
+    units
 }
 
 /// Set the ID of the map.

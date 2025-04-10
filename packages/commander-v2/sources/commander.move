@@ -53,21 +53,7 @@ public struct Game has key {
     recruits: ObjectTable<ID, Recruit>,
 }
 
-/// Start a new game with a custom map passed directly as a byte array.
-public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut TxContext): Game {
-    let mut preset = transfer::receive(&mut cmd.id, preset);
-    let map = preset.map.clone();
-
-    preset.popularity = preset.popularity + 1; // increment popularity
-    transfer::transfer(preset, cmd.id.to_address()); // transfer back
-
-    Game {
-        map,
-        id: object::new(ctx),
-        history: history::empty(),
-        recruits: object_table::new(ctx),
-    }
-}
+// === Map Registration & Removal ===
 
 /// Register a new `Map` so it can be played.
 public fun register_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx: &mut TxContext) {
@@ -89,6 +75,24 @@ public fun delete_map(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut 
     id.delete();
 }
 
+// === New Game Registration & Removal ===
+
+/// Start a new game with a custom map passed directly as a byte array.
+public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut TxContext): Game {
+    let mut preset = transfer::receive(&mut cmd.id, preset);
+    let map = preset.map.clone();
+
+    preset.popularity = preset.popularity + 1; // increment popularity
+    transfer::transfer(preset, cmd.id.to_address()); // transfer back
+
+    Game {
+        map,
+        id: object::new(ctx),
+        history: history::empty(),
+        recruits: object_table::new(ctx),
+    }
+}
+
 /// Create a new public game, allowing anyone to spectate.
 public fun register_game(cmd: &mut Commander, clock: &Clock, game: &Game, _ctx: &mut TxContext) {
     if (cmd.games.size() == PUBLIC_GAMES_LIMIT) {
@@ -97,6 +101,17 @@ public fun register_game(cmd: &mut Commander, clock: &Clock, game: &Game, _ctx: 
     };
 
     cmd.games.insert(game.id.to_inner(), clock.timestamp_ms());
+}
+
+#[allow(lint(self_transfer))]
+/// Destroy a game object, remove it from the registry's most recent if present.
+/// TODO: add access control to prevent deletion of other users' games.
+public fun destroy_game(cmd: &mut Commander, game: Game, ctx: &mut TxContext) {
+    let Game { id, map, mut recruits, .. } = game;
+    map.destroy().do!(|unit| transfer::public_transfer(recruits.remove(unit), ctx.sender()));
+    if (cmd.games.contains(id.as_inner())) { cmd.games.remove(id.as_inner()); };
+    recruits.destroy_empty();
+    id.delete();
 }
 
 /// Place a Recruit on the map, store it in the `Game`.
