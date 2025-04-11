@@ -1,13 +1,8 @@
 # Codec
 
-This library implements 3 most popular encoding schemes: HEX (Base16), Base64,
-and Urlencode. The latter is extremely useful in building
-[Data URLs](https://datatracker.ietf.org/doc/html/rfc2397) with the
-[%-encoding scheme](https://datatracker.ietf.org/doc/html/rfc3986).
+This library implements 3 most popular encoding schemes: HEX (Base16), Base64, and Urlencode. The latter is extremely useful in building [Data URLs](https://datatracker.ietf.org/doc/html/rfc2397) with the [%-encoding scheme](https://datatracker.ietf.org/doc/html/rfc3986).
 
-Additionally, it implements a `potatoes` encoding scheme which is based on the
-standard HEX encoding but replaces the `ABCDEF` symbols with `POTAES` (all unique
-letters in "potatoes").
+Additionally, it implements `base64url` and a `potatoes` encoding scheme which is based on the standard HEX encoding but replaces the `ABCDEF` symbols with `POTAES` (all unique letters in "potatoes").
 
 ## Installing
 
@@ -27,14 +22,14 @@ To add this library to your project, add this to your `Move.toml` file under
 
 ```toml
 # goes into [dependencies] section
-Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@testnet-v2" }
+Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@testnet-v3" }
 ```
 
 If you need a **mainnet** version of this package, use the `mainnet-v2` tag instead:
 
 ```toml
 # goes into [dependencies] section
-Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@mainnet-v2" }
+Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@mainnet-v3" }
 ```
 
 Exported address of this package is:
@@ -97,6 +92,17 @@ let encoded: String = base64::encode(b"hello, potato!");
 let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE=".to_string());
 ```
 
+### Base64url
+
+Implements the Base64url encoding - a URL-friendly modification of `base64`, using slightly different dictionary and lack of padding `==`.
+
+```rust
+use codec::base64url;
+
+let encoded: String = base64::encode(b"hello, potato!");
+let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE".to_string());
+```
+
 ### URL Encoding
 
 Implements the URL encoding scheme. The module is called `urlencode`.
@@ -118,6 +124,27 @@ use codec::potatoes;
 let encoded: String = potatoes::encode(b"hello, potato!");
 let decoded: vector<u8> = potatoes::decode(b"10POTATOES".to_string());
 ```
+
+## Changelog
+
+### v3 - adds `base64url`
+
+-   adds `base64url` encoding scheme
+-   increases performance of encoding by 5%
+-   fixes bug in encoding of large values in `base64`
+
+### v2 - performance and stability
+
+-   overall performance improvements
+
+### v1 - hello world
+
+Adds encoding schemes:
+
+-   `hex.move` - for Base16 (HEX)
+-   `potatoes.move` - for POTAES encoding, derivative of HEX
+-   `base64.move` - for Base64 encoding
+-   `urlencode.move` - for URL encoding
 
 ## License
 

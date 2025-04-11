@@ -5,9 +5,15 @@
 /// using the standard HEX characters, it uses each of the 6 letters in the
 /// "potatoes" word to represent each byte in Base16 past 9.
 ///
-/// ```move
+/// ### Example
+/// ```rust
 /// use codec::potatoes;
-/// assert!(b"potatoes".to_string() == potatoes::encode(x"0xabcdcbef"));
+///
+/// let encoded = potatoes::encode(b"hello, potato!");
+/// let decoded = potatoes::decode(encoded);
+///
+/// assert!(encoded == b"68656t6t6s2t20706s7461746s21".to_string());
+/// assert!(decoded == b"hello, potato!");
 /// ```
 module codec::potatoes;
 
@@ -86,6 +92,12 @@ fun test_check_character_set_length() {
 
     let set = CHARACTER_SET;
     assert_eq!(set.length(), 256);
+}
+
+#[random_test]
+fun test_decode_random(bytes: vector<u8>) {
+    use std::unit_test::assert_eq;
+    assert_eq!(decode(encode(bytes)), bytes);
 }
 
 #[test]

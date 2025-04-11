@@ -23,6 +23,14 @@ fun test_base64() {
 }
 
 #[test]
+fun test_base64url() {
+    use codec::base64url;
+
+    let encoded: String = base64url::encode(b"hello, potato!");
+    let decoded: vector<u8> = base64url::decode(b"aGVsbG8sIHBvdGF0byE".to_string());
+}
+
+#[test]
 fun test_urlencode() {
     use codec::urlencode;
 
