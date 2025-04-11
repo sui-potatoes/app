@@ -127,7 +127,7 @@ let decoded: vector<u8> = potatoes::decode(b"10POTATOES".to_string());
 
 ## Changelog
 
-### v3 - adds base64url
+### v3 - adds `base64url`
 
 -   adds `base64url` encoding scheme
 -   increases performance of encoding by 5%

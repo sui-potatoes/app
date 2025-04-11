@@ -3,6 +3,17 @@
 
 /// Implements URL encoding and decoding.
 /// Can operate on UTF8 strings, encoding only ASCII characters.
+///
+/// ### Example
+/// ```rust
+/// use codec::urlencode;
+///
+/// let encoded = urlencode::encode(b"hello, potato!");
+/// let decoded = urlencode::decode(encoded);
+///
+/// assert!(encoded == b"hello%2C%20potato%21".to_string());
+/// assert!(decoded == b"hello, potato!");
+/// ```
 module codec::urlencode;
 
 use std::string::String;
@@ -12,12 +23,13 @@ use std::string::String;
 public fun encode(string: vector<u8>): String {
     let mut res = vector[];
     string.do!(|c| {
+        // 32 = space
         if (c == 32) {
-            res.push_back(37);
-            res.push_back(50);
-            res.push_back(48);
+            res.push_back(37); // %
+            res.push_back(50); // 2
+            res.push_back(48); // 0
         } else if ((c < 48 || c > 57) && (c < 65 || c > 90) && (c < 97 || c > 122)) {
-            res.push_back(37);
+            res.push_back(37); // %
             res.push_back((c / 16) + if (c / 16 < 10) 48 else 55);
             res.push_back((c % 16) + if (c % 16 < 10) 48 else 55);
         } else {

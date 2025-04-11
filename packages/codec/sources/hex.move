@@ -3,6 +3,17 @@
 
 /// Proxies Base16 encoding library from the Sui Framework, but does it for
 /// strings instead of bytes.
+///
+/// ### Example
+/// ```rust
+/// use codec::hex;
+///
+/// let encoded = hex::encode(b"hello, potato!");
+/// let decoded = hex::decode(encoded);
+///
+/// assert!(encoded == b"68656c6c6f2c20706f7461746f".to_string());
+/// assert!(decoded == b"hello, potato!");
+/// ```
 module codec::hex;
 
 use std::string::String;

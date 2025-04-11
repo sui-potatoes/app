@@ -1,9 +1,19 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Base64 encoding.
-///
+/// Implements Base64 encoding.
 /// See [RFC 4648; Section 4](https://datatracker.ietf.org/doc/html/rfc4648#section-4) for more details.
+///
+/// ### Example
+/// ```rust
+/// use codec::base64;
+///
+/// let encoded = base64::encode(b"hello, potato!");
+/// let decoded = base64::decode(encoded);
+///
+/// assert!(encoded == b"aGVsbG8sIHBvdGF0byE=".to_string());
+/// assert!(decoded == b"hello, potato!");
+/// ```
 module codec::base64;
 
 use std::string::String;

@@ -6,6 +6,17 @@
 ///
 /// See [RFC 4648; section 5](https://datatracker.ietf.org/doc/html/rfc4648#section-5)
 /// for more details.
+///
+/// ### Example
+/// ```rust
+/// use codec::base64url;
+///
+/// let encoded = base64url::encode(b"hello, potato!");
+/// let decoded = base64url::decode(encoded);
+///
+/// assert!(encoded == b"aGVsbG8sIHBvdGF0byE".to_string());
+/// assert!(decoded == b"hello, potato!");
+/// ```
 module codec::base64url;
 
 use codec::base64;
