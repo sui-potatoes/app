@@ -17,7 +17,8 @@ import { useEffect } from "react";
 import { Observer } from "./pages/Observer";
 import { Spectate } from "./pages/Spectate";
 import { preload } from "react-dom";
-
+import { Replays } from "./pages/Replays";
+import { WatchReplay } from "./pages/WatchReplay";
 export default function App() {
     const zkLogin = useZkLogin();
     const location = useLocation();
@@ -67,6 +68,8 @@ export default function App() {
                             <Route path="headquarters" element={<Headquarters />} />
                             <Route path="play" element={<Playground />} />
                             <Route path="editor" element={<Editor />} />
+                            <Route path="replays" element={<Replays />} />
+                            <Route path="watch/:gameId" element={<WatchReplay />} />
                         </>
                     )}
                 </Routes>

@@ -104,9 +104,7 @@ public fun leader(r: &Recruit): address { r.leader }
 public fun metadata(r: &Recruit): &Metadata { &r.metadata }
 
 /// Promotes the rank of the Recruit.
-public fun rank_up(recruit: &mut Recruit) {
-    recruit.rank.rank_up()
-}
+public fun rank_up(recruit: &mut Recruit) { recruit.rank.rank_up() }
 
 /// Create a new `Recruit` with default values.
 public fun default(ctx: &mut TxContext): Recruit {

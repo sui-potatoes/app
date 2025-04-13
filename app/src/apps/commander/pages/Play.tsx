@@ -86,14 +86,7 @@ export function Playground() {
         return centerDiv(
             <>
                 <p>Map not found</p>
-                <button
-                    onClick={() => {
-                        sessionStorage.removeItem(LS_KEY);
-                        setMapKey(null);
-                    }}
-                >
-                    Back
-                </button>
+                <button onClick={unsetMapKey}>Back</button>
             </>,
         );
     if (!map)
@@ -111,10 +104,7 @@ export function Playground() {
                                 key={preset.objectId}
                                 className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
                                 onClick={async () => {
-                                    const map = await tx.createDemo(preset, [
-                                        [0, 3],
-                                        [6, 5],
-                                    ]);
+                                    const map = await tx.createDemo(preset);
                                     eventBus.dispatchEvent({ type: "sui:map_created" });
                                     setTimeout(() => map && setMapKey(map.objectId), 1000);
                                 }}
@@ -124,6 +114,9 @@ export function Playground() {
                         ))}
                     <NavLink to="../editor" className="options-row mt-10 interactive">
                         Level Editor
+                    </NavLink>
+                    <NavLink to="../replays" className="options-row interactive">
+                        Replays (preview)
                     </NavLink>
                 </div>
                 <Footer />
@@ -303,14 +296,10 @@ export function Playground() {
     async function onExit() {
         if (!map) return;
 
-        const result = await tx.destroyGame(map.objectId).catch(catchDryRunError);
+        const result = await tx.destroyGame(map.objectId, true).catch(catchDryRunError);
 
         if (!result) throw new Error("Failed to execute destroy game transaction");
-
-        console.log("Game destroyed");
-
-        sessionStorage.removeItem(LS_KEY);
-        setMapKey(null);
+        unsetMapKey();
     }
 
     /** Universal try-catch mechanism for all dry runs */
@@ -328,6 +317,11 @@ export function Playground() {
         });
 
         return null;
+    }
+
+    function unsetMapKey() {
+        sessionStorage.removeItem(LS_KEY);
+        setMapKey(null);
     }
 }
 

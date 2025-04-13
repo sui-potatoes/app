@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 /// Direction module provides macros to check the relative positions of points
-/// on a grid. Grid axiss are defined as follows:
+/// on a grid. Additionally, it provides a `Cursor` struct to represent a cursor
+/// on a grid which can be moved using the `move_to` function.
+///
+/// Grid axes are defined as follows:
 /// - X-axis: vertical axis (top->down)
 /// - Y-axis: horizontal axis (left->right)
 ///
@@ -17,7 +20,7 @@
 /// - b00001001 - up | left
 /// - b00001100 - right | down
 ///
-/// Directions can be combined using bitwise OR.
+/// Directions can be combined using bitwise OR or checked using bitwise AND.
 /// ```
 /// use grid::direction;
 ///
@@ -25,6 +28,25 @@
 /// fun test_directions() {
 ///     let dir = direction::up!() | direction::right!();
 ///     assert_eq!(dir, direction::up_right!());
+///
+///     let is_left = direction::up_left!() & direction::left!() > 0;
+///     assert!(is_left);
+/// }
+/// ```
+///
+/// The `Cursor` struct represents a point on the grid, and can be used to move
+/// a point in a given direction.
+/// ```
+/// use grid::direction;
+///
+/// #[test]
+/// fun test_cursor() {
+///     let mut cursor = direction::new_cursor(0, 0);
+///     cursor.move_to(direction::down!());
+///     cursor.move_to(direction::down_right!())
+///
+///     let (x, y) = cursor.to_values();
+///     assert!(x == 2 && y == 1);
 /// }
 /// ```
 module grid::direction;
@@ -155,20 +177,4 @@ public macro fun direction($x0: u16, $y0: u16, $x1: u16, $y1: u16): u8 {
     if (y_direction == none!() || diff_x > diff_y) return x_direction;
 
     x_direction | y_direction // diagonals
-}
-
-/// Converts a direction to its ASCII bytestring string representation.
-public macro fun direction_to_bytes($direction: u8): vector<u8> {
-    match ($direction) {
-        0 => b"none",
-        1 => b"up",
-        2 => b"up_right",
-        3 => b"right",
-        4 => b"down_right",
-        5 => b"down",
-        6 => b"down_left",
-        7 => b"left",
-        8 => b"up_left",
-        _ => abort,
-    }
 }

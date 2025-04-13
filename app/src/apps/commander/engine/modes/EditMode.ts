@@ -7,12 +7,19 @@ import { Controls } from "../Controls";
 import { Mode } from "./Mode";
 
 type Direction = "up" | "down" | "left" | "right";
+type Tool = "Cover" | "Spawn" | "Remove Spawn" | "High Cover" | "Object" | "Unwalkable";
 
 export type EditModeEvent = {
     message: { message: string };
-    tool: { tool: "Cover" | "High Cover" | "Object" | "Unwalkable"; direction: Direction };
+    tool: {
+        tool: Tool;
+        direction: Direction;
+    };
     direction: { direction: Direction };
-    change: { tool: "Cover" | "High Cover" | "Object" | "Unwalkable"; location: [number, number] };
+    change: {
+        tool: Tool;
+        location: [number, number];
+    };
 };
 
 /**
@@ -27,7 +34,7 @@ export class EditMode extends Mode {
 
     public readonly name = "editor";
     public coverDirection: "up" | "down" | "left" | "right" = "up";
-    public tool: "Cover" | "High Cover" | "Object" | "Unwalkable" = "Cover";
+    public tool: Tool = "Cover";
     private _clickCb: ((_: any) => void) | null = null;
     private _keyupCb: ((_: any) => void) | null = null;
 
@@ -101,6 +108,24 @@ export class EditMode extends Mode {
         }
 
         if (button === THREE.MOUSE.LEFT) {
+            if (mode.tool === "Spawn") {
+                this.eventBus?.dispatchEvent({
+                    type: "game:editor:change",
+                    tool: mode.tool,
+                    location: [x, y],
+                });
+                return this.grid.markSpawn(x, y);
+            }
+
+            if (mode.tool === "Remove Spawn") {
+                this.eventBus?.dispatchEvent({
+                    type: "game:editor:change",
+                    tool: mode.tool,
+                    location: [x, y],
+                });
+                return this.grid.removeSpawn(x, y);
+            }
+
             if (mode.tool === "Object") {
                 this.eventBus?.dispatchEvent({
                     type: "game:editor:change",
@@ -142,6 +167,14 @@ export class EditMode extends Mode {
         const mode = this.mode as EditMode;
 
         switch (key) {
+            // === Position Markers ===
+            case "1":
+                mode.tool = "Spawn";
+                break;
+            case "2":
+                mode.tool = "Remove Spawn";
+                break;
+
             // === Tool Selection ===
             case "c":
                 mode.tool = "Cover";

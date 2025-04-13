@@ -12,6 +12,7 @@ import { bcs } from "@mysten/bcs";
 import { useTransactionExecutor } from "./useTransactionExecutor";
 import { coordinatesToPath } from "../types/cursor";
 import type { SuiObjectRef } from "@mysten/sui/client";
+import { Preset } from "./useMaps";
 
 export const LS_KEY = "commander-v2";
 
@@ -43,23 +44,25 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         isExecuting,
         executeLocked,
         destroyGame,
+        deleteReplay,
     };
 
     /**
      * Create a demo map (1 or 2) with the given positions.
      * Add recruits to the given positions.
      */
-    async function createDemo(preset: SuiObjectRef, positions: [number, number][] = []) {
+    async function createDemo(preset: Preset & SuiObjectRef) {
         if (!canTransact) return;
 
         const tx = new Transaction();
+        const positions = preset.positions;
         const registryArg = tx.object(registryId);
         const game = tx.moveCall({
             target: `${packageId}::commander::new_game`,
             arguments: [registryArg, tx.receivingRef(preset)],
         });
 
-        for (let [x, y] of positions) {
+        for (let _ of positions) {
             const { name, backstory } = await useNameGenerator();
             const recruit = tx.moveCall({
                 target: `${packageId}::recruit::new`,
@@ -78,7 +81,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
 
             tx.moveCall({
                 target: `${packageId}::commander::place_recruit`,
-                arguments: [game, recruit, tx.pure.u16(x), tx.pure.u16(y)],
+                arguments: [game, recruit],
             });
         }
 
@@ -245,13 +248,26 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         return await executeTransaction(tx);
     }
 
-    async function destroyGame(gameId: string) {
+    async function destroyGame(gameId: string, saveReplay: boolean) {
         if (!canTransact) return;
 
         const tx = new Transaction();
         tx.moveCall({
             target: `${packageId}::commander::destroy_game`,
-            arguments: [tx.object(registryId), tx.object(gameId)],
+            arguments: [tx.object(registryId), tx.object(gameId), tx.pure.bool(saveReplay)],
+        });
+        tx.setSender(zkLogin.address!);
+
+        return await executeTransaction(tx);
+    }
+
+    async function deleteReplay(replayId: string) {
+        if (!canTransact) return;
+
+        const tx = new Transaction();
+        tx.moveCall({
+            target: `${packageId}::replay::delete`,
+            arguments: [tx.object(replayId)],
         });
         tx.setSender(zkLogin.address!);
 
@@ -272,9 +288,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         });
         tx.setSender(zkLogin.address!);
 
-        const res = await executeTransaction(tx);
-        console.log("publishMap", res);
-        return res;
+        return await executeTransaction(tx);
     }
 
     /** Execute locked transaction */

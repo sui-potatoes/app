@@ -3,7 +3,7 @@
 
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { fromBase64 } from "@mysten/bcs";
-import { bcs, Map } from "../types/bcs";
+import { Preset } from "../types/bcs";
 import { useNetworkVariable } from "../../../networkConfig";
 import type { SuiObjectRef } from "@mysten/sui/client";
 
@@ -11,15 +11,6 @@ type Props = {
     enabled?: boolean;
     refetchInterval?: number;
 };
-
-const Preset = bcs.struct("Commander", {
-    id: bcs.Address,
-    map: Map,
-    name: bcs.String,
-    positions: bcs.vector(bcs.vector(bcs.u8())),
-    author: bcs.Address,
-    popularity: bcs.u64(),
-});
 
 export type Preset = typeof Preset.$inferType;
 

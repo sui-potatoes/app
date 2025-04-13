@@ -8,6 +8,24 @@ use std::unit_test::{assert_eq, assert_ref_eq};
 use sui::bcs;
 
 #[test]
+fun creation() {
+    let grid = grid::from_vector(vector[vector[0]]);
+    assert_eq!(grid.width(), 1);
+    assert_eq!(grid.height(), 1);
+    assert_eq!(grid[0, 0], 0);
+
+    let inner = grid.into_vector();
+    assert_eq!(inner.length(), 1);
+    assert_eq!(inner[0].length(), 1);
+    assert_eq!(inner[0][0], 0);
+
+    let grid2 = grid::from_vector_unchecked(inner);
+    assert_eq!(grid2.width(), 1);
+    assert_eq!(grid2.height(), 1);
+    assert_eq!(grid2[0, 0], 0);
+}
+
+#[test]
 fun test_borrows() {
     let mut grid = grid::from_vector(vector[vector[0]]);
     assert_eq!(grid[0, 0], 0);

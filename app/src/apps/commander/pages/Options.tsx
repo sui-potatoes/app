@@ -117,37 +117,7 @@ function suinsSetting() {
     const client = useSuiClient();
     const name = useSuinsName({ address: zkLogin.address });
     // TODO: get this from the network config
-    const suinsAddress = "0x22fa05f21b1ad71442491220bb9338f7b7095fe35000ef88d5400d28523bdd93";
-    const { data: names } = useSuiClientQuery(
-        "getOwnedObjects",
-        {
-            owner: zkLogin.address || "",
-            options: { showType: true, showContent: true },
-            filter: {
-                StructType: `${suinsAddress}::subdomain_registration::SubDomainRegistration`,
-            },
-        },
-        {
-            enabled: !!zkLogin.address,
-            select: (data) => {
-                return data.data.map((obj) => {
-                    if (!obj.data?.content) return null;
-                    if (obj.data.content.dataType !== "moveObject") return null;
-
-                    const fields = obj.data.content.fields as any;
-
-                    return {
-                        ...fields.nft.fields,
-                        objectId: obj.data.objectId,
-                        digest: obj.data.digest,
-                        type: obj.data.type,
-                    };
-                });
-            },
-        },
-    );
-
-    console.log(names);
+    // const suinsAddress = "0x22fa05f21b1ad71442491220bb9338f7b7095fe35000ef88d5400d28523bdd93";
 
     const packageId = useNetworkVariable("commanderRegistryPackageId");
     const registry = useNetworkVariable("commanderNamesObjectId");
@@ -182,7 +152,7 @@ function suinsSetting() {
                         className="bg-black w-full h-10 text-lg text-white border border-grey uppercase p-4"
                         placeholder="Enter name..."
                         onChange={(e) => setSuinsName(e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && createSuinsName(suinsName)}
+                        onKeyUp={(e) => e.key === "Enter" && createSuinsName(suinsName)}
                     />
                     <button
                         className="interactive w-full mt-10 §10"

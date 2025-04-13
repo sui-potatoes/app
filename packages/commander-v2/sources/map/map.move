@@ -107,6 +107,9 @@ public fun destroy(map: Map): vector<ID> {
     units
 }
 
+/// Get the ID of the map.
+public fun id(map: &Map): ID { map.id }
+
 /// Set the ID of the map.
 public(package) fun set_id(map: &mut Map, id: ID) { map.id = id; }
 
@@ -514,8 +517,9 @@ public(package) fun from_bcs(bcs: &mut BCS): Map {
             unit: bcs.peel_option!(|bcs| unit::from_bcs(bcs)),
         }
     });
+    let turn = bcs.peel_u16();
 
-    Map { id, turn: 0, grid }
+    Map { id, turn, grid }
 }
 
 /// Implements the `Grid.to_string` method due to `Tile` implementing
