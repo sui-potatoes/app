@@ -121,6 +121,8 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
                     <p className="text-sm">Click to place objects; right-click to remove</p>
                     <p className="text-sm">Use WSAD keys to change direction</p>
                     <p className="text-sm">C - Cover; H - High Cover; O - Object; U - Unwalkable</p>
+                    <p className="text-sm">1 - Set Spawn Point; 2 - Remove Spawn</p>
+                    <p className="text-sm">A Map MUST have at least one spawn point</p>
                 </div>
                 <div className="absolute right-0 bottom-0">
                     <button

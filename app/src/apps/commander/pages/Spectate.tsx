@@ -7,6 +7,7 @@ import { formatAddress } from "@mysten/sui/utils";
 import { useGame } from "../hooks/useGame";
 import { Footer, Loader } from "./Components";
 import { NavLink } from "react-router-dom";
+import { timeAgo } from "../types/utils";
 
 export function Spectate() {
     const { data: games } = useRecentGames({});
@@ -22,23 +23,27 @@ export function Spectate() {
                 <h1 className="block p-1 mb-10 page-heading">SPECTATE</h1>
                 <div className="flex justify-start">
                     <div className="w-96 max-w-md">
-                        <h2 className="mb-2">Recent games</h2>
+                        <h2 className="mb-2">Currently playing</h2>
                         <div style={{ maxHeight: "40vh" }}>
-                            {games.reverse().map((game) => {
-                                return (
-                                    <div
-                                        className={
-                                            "options-row interactive " +
-                                            (selected == game.id ? "selected" : "")
-                                        }
-                                        key={game.id}
-                                        onClick={() => setSelected(game.id)}
-                                    >
-                                        <a>{formatAddress(game.id)}</a>
-                                        <p>{timeAgo(+game.timestamp_ms)}</p>
-                                    </div>
-                                );
-                            })}
+                            {!games.length ? (
+                                <p>No games are played at the moment</p>
+                            ) : (
+                                games.slice().reverse().map((game) => {
+                                    return (
+                                        <div
+                                            className={
+                                                "options-row interactive " +
+                                                (selected == game.id ? "selected" : "")
+                                            }
+                                            key={game.id}
+                                            onClick={() => setSelected(game.id)}
+                                        >
+                                            <a>{formatAddress(game.id)}</a>
+                                            <p>{timeAgo(+game.timestamp_ms)}</p>
+                                        </div>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
                     {selected && (
@@ -119,13 +124,4 @@ export function Spectate() {
             <Footer to=".." />
         </div>
     );
-}
-
-function timeAgo(time: number) {
-    const diff = Date.now() - time;
-    if (diff < 1000) return "just now";
-    if (diff < 60000) return Math.floor(diff / 1000) + "s ago";
-    if (diff < 3600000) return Math.floor(diff / 60000) + "m ago";
-    if (diff < 86400000) return Math.floor(diff / 3600000) + "h ago";
-    return Math.floor(diff / 86400000) + "d ago";
 }

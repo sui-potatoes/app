@@ -205,7 +205,7 @@ export class UnitModel extends THREE.Object3D {
 
     /** Removes the attack params info from the target */
     removeTarget() {
-        this.text.dispose(); // must be done explicitly!
+        this.text?.dispose(); // must be done explicitly!
         this.aimCircle.clear();
         this.updateQueue = [];
     }

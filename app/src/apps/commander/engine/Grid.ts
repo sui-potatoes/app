@@ -6,7 +6,13 @@ import { Tile } from "./Game";
 import { models } from "./models";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { Map as GameMap } from "../types/bcs";
+import { bcs } from "@mysten/bcs";
 import { normalizeSuiObjectId } from "@mysten/sui/utils";
+
+const LocalPreset = bcs.struct("LocalPreset", {
+    map: GameMap,
+    positions: bcs.vector(bcs.vector(bcs.u8())),
+});
 
 /**
  * Grid follows the structure of the game board, similar to how it is handled in
@@ -20,6 +26,7 @@ export class Grid extends THREE.Object3D {
     public readonly grid: Tile[][];
     public readonly meshes: { [key: string]: THREE.Object3D | THREE.Group } = {};
     public readonly floor = new THREE.Group();
+    public spawnPositions: THREE.Vector2[] = [];
 
     constructor(public readonly size: number) {
         super();
@@ -266,8 +273,32 @@ export class Grid extends THREE.Object3D {
         if (y0 < y1) return "RIGHT";
     }
 
+    // === Edit Mode ===
+
+    /** Edit mode marker, add a mesh to the cell to indicate a spawn point. */
+    markSpawn(x: number, y: number) {
+        if (this.grid[x][y].type === "Unwalkable") {
+            return false;
+        }
+
+        const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 2, 1),
+            new THREE.MeshStandardMaterial({ color: 0xffffff, opacity: 0.5, transparent: true }),
+        );
+        this.spawnPositions.push(new THREE.Vector2(x, y));
+        this.meshes[`${x}-${y}`] = mesh;
+        mesh.position.set(x, 0, -y);
+        this.add(mesh);
+    }
+
+    removeSpawn(x: number, y: number) {
+        this.spawnPositions = this.spawnPositions.filter((pos) => pos.x !== x || pos.y !== y);
+        this.remove(this.meshes[`${x}-${y}`]);
+        delete this.meshes[`${x}-${y}`];
+    }
+
     resetFromBcs(bcs: Uint8Array) {
-        const map = GameMap.parse(bcs);
+        const { map, positions } = LocalPreset.parse(bcs);
         map.grid.forEach((row, x) => {
             row.forEach((cell, y) => {
                 switch (cell.tile_type.$kind) {
@@ -282,32 +313,39 @@ export class Grid extends THREE.Object3D {
                 }
             });
         });
+        positions.forEach(([x, y]) => {
+            this.spawnPositions.push(new THREE.Vector2(x, y));
+            this.markSpawn(x, y);
+        });
     }
 
     toBytes() {
         const grid = this.grid;
-        return GameMap.serialize({
-            id: normalizeSuiObjectId("0x0"),
-            grid: grid.map((row) =>
-                row.map((cell) => {
-                    switch (cell.type) {
-                        case "Empty":
-                            return { tile_type: { ["Empty"]: true }, unit: null };
-                        case "Cover":
-                            return {
-                                tile_type: { ["Cover"]: { ...cell } },
-                                unit: null,
-                            };
-                        case "Unwalkable":
-                            return { tile_type: { ["Unwalkable"]: true }, unit: null };
-                        default:
-                            throw new Error("Invalid tile type");
-                    }
-                }),
-            ),
-            turn: 0,
+        return LocalPreset.serialize({
+            map: {
+                id: normalizeSuiObjectId("0x0"),
+                grid: grid.map((row) =>
+                    row.map((cell) => {
+                        switch (cell.type) {
+                            case "Empty":
+                                return { tile_type: { ["Empty"]: true }, unit: null };
+                            case "Cover":
+                                return {
+                                    tile_type: { ["Cover"]: { ...cell } },
+                                    unit: null,
+                                };
+                            case "Unwalkable":
+                                return { tile_type: { ["Unwalkable"]: true }, unit: null };
+                        }
+                    }),
+                ),
+                turn: 0,
+            },
+            positions: [...this.spawnPositions.map((pos) => [pos.x, pos.y])],
         });
     }
+
+    // === Utilities ===
 
     /**
      * Traces a path from start to end using the wave algorithm.

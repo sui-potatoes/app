@@ -1,12 +1,17 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Module: commander
+/// The frontend module for the Commander game. Defines the `Commander` object,
+/// which is used to store recent games, their metadata and the map presets.
+///
+/// Additionally, handles the interaction between players, such as hosting a
+/// game, joining it, canceling a game, etc.
 module commander::commander;
 
-use commander::{history::{Self, History}, map::{Self, Map}, recruit::Recruit};
+use commander::{history::{Self, History}, map::{Self, Map}, recruit::Recruit, replay};
 use std::string::String;
 use sui::{
+    bcs,
     clock::Clock,
     object_table::{Self, ObjectTable},
     random::Random,
@@ -15,6 +20,10 @@ use sui::{
 };
 
 const ENotAuthor: u64 = 0;
+const ENotPlayer: u64 = 1;
+const EInvalidGame: u64 = 2;
+const ENotYourRecruit: u64 = 3;
+const ENoPositions: u64 = 4;
 
 /// Stack limit of public games in the `Commander` object.
 const PUBLIC_GAMES_LIMIT: u64 = 20;
@@ -42,11 +51,26 @@ public struct Preset has key {
     popularity: u64,
 }
 
+/// Host is an object created to mark a hosted game. An account joining a hosted
+/// game will consume this object and create a new `Game` with it.
+public struct Host has key {
+    id: UID,
+    game_id: ID,
+    name: String,
+    timestamp_ms: u64,
+    host: address,
+}
+
 /// A single instance of the game. A `Game` object is created when a new game is
 /// started, it contains the Map and the
 public struct Game has key {
     id: UID,
     map: Map,
+    /// The players in the game.
+    players: vector<address>,
+    /// The spawn positions of recruits.
+    positions: vector<vector<u8>>,
+    /// History of the game.
     history: History,
     /// Temporarily stores recruits for the duration of the game.
     /// If recruits are KIA, they're "killed" upon removal from this table.
@@ -57,21 +81,79 @@ public struct Game has key {
 
 /// Register a new `Map` so it can be played.
 public fun publish_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx: &mut TxContext) {
-    let mut map = map::from_bytes(bytes);
+    let mut bcs = bcs::new(bytes);
+    let mut map = map::from_bcs(&mut bcs);
+    let positions = bcs.peel_vec!(|bcs| bcs.peel_vec!(|bcs| bcs.peel_u8()));
     let id = object::new(ctx);
 
     map.set_id(id.to_inner());
     transfer::transfer(
-        Preset { id, name, map, positions: vector[], author: ctx.sender(), popularity: 0 },
+        Preset { id, name, map, positions, author: ctx.sender(), popularity: 0 },
         cmd.id.to_address(),
     );
 }
 
 /// Delete a map from the `Commander` object. Can only be done by the author.
+/// Once a `Preset` is deleted, it makes `Replay`s of the game using that map invalid.
 public fun delete_map(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut TxContext) {
     let Preset { id, map, author, .. } = transfer::receive(&mut cmd.id, preset);
     assert!(author == ctx.sender(), ENotAuthor);
     map.destroy();
+    id.delete();
+}
+
+// === Multiplayer Features: Host and Join ===
+
+/// Host a new game.
+public fun host_game(
+    cmd: &mut Commander,
+    clock: &Clock,
+    preset: Receiving<Preset>,
+    ctx: &mut TxContext,
+): Game {
+    let mut preset = transfer::receive(&mut cmd.id, preset);
+    preset.popularity = preset.popularity + 1; // increment popularity
+
+    let name = preset.name;
+    let map = preset.map.clone();
+    let positions = preset.positions;
+    let cmd_address = cmd.id.to_address();
+    let timestamp_ms = clock.timestamp_ms();
+    let id = object::new(ctx);
+
+    transfer::transfer(preset, cmd_address);
+    transfer::transfer(
+        Host {
+            id: object::new(ctx),
+            game_id: id.to_inner(),
+            name,
+            timestamp_ms,
+            host: ctx.sender(),
+        },
+        cmd_address,
+    );
+
+    Game {
+        id,
+        map,
+        positions,
+        history: history::empty(),
+        recruits: object_table::new(ctx),
+        players: vector[ctx.sender()],
+    }
+}
+
+/// Join a hosted game.
+public fun join_game(
+    cmd: &mut Commander,
+    game: &mut Game,
+    host: Receiving<Host>,
+    ctx: &mut TxContext,
+) {
+    let Host { id, game_id, .. } = transfer::receive(&mut cmd.id, host);
+    assert!(game_id == game.id.to_inner(), EInvalidGame);
+
+    game.players.push_back(ctx.sender());
     id.delete();
 }
 
@@ -81,6 +163,7 @@ public fun delete_map(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut 
 public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut TxContext): Game {
     let mut preset = transfer::receive(&mut cmd.id, preset);
     let map = preset.map.clone();
+    let positions = preset.positions;
 
     preset.popularity = preset.popularity + 1; // increment popularity
     transfer::transfer(preset, cmd.id.to_address()); // transfer back
@@ -90,6 +173,8 @@ public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut Tx
         id: object::new(ctx),
         history: history::empty(),
         recruits: object_table::new(ctx),
+        players: vector[ctx.sender()],
+        positions,
     }
 }
 
@@ -105,22 +190,34 @@ public fun register_game(cmd: &mut Commander, clock: &Clock, game: &Game, _ctx: 
 
 #[allow(lint(self_transfer))]
 /// Destroy a game object, remove it from the registry's most recent if present.
-/// TODO: add access control to prevent deletion of other users' games.
-public fun destroy_game(cmd: &mut Commander, game: Game, ctx: &mut TxContext) {
-    let Game { id, map, mut recruits, .. } = game;
+public fun destroy_game(cmd: &mut Commander, game: Game, save_replay: bool, ctx: &mut TxContext) {
+    let Game { id, map, mut recruits, history, players, .. } = game;
+    let preset_id = map.id();
     map.destroy().do!(|unit| transfer::public_transfer(recruits.remove(unit), ctx.sender()));
+
+    // only the players can destroy the game, no garbage collection
+    assert!(players.any!(|player| player == ctx.sender()), ENotPlayer);
+
     if (cmd.games.contains(id.as_inner())) { cmd.games.remove(id.as_inner()); };
     recruits.destroy_empty();
+
+    // save the replay if the flag is set
+    if (save_replay) {
+        transfer::public_transfer(replay::new(preset_id, history, ctx), ctx.sender());
+    };
+
     id.delete();
 }
 
 // === Game Actions ===
 
 /// Place a Recruit on the map, store it in the `Game`.
-public fun place_recruit(game: &mut Game, recruit: Recruit, x: u16, y: u16, ctx: &mut TxContext) {
-    assert!(recruit.leader() == ctx.sender()); // make sure the sender owns the recruit
+public fun place_recruit(game: &mut Game, recruit: Recruit, ctx: &mut TxContext) {
+    assert!(recruit.leader() == ctx.sender(), ENotYourRecruit); // make sure the sender owns the recruit
+    assert!(game.positions.length() > 0, ENoPositions);
 
-    let history = game.map.place_recruit(&recruit, x, y);
+    let position = game.positions.pop_back();
+    let history = game.map.place_recruit(&recruit, position[0] as u16, position[1] as u16);
     game.recruits.add(object::id(&recruit), recruit);
     game.history.add(history);
 }
@@ -194,9 +291,7 @@ public fun share(game: Game) {
 
 #[allow(unused_function)]
 /// Get the current turn of the game.
-fun turn(self: &Game): u16 {
-    self.map.turn()
-}
+fun turn(self: &Game): u16 { self.map.turn() }
 
 // === Init ===
 
@@ -205,39 +300,48 @@ fun init(ctx: &mut TxContext) {
     let id = object::new(ctx);
     let id_address = id.to_address();
 
-    // positions:
-    // [0, 3]
-    // [6, 5]
-
-    transfer::transfer(
+    // prettier-ignore
+    transfer::transfer({
+        let id = object::new(ctx);
         Preset {
-            id: object::new(ctx),
+            map: map::demo_1(id.to_inner()),
             name: b"Demo 1".to_string(),
-            map: map::demo_1(@0.to_id()),
-            positions: vector[],
-            author: @0,
+            positions: vector[vector[0, 3], vector[6, 5]],
             popularity: 0,
-        },
-        id_address,
-    );
+            author: @0,
+            id,
+        }
+    }, id_address);
 
-    // positions:
-    // [8, 2],
-    // [7, 6],
-    // [1, 2],
-    // [1, 7],
-
-    transfer::transfer(
+    // prettier-ignore
+    transfer::transfer({
+        let id = object::new(ctx);
         Preset {
-            id: object::new(ctx),
+            map: map::demo_2(id.to_inner()),
             name: b"Demo 2".to_string(),
-            map: map::demo_2(@1.to_id()),
-            positions: vector[],
+            positions: vector[vector[8, 2], vector[7, 6], vector[1, 2], vector[1, 7]],
             author: @0,
             popularity: 0,
-        },
-        id_address,
-    );
+            id,
+        }
+    }, id_address);
 
     transfer::share_object(Commander { id, games: vec_map::empty() });
+}
+
+#[test]
+fun test_deserialize_map() {
+    let bytes =
+        x"00000000000000000000000000000000000000000000000000000000000000000a0a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a0000000000000000000000000000000000000000000001020801";
+    let mut bcs = bcs::new(bytes);
+    let map = map::from_bcs(&mut bcs);
+    let positions = bcs.peel_vec_length();
+    // let positions = bcs.peel_vec!(|bcs| bcs.peel_vec!(|bcs| bcs.peel_u8()));
+
+    assert!(map.id() == @0.to_id());
+    assert!(map.turn() == 0);
+    // assert!(positions.length() > 0);
+
+    map.destroy();
+    std::debug::print(&positions);
 }

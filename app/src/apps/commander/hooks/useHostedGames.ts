@@ -3,7 +3,7 @@
 
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { fromBase64 } from "@mysten/bcs";
-import { Preset } from "../types/bcs";
+import { bcs } from "@mysten/sui/bcs";
 import { useNetworkVariable } from "../../../networkConfig";
 import type { SuiObjectRef } from "@mysten/sui/client";
 
@@ -12,9 +12,17 @@ type Props = {
     refetchInterval?: number;
 };
 
-export type Preset = typeof Preset.$inferType;
+const Host = bcs.struct("Host", {
+    id: bcs.Address,
+    gameId: bcs.Address,
+    name: bcs.string(),
+    timestampMs: bcs.u64(),
+    host: bcs.Address,
+});
 
-export function useMaps({ enabled, refetchInterval }: Props) {
+export type Host = typeof Host.$inferType & SuiObjectRef;
+
+export function useHostedGames({ enabled, refetchInterval }: Props) {
     const registryId = useNetworkVariable("commanderV2RegistryId");
     const packageId = useNetworkVariable("commanderV2PackageId");
     return useSuiClientQuery(
@@ -22,12 +30,12 @@ export function useMaps({ enabled, refetchInterval }: Props) {
         {
             owner: registryId,
             options: { showBcs: true },
-            filter: { StructType: `${packageId}::commander::Preset` },
+            filter: { StructType: `${packageId}::commander::Host` },
         },
         {
             refetchInterval,
             enabled: enabled == undefined ? true : enabled,
-            select(data): (typeof Preset.$inferType & SuiObjectRef)[] {
+            select(data): (typeof Host.$inferType & SuiObjectRef)[] {
                 return (data.data || [])
                     .map((item) => {
                         if (!item.data) return null;
@@ -41,7 +49,7 @@ export function useMaps({ enabled, refetchInterval }: Props) {
                         } as SuiObjectRef;
 
                         return {
-                            ...Preset.parse(fromBase64(item.data.bcs.bcsBytes)),
+                            ...Host.parse(fromBase64(item.data.bcs.bcsBytes)),
                             ...objectRef,
                         };
                     })

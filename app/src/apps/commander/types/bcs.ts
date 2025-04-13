@@ -159,11 +159,36 @@ export const HistoryRecord = bcs.enum("HistoryRecord", {
     Dodged: null,
 });
 
+export const Replay = bcs.struct("Replay", {
+    id: bcs.Address,
+    presetId: bcs.Address,
+    history: bcs.vector(HistoryRecord),
+});
+
+export const Preset = bcs.struct("Commander", {
+    id: bcs.Address,
+    map: Map,
+    name: bcs.String,
+    positions: bcs.vector(bcs.vector(bcs.u8())),
+    author: bcs.Address,
+    popularity: bcs.u64(),
+});
+
+export const Host = bcs.struct("Host", {
+    id: bcs.Address,
+    game_id: bcs.Address,
+    timestamp_ms: bcs.u64(),
+    host: bcs.Address,
+});
+
 export const Game = bcs
     .struct("Game", {
         id: bcs.Address,
         map: Map,
+        players: bcs.vector(bcs.Address),
+        positions: bcs.vector(bcs.vector(bcs.u8())),
         history: bcs.vector(HistoryRecord),
+        recruits: bcs.Address,
     })
     .transform({
         output(game) {
