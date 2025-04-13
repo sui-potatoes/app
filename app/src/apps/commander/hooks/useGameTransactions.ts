@@ -8,11 +8,13 @@ import { Transaction } from "@mysten/sui/transactions";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { GameMap } from "./useGame";
 import { useSuiClient } from "@mysten/dapp-kit";
-import { bcs } from "@mysten/bcs";
+import { bcs, fromBase64 } from "@mysten/bcs";
 import { useTransactionExecutor } from "./useTransactionExecutor";
 import { coordinatesToPath } from "../types/cursor";
 import type { SuiObjectRef } from "@mysten/sui/client";
 import { Preset } from "./useMaps";
+import { Host } from "./useHostedGames";
+import { Game } from "../types/bcs";
 
 export const LS_KEY = "commander-v2";
 
@@ -35,6 +37,8 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         canTransact,
         lockedTx,
         createDemo,
+        hostGame,
+        joinGame,
         publishMap,
         performAttack,
         performGrenade,
@@ -106,6 +110,99 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
 
         sessionStorage.setItem(LS_KEY, map.objectId);
         return map;
+    }
+
+    async function hostGame(preset: Preset & SuiObjectRef) {
+        if (!canTransact) return;
+
+        const tx = new Transaction();
+        const game = tx.moveCall({
+            target: `${packageId}::commander::host_game`,
+            arguments: [tx.object(registryId), tx.object.clock(), tx.receivingRef(preset)],
+        });
+
+        const numRecruits = preset.positions.length;
+        const myRecruits = numRecruits / 2;
+
+        for (let i = 0; i < myRecruits; i++) {
+            const { name, backstory } = await useNameGenerator();
+            const recruit = tx.moveCall({
+                target: `${packageId}::recruit::new`,
+                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
+            });
+
+            tx.moveCall({
+                target: `${packageId}::commander::place_recruit`,
+                arguments: [game, recruit],
+            });
+        }
+
+        tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
+
+        const res = await executeTransaction(tx);
+        const map = res.data.objectChanges?.find((change) => {
+            return (
+                change.type === "created" && change.objectType === `${packageId}::commander::Game`
+            );
+        });
+
+        if (!map)
+            throw new Error(`Map not found, something is off: ${res.data.effects?.status.error}`);
+        if (map.type !== "created") throw new Error("Map not created, something is off");
+
+        sessionStorage.setItem(LS_KEY, map.objectId);
+        return map;
+    }
+
+    async function joinGame(host: Host) {
+        if (!canTransact) return;
+
+        const game = await client.getObject({
+            id: host.gameId,
+            options: { showBcs: true, showOwner: true },
+        });
+
+        if (!game || !game.data || !game.data.bcs || game.data.bcs.dataType !== "moveObject") {
+            throw new Error("Game not found");
+        }
+
+        const parsedGame = Game.parse(fromBase64(game.data.bcs.bcsBytes));
+        const positions = parsedGame.positions;
+
+        const tx = new Transaction();
+        const gameArg = tx.object(host.gameId);
+        tx.moveCall({
+            target: `${packageId}::commander::join_game`,
+            arguments: [tx.object(registryId), gameArg, tx.receivingRef(host)],
+        });
+
+        for (let i = 0; i < positions.length; i++) {
+            const { name, backstory } = await useNameGenerator();
+            const recruit = tx.moveCall({
+                target: `${packageId}::recruit::new`,
+                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
+            });
+
+            tx.moveCall({
+                target: `${packageId}::commander::place_recruit`,
+                arguments: [gameArg, recruit],
+            });
+        }
+
+        tx.setSender(zkLogin.address!);
+
+        const res = await executeTransaction(tx);
+        const map = res.data.objectChanges?.find((change) => {
+            return (
+                change.type === "mutated" && change.objectType === `${packageId}::commander::Game`
+            );
+        });
+
+        if (!map)
+            throw new Error(`Map not found, something is off: ${res.data.effects?.status.error}`);
+        if (map.type !== "mutated") throw new Error("Map not created, something is off");
+
+        sessionStorage.setItem(LS_KEY, map.objectId);
     }
 
     /** Perform ranged attack. I've been waiting for this soooo long */

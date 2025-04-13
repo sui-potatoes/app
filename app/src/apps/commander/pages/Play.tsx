@@ -18,11 +18,15 @@ import { DryRunTransactionBlockResponse, SuiObjectRef } from "@mysten/sui/client
 import { parseVMError, vmAbortCodeToMessage } from "../types/abort_codes";
 import { pathToCoordinates } from "../types/cursor";
 import { Preset, useMaps } from "../hooks/useMaps";
-import { normalizeSuiAddress } from "@mysten/sui/utils";
+import { formatAddress, normalizeSuiAddress } from "@mysten/sui/utils";
 import { useSuinsName } from "../hooks/useSuinsName";
+import { Host, useHostedGames } from "../hooks/useHostedGames";
+import { timeAgo } from "../types/utils";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
+
+type Mode = "single" | "multi" | "join";
 
 /**
  * The main component of the game.
@@ -33,6 +37,8 @@ export function Playground() {
     const eventBus = useMemo(() => new EventBus(), []);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [mapKey, setMapKey] = useState<string | null>(sessionStorage.getItem(LS_KEY));
+    const [mode, setMode] = useState<Mode>("single");
+    const { data: hostedGames } = useHostedGames({ enabled: true });
     const { data: map, isFetching, isFetched } = useGame({ id: mapKey, enabled: true });
     const { data: recruits } = useGameRecruits({ recruits: map?.map.recruits || [] });
     const { data: presets } = useMaps({ enabled: true });
@@ -91,33 +97,79 @@ export function Playground() {
         );
     if (!map)
         return (
-            <div className="flex justify-between flex-col w-full">
+            <div className="flex justify-start flex-col w-full h-full">
                 <div className="text-left p-10 max-w-xl">
                     <h1 className="p-1 mb-10 page-heading">play</h1>
                 </div>
-                <div className="p-10 max-w-3xl">
-                    {presets
-                        ?.sort((a, b) => a.map.id.localeCompare(b.map.id))
-                        .slice(0, 10)
-                        .map((preset) => (
-                            <a
-                                key={preset.objectId}
-                                className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
-                                onClick={async () => {
-                                    const map = await tx.createDemo(preset);
-                                    eventBus.dispatchEvent({ type: "sui:map_created" });
-                                    setTimeout(() => map && setMapKey(map.objectId), 1000);
-                                }}
+                <div className="w-full h-full flex">
+                    <div className="p-10 max-w-3xl w-full">
+                        <h2 className="text-left text-3xl py-4">Mode</h2>
+                        <div className="flex justify-between mb-10">
+                            <div
+                                className={`interactive p-3 w-1/2 ${mode == "single" ? "selected" : ""}`}
+                                onClick={() => setMode("single")}
                             >
-                                <MapItem preset={preset} />
-                            </a>
-                        ))}
-                    <NavLink to="../editor" className="options-row mt-10 interactive">
-                        Level Editor
-                    </NavLink>
-                    <NavLink to="../replays" className="options-row interactive">
-                        Replays (preview)
-                    </NavLink>
+                                Demo
+                            </div>
+                            <div
+                                className={`interactive p-3 w-full ${mode == "multi" ? "selected" : ""}`}
+                                onClick={() => setMode("multi")}
+                            >
+                                Host Multiplayer
+                            </div>
+                            <div
+                                className={`interactive p-3 w-full ${mode == "join" ? "selected" : ""}`}
+                                onClick={() => setMode("join")}
+                            >
+                                Join Multiplayer
+                            </div>
+                        </div>
+                        {mode == "join" ? (
+                            <>
+                                <h2 className="text-left text-3xl py-4">Games</h2>
+                                {hostedGames && !hostedGames.length && <p>No games available</p>}
+                                {hostedGames?.map((game) => (
+                                    <HostedGameItem
+                                        key={game.objectId}
+                                        game={game}
+                                        onSelect={(host) =>
+                                            confirm("Join the game?") && tx.joinGame(host)
+                                        }
+                                    />
+                                ))}
+                            </>
+                        ) : (
+                            <>
+                                <h2 className="text-left text-3xl py-4">Choose Map</h2>
+                                {presets
+                                    ?.sort((a, b) => a.map.id.localeCompare(b.map.id))
+                                    .slice(0, 10)
+                                    .map((preset) => (
+                                        <a
+                                            key={preset.objectId}
+                                            className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
+                                            onClick={async () => {
+                                                const map = await createGame(mode, preset);
+                                                eventBus.dispatchEvent({ type: "sui:map_created" });
+                                                setTimeout(
+                                                    () => map && setMapKey(map.objectId),
+                                                    1000,
+                                                );
+                                            }}
+                                        >
+                                            <MapItem preset={preset} />
+                                        </a>
+                                    ))}
+                            </>
+                        )}
+                        <h2 className="text-left text-3xl py-4 mt-10">Other</h2>
+                        <NavLink to="../editor" className="options-row interactive">
+                            Level Editor
+                        </NavLink>
+                        <NavLink to="../replays" className="options-row interactive">
+                            Replays (preview)
+                        </NavLink>
+                    </div>
                 </div>
                 <Footer />
             </div>
@@ -134,6 +186,19 @@ export function Playground() {
             />
         </>
     );
+
+    // === Initiation ===
+
+    async function createGame(type: Mode, preset: Preset & SuiObjectRef) {
+        switch (type) {
+            case "join":
+                throw new Error("Incompatible mode");
+            case "single":
+                return tx.createDemo(preset);
+            case "multi":
+                return tx.hostGame(preset);
+        }
+    }
 
     // === Events Handling ===
 
@@ -349,6 +414,27 @@ function MapItem({ preset }: { preset: Preset & SuiObjectRef }) {
                 {(name && `@${name}`) ||
                     (preset.author == normalizeSuiAddress("0x0") ? "system" : "unknown")}
             </p>
+        </div>
+    );
+}
+
+function HostedGameItem({
+    game,
+    onSelect,
+}: {
+    game: Host & SuiObjectRef;
+    onSelect: (host: Host) => void;
+}) {
+    const name = useSuinsName({ address: game.host });
+
+    return (
+        <div
+            className="flex flex-row justify-between w-full text-left interactive p-3"
+            onClick={() => onSelect(game)}
+        >
+            <p>Map: {game.name}</p>
+            <p>Host: {(name && `@${name}`) || formatAddress(game.host)}</p>
+            <p>{timeAgo(+game.timestampMs)}</p>
         </div>
     );
 }
