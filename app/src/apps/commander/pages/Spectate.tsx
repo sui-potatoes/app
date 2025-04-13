@@ -28,7 +28,7 @@ export function Spectate() {
                             {!games.length ? (
                                 <p>No games are played at the moment</p>
                             ) : (
-                                games.reverse().map((game) => {
+                                games.slice().reverse().map((game) => {
                                     return (
                                         <div
                                             className={
