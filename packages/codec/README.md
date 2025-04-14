@@ -22,14 +22,14 @@ To add this library to your project, add this to your `Move.toml` file under
 
 ```toml
 # goes into [dependencies] section
-Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@testnet-v3" }
+Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@v3" }
 ```
 
 If you need a **mainnet** version of this package, use the `mainnet-v2` tag instead:
 
 ```toml
 # goes into [dependencies] section
-Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@mainnet-v3" }
+Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@v3" }
 ```
 
 Exported address of this package is:
@@ -57,9 +57,9 @@ intuitive to use. Every module consists of two public functions: `encode` and
 `decode`, both stay the same in every scheme implementation. The `String` type
 is always `std::string::String`.
 
-```rust
-use std::string::String;
+```move
 use codec::hex;
+use std::string::String;
 
 // while the type annotation is not necessary, we've added it to be explicit
 let encoded: String = hex::encode(b"hello, potato!"); // takes vector<u8>
@@ -74,8 +74,9 @@ Each encoding is placed into a separate module, here is a full list:
 
 Implements the Base16 encoding scheme. The module is called `hex`.
 
-```rust
+```move
 use codec::hex;
+use std::string::String;
 
 let encoded: String = hex::encode(b"hello, potato!");
 let decoded: vector<u8> = hex::decode(b"DEADBEEF".to_string());
@@ -85,8 +86,9 @@ let decoded: vector<u8> = hex::decode(b"DEADBEEF".to_string());
 
 Implements the Base64 encoding scheme. The module is called `base64`.
 
-```rust
+```move
 use codec::base64;
+use std::string::String;
 
 let encoded: String = base64::encode(b"hello, potato!");
 let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE=".to_string());
@@ -96,8 +98,9 @@ let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE=".to_string());
 
 Implements the Base64url encoding - a URL-friendly modification of `base64`, using slightly different dictionary and lack of padding `==`.
 
-```rust
+```move
 use codec::base64url;
+use std::string::String;
 
 let encoded: String = base64::encode(b"hello, potato!");
 let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE".to_string());
@@ -107,8 +110,9 @@ let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE".to_string());
 
 Implements the URL encoding scheme. The module is called `urlencode`.
 
-```rust
+```move
 use codec::urlencode;
+use std::string::String;
 
 let encoded: String = urlencode::encode(b"hello, potato!");
 let decoded: vector<u8> = urlencode::decode(b"hello%2C%20potato%21".to_string());
@@ -118,8 +122,9 @@ let decoded: vector<u8> = urlencode::decode(b"hello%2C%20potato%21".to_string())
 
 Implements the POTAES encoding scheme. The module is called `potatoes`.
 
-```rust
+```move
 use codec::potatoes;
+use std::string::String;
 
 let encoded: String = potatoes::encode(b"hello, potato!");
 let decoded: vector<u8> = potatoes::decode(b"10POTATOES".to_string());
