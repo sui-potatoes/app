@@ -25,13 +25,6 @@ To add this library to your project, add this to your `Move.toml` file under
 Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@v3" }
 ```
 
-If you need a **mainnet** version of this package, use the `mainnet-v2` tag instead:
-
-```toml
-# goes into [dependencies] section
-Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@v3" }
-```
-
 Exported address of this package is:
 
 ```toml
@@ -102,8 +95,8 @@ Implements the Base64url encoding - a URL-friendly modification of `base64`, usi
 use codec::base64url;
 use std::string::String;
 
-let encoded: String = base64::encode(b"hello, potato!");
-let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE".to_string());
+let encoded: String = base64url::encode(b"hello, potato!");
+let decoded: vector<u8> = base64url::decode(b"SGVsbG8sIHBvdGF0byE".to_string());
 ```
 
 ### URL Encoding
@@ -127,7 +120,7 @@ use codec::potatoes;
 use std::string::String;
 
 let encoded: String = potatoes::encode(b"hello, potato!");
-let decoded: vector<u8> = potatoes::decode(b"10POTATOES".to_string());
+let decoded: vector<u8> = potatoes::decode(b"10potatoes".to_string());
 ```
 
 ## Changelog
