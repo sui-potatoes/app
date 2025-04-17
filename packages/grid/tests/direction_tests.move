@@ -3,7 +3,7 @@
 
 module grid::direction_tests;
 
-use grid::direction;
+use grid::direction::{Self, up, down, left, right, inverse};
 use std::unit_test::assert_eq;
 
 #[test]
@@ -29,6 +29,18 @@ fun direction() {
 }
 
 #[test]
+fun direction_inverse() {
+    assert_eq!(inverse!(up!()), down!());
+    assert_eq!(inverse!(down!()), up!());
+    assert_eq!(inverse!(left!()), right!());
+    assert_eq!(inverse!(right!()), left!());
+    assert_eq!(inverse!(up!() | left!()), down!() | right!());
+    assert_eq!(inverse!(up!() | right!()), down!() | left!());
+    assert_eq!(inverse!(down!() | left!()), up!() | right!());
+    assert_eq!(inverse!(down!() | right!()), up!() | left!());
+}
+
+#[test]
 // goes in a square: down, right, up, left
 // then in zigzag: down-right, down-left, up-right, up-left
 fun cursor() {
@@ -36,42 +48,42 @@ fun cursor() {
     let (x, y) = cursor.to_values();
     assert_eq!(x + y, 0); // lazy check
 
-    cursor.move_to(direction::down!());
+    cursor.move_to(down!());
     let (x, y) = cursor.to_values();
     assert_eq!(x, 1);
     assert_eq!(y, 0);
 
-    cursor.move_to(direction::right!());
+    cursor.move_to(right!());
     let (x, y) = cursor.to_values();
     assert_eq!(x, 1);
     assert_eq!(y, 1);
 
-    cursor.move_to(direction::up!());
+    cursor.move_to(up!());
     let (x, y) = cursor.to_values();
     assert_eq!(x, 0);
     assert_eq!(y, 1);
 
-    cursor.move_to(direction::left!());
+    cursor.move_to(left!());
     let (x, y) = cursor.to_values();
     assert_eq!(x, 0);
     assert_eq!(y, 0);
 
-    cursor.move_to(direction::down_right!());
+    cursor.move_to(down!() | right!());
     let (x, y) = cursor.to_values();
     assert_eq!(x, 1);
     assert_eq!(y, 1);
 
-    cursor.move_to(direction::down_left!());
+    cursor.move_to(down!() | left!());
     let (x, y) = cursor.to_values();
     assert_eq!(x, 2);
     assert_eq!(y, 0);
 
-    cursor.move_to(direction::up_right!());
+    cursor.move_to(up!() | right!());
     let (x, y) = cursor.to_values();
     assert_eq!(x, 1);
     assert_eq!(y, 1);
 
-    cursor.move_to(direction::up_left!());
+    cursor.move_to(up!() | left!());
     let (x, y) = cursor.to_values();
     assert_eq!(x, 0);
     assert_eq!(y, 0);
