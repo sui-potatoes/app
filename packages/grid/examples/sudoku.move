@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 /// Simple Sudoku Generator and verifier.
-module 0::sudoku;
+module grid::sudoku;
 
 use grid::grid::{Self, Grid};
 use sui::random::{Random, RandomGenerator};
