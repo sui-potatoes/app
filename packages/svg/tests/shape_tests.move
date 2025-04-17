@@ -243,10 +243,7 @@ fun custom() {
 fun animation_shape() {
     let mut svg = svg::svg(vector[0, 0, 200, 200]);
     let mut circle = shape::circle(5).move_to(10, 10);
-    let animation = /* ERROR: */ animation::animate()
-        .repeat_count(b"10")
-        .attribute_name(b"r")
-        .duration(b"1s");
+    let animation = animation::animate().repeat_count(b"10").attribute_name(b"r").duration(b"1s");
 
     circle.animation_mut().fill(animation);
     svg.add_root(vector[circle]);

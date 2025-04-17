@@ -96,7 +96,7 @@ fun test_path_tracing() {
 
 #[test]
 fun test_find_group() {
-    let grid = grid::from_vector /* ERROR: */ (vector[
+    let grid = grid::from_vector(vector[
         vector[0, 0, 1, 0, 0],
         vector[0, 0, 1, 0, 2],
         vector[0, 0, 1, 0, 0],
