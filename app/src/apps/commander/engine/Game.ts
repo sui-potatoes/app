@@ -109,7 +109,7 @@ export class Game extends THREE.Object3D {
                         unit.ap.value = unit.ap.max_value;
                     }
 
-                    let unitObj = new Unit(unit, models.soldier!, x, z);
+                    let unitObj = new Unit(unit, models.the_dude!, x, z);
                     game.addUnit(unitObj);
                 }
             }
