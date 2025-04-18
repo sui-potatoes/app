@@ -13,6 +13,8 @@ import { Unit as UnitProps } from "../types/bcs";
 import * as THREE from "three";
 import { Game } from "./Game";
 
+type ANIMATIONS = "idle" | "run" | "shot" | "Damage" | "Death";
+
 /**
  * Implements the base class for the Unit object. Contains both the data (from
  * the `Move` side of the application) and the visual representation.
@@ -55,7 +57,7 @@ export class UnitModel extends THREE.Object3D {
 
     /** Perform movemement along the path */
     async walk(path: THREE.Vector2[]) {
-        this.playAnimation("Run", 0.5).play();
+        this.playAnimation("run", 0.5).play();
 
         let easings: [{ x: number; z: number }, JEASINGS.JEasing][] = path
             .slice(1)
@@ -73,12 +75,12 @@ export class UnitModel extends THREE.Object3D {
             });
         }
 
-        this.playAnimation("Idle").play();
+        this.playAnimation("idle").play();
     }
 
     /** Do the "fancy" shooting animation with particles flying toward the target */
     async shoot(target: this) {
-        this.playAnimation("SniperShot", 3).play();
+        this.playAnimation("shot", 3).play();
 
         // create a vector from this to targetPos and normalize it
         const targetPos = this.worldToLocal(target.position.clone());
@@ -132,13 +134,13 @@ export class UnitModel extends THREE.Object3D {
 
         target
             .playAnimation("Damage", 0.5)
-            .crossFadeTo(target.playAnimation("Idle"), 1, true)
+            .crossFadeTo(target.playAnimation("idle"), 1, true)
             .play();
 
         await Promise.all(promises);
 
         particles.clear();
-        this.playAnimation("Idle").play();
+        this.playAnimation("idle").play();
     }
 
     // === Animation & Game Loop ===
@@ -236,7 +238,7 @@ export class Unit extends UnitModel {
     constructor(props: typeof UnitProps.$inferType, gltf: GLTF, x: number, z: number) {
         super(props, gltf);
         this.gridPosition.set(x, z);
-        this.playAnimation("Idle").play();
+        this.playAnimation("idle").play();
     }
 
     markSelected(game: Game, selected: boolean) {

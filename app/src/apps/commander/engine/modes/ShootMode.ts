@@ -159,7 +159,7 @@ export class ShootMode implements Mode {
         const selectedUnit = this.selectedUnit;
 
         // move camera to the selected unit aiming at the target
-        selectedUnit.playAnimation("SniperShot", 0.1).play();
+        selectedUnit.playAnimation("shooting", 0.1).play();
 
         this.eventBus?.dispatchEvent({
             type: "game:shoot:aim",
