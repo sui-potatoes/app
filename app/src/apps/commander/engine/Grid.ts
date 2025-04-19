@@ -57,7 +57,7 @@ export class Grid extends THREE.Object3D {
     }
 
     initFloorTiles(size: number) {
-        const tileMaterial = new THREE.MeshStandardMaterial({ map: FLOOR_TEXTURE, });
+        const tileMaterial = new THREE.MeshStandardMaterial({ map: FLOOR_TEXTURE });
 
         tileMaterial.color = new THREE.Color(0xaaaaaa);
 
