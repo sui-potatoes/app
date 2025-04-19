@@ -28,21 +28,24 @@ export function Spectate() {
                             {!games.length ? (
                                 <p>No games are played at the moment</p>
                             ) : (
-                                games.slice().reverse().map((game) => {
-                                    return (
-                                        <div
-                                            className={
-                                                "options-row interactive " +
-                                                (selected == game.id ? "selected" : "")
-                                            }
-                                            key={game.id}
-                                            onClick={() => setSelected(game.id)}
-                                        >
-                                            <a>{formatAddress(game.id)}</a>
-                                            <p>{timeAgo(+game.timestamp_ms)}</p>
-                                        </div>
-                                    );
-                                })
+                                games
+                                    .slice()
+                                    .reverse()
+                                    .map((game) => {
+                                        return (
+                                            <div
+                                                className={
+                                                    "options-row interactive " +
+                                                    (selected == game.id ? "selected" : "")
+                                                }
+                                                key={game.id}
+                                                onClick={() => setSelected(game.id)}
+                                            >
+                                                <a>{formatAddress(game.id)}</a>
+                                                <p>{timeAgo(+game.timestamp_ms)}</p>
+                                            </div>
+                                        );
+                                    })
                             )}
                         </div>
                     </div>

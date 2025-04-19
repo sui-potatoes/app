@@ -35,10 +35,12 @@ const BUTTON_CONTENTS: Record<UIKey, string | JSX.Element> = {
 export function UI({
     eventBus,
     isExecuting,
+    isChecking,
     recruits,
 }: {
     eventBus: EventBus;
     isExecuting?: boolean;
+    isChecking?: boolean;
     turn: number;
     recruits: { [key: string]: Recruit } | undefined;
 }) {
@@ -171,8 +173,8 @@ export function UI({
             >
                 {shootMode && button("next_target", false, ">")}
                 {shootMode && button("prev_target", false, "<")}
-                {button("confirm", panelDisabled)}
-                {button("cancel", panelDisabled)}
+                {button("confirm", isExecuting || isChecking || panelDisabled)}
+                {button("cancel", isExecuting || panelDisabled)}
                 {button("edit")}
                 {button("exit")}
             </div>

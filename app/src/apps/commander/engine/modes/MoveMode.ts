@@ -12,7 +12,7 @@ import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { Unit } from "../Unit";
 
 const COLOR = 0x1ae7bf;
-const DARKER_COLOR = 0x568882;
+// const DARKER_COLOR = 0x568882;
 
 export type MoveModeEvent = {
     perform: { unit: Unit; path: THREE.Vector2[] };
@@ -133,12 +133,13 @@ export class MoveMode implements Mode {
 
     drawWalkable(tiles: Set<[number, number, number]>) {
         this.clearHighlight();
+
         tiles.forEach(([x, z, distance]) => {
             const geometry = new THREE.BoxGeometry(1, 0.1, 1);
             const material = new THREE.MeshStandardMaterial({
-                color: DARKER_COLOR,
+                color: COLOR,
                 transparent: true,
-                opacity: 2 / (distance + 2),
+                opacity: 1 / (distance + 2),
             });
 
             const cube = new THREE.Mesh(geometry, material);
