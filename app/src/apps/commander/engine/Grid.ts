@@ -53,24 +53,41 @@ export class Grid extends THREE.Object3D {
     }
 
     initFloorTiles(size: number) {
-        if (models.base_tile === null) {
-            throw new Error("Base tile model is not loaded!");
-        }
+        // const mesh = models.base_tile.scene.children[0] as THREE.Mesh;
 
-        const mesh = models.base_tile.scene.children[0] as THREE.Mesh;
-        const tileMaterial = mesh.material as THREE.MeshStandardMaterial;
+        const texture = new THREE.TextureLoader().load("/images/grass.jpg");
+        texture.anisotropy = 2;
+        const tileMaterial = new THREE.MeshStandardMaterial({
+            map: texture,
+        });
+
+        tileMaterial.color = new THREE.Color(0xAAAAAA);
+
+        // const tileMaterial = mesh.material as THREE.MeshStandardMaterial;
         const material = tileMaterial.clone();
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(size, size), material);
         const secondFloor = new THREE.Mesh(
-            new THREE.PlaneGeometry(size * 10, size * 10),
-            new THREE.MeshStandardMaterial({ color: 0x333333 }),
+            new THREE.PlaneGeometry(size * 2, size * 2),
+            tileMaterial.clone(),
         );
 
         floor.rotation.x = -Math.PI / 2;
         floor.position.set(size / 2 - 0.5, 0, -(size / 2 - 0.5));
 
         secondFloor.rotation.x = -Math.PI / 2;
-        secondFloor.position.set(0, -0.1, 0);
+        secondFloor.position.set(size / 2, -0.1, -size / 2);
+
+        // add fog around the play area
+        // Create a darker plane around the play area to indicate out-of-bounds
+        const fogMaterial = tileMaterial.clone();
+        fogMaterial.color = new THREE.Color(0x000000);
+        fogMaterial.opacity = 0.5;
+        fogMaterial.transparent = true;
+
+        const fog = new THREE.Mesh(new THREE.PlaneGeometry(size * 4, size * 4), fogMaterial);
+
+        fog.rotation.x = -Math.PI / 2;
+        fog.position.set(size / 2, -0.05, -size / 2);
 
         this.floor.add(floor);
         this.add(secondFloor);
@@ -129,9 +146,10 @@ export class Grid extends THREE.Object3D {
     drawBarrier(x: number, z: number, direction: "UP" | "DOWN" | "LEFT" | "RIGHT", type: number) {
         const height = type == 1 ? 1 : 2.5;
 
+        const texture = new THREE.TextureLoader().load("/images/stone.jpeg");
         const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(0.1, height, 1),
-            new THREE.MeshStandardMaterial({ color: 0x333333 }),
+            new THREE.MeshStandardMaterial({ map: texture, transparent: true }),
         );
 
         mesh.position.set(x, 0.5, -z);

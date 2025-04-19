@@ -12,8 +12,23 @@ import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
 import { Unit as UnitProps } from "../types/bcs";
 import * as THREE from "three";
 import { Game } from "./Game";
+import { AnimationPlayer } from "./AnimationPlayer";
 
-type ANIMATIONS = "idle" | "run" | "shot" | "Damage" | "Death";
+/** Animations supported by the current unit model */
+type Animation =
+    | "idle"
+    | "reload"
+    | "death"
+    | "run"
+    | "shooting"
+    | "take_damage"
+    | "crouch_idle"
+    | "toss_grenade"
+    | "crouch_reload"
+    | "put_back_rifle"
+    | "crouch_shooting";
+
+const RIFLE_OBJECT_NAME = "Rifle";
 
 /**
  * Implements the base class for the Unit object. Contains both the data (from
@@ -21,11 +36,12 @@ type ANIMATIONS = "idle" | "run" | "shot" | "Damage" | "Death";
  */
 export class UnitModel extends THREE.Object3D {
     public readonly model: THREE.Object3D;
-    public readonly animations: THREE.AnimationClip[];
-    public readonly mixer: THREE.AnimationMixer;
+    public readonly animationPlayer: AnimationPlayer;
+
     public readonly aimCircle: THREE.Group = new THREE.Group();
     public readonly statsPanel: THREE.Group = new THREE.Group();
     public readonly light = new THREE.SpotLight(0xffffff, 20, 10, Math.PI / 2);
+    protected cover: Cover = "low";
 
     protected text: Text;
     protected updateQueue: ((d: number) => {})[] = [];
@@ -36,11 +52,11 @@ export class UnitModel extends THREE.Object3D {
     ) {
         super();
 
-        this.animations = Array.from(gltf.animations);
         this.model = clone(gltf.scene);
         this.model.castShadow = true;
         this.model.receiveShadow = true;
-        this.mixer = new THREE.AnimationMixer(this.model);
+        this.animationPlayer = new AnimationPlayer(this.model, [...gltf.animations], "idle");
+        this.model.scale.set(0.9, 0.9, 0.9);
 
         this.light.position.set(0, 4, 0);
         this.light.target = this.model;
@@ -53,11 +69,19 @@ export class UnitModel extends THREE.Object3D {
         this.add(this.statsPanel);
     }
 
+    // === Animations ===
+
+    async defaultAnimation(timeScale: number = 1, fadeIn: number = 0) {
+        // this.animationPlayer.
+        let animation: Animation = this.cover == "low" ? "crouch_idle" : "idle";
+        return this.animationPlayer.play(animation, timeScale, fadeIn);
+    }
+
     // === Unit Actions ===
 
-    /** Perform movemement along the path */
+    /** Perform movement along the path */
     async walk(path: THREE.Vector2[]) {
-        this.playAnimation("run", 0.5).play();
+        this.animationPlayer.play("run", 0.5);
 
         let easings: [{ x: number; z: number }, JEASINGS.JEasing][] = path
             .slice(1)
@@ -75,16 +99,69 @@ export class UnitModel extends THREE.Object3D {
             });
         }
 
-        this.playAnimation("idle").play();
+        let animation: Animation = this.cover == "low" ? "crouch_idle" : "idle";
+
+        this.animationPlayer.play(animation, 0.5);
+    }
+
+    /** Play reload animation once and then return to idle */
+    async reload() {
+        const animation: Animation = this.cover == "low" ? "crouch_reload" : "reload";
+        await this.playAnimationOnce(animation, 1, 0.5).wait;
+        return this.defaultAnimation(1, 0.1);
+    }
+
+    async death() {
+        await this.playAnimationOnce("death", 1, 0.5).wait;
+    }
+
+    async grenade() {
+        await this.playAnimationOnce("toss_grenade", 0.9, 0.5).wait;
+        return this.defaultAnimation(1, 0.1);
+    }
+
+    /** Move rifle attachment from right hand to left hand */
+    _moveRifle() {
+        const rifle = this.model.getObjectByName(RIFLE_OBJECT_NAME);
+        const leftHand = this.model.getObjectByName("mixamorigLeftHand");
+        const rightHand = this.model.getObjectByName("mixamorigRightHand");
+
+        if (!rifle || !leftHand || !rightHand) return console.log("no rifle, left hand or right hand");
+
+        const worldPos = new THREE.Vector3();
+        const worldQuat = new THREE.Quaternion();
+        rifle.getWorldPosition(worldPos);
+        rifle.getWorldQuaternion(worldQuat);
+
+        if (rifle && rifle.parent == rightHand && leftHand) {
+            console.log("moving rifle to left hand");
+
+            rightHand.remove(rifle);
+            // rifle.position.copy(worldPos);
+
+            leftHand.add(rifle);
+            rifle.quaternion.copy(worldQuat);
+            rifle.position.set(-0.1, 0, -0.1);
+        }
+
+        if (rifle && rifle.parent == leftHand && rightHand) {
+            leftHand.remove(rifle);
+
+            // rifle.position.copy(worldPos);
+            rifle.quaternion.copy(worldQuat);
+
+            rightHand.add(rifle);
+        }
     }
 
     /** Do the "fancy" shooting animation with particles flying toward the target */
     async shoot(target: this) {
-        this.playAnimation("shot", 3).play();
+        let startAnimation: Animation = this.cover == "low" ? "shooting" : "crouch_shooting";
+
+        this.animationPlayer.play(startAnimation, 3, 0);
 
         // create a vector from this to targetPos and normalize it
         const targetPos = this.worldToLocal(target.position.clone());
-        // const direction = targetPos.clone().normalize().multiplyScalar(0.5);
 
         // send particles to the target
         const particles = new THREE.Group();
@@ -132,39 +209,29 @@ export class UnitModel extends THREE.Object3D {
             });
         });
 
-        target
-            .playAnimation("Damage", 0.5)
-            .crossFadeTo(target.playAnimation("idle"), 1, true)
-            .play();
+        promises.push(target.playAnimationOnce("take_damage", 1.2, 0.1).wait);
 
         await Promise.all(promises);
 
+        target.defaultAnimation(1, 0.2);
+
         particles.clear();
-        this.playAnimation("idle").play();
+        this.defaultAnimation();
     }
 
     // === Animation & Game Loop ===
 
     /** Play an animation by name */
-    playAnimation(name: string, timeScale: number = 1) {
-        this.mixer.stopAllAction();
-        const clip = THREE.AnimationClip.findByName(this.animations, name);
-        const action = this.mixer.clipAction(clip, this, THREE.NormalAnimationBlendMode);
+    playAnimation(name: Animation, timeScale: number = 1, fadeIn: number = 1) {
+        return this.animationPlayer.play(name, timeScale, fadeIn);
+    }
 
-        if (!action) {
-            throw new Error(
-                `Animation ${name} not found. Available names are: ${this.animations.map((clip) => clip.name).join(", ")}`,
-            );
-        }
-
-        action.setLoop(THREE.LoopRepeat, 999);
-
-        action.timeScale = timeScale;
-        return action;
+    playAnimationOnce(name: Animation, timeScale: number = 1, fadeIn: number = 1) {
+        return this.animationPlayer.playOnce(name, timeScale, fadeIn);
     }
 
     update(delta: number) {
-        this.mixer.update(delta);
+        this.animationPlayer.mixer.update(delta);
         this.updateQueue.forEach((fn) => fn(delta));
     }
 
@@ -194,7 +261,7 @@ export class UnitModel extends THREE.Object3D {
             Math.PI * 1.5,
             0.8,
         );
-        circle.position.set(0, 1.5, 0.8);
+        circle.position.set(0, this.cover !== "low" ? 1.5 : 1.1, 0.8);
         circle.add(innerCircle);
         circle.add(innerCircle2);
 
@@ -232,13 +299,20 @@ export class UnitModel extends THREE.Object3D {
     }
 }
 
+type Cover = "none" | "low" | "high";
+
 export class Unit extends UnitModel {
     public readonly gridPosition: THREE.Vector2 = new THREE.Vector2();
 
     constructor(props: typeof UnitProps.$inferType, gltf: GLTF, x: number, z: number) {
         super(props, gltf);
         this.gridPosition.set(x, z);
-        this.playAnimation("idle").play();
+        this.defaultAnimation();
+    }
+
+    /** Set the cover of the Unit (which affects animations) */
+    setCover(cover: Cover) {
+        this.cover = cover;
     }
 
     markSelected(game: Game, selected: boolean) {

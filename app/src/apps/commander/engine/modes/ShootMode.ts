@@ -96,8 +96,7 @@ export class ShootMode implements Mode {
 
     disconnect(this: Game, mode: this) {
         if (this.selectedUnit) {
-            this.selectedUnit.playAnimation("Idle").play();
-            this.selectedUnit.mixer.timeScale = 1;
+            this.selectedUnit.defaultAnimation();
         }
 
         // unsubscribe from the UI events
@@ -159,7 +158,7 @@ export class ShootMode implements Mode {
         const selectedUnit = this.selectedUnit;
 
         // move camera to the selected unit aiming at the target
-        selectedUnit.playAnimation("shooting", 0.1).play();
+        selectedUnit.playAnimation("shooting", 0.1, 0.1);
 
         this.eventBus?.dispatchEvent({
             type: "game:shoot:aim",

@@ -25,6 +25,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     const registryId = useNetworkVariable("commanderV2RegistryId");
     const packageId = useNetworkVariable("commanderV2PackageId");
     const [lockedTx, setLockedTx] = useState<Transaction | null>(null);
+    const [isChecking, setIsChecking] = useState(false);
     const { executeTransaction, isExecuting } = useTransactionExecutor({
         // @ts-ignore
         client,
@@ -46,6 +47,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         moveUnit,
         nextTurn,
         isExecuting,
+        isChecking,
         executeLocked,
         destroyGame,
         deleteReplay,
@@ -209,6 +211,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     async function performAttack(unit: [number, number], target: [number, number]) {
         if (!map) return;
         if (!canTransact) return;
+        setIsChecking(true);
 
         const tx = new Transaction();
         const game = tx.sharedObjectRef({
@@ -235,6 +238,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             transactionBlock: await tx.build({ client: client as any }),
         });
 
+        setIsChecking(false);
         setLockedTx(tx);
 
         return { res, tx };
@@ -243,6 +247,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     async function performReload(unit: [number, number]) {
         if (!map) return;
         if (!canTransact) return;
+        setIsChecking(true);
 
         const tx = new Transaction();
         const game = tx.sharedObjectRef({
@@ -262,6 +267,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             transactionBlock: await tx.build({ client: client as any }),
         });
 
+        setIsChecking(false);
         setLockedTx(tx);
 
         return { res, tx };
@@ -270,7 +276,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     async function performGrenade(from: [number, number], to: [number, number]) {
         if (!map) return;
         if (!canTransact) return;
-
+        setIsChecking(true);
         const tx = new Transaction();
         const game = tx.sharedObjectRef({
             objectId: map.objectId,
@@ -296,6 +302,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             transactionBlock: await tx.build({ client: client as any }),
         });
 
+        setIsChecking(false);
         setLockedTx(tx);
 
         return { res, tx };
@@ -305,7 +312,8 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     async function moveUnit(path: [number, number][]) {
         if (!map) throw new Error("Map not found");
         if (!canTransact) throw new Error("Cannot transact");
-
+        setIsChecking(true);
+        
         const tx = new Transaction();
         const game = tx.sharedObjectRef({
             objectId: map.objectId,
@@ -322,6 +330,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             transactionBlock: await tx.build({ client: client as any }),
         });
 
+        setIsChecking(false);
         setLockedTx(tx);
 
         return { res, tx };

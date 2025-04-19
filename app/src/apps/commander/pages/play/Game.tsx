@@ -46,6 +46,7 @@ export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps)
                         maxDistance={12}
                     />
                 )}
+                <ambientLight color={"white"} intensity={0.5} />
                 <App map={map} camera={camera} eventBus={eventBus} history={history} />
                 <Stats />
             </Canvas>

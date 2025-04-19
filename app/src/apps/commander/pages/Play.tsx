@@ -181,6 +181,7 @@ export function Playground() {
             <GameApp map={map} eventBus={eventBus} camera={camera} />
             <UI
                 isExecuting={tx.isExecuting}
+                isChecking={tx.isChecking}
                 recruits={recruits}
                 turn={map.map.map.turn}
                 eventBus={eventBus}

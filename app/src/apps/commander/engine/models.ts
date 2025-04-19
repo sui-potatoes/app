@@ -6,7 +6,7 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
 const modelsList = {
     soldier: "/models/soldier_3.glb",
-    base_tile: "/models/base_tile.glb",
+    // base_tile: "/models/base_tile.glb",
     barrier_steel: "/models/barrier_steel.glb",
     barrel_stack: "/models/barrel_stack.glb",
     the_dude: "/models/the_dude.glb",
@@ -21,7 +21,7 @@ export type ModelName = keyof typeof modelsList;
 export const models: Record<ModelName, GLTF | null> & { loaded: boolean } = {
     soldier: null,
     the_dude: null,
-    base_tile: null,
+    // base_tile: null,
     barrier_steel: null,
     barrel_stack: null,
     loaded: false,
