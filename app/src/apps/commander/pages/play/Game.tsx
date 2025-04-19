@@ -48,13 +48,17 @@ export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps)
                     gl.shadowMap.needsUpdate = true;
                 }}
             >
-                {orbit && (
-                    <OrbitControls
-                        target={new THREE.Vector3(5, 0, -pos + 0.5)}
-                        minDistance={4}
-                        maxDistance={12}
-                    />
-                )}
+                {orbit && <OrbitControls
+                    target={new THREE.Vector3(5, 0, -pos + 0.5)}
+                    minDistance={4}
+                    maxDistance={12}
+                    // horizontal
+                    minAzimuthAngle={Math.PI / 2}
+                    maxAzimuthAngle={Math.PI * 2}
+                    // vertical
+                    // minPolarAngle={Math.PI / 4}
+                    maxPolarAngle={Math.PI / 2}
+                />}
                 {/* <ambientLight color={"white"} intensity={0.5} /> */}
                 <App map={map} camera={camera} eventBus={eventBus} history={history} />
                 <Stats />
