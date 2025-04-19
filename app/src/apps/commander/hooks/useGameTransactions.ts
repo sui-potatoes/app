@@ -313,7 +313,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         if (!map) throw new Error("Map not found");
         if (!canTransact) throw new Error("Cannot transact");
         setIsChecking(true);
-        
+
         const tx = new Transaction();
         const game = tx.sharedObjectRef({
             objectId: map.objectId,

@@ -79,6 +79,6 @@ export class AnimationPlayer {
         const { action, wait } = this.play(animation, timeScale, fadeIn);
         action.setLoop(THREE.LoopOnce, 1);
         action.clampWhenFinished = true;
-        return { action, wait};
+        return { action, wait };
     }
 }

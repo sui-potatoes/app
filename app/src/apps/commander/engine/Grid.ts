@@ -53,23 +53,23 @@ export class Grid extends THREE.Object3D {
     }
 
     initFloorTiles(size: number) {
-        // const mesh = models.base_tile.scene.children[0] as THREE.Mesh;
-
-        const texture = new THREE.TextureLoader().load("/images/grass.jpg");
+        const texture = new THREE.TextureLoader().load("/textures/sand.jpg");
         texture.anisotropy = 2;
         const tileMaterial = new THREE.MeshStandardMaterial({
             map: texture,
         });
 
-        tileMaterial.color = new THREE.Color(0xAAAAAA);
+        tileMaterial.color = new THREE.Color(0xaaaaaa);
 
-        // const tileMaterial = mesh.material as THREE.MeshStandardMaterial;
-        const material = tileMaterial.clone();
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(size, size), material);
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(size, size), tileMaterial);
         const secondFloor = new THREE.Mesh(
             new THREE.PlaneGeometry(size * 2, size * 2),
             tileMaterial.clone(),
         );
+
+        // Enable shadows for floor
+        floor.receiveShadow = true;
+        secondFloor.receiveShadow = true;
 
         floor.rotation.x = -Math.PI / 2;
         floor.position.set(size / 2 - 0.5, 0, -(size / 2 - 0.5));
@@ -77,20 +77,63 @@ export class Grid extends THREE.Object3D {
         secondFloor.rotation.x = -Math.PI / 2;
         secondFloor.position.set(size / 2, -0.1, -size / 2);
 
+        // Initialize grass
+        // Do not do it here yet.
+        // this.initGrassFloorTiles(size);
+
         // add fog around the play area
-        // Create a darker plane around the play area to indicate out-of-bounds
         const fogMaterial = tileMaterial.clone();
         fogMaterial.color = new THREE.Color(0x000000);
         fogMaterial.opacity = 0.5;
         fogMaterial.transparent = true;
 
         const fog = new THREE.Mesh(new THREE.PlaneGeometry(size * 4, size * 4), fogMaterial);
+        fog.receiveShadow = true;
 
         fog.rotation.x = -Math.PI / 2;
         fog.position.set(size / 2, -0.05, -size / 2);
 
         this.floor.add(floor);
         this.add(secondFloor);
+    }
+
+    /** Helper utility to draw grass on the ground */
+    _initGrassFloorTiles(size: number) {
+        // Add grass using instanced cones
+        const grassGeometry = new THREE.ConeGeometry(0.02, 0.1, 4);
+        const grassMaterial = new THREE.MeshStandardMaterial({
+            color: 0x2d5a27,
+            roughness: 0.8,
+            metalness: 0.4,
+        });
+
+        // Create instanced mesh for grass
+        const grassCount = 100 * size * size * 5; // 5 grass blades per tile
+        const grassMesh = new THREE.InstancedMesh(grassGeometry, grassMaterial, grassCount);
+
+        // Create dummy object for matrix calculations
+        const dummy = new THREE.Object3D();
+
+        // Position grass instances
+        for (let i = 0; i < grassCount; i++) {
+            const x = Math.random() * size - 0.5;
+            const z = Math.random() * size - 0.5;
+            const height = 0.05 + Math.random() * 0.05;
+            const rotation = Math.random() * Math.PI * 2;
+            const tilt = (Math.random() - 1) * 0.2; // Slight random tilt
+
+            dummy.position.set(x, height / 2, -z);
+            dummy.rotation.set(tilt, rotation, tilt);
+            dummy.scale.set(0.2, height / 0.03, 0.2); // Scale height while keeping base size
+            dummy.updateMatrix();
+
+            grassMesh.setMatrixAt(i, dummy.matrix);
+        }
+
+        grassMesh.instanceMatrix.needsUpdate = true;
+        grassMesh.castShadow = true;
+        grassMesh.receiveShadow = true;
+        this.floor.add(grassMesh);
     }
 
     clearCell(x: number, y: number) {
@@ -119,17 +162,36 @@ export class Grid extends THREE.Object3D {
         if (tile.type === "Unwalkable") {
             this.grid[x][z] = { type: "Unwalkable", unit: null };
 
-            if (models.barrel_stack === null) {
-                throw new Error("Barrel stack model is not loaded!");
-            }
+            const texture = new THREE.TextureLoader().load("/textures/crate.jpg");
+            const mesh = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.MeshStandardMaterial({ map: texture }),
+            );
+            mesh.material.color = new THREE.Color(0xaaaaaa);
+            mesh.position.set(x, 0.5, -z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            group.add(mesh);
 
-            const barrels = clone(models.barrel_stack.scene);
-            barrels.scale.set(0.5, 0.5, 0.5);
-            barrels.position.set(x, 0, -z);
+            // if (models.barrel_stack === null) {
+            //     throw new Error("Barrel stack model is not loaded!");
+            // }
 
-            this.meshes[`${x}-${z}`] = barrels;
-            this.add(barrels);
-            return;
+            // const barrels = clone(models.barrel_stack.scene);
+            // barrels.scale.set(0.5, 0.5, 0.5);
+            // barrels.position.set(x, 0, -z);
+
+            // // Enable shadows for barrels
+            // barrels.traverse((child) => {
+            //     if (child instanceof THREE.Mesh) {
+            //         child.castShadow = true;
+            //         child.receiveShadow = true;
+            //     }
+            // });
+
+            // this.meshes[`${x}-${z}`] = barrels;
+            // this.add(barrels);
+            // return;
         }
 
         if (tile.type === "Cover") {
@@ -146,12 +208,17 @@ export class Grid extends THREE.Object3D {
     drawBarrier(x: number, z: number, direction: "UP" | "DOWN" | "LEFT" | "RIGHT", type: number) {
         const height = type == 1 ? 1 : 2.5;
 
-        const texture = new THREE.TextureLoader().load("/images/stone.jpeg");
+        const texture = new THREE.TextureLoader().load("/textures/sandstone-brick.png");
+        texture.colorSpace = THREE.SRGBColorSpace;
         const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(0.1, height, 1),
-            new THREE.MeshStandardMaterial({ map: texture, transparent: true }),
+            new THREE.MeshStandardMaterial({ map: texture }),
         );
 
+        // Enable shadows for barriers
+        mesh.material.color = new THREE.Color(0xaaaaaa);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
         mesh.position.set(x, 0.5, -z);
 
         switch (direction) {

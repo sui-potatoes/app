@@ -58,9 +58,22 @@ export class UnitModel extends THREE.Object3D {
         this.animationPlayer = new AnimationPlayer(this.model, [...gltf.animations], "idle");
         this.model.scale.set(0.9, 0.9, 0.9);
 
+        this.model.castShadow = true;
+        this.model.receiveShadow = true;
+
+        this.model.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+
         this.light.position.set(0, 4, 0);
         this.light.target = this.model;
         this.light.castShadow = true;
+        this.light.shadow.mapSize.set(1024, 1024);
+        this.light.shadow.radius = 10;
+
         this.aimCircle.renderOrder = 0;
 
         this.add(this.light);
@@ -126,7 +139,8 @@ export class UnitModel extends THREE.Object3D {
         const leftHand = this.model.getObjectByName("mixamorigLeftHand");
         const rightHand = this.model.getObjectByName("mixamorigRightHand");
 
-        if (!rifle || !leftHand || !rightHand) return console.log("no rifle, left hand or right hand");
+        if (!rifle || !leftHand || !rightHand)
+            return console.log("no rifle, left hand or right hand");
 
         const worldPos = new THREE.Vector3();
         const worldQuat = new THREE.Quaternion();
