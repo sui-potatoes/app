@@ -38,14 +38,30 @@ export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps)
 
     return (
         <>
-            <Canvas camera={camera}>
+            <Canvas
+                camera={camera}
+                shadows
+                onCreated={({ gl }) => {
+                    gl.shadowMap.enabled = true;
+                    gl.shadowMap.type = THREE.PCFSoftShadowMap;
+                    gl.shadowMap.autoUpdate = true;
+                    gl.shadowMap.needsUpdate = true;
+                }}
+            >
                 {orbit && (
                     <OrbitControls
                         target={new THREE.Vector3(5, 0, -pos + 0.5)}
                         minDistance={4}
                         maxDistance={12}
+                        // horizontal
+                        minAzimuthAngle={Math.PI / 2}
+                        maxAzimuthAngle={Math.PI * 2}
+                        // vertical
+                        // minPolarAngle={Math.PI / 4}
+                        maxPolarAngle={Math.PI / 2}
                     />
                 )}
+                {/* <ambientLight color={"white"} intensity={0.5} /> */}
                 <App map={map} camera={camera} eventBus={eventBus} history={history} />
                 <Stats />
             </Canvas>
@@ -123,7 +139,18 @@ function App({ map, camera, eventBus, history }: AppProps) {
     return (
         <>
             <primitive object={game} />
-            <ambientLight color={"white"} intensity={0.5} />
+            <directionalLight
+                color={0xedaf62} // sunset
+                position={[game.size / 2, 10, game.size / 2]}
+                intensity={1.0}
+                castShadow
+                shadow-mapSize={[2048, 2048]}
+                shadow-camera-far={50}
+                shadow-camera-left={-10}
+                shadow-camera-right={10}
+                shadow-camera-top={10}
+                shadow-camera-bottom={-10}
+            />
             <fog attach="fog" args={["white", 0.5, 200]} />
         </>
     );

@@ -67,7 +67,7 @@ export function Observer() {
  */
 function loadCamera() {
     const aspect = window.innerWidth / window.innerHeight;
-    const camera = new Camera(75, aspect, 0.1, 100);
+    const camera = new Camera(75, aspect, 0.1, 200);
     camera.resetForSize(10);
     return camera;
 }

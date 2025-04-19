@@ -96,8 +96,7 @@ export class ShootMode implements Mode {
 
     disconnect(this: Game, mode: this) {
         if (this.selectedUnit) {
-            this.selectedUnit.playAnimation("Idle").play();
-            this.selectedUnit.mixer.timeScale = 1;
+            this.selectedUnit.defaultAnimation();
         }
 
         // unsubscribe from the UI events
@@ -159,7 +158,7 @@ export class ShootMode implements Mode {
         const selectedUnit = this.selectedUnit;
 
         // move camera to the selected unit aiming at the target
-        selectedUnit.playAnimation("SniperShot", 0.1).play();
+        selectedUnit.playAnimation("shooting", 0.1, 0.1);
 
         this.eventBus?.dispatchEvent({
             type: "game:shoot:aim",
@@ -287,25 +286,33 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
         const isLeft = target.gridPosition.y < unit.gridPosition.y;
         const isRight = target.gridPosition.y > unit.gridPosition.y;
 
+        console.log(isLeft, isRight);
+
         if (isLeft) {
-            const middleTile = grid.grid[target.gridPosition.x][unit.gridPosition.y + 1];
+            const middleTile = grid.grid[target.gridPosition.x][target.gridPosition.y + 1];
+
+            console.log(middleTile);
 
             // try target tile first, or else -> middle tile
             if (targetTile.type === "Cover") {
                 return targetTile.right * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.left * DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Unwalkable") {
+                return DEFENSE_MULTIPLIER;
             } else return 0;
         }
 
         if (isRight) {
-            const middleTile = grid.grid[target.gridPosition.x][unit.gridPosition.y - 1];
+            const middleTile = grid.grid[target.gridPosition.x][target.gridPosition.y - 1];
 
             // try target tile first, or else -> middle tile
             if (targetTile.type === "Cover") {
                 return targetTile.left * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.right * DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Unwalkable") {
+                return DEFENSE_MULTIPLIER;
             } else return 0;
         }
     }
@@ -316,23 +323,28 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
         const isDown = target.gridPosition.x > unit.gridPosition.x;
 
         if (isUp) {
-            const middleTile = grid.grid[target.gridPosition.x + 1][unit.gridPosition.y];
+            const middleTile = grid.grid[target.gridPosition.x + 1][target.gridPosition.y];
 
             // try target tile first, or else -> middle tile
             if (targetTile.type === "Cover") {
                 return targetTile.down * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.up * DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Unwalkable") {
+                return DEFENSE_MULTIPLIER;
             } else return 0;
         }
+
         if (isDown) {
-            const middleTile = grid.grid[target.gridPosition.x - 1][unit.gridPosition.y];
+            const middleTile = grid.grid[target.gridPosition.x - 1][target.gridPosition.y];
 
             // try target tile first, or else -> middle tile
             if (targetTile.type === "Cover") {
                 return targetTile.up * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.down * DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Unwalkable") {
+                return DEFENSE_MULTIPLIER;
             } else return 0;
         }
     }

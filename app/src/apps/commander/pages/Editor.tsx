@@ -30,7 +30,7 @@ export function Editor() {
 
     return (
         <>
-            <Canvas camera={camera} onCreated={({ gl }) => gl.setClearColor("lightblue")}>
+            <Canvas camera={camera} onCreated={({ gl }) => gl.setClearColor("black")}>
                 <Field size={size} preset={preset} eventBus={eventBus} camera={camera} />
             </Canvas>
             <UI eventBus={eventBus} />

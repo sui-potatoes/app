@@ -109,7 +109,7 @@ export class Game extends THREE.Object3D {
                         unit.ap.value = unit.ap.max_value;
                     }
 
-                    let unitObj = new Unit(unit, models.soldier!, x, z);
+                    let unitObj = new Unit(unit, models.the_dude!, x, z);
                     game.addUnit(unitObj);
                 }
             }
@@ -147,7 +147,7 @@ export class Game extends THREE.Object3D {
     }
 
     /** Apply event received from Sui */
-    applyAttackEvent({ damage, targetUnit: [x1, y1] }: SuiAction["attack"]) {
+    async applyAttackEvent({ damage, targetUnit: [x1, y1] }: SuiAction["attack"]) {
         const unitId = this.grid.grid[x1][y1].unit;
 
         if (unitId === null) return; // ignore, fetched event too late
@@ -156,6 +156,7 @@ export class Game extends THREE.Object3D {
 
         if (this.units[unitId]!.props.hp.value <= 0) {
             this.grid.grid[x1][y1].unit = null;
+            await this.units[unitId]!.death();
             this.remove(this.units[unitId]!);
             delete this.units[unitId];
         }

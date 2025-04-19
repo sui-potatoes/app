@@ -43,6 +43,7 @@ export class ReloadMode implements Mode {
         this._isBlocked = true;
         const unit = this.selectedUnit;
         unit.spendAp(mode.cost);
+        unit.reload();
         this._isBlocked = false;
     }
 }

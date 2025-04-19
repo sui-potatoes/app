@@ -54,6 +54,10 @@ export class GrenadeMode implements Mode {
         if (!mode.targetTile) return;
         const { x, y } = mode.targetTile as THREE.Vector2;
 
+        this.selectedUnit.lookAt(x, 0, -y);
+        this.selectedUnit.spendAp(mode.cost);
+        await this.selectedUnit.grenade();
+
         const tiles = this.grid.radiusTiles([x, y], 2);
         for (const [x, y] of tiles) this.grid.clearCell(x, y);
     }

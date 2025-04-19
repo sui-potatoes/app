@@ -67,6 +67,7 @@ export function Playground() {
             eventBus.removeEventListener("game:reload:perform", onGameReload);
             eventBus.removeEventListener("game:grenade:target", onGameGrenade);
             eventBus.removeEventListener("ui:next_turn", onNextTurn);
+            eventBus.removeEventListener("ui:exit", onExit);
         };
     }, [map, tx, eventBus, tx.lockedTx]); // mind the `tx` dependency here!
 
@@ -180,6 +181,7 @@ export function Playground() {
             <GameApp map={map} eventBus={eventBus} camera={camera} />
             <UI
                 isExecuting={tx.isExecuting}
+                isChecking={tx.isChecking}
                 recruits={recruits}
                 turn={map.map.map.turn}
                 eventBus={eventBus}
