@@ -10,16 +10,15 @@
 /// - Y-axis: horizontal axis (left->right)
 ///
 /// Direction is packed as a bit field in a single byte.
-/// - b00000000 - none
-/// - b00000001 - up
-/// - b00000010 - right
-/// - b00000100 - down
-/// - b00001000 - left
-/// - b00000011 - up | right
-/// - b00000101 - up | down
-/// - b00001001 - up | left
-/// - b00001100 - right | down
-///
+/// - `b00000000` - none - 0
+/// - `b00000001` - up - 1
+/// - `b00000010` - right - 2
+/// - `b00000100` - down - 4
+/// - `b00001000` - left - 8
+/// - `b00000011` - up | right - 3
+/// - `b00000110` - right | down - 6
+/// - `b00001100` - down | left - 12
+/// - `b00001001` - up | left - 9
 /// Directions can be combined using bitwise OR or checked using bitwise AND.
 /// ```
 /// use grid::direction;
@@ -69,7 +68,13 @@ public fun cursor_to_values(c: &Cursor): (u16, u16) {
     (*x, *y)
 }
 
-/// Move cursor in a given direction.
+/// Reset the cursor to a given point.
+public fun reset(c: &mut Cursor, x: u16, y: u16) {
+    c.0 = x;
+    c.1 = y;
+}
+
+/// Move cursor in a given direction. Aborts if the cursor is out of bounds.
 public fun move_to(c: &mut Cursor, direction: u8) {
     let Cursor(x, y) = c;
     if (direction & up!() > 0) {
@@ -85,6 +90,14 @@ public fun move_to(c: &mut Cursor, direction: u8) {
     } else if (direction & right!() > 0) {
         *y = *y + 1;
     };
+}
+
+/// Check if a cursor can move in a given direction. Checks 0-index bounds.
+public fun can_move_to(c: &Cursor, direction: u8): bool {
+    let Cursor(x, y) = c;
+    let is_up = direction & up!() > 0;
+    let is_left = direction & left!() > 0;
+    (is_up && *x > 0 || !is_up) && (is_left && *y > 0 || !is_left)
 }
 
 // === Check Directions ===
@@ -155,6 +168,20 @@ public macro fun up_left(): u8 { up!() | left!() }
 /// Direction: none
 public macro fun none(): u8 { 0 }
 
+/// Get the inverse direction of a given direction.
+public macro fun inverse($direction: u8): u8 {
+    match ($direction) {
+        1 => down!(),
+        2 => left!(),
+        4 => up!(),
+        8 => right!(),
+        3 => down!() | left!(),
+        9 => down!() | right!(),
+        6 => up!() | left!(),
+        12 => up!() | right!(),
+        _ => abort,
+    }
+}
 // === Determine Direction ===
 
 /// Get the attack direction from point `(x0, y0)` to point `(x1, y1)`.
