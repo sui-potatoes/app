@@ -3,8 +3,8 @@
 
 import * as THREE from "three";
 import { Tile } from "./Game";
-import { models } from "./models";
-import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
+// import { models } from "./models";
+// import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { Map as GameMap } from "../types/bcs";
 import { bcs } from "@mysten/bcs";
 import { normalizeSuiObjectId } from "@mysten/sui/utils";
@@ -13,6 +13,10 @@ const LocalPreset = bcs.struct("LocalPreset", {
     map: GameMap,
     positions: bcs.vector(bcs.vector(bcs.u8())),
 });
+
+const OBSTACLE_TEXTURE = new THREE.TextureLoader().load("/textures/crate.jpg");
+const FLOOR_TEXTURE = new THREE.TextureLoader().load("/textures/sand.jpg");
+const BARRIER_TEXTURE = new THREE.TextureLoader().load("/textures/sandstone-brick.png");
 
 /**
  * Grid follows the structure of the game board, similar to how it is handled in
@@ -53,11 +57,7 @@ export class Grid extends THREE.Object3D {
     }
 
     initFloorTiles(size: number) {
-        const texture = new THREE.TextureLoader().load("/textures/sand.jpg");
-        texture.anisotropy = 2;
-        const tileMaterial = new THREE.MeshStandardMaterial({
-            map: texture,
-        });
+        const tileMaterial = new THREE.MeshStandardMaterial({ map: FLOOR_TEXTURE, });
 
         tileMaterial.color = new THREE.Color(0xaaaaaa);
 
@@ -162,10 +162,9 @@ export class Grid extends THREE.Object3D {
         if (tile.type === "Unwalkable") {
             this.grid[x][z] = { type: "Unwalkable", unit: null };
 
-            const texture = new THREE.TextureLoader().load("/textures/crate.jpg");
             const mesh = new THREE.Mesh(
                 new THREE.BoxGeometry(1, 1, 1),
-                new THREE.MeshStandardMaterial({ map: texture }),
+                new THREE.MeshStandardMaterial({ map: OBSTACLE_TEXTURE }),
             );
             mesh.material.color = new THREE.Color(0xaaaaaa);
             mesh.position.set(x, 0.5, -z);
@@ -208,11 +207,9 @@ export class Grid extends THREE.Object3D {
     drawBarrier(x: number, z: number, direction: "UP" | "DOWN" | "LEFT" | "RIGHT", type: number) {
         const height = type == 1 ? 1 : 2.5;
 
-        const texture = new THREE.TextureLoader().load("/textures/sandstone-brick.png");
-        texture.colorSpace = THREE.SRGBColorSpace;
         const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(0.1, height, 1),
-            new THREE.MeshStandardMaterial({ map: texture }),
+            new THREE.MeshStandardMaterial({ map: BARRIER_TEXTURE }),
         );
 
         // Enable shadows for barriers

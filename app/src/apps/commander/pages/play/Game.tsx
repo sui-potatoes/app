@@ -134,6 +134,7 @@ function App({ map, camera, eventBus, history }: AppProps) {
         <>
             <primitive object={game} />
             <directionalLight
+                color={0xedaf62} // sunset
                 position={[game.size / 2, 10, game.size / 2]}
                 intensity={1.0}
                 castShadow

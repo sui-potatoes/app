@@ -174,7 +174,7 @@ export function UI({
                 {shootMode && button("next_target", false, ">")}
                 {shootMode && button("prev_target", false, "<")}
                 {button("confirm", isExecuting || isChecking || panelDisabled)}
-                {button("cancel", isExecuting || isChecking || panelDisabled)}
+                {button("cancel", isExecuting || panelDisabled)}
                 {button("edit")}
                 {button("exit")}
             </div>
