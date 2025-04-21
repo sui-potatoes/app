@@ -47,6 +47,7 @@
 ///
 /// Utility functions:
 /// - `scale` - set the scaling factor for the formula manually
+/// - `disable_optimizations` - disable operation order optimizations
 module formula::formula;
 
 use formula::macros::sqrt_u256;
@@ -60,11 +61,12 @@ const BPS_MAX: u16 = 100_00;
 
 /// Represents a single operation in a formula.
 public enum Op<T> has copy, drop, store {
-    Div(T),
-    DivUp(T),
-    Mul(T),
     Add(T),
     Sub(T),
+    Mul(T),
+    Div(T),
+    DivUp(T),
+    Rem(T),
     Pow(u8),
     BPS(u16),
     Min(T),
@@ -116,6 +118,47 @@ public fun disable_optimizations<T: drop>(mut self: Formula<T>): Formula<T> {
 
 // === Operations ===
 
+/// Register an addition operation to be executed in the `calc_*` functions.
+/// Can overlow if the intermediary result is greater than `uX.max_value!()`;
+///
+/// ```rust
+/// // f(x) = x + 10
+/// let f = formula::new().add(10);
+/// assert_eq!(f.calc_u8(10), 20);
+/// assert_eq!(f.calc_u8(15), 25);
+/// ```
+public fun add<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
+    self.expressions.push_back(Op::Add(arg));
+    self
+}
+
+/// Register a subtraction operation to be executed in the `calc_*`
+/// functions. Can underflow if the intermediary result is less than the
+/// subtrahend.
+///
+/// ```rust
+/// // f(x) = x - 10
+/// let f = formula::new().sub(10);
+/// assert_eq!(f.calc_u8(10), 0);
+/// assert_eq!(f.calc_u8(15), 5);
+/// ```
+public fun sub<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
+    self.expressions.push_back(Op::Sub(arg));
+    self
+}
+
+/// Register a multiplication operation to be executed in the `calc_*`
+/// functions.
+///
+/// ```rust
+/// // f(x) = x * 10
+/// let f = formula::new().mul(10);
+///
+public fun mul<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
+    self.expressions.push_back(Op::Mul(arg));
+    self
+}
+
 /// Register a division operation to be executed in the `calc_*` functions.
 /// Value is upscaled to prevent precision loss. Aborts if the divisor is zero.
 ///
@@ -145,44 +188,16 @@ public fun div_up<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
     self
 }
 
-/// Register a multiplication operation to be executed in the `calc_*`
-/// functions.
+/// Register a remainder operation to be executed in the `calc_*` functions.
 ///
 /// ```rust
-/// // f(x) = x * 10
-/// let f = formula::new().mul(10);
-///
-public fun mul<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
-    self.expressions.push_back(Op::Mul(arg));
-    self
-}
-
-/// Register an addition operation to be executed in the `calc_*` functions.
-/// Can overlow if the intermediary result is greater than `uX.max_value!()`;
-///
-/// ```rust
-/// // f(x) = x + 10
-/// let f = formula::new().add(10);
-/// assert_eq!(f.calc_u8(10), 20);
-/// assert_eq!(f.calc_u8(15), 25);
-/// ```
-public fun add<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
-    self.expressions.push_back(Op::Add(arg));
-    self
-}
-
-/// Register a subtraction operation to be executed in the `calc_*`
-/// functions. Can underflow if the intermediary result is less than the
-/// subtrahend.
-///
-/// ```rust
-/// // f(x) = x - 10
-/// let f = formula::new().sub(10);
+/// // f(x) = x % 10
+/// let f = formula::new().rem(10);
 /// assert_eq!(f.calc_u8(10), 0);
 /// assert_eq!(f.calc_u8(15), 5);
 /// ```
-public fun sub<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
-    self.expressions.push_back(Op::Sub(arg));
+public fun rem<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
+    self.expressions.push_back(Op::Rem(arg));
     self
 }
 
@@ -266,27 +281,34 @@ public fun max<T: drop>(mut self: Formula<T>, arg: T): Formula<T> {
 
 /// Calculate formula for `u8` type.
 public fun calc_u8(self: Formula<u8>, value: u8): u8 {
-    calc!<u8, u16>(self, value, |v| v.sqrt(), std::u8::max_value!(), 0)
+    calc!<u8, u16>(self, value, |v| v.sqrt(), std::u8::max_value!(), std::u16::max_value!(), 0)
 }
 
 /// Calculate formula for `u16` type.
 public fun calc_u16(self: Formula<u16>, value: u16): u16 {
-    calc!<u16, u32>(self, value, |v| v.sqrt(), std::u16::max_value!(), 8)
+    calc!<u16, u32>(self, value, |v| v.sqrt(), std::u16::max_value!(), std::u32::max_value!(), 8)
 }
 
 /// Calculate formula for `u32` type.
 public fun calc_u32(self: Formula<u32>, value: u32): u32 {
-    calc!<u32, u64>(self, value, |v| v.sqrt(), std::u32::max_value!(), 16)
+    calc!<u32, u64>(self, value, |v| v.sqrt(), std::u32::max_value!(), std::u64::max_value!(), 16)
 }
 
 /// Calculate formula for `u64` type.
 public fun calc_u64(self: Formula<u64>, value: u64): u64 {
-    calc!<u64, u128>(self, value, |v| v.sqrt(), std::u64::max_value!(), 32)
+    calc!<u64, u128>(self, value, |v| v.sqrt(), std::u64::max_value!(), std::u128::max_value!(), 32)
 }
 
 /// Calculate formula for `u128` type.
 public fun calc_u128(self: Formula<u128>, value: u128): u128 {
-    calc!<u128, u256>(self, value, |v| sqrt_u256!(v), std::u128::max_value!(), 64)
+    calc!<u128, u256>(
+        self,
+        value,
+        |v| sqrt_u256!(v),
+        std::u128::max_value!(),
+        std::u256::max_value!(),
+        64,
+    )
 }
 
 // === Internal ===
@@ -303,6 +325,7 @@ macro fun calc<$N, $U>(
     $value: $N,
     $sqrt: |$U| -> $U,
     $max: $N,
+    $max_scaled: $U,
     $scale: u8,
 ): $N {
     use std::macros::{num_divide_and_round_up, num_min, num_max};
@@ -337,27 +360,6 @@ macro fun calc<$N, $U>(
 
     let mut value = expressions.fold!($value as $U, |res, expr| {
         match (expr) {
-            Op::Div(divisor) => {
-                assert!(divisor != 0, EDivideByZero);
-                if (is_scaled) {
-                    res / (divisor as $U)
-                } else {
-                    is_scaled = true;
-                    res * scaling / (divisor as $U)
-                }
-            },
-            Op::DivUp(divisor) => {
-                assert!(divisor != 0, EDivideByZero);
-                if (is_scaled) {
-                    num_divide_and_round_up!(res, divisor as $U)
-                } else {
-                    is_scaled = true;
-                    num_divide_and_round_up!(res * scaling, divisor as $U)
-                }
-            },
-            Op::Mul(multiplier) => {
-                res * (multiplier as $U)
-            },
             Op::Add(addend) => {
                 if (is_scaled) res + ((addend as $U) * scaling) else res + (addend as $U)
             },
@@ -370,17 +372,59 @@ macro fun calc<$N, $U>(
                     res - (subtrahend as $U)
                 }
             },
+            // r = (x / s) * a;
+            Op::Mul(multiplier) => {
+                res * (multiplier as $U)
+            },
+            Op::Div(divisor) => {
+                assert!(divisor != 0, EDivideByZero);
+                if (is_scaled) {
+                    res / (divisor as $U)
+                } else if ($max_scaled / scaling > res) {
+                    is_scaled = true;
+                    res * scaling / (divisor as $U)
+                } else {
+                    res / (divisor as $U)
+                }
+            },
+            Op::DivUp(divisor) => {
+                assert!(divisor != 0, EDivideByZero);
+                if (is_scaled) {
+                    num_divide_and_round_up!(res, divisor as $U)
+                } else if ($max_scaled / scaling > res) {
+                    is_scaled = true;
+                    num_divide_and_round_up!(res * scaling, divisor as $U)
+                } else {
+                    num_divide_and_round_up!(res, divisor as $U)
+                }
+            },
+            Op::Rem(divisor) => {
+                assert!(divisor != 0, EDivideByZero);
+                if (is_scaled) {
+                    is_scaled = false;
+                    (res / scaling) % (divisor as $U)
+                } else {
+                    res % (divisor as $U)
+                }
+            },
             Op::Pow(exponent) => {
                 // may overflow quite easily, get back to me!
                 if (is_scaled && exponent > 1) {
                     is_scaled = false;
+                    (res / scaling).pow(exponent)
+                } else if ($max_scaled / scaling > res) {
+                    is_scaled = true;
                     (res / scaling).pow(exponent)
                 } else {
                     res.pow(exponent)
                 }
             },
             Op::BPS(bps) => {
-                res * (bps as $U) / (BPS_MAX as $U)
+                if ($max_scaled / (bps.max(1) as $U) < res) {
+                    res / (BPS_MAX as $U) * (bps as $U)
+                } else {
+                    res * (bps as $U) / (BPS_MAX as $U)
+                }
             },
             Op::Min(min) => {
                 num_min!(res, if (is_scaled) scaling else { 1 } * (min as $U))

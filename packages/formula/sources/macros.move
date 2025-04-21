@@ -22,7 +22,7 @@ public macro fun uint_max<$T: drop>(): $T {
 /// Implements a missing `sqrt` function for `u256` type.
 /// Implementation is based on various community projects, and suggested to
 /// this project by @kklas
-public macro fun sqrt_u256($x: u256): u256 {
+public(package) macro fun sqrt_u256($x: u256): u256 {
     let x = $x;
     if (x == 0) return 0;
 
@@ -39,7 +39,7 @@ public macro fun sqrt_u256($x: u256): u256 {
     result.min(x / result)
 }
 
-public macro fun log2_u256($x: u256): u8 {
+public(package) macro fun log2_u256($x: u256): u8 {
     let mut x = $x;
     if (x == 0) return 0;
     let mut result = 0;
