@@ -58,6 +58,9 @@ export class UnitModel extends THREE.Object3D {
         this.animationPlayer = new AnimationPlayer(this.model, [...gltf.animations], "idle");
         this.model.scale.set(0.9, 0.9, 0.9);
 
+        const hat = this.model.getObjectByName("MocapGuy_Hat");
+        if (hat) hat.parent!.remove(hat);
+
         this.model.castShadow = true;
         this.model.receiveShadow = true;
 

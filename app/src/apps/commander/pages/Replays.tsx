@@ -55,43 +55,44 @@ export function Replays() {
 
     return (
         <div className="flex justify-between flex-col w-full">
-            <div className="p-10 max-w-xl">
+            <div className="p-10 max-w-2xl">
                 <h1 className="p-1 mb-10 page-heading">
                     <NavLink to="../play">PLAY</NavLink> / replays
                 </h1>
-            </div>
-            <div className="p-10 max-w-3xl">
-                {replays.length === 0 && (
-                    <div>
-                        No replays found. <br />
-                        Replays can be saved after a game is finished.
-                    </div>
-                )}
-                {replays?.map((replay) => (
-                    <div className="options-row interactive w-full">
-                        <a>
-                            {formatAddress(replay.objectId)} ({replay.history.length} actions)
-                        </a>
-                        <div className="flex gap-2">
-                            <button className="px-4 w-full">
-                                <NavLink to={`../watch/${replay.objectId}`}>Watch</NavLink>
-                            </button>
-                            <button className="px-4 w-full">
-                                <a
-                                    onClick={() =>
-                                        canTransact &&
-                                        confirm("Are you sure? This is irreversible action!") &&
-                                        deleteReplay(replay.objectId).then(() => {
-                                            setTimeout(() => refetch(), 1000);
-                                        })
-                                    }
-                                >
-                                    Delete
-                                </a>
-                            </button>
+                <h2 className="mb-2">REPLAYS</h2>
+                <div className="overflowing">
+                    {replays.length === 0 && (
+                        <div>
+                            No replays found. <br />
+                            Replays can be saved after a game is finished.
                         </div>
-                    </div>
-                ))}
+                    )}
+                    {replays?.map((replay) => (
+                        <div className="options-row interactive w-full">
+                            <a>
+                                {formatAddress(replay.objectId)} ({replay.history.length} actions)
+                            </a>
+                            <div className="flex gap-2">
+                                <button className="px-4 w-full">
+                                    <NavLink to={`../watch/${replay.objectId}`}>Watch</NavLink>
+                                </button>
+                                <button className="px-4 w-full">
+                                    <a
+                                        onClick={() =>
+                                            canTransact &&
+                                            confirm("Are you sure? This is irreversible action!") &&
+                                            deleteReplay(replay.objectId).then(() => {
+                                                setTimeout(() => refetch(), 1000);
+                                            })
+                                        }
+                                    >
+                                        Delete
+                                    </a>
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
             <Footer to="../play" />
         </div>

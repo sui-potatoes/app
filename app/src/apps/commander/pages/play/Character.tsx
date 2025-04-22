@@ -49,6 +49,7 @@ export function Scene({ model, morphTargets }: { model: GLTF; morphTargets: numb
     });
 
     useEffect(() => {
+        unit.light.position.set(0, 4, 1);
         unit.position.set(0, -1, 0);
         unit.model.scale.set(2, 2, 2);
         unit.playAnimation("idle", 0.2, 0);

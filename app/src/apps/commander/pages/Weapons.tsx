@@ -81,7 +81,7 @@ export function Weapons() {
                     <NavLink to="../headquarters">HEADQUATERS</NavLink> / WEAPONS
                 </h1>
                 <div className="flex justify-start">
-                    <div className="w-96 max-w-md">
+                    <div className="w-96 max-w-md overflowing">
                         <div>
                             {(isPending || isExecuting) && <Loader />}
                             {displayed.map((w) => (
@@ -110,10 +110,7 @@ export function Weapons() {
                         </div>
                     </div>
                     {selected && (
-                        <div
-                            className="ml-10 px-10 pb-10 max-w-3xl overflow-auto"
-                            style={{ maxHeight: "80vh" }}
-                        >
+                        <div className="ml-10 px-10 pb-10 max-w-3xl overflowing">
                             <div className="mb-10">
                                 <h2 className="mb-2">DESCRIPTION</h2>
                                 <p className="normal-case">

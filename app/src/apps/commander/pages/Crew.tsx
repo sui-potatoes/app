@@ -93,12 +93,13 @@ export function Crew() {
     return (
         <div className="flex justify-between align-middle h-screen flex-col w-full">
             <div className="text-left text-uppercase text-lg p-10">
-                <h1 className="p-1 mb-10 uppercase white page-heading">
+                <h1 className="mb-10 uppercase white page-heading">
                     <NavLink to="../HEADQUARTERS">HEADQUARTERS</NavLink> / CREW
                 </h1>
-                <div className="flex justify-start">
-                    <div className="w-96 rounded max-w-xl">
-                        <div className="overflow-y-auto" style={{ height: "70vh" }}>
+                <div className="flex justify-between">
+                    <div className="rounded w-sm" style={{ padding: "2px" }}>
+                        <h2 className="mb-2">RECRUITS</h2>
+                        <div className="overflowing" style={{ padding: "2px" }}>
                             {recruits?.map((r) => {
                                 return (
                                     <div
@@ -110,7 +111,7 @@ export function Crew() {
                                         onClick={() => setSelected(r)}
                                     >
                                         <div>{r.metadata.name}</div>
-                                        <div>({r.rank.$kind})</div>
+                                        {/* <div>({r.rank.$kind})</div> */}
                                     </div>
                                 );
                             })}
@@ -126,7 +127,15 @@ export function Crew() {
                     </div>
                     {selected && (
                         <>
-                            <div className="size-max ml-10 text-lg max-w-2xl">
+                            <div className="w-xl h-screen">
+                                <Character
+                                    morphTargets={[...fromHex(selected.id)].map((e) => e / 200)}
+                                />
+                            </div>
+                            <div
+                                className="size-max text-lg max-w-md overflowing h-10/12"
+                                style={{ padding: "2px" }}
+                            >
                                 <div className="mb-10">
                                     <h2 className="mb-2">BACKSTORY</h2>
                                     <p className="normal-case">
@@ -157,86 +166,62 @@ export function Crew() {
                                         />
                                     ))}
                                 </div>
-
-                                <div className="mt-10 w-full flex justify-between">
+                                <h2 className="mt-10 text-left">EQUIPMENT</h2>
+                                <div className="w-full">
                                     {/* Weapon selection */}
-                                    <div className="my-auto">
-                                        <h3 className="text-left mb-4">WEAPON</h3>
+                                    <div className="options-row">
+                                        <h3 className="text-left">WEAPON</h3>
                                         {(selected.weapon && (
                                             <div
-                                                style={{
-                                                    height: "200px",
-                                                    width: "375px",
-                                                }}
-                                                className="h-full text-center flex flex-col interactive"
+                                                style={{ border: "none" }}
+                                                className="interactive px-4"
                                                 onClick={() => setShowModal("weapon")}
                                             >
-                                                <img
-                                                    src={weaponMetadata(selected.weapon.name).image}
-                                                    style={{ maxHeight: "150px" }}
-                                                />
-                                                <label className="mt-2">
-                                                    {selected.weapon.name}
-                                                    {selected.weapon.upgrades.length > 0 && "+"}
-                                                </label>
+                                                {selected.weapon.name}
+                                                {selected.weapon.upgrades.length > 0 && "+"}
                                             </div>
                                         )) || (
                                             <div
-                                                style={{ height: "200px", width: "375px" }}
-                                                className="text-center flex flex-col interactive"
+                                                style={{ width: "180px" }}
+                                                className="text-center interactive px-4"
                                                 onClick={() => setShowModal("weapon")}
                                             >
-                                                <div className="my-auto">
-                                                    Select
-                                                    <br />
-                                                    weapon
-                                                </div>
+                                                Select weapon
                                             </div>
                                         )}
                                     </div>
                                     {/* Armor selection */}
                                     {/* max width is 30% of the container */}
-                                    <div className="my-auto max-w-1/3 ml-10">
-                                        <h3 className="text-left mb-4">ARMOR</h3>
+                                    <div className="options-row">
+                                        <h3 className="text-left">ARMOR</h3>
                                         {(selected.armor && (
-                                            <div
-                                                style={{ height: "200px", width: "200px" }}
-                                                className="text-center flex flex-col interactive"
-                                                onClick={() => setShowModal("armor")}
-                                            >
-                                                <img
-                                                    src={armorMetadata(selected.armor.name).image}
-                                                    style={{ maxHeight: "150px" }}
-                                                />
-                                                <label>{selected.armor.name}</label>
-                                            </div>
+                                            <>
+                                                <div
+                                                    style={{ border: "none" }}
+                                                    className="interactive px-4 h-full"
+                                                    onClick={() => setShowModal("armor")}
+                                                >
+                                                    {selected.armor.name}
+                                                </div>
+                                            </>
                                         )) || (
                                             <div
-                                                style={{ height: "200px", width: "200px" }}
-                                                className="text-center flex flex-col interactive"
+                                                style={{ width: "180px" }}
+                                                className="text-center interactive px-4"
                                                 onClick={() => setShowModal("armor")}
                                             >
-                                                <div className="my-auto">
-                                                    Select
-                                                    <br />
-                                                    armor
-                                                </div>
+                                                Select armor
                                             </div>
                                         )}
                                     </div>
                                 </div>
                                 <div
                                     className="mt-10 py-10 yes-no"
-                                    style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
+                                    style={{ width: "200", marginLeft: "0", padding: "10px 0" }}
                                     onClick={() => dismissRecruit(selected)}
                                 >
                                     DISMISS
                                 </div>
-                            </div>
-                            <div className="w-xl h-screen">
-                                <Character
-                                    morphTargets={[...fromHex(selected.id)].map((e) => e / 200)}
-                                />
                             </div>
                         </>
                     )}

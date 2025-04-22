@@ -323,6 +323,19 @@ SPDX-License-Identifier: MIT
 
 /* Defining application styles */
 
+/* Commonly used for lists, hide scrollbar */
+.overflowing {
+    overflow-y: auto;
+    height: 68vh;
+    padding: 2px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+}
+
+.overflowing::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+
 /* Commonly used for Cards */
 .hover-shadow:hover {
     box-shadow: var(--shadow);
