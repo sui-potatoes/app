@@ -18,6 +18,8 @@ import { armorMetadata, weaponMetadata } from "../types/metadata";
 import { useWeapons, Weapon } from "../hooks/useWeapons";
 import { WEAPON_STATS } from "./Weapons";
 import { mergeStats } from "../types/bcs";
+import { Character } from "./play/Character";
+import { fromHex } from "@mysten/bcs";
 
 /** Main stats of the Recruit with descriptions */
 export const RECRUIT_STATS: StatRecord[] = [
@@ -95,8 +97,8 @@ export function Crew() {
                     <NavLink to="../HEADQUARTERS">HEADQUARTERS</NavLink> / CREW
                 </h1>
                 <div className="flex justify-start">
-                    <div className="w-96 rounded max-w-md">
-                        <div>
+                    <div className="w-96 rounded max-w-xl">
+                        <div className="overflow-y-auto" style={{ height: "70vh" }}>
                             {recruits?.map((r) => {
                                 return (
                                     <div
@@ -123,114 +125,120 @@ export function Crew() {
                         </div>
                     </div>
                     {selected && (
-                        <div className="size-max ml-10 text-lg max-w-3xl">
-                            <div className="mb-10">
-                                <h2 className="mb-2">BACKSTORY</h2>
-                                <p className="normal-case">
-                                    {selected.metadata.backstory == "Story locked"
-                                        ? "Get more experience to unlock character backstory and traits."
-                                        : selected.metadata.backstory}
-                                </p>
-                            </div>
-                            <div>
-                                <h2 className="mb-2">STATS</h2>
-                                <div
-                                    className="options-row"
-                                    title="Rank is based on experience the unit has and progresses"
-                                >
-                                    <label>RANK</label>
-                                    <p>{selected.rank.$kind}</p>
+                        <>
+                            <div className="size-max ml-10 text-lg max-w-2xl">
+                                <div className="mb-10">
+                                    <h2 className="mb-2">BACKSTORY</h2>
+                                    <p className="normal-case">
+                                        {selected.metadata.backstory == "Story locked"
+                                            ? "Get more experience to unlock character backstory and traits."
+                                            : selected.metadata.backstory}
+                                    </p>
                                 </div>
-                                {RECRUIT_STATS.map((record) => (
-                                    <StatRecord
-                                        key={record.key}
-                                        record={record}
-                                        stats={selected.stats}
-                                        modifier={mergeStats(
-                                            selected.armor?.stats,
-                                            selected.weapon?.stats,
-                                        )}
+                                <div>
+                                    <h2 className="mb-2">STATS</h2>
+                                    <div
                                         className="options-row"
-                                    />
-                                ))}
-                            </div>
+                                        title="Rank is based on experience the unit has and progresses"
+                                    >
+                                        <label>RANK</label>
+                                        <p>{selected.rank.$kind}</p>
+                                    </div>
+                                    {RECRUIT_STATS.map((record) => (
+                                        <StatRecord
+                                            key={record.key}
+                                            record={record}
+                                            stats={selected.stats}
+                                            modifier={mergeStats(
+                                                selected.armor?.stats,
+                                                selected.weapon?.stats,
+                                            )}
+                                            className="options-row"
+                                        />
+                                    ))}
+                                </div>
 
-                            <div className="mt-10 w-full flex justify-between">
-                                {/* Weapon selection */}
-                                <div className="my-auto">
-                                    <h3 className="text-left mb-4">WEAPON</h3>
-                                    {(selected.weapon && (
-                                        <div
-                                            style={{
-                                                height: "200px",
-                                                minWidth: "200px",
-                                                maxWidth: "400px",
-                                            }}
-                                            className="h-full text-center flex flex-col interactive"
-                                            onClick={() => setShowModal("weapon")}
-                                        >
-                                            <img
-                                                src={weaponMetadata(selected.weapon.name).image}
-                                                style={{ maxHeight: "150px" }}
-                                            />
-                                            <label className="mt-2">
-                                                {selected.weapon.name}
-                                                {selected.weapon.upgrades.length > 0 && "+"}
-                                            </label>
-                                        </div>
-                                    )) || (
-                                        <div
-                                            style={{ height: "200px", width: "375px" }}
-                                            className="text-center flex flex-col interactive"
-                                            onClick={() => setShowModal("weapon")}
-                                        >
-                                            <div className="my-auto">
-                                                Select
-                                                <br />
-                                                weapon
+                                <div className="mt-10 w-full flex justify-between">
+                                    {/* Weapon selection */}
+                                    <div className="my-auto">
+                                        <h3 className="text-left mb-4">WEAPON</h3>
+                                        {(selected.weapon && (
+                                            <div
+                                                style={{
+                                                    height: "200px",
+                                                    width: "375px",
+                                                }}
+                                                className="h-full text-center flex flex-col interactive"
+                                                onClick={() => setShowModal("weapon")}
+                                            >
+                                                <img
+                                                    src={weaponMetadata(selected.weapon.name).image}
+                                                    style={{ maxHeight: "150px" }}
+                                                />
+                                                <label className="mt-2">
+                                                    {selected.weapon.name}
+                                                    {selected.weapon.upgrades.length > 0 && "+"}
+                                                </label>
                                             </div>
-                                        </div>
-                                    )}
+                                        )) || (
+                                            <div
+                                                style={{ height: "200px", width: "375px" }}
+                                                className="text-center flex flex-col interactive"
+                                                onClick={() => setShowModal("weapon")}
+                                            >
+                                                <div className="my-auto">
+                                                    Select
+                                                    <br />
+                                                    weapon
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {/* Armor selection */}
+                                    {/* max width is 30% of the container */}
+                                    <div className="my-auto max-w-1/3 ml-10">
+                                        <h3 className="text-left mb-4">ARMOR</h3>
+                                        {(selected.armor && (
+                                            <div
+                                                style={{ height: "200px", width: "200px" }}
+                                                className="text-center flex flex-col interactive"
+                                                onClick={() => setShowModal("armor")}
+                                            >
+                                                <img
+                                                    src={armorMetadata(selected.armor.name).image}
+                                                    style={{ maxHeight: "150px" }}
+                                                />
+                                                <label>{selected.armor.name}</label>
+                                            </div>
+                                        )) || (
+                                            <div
+                                                style={{ height: "200px", width: "200px" }}
+                                                className="text-center flex flex-col interactive"
+                                                onClick={() => setShowModal("armor")}
+                                            >
+                                                <div className="my-auto">
+                                                    Select
+                                                    <br />
+                                                    armor
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                {/* Armor selection */}
-                                {/* max width is 30% of the container */}
-                                <div className="my-auto max-w-1/3 ml-10">
-                                    <h3 className="text-left mb-4">ARMOR</h3>
-                                    {(selected.armor && (
-                                        <div
-                                            style={{ height: "200px", width: "200px" }}
-                                            className="text-center flex flex-col interactive"
-                                            onClick={() => setShowModal("armor")}
-                                        >
-                                            <img
-                                                src={armorMetadata(selected.armor.name).image}
-                                                style={{ maxHeight: "150px" }}
-                                            />
-                                            <label>{selected.armor.name}</label>
-                                        </div>
-                                    )) || (
-                                        <div
-                                            style={{ height: "200px", width: "200px" }}
-                                            className="text-center flex flex-col interactive"
-                                            onClick={() => setShowModal("armor")}
-                                        >
-                                            <div className="my-auto">
-                                                Select
-                                                <br />
-                                                armor
-                                            </div>
-                                        </div>
-                                    )}
+                                <div
+                                    className="mt-10 py-10 yes-no"
+                                    style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
+                                    onClick={() => dismissRecruit(selected)}
+                                >
+                                    DISMISS
                                 </div>
                             </div>
-                            <div
-                                className="mt-10 py-10 yes-no"
-                                style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
-                                onClick={() => dismissRecruit(selected)}
-                            >
-                                DISMISS
+                            <div className="w-xl h-screen">
+                                <Character
+                                    morphTargets={[...fromHex(selected.id)].map((e) => e / 200)}
+                                />
                             </div>
-                        </div>
+                        </>
                     )}
                 </div>
             </div>

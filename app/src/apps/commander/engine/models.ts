@@ -43,3 +43,10 @@ export async function loadModels() {
 
     models.loaded = true;
 }
+
+/** Load a model from the list of models. */
+export async function loadModel(name: ModelName) {
+    if (!models[name]) {
+        models[name] = await loader.loadAsync(modelsList[name]);
+    }
+}
