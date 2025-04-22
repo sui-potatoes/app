@@ -76,6 +76,8 @@ export class UnitModel extends THREE.Object3D {
 
         this.aimCircle.renderOrder = 0;
 
+        this.applyMorphTargets([...new Array(10).fill(Math.abs(Math.random()))]);
+
         this.add(this.light);
         this.add(this.model);
         this.add(this.aimCircle);
@@ -310,6 +312,18 @@ export class UnitModel extends THREE.Object3D {
             line.position.set(0, 0.1, 0);
             this.statsPanel.add(line);
         }
+    }
+
+    applyMorphTargets(morphTargets: number[]) {
+        const mesh = this.model.getObjectByName("Body") as THREE.SkinnedMesh;
+
+        (mesh.material as THREE.MeshPhysicalMaterial).color.setHSL(
+            Math.max(morphTargets[0] / 10, 0.01),
+            Math.max(morphTargets[1], 0.1),
+            Math.max(morphTargets[2], 0.1),
+        );
+
+        mesh.morphTargetInfluences = morphTargets || mesh.morphTargetInfluences;
     }
 }
 

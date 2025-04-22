@@ -52,7 +52,14 @@ export function Scene({ model, morphTargets }: { model: GLTF; morphTargets: numb
         unit.position.set(0, -1, 0);
         unit.model.scale.set(2, 2, 2);
         unit.playAnimation("idle", 0.2, 0);
-        const mesh = unit.model.getObjectByName("Body_1") as THREE.SkinnedMesh;
+
+        const mesh = unit.model.getObjectByName("Body") as THREE.SkinnedMesh;
+
+        (mesh.material as THREE.MeshPhysicalMaterial).color.setHSL(
+            Math.max(morphTargets[0] / 10, 0.01),
+            Math.max(morphTargets[1], 0.1),
+            Math.max(morphTargets[2], 0.1),
+        );
 
         mesh.morphTargetInfluences = morphTargets || mesh.morphTargetInfluences;
 
