@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import JEASINGS from "jeasings";
 import { OrbitControls, Stats } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
+import { RefObject, useEffect, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
     Game,
@@ -25,7 +25,7 @@ type GameAppProps = {
     map: GameMap;
     camera: Camera;
     eventBus: EventBus;
-    history?: (typeof HistoryRecord.$inferType)[];
+    history: RefObject<(typeof HistoryRecord.$inferType)[]>;
     orbit?: boolean;
 };
 
@@ -39,6 +39,9 @@ export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps)
     return (
         <>
             <Canvas
+                onReset={() => {
+                    console.log("game reset");
+                }}
                 camera={camera}
                 shadows
                 onCreated={({ gl }) => {
@@ -73,7 +76,7 @@ type AppProps = {
     map: GameMap;
     camera: Camera;
     eventBus: EventBus;
-    history?: (typeof HistoryRecord.$inferType)[];
+    history: RefObject<(typeof HistoryRecord.$inferType)[]>;
 };
 
 function App({ map, camera, eventBus, history }: AppProps) {
@@ -133,7 +136,7 @@ function App({ map, camera, eventBus, history }: AppProps) {
 
     // track history updates, send them to the game
     useEffect(() => {
-        game.applyHistory(history || []);
+        game.applyHistory(history.current);
     }, [history]);
 
     return (

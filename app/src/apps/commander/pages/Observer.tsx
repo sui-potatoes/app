@@ -3,10 +3,11 @@
 
 import { useParams } from "react-router-dom";
 import { GameMap, useGame } from "../hooks/useGame";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GameApp } from "./play/Game";
 import { Camera, EventBus, loadModels } from "../engine";
 import { Footer, Loader } from "./Components";
+import { HistoryRecord } from "../types/bcs";
 
 /**
  * Observer is a page that allows spectating a single game.
@@ -16,10 +17,10 @@ export function Observer() {
     const { gameId } = useParams();
     const camera = useMemo(() => loadCamera(), []);
     const eventBus = useMemo(() => new EventBus(), []);
+    const history = useRef<(typeof HistoryRecord.$inferType)[]>([]);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [initialGame, setInitialGame] = useState<GameMap>();
     const { data: game } = useGame({ id: gameId!, refetchInterval: 1000 });
-    const history = game?.map.history;
 
     useEffect(() => {
         loadModels().then(() => setModelsLoaded(true));
@@ -28,7 +29,10 @@ export function Observer() {
     // to prevent re-renders, we set initial game state just once and then
     // only call updates on history.
     useEffect(() => {
-        if (!game || !!initialGame) return;
+        if (!game) return;
+        history.current = game.map.history;
+
+        if (!!initialGame) return;
         setInitialGame(game);
     }, [game]);
 
@@ -51,7 +55,7 @@ export function Observer() {
                     id="panel-bottom"
                     className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10 normal-case overflow-auto h-20"
                 >
-                    {game?.map.history.map((history, i) => (
+                    {history.current.map((history, i) => (
                         <p key={"log-" + i} className="text-sm normal-case text-white">
                             {history.$kind}: {JSON.stringify(history[history.$kind])}
                         </p>

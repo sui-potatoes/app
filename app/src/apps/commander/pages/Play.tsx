@@ -3,7 +3,7 @@
 
 import * as THREE from "three";
 import { Loader } from "./Components";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { UI } from "./play/UI";
 import { Camera, EventBus, loadModels, GameAction } from "../engine";
 import { bcs, HistoryRecord } from "../types/bcs";
@@ -42,13 +42,17 @@ export function Playground() {
     const [mapKey, setMapKey] = useState<string | null>(sessionStorage.getItem(LS_KEY));
     const [mode, setMode] = useState<Mode>("single");
     const [initialGame, setInitialGame] = useState<GameMap>();
+    const [gameState, setGameState] = useState<
+        "none" | "waiting" | "placing" | "playing" | "ended"
+    >("none");
     const [host, setHost] = useState<SuiObjectRef | null>(
         sessionStorage.getItem(HOST_KEY) ? JSON.parse(sessionStorage.getItem(HOST_KEY)!) : null,
     );
-    const { data: game, isFetching, isFetched, refetch } = useGame({ id: mapKey, enabled: true });
+    const { data: game, isFetched } = useGame({ id: mapKey, enabled: true, refetchInterval: 1000 });
     const { data: hostedGames } = useHostedGames({ enabled: !game, refetchInterval: 1000 });
     const { data: recruits } = useGameRecruits({ recruits: game?.map.recruits || [] });
     const { data: presets } = useMaps({ enabled: !game, refetchInterval: 1000 });
+    const history = useRef<(typeof HistoryRecord.$inferType)[]>([]);
     const tx = useGameTransactions({ map: game });
 
     // Filter hosted games to show only the ones that are less than 3 minutes old.
@@ -64,12 +68,43 @@ export function Playground() {
     }, [mapKey]);
 
     useEffect(() => {
-        if (!game || !!initialGame) return;
+        if (!game && initialGame) return setGameState("ended");
+        if (!game) return;
+
+        const state = game.map.state.$kind;
+
+        // Yay. State machine!
+        if (state === "Waiting" && gameState !== "waiting") setGameState("waiting");
+        if (state === "PlacingRecruits" && gameState !== "placing") setGameState("placing");
+        if (state === "Playing" && gameState !== "playing") setGameState("playing");
+        if (state === "Finished" && gameState !== "ended") setGameState("ended");
+
+        history.current = game.map.history;
+
+        if (!!initialGame) return;
         setInitialGame(game);
     }, [game]);
 
     useEffect(() => {
-        if (!game) return;
+        if (gameState === "none") return;
+        if (gameState === "waiting") return;
+        if (gameState === "placing" && game) {
+            setInitialGame(game!);
+            if (
+                host &&
+                game.map.state.$kind === "PlacingRecruits" &&
+                game.map.state.PlacingRecruits.some((r) => r === tx.address)
+            ) {
+                tx.placeRecruits(game.objectId).then((res) => {
+                    eventBus.dispatchEvent({ type: "sui:recruits_placed", success: !!res });
+                });
+                setGameState("playing");
+            }
+        }
+    }, [gameState]);
+
+    useEffect(() => {
+        if (!initialGame) return;
 
         eventBus.addEventListener("game:shoot:aim", onGameAim);
         eventBus.addEventListener("game:move:trace", onGameTrace);
@@ -95,25 +130,9 @@ export function Playground() {
     useEffect(() => {
         eventBus.addEventListener("ui:confirm", onConfirm);
         return () => eventBus.removeEventListener("ui:confirm", onConfirm);
-    }, [tx.lockedTx, game]);
+    }, [tx.lockedTx, initialGame]);
 
-    // If the host is set and the game is in the PlacingRecruits state,
-    // place the recruits, if it's your turn to do so.
-    useEffect(() => {
-        if (!game) return;
-
-        const state = game.map.state;
-
-        if (
-            host &&
-            state.$kind === "PlacingRecruits" &&
-            state.PlacingRecruits.some((r) => r === tx.address)
-        ) {
-            tx.placeRecruits(game.objectId).then((res) => {
-                eventBus.dispatchEvent({ type: "sui:recruits_placed", success: !!res });
-            });
-        }
-    }, [game]);
+    if (initialGame && !game) return window.location.reload();
 
     const centerDiv = (children: any) => (
         <div className="text-center bg-black/40 w-full h-full flex flex-col items-center justify-center">
@@ -122,17 +141,16 @@ export function Playground() {
     );
 
     if (!modelsLoaded && mapKey) return <Loader text="loading models" />;
-    if (tx.isExecuting && !game) return <Loader text="creating game" />;
-    if (isFetching) return <Loader text="loading game" />;
-    if (isFetched && !game)
+    if (tx.isExecuting && !initialGame) return <Loader text="creating game" />;
+    if (isFetched && !initialGame)
         return centerDiv(
             <>
-                <p>Map not found</p>
+                <p>Game was not found or ended</p>
                 <button onClick={unsetMapKey}>Back</button>
             </>,
         );
 
-    if (game && game.map.state.$kind === "Waiting") {
+    if (initialGame && game?.map.state.$kind === "Waiting") {
         return (
             <Loader text="waiting for players">
                 <button
@@ -149,7 +167,7 @@ export function Playground() {
         );
     }
 
-    if (!game)
+    if (!initialGame)
         return (
             <GameScreen title="play">
                 <div className="max-w-3xl w-full">
@@ -185,7 +203,7 @@ export function Playground() {
                                     onSelect={(host) =>
                                         confirm("Join the game?") &&
                                         tx.joinGame(host).then(() => {
-                                            setTimeout(() => refetch(), 1000);
+                                            window.location.reload();
                                         })
                                     }
                                 />
@@ -225,14 +243,14 @@ export function Playground() {
 
     return (
         <>
-            <GameApp map={game} history={game?.map.history} eventBus={eventBus} camera={camera} />
+            <GameApp map={initialGame} history={history} eventBus={eventBus} camera={camera} />
             <UI
                 isExecuting={tx.isExecuting}
                 isChecking={tx.isChecking}
                 recruits={recruits}
-                turn={game.map.map.turn}
-                lastTurnTimestamp={+game.map.last_turn}
-                turnTimeLimit={+game.map.time_limit}
+                turn={initialGame.map.map.turn}
+                lastTurnTimestamp={+(game?.map.last_turn || 0)}
+                turnTimeLimit={+(game?.map.time_limit || 0)}
                 eventBus={eventBus}
             />
         </>

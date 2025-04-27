@@ -34,6 +34,8 @@ export function printEvent(eventKey: keyof EventMap, map: Partial<EventMap>): st
         // Game events block
         case "game:unit_selected":
             return `Unit selected at '(${[...map[eventKey].unit.gridPosition]})`;
+        case "game:log":
+            return `Game: ${map[eventKey].message}`;
 
         // Mode block
         case "game:mode:perform":

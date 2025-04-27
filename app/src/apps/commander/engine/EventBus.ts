@@ -34,7 +34,7 @@ export type SuiAction = {
 };
 
 /** Events emitted by the `Game` instance during the gameplay */
-export type GameAction = { unit_selected: { unit: Unit } } & ModeEvent;
+export type GameAction = { unit_selected: { unit: Unit }; log: { message: string } } & ModeEvent;
 
 export type UIKey =
     | "shoot"
@@ -71,8 +71,8 @@ type AllEvent<T extends Exclude<keyof EventMap, "all">> = THREE.BaseEvent<T> &
 
 export type EventKey = Exclude<keyof EventMap, "all">;
 
-/** All events emitted by the EventBus */
 // prettier-ignore
+/** All events emitted by the EventBus */
 export type EventMap =
     & GameUIEvent
     & ObserverEvent
@@ -86,7 +86,9 @@ export type EventMap =
  * game, UI and transactional events.
  */
 export class EventBus extends THREE.EventDispatcher<EventMap> {
+    public count: number = 0;
     public dispatchEvent<T extends keyof EventMap>(event: THREE.BaseEvent<T> & EventMap[T]): void {
+        this.count++;
         super.dispatchEvent(event);
         super.dispatchEvent({
             type: "all",

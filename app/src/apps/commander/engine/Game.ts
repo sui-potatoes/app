@@ -174,6 +174,7 @@ export class Game extends THREE.Object3D {
     // === History API ===
 
     async applyHistory(history: (typeof HistoryRecord.$inferType)[]) {
+        this.eventBus?.dispatchEvent({ type: "game:log", message: "Applying history" });
         let i = this.historyIdx;
         while (i < history.length) {
             const record = history[i];
