@@ -48,11 +48,9 @@ export function StatRecord({
 export function Footer({ to, text }: { to?: string; text?: string }) {
     return (
         <>
-            {/* this div is for justify between.. */}
-            <div></div>
             <NavLink
                 to={to || ".."}
-                className="fixed flex justify-between bottom-10 left-10 p-10 text-lg hover:underline menu-control back-button"
+                className="fixed flex justify-start bottom-10 left-10 p-10 text-lg hover:underline menu-control back-button"
             >
                 {text || "Back"}
             </NavLink>
@@ -157,6 +155,28 @@ export function YesOrNo({ value, onChange }: { value: boolean; onChange: (v: boo
     );
 }
 
+export function GameScreen({
+    children,
+    title,
+    footerTo,
+    className,
+}: {
+    children: ReactNode | ReactNode[];
+    title: ReactNode | ReactNode[];
+    footerTo?: string;
+    className?: string;
+}) {
+    return (
+        <div className="flex justify-start flex-col w-full h-full">
+            <div className="text-left p-10 max-w-xl">
+                <h1 className="p-1 mb-10 page-heading">{title}</h1>
+            </div>
+            <div className={`w-auto h-full flex mx-10 ${className}`}>{children}</div>
+            <Footer to={footerTo} />
+        </div>
+    );
+}
+
 type ModalProps = {
     children: ReactNode | ReactNode[];
     show: boolean;
@@ -207,8 +227,8 @@ export function SuinsModal({ show, onClose }: { show: boolean; onClose: () => vo
     );
 }
 
-/** Modal window loader */
-export function Loader({ text }: { text?: string }) {
+/** Modal window loader, supports children for loading */
+export function Loader({ text, children }: { text?: string; children?: ReactNode }) {
     // animate the image by rotating it
     useEffect(() => {
         const rr = document.getElementById("rr");
@@ -226,9 +246,12 @@ export function Loader({ text }: { text?: string }) {
     return (
         <>
             <Footer />
-            <div className="w-full h-full flex flex-col animate-pulse text-sm items-center justify-center bg-black/50 fixed top-0 left-0 z-50">
-                <img id="rr" src="/images/rotorelief.svg" style={{ width: "150px" }} />
-                <div className="text-md mt-4">{text || "Loading..."}</div>
+            <div className="w-full h-full flex flex-col text-sm items-center justify-center bg-black/50 fixed top-0 left-0 z-50">
+                <div className="animate-pulse flex flex-col items-center justify-center">
+                    <img id="rr" src="/images/rotorelief.svg" style={{ width: "150px" }} />
+                    <div className="text-md mt-4">{text || "Loading..."}</div>
+                </div>
+                {children}
             </div>
         </>
     );

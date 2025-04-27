@@ -11,7 +11,7 @@ import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
 import { useNameGenerator } from "../hooks/useNameGenerator";
 import { SuiObjectRef, SuiTransactionBlockResponse } from "@mysten/sui/client";
-import { Footer, Modal, StatRecord, Loader } from "./Components";
+import { Modal, StatRecord, Loader, GameScreen } from "./Components";
 import { useState } from "react";
 import { Armor, useArmor } from "../hooks/useArmor";
 import { armorMetadata, weaponMetadata } from "../types/metadata";
@@ -90,134 +90,125 @@ export function Crew() {
 
     if (isPending || isExecuting) return <Loader />;
 
+    // prettier-ignore
+    const title = <><NavLink to="../headquarters">HEADQUARTERS</NavLink> / CREW</>;
+
     return (
-        <div className="flex justify-between align-middle h-screen flex-col w-full">
-            <div className="text-left text-uppercase text-lg p-10">
-                <h1 className="mb-10 uppercase white page-heading">
-                    <NavLink to="../HEADQUARTERS">HEADQUARTERS</NavLink> / CREW
-                </h1>
-                <div className="flex justify-between">
-                    <div className="rounded w-sm" style={{ padding: "2px" }}>
-                        <h2 className="mb-2">RECRUITS</h2>
-                        <div className="overflowing" style={{ padding: "2px", maxHeight: "60vh" }}>
-                            {recruits?.map((r) => {
-                                return (
-                                    <div
-                                        key={r.objectId}
-                                        className={
-                                            "options-row interactive " +
-                                            (selected?.objectId == r.objectId ? "selected" : "")
-                                        }
-                                        onClick={() => setSelected(r)}
-                                    >
-                                        <div>{r.metadata.name}</div>
-                                        {/* <div>({r.rank.$kind})</div> */}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <div
-                            key="new-recruit"
-                            className={`options-row text-center ${(recruits?.length || 0) > 1 ? "mt-10" : ""} ${!canTransact ? "non-interactive" : "interactive"}`}
-                            onClick={hireRecruit}
-                        >
-                            <div>NEW HIRE</div>
-                            <div>+</div>
-                        </div>
-                    </div>
-                    {selected && (
-                        <>
-                            <div className="w-xl h-screen">
-                                <Character
-                                    morphTargets={[...fromHex(selected.id)].map((e) => e / 200)}
-                                />
-                            </div>
+        <GameScreen footerTo="../headquarters" className="justify-between" title={title}>
+            <div className="w-xs">
+                <h2 className="mb-2">RECRUITS</h2>
+                <div className="overflowing">
+                    {recruits?.map((r) => {
+                        return (
                             <div
-                                className="size-max text-lg max-w-md overflowing h-10/12"
-                                style={{ padding: "2px" }}
+                                key={r.objectId}
+                                className={
+                                    "options-row interactive " +
+                                    (selected?.objectId == r.objectId ? "selected" : "")
+                                }
+                                onClick={() => setSelected(r)}
                             >
-                                <div className="mb-10">
-                                    <h2 className="mb-2">BACKSTORY</h2>
-                                    <p className="normal-case">
-                                        {selected.metadata.backstory == "Story locked"
-                                            ? "Get more experience to unlock character backstory and traits."
-                                            : selected.metadata.backstory}
-                                    </p>
-                                </div>
-                                <div>
-                                    <h2 className="mb-2">STATS</h2>
-                                    <div
-                                        className="options-row"
-                                        title="Rank is based on experience the unit has and progresses"
-                                    >
-                                        <label>RANK</label>
-                                        <p>{selected.rank.$kind}</p>
-                                    </div>
-                                    {RECRUIT_STATS.map((record) => (
-                                        <StatRecord
-                                            key={record.key}
-                                            record={record}
-                                            stats={selected.stats}
-                                            modifier={mergeStats(
-                                                selected.armor?.stats,
-                                                selected.weapon?.stats,
-                                            )}
-                                            className="options-row"
-                                        />
-                                    ))}
-                                </div>
-                                <h2 className="mt-10 text-left">EQUIPMENT</h2>
-                                <div className="w-full">
-                                    {/* Weapon selection */}
-                                    <div className="options-row">
-                                        <h3 className="text-left">WEAPON</h3>
-                                        <div
-                                            style={{ border: "none" }}
-                                            className="interactive px-4"
-                                            onClick={() => setShowModal("weapon")}
-                                        >
-                                            {selected && selected.weapon
-                                                ? `${selected.weapon.name}${selected.weapon.upgrades.length > 0 ? "+" : ""}`
-                                                : "Standard Rifle"}
-                                        </div>
-                                    </div>
-                                    {/* Armor selection */}
-                                    {/* max width is 30% of the container */}
-                                    <div className="options-row">
-                                        <h3 className="text-left">ARMOR</h3>
-                                        {(selected.armor && (
-                                            <>
-                                                <div
-                                                    style={{ border: "none" }}
-                                                    className="interactive px-4 h-full"
-                                                    onClick={() => setShowModal("armor")}
-                                                >
-                                                    {selected.armor.name}
-                                                </div>
-                                            </>
-                                        )) || (
-                                            <div
-                                                style={{ width: "180px" }}
-                                                className="text-center interactive px-4"
-                                                onClick={() => setShowModal("armor")}
-                                            >
-                                                Select armor
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div
-                                    className="mt-10 py-10 yes-no"
-                                    style={{ width: "200", marginLeft: "0", padding: "10px 0" }}
-                                    onClick={() => dismissRecruit(selected)}
-                                >
-                                    DISMISS
-                                </div>
+                                <div>{r.metadata.name}</div>
+                                {/* <div>({r.rank.$kind})</div> */}
                             </div>
-                        </>
-                    )}
+                        );
+                    })}
+                </div>
+                <div
+                    key="new-recruit"
+                    className={`options-row text-center ${(recruits?.length || 0) > 1 ? "mt-10" : ""} ${!canTransact ? "non-interactive" : "interactive"}`}
+                    onClick={hireRecruit}
+                >
+                    <div>NEW HIRE</div>
+                    <div>+</div>
                 </div>
             </div>
+            {selected && (
+                <>
+                    <div className="w-auto h-screen min-w-xl">
+                        <Character morphTargets={[...fromHex(selected.id)].map((e) => e / 200)} />
+                    </div>
+                    <div className="text-lg w-xl overflowing">
+                        <div className="mb-10">
+                            <h2 className="mb-2">BACKSTORY</h2>
+                            <p className="normal-case">
+                                {selected.metadata.backstory == "Story locked"
+                                    ? "Get more experience to unlock character backstory and traits."
+                                    : selected.metadata.backstory}
+                            </p>
+                        </div>
+                        <div>
+                            <h2 className="mb-2">STATS</h2>
+                            <div
+                                className="options-row"
+                                title="Rank is based on experience the unit has and progresses"
+                            >
+                                <label>RANK</label>
+                                <p>{selected.rank.$kind}</p>
+                            </div>
+                            {RECRUIT_STATS.map((record) => (
+                                <StatRecord
+                                    key={record.key}
+                                    record={record}
+                                    stats={selected.stats}
+                                    modifier={mergeStats(
+                                        selected.armor?.stats,
+                                        selected.weapon?.stats,
+                                    )}
+                                    className="options-row"
+                                />
+                            ))}
+                        </div>
+                        <h2 className="mt-10 text-left">EQUIPMENT</h2>
+                        <div className="w-full">
+                            {/* Weapon selection */}
+                            <div className="options-row">
+                                <h3 className="text-left">WEAPON</h3>
+                                <div
+                                    style={{ border: "none" }}
+                                    className="interactive px-4"
+                                    onClick={() => setShowModal("weapon")}
+                                >
+                                    {selected && selected.weapon
+                                        ? `${selected.weapon.name}${selected.weapon.upgrades.length > 0 ? "+" : ""}`
+                                        : "Standard Rifle"}
+                                </div>
+                            </div>
+                            {/* Armor selection */}
+                            {/* max width is 30% of the container */}
+                            <div className="options-row">
+                                <h3 className="text-left">ARMOR</h3>
+                                {(selected.armor && (
+                                    <>
+                                        <div
+                                            style={{ border: "none" }}
+                                            className="interactive px-4 h-full"
+                                            onClick={() => setShowModal("armor")}
+                                        >
+                                            {selected.armor.name}
+                                        </div>
+                                    </>
+                                )) || (
+                                    <div
+                                        style={{ width: "180px" }}
+                                        className="text-center interactive px-4"
+                                        onClick={() => setShowModal("armor")}
+                                    >
+                                        Select armor
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div
+                            className="mt-10 py-10 yes-no"
+                            style={{ width: "200", marginLeft: "0", padding: "10px 0" }}
+                            onClick={() => dismissRecruit(selected)}
+                        >
+                            DISMISS
+                        </div>
+                    </div>
+                </>
+            )}
             <Modal show={!!showModal} onClose={() => setShowModal(false)}>
                 {/* armor selection modal */}
                 {showModal === "armor" && (
@@ -336,8 +327,7 @@ export function Crew() {
                     </div>
                 )}
             </Modal>
-            <Footer to="../headquarters" />
-        </div>
+        </GameScreen>
     );
 
     /**

@@ -5,7 +5,7 @@ import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { formatAddress } from "@mysten/sui/utils";
 import { useState } from "react";
-import { Modal, YesOrNo, Footer } from "./Components";
+import { Modal, YesOrNo, Footer, GameScreen } from "./Components";
 import { Transaction } from "@mysten/sui/transactions";
 import { SuinsClient, SuinsTransaction } from "@mysten/suins";
 import { useNetworkVariable } from "../../../networkConfig";
@@ -40,11 +40,8 @@ export function Options() {
     );
 
     return (
-        <div className="flex justify-between align-middle flex-col w-full">
-            <div className="text-left text-uppercase text-lg p-10 max-w-xl">
-                <h1 className="block p-1 mb-10 uppercase white page-heading">options / general</h1>
-            </div>
-            <div className="p-10 text-uppercase text-lg rounded max-w-3xl">
+        <GameScreen title="options / general">
+            <div className="text-left text-uppercase text-lg w-xl">
                 <div className="options-row">
                     <label>ADDRESS</label>
                     {zkLogin.address && (
@@ -106,8 +103,7 @@ export function Options() {
                 </div>
             </div>
             {suinsModal}
-            <Footer />
-        </div>
+        </GameScreen>
     );
 }
 

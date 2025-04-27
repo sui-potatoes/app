@@ -89,7 +89,7 @@ export function WatchReplay() {
                 history: [],
                 players: [],
                 positions: [],
-            },
+            } as any,
         };
 
         setInitialGame(gameMap);
@@ -106,7 +106,8 @@ export function WatchReplay() {
         setSentHistory(replay.history.slice(0, offset));
 
         const indexRef = { value: offset };
-        const interval = setInterval(() => {
+        const interval = setInterval(function nextRecord() {
+            if (!replay) return;
             if (indexRef.value >= replay.history.length) {
                 return clearInterval(interval);
             }
@@ -119,6 +120,12 @@ export function WatchReplay() {
                     // For Attack events, include the next event as well
                     setSentHistory(replay.history.slice(0, indexRef.value + 2));
                     indexRef.value += 2;
+                    break;
+                case "NextTurn":
+                    // NextTurn event is emitted instantly.
+                    setSentHistory(newHistory);
+                    indexRef.value += 1;
+                    nextRecord();
                     break;
                 default:
                     setSentHistory(newHistory);
@@ -142,7 +149,7 @@ export function WatchReplay() {
     if (isFetchingPreset) return <Loader text="Fetching Preset..." />;
     if (preset == null) return <div>Preset not found</div>;
 
-    // Construct the Game object from the Replay and Preset
+    // Construct the Game object from the Replay and Preset.
     return (
         <>
             {modelsLoaded && initialGame && (

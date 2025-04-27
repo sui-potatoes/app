@@ -7,10 +7,9 @@ import { useNetworkVariable } from "../../../networkConfig";
 import { formatAddress, fromBase64 } from "@mysten/sui/utils";
 import { SuiObjectRef } from "@mysten/sui/client";
 import { NavLink } from "react-router-dom";
-import { Footer } from "./Components";
 import { Replay } from "../types/bcs";
 import { useGameTransactions } from "../hooks/useGameTransactions";
-import { Loader } from "./Components";
+import { Loader, GameScreen } from "./Components";
 
 export type Replay = typeof Replay.$inferType & SuiObjectRef;
 
@@ -54,11 +53,15 @@ export function Replays() {
     if (!replays) return <Loader text="Fetching replays..." />;
 
     return (
-        <div className="flex justify-between flex-col w-full">
-            <div className="p-10 max-w-2xl">
-                <h1 className="p-1 mb-10 page-heading">
+        <GameScreen
+            title={
+                <>
                     <NavLink to="../play">PLAY</NavLink> / replays
-                </h1>
+                </>
+            }
+            footerTo="../play"
+        >
+            <div className="pl-10 max-w-2xl">
                 <h2 className="mb-2">REPLAYS</h2>
                 <div className="overflowing">
                     {replays.length === 0 && (
@@ -94,7 +97,6 @@ export function Replays() {
                     ))}
                 </div>
             </div>
-            <Footer to="../play" />
-        </div>
+        </GameScreen>
     );
 }

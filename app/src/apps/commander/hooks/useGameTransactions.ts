@@ -4,17 +4,17 @@
 import { useState } from "react";
 import { useNetworkVariable } from "../../../networkConfig";
 import { useNameGenerator } from "./useNameGenerator";
-import { Transaction } from "@mysten/sui/transactions";
+import { Transaction, TransactionObjectInput, TransactionResult } from "@mysten/sui/transactions";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { GameMap } from "./useGame";
 import { useSuiClient } from "@mysten/dapp-kit";
-import { bcs, fromBase64 } from "@mysten/bcs";
+import { bcs } from "@mysten/bcs";
 import { useTransactionExecutor } from "./useTransactionExecutor";
 import { coordinatesToPath } from "../types/cursor";
 import type { SuiObjectRef } from "@mysten/sui/client";
 import { Preset } from "./useMaps";
 import { Host } from "./useHostedGames";
-import { Game } from "../types/bcs";
+import { useRecruits } from "./useRecruits";
 
 export const LS_KEY = "commander-v2";
 
@@ -26,6 +26,10 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     const packageId = useNetworkVariable("commanderV2PackageId");
     const [lockedTx, setLockedTx] = useState<Transaction | null>(null);
     const [isChecking, setIsChecking] = useState(false);
+    const { data: ownedRecruits, refetch: refetchRecruits } = useRecruits({
+        owner: zkLogin.address!,
+        enabled: !!zkLogin.address,
+    });
     const { executeTransaction, isExecuting } = useTransactionExecutor({
         // @ts-ignore
         client,
@@ -35,15 +39,18 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     const canTransact = !!zkLogin.address && !isExecuting && executeTransaction;
 
     return {
+        address: zkLogin.address,
         canTransact,
         lockedTx,
         createDemo,
         hostGame,
         joinGame,
+        placeRecruits,
         publishMap,
         performAttack,
         performGrenade,
         performReload,
+        destroyHostedGame,
         moveUnit,
         nextTurn,
         isExecuting,
@@ -61,40 +68,30 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         if (!canTransact) return;
 
         const tx = new Transaction();
-        const positions = preset.positions;
         const registryArg = tx.object(registryId);
         const game = tx.moveCall({
             target: `${packageId}::commander::new_game`,
-            arguments: [registryArg, tx.receivingRef(preset)],
+            arguments: [registryArg, tx.receivingRef(preset), tx.object.clock()],
         });
 
-        for (let _ of positions) {
-            const { name, backstory } = await useNameGenerator();
-            const recruit = tx.moveCall({
-                target: `${packageId}::recruit::new`,
-                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
-            });
+        const recruits = await getNumRecruits(tx, 2);
 
-            const armor = tx.moveCall({
-                target: `${packageId}::items::armor`,
-                arguments: [tx.pure.u8(1)],
-            });
-
-            tx.moveCall({
-                target: `${packageId}::recruit::add_armor`,
-                arguments: [recruit, armor],
-            });
-
-            tx.moveCall({
-                target: `${packageId}::commander::place_recruit`,
-                arguments: [game, recruit],
-            });
-        }
-
-        // register the game in the Commander object.
+        // Register the game in the Commander object.
         tx.moveCall({
             target: `${packageId}::commander::register_game`,
-            arguments: [registryArg, tx.object.clock(), game],
+            arguments: [registryArg, game, tx.object.clock()],
+        });
+
+        // Place recruits on the map.
+        tx.moveCall({
+            target: `${packageId}::commander::place_recruits`,
+            arguments: [
+                game,
+                tx.makeMoveVec({
+                    type: `${packageId}::recruit::Recruit`,
+                    elements: recruits as any,
+                }),
+            ],
         });
 
         tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
@@ -111,51 +108,53 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         if (map.type !== "created") throw new Error("Map not created, something is off");
 
         sessionStorage.setItem(LS_KEY, map.objectId);
+        refetchRecruits();
         return map;
     }
 
-    async function hostGame(preset: Preset & SuiObjectRef) {
-        if (!canTransact) return;
+    /** Host a multiplayer game, wait for players to join. */
+    async function hostGame(
+        preset: Preset & SuiObjectRef,
+    ): Promise<{ host: SuiObjectRef; map: SuiObjectRef }> {
+        if (!canTransact) throw new Error("Cannot transact");
 
         const tx = new Transaction();
         const game = tx.moveCall({
             target: `${packageId}::commander::host_game`,
-            arguments: [tx.object(registryId), tx.object.clock(), tx.receivingRef(preset)],
+            arguments: [tx.object(registryId), tx.receivingRef(preset), tx.object.clock()],
         });
-
-        const numRecruits = preset.positions.length;
-        const myRecruits = numRecruits / 2;
-
-        for (let i = 0; i < myRecruits; i++) {
-            const { name, backstory } = await useNameGenerator();
-            const recruit = tx.moveCall({
-                target: `${packageId}::recruit::new`,
-                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
-            });
-
-            tx.moveCall({
-                target: `${packageId}::commander::place_recruit`,
-                arguments: [game, recruit],
-            });
-        }
 
         tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
 
         const res = await executeTransaction(tx);
+        const host = res.data.objectChanges?.find((change) => {
+            return (
+                change.type === "created" && change.objectType === `${packageId}::commander::Host`
+            );
+        });
         const map = res.data.objectChanges?.find((change) => {
             return (
                 change.type === "created" && change.objectType === `${packageId}::commander::Game`
             );
         });
 
-        if (!map)
+        if (!host) {
+            throw new Error(`Host not found, something is off: ${res.data.effects?.status.error}`);
+        }
+
+        if (!map) {
             throw new Error(`Map not found, something is off: ${res.data.effects?.status.error}`);
-        if (map.type !== "created") throw new Error("Map not created, something is off");
+        }
+
+        if (map.type !== "created" || host.type !== "created") {
+            throw new Error("Map or Host not created, something is off");
+        }
 
         sessionStorage.setItem(LS_KEY, map.objectId);
-        return map;
+        return { host, map };
     }
 
+    /** Join a multiplayer game, place recruits right away. */
     async function joinGame(host: Host) {
         if (!canTransact) return;
 
@@ -168,28 +167,25 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             throw new Error("Game not found");
         }
 
-        const parsedGame = Game.parse(fromBase64(game.data.bcs.bcsBytes));
-        const positions = parsedGame.positions;
-
         const tx = new Transaction();
         const gameArg = tx.object(host.gameId);
         tx.moveCall({
             target: `${packageId}::commander::join_game`,
-            arguments: [tx.object(registryId), gameArg, tx.receivingRef(host)],
+            arguments: [tx.object(registryId), gameArg, tx.receivingRef(host), tx.object.clock()],
         });
 
-        for (let i = 0; i < positions.length; i++) {
-            const { name, backstory } = await useNameGenerator();
-            const recruit = tx.moveCall({
-                target: `${packageId}::recruit::new`,
-                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
-            });
+        const recruits = await getNumRecruits(tx, 2);
 
-            tx.moveCall({
-                target: `${packageId}::commander::place_recruit`,
-                arguments: [gameArg, recruit],
-            });
-        }
+        tx.moveCall({
+            target: `${packageId}::commander::place_recruits`,
+            arguments: [
+                gameArg,
+                tx.makeMoveVec({
+                    type: `${packageId}::recruit::Recruit`,
+                    elements: recruits as any,
+                }),
+            ],
+        });
 
         tx.setSender(zkLogin.address!);
 
@@ -205,6 +201,28 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         if (map.type !== "mutated") throw new Error("Map not created, something is off");
 
         sessionStorage.setItem(LS_KEY, map.objectId);
+    }
+
+    /** In a multiplayer game, place the recruits on the map. */
+    async function placeRecruits(game: string) {
+        if (!canTransact) return;
+
+        const tx = new Transaction();
+        const gameArg = tx.object(game);
+        const recruits = await getNumRecruits(tx, 2);
+
+        tx.moveCall({
+            target: `${packageId}::commander::place_recruits`,
+            arguments: [
+                gameArg,
+                tx.makeMoveVec({
+                    type: `${packageId}::recruit::Recruit`,
+                    elements: recruits as any,
+                }),
+            ],
+        });
+
+        return await executeTransaction(tx);
     }
 
     /** Perform ranged attack. I've been waiting for this soooo long */
@@ -229,6 +247,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
                 tx.pure.u16(unit[1]),
                 tx.pure.u16(target[0]),
                 tx.pure.u16(target[1]),
+                tx.object.clock(),
             ],
         });
 
@@ -244,6 +263,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         return { res, tx };
     }
 
+    /** Perform reload. */
     async function performReload(unit: [number, number]) {
         if (!map) return;
         if (!canTransact) return;
@@ -258,7 +278,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
 
         tx.moveCall({
             target: `${packageId}::commander::perform_reload`,
-            arguments: [game, tx.pure.u16(unit[0]), tx.pure.u16(unit[1])],
+            arguments: [game, tx.pure.u16(unit[0]), tx.pure.u16(unit[1]), tx.object.clock()],
         });
 
         tx.setSender(zkLogin.address!);
@@ -323,7 +343,10 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
 
         const pathArg = tx.pure(bcs.vector(bcs.u8()).serialize(coordinatesToPath(path)));
 
-        tx.moveCall({ target: `${packageId}::commander::move_unit`, arguments: [game, pathArg] });
+        tx.moveCall({
+            target: `${packageId}::commander::move_unit`,
+            arguments: [game, pathArg, tx.object.clock()],
+        });
         tx.setSender(zkLogin.address!);
 
         const res = await client.dryRunTransactionBlock({
@@ -348,7 +371,10 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             mutable: true,
         });
 
-        tx.moveCall({ target: `${packageId}::commander::next_turn`, arguments: [game] });
+        tx.moveCall({
+            target: `${packageId}::commander::next_turn`,
+            arguments: [game, tx.object.clock()],
+        });
         tx.setSender(zkLogin.address!);
 
         return await executeTransaction(tx);
@@ -358,10 +384,50 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         if (!canTransact) return;
 
         const tx = new Transaction();
-        tx.moveCall({
-            target: `${packageId}::commander::destroy_game`,
-            arguments: [tx.object(registryId), tx.object(gameId), tx.pure.bool(saveReplay)],
+        const opt = tx.moveCall({
+            target: `0x1::option::none`,
+            typeArguments: [`0x2::transfer::Receiving<${packageId}::commander::Host>`],
         });
+
+        const replay = tx.moveCall({
+            target: `${packageId}::commander::destroy_game`,
+            arguments: [tx.object(registryId), tx.object(gameId), opt],
+        });
+
+        if (saveReplay) {
+            tx.transferObjects([replay], zkLogin.address!);
+        } else {
+            tx.moveCall({
+                target: `${packageId}::replay::delete`,
+                arguments: [replay],
+            });
+        }
+
+        tx.setSender(zkLogin.address!);
+
+        return await executeTransaction(tx);
+    }
+
+    async function destroyHostedGame(gameId: string, host: SuiObjectRef) {
+        if (!canTransact) throw new Error("Cannot transact");
+
+        const tx = new Transaction();
+        const opt = tx.moveCall({
+            target: `0x1::option::some`,
+            arguments: [tx.receivingRef(host)],
+            typeArguments: [`0x2::transfer::Receiving<${packageId}::commander::Host>`],
+        });
+
+        const replay = tx.moveCall({
+            target: `${packageId}::commander::destroy_game`,
+            arguments: [tx.object(registryId), tx.object(gameId), opt],
+        });
+
+        tx.moveCall({
+            target: `${packageId}::replay::delete`,
+            arguments: [replay],
+        });
+
         tx.setSender(zkLogin.address!);
 
         return await executeTransaction(tx);
@@ -405,5 +471,28 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         const res = await executeTransaction(lockedTx);
         setLockedTx(null);
         return res;
+    }
+
+    /** Pull recruits from the owner's inventory and create new ones if needed. */
+    async function getNumRecruits(tx: Transaction, limit: number) {
+        const ownedLen = ownedRecruits?.length || 0;
+        const recruits: (TransactionResult | TransactionObjectInput)[] = [
+            ...(ownedRecruits || []).slice(0, limit).map((r) => tx.objectRef(r)),
+        ];
+
+        limit = Math.min(ownedLen, limit);
+
+        // If we don't have enough recruits, create new ones.
+        for (let i = limit; i < 2; i++) {
+            const { name, backstory } = await useNameGenerator();
+            const recruit = tx.moveCall({
+                target: `${packageId}::recruit::new`,
+                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
+            });
+
+            recruits.push(recruit);
+        }
+
+        return recruits;
     }
 }

@@ -37,11 +37,15 @@ export function UI({
     isExecuting,
     isChecking,
     recruits,
+    lastTurnTimestamp,
+    turnTimeLimit,
 }: {
     eventBus: EventBus;
     isExecuting?: boolean;
     isChecking?: boolean;
     turn: number;
+    lastTurnTimestamp: number;
+    turnTimeLimit: number;
     recruits: { [key: string]: Recruit } | undefined;
 }) {
     const [panelDisabled, setPanelDisabled] = useState(true);
@@ -50,6 +54,8 @@ export function UI({
     const [log, setLog] = useState<string[]>([]);
     const [unit, setUnit] = useState<Unit | null>(null);
     const [recruit, setRecruit] = useState<Recruit | null>(null);
+    const timer = Timer({ lastTurnTimestamp, turnTimeLimit });
+    const isOutOfTime = timer.timeLeft == 0;
 
     const onAction = (action: UIKey) =>
         eventBus.dispatchEvent({ type: `ui:${action}`, name: action });
@@ -107,7 +113,7 @@ export function UI({
     // Subscribe to the SUI events + all events to update the log.
     useEffect(() => {
         function onNextTurn(_event: SuiAction["next_turn"]) {
-            // ... mark next turn ?
+            timer.reset();
         }
 
         eventBus.addEventListener("sui:next_turn", onNextTurn);
@@ -139,17 +145,26 @@ export function UI({
                     </p>
                 </div>
             )}
+            {/* top right is the timer */}
+            <div className="fixed right-0 top-0 p-10  justify-start flex-col text-center">
+                <div
+                    className="action-button interactive disabled flex items-center justify-center"
+                    style={{ color: "white!important" }}
+                >
+                    {timer.timeLeft}
+                </div>
+            </div>
             <div
                 id="panel-left"
                 className="fixed h-full left-0 top-0 p-10 flex justify-end flex-col text-center"
             >
-                {unitButton("shoot")}
+                {unitButton("shoot", isOutOfTime)}
                 {unitButton(
                     "reload",
-                    unit?.props.ammo.value == unit?.props.ammo.max_value,
+                    unit?.props.ammo.value == unit?.props.ammo.max_value || isOutOfTime,
                     reloadText,
                 )}
-                {unitButton("grenade")}
+                {unitButton("grenade", isOutOfTime)}
                 <button
                     onClick={() => onAction("next_turn")}
                     className={"action-button interactive mt-40" + (isExecuting ? " disabled" : "")}
@@ -173,11 +188,40 @@ export function UI({
             >
                 {shootMode && button("next_target", false, ">")}
                 {shootMode && button("prev_target", false, "<")}
-                {button("confirm", isExecuting || isChecking || panelDisabled)}
-                {button("cancel", isExecuting || panelDisabled)}
+                {button("confirm", isExecuting || isChecking || panelDisabled || isOutOfTime)}
+                {button("cancel", isExecuting || panelDisabled || isOutOfTime)}
                 {button("edit")}
                 {button("exit")}
             </div>
         </div>
     );
+}
+
+function Timer({
+    lastTurnTimestamp,
+    turnTimeLimit,
+}: {
+    lastTurnTimestamp: number;
+    turnTimeLimit: number;
+}) {
+    const [timeLeft, setTimeLeft] = useState(getTimeLeft());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTimeLeft(getTimeLeft());
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [lastTurnTimestamp]);
+
+    return {
+        timeLeft,
+        reset() {
+            lastTurnTimestamp = Date.now();
+            setTimeLeft(getTimeLeft());
+        },
+    };
+
+    function getTimeLeft() {
+        return Math.max(0, +((turnTimeLimit - (Date.now() - lastTurnTimestamp)) / 1000).toFixed(0));
+    }
 }

@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { UI } from "./play/UI";
 import { Camera, EventBus, loadModels, GameAction } from "../engine";
 import { bcs, HistoryRecord } from "../types/bcs";
-import { useGame } from "../hooks/useGame";
+import { GameMap, useGame } from "../hooks/useGame";
 import { useGameRecruits } from "../hooks/useGameRecruits";
 import { NavLink } from "react-router-dom";
 import { fromBase64 } from "@mysten/bcs";
@@ -22,9 +22,12 @@ import { formatAddress, normalizeSuiAddress } from "@mysten/sui/utils";
 import { useSuinsName } from "../hooks/useSuinsName";
 import { Host, useHostedGames } from "../hooks/useHostedGames";
 import { timeAgo } from "../types/utils";
+import { usePreset } from "../hooks/usePreset";
+import { GameScreen } from "./Components";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
+export const HOST_KEY = "commander-v2-host";
 
 type Mode = "single" | "multi" | "join";
 
@@ -38,11 +41,20 @@ export function Playground() {
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [mapKey, setMapKey] = useState<string | null>(sessionStorage.getItem(LS_KEY));
     const [mode, setMode] = useState<Mode>("single");
-    const { data: hostedGames } = useHostedGames({ enabled: true });
-    const { data: map, isFetching, isFetched } = useGame({ id: mapKey, enabled: true });
-    const { data: recruits } = useGameRecruits({ recruits: map?.map.recruits || [] });
-    const { data: presets } = useMaps({ enabled: true });
-    const tx = useGameTransactions({ map });
+    const [initialGame, setInitialGame] = useState<GameMap>();
+    const [host, setHost] = useState<SuiObjectRef | null>(
+        sessionStorage.getItem(HOST_KEY) ? JSON.parse(sessionStorage.getItem(HOST_KEY)!) : null,
+    );
+    const { data: game, isFetching, isFetched, refetch } = useGame({ id: mapKey, enabled: true });
+    const { data: hostedGames } = useHostedGames({ enabled: !game, refetchInterval: 1000 });
+    const { data: recruits } = useGameRecruits({ recruits: game?.map.recruits || [] });
+    const { data: presets } = useMaps({ enabled: !game, refetchInterval: 1000 });
+    const tx = useGameTransactions({ map: game });
+
+    // Filter hosted games to show only the ones that are less than 3 minutes old.
+    const filteredHostedGames = (hostedGames || []).filter(
+        (game) => Date.now() - +game.timestampMs < 1000 * 60 * 3,
+    );
 
     useEffect(() => {
         if (modelsLoaded) return;
@@ -52,7 +64,12 @@ export function Playground() {
     }, [mapKey]);
 
     useEffect(() => {
-        if (!map) return;
+        if (!game || !!initialGame) return;
+        setInitialGame(game);
+    }, [game]);
+
+    useEffect(() => {
+        if (!game) return;
 
         eventBus.addEventListener("game:shoot:aim", onGameAim);
         eventBus.addEventListener("game:move:trace", onGameTrace);
@@ -69,7 +86,7 @@ export function Playground() {
             eventBus.removeEventListener("ui:next_turn", onNextTurn);
             eventBus.removeEventListener("ui:exit", onExit);
         };
-    }, [map, tx, eventBus, tx.lockedTx]); // mind the `tx` dependency here!
+    }, [game, tx, eventBus, tx.lockedTx]); // mind the `tx` dependency here!
 
     /**
      * Submit the locked transaction when the user clicks the confirm button.
@@ -78,7 +95,25 @@ export function Playground() {
     useEffect(() => {
         eventBus.addEventListener("ui:confirm", onConfirm);
         return () => eventBus.removeEventListener("ui:confirm", onConfirm);
-    }, [tx.lockedTx, map]);
+    }, [tx.lockedTx, game]);
+
+    // If the host is set and the game is in the PlacingRecruits state,
+    // place the recruits, if it's your turn to do so.
+    useEffect(() => {
+        if (!game) return;
+
+        const state = game.map.state;
+
+        if (
+            host &&
+            state.$kind === "PlacingRecruits" &&
+            state.PlacingRecruits.some((r) => r === tx.address)
+        ) {
+            tx.placeRecruits(game.objectId).then((res) => {
+                eventBus.dispatchEvent({ type: "sui:recruits_placed", success: !!res });
+            });
+        }
+    }, [game]);
 
     const centerDiv = (children: any) => (
         <div className="text-center bg-black/40 w-full h-full flex flex-col items-center justify-center">
@@ -87,103 +122,117 @@ export function Playground() {
     );
 
     if (!modelsLoaded && mapKey) return <Loader text="loading models" />;
-    if (tx.isExecuting && !map) return <Loader text="creating game" />;
+    if (tx.isExecuting && !game) return <Loader text="creating game" />;
     if (isFetching) return <Loader text="loading game" />;
-    if (isFetched && !map)
+    if (isFetched && !game)
         return centerDiv(
             <>
                 <p>Map not found</p>
                 <button onClick={unsetMapKey}>Back</button>
             </>,
         );
-    if (!map)
+
+    if (game && game.map.state.$kind === "Waiting") {
         return (
-            <div className="flex justify-start flex-col w-full h-full">
-                <div className="text-left p-10 max-w-xl">
-                    <h1 className="p-1 mb-10 page-heading">play</h1>
-                </div>
-                <div className="w-full h-full flex">
-                    <div className="p-10 max-w-3xl w-full">
-                        <h2 className="text-left text-3xl py-4">Mode</h2>
-                        <div className="flex justify-between mb-10">
-                            <div
-                                className={`interactive p-3 w-1/2 ${mode == "single" ? "selected" : ""}`}
-                                onClick={() => setMode("single")}
-                            >
-                                Demo
-                            </div>
-                            <div
-                                className={`interactive p-3 w-full ${mode == "multi" ? "selected" : ""}`}
-                                onClick={() => setMode("multi")}
-                            >
-                                Host Multiplayer
-                            </div>
-                            <div
-                                className={`interactive p-3 w-full ${mode == "join" ? "selected" : ""}`}
-                                onClick={() => setMode("join")}
-                            >
-                                Join Multiplayer
-                            </div>
+            <Loader text="waiting for players">
+                <button
+                    className="mt-10 px-4 py-2 interactive"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        confirm("Are you sure you want to stop waiting for players?") &&
+                            quitHostedGame().then(() => unsetMapKey());
+                    }}
+                >
+                    Quit Game
+                </button>
+            </Loader>
+        );
+    }
+
+    if (!game)
+        return (
+            <GameScreen title="play">
+                <div className="max-w-3xl w-full">
+                    <h2 className="text-left text-3xl mb-4">Mode</h2>
+                    <div className="flex justify-between mb-10">
+                        <div
+                            className={`interactive p-3 w-1/2 ${mode == "single" ? "selected" : ""}`}
+                            onClick={() => setMode("single")}
+                        >
+                            Demo
                         </div>
-                        {mode == "join" ? (
-                            <>
-                                <h2 className="text-left text-3xl py-4">Games</h2>
-                                {hostedGames && !hostedGames.length && <p>No games available</p>}
-                                {hostedGames?.map((game) => (
-                                    <HostedGameItem
-                                        key={game.objectId}
-                                        game={game}
-                                        onSelect={(host) =>
-                                            confirm("Join the game?") && tx.joinGame(host)
-                                        }
-                                    />
-                                ))}
-                            </>
-                        ) : (
-                            <>
-                                <h2 className="text-left text-3xl py-4">Choose Map</h2>
-                                {presets
-                                    ?.sort((a, b) => a.map.id.localeCompare(b.map.id))
-                                    .slice(0, 10)
-                                    .map((preset) => (
-                                        <a
-                                            key={preset.objectId}
-                                            className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
-                                            onClick={async () => {
-                                                const map = await createGame(mode, preset);
-                                                eventBus.dispatchEvent({ type: "sui:map_created" });
-                                                setTimeout(
-                                                    () => map && setMapKey(map.objectId),
-                                                    1000,
-                                                );
-                                            }}
-                                        >
-                                            <MapItem preset={preset} />
-                                        </a>
-                                    ))}
-                            </>
-                        )}
-                        <h2 className="text-left text-3xl py-4 mt-10">Other</h2>
-                        <NavLink to="../editor" className="options-row interactive">
-                            Level Editor
-                        </NavLink>
-                        <NavLink to="../replays" className="options-row interactive">
-                            Replays (preview)
-                        </NavLink>
+                        <div
+                            className={`interactive p-3 w-full ${mode == "multi" ? "selected" : ""}`}
+                            onClick={() => setMode("multi")}
+                        >
+                            Host Multiplayer
+                        </div>
+                        <div
+                            className={`interactive p-3 w-full ${mode == "join" ? "selected" : ""}`}
+                            onClick={() => setMode("join")}
+                        >
+                            Join Multiplayer
+                        </div>
                     </div>
+                    {mode == "join" ? (
+                        <>
+                            <h2 className="text-left text-3xl py-4">Games</h2>
+                            {filteredHostedGames.length == 0 && <p>No games available</p>}
+                            {filteredHostedGames.map((game) => (
+                                <HostedGameItem
+                                    key={game.objectId}
+                                    game={game}
+                                    onSelect={(host) =>
+                                        confirm("Join the game?") &&
+                                        tx.joinGame(host).then(() => {
+                                            setTimeout(() => refetch(), 1000);
+                                        })
+                                    }
+                                />
+                            ))}
+                        </>
+                    ) : (
+                        <>
+                            <h2 className="text-left text-3xl py-4">Choose Map</h2>
+                            {presets
+                                ?.sort((a, b) => a.map.id.localeCompare(b.map.id))
+                                .slice(0, 10)
+                                .map((preset) => (
+                                    <a
+                                        key={preset.objectId}
+                                        className={`options-row ${tx.canTransact ? "interactive" : "non-interactive"}`}
+                                        onClick={async () => {
+                                            const map = await createGame(mode, preset);
+                                            eventBus.dispatchEvent({ type: "sui:map_created" });
+                                            setTimeout(() => map && setMapKey(map.objectId), 1000);
+                                        }}
+                                    >
+                                        <MapItem preset={preset} />
+                                    </a>
+                                ))}
+                        </>
+                    )}
+                    <h2 className="text-left text-3xl py-4 mt-10">Other</h2>
+                    <NavLink to="../editor" className="options-row interactive">
+                        Level Editor
+                    </NavLink>
+                    <NavLink to="../replays" className="options-row interactive">
+                        Replays (preview)
+                    </NavLink>
                 </div>
-                <Footer />
-            </div>
+            </GameScreen>
         );
 
     return (
         <>
-            <GameApp map={map} eventBus={eventBus} camera={camera} />
+            <GameApp map={game} history={game?.map.history} eventBus={eventBus} camera={camera} />
             <UI
                 isExecuting={tx.isExecuting}
                 isChecking={tx.isChecking}
                 recruits={recruits}
-                turn={map.map.map.turn}
+                turn={game.map.map.turn}
+                lastTurnTimestamp={+game.map.last_turn}
+                turnTimeLimit={+game.map.time_limit}
                 eventBus={eventBus}
             />
         </>
@@ -198,13 +247,23 @@ export function Playground() {
             case "single":
                 return tx.createDemo(preset);
             case "multi":
-                return tx.hostGame(preset);
+                const { host, map } = await tx.hostGame(preset);
+                setHost(host);
+                sessionStorage.setItem(HOST_KEY, JSON.stringify(host));
+                return map;
         }
+    }
+
+    async function quitHostedGame() {
+        if (!host) throw new Error("No hosted game");
+        if (!game) throw new Error("No map");
+
+        return tx.destroyHostedGame(game.objectId, host);
     }
 
     // === Events Handling ===
 
-    /** Listen to the ui:confirm event, trigger tx sending */
+    /** Listen to the `ui:confirm` event, trigger tx sending. */
     async function onConfirm() {
         if (!tx.lockedTx) return;
         const res = await tx.executeLocked();
@@ -217,7 +276,7 @@ export function Playground() {
 
         eventBus.dispatchEvent({ type: "sui:tx_success", history });
 
-        const first = history[0]!; // the first record cannot be an empty
+        const first = history[0]!; // The first record cannot be an empty.
 
         switch (first.$kind) {
             case "Reload":
@@ -352,7 +411,7 @@ export function Playground() {
         eventBus.dispatchEvent({ type: "sui:tx_success", history });
 
         if (!result) console.error("Failed to execute next turn transaction");
-        if (map) {
+        if (game) {
             eventBus.dispatchEvent({
                 type: "sui:next_turn",
                 turn: first.NextTurn,
@@ -361,10 +420,10 @@ export function Playground() {
     }
 
     async function onExit() {
-        if (!map) return;
+        if (!game) return;
 
-        const result = await tx.destroyGame(map.objectId, true).catch(catchDryRunError);
-
+        const result = await tx.destroyGame(game.objectId, true).catch(catchDryRunError);
+        if (host) sessionStorage.removeItem(HOST_KEY);
         if (!result) throw new Error("Failed to execute destroy game transaction");
         unsetMapKey();
     }
@@ -428,13 +487,14 @@ function HostedGameItem({
     onSelect: (host: Host) => void;
 }) {
     const name = useSuinsName({ address: game.host });
+    const { data: preset } = usePreset({ id: game.presetId });
 
     return (
         <div
             className="flex flex-row justify-between w-full text-left interactive p-3"
             onClick={() => onSelect(game)}
         >
-            <p>Map: {game.name}</p>
+            <p>Map: {preset?.name || "..."}</p>
             <p>Host: {(name && `@${name}`) || formatAddress(game.host)}</p>
             <p>{timeAgo(+game.timestampMs)}</p>
         </div>

@@ -15,7 +15,7 @@ type Props = {
 const Host = bcs.struct("Host", {
     id: bcs.Address,
     gameId: bcs.Address,
-    name: bcs.string(),
+    presetId: bcs.Address,
     timestampMs: bcs.u64(),
     host: bcs.Address,
 });

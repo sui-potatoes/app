@@ -7,7 +7,7 @@ import { Transaction } from "@mysten/sui/transactions";
 import { useNetworkVariable } from "../../../networkConfig";
 import { NavLink } from "react-router-dom";
 import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
-import { Footer, Loader, StatRecord } from "./Components";
+import { Footer, GameScreen, Loader, StatRecord } from "./Components";
 import { useState } from "react";
 import { type Armor, useArmor } from "../hooks/useArmor";
 import { armorImgUrls, armorMetadata } from "../types/metadata";
@@ -70,71 +70,65 @@ export function Armor() {
         return true;
     });
 
+    // prettier-ignore
+    const title = <><NavLink to="../headquarters">HEADQUARTERS</NavLink> / ARMOR</>;
+
     return (
-        <div className="flex justify-between align-middle h-screen flex-col w-full">
-            <div className="text-left p-10">
-                <h1 className="block p-1 mb-10 page-heading">
-                    <NavLink to="../headquarters">HEADQUATERS</NavLink> / ARMOR
-                </h1>
-                <div className="flex justify-start">
-                    <div className="w-96 max-w-md">
-                        <div>
-                            {(isPending || isExecuting) && <Loader />}
-                            {displayed.map((a) => (
-                                <div
-                                    className={
-                                        "options-row interactive " +
-                                        (selected?.name == a.name ? "selected" : "")
-                                    }
-                                    key={a.name}
-                                    onClick={() => setSelected(a)}
-                                >
-                                    <a>{a.name}</a>
-                                    <p>{count[a.name]}</p>
-                                </div>
-                            ))}
-                        </div>
+        <GameScreen footerTo="../headquarters" title={title}>
+            <div className="w-lg">
+                <h2 className="mb-2">ARMOR</h2>
+                <div className="overflowing">
+                    {(isPending || isExecuting) && <Loader />}
+                    {displayed.map((a) => (
                         <div
-                            className={`options-row mt-10 ${!canTransact ? "non-interactive" : "interactive"}`}
-                            onClick={() => mintArmor(rngTier())}
+                            className={
+                                "options-row interactive " +
+                                (selected?.name == a.name ? "selected" : "")
+                            }
+                            key={a.name}
+                            onClick={() => setSelected(a)}
                         >
-                            <div>New random piece</div>
-                            <div>+</div>
+                            <a>{a.name}</a>
+                            <p>{count[a.name]}</p>
                         </div>
-                    </div>
-                    {selected && (
-                        <div className="size-max ml-10 max-w-3xl">
-                            <div className="mb-10">
-                                <h2 className="mb-2">DESCRIPTION</h2>
-                                <img src={armorMetadata(selected.name).image} />
-                                <p className="normal-case">
-                                    {armorMetadata(selected.name).description}
-                                </p>
-                            </div>
-                            <div>
-                                <h2 className="mb-2">STATS</h2>
-                                {ARMOR_STATS.map((record) => (
-                                    <StatRecord
-                                        key={record.key}
-                                        record={record}
-                                        stats={selected.stats}
-                                        className="options-row"
-                                    />
-                                ))}
-                            </div>
-                            <div
-                                className="mt-10 py-10 text-center interactive"
-                                style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
-                                onClick={() => throwAway(selected)}
-                            >
-                                throw away
-                            </div>
-                        </div>
-                    )}
+                    ))}
+                </div>
+                <div
+                    className={`options-row mt-10 ${!canTransact ? "non-interactive" : "interactive"}`}
+                    onClick={() => mintArmor(rngTier())}
+                >
+                    <div>New random piece</div>
+                    <div>+</div>
                 </div>
             </div>
-            <Footer to="../headquarters" />
-        </div>
+            {selected && (
+                <div className="size-max ml-10 max-w-3xl">
+                    <div className="mb-10">
+                        <h2 className="mb-2">DESCRIPTION</h2>
+                        <img src={armorMetadata(selected.name).image} />
+                        <p className="normal-case">{armorMetadata(selected.name).description}</p>
+                    </div>
+                    <div>
+                        <h2 className="mb-2">STATS</h2>
+                        {ARMOR_STATS.map((record) => (
+                            <StatRecord
+                                key={record.key}
+                                record={record}
+                                stats={selected.stats}
+                                className="options-row"
+                            />
+                        ))}
+                    </div>
+                    <div
+                        className="mt-10 py-10 text-center interactive"
+                        style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
+                        onClick={() => throwAway(selected)}
+                    >
+                        throw away
+                    </div>
+                </div>
+            )}
+        </GameScreen>
     );
 
     /** Mints a random armor object of the given tier. */

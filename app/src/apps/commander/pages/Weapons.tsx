@@ -7,7 +7,7 @@ import { useNetworkVariable } from "../../../networkConfig";
 import { NavLink } from "react-router-dom";
 import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
 import { Transaction } from "@mysten/sui/transactions";
-import { Loader, Footer, StatRecord } from "./Components";
+import { Loader, GameScreen, StatRecord } from "./Components";
 import { SuiObjectRef } from "@mysten/sui/client";
 import { useState } from "react";
 import { type Weapon, useWeapons } from "../hooks/useWeapons";
@@ -74,109 +74,97 @@ export function Weapons() {
             return true;
         });
 
-    return (
-        <div className="flex justify-between align-middle h-screen flex-col w-full">
-            <div className="text-left p-10">
-                <h1 className="p-1 mb-10 white page-heading">
-                    <NavLink to="../headquarters">HEADQUATERS</NavLink> / WEAPONS
-                </h1>
-                <div className="flex justify-start">
-                    <div className="w-96 max-w-md overflowing">
-                        <div>
-                            {(isPending || isExecuting) && <Loader />}
-                            {displayed.map((w) => (
-                                <div
-                                    className={
-                                        "options-row interactive " +
-                                        (selected?.objectId == w.objectId ? "selected" : "")
-                                    }
-                                    key={w.objectId}
-                                    onClick={() => setSelected(w)}
-                                >
-                                    <a>
-                                        {w.name}
-                                        {w.hasUpgrades ? "+" : ""}
-                                    </a>
-                                    <p>{!w.hasUpgrades && count[w.name]}</p>
-                                </div>
-                            ))}
-                        </div>
-                        <div
-                            className={`options-row mt-10 ${!canTransact ? "non-interactive" : "interactive"}`}
-                            onClick={() => mintWeapon(rngTier(), { ...rngUpgrade() })}
-                        >
-                            <div>New random weapon</div>
-                            <div>+</div>
-                        </div>
-                    </div>
-                    {selected && (
-                        <div className="ml-10 px-10 pb-10 max-w-3xl overflowing">
-                            <div className="mb-10">
-                                <h2 className="mb-2">DESCRIPTION</h2>
-                                <p className="normal-case">
-                                    {weaponMetadata(selected.name).description}
-                                </p>
-                                <img src={weaponMetadata(selected.name).image} />
-                            </div>
-                            <div>
-                                <h2 className="mb-2">STATS</h2>
-                                {WEAPON_STATS.map((record) => (
-                                    <StatRecord
-                                        key={record.key}
-                                        record={record}
-                                        stats={selected.stats}
-                                        className="options-row"
-                                    />
-                                ))}
-                            </div>
+    // prettier-ignore
+    const title = <><NavLink to="../headquarters">HEADQUARTERS</NavLink> / WEAPONS</>;
 
-                            <h2 className="mb-2 mt-10">UPGRADES</h2>
-                            <div className="w-full">
-                                {[...Array(2)].map((_, i) => {
-                                    if (selected.upgrades[i]) {
-                                        const upgrade = selected.upgrades[i];
-                                        return (
-                                            <div
-                                                className="my-auto options-row interactive"
-                                                key={i}
-                                            >
-                                                <a>{upgrade.name}</a>
-                                                <div>⨉</div>
-                                            </div>
-                                        );
-                                    } else {
-                                        return (
-                                            <div
-                                                className="my-auto options-row interactive"
-                                                key={i}
-                                            >
-                                                <div className="text-left">Empty upgrade slot</div>
-                                                <div>+</div>
-                                            </div>
-                                        );
-                                    }
-                                })}
-                                <div className="my-auto options-row non-interactive">
-                                    <div className="text-left">Upgrade slot unavailable</div>
-                                </div>
-                            </div>
-                            <p className="mt-2 normal-case">
-                                An upgrade can only be used once. Once installed, it can be removed
-                                and thrown out or replaced with another upgrade.
-                            </p>
-                            <div
-                                className="mt-10 py-10 text-center interactive"
-                                style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
-                                onClick={() => throwAway(selected)}
-                            >
-                                throw away
-                            </div>
+    return (
+        <GameScreen footerTo="../headquarters" title={title}>
+            <div className="w-lg">
+                <h2 className="mb-2">WEAPONS</h2>
+                <div className="overflowing">
+                    {(isPending || isExecuting) && <Loader />}
+                    {displayed.map((w) => (
+                        <div
+                            className={
+                                "options-row interactive " +
+                                (selected?.objectId == w.objectId ? "selected" : "")
+                            }
+                            key={w.objectId}
+                            onClick={() => setSelected(w)}
+                        >
+                            <a>
+                                {w.name}
+                                {w.hasUpgrades ? "+" : ""}
+                            </a>
+                            <p>{!w.hasUpgrades && count[w.name]}</p>
                         </div>
-                    )}
+                    ))}
+                </div>
+                <div
+                    className={`options-row p-2 mt-10 ${!canTransact ? "non-interactive" : "interactive"}`}
+                    onClick={() => mintWeapon(rngTier(), { ...rngUpgrade() })}
+                >
+                    <div>New random weapon</div>
+                    <div>+</div>
                 </div>
             </div>
-            <Footer to="../headquarters" />
-        </div>
+            {selected && (
+                <div className="ml-10 px-10 pb-10 max-w-3xl overflowing">
+                    <div className="mb-10">
+                        <h2 className="mb-2">DESCRIPTION</h2>
+                        <p className="normal-case">{weaponMetadata(selected.name).description}</p>
+                        <img src={weaponMetadata(selected.name).image} />
+                    </div>
+                    <div>
+                        <h2 className="mb-2">STATS</h2>
+                        {WEAPON_STATS.map((record) => (
+                            <StatRecord
+                                key={record.key}
+                                record={record}
+                                stats={selected.stats}
+                                className="options-row"
+                            />
+                        ))}
+                    </div>
+
+                    <h2 className="mb-2 mt-10">UPGRADES</h2>
+                    <div className="w-full">
+                        {[...Array(2)].map((_, i) => {
+                            if (selected.upgrades[i]) {
+                                const upgrade = selected.upgrades[i];
+                                return (
+                                    <div className="my-auto options-row interactive" key={i}>
+                                        <a>{upgrade.name}</a>
+                                        <div>⨉</div>
+                                    </div>
+                                );
+                            } else {
+                                return (
+                                    <div className="my-auto options-row interactive" key={i}>
+                                        <div className="text-left">Empty upgrade slot</div>
+                                        <div>+</div>
+                                    </div>
+                                );
+                            }
+                        })}
+                        <div className="my-auto options-row non-interactive">
+                            <div className="text-left">Upgrade slot unavailable</div>
+                        </div>
+                    </div>
+                    <p className="mt-2 normal-case">
+                        An upgrade can only be used once. Once installed, it can be removed and
+                        thrown out or replaced with another upgrade.
+                    </p>
+                    <div
+                        className="mt-10 py-10 text-center interactive"
+                        style={{ width: "172.8px", marginLeft: "0", padding: "10px 0" }}
+                        onClick={() => throwAway(selected)}
+                    >
+                        throw away
+                    </div>
+                </div>
+            )}
+        </GameScreen>
     );
 
     /**

@@ -16,6 +16,7 @@ export type SuiAction = {
         module: string;
         function: string;
     };
+    recruits_placed: { success: boolean };
     next_turn: { turn: number };
     reload: { unit: [number, number]; success: boolean };
     path: { path: [number, number][] };

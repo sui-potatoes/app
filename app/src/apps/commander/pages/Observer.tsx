@@ -8,13 +8,16 @@ import { GameApp } from "./play/Game";
 import { Camera, EventBus, loadModels } from "../engine";
 import { Footer, Loader } from "./Components";
 
+/**
+ * Observer is a page that allows spectating a single game.
+ * It uses History API and frequent refetching to pull game updates.
+ */
 export function Observer() {
     const { gameId } = useParams();
     const camera = useMemo(() => loadCamera(), []);
     const eventBus = useMemo(() => new EventBus(), []);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [initialGame, setInitialGame] = useState<GameMap>();
-    const [_historyIdx, setHistoryIdx] = useState(0);
     const { data: game } = useGame({ id: gameId!, refetchInterval: 1000 });
     const history = game?.map.history;
 
@@ -26,7 +29,6 @@ export function Observer() {
     // only call updates on history.
     useEffect(() => {
         if (!game || !!initialGame) return;
-        setHistoryIdx(game.map.history.length);
         setInitialGame(game);
     }, [game]);
 
