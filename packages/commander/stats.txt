@@ -54,9 +54,13 @@ Matchmaking:
 area is von neumann neighbourhood of 1, precisely 5 points; each map contains pointers
 to start locations, selected randomly;
 
+Map limitations:
+
+- 255 is the max size of the Map. Shall we see how big it is? 
+
 TODOs:
 
-- [ ] cover system
+- [x] cover system
 - [ ] multiplayer (random placement of units)
 - [ ] research redesign of the cover tile system, tiles as the second layer to main layout (?);
 the idea is to decrease load on cover system and not check 2 tiles at once.

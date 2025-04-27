@@ -8,7 +8,12 @@
 /// game, joining it, canceling a game, etc.
 module commander::commander;
 
-use commander::{history::{Self, History}, map::{Self, Map}, recruit::Recruit, replay};
+use commander::{
+    history::{Self, History},
+    map::{Self, Map},
+    recruit::Recruit,
+    replay::{Self, Replay}
+};
 use std::string::String;
 use sui::{
     bcs,
@@ -24,6 +29,7 @@ const ENotPlayer: u64 = 1;
 const EInvalidGame: u64 = 2;
 const ENotYourRecruit: u64 = 3;
 const ENoPositions: u64 = 4;
+const ENotHost: u64 = 5;
 
 /// Stack limit of public games in the `Commander` object.
 const PUBLIC_GAMES_LIMIT: u64 = 20;
@@ -66,6 +72,9 @@ public struct Host has key {
 public struct Game has key {
     id: UID,
     map: Map,
+    /// Stores the ID of the Host object for discovery. Emptied when game is
+    /// joined by another player.
+    host_id: Option<ID>,
     /// The players in the game.
     players: vector<address>,
     /// The spawn positions of recruits.
@@ -120,6 +129,7 @@ public fun host_game(
     let cmd_address = cmd.id.to_address();
     let timestamp_ms = clock.timestamp_ms();
     let id = object::new(ctx);
+    let host_id = id.to_inner();
 
     transfer::transfer(preset, cmd_address);
     transfer::transfer(
@@ -137,6 +147,7 @@ public fun host_game(
         id,
         map,
         positions,
+        host_id: option::some(host_id),
         history: history::empty(),
         recruits: object_table::new(ctx),
         players: vector[ctx.sender()],
@@ -151,7 +162,9 @@ public fun join_game(
     ctx: &mut TxContext,
 ) {
     let Host { id, game_id, .. } = transfer::receive(&mut cmd.id, host);
+    let host_id = game.host_id.extract();
     assert!(game_id == game.id.to_inner(), EInvalidGame);
+    assert!(host_id == id.to_inner(), ENotHost);
 
     game.players.push_back(ctx.sender());
     id.delete();
@@ -170,11 +183,12 @@ public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut Tx
 
     Game {
         map,
+        positions,
+        host_id: option::none(),
         id: object::new(ctx),
         history: history::empty(),
         recruits: object_table::new(ctx),
         players: vector[ctx.sender()],
-        positions,
     }
 }
 
@@ -190,10 +204,27 @@ public fun register_game(cmd: &mut Commander, clock: &Clock, game: &Game, _ctx: 
 
 #[allow(lint(self_transfer))]
 /// Destroy a game object, remove it from the registry's most recent if present.
-public fun destroy_game(cmd: &mut Commander, game: Game, save_replay: bool, ctx: &mut TxContext) {
-    let Game { id, map, mut recruits, history, players, .. } = game;
+public fun destroy_game(
+    cmd: &mut Commander,
+    game: Game,
+    host: Option<Receiving<Host>>,
+    ctx: &mut TxContext,
+): Replay {
+    let Game { id, map, mut recruits, history, players, host_id, .. } = game;
     let preset_id = map.id();
-    map.destroy().do!(|unit| transfer::public_transfer(recruits.remove(unit), ctx.sender()));
+    map.destroy().do!(|unit| {
+        let recruit = recruits.remove(unit);
+        let leader = recruit.leader();
+        transfer::public_transfer(recruit, leader)
+    });
+
+    host.do!(|host| {
+        let Host { id: host_uid, game_id, .. } = transfer::receive(&mut cmd.id, host);
+        assert!(game_id == id.to_inner(), EInvalidGame);
+        assert!(host_id.destroy_some() == host_uid.to_inner(), ENotHost);
+
+        host_uid.delete();
+    });
 
     // only the players can destroy the game, no garbage collection
     assert!(players.any!(|player| player == ctx.sender()), ENotPlayer);
@@ -201,12 +232,9 @@ public fun destroy_game(cmd: &mut Commander, game: Game, save_replay: bool, ctx:
     if (cmd.games.contains(id.as_inner())) { cmd.games.remove(id.as_inner()); };
     recruits.destroy_empty();
 
-    // save the replay if the flag is set
-    if (save_replay) {
-        transfer::public_transfer(replay::new(preset_id, history, ctx), ctx.sender());
-    };
-
     id.delete();
+
+    replay::new(preset_id, history, ctx)
 }
 
 // === Game Actions ===
@@ -243,15 +271,15 @@ entry fun perform_grenade(
     ctx: &mut TxContext,
 ) {
     let mut rng = rng.new_generator(ctx);
-    let history = game.map.perform_grenade(&mut rng, x0, y0, x1, y1);
+    let history_records = game.map.perform_grenade(&mut rng, x0, y0, x1, y1);
 
-    history::list_kia(&history).do!(|id| {
+    history::list_kia(&history_records).do!(|id| {
         let recruit = game.recruits.remove(id);
         let leader = recruit.leader();
         transfer::public_transfer(recruit.kill(ctx), leader);
     });
 
-    game.history.append(history)
+    game.history.append(history_records)
 }
 
 /// Perform an attack action.
@@ -329,13 +357,18 @@ fun init(ctx: &mut TxContext) {
     transfer::share_object(Commander { id, games: vec_map::empty() });
 }
 
+#[test_only]
+public fun init_for_testing(ctx: &mut TxContext) {
+    init(ctx);
+}
+
 #[test]
 fun test_deserialize_map() {
     let bytes =
         x"00000000000000000000000000000000000000000000000000000000000000000a0a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a0000000000000000000000000000000000000000000001020801";
     let mut bcs = bcs::new(bytes);
     let map = map::from_bcs(&mut bcs);
-    let positions = bcs.peel_vec_length();
+    let _positions = bcs.peel_vec_length();
     // let positions = bcs.peel_vec!(|bcs| bcs.peel_vec!(|bcs| bcs.peel_u8()));
 
     assert!(map.id() == @0.to_id());
@@ -343,5 +376,4 @@ fun test_deserialize_map() {
     // assert!(positions.length() > 0);
 
     map.destroy();
-    std::debug::print(&positions);
 }
