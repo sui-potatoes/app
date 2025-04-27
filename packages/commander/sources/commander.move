@@ -6,6 +6,14 @@
 ///
 /// Additionally, handles the interaction between players, such as hosting a
 /// game, joining it, canceling a game, etc.
+///
+///
+/// Game State:
+///
+/// - Waiting to Join(host_id)
+/// - Placing Recruits(positions)
+/// - Playing(last_turn)
+/// - Finished(winner)
 module commander::commander;
 
 use commander::{
@@ -28,8 +36,13 @@ const ENotAuthor: u64 = 0;
 const ENotPlayer: u64 = 1;
 const EInvalidGame: u64 = 2;
 const ENotYourRecruit: u64 = 3;
-const ENoPositions: u64 = 4;
-const ENotHost: u64 = 5;
+const EIncorrectHost: u64 = 4;
+const EHostNotSpecified: u64 = 5;
+const ECannotPlay: u64 = 6;
+const ENotReady: u64 = 7;
+const EInvalidState: u64 = 8;
+const EMustPlaceRecruits: u64 = 9;
+const EAlreadyPlacedRecruits: u64 = 10;
 
 /// Stack limit of public games in the `Commander` object.
 const PUBLIC_GAMES_LIMIT: u64 = 20;
@@ -67,14 +80,29 @@ public struct Host has key {
     host: address,
 }
 
+/// The state of the game, used to determine the game state.
+public enum GameState has drop, store {
+    /// The game is waiting to be joined. Stores the ID of the Host object.
+    Waiting(ID),
+    /// Players are expected to place their recruits.
+    /// Makes sure that each player has placed their recruits only once.
+    PlacingRecruits(vector<address>),
+    /// The game is in progress. Stores the timestamp of the last turn.
+    Playing(u64),
+    /// The game is over. Stores the winner.
+    Finished(address),
+}
+
 /// A single instance of the game. A `Game` object is created when a new game is
 /// started, it contains the Map and the
 public struct Game has key {
     id: UID,
     map: Map,
-    /// Stores the ID of the Host object for discovery. Emptied when game is
-    /// joined by another player.
-    host_id: Option<ID>,
+    state: GameState,
+    /// The time limit (in ms) for a single turn.
+    time_limit: u64,
+    /// The timestamp of the last turn.
+    last_turn: u64,
     /// The players in the game.
     players: vector<address>,
     /// The spawn positions of recruits.
@@ -116,8 +144,8 @@ public fun delete_map(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut 
 /// Host a new game.
 public fun host_game(
     cmd: &mut Commander,
-    clock: &Clock,
     preset: Receiving<Preset>,
+    clock: &Clock,
     ctx: &mut TxContext,
 ): Game {
     let mut preset = transfer::receive(&mut cmd.id, preset);
@@ -129,12 +157,13 @@ public fun host_game(
     let cmd_address = cmd.id.to_address();
     let timestamp_ms = clock.timestamp_ms();
     let id = object::new(ctx);
-    let host_id = id.to_inner();
+    let host_uid = object::new(ctx);
+    let host_id = host_uid.to_inner();
 
     transfer::transfer(preset, cmd_address);
     transfer::transfer(
         Host {
-            id: object::new(ctx),
+            id: host_uid,
             game_id: id.to_inner(),
             name,
             timestamp_ms,
@@ -147,7 +176,9 @@ public fun host_game(
         id,
         map,
         positions,
-        host_id: option::some(host_id),
+        state: GameState::Waiting(host_id),
+        time_limit: 100_000, // 100 seconds.
+        last_turn: timestamp_ms,
         history: history::empty(),
         recruits: object_table::new(ctx),
         players: vector[ctx.sender()],
@@ -159,32 +190,43 @@ public fun join_game(
     cmd: &mut Commander,
     game: &mut Game,
     host: Receiving<Host>,
+    clock: &Clock,
     ctx: &mut TxContext,
 ) {
-    let Host { id, game_id, .. } = transfer::receive(&mut cmd.id, host);
-    let host_id = game.host_id.extract();
-    assert!(game_id == game.id.to_inner(), EInvalidGame);
-    assert!(host_id == id.to_inner(), ENotHost);
+    let host_id = game.state.to_host_id!();
 
+    let Host { id, game_id, .. } = transfer::receive(&mut cmd.id, host);
+    assert!(game_id == game.id.to_inner(), EInvalidGame);
+    assert!(host_id == id.to_inner(), EIncorrectHost);
+
+    game.last_turn = clock.timestamp_ms();
     game.players.push_back(ctx.sender());
+    game.state = GameState::PlacingRecruits(game.players); // 2 players.
     id.delete();
 }
 
 // === New Game Registration & Removal ===
 
 /// Start a new game with a custom map passed directly as a byte array.
-public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut TxContext): Game {
+public fun new_game(
+    cmd: &mut Commander,
+    preset: Receiving<Preset>,
+    clock: &Clock,
+    ctx: &mut TxContext,
+): Game {
     let mut preset = transfer::receive(&mut cmd.id, preset);
     let map = preset.map.clone();
     let positions = preset.positions;
 
-    preset.popularity = preset.popularity + 1; // increment popularity
-    transfer::transfer(preset, cmd.id.to_address()); // transfer back
+    preset.popularity = preset.popularity + 1; // Increment popularity.
+    transfer::transfer(preset, cmd.id.to_address()); // Transfer back to Commander.
 
     Game {
         map,
         positions,
-        host_id: option::none(),
+        state: GameState::PlacingRecruits(vector[ctx.sender()]),
+        time_limit: 100_000, // 100 seconds.
+        last_turn: clock.timestamp_ms(),
         id: object::new(ctx),
         history: history::empty(),
         recruits: object_table::new(ctx),
@@ -193,9 +235,9 @@ public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut Tx
 }
 
 /// Create a new public game, allowing anyone to spectate.
-public fun register_game(cmd: &mut Commander, clock: &Clock, game: &Game, _ctx: &mut TxContext) {
+public fun register_game(cmd: &mut Commander, game: &Game, clock: &Clock, _ctx: &mut TxContext) {
     if (cmd.games.size() == PUBLIC_GAMES_LIMIT) {
-        // remove the oldest game, given that the VecMap is following the insertion order
+        // Remove the oldest game, given that the VecMap is following the insertion order.
         let (_, _) = cmd.games.remove_entry_by_idx(0);
     };
 
@@ -210,7 +252,7 @@ public fun destroy_game(
     host: Option<Receiving<Host>>,
     ctx: &mut TxContext,
 ): Replay {
-    let Game { id, map, mut recruits, history, players, host_id, .. } = game;
+    let Game { id, map, mut recruits, history, players, state, .. } = game;
     let preset_id = map.id();
     map.destroy().do!(|unit| {
         let recruit = recruits.remove(unit);
@@ -218,15 +260,17 @@ public fun destroy_game(
         transfer::public_transfer(recruit, leader)
     });
 
+    assert!(!state.is_waiting!() || host.is_some(), EHostNotSpecified);
+
     host.do!(|host| {
         let Host { id: host_uid, game_id, .. } = transfer::receive(&mut cmd.id, host);
         assert!(game_id == id.to_inner(), EInvalidGame);
-        assert!(host_id.destroy_some() == host_uid.to_inner(), ENotHost);
+        assert!(state.to_host_id!() == host_uid.to_inner(), EIncorrectHost);
 
         host_uid.delete();
     });
 
-    // only the players can destroy the game, no garbage collection
+    // Only the players can destroy the game, no garbage collection.
     assert!(players.any!(|player| player == ctx.sender()), ENotPlayer);
 
     if (cmd.games.contains(id.as_inner())) { cmd.games.remove(id.as_inner()); };
@@ -240,23 +284,53 @@ public fun destroy_game(
 // === Game Actions ===
 
 /// Place a Recruit on the map, store it in the `Game`.
-public fun place_recruit(game: &mut Game, recruit: Recruit, ctx: &mut TxContext) {
-    assert!(recruit.leader() == ctx.sender(), ENotYourRecruit); // make sure the sender owns the recruit
-    assert!(game.positions.length() > 0, ENoPositions);
+public fun place_recruits(game: &mut Game, recruits: vector<Recruit>, ctx: &mut TxContext) {
+    let sender = ctx.sender();
+
+    assert!(recruits.length() > 0, EMustPlaceRecruits);
+    assert!(game.players.contains(&sender), ENotPlayer);
+
+    match (&mut game.state) {
+        GameState::PlacingRecruits(players) => {
+            let idx = players
+                .find_index!(|player| *player == sender)
+                .destroy_or!(abort EAlreadyPlacedRecruits);
+
+            players.remove(idx);
+
+            if (players.length() == 0) {
+                game.state = GameState::Playing(0);
+            }
+        },
+        _ => abort EInvalidGame,
+    };
 
     let position = game.positions.pop_back();
-    let history = game.map.place_recruit(&recruit, position[0] as u16, position[1] as u16);
-    game.recruits.add(object::id(&recruit), recruit);
-    game.history.add(history);
+    let mut neighbors = game.map.spawn_points(position);
+
+    recruits.destroy!(|recruit| {
+        assert!(recruit.leader() == sender, ENotYourRecruit); // Make sure the sender owns the recruit.
+        let point = neighbors.pop_back();
+        let history = game.map.place_recruit(&recruit, point);
+
+        game.recruits.add(object::id(&recruit), recruit);
+        game.history.add(history);
+    })
 }
 
 /// Move a unit along the path, the first point is the current position of the unit.
-public fun move_unit(game: &mut Game, path: vector<u8>, _ctx: &mut TxContext) {
+public fun move_unit(game: &mut Game, path: vector<u8>, clock: &Clock, ctx: &mut TxContext) {
+    assert!(game.state.is_playing!(), ENotReady);
+    assert!(game.can_play!(clock, ctx), ECannotPlay);
+
     game.history.add(game.map.move_unit(path))
 }
 
 /// Perform a reload action, replenishing ammo.
-public fun perform_reload(game: &mut Game, x: u16, y: u16, _ctx: &mut TxContext) {
+public fun perform_reload(game: &mut Game, x: u16, y: u16, clock: &Clock, ctx: &mut TxContext) {
+    assert!(game.state.is_playing!(), ENotReady);
+    assert!(game.can_play!(clock, ctx), ECannotPlay);
+
     game.history.add(game.map.perform_reload(x, y))
 }
 
@@ -268,8 +342,12 @@ entry fun perform_grenade(
     y0: u16,
     x1: u16,
     y1: u16,
+    clock: &Clock,
     ctx: &mut TxContext,
 ) {
+    assert!(game.state.is_playing!(), ENotReady);
+    assert!(game.can_play!(clock, ctx), ECannotPlay);
+
     let mut rng = rng.new_generator(ctx);
     let history_records = game.map.perform_grenade(&mut rng, x0, y0, x1, y1);
 
@@ -290,13 +368,17 @@ entry fun perform_attack(
     y0: u16,
     x1: u16,
     y1: u16,
+    clock: &Clock,
     ctx: &mut TxContext,
 ) {
+    assert!(game.state.is_playing!(), ENotReady);
+    assert!(game.can_play!(clock, ctx), ECannotPlay);
+
     let mut rng = rng.new_generator(ctx);
     let history = game.map.perform_attack(&mut rng, x0, y0, x1, y1);
 
     history::list_kia(&history).do!(|id| {
-        if (id.to_address() == @0) return; // skip empty addresses
+        if (id.to_address() == @0) return; // Skip empty addresses; needed for tests.
         let recruit = game.recruits.remove(id);
         let leader = recruit.leader();
         transfer::public_transfer(recruit.kill(ctx), leader);
@@ -306,8 +388,13 @@ entry fun perform_attack(
 }
 
 /// Switch to the next turn.
-public fun next_turn(game: &mut Game) {
+public fun next_turn(game: &mut Game, clock: &Clock, ctx: &mut TxContext) {
+    assert!(game.state.is_playing!(), ENotReady);
+    assert!(game.can_play!(clock, ctx), ECannotPlay);
+
+    if (game.players.length() == 2) game.players.swap(0, 1);
     game.history.add(game.map.next_turn());
+    game.last_turn = clock.timestamp_ms();
 }
 
 /// Share the `key`-only object after placing Recruits on the map.
@@ -315,11 +402,116 @@ public fun share(game: Game) {
     transfer::share_object(game)
 }
 
+// === Clock Management ===
+
+/// Check if the current player is within the time limit. If over, turn is illegal, and next player
+/// can play. Past this limit, we forbid any action, including the next turn (which will be called
+/// by the next player).
+macro fun can_play($game: &mut Game, $clock: &Clock, $ctx: &TxContext): bool {
+    let ctx = $ctx;
+    let game = $game;
+    let clock = $clock;
+    let sender = ctx.sender();
+    let timestamp_ms = clock.timestamp_ms();
+
+    // If the game is single player, allow the host to play indefinitely.
+    if (game.players.length() == 1 && game.state.is_playing!()) {
+        true
+    } else if (sender == game.players[0]) {
+        // Multiplayer: if the current player is within the time limit, allow them to play.
+        (timestamp_ms - game.last_turn) <= game.time_limit
+    } else if (sender == game.players[1]) {
+        // Multiplayer: if player one missed their turn, and turn wasn't switched, allow player two
+        // to end turn.
+        // WARNING: expectation is that player two will first call next_turn();
+        (timestamp_ms - game.last_turn) > game.time_limit
+    } else {
+        false
+    }
+}
+
 // === Getters ===
 
-#[allow(unused_function)]
 /// Get the current turn of the game.
-fun turn(self: &Game): u16 { self.map.turn() }
+public(package) fun turn(self: &Game): u16 { self.map.turn() }
+
+/// Get the time limit of the game.
+public(package) fun time_limit(self: &Game): u64 { self.time_limit }
+
+/// Get the last turn timestamp.
+public(package) fun last_turn(self: &Game): u64 { self.last_turn }
+
+/// Get the players in the game.
+public(package) fun players(self: &Game): vector<address> { self.players }
+
+/// Get the positions of the recruits.
+public(package) fun positions(self: &Game): vector<vector<u8>> { self.positions }
+
+/// Whether the game is in waiting state.
+public(package) fun is_waiting(self: &Game): bool {
+    self.state.is_waiting!()
+}
+
+/// Whether the game is in placing recruits state.
+public(package) fun is_placing_recruits(self: &Game): bool {
+    self.state.is_placing_recruits!()
+}
+
+/// Whether the game is in playing state.
+public(package) fun is_playing(self: &Game): bool {
+    self.state.is_playing!()
+}
+
+/// Whether the game is in finished state.
+public(package) fun is_finished(self: &Game): bool {
+    self.state.is_finished!()
+}
+
+// === State ===
+
+/// Convert the `GameState` into a `Host` ID. Fails if the state is not `Waiting`.
+macro fun to_host_id($state: &GameState): ID {
+    match ($state) {
+        GameState::Waiting(host_id) => *host_id,
+        _ => abort EInvalidState,
+    }
+}
+
+use fun state_is_waiting as GameState.is_waiting;
+
+macro fun state_is_waiting($state: &GameState): bool {
+    match ($state) {
+        GameState::Waiting(_) => true,
+        _ => false,
+    }
+}
+
+use fun state_is_placing_recruits as GameState.is_placing_recruits;
+
+macro fun state_is_placing_recruits($state: &GameState): bool {
+    match ($state) {
+        GameState::PlacingRecruits(_) => true,
+        _ => false,
+    }
+}
+
+use fun state_is_playing as GameState.is_playing;
+
+macro fun state_is_playing($state: &GameState): bool {
+    match ($state) {
+        GameState::Playing(_) => true,
+        _ => false,
+    }
+}
+
+use fun state_is_finished as GameState.is_finished;
+
+macro fun state_is_finished($state: &GameState): bool {
+    match ($state) {
+        GameState::Finished(_) => true,
+        _ => false,
+    }
+}
 
 // === Init ===
 
@@ -368,12 +560,11 @@ fun test_deserialize_map() {
         x"00000000000000000000000000000000000000000000000000000000000000000a0a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a0000000000000000000000000000000000000000000001020801";
     let mut bcs = bcs::new(bytes);
     let map = map::from_bcs(&mut bcs);
-    let _positions = bcs.peel_vec_length();
-    // let positions = bcs.peel_vec!(|bcs| bcs.peel_vec!(|bcs| bcs.peel_u8()));
+    let positions = bcs.peel_vec_length();
 
     assert!(map.id() == @0.to_id());
     assert!(map.turn() == 0);
-    // assert!(positions.length() > 0);
+    assert!(positions > 0);
 
     map.destroy();
 }

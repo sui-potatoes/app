@@ -19,9 +19,9 @@ public struct Point(u16, u16) has copy, drop, store;
 public fun new(x: u16, y: u16): Point { Point(x, y) }
 
 /// Create a point from a vector of two values.
-public macro fun from_vector($v: vector<u16>): Point {
+public macro fun from_vector<$T: drop>($v: vector<$T>): Point {
     let v = $v;
-    new(v[0], v[1])
+    new(v[0] as u16, v[1] as u16)
 }
 
 /// Get a tuple of two values from a point.

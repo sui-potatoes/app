@@ -11,7 +11,7 @@
 module commander::map;
 
 use commander::{history::{Self, Record}, recruit::Recruit, unit::{Self, Unit}};
-use grid::{direction, grid::{Self, Grid}, point};
+use grid::{direction, grid::{Self, Grid}, point::{Self, Point}};
 use std::{macros::{num_min, num_max}, string::String};
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
@@ -116,10 +116,29 @@ public(package) fun set_id(map: &mut Map, id: ID) { map.id = id; }
 /// Clone the `Map`.
 public(package) fun clone(map: &Map): Map { Map { id: map.id, turn: map.turn, grid: map.grid } }
 
-// === Actions ===
+// === Recruit Placement ===
+
+/// Get the spawn points for the given position, filtered by the `can_place` macro.
+public(package) fun spawn_points(map: &Map, pos: vector<u8>): vector<Point> {
+    let start = point::from_vector!(pos);
+    let mut points = map.grid.von_neumann!(start, 1);
+    points.push_back(start);
+    points.filter!(|p| map.can_place!(p))
+}
+
+/// Check if the given tile can be placed on.
+macro fun can_place($map: &Map, $p: &Point): bool {
+    let p = $p;
+    let map = $map;
+    let (x, y) = p.to_values();
+    let target_tile = &map.grid[x, y];
+
+    target_tile.unit.is_none() && target_tile.tile_type != TileType::Unwalkable
+}
 
 /// Place a `Recruit` on the map at the given position.
-public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16): Record {
+public fun place_recruit(map: &mut Map, recruit: &Recruit, p: Point): Record {
+    let (x, y) = p.into_values();
     let target_tile = &map.grid[x, y];
 
     assert!(target_tile.unit.is_none(), EUnitAlreadyOnTile);
@@ -128,6 +147,8 @@ public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16): Reco
     map.grid[x, y].unit.fill(recruit.to_unit());
     history::new_recruit_placed(x, y)
 }
+
+// === Actions ===
 
 /// Proceed to the next turn.
 public fun next_turn(map: &mut Map): Record {
@@ -386,7 +407,6 @@ public fun is_tile_unwalkable(map: &Map, x: u16, y: u16): bool {
 
 /// Alias to support the `Grid.to_string` method.
 public use fun tile_to_string as Tile.to_string;
-
 /// Print the `Tile` as a `String`. Used in the `Grid.to_string!()` macro.
 public fun tile_to_string(tile: &Tile): String {
     match (tile.tile_type) {
@@ -721,8 +741,8 @@ fun test_map_with_units() {
     assert!(!map.tile_has_unit(3, 3));
     assert!(!map.tile_has_unit(5, 2));
 
-    map.place_recruit(&recruit_one, 3, 3);
-    map.place_recruit(&recruit_two, 5, 2);
+    map.place_recruit(&recruit_one, point::new(3, 3));
+    map.place_recruit(&recruit_two, point::new(5, 2));
 
     assert!(map.tile_has_unit(3, 3));
     assert!(map.tile_has_unit(5, 2));

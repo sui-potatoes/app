@@ -42,6 +42,7 @@ fun play_test_demo_2() {
 // - Repeat attack until one unit dies
 fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
     use grid::direction::{up, left};
+    use grid::point;
 
     let ctx = &mut tx_context::dummy();
     let id = ctx.fresh_object_address().to_id();
@@ -50,8 +51,8 @@ fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
     let (r1, r3) = (recruit_one(ctx), recruit_two(ctx));
 
     // recruit placement over
-    map.place_recruit(&r1, 6, 5);
-    map.place_recruit(&r3, 0, 3);
+    map.place_recruit(&r1, point::new(6, 5));
+    map.place_recruit(&r3, point::new(0, 3));
 
     // Unit 1 performs a move action and takes cover in the construction on
     // the left side (high cover + low cover mix)
