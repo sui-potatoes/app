@@ -99,7 +99,7 @@ export function Crew() {
                 <div className="flex justify-between">
                     <div className="rounded w-sm" style={{ padding: "2px" }}>
                         <h2 className="mb-2">RECRUITS</h2>
-                        <div className="overflowing" style={{ padding: "2px" }}>
+                        <div className="overflowing" style={{ padding: "2px", maxHeight: "60vh" }}>
                             {recruits?.map((r) => {
                                 return (
                                     <div
@@ -171,24 +171,15 @@ export function Crew() {
                                     {/* Weapon selection */}
                                     <div className="options-row">
                                         <h3 className="text-left">WEAPON</h3>
-                                        {(selected.weapon && (
-                                            <div
-                                                style={{ border: "none" }}
-                                                className="interactive px-4"
-                                                onClick={() => setShowModal("weapon")}
-                                            >
-                                                {selected.weapon.name}
-                                                {selected.weapon.upgrades.length > 0 && "+"}
-                                            </div>
-                                        )) || (
-                                            <div
-                                                style={{ width: "180px" }}
-                                                className="text-center interactive px-4"
-                                                onClick={() => setShowModal("weapon")}
-                                            >
-                                                Select weapon
-                                            </div>
-                                        )}
+                                        <div
+                                            style={{ border: "none" }}
+                                            className="interactive px-4"
+                                            onClick={() => setShowModal("weapon")}
+                                        >
+                                            {selected && selected.weapon
+                                                ? `${selected.weapon.name}${selected.weapon.upgrades.length > 0 ? "+" : ""}`
+                                                : "Standard Rifle"}
+                                        </div>
                                     </div>
                                     {/* Armor selection */}
                                     {/* max width is 30% of the container */}

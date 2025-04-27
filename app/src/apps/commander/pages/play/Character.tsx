@@ -23,13 +23,16 @@ export function Character({ morphTargets }: { morphTargets: number[] }) {
 
     return (
         <Canvas camera={{ position: [0, 3, 4] }} shadows>
-            {/* <color attach="background" args={["#000000"]} /> */}
             <ambientLight intensity={2} />
             <OrbitControls
-                rotateSpeed={0.5}
-                panSpeed={0.5}
+                makeDefault
+                minPolarAngle={0}
                 zoomSpeed={0.5}
-                position0={[10, 4, 4]}
+                maxZoom={10}
+                minDistance={2}
+                panSpeed={0.5}
+                maxDistance={5}
+                maxPolarAngle={Math.PI / 1.75}
             />
             <Scene model={models.the_dude} morphTargets={morphTargets} />
         </Canvas>
@@ -72,7 +75,7 @@ export function Scene({ model, morphTargets }: { model: GLTF; morphTargets: numb
             <primitive object={unit} />
             <directionalLight
                 position={[30, 2, 30]}
-                target={unit.model}
+                target={unit}
                 castShadow
                 shadow-mapSize={[1024, 1024]}
                 shadow-radius={2}

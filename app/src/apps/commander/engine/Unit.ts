@@ -64,6 +64,11 @@ export class UnitModel extends THREE.Object3D {
         this.model.castShadow = true;
         this.model.receiveShadow = true;
 
+        const rifle = this.model.getObjectByName("Rifle");
+        if (rifle) {
+            rifle.visible = false;
+        }
+
         this.model.traverse((child) => {
             if (child instanceof THREE.Mesh) {
                 child.castShadow = true;
