@@ -5,7 +5,7 @@ import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
 import { formatAddress } from "@mysten/sui/utils";
 import { useState } from "react";
-import { Modal, YesOrNo, Footer, GameScreen } from "./Components";
+import { Modal, YesOrNo, GameScreen } from "./Components";
 import { Transaction } from "@mysten/sui/transactions";
 import { SuinsClient, SuinsTransaction } from "@mysten/suins";
 import { useNetworkVariable } from "../../../networkConfig";

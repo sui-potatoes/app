@@ -17,10 +17,10 @@ use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
 /// Attempt to place a `Recruit` on a tile that already has a unit.
 const EUnitAlreadyOnTile: u64 = 1;
-/// Attempt to place a `Recruit` on an unwalkable tile.
-const ETileIsUnwalkable: u64 = 2;
-/// The path is unwalkable.
-const EPathUnwalkable: u64 = 3;
+/// Attempt to place a `Recruit` on an not walkable tile.
+const ETileNotWalkable: u64 = 2;
+/// The path is not walkable.
+const EPathNotWalkable: u64 = 3;
 /// The unit is not on the tile.
 const ENoUnit: u64 = 5;
 /// The path is too short.
@@ -43,8 +43,8 @@ const DEFENSE_BONUS: u8 = 25;
 const GRENADE_RANGE: u16 = 5;
 
 /// Defines a single Tile in the game `Map`. Tiles can be empty, provide cover
-/// or be unwalkable. Additionally, a unit standing on a tile effectively makes
-/// it unwalkable.
+/// or be unavailable for moving over them. Additionally, a unit standing on a
+/// tile effectively makes it non-walkable.
 public struct Tile has copy, store {
     /// The type of the tile.
     tile_type: TileType,
@@ -120,7 +120,7 @@ public(package) fun clone(map: &Map): Map { Map { id: map.id, turn: map.turn, gr
 
 /// Get the spawn points for the given position, filtered by the `can_place` macro.
 public(package) fun spawn_points(map: &Map, pos: vector<u8>): vector<Point> {
-    let start = point::from_vector!(pos);
+    let start = point::from_vector!(&pos);
     let mut points = map.grid.von_neumann!(start, 1);
     points.push_back(start);
     points.filter!(|p| map.can_place!(p))
@@ -142,7 +142,7 @@ public fun place_recruit(map: &mut Map, recruit: &Recruit, p: Point): Record {
     let target_tile = &map.grid[x, y];
 
     assert!(target_tile.unit.is_none(), EUnitAlreadyOnTile);
-    assert!(target_tile.tile_type != TileType::Unwalkable, ETileIsUnwalkable);
+    assert!(target_tile.tile_type != TileType::Unwalkable, ETileNotWalkable);
 
     map.grid[x, y].unit.fill(recruit.to_unit());
     history::new_recruit_placed(x, y)
@@ -175,7 +175,7 @@ public fun move_unit(map: &mut Map, path: vector<u8>): Record {
     let (width, height) = (map.grid.width(), map.grid.height());
 
     assert!(y0 < height && x0 < width, ETileOutOfBounds);
-    let search = map.check_path(path).destroy_or!(abort EPathUnwalkable);
+    let search = map.check_path(path).destroy_or!(abort EPathNotWalkable);
     let (x1, y1) = (search[0], search[1]);
     assert!(y1 < height && x1 < width, ETileOutOfBounds);
 
@@ -407,6 +407,7 @@ public fun is_tile_unwalkable(map: &Map, x: u16, y: u16): bool {
 
 /// Alias to support the `Grid.to_string` method.
 public use fun tile_to_string as Tile.to_string;
+
 /// Print the `Tile` as a `String`. Used in the `Grid.to_string!()` macro.
 public fun tile_to_string(tile: &Tile): String {
     match (tile.tile_type) {

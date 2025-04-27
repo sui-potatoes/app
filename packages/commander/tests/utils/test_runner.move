@@ -4,8 +4,12 @@
 module commander::test_runner;
 
 use commander::commander::{Self, Commander, Game};
-use sui::{clock::{Self, Clock}, test_scenario::{Self as test, Scenario}, transfer::Receiving};
-use sui::test_utils::destroy;
+use sui::{
+    clock::{Self, Clock},
+    test_scenario::{Self as test, Scenario},
+    test_utils::destroy,
+    transfer::Receiving
+};
 
 public struct TestRunner { scenario: Scenario, sender: address, game: Option<Game> }
 

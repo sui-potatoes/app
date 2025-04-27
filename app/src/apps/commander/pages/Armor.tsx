@@ -7,7 +7,7 @@ import { Transaction } from "@mysten/sui/transactions";
 import { useNetworkVariable } from "../../../networkConfig";
 import { NavLink } from "react-router-dom";
 import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
-import { Footer, GameScreen, Loader, StatRecord } from "./Components";
+import { GameScreen, Loader, StatRecord } from "./Components";
 import { useState } from "react";
 import { type Armor, useArmor } from "../hooks/useArmor";
 import { armorImgUrls, armorMetadata } from "../types/metadata";

@@ -75,7 +75,7 @@ public struct Preset has key {
 public struct Host has key {
     id: UID,
     game_id: ID,
-    name: String,
+    preset_id: ID,
     timestamp_ms: u64,
     host: address,
 }
@@ -151,7 +151,6 @@ public fun host_game(
     let mut preset = transfer::receive(&mut cmd.id, preset);
     preset.popularity = preset.popularity + 1; // increment popularity
 
-    let name = preset.name;
     let map = preset.map.clone();
     let positions = preset.positions;
     let cmd_address = cmd.id.to_address();
@@ -160,17 +159,18 @@ public fun host_game(
     let host_uid = object::new(ctx);
     let host_id = host_uid.to_inner();
 
-    transfer::transfer(preset, cmd_address);
     transfer::transfer(
         Host {
             id: host_uid,
             game_id: id.to_inner(),
-            name,
+            preset_id: preset.id.to_inner(),
             timestamp_ms,
             host: ctx.sender(),
         },
         cmd_address,
     );
+
+    transfer::transfer(preset, cmd_address);
 
     Game {
         id,
@@ -194,8 +194,8 @@ public fun join_game(
     ctx: &mut TxContext,
 ) {
     let host_id = game.state.to_host_id!();
-
     let Host { id, game_id, .. } = transfer::receive(&mut cmd.id, host);
+
     assert!(game_id == game.id.to_inner(), EInvalidGame);
     assert!(host_id == id.to_inner(), EIncorrectHost);
 
@@ -526,7 +526,7 @@ fun init(ctx: &mut TxContext) {
         Preset {
             map: map::demo_1(id.to_inner()),
             name: b"Demo 1".to_string(),
-            positions: vector[vector[0, 3], vector[6, 5]],
+            positions: vector[vector[4, 3]],
             popularity: 0,
             author: @0,
             id,

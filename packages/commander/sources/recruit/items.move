@@ -35,7 +35,7 @@ public fun armor(tier: u8, ctx: &mut TxContext): Armor {
 public fun rifle(tier: u8, ctx: &mut TxContext): Weapon {
     let (name, stats) = match (tier) {
         // 4 DMG, 2 SPREAD, +10% CRIT, 1 AREA, 4 RANGE, 3 AMMO
-        1 => (b"Standard Rifle", 0x03_04_00_01_01_0A_0A_02_04 << (6 * 8)),
+        1 => (b"Standard Rifle", stats::default_weapon().inner()),
         // 5 DMG, 1 SPREAD, +20% CRIT, 1 AREA, 5 RANGE, 3 AMMO
         2 => (b"Sharpshooter Rifle", 0x03_05_00_01_01_14_14_01_05 << (6 * 8)),
         // 6 DMG, 1 SPREAD, +30% CRIT, 1 AREA, 5 RANGE, 3 AMMO

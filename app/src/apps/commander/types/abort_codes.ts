@@ -7,13 +7,25 @@ export function vmAbortCodeToMessage(mod: string, fun: string, code: number) {
 
     // prettier-ignore
     switch (`${mod}:${code}`) {
-        case "map:1": errorName = 'EUnitAlreadyonTile'; break;
-        case "map:2": errorName = `ETileIsUnwalkable`; break;
-        case "map:3": errorName = `EPathUnwalkable`; break;
+        case "map:1": errorName = 'EUnitAlreadyOnTile'; break;
+        case "map:2": errorName = `ETileNotWalkable`; break;
+        case "map:3": errorName = `EPathNotWalkable`; break;
         case "map:4": errorName = `EIncorrectPath`; break;
         case "map:5": errorName = `ENoUnit`; break;
         case "map:6": errorName = `EPathTooShort`; break;
         case "map:7": errorName = `ETileOutOfBounds`; break;
+
+        case "commander:0": errorName = `ENotAuthor`; break;
+        case "commander:1": errorName = `ENotPlayer`; break;
+        case "commander:2": errorName = `EInvalidGame`; break;
+        case "commander:3": errorName = `ENotYourRecruit`; break;
+        case "commander:4": errorName = `EIncorrectHost`; break;
+        case "commander:5": errorName = `EHostNotSpecified`; break;
+        case "commander:6": errorName = `ECannotPlay`; break;
+        case "commander:7": errorName = `ENotReady`; break;
+        case "commander:8": errorName = `EInvalidState`; break;
+        case "commander:9": errorName = `EMustPlaceRecruits`; break;
+        case "commander:10": errorName = `EAlreadyPlacedRecruits`; break;
     }
 
     return `Abort '${errorName}' at '${mod}::${fun}'`;

@@ -71,7 +71,7 @@ public fun default(): Stats { new(7, 65, 10, 0, 0) }
 public fun default_weapon(): Stats {
     // reverse:
     // 6-14 -> damage, spread, plus_one, crit_chance, can_be_dodged, area_size, env_damage, range, ammo
-    Stats(0x03_04_00_01_01_00_00_02_04 << (6 * 8))
+    Stats(0x03_04_00_01_01_0A_0A_02_04 << (6 * 8))
 }
 
 /// Default stats for an Armor.

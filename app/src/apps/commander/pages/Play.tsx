@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import * as THREE from "three";
-import { Loader, Footer } from "./Components";
+import { Loader } from "./Components";
 import { useEffect, useMemo, useState } from "react";
 import { UI } from "./play/UI";
 import { Camera, EventBus, loadModels, GameAction } from "../engine";
