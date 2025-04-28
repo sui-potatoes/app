@@ -39,7 +39,10 @@ export function UI({
     recruits,
     lastTurnTimestamp,
     turnTimeLimit,
+    playerIdx,
+    turn: initialTurn,
 }: {
+    playerIdx: number;
     eventBus: EventBus;
     isExecuting?: boolean;
     isChecking?: boolean;
@@ -54,8 +57,10 @@ export function UI({
     const [log, setLog] = useState<string[]>([]);
     const [unit, setUnit] = useState<Unit | null>(null);
     const [recruit, setRecruit] = useState<Recruit | null>(null);
+    const [turn, setTurn] = useState<number>(initialTurn);
     const timer = Timer({ lastTurnTimestamp, turnTimeLimit });
     const isOutOfTime = timer.timeLeft == 0;
+    const isMyTurn = playerIdx === turn % 2;
 
     const onAction = (action: UIKey) =>
         eventBus.dispatchEvent({ type: `ui:${action}`, name: action });
@@ -112,7 +117,8 @@ export function UI({
 
     // Subscribe to the SUI events + all events to update the log.
     useEffect(() => {
-        function onNextTurn(_event: SuiAction["next_turn"]) {
+        function onNextTurn(event: SuiAction["next_turn"]) {
+            setTurn(event.turn);
             timer.reset();
         }
 
@@ -153,18 +159,21 @@ export function UI({
                 >
                     {timer.timeLeft}
                 </div>
+                <div className="text-sm text-white">{isMyTurn ? "Your turn" : "Enemy's turn"}</div>
             </div>
             <div
                 id="panel-left"
                 className="fixed h-full left-0 top-0 p-10 flex justify-end flex-col text-center"
             >
-                {unitButton("shoot", isOutOfTime)}
+                {unitButton("shoot", isOutOfTime || !isMyTurn)}
                 {unitButton(
                     "reload",
-                    unit?.props.ammo.value == unit?.props.ammo.max_value || isOutOfTime,
+                    unit?.props.ammo.value == unit?.props.ammo.max_value ||
+                        isOutOfTime ||
+                        !isMyTurn,
                     reloadText,
                 )}
-                {unitButton("grenade", isOutOfTime)}
+                {unitButton("grenade", isOutOfTime || !isMyTurn)}
                 <button
                     onClick={() => onAction("next_turn")}
                     className={"action-button interactive mt-40" + (isExecuting ? " disabled" : "")}
@@ -188,7 +197,10 @@ export function UI({
             >
                 {shootMode && button("next_target", false, ">")}
                 {shootMode && button("prev_target", false, "<")}
-                {button("confirm", isExecuting || isChecking || panelDisabled || isOutOfTime)}
+                {button(
+                    "confirm",
+                    isExecuting || isChecking || !isMyTurn || panelDisabled || isOutOfTime,
+                )}
                 {button("cancel", isExecuting || panelDisabled || isOutOfTime)}
                 {button("edit")}
                 {button("exit")}

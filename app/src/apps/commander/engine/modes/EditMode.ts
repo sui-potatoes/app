@@ -7,7 +7,7 @@ import { Controls } from "../Controls";
 import { Mode } from "./Mode";
 
 type Direction = "up" | "down" | "left" | "right";
-type Tool = "Cover" | "Spawn" | "Remove Spawn" | "High Cover" | "Object" | "Unwalkable";
+type Tool = "Cover" | "Spawn" | "Remove Spawn" | "High Cover" | "Object" | "Obstacle";
 
 export type EditModeEvent = {
     message: { message: string };
@@ -82,7 +82,7 @@ export class EditMode extends Mode {
         const pointer = mode.pointerMesh;
 
         // if obstacle, color red, if empty, color green, if cover, color blue
-        if (this.grid.grid[x][y].type === "Unwalkable") {
+        if (this.grid.grid[x][y].type === "Obstacle") {
             pointer.material.color.set("red");
         } else if (this.grid.grid[x][y].type === "Empty") {
             pointer.material.color.set("green");
@@ -132,7 +132,7 @@ export class EditMode extends Mode {
                     tool: mode.tool,
                     location: [x, y],
                 });
-                return this.grid.setCell(x, y, { type: "Unwalkable", unit: null });
+                return this.grid.setCell(x, y, { type: "Obstacle", unit: null });
             }
 
             if (mode.tool === "Cover" || mode.tool === "High Cover") {
@@ -186,7 +186,7 @@ export class EditMode extends Mode {
                 mode.tool = "Object";
                 break;
             case "u":
-                mode.tool = "Unwalkable";
+                mode.tool = "Obstacle";
                 break;
 
             // === Directional keys ===

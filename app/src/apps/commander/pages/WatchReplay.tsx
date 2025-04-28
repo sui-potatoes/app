@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 import { Replay, Preset, HistoryRecord } from "../types/bcs";
 import { fromBase64 } from "@mysten/sui/utils";
 import { Footer, Loader } from "./Components";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Camera, EventBus, loadModels } from "../engine";
 import { GameApp } from "./play/Game";
 import { GameMap } from "../hooks/useGame";
@@ -17,7 +17,7 @@ export function WatchReplay() {
     const eventBus = useMemo(() => new EventBus(), []);
     const [initialGame, setInitialGame] = useState<GameMap>();
     const [modelsLoaded, setModelsLoaded] = useState(false);
-    const [sentHistory, setSentHistory] = useState<(typeof HistoryRecord.$inferType)[]>([]);
+    const sentHistory = useRef<(typeof HistoryRecord.$inferType)[]>([]);
 
     useEffect(() => {
         loadModels().then(() => setModelsLoaded(true));
@@ -73,6 +73,7 @@ export function WatchReplay() {
                 hp: { value: 10, max_value: 10 },
                 grenade_used: false,
                 last_turn: 0,
+                player_idx: 0,
                 stats: {} as any,
             };
         });
@@ -99,11 +100,11 @@ export function WatchReplay() {
         if (!replay) return;
         if (!initialGame) return;
         if (!modelsLoaded) return;
-        if (sentHistory.length >= replay.history.length) return;
+        if (sentHistory.current.length >= replay.history.length) return;
 
         const offset = replay.history.filter((h) => h.$kind === "RecruitPlaced").length;
 
-        setSentHistory(replay.history.slice(0, offset));
+        sentHistory.current = replay.history.slice(0, offset);
 
         const indexRef = { value: offset };
         const interval = setInterval(function nextRecord() {
@@ -118,17 +119,17 @@ export function WatchReplay() {
             switch (currentEvent.$kind) {
                 case "Attack":
                     // For Attack events, include the next event as well
-                    setSentHistory(replay.history.slice(0, indexRef.value + 2));
+                    sentHistory.current = replay.history.slice(0, indexRef.value + 2);
                     indexRef.value += 2;
                     break;
                 case "NextTurn":
                     // NextTurn event is emitted instantly.
-                    setSentHistory(newHistory);
+                    sentHistory.current = newHistory;
                     indexRef.value += 1;
                     nextRecord();
                     break;
                 default:
-                    setSentHistory(newHistory);
+                    sentHistory.current = newHistory;
                     indexRef.value += 1;
                     break;
             }
@@ -167,7 +168,7 @@ export function WatchReplay() {
                     id="panel-bottom"
                     className="fixed w-full text-xs bottom-0 left-0 p-0 text-center mb-10 normal-case overflow-auto h-20"
                 >
-                    {sentHistory.map((history, i) => (
+                    {sentHistory.current.map((history, i) => (
                         <p key={"log-" + i} className="text-sm normal-case text-white">
                             {history.$kind}: {JSON.stringify(history[history.$kind])}
                         </p>

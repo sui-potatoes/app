@@ -91,8 +91,8 @@ export const Stats = bcs.u128().transform({
 });
 
 export const Param = bcs.struct("Param", {
-    value: bcs.u16(),
-    max_value: bcs.u16(),
+    value: bcs.u8(),
+    max_value: bcs.u8(),
 });
 
 export const Unit = bcs.struct("Unit", {
@@ -103,6 +103,7 @@ export const Unit = bcs.struct("Unit", {
     grenade_used: bcs.bool(),
     stats: Stats,
     last_turn: bcs.u16(),
+    player_idx: bcs.u8(),
 });
 
 const Cover = bcs.struct("Cover", {
@@ -115,7 +116,7 @@ const Cover = bcs.struct("Cover", {
 const TileType = bcs.enum("TileType", {
     Empty: null,
     Cover: Cover,
-    Unwalkable: null,
+    Obstacle: null,
 });
 
 export const Tile = bcs.struct("Tile", {

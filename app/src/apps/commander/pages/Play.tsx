@@ -42,6 +42,7 @@ export function Playground() {
     const [mapKey, setMapKey] = useState<string | null>(sessionStorage.getItem(LS_KEY));
     const [mode, setMode] = useState<Mode>("single");
     const [initialGame, setInitialGame] = useState<GameMap>();
+    const [playerIdx, setPlayerIdx] = useState<number>(0);
     const [gameState, setGameState] = useState<
         "none" | "waiting" | "placing" | "playing" | "ended"
     >("none");
@@ -70,6 +71,8 @@ export function Playground() {
     useEffect(() => {
         if (!game && initialGame) return setGameState("ended");
         if (!game) return;
+
+        setPlayerIdx(game.map.players.indexOf(tx.address!));
 
         const state = game.map.state.$kind;
 
@@ -131,8 +134,6 @@ export function Playground() {
         eventBus.addEventListener("ui:confirm", onConfirm);
         return () => eventBus.removeEventListener("ui:confirm", onConfirm);
     }, [tx.lockedTx, initialGame]);
-
-    if (initialGame && !game) return window.location.reload();
 
     const centerDiv = (children: any) => (
         <div className="text-center bg-black/40 w-full h-full flex flex-col items-center justify-center">
@@ -245,6 +246,7 @@ export function Playground() {
         <>
             <GameApp map={initialGame} history={history} eventBus={eventBus} camera={camera} />
             <UI
+                playerIdx={playerIdx}
                 isExecuting={tx.isExecuting}
                 isChecking={tx.isChecking}
                 recruits={recruits}

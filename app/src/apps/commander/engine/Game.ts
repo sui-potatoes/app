@@ -19,7 +19,7 @@ import { pathToCoordinates } from "../types/cursor";
 
 export type Tile =
     | { type: "Empty"; unit: number | null }
-    | { type: "Unwalkable"; unit: number | null }
+    | { type: "Obstacle"; unit: number | null }
     | {
           type: "Cover";
           up: number;
@@ -89,8 +89,8 @@ export class Game extends THREE.Object3D {
                 let mapTile = map.grid[x][z];
                 let unit = mapTile.unit;
 
-                if (mapTile.tile_type.$kind == "Unwalkable") {
-                    game.grid.setCell(x, z, { type: "Unwalkable", unit: null });
+                if (mapTile.tile_type.$kind == "Obstacle") {
+                    game.grid.setCell(x, z, { type: "Obstacle", unit: null });
                 }
 
                 if (mapTile.tile_type.$kind == "Empty") {
@@ -321,7 +321,7 @@ export class Game extends THREE.Object3D {
 
         this.pointer.set(x, z);
 
-        if (this.grid.grid[x][z].type === "Unwalkable") return;
+        if (this.grid.grid[x][z].type === "Obstacle") return;
         if (this.selectedUnit) return;
 
         // TODO: highlight the unit tile when pointer over to give user a hint
@@ -384,7 +384,7 @@ export class Game extends THREE.Object3D {
             throw new Error("Invalid Unit positioning");
         }
 
-        if (this.grid.grid[x][z].type === "Unwalkable") {
+        if (this.grid.grid[x][z].type === "Obstacle") {
             return;
         }
 

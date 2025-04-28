@@ -16,18 +16,18 @@ use sui::bcs::{Self, BCS};
 /// value and a maximum value, and can be reset to the maximum value at the
 /// start of each turn.
 public struct Param has copy, drop, store {
-    value: u16,
-    max_value: u16,
+    value: u8,
+    max_value: u8,
 }
 
 /// Create a new `Param` a maximum value.
-public fun new(max_value: u16): Param { Param { value: max_value, max_value } }
+public fun new(max_value: u8): Param { Param { value: max_value, max_value } }
 
 /// Get the current value of the parameter.
-public fun value(param: &Param): u16 { param.value }
+public fun value(param: &Param): u8 { param.value }
 
 /// Get the maximum value of the parameter.
-public fun max_value(param: &Param): u16 { param.max_value }
+public fun max_value(param: &Param): u8 { param.max_value }
 
 /// Check if the parameter is full, i.e. the value is equal to the maximum value.
 public fun is_full(param: &Param): bool { param.value == param.max_value }
@@ -37,7 +37,7 @@ public fun is_empty(param: &Param): bool { param.value == 0 }
 
 /// Decrease the value of the parameter by a certain amount. The value cannot go
 /// below 0.
-public fun decrease(param: &mut Param, amount: u16): u16 {
+public fun decrease(param: &mut Param, amount: u8): u8 {
     param.value = param.value - amount.min(param.value);
     param.value
 }
@@ -57,8 +57,8 @@ public fun from_bytes(bytes: vector<u8>): Param {
 /// Helper method to allow nested deserialization of `Param`.
 public(package) fun from_bcs(bcs: &mut BCS): Param {
     Param {
-        value: bcs.peel_u16(),
-        max_value: bcs.peel_u16(),
+        value: bcs.peel_u8(),
+        max_value: bcs.peel_u8(),
     }
 }
 

@@ -16,7 +16,7 @@ fun default() {
 
     // make sure the conversion is correct
     // assert_eq!(unit.stats, *recruit.stats());
-    assert_eq!(unit.hp(), recruit.stats().health() as u16);
+    assert_eq!(unit.hp(), recruit.stats().health());
     assert_eq!(unit.ap(), 2);
 
     // now test application of damage to the unit

@@ -136,6 +136,7 @@ function App({ map, camera, eventBus, history }: AppProps) {
 
     // track history updates, send them to the game
     useEffect(() => {
+        console.log("history updated", history.current);
         game.applyHistory(history.current);
     }, [history]);
 

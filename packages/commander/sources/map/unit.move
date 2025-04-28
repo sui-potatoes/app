@@ -53,11 +53,6 @@ public struct Unit has copy, store {
     player_idx: u8,
 }
 
-/// Get the attack parameters of the `Unit`: damage and aim.
-public fun attack_params(unit: &Unit): (u16, u16) {
-    (unit.stats.damage() as u16, unit.stats.aim() as u16)
-}
-
 /// Reset the AP of the `Unit` to the default value if the turn is over.
 public fun try_reset_ap(unit: &mut Unit, turn: u16) {
     if (unit.last_turn < turn) unit.ap.reset();
@@ -174,7 +169,7 @@ public fun apply_damage(
         return (true, 0, false)
     };
 
-    let hp_left = unit.hp.decrease(damage as u16);
+    let hp_left = unit.hp.decrease(damage);
     (false, damage, hp_left == 0)
 }
 
@@ -190,8 +185,8 @@ public fun from_recruit(recruit: &Recruit, player_idx: u8): Unit {
     Unit {
         recruit: object::id(recruit),
         ap: param::new(2),
-        hp: param::new(stats.health() as u16),
-        ammo: param::new(stats.ammo() as u16),
+        hp: param::new(stats.health()),
+        ammo: param::new(stats.ammo()),
         grenade_used: false,
         stats,
         last_turn: 0,
@@ -213,19 +208,22 @@ public fun destroy(unit: Unit): ID {
 public fun recruit_id(unit: &Unit): ID { unit.recruit }
 
 /// Get the `Unit`'s HP.
-public fun hp(unit: &Unit): u16 { unit.hp.value() }
+public fun hp(unit: &Unit): u8 { unit.hp.value() }
 
 /// Get the `Unit`'s AP.
-public fun ap(unit: &Unit): u16 { unit.ap.value() }
+public fun ap(unit: &Unit): u8 { unit.ap.value() }
 
 /// Get the `Unit`'s ammo.
-public fun ammo(unit: &Unit): u16 { unit.ammo.value() }
+public fun ammo(unit: &Unit): u8 { unit.ammo.value() }
 
 /// Get whether a grenade was used.
 public fun grenade_used(unit: &Unit): bool { unit.grenade_used }
 
 /// Get the `Unit`'s stats.
 public fun stats(unit: &Unit): &Stats { &unit.stats }
+
+/// Get the `Unit`'s player index.
+public fun player_idx(unit: &Unit): u8 { unit.player_idx }
 
 // === Convenience and compatibility ===
 

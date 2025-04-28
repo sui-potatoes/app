@@ -137,7 +137,7 @@ export class Grid extends THREE.Object3D {
     }
 
     clearCell(x: number, y: number) {
-        if (this.grid[x][y].type === "Unwalkable") {
+        if (this.grid[x][y].type === "Obstacle") {
             this.remove(this.meshes[`${x}-${y}`]?.clear());
         }
 
@@ -159,8 +159,8 @@ export class Grid extends THREE.Object3D {
         this.grid[x][z] = { ...tile, unit: this.grid[x][z].unit };
         const group = new THREE.Group();
 
-        if (tile.type === "Unwalkable") {
-            this.grid[x][z] = { type: "Unwalkable", unit: null };
+        if (tile.type === "Obstacle") {
+            this.grid[x][z] = { type: "Obstacle", unit: null };
 
             const mesh = new THREE.Mesh(
                 new THREE.BoxGeometry(1, 1, 1),
@@ -280,7 +280,7 @@ export class Grid extends THREE.Object3D {
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
                     if (to.unit !== null) continue;
-                    if (to.type === "Unwalkable") continue;
+                    if (to.type === "Obstacle") continue;
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.down) continue;
                         if (direction === "DOWN" && to.up) continue;
@@ -359,7 +359,7 @@ export class Grid extends THREE.Object3D {
 
     /** Edit mode marker, add a mesh to the cell to indicate a spawn point. */
     markSpawn(x: number, y: number) {
-        if (this.grid[x][y].type === "Unwalkable") {
+        if (this.grid[x][y].type === "Obstacle") {
             return false;
         }
 
@@ -386,8 +386,8 @@ export class Grid extends THREE.Object3D {
                 switch (cell.tile_type.$kind) {
                     case "Empty":
                         return this.setCell(x, y, { type: "Empty", unit: null });
-                    case "Unwalkable":
-                        return this.setCell(x, y, { type: "Unwalkable", unit: null });
+                    case "Obstacle":
+                        return this.setCell(x, y, { type: "Obstacle", unit: null });
                     case "Cover": {
                         const { left, right, up, down } = cell.tile_type.Cover;
                         this.setCell(x, y, { type: "Cover", left, right, up, down, unit: null });
@@ -416,8 +416,8 @@ export class Grid extends THREE.Object3D {
                                     tile_type: { ["Cover"]: { ...cell } },
                                     unit: null,
                                 };
-                            case "Unwalkable":
-                                return { tile_type: { ["Unwalkable"]: true }, unit: null };
+                            case "Obstacle":
+                                return { tile_type: { ["Obstacle"]: true }, unit: null };
                         }
                     }),
                 ),
@@ -462,7 +462,7 @@ export class Grid extends THREE.Object3D {
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
                     if (to.unit !== null) continue;
-                    if (to.type === "Unwalkable") continue;
+                    if (to.type === "Obstacle") continue;
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.down) continue;
                         if (direction === "DOWN" && to.up) continue;

@@ -122,7 +122,7 @@ export class ShootMode implements Mode {
         const pos = this.selectedUnit?.gridPosition;
 
         if (pos?.x === x && pos?.y === y) return; // clicked on the selected unit
-        if (typeof cell.unit === "number" && cell.type !== "Unwalkable") {
+        if (typeof cell.unit === "number" && cell.type !== "Obstacle") {
             this.selectedUnit = this.units[cell.unit];
             this.switchMode(new MoveMode(controls));
         }
@@ -298,7 +298,7 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
                 return targetTile.right * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.left * DEFENSE_MULTIPLIER;
-            } else if (middleTile.type === "Unwalkable") {
+            } else if (middleTile.type === "Obstacle") {
                 return DEFENSE_MULTIPLIER;
             } else return 0;
         }
@@ -311,7 +311,7 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
                 return targetTile.left * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.right * DEFENSE_MULTIPLIER;
-            } else if (middleTile.type === "Unwalkable") {
+            } else if (middleTile.type === "Obstacle") {
                 return DEFENSE_MULTIPLIER;
             } else return 0;
         }
@@ -330,7 +330,7 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
                 return targetTile.down * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.up * DEFENSE_MULTIPLIER;
-            } else if (middleTile.type === "Unwalkable") {
+            } else if (middleTile.type === "Obstacle") {
                 return DEFENSE_MULTIPLIER;
             } else return 0;
         }
@@ -343,7 +343,7 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
                 return targetTile.up * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.down * DEFENSE_MULTIPLIER;
-            } else if (middleTile.type === "Unwalkable") {
+            } else if (middleTile.type === "Obstacle") {
                 return DEFENSE_MULTIPLIER;
             } else return 0;
         }
