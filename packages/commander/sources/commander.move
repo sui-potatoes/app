@@ -286,9 +286,12 @@ public fun destroy_game(
 /// Place a Recruit on the map, store it in the `Game`.
 public fun place_recruits(game: &mut Game, recruits: vector<Recruit>, ctx: &mut TxContext) {
     let sender = ctx.sender();
+    let player_idx = game
+        .players
+        .find_index!(|player| *player == sender)
+        .destroy_or!(abort ENotPlayer);
 
     assert!(recruits.length() > 0, EMustPlaceRecruits);
-    assert!(game.players.contains(&sender), ENotPlayer);
 
     match (&mut game.state) {
         GameState::PlacingRecruits(players) => {
@@ -311,7 +314,7 @@ public fun place_recruits(game: &mut Game, recruits: vector<Recruit>, ctx: &mut 
     recruits.destroy!(|recruit| {
         assert!(recruit.leader() == sender, ENotYourRecruit); // Make sure the sender owns the recruit.
         let point = neighbors.pop_back();
-        let history = game.map.place_recruit(&recruit, point);
+        let history = game.map.place_recruit(&recruit, point, player_idx as u8);
 
         game.recruits.add(object::id(&recruit), recruit);
         game.history.add(history);
@@ -392,7 +395,6 @@ public fun next_turn(game: &mut Game, clock: &Clock, ctx: &mut TxContext) {
     assert!(game.state.is_playing!(), ENotReady);
     assert!(game.can_play!(clock, ctx), ECannotPlay);
 
-    if (game.players.length() == 2) game.players.swap(0, 1);
     game.history.add(game.map.next_turn());
     game.last_turn = clock.timestamp_ms();
 }
@@ -412,15 +414,16 @@ macro fun can_play($game: &mut Game, $clock: &Clock, $ctx: &TxContext): bool {
     let game = $game;
     let clock = $clock;
     let sender = ctx.sender();
+    let turn = (game.map.turn() % 2) as u64;
     let timestamp_ms = clock.timestamp_ms();
 
     // If the game is single player, allow the host to play indefinitely.
     if (game.players.length() == 1 && game.state.is_playing!()) {
         true
-    } else if (sender == game.players[0]) {
+    } else if (sender == game.players[turn]) {
         // Multiplayer: if the current player is within the time limit, allow them to play.
         (timestamp_ms - game.last_turn) <= game.time_limit
-    } else if (sender == game.players[1]) {
+    } else if (sender == game.players[1 - turn]) {
         // Multiplayer: if player one missed their turn, and turn wasn't switched, allow player two
         // to end turn.
         // WARNING: expectation is that player two will first call next_turn();

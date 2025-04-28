@@ -12,7 +12,7 @@ fun default() {
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
     let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
+    let mut unit = recruit.to_unit(0);
 
     // make sure the conversion is correct
     // assert_eq!(unit.stats, *recruit.stats());
@@ -38,7 +38,7 @@ fun perform_reload() {
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
     let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
+    let mut unit = recruit.to_unit(0);
 
     unit.perform_attack(&mut rng, 1, 0);
     unit.try_reset_ap(1);
@@ -57,7 +57,7 @@ fun perform_reload_no_ap_fail() {
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
     let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
+    let mut unit = recruit.to_unit(0);
 
     unit.perform_attack(&mut rng, 1, 0);
     unit.perform_reload();
@@ -71,7 +71,7 @@ fun perform_reload_no_ap_fail() {
 fun perform_reload_full_clip_fail() {
     let ctx = &mut tx_context::dummy();
     let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
+    let mut unit = recruit.to_unit(0);
 
     unit.perform_reload();
 
@@ -85,7 +85,7 @@ fun perform_reload_full_clip_fail() {
 fun perform_grenade() {
     let ctx = &mut tx_context::dummy();
     let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
+    let mut unit = recruit.to_unit(0);
 
     assert!(!unit.grenade_used());
     assert_eq!(unit.ap(), 2);
@@ -106,7 +106,7 @@ fun perform_grenade() {
 fun perform_grenade_twice_fail() {
     let ctx = &mut tx_context::dummy();
     let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
+    let mut unit = recruit.to_unit(0);
 
     unit.perform_grenade();
     unit.perform_grenade();
@@ -122,7 +122,7 @@ fun perform_grenade_no_ap_fail() {
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
     let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
+    let mut unit = recruit.to_unit(0);
 
     unit.perform_attack(&mut rng, 4, 0);
     unit.perform_grenade();
@@ -135,7 +135,7 @@ fun perform_attack_distance_modifiers() {
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
     let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
+    let mut unit = recruit.to_unit(0);
 
     assert_eq!(unit.stats().range(), 4);
     assert_eq!(unit.stats().aim(), 65);
@@ -186,7 +186,7 @@ fun shoot_and_reload() {
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(vector[0]);
     let recruit = recruit::default(ctx);
-    let mut unit = recruit.to_unit();
+    let mut unit = recruit.to_unit(0);
 
     assert_eq!(unit.ammo(), 3);
     unit.perform_attack(&mut rng, 1, 0);
@@ -220,7 +220,7 @@ fun unit_custom_weapon() {
 
     recruit.add_weapon(weapon);
 
-    let unit = recruit.to_unit();
+    let unit = recruit.to_unit(0);
     let (weapon, armor) = recruit.dismiss();
 
     assert_eq!(unit.stats().damage(), 7);
@@ -234,7 +234,7 @@ fun unit_custom_weapon() {
 fun from_bcs() {
     let ctx = &mut tx_context::dummy();
     let recruit = recruit::default(ctx);
-    let unit = recruit.to_unit();
+    let unit = recruit.to_unit(0);
 
     let bytes = bcs::to_bytes(&unit);
     let unit2 = unit::from_bytes(bytes);

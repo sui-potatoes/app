@@ -51,8 +51,8 @@ fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
     let (r1, r3) = (recruit_one(ctx), recruit_two(ctx));
 
     // recruit placement over
-    map.place_recruit(&r1, point::new(6, 5));
-    map.place_recruit(&r3, point::new(0, 3));
+    map.place_recruit(&r1, point::new(6, 5), 0);
+    map.place_recruit(&r3, point::new(0, 3), 0);
 
     // Unit 1 performs a move action and takes cover in the construction on
     // the left side (high cover + low cover mix)

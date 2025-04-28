@@ -49,6 +49,8 @@ public struct Unit has copy, store {
     stats: Stats,
     /// The last turn the `Unit` has performed an action.
     last_turn: u16,
+    /// The index of the player that owns the `Unit`.
+    player_idx: u8,
 }
 
 /// Get the attack parameters of the `Unit`: damage and aim.
@@ -177,7 +179,7 @@ public fun apply_damage(
 }
 
 /// Creates a new `Unit` - an in-game representation of a `Recruit`.
-public fun from_recruit(recruit: &Recruit): Unit {
+public fun from_recruit(recruit: &Recruit, player_idx: u8): Unit {
     let stats = *recruit.stats();
     let mut armor_stats = stats::default_armor();
     let mut weapon_stats = stats::default_weapon();
@@ -193,6 +195,7 @@ public fun from_recruit(recruit: &Recruit): Unit {
         grenade_used: false,
         stats,
         last_turn: 0,
+        player_idx,
     }
 }
 
@@ -241,6 +244,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Unit {
         grenade_used: bcs.peel_bool(),
         stats: stats::from_bcs(bcs),
         last_turn: bcs.peel_u16(),
+        player_idx: bcs.peel_u8(),
     }
 }
 

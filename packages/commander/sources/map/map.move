@@ -68,7 +68,7 @@ public enum TileType has copy, drop, store {
         bottom: u8,
     },
     /// Certain tiles cannot be walked on, like walls or water.
-    Unwalkable,
+    Obstacle,
 }
 
 /// Defines the game Map - a grid of tiles where the game takes place.
@@ -133,18 +133,18 @@ macro fun can_place($map: &Map, $p: &Point): bool {
     let (x, y) = p.to_values();
     let target_tile = &map.grid[x, y];
 
-    target_tile.unit.is_none() && target_tile.tile_type != TileType::Unwalkable
+    target_tile.unit.is_none() && target_tile.tile_type != TileType::Obstacle
 }
 
 /// Place a `Recruit` on the map at the given position.
-public fun place_recruit(map: &mut Map, recruit: &Recruit, p: Point): Record {
+public fun place_recruit(map: &mut Map, recruit: &Recruit, p: Point, player_idx: u8): Record {
     let (x, y) = p.into_values();
     let target_tile = &map.grid[x, y];
 
     assert!(target_tile.unit.is_none(), EUnitAlreadyOnTile);
-    assert!(target_tile.tile_type != TileType::Unwalkable, ETileNotWalkable);
+    assert!(target_tile.tile_type != TileType::Obstacle, ETileNotWalkable);
 
-    map.grid[x, y].unit.fill(recruit.to_unit());
+    map.grid[x, y].unit.fill(recruit.to_unit(player_idx));
     history::new_recruit_placed(x, y)
 }
 
@@ -397,10 +397,10 @@ public fun is_tile_empty(map: &Map, x: u16, y: u16): bool {
     }
 }
 
-/// Check if the given tile is unwalkable.
-public fun is_tile_unwalkable(map: &Map, x: u16, y: u16): bool {
+/// Check if the given tile is an obstacle.
+public fun is_tile_obstacle(map: &Map, x: u16, y: u16): bool {
     match (map.grid[x, y].tile_type) {
-        TileType::Unwalkable => true,
+        TileType::Obstacle => true,
         _ => false,
     }
 }
@@ -421,7 +421,7 @@ public fun tile_to_string(tile: &Tile): String {
             str.append_utf8(if (tile.unit.is_some()) b"U" else b"-");
             str
         },
-        TileType::Unwalkable => b" XXX ".to_string(),
+        TileType::Obstacle => b" XXX ".to_string(),
     }
 }
 
@@ -449,11 +449,11 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
             let (x1, y1) = cursor.to_values();
             let target = &map.grid[x1, y1];
 
-            // units, high covers and unwalkable tiles block the path
+            // units, high covers and obstacles block the path
             if (target.unit.is_some()) return 'path none();
             match (source.tile_type) {
                 TileType::Empty => (),
-                TileType::Unwalkable => return 'path none(),
+                TileType::Obstacle => return 'path none(),
                 TileType::Cover { left, right, top, bottom } => {
                     if (direction == left!() && left == HIGH_COVER) return 'path none();
                     if (direction == right!() && right == HIGH_COVER) return 'path none();
@@ -464,7 +464,7 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
 
             match (target.tile_type) {
                 TileType::Empty => (),
-                TileType::Unwalkable => return 'path none(),
+                TileType::Obstacle => return 'path none(),
                 TileType::Cover { left, right, top, bottom } => {
                     if (direction == left!() && right == HIGH_COVER) return 'path none();
                     if (direction == right!() && left == HIGH_COVER) return 'path none();
@@ -532,7 +532,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Map {
                     right: bcs.peel_u8(),
                     bottom: bcs.peel_u8(),
                 },
-                2 => TileType::Unwalkable,
+                2 => TileType::Obstacle,
                 _ => abort,
             },
             unit: bcs.peel_option!(|bcs| unit::from_bcs(bcs)),
@@ -742,8 +742,8 @@ fun test_map_with_units() {
     assert!(!map.tile_has_unit(3, 3));
     assert!(!map.tile_has_unit(5, 2));
 
-    map.place_recruit(&recruit_one, point::new(3, 3));
-    map.place_recruit(&recruit_two, point::new(5, 2));
+    map.place_recruit(&recruit_one, point::new(3, 3), 0);
+    map.place_recruit(&recruit_two, point::new(5, 2), 0);
 
     assert!(map.tile_has_unit(3, 3));
     assert!(map.tile_has_unit(5, 2));
