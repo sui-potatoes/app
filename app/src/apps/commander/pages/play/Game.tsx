@@ -26,13 +26,14 @@ type GameAppProps = {
     camera: Camera;
     eventBus: EventBus;
     history: RefObject<(typeof HistoryRecord.$inferType)[]>;
+    playerIdx: number;
     orbit?: boolean;
 };
 
 /**
  * The Game itself, rendered inside the `Canvas` component.
  */
-export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps) {
+export function GameApp({ map, camera, orbit, eventBus, history, playerIdx }: GameAppProps) {
     const size = map.map.map.grid.length;
     const pos = size / 2;
 
@@ -65,7 +66,13 @@ export function GameApp({ map, camera, orbit, eventBus, history }: GameAppProps)
                     />
                 )}
                 {/* <ambientLight color={"white"} intensity={0.5} /> */}
-                <App map={map} camera={camera} eventBus={eventBus} history={history} />
+                <App
+                    playerIdx={playerIdx}
+                    map={map}
+                    camera={camera}
+                    eventBus={eventBus}
+                    history={history}
+                />
                 <Stats />
             </Canvas>
         </>
@@ -77,11 +84,16 @@ type AppProps = {
     camera: Camera;
     eventBus: EventBus;
     history: RefObject<(typeof HistoryRecord.$inferType)[]>;
+    playerIdx: number;
 };
 
-function App({ map, camera, eventBus, history }: AppProps) {
+function App({ map, camera, eventBus, history, playerIdx }: AppProps) {
     const { gl } = useThree();
-    const game = useMemo(() => Game.fromBCS(map), []);
+    const game = useMemo(() => {
+        const g = Game.fromBCS(map);
+        g.setPlayerIdx(playerIdx);
+        return g;
+    }, []);
     const controls = useMemo(() => new Controls(game, gl.domElement), []);
 
     // actions to perform on each frame:

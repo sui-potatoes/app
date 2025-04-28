@@ -52,6 +52,7 @@ export class ShootMode implements Mode {
         const targets = Object.values(this.units).filter((unit) => {
             // can't aim at yourself
             if (unit.id === selectedUnit.id) return false;
+            if (unit.props.player_idx === this.playerIdx) return false;
 
             let hitChance = chance(selectedUnit, unit);
             if (hitChance === 0) return false;
@@ -158,7 +159,7 @@ export class ShootMode implements Mode {
         const selectedUnit = this.selectedUnit;
 
         // move camera to the selected unit aiming at the target
-        selectedUnit.playAnimation("shooting", 0.1, 0.1);
+        selectedUnit.playAnimation("shooting", 0.1, 0);
 
         this.eventBus?.dispatchEvent({
             type: "game:shoot:aim",

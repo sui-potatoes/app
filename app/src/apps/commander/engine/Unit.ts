@@ -130,7 +130,7 @@ export class UnitModel extends THREE.Object3D {
     /** Play reload animation once and then return to idle */
     async reload() {
         const animation: Animation = this.cover == "low" ? "crouch_reload" : "reload";
-        await this.playAnimationOnce(animation, 1, 0.5).wait;
+        await this.playAnimationOnce(animation, 2, 0.5).wait;
         return this.defaultAnimation(1, 0.1);
     }
 

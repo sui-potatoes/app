@@ -313,6 +313,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
                 tx.pure.u16(from[1]),
                 tx.pure.u16(to[0]),
                 tx.pure.u16(to[1]),
+                tx.object.clock(),
             ],
         });
 

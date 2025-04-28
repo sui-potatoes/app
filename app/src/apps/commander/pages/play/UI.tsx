@@ -34,6 +34,7 @@ const BUTTON_CONTENTS: Record<UIKey, string | JSX.Element> = {
  */
 export function UI({
     eventBus,
+    players,
     isExecuting,
     isChecking,
     recruits,
@@ -43,6 +44,7 @@ export function UI({
     turn: initialTurn,
 }: {
     playerIdx: number;
+    players: string[];
     eventBus: EventBus;
     isExecuting?: boolean;
     isChecking?: boolean;
@@ -60,7 +62,7 @@ export function UI({
     const [turn, setTurn] = useState<number>(initialTurn);
     const timer = Timer({ lastTurnTimestamp, turnTimeLimit });
     const isOutOfTime = timer.timeLeft == 0;
-    const isMyTurn = playerIdx === turn % 2;
+    const isMyTurn = playerIdx === turn % 2 || players.length === 1;
 
     const onAction = (action: UIKey) =>
         eventBus.dispatchEvent({ type: `ui:${action}`, name: action });

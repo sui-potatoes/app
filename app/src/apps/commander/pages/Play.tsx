@@ -104,6 +104,10 @@ export function Playground() {
                 setGameState("playing");
             }
         }
+
+        if (gameState === "ended") {
+            window.location.reload();
+        }
     }, [gameState]);
 
     useEffect(() => {
@@ -244,8 +248,15 @@ export function Playground() {
 
     return (
         <>
-            <GameApp map={initialGame} history={history} eventBus={eventBus} camera={camera} />
+            <GameApp
+                playerIdx={playerIdx}
+                map={initialGame}
+                history={history}
+                eventBus={eventBus}
+                camera={camera}
+            />
             <UI
+                players={game?.map.players || []}
                 playerIdx={playerIdx}
                 isExecuting={tx.isExecuting}
                 isChecking={tx.isChecking}
@@ -361,9 +372,9 @@ export function Playground() {
                 throw new Error(`Unexpected record in the history log: ${result.$kind}`);
             }
             case "Grenade": {
-                const result = history[1];
-                if (!result)
-                    throw new Error("History log is incorrect, only one grenade record is present");
+                // const result = history[1];
+                // if (!result)
+                //     throw new Error("History log is incorrect, only one grenade record is present");
                 return eventBus.dispatchEvent({ type: "sui:grenade", success: true });
             }
         }
@@ -450,6 +461,7 @@ export function Playground() {
 
     /** Universal try-catch mechanism for all dry runs */
     function catchDryRunError(e: any): null {
+        console.log(e);
         const cause = e.cause as DryRunTransactionBlockResponse & { executionErrorSource: string };
         const message = cause.executionErrorSource;
         const [mod, fun, code] = parseVMError(message);

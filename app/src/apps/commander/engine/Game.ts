@@ -74,6 +74,8 @@ export class Game extends THREE.Object3D {
     protected _isBlocked: boolean = false;
     /** Index of the current history record */
     protected historyIdx: number = 0;
+    /** Index of the current player */
+    protected playerIdx: number = 0;
 
     /** Construct the `Game` instance from BCS representation (fetched Sui Object) */
     public static fromBCS(data: GameMap): Game {
@@ -141,6 +143,10 @@ export class Game extends THREE.Object3D {
     }
 
     // === Turn ===
+
+    setPlayerIdx(playerIdx: number) {
+        this.playerIdx = playerIdx;
+    }
 
     nextTurn() {
         this.turn += 1;
@@ -339,6 +345,14 @@ export class Game extends THREE.Object3D {
      * @param mode The new mode to switch to.
      */
     switchMode(mode: Mode) {
+        if (this.selectedUnit && this.selectedUnit.props.player_idx !== this.playerIdx) {
+            this.mode.disconnect.call(this, this.mode);
+            this.mode = new NoneMode();
+            this.mode.connect.call(this, this.mode);
+            this.eventBus?.dispatchEvent({ type: "game:mode:switch", mode: this.mode });
+            return;
+        }
+
         this.mode.disconnect.call(this, this.mode);
         this.mode = mode;
         this.mode.connect.call(this, this.mode);

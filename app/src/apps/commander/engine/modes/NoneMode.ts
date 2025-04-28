@@ -25,8 +25,10 @@ export class NoneMode implements Mode {
         const cell = this.grid.grid[x][y];
 
         if (typeof cell.unit === "number" && cell.type !== "Obstacle") {
-            this.selectedUnit = this.units[cell.unit];
-            this.switchMode(new MoveMode(controls));
+            if (!this.selectedUnit?.gridPosition.equals(new THREE.Vector2(x, y))) {
+                this.selectUnit(x, y);
+                this.switchMode(new MoveMode(controls));
+            }
         }
     }
 

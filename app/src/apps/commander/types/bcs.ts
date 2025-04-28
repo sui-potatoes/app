@@ -128,6 +128,7 @@ export const Map = bcs.struct("Map", {
     id: bcs.Address,
     grid: bcs.vector(bcs.vector(Tile)),
     turn: bcs.u16(),
+    player_idx: bcs.u8(),
 });
 
 export const Metadata = bcs.struct("Metadata", {
