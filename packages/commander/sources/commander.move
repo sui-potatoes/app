@@ -293,6 +293,9 @@ public fun place_recruits(game: &mut Game, recruits: vector<Recruit>, ctx: &mut 
 
     assert!(recruits.length() > 0, EMustPlaceRecruits);
 
+    // Set the player index for the unit placement.
+    game.map.set_player_idx(player_idx as u8);
+
     match (&mut game.state) {
         GameState::PlacingRecruits(players) => {
             let idx = players
@@ -314,7 +317,7 @@ public fun place_recruits(game: &mut Game, recruits: vector<Recruit>, ctx: &mut 
     recruits.destroy!(|recruit| {
         assert!(recruit.leader() == sender, ENotYourRecruit); // Make sure the sender owns the recruit.
         let point = neighbors.pop_back();
-        let history = game.map.place_recruit(&recruit, point, player_idx as u8);
+        let history = game.map.place_recruit(&recruit, point);
 
         game.recruits.add(object::id(&recruit), recruit);
         game.history.add(history);
@@ -326,6 +329,7 @@ public fun move_unit(game: &mut Game, path: vector<u8>, clock: &Clock, ctx: &mut
     assert!(game.state.is_playing!(), ENotReady);
     assert!(game.can_play!(clock, ctx), ECannotPlay);
 
+    game.map.set_player_idx(game.player_idx!(ctx));
     game.history.add(game.map.move_unit(path))
 }
 
@@ -334,6 +338,7 @@ public fun perform_reload(game: &mut Game, x: u16, y: u16, clock: &Clock, ctx: &
     assert!(game.state.is_playing!(), ENotReady);
     assert!(game.can_play!(clock, ctx), ECannotPlay);
 
+    game.map.set_player_idx(game.player_idx!(ctx));
     game.history.add(game.map.perform_reload(x, y))
 }
 
@@ -350,6 +355,8 @@ entry fun perform_grenade(
 ) {
     assert!(game.state.is_playing!(), ENotReady);
     assert!(game.can_play!(clock, ctx), ECannotPlay);
+
+    game.map.set_player_idx(game.player_idx!(ctx));
 
     let mut rng = rng.new_generator(ctx);
     let history_records = game.map.perform_grenade(&mut rng, x0, y0, x1, y1);
@@ -377,6 +384,7 @@ entry fun perform_attack(
     assert!(game.state.is_playing!(), ENotReady);
     assert!(game.can_play!(clock, ctx), ECannotPlay);
 
+    game.map.set_player_idx(game.player_idx!(ctx));
     let mut rng = rng.new_generator(ctx);
     let history = game.map.perform_attack(&mut rng, x0, y0, x1, y1);
 
@@ -395,6 +403,7 @@ public fun next_turn(game: &mut Game, clock: &Clock, ctx: &mut TxContext) {
     assert!(game.state.is_playing!(), ENotReady);
     assert!(game.can_play!(clock, ctx), ECannotPlay);
 
+    game.map.set_player_idx(game.player_idx!(ctx));
     game.history.add(game.map.next_turn());
     game.last_turn = clock.timestamp_ms();
 }
@@ -405,6 +414,12 @@ public fun share(game: Game) {
 }
 
 // === Clock Management ===
+
+/// Get the index of the current player.
+macro fun player_idx($game: &Game, $ctx: &TxContext): u8 {
+    let game = $game;
+    if (game.players[0] == tx_context::sender($ctx)) 0 else 1
+}
 
 /// Check if the current player is within the time limit. If over, turn is illegal, and next player
 /// can play. Past this limit, we forbid any action, including the next turn (which will be called

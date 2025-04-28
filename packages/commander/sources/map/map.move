@@ -27,6 +27,8 @@ const ENoUnit: u64 = 5;
 const EPathTooShort: u64 = 6;
 /// The tile is out of bounds.
 const ETileOutOfBounds: u64 = 7;
+/// Incorrect player index.
+const EIncorrectPlayerIndex: u64 = 8;
 
 #[allow(unused_const)]
 /// Constant for no cover in the `TileType::Cover`.
@@ -79,6 +81,8 @@ public struct Map has store {
     grid: Grid<Tile>,
     /// The current turn number.
     turn: u16,
+    /// The index of the player that is currently playing.
+    player_idx: u8,
 }
 
 public fun new(id: ID, size: u16): Map {
@@ -93,6 +97,7 @@ public fun new(id: ID, size: u16): Map {
                 unit: option::none(),
             },
         ),
+        player_idx: 0,
     }
 }
 
@@ -114,7 +119,12 @@ public fun id(map: &Map): ID { map.id }
 public(package) fun set_id(map: &mut Map, id: ID) { map.id = id; }
 
 /// Clone the `Map`.
-public(package) fun clone(map: &Map): Map { Map { id: map.id, turn: map.turn, grid: map.grid } }
+public(package) fun clone(map: &Map): Map {
+    Map { id: map.id, turn: map.turn, grid: map.grid, player_idx: map.player_idx }
+}
+
+/// Set the `player_idx` of the map.
+public(package) fun set_player_idx(map: &mut Map, player_idx: u8) { map.player_idx = player_idx; }
 
 // === Recruit Placement ===
 
@@ -137,14 +147,14 @@ macro fun can_place($map: &Map, $p: &Point): bool {
 }
 
 /// Place a `Recruit` on the map at the given position.
-public fun place_recruit(map: &mut Map, recruit: &Recruit, p: Point, player_idx: u8): Record {
+public fun place_recruit(map: &mut Map, recruit: &Recruit, p: Point): Record {
     let (x, y) = p.into_values();
     let target_tile = &map.grid[x, y];
 
     assert!(target_tile.unit.is_none(), EUnitAlreadyOnTile);
     assert!(target_tile.tile_type != TileType::Obstacle, ETileNotWalkable);
 
-    map.grid[x, y].unit.fill(recruit.to_unit(player_idx));
+    map.grid[x, y].unit.fill(recruit.to_unit(map.player_idx));
     history::new_recruit_placed(x, y)
 }
 
@@ -160,6 +170,7 @@ public fun next_turn(map: &mut Map): Record {
 public fun perform_reload(map: &mut Map, x: u16, y: u16): Record {
     assert!(map.grid[x, y].unit.is_some(), ENoUnit);
     let unit = map.grid[x, y].unit.borrow_mut();
+    assert!(unit.player_idx() == map.player_idx, EIncorrectPlayerIndex);
     unit.try_reset_ap(map.turn);
     unit.perform_reload();
 
@@ -180,6 +191,7 @@ public fun move_unit(map: &mut Map, path: vector<u8>): Record {
     assert!(y1 < height && x1 < width, ETileOutOfBounds);
 
     let mut unit = map.grid[x0, y0].unit.extract();
+    assert!(unit.player_idx() == map.player_idx, EIncorrectPlayerIndex);
     unit.try_reset_ap(map.turn);
     unit.perform_move(distance as u8);
     map.grid[x1, y1].unit.fill(unit);
@@ -207,6 +219,7 @@ public fun perform_attack(
     assert!(attacker.is_some(), ENoUnit);
 
     let unit = attacker.borrow_mut();
+    assert!(unit.player_idx() == map.player_idx, EIncorrectPlayerIndex);
     unit.try_reset_ap(map.turn);
 
     let (is_hit, _, is_crit, damage, _) = unit.perform_attack(rng, range, defense_bonus);
@@ -337,6 +350,7 @@ public fun perform_grenade(
 
     // update unit's stats
     let unit = unit.borrow_mut();
+    assert!(unit.player_idx() == map.player_idx, EIncorrectPlayerIndex);
     unit.try_reset_ap(map.turn);
     unit.perform_grenade();
 
@@ -425,7 +439,7 @@ public fun tile_to_string(tile: &Tile): String {
     }
 }
 
-/// Check if the given path is walkable. Can be an optimization for pathfinding,
+/// Check if the given path is walkable. Can be an optimization for path finding,
 /// if the path is traced on the frontend.
 ///
 /// Returns `None` if the path is not walkable, otherwise returns the end point
@@ -500,14 +514,14 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
 public fun demo_1(id: ID): Map {
     let mut preset_bytes = bcs::to_bytes(&id);
     // prettier-ignore
-    preset_bytes.append(x"0707000000000102000002000100000001000100000002000000000007020000000000000000000000000007000000000000000000000100000001000100000001000701000100000001000102000000000200000001010000000001010000000007010000000100010001000200000000000000000000000700000000000000000000000000000700000200000000000101010000000100010000000100010100000000");
+    preset_bytes.append(x"070700000000010200000200010000000100010000000200000000000702000000000000000000000000000700000000000000000000010000000100010000000100070100010000000100010200000000020000000101000000000101000000000701000000010001000100020000000000000000000000070000000000000000000000000000070000020000000000010101000000010001000000010001010000000000");
     from_bytes(preset_bytes)
 }
 
 /// Creates a demo map #2.
 public fun demo_2(id: ID): Map {
     // prettier-ignore
-    let mut map = from_bytes(x"00000000000000000000000000000000000000000000000000000000000000000a0a00000000000000000000000000000000000000000a00000101000001000100000001000100000101000000000001010000010001000000010001000001010000000a00000000000000000000000000000000000000000a00000200020002000000000002000200020000000a000001010000010000000100000101000000000000000200000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a010202000000010001000000010001000000010002020000000000000101020000000100010000000100010000000100020200000a01020000000000000000010000010000000000000000000000000100000200000a0102000002000100000002000100000002000100000002000100000002000100000002000100000002000100000002000100000002000100000202000000");
+    let mut map = from_bytes(x"00000000000000000000000000000000000000000000000000000000000000000a0a00000000000000000000000000000000000000000a00000101000001000100000001000100000101000000000001010000010001000000010001000001010000000a00000000000000000000000000000000000000000a00000200020002000000000002000200020000000a000001010000010000000100000101000000000000000200000000000a00000000000000000000000000000000000000000a00000000000000000000000000000000000000000a010202000000010001000000010001000000010002020000000000000101020000000100010000000100010000000100020200000a01020000000000000000010000010000000000000000000000000100000200000a010200000200010000000200010000000200010000000200010000000200010000000200010000000200010000000200010000000200010000020200000000");
     map.id = id;
     map
 }
@@ -539,8 +553,9 @@ public(package) fun from_bcs(bcs: &mut BCS): Map {
         }
     });
     let turn = bcs.peel_u16();
+    let player_idx = bcs.peel_u8();
 
-    Map { id, turn, grid }
+    Map { id, turn, grid, player_idx }
 }
 
 /// Implements the `Grid.to_string` method due to `Tile` implementing
@@ -742,8 +757,8 @@ fun test_map_with_units() {
     assert!(!map.tile_has_unit(3, 3));
     assert!(!map.tile_has_unit(5, 2));
 
-    map.place_recruit(&recruit_one, point::new(3, 3), 0);
-    map.place_recruit(&recruit_two, point::new(5, 2), 0);
+    map.place_recruit(&recruit_one, point::new(3, 3));
+    map.place_recruit(&recruit_two, point::new(5, 2));
 
     assert!(map.tile_has_unit(3, 3));
     assert!(map.tile_has_unit(5, 2));

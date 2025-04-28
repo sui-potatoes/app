@@ -29,7 +29,7 @@ fun next_turn() {
     let recruit = recruit::default(ctx);
 
     assert_eq!(map.turn(), 0);
-    map.place_recruit(&recruit, point::new(0, 0), 0);
+    map.place_recruit(&recruit, point::new(0, 0));
     map.move_unit(vector[0, 0, direction::right!()]); // spend 1 AP point
     assert!(map.unit(0, 1).is_some_and!(|unit| unit.ap() == 1));
 
