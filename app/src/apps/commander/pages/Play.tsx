@@ -24,6 +24,7 @@ import { Host, useHostedGames } from "../hooks/useHostedGames";
 import { timeAgo } from "../types/utils";
 import { usePreset } from "../hooks/usePreset";
 import { GameScreen } from "./Components";
+import { HistoryPlayer } from "../engine/HistoryPlayer";
 
 export const SIZE = 10;
 export const LS_KEY = "commander-v2";
@@ -85,6 +86,7 @@ export function Playground() {
         history.current = game.map.history;
 
         if (!!initialGame) return;
+
         setInitialGame(game);
     }, [game]);
 
@@ -151,6 +153,7 @@ export function Playground() {
         return centerDiv(
             <>
                 <p>Game was not found or ended</p>
+                <p>Your recruits are returned to your inventory</p>
                 <button onClick={unsetMapKey}>Back</button>
             </>,
         );

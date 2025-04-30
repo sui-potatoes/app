@@ -25,7 +25,7 @@ export function pathToCoordinates(path: number[]): [number, number][] {
     const cursor = { x, y } as Cursor;
 
     if (x == undefined || y == undefined) {
-        throw new Error(`Invalid path: ${path}`);
+        return []; // TODO: study this case
     }
 
     while (path.length) {

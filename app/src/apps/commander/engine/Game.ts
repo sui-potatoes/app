@@ -73,7 +73,7 @@ export class Game extends THREE.Object3D {
     /** Flag to block execution any other action from being run in parallel */
     protected _isBlocked: boolean = false;
     /** Index of the current history record */
-    protected historyIdx: number = 0;
+    protected historyIdx: { current: number } = { current: 0 };
     /** Index of the current player */
     protected playerIdx: number = 0;
 
@@ -83,7 +83,7 @@ export class Game extends THREE.Object3D {
         const size = map.grid[0].length;
         const game = new Game(size, true);
 
-        game.historyIdx = data.map.history.length;
+        game.historyIdx = { current: data.map.history.length };
         game.turn = map.turn;
 
         for (let x = 0; x < size; x++) {
@@ -180,14 +180,28 @@ export class Game extends THREE.Object3D {
     // === History API ===
 
     async applyHistory(history: (typeof HistoryRecord.$inferType)[]) {
-        this.eventBus?.dispatchEvent({ type: "game:log", message: "Applying history" });
-        let i = this.historyIdx;
+        let i = this.historyIdx.current;
+
+        let eventBus = this.eventBus;
+        this.eventBus = null;
+
         while (i < history.length) {
             const record = history[i];
+
+            console.log(record.$kind);
+
             if (record.$kind === "Move") {
                 const path = pathToCoordinates(record.Move);
                 this.selectUnit(path[0][0], path[0][1]);
-                this.switchMode(new MoveMode(this.controls!));
+
+                // Skip if the unit is the current player's unit, we already
+                // handled this action in the UI.
+                if (!this.selectedUnit || this.selectedUnit?.props.player_idx === this.playerIdx) {
+                    i += 1;
+                    continue;
+                }
+
+                this.switchMode(new MoveMode(this.controls!), true);
 
                 if (!(this.mode instanceof MoveMode)) {
                     throw new Error(`Invalid mode ${this.mode.name}`);
@@ -198,6 +212,13 @@ export class Game extends THREE.Object3D {
                 );
                 await this.performAction();
             } else if (record.$kind === "NextTurn") {
+                // Skip if the turn % 2 is not equal to the playerIdx.
+                if (record.NextTurn % 2 === this.playerIdx) {
+                    eventBus?.dispatchEvent({ type: "sui:next_turn", turn: record.NextTurn });
+                    i += 1;
+                    continue;
+                }
+
                 this.nextTurn();
             } else if (record.$kind === "Attack") {
                 const { origin, target } = record.Attack;
@@ -214,6 +235,14 @@ export class Game extends THREE.Object3D {
                 }
 
                 this.selectUnit(origin[0], origin[1]);
+
+                // Skip if the unit is the current player's unit, we already
+                // handled this action in the UI.
+                if (this.selectedUnit?.props.player_idx === this.playerIdx) {
+                    i += 2; // attack + effect
+                    continue;
+                }
+
                 this.switchMode(
                     new ShootMode(
                         {
@@ -223,6 +252,7 @@ export class Game extends THREE.Object3D {
                         } as unknown as Camera,
                         this.controls!,
                     ),
+                    true,
                 );
 
                 if (!(this.mode instanceof ShootMode)) {
@@ -237,18 +267,18 @@ export class Game extends THREE.Object3D {
                 const targetUnit = [target[0], target[1]] as [number, number];
 
                 if (nextRecord.$kind === "Miss") {
-                    this.applyAttackEvent({ unit, targetUnit, result: "Miss", damage: 0 });
+                    await this.applyAttackEvent({ unit, targetUnit, result: "Miss", damage: 0 });
                 } else if (nextRecord.$kind === "Dodged") {
-                    this.applyAttackEvent({ unit, targetUnit, result: "Dodged", damage: 0 });
+                    await this.applyAttackEvent({ unit, targetUnit, result: "Dodged", damage: 0 });
                 } else if (nextRecord.$kind === "Damage") {
-                    this.applyAttackEvent({
+                    await this.applyAttackEvent({
                         unit,
                         targetUnit,
                         result: "Damage",
                         damage: nextRecord.Damage,
                     });
                 } else if (nextRecord.$kind === "CriticalHit") {
-                    this.applyAttackEvent({
+                    await this.applyAttackEvent({
                         unit,
                         targetUnit,
                         result: "CriticalHit",
@@ -258,7 +288,15 @@ export class Game extends THREE.Object3D {
             } else if (record.$kind === "Reload") {
                 const [x, y] = record.Reload;
                 this.selectUnit(x, y);
-                this.switchMode(new ReloadMode());
+
+                // Skip if the unit is the current player's unit, we already
+                // handled this action in the UI.
+                if (this.selectedUnit?.props.player_idx === this.playerIdx) {
+                    i += 1;
+                    continue;
+                }
+
+                this.switchMode(new ReloadMode(), true);
                 await this.performAction();
             } else {
                 console.log("Unsupported event", record);
@@ -266,7 +304,8 @@ export class Game extends THREE.Object3D {
 
             i++;
         }
-        this.historyIdx = i;
+        this.historyIdx.current = i;
+        this.eventBus = eventBus;
     }
 
     // === Component integration ===
@@ -344,8 +383,8 @@ export class Game extends THREE.Object3D {
      *
      * @param mode The new mode to switch to.
      */
-    switchMode(mode: Mode) {
-        if (this.selectedUnit && this.selectedUnit.props.player_idx !== this.playerIdx) {
+    switchMode(mode: Mode, force: boolean = false) {
+        if (!force && this.selectedUnit && this.selectedUnit.props.player_idx !== this.playerIdx) {
             this.mode.disconnect.call(this, this.mode);
             this.mode = new NoneMode();
             this.mode.connect.call(this, this.mode);

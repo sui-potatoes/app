@@ -52,7 +52,7 @@ export class ShootMode implements Mode {
         const targets = Object.values(this.units).filter((unit) => {
             // can't aim at yourself
             if (unit.id === selectedUnit.id) return false;
-            if (unit.props.player_idx === this.playerIdx) return false;
+            // if (unit.props.player_idx === this.playerIdx) return false;
 
             let hitChance = chance(selectedUnit, unit);
             if (hitChance === 0) return false;

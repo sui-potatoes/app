@@ -3,7 +3,7 @@
 
 import * as THREE from "three";
 import JEASINGS from "jeasings";
-import { OrbitControls, Stats } from "@react-three/drei";
+import { AdaptiveDpr, OrbitControls, Stats } from "@react-three/drei";
 import { RefObject, useEffect, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -148,12 +148,18 @@ function App({ map, camera, eventBus, history, playerIdx }: AppProps) {
 
     // track history updates, send them to the game
     useEffect(() => {
-        console.log("history updated", history.current);
-        game.applyHistory(history.current);
-    }, [history]);
+        const interval = setInterval(() => {
+            console.log("history updated", history.current);
+            game.applyHistory(history.current);
+        }, 2000);
+        return () => clearInterval(interval);
+    }, [map]);
+
+    console.log("reload");
 
     return (
         <>
+            <AdaptiveDpr pixelated />
             <primitive object={game} />
             <directionalLight
                 color={0xedaf62} // sunset
