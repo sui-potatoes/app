@@ -93,6 +93,45 @@ public fun von_neumann(p: &Point, size: u16): vector<Point> {
     neighbors
 }
 
+/// Get all Moore neighbors of a point. Moore neighborhood is a set of points
+/// that are adjacent to the given point. In 2D space, it's the point to the
+/// left, right, up, down, and diagonals from the given point.
+///
+/// ```
+///    0 1 2 3 4
+/// 0: |2|2|2|2|2|
+/// 1: |2|1|1|1|2|
+/// 2: |2|1|0|1|2|
+/// 3: |2|1|1|1|2|
+/// 4: |2|2|2|2|2|
+/// ```
+public fun moore(p: &Point, size: u16): vector<Point> {
+    if (size == 0) return vector[];
+
+    let mut neighbors = vector[];
+    let Point(x, y) = *p;
+
+    size.do!(|i| {
+        let i = i + 1;
+        neighbors.push_back(Point(x + i, y));
+        neighbors.push_back(Point(x, y + i));
+
+        if (x >= i) neighbors.push_back(Point(x - i, y));
+        if (y >= i) neighbors.push_back(Point(x, y - i));
+
+        // top left
+        if (x >= i && y >= i) neighbors.push_back(Point(x - i, y - i));
+        // top right
+        if (x >= i) neighbors.push_back(Point(x - i, y + i));
+        // bottom left
+        if (y >= i) neighbors.push_back(Point(x + i, y - i));
+        // bottom right
+        neighbors.push_back(Point(x + i, y + i));
+    });
+
+    neighbors
+}
+
 // === Convenience & Compatibility ===
 
 /// Parse bytes (encoded as BCS) into a point.
@@ -117,19 +156,15 @@ public fun to_string(p: &Point): String {
     str
 }
 
-#[allow(unused_function)]
-/// Get all Moore neighbors of a point. Moore neighborhood is a set of points
-/// that are adjacent to the given point. In 2D space, it's the point to the
-/// left, right, up, down, and diagonals from the given point.
-///
-/// ```
-///    0 1 2 3 4
-/// 0: |2|2|2|2|2|
-/// 1: |2|1|1|1|2|
-/// 2: |2|1|0|1|2|
-/// 3: |2|1|1|1|2|
-/// 4: |2|2|2|2|2|
-/// ```
-fun moore(_p: &Point, _size: u16): vector<Point> {
-    abort ENotImplemented
+#[test]
+fun test_moore() {
+    use std::unit_test::assert_eq;
+
+    let neighbors = Point(0, 0).moore(1);
+    neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
+    assert_eq!(neighbors.length(), 3);
+
+    let neighbors = Point(1, 1).moore(1);
+    neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
+    assert_eq!(neighbors.length(), 8);
 }

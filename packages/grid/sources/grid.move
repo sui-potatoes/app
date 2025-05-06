@@ -89,6 +89,12 @@ public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {
     macros::num_diff!($x0, $x1) + macros::num_diff!($y0, $y1)
 }
 
+public macro fun traverse<$T, $R>($g: &Grid<$T>, $f: |&$T, u16, u16| -> $R) {
+    let g = $g;
+    let (width, height) = (g.width(), g.height());
+    width.do!(|x| height.do!(|y| $f(&g[x, y], x, y)));
+}
+
 /// Get all von Neumann neighbors of a point, checking if the point is within
 /// the bounds of the grid. The size parameter specifies the size of the neighborhood.
 ///
@@ -98,6 +104,20 @@ public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<P
     let g = $g;
     let (width, height) = (g.width(), g.height());
     p.von_neumann($size).filter!(|point| {
+        let (x, y) = point.to_values();
+        x < width && y < height
+    })
+}
+
+/// Get all Moore neighbors of a point, checking if the point is within the
+/// bounds of the grid. The size parameter specifies the size of the neighborhood.
+///
+/// See `Point` for more information on the Moore neighborhood.
+public macro fun moore<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> {
+    let p = $p;
+    let g = $g;
+    let (width, height) = (g.width(), g.height());
+    p.moore($size).filter!(|point| {
         let (x, y) = point.to_values();
         x < width && y < height
     })

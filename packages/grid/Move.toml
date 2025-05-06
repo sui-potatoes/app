@@ -6,3 +6,6 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [addresses]
 grid = "0x0"
+
+[dependencies]
+BitField = { local = "../bit-field" }
