@@ -27,6 +27,7 @@ jobs:
               uses: jaxxstorm/action-install-gh-release@v1.12.0
               with:
                   repo: MystenLabs/mvr
+                  extension-matching: disable
                   platform: ubuntu
                   cache: enable
             # # List all directories in the packages folder, and run sui move test on
