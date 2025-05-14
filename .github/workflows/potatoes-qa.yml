@@ -23,6 +23,13 @@ jobs:
                   platform: ubuntu
                   version: testnet
                   cache: enable
+            - name: Download MVR
+              uses: jaxxstorm/action-install-gh-release@v1.12.0
+              with:
+                  repo: MystenLabs/sui
+                  platform: ubuntu
+                  version: testnet
+                  cache: enable
             # List all directories in the packages folder, and run sui move test on
             # each of them
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
@@ -35,19 +42,6 @@ jobs:
             - uses: MystenLabs/move-formatter-action@v1
               with:
                 working-directory: ${{ env.MOVE_PACKAGES_PATH }}
-
-    # prettier-move:
-    #     name: Check Move formatting
-    #     runs-on: ubuntu-latest
-    #     defaults:
-    #         run:
-    #             working-directory: ${{ env.MOVE_PACKAGES_PATH }}
-    #     steps:
-    #         - uses: actions/checkout@v4
-    #         - name: Use Node.js
-    #           uses: actions/setup-node@v4
-    #         - run: npm i @mysten/prettier-plugin-move
-    #         - run: npx prettier-move -c **/*.move
 
     prettier-ts:
         name: Check TypeScript formatting
