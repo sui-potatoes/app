@@ -31,6 +31,7 @@ jobs:
         name: Check Move formatting
         runs-on: ubuntu-latest
         steps:
+            - uses: actions/checkout@v4
             - uses: MystenLabs/move-formatter-action@v1
               with:
                 working-directory: ${{ env.MOVE_PACKAGES_PATH }}
