@@ -29,6 +29,7 @@ jobs:
 
     move-formatter:
         name: Check Move formatting
+        runs-on: ubuntu-latest
         steps:
             - uses: MystenLabs/move-formatter-action@v1
               with:
