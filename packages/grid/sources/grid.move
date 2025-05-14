@@ -295,5 +295,7 @@ public macro fun from_bcs<$T>($bcs: &mut BCS, $f: |&mut BCS| -> $T): Grid<$T> {
 #[test_only]
 /// Test-only function to print the grid to the console.
 public macro fun debug<$T>($grid: &Grid<$T>) {
-    std::debug::print(&to_string!($grid));
+    let mut str = b"\n".to_string();
+    str.append(to_string!($grid));
+    std::debug::print(&str);
 }

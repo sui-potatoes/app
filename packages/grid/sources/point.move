@@ -24,6 +24,8 @@ public macro fun from_vector($v: vector<u16>): Point {
     new(v[0], v[1])
 }
 
+public use fun grid::direction::cursor_from_point as Point.to_cursor;
+
 /// Get a tuple of two values from a point.
 public fun to_values(p: &Point): (u16, u16) { let Point(x, y) = p; (*x, *y) }
 

@@ -276,12 +276,7 @@ public fun to_string(field: &Field): String {
 
 #[test_only]
 public fun debug(field: &Field) {
-    // prettier-ignore
-    std::debug::print(&{
-        let mut str = b"\n".to_string();
-        str.append(field.to_string());
-        str
-    });
+    field.grid.debug!();
 }
 
 #[test]
