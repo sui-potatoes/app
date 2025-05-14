@@ -24,6 +24,7 @@ jobs:
                   rename-to: mvr
                   platform: ubuntu
                   cache: enable
+                  chmod: 0755
             - run: mvr search @potatoes
             - name: Download Sui
               uses: jaxxstorm/action-install-gh-release@v1.12.0
