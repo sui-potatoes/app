@@ -28,9 +28,11 @@ jobs:
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
 
     move-formatter:
-        - uses: MystenLabs/move-formatter-action@v1
-          with:
-            working-directory: ${{ env.MOVE_PACKAGES_PATH }}
+        name: Check Move formatting
+        steps:
+            - uses: MystenLabs/move-formatter-action@v1
+              with:
+                working-directory: ${{ env.MOVE_PACKAGES_PATH }}
 
     # prettier-move:
     #     name: Check Move formatting
