@@ -50,6 +50,7 @@
 /// ```
 module grid::direction;
 
+use grid::point::{Self, Point};
 use std::macros::{num_min, num_diff};
 
 const EOutOfBounds: u64 = 0;
@@ -66,6 +67,19 @@ public use fun cursor_to_values as Cursor.to_values;
 public fun cursor_to_values(c: &Cursor): (u16, u16) {
     let Cursor(x, y) = c;
     (*x, *y)
+}
+
+public use fun cursor_to_point as Cursor.to_point;
+
+/// Construct a `Point` from a `Cursor`.
+public fun cursor_to_point(c: &Cursor): Point {
+    point::new(c.0, c.1)
+}
+
+/// Construct a `Cursor` from a `Point`.
+public fun cursor_from_point(p: &Point): Cursor {
+    let (x, y) = p.to_values();
+    Cursor(x, y)
 }
 
 /// Reset the cursor to a given point.
@@ -103,39 +117,47 @@ public fun can_move_to(c: &Cursor, direction: u8): bool {
 // === Check Directions ===
 
 /// Check if a point is above another point (decrease in X).
-public macro fun is_up($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 > $x1 && $y0 == $y1 }
+public macro fun is_up<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
+    $x0 > $x1 && $y0 == $y1
+}
 
 /// Check if a point is below another point (increase in X).
-public macro fun is_down($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 < $x1 && $y0 == $y1 }
+public macro fun is_down<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
+    $x0 < $x1 && $y0 == $y1
+}
 
 /// Check if a point is to the left of another point (decrease in Y).
-public macro fun is_left($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 == $x1 && $y0 > $y1 }
+public macro fun is_left<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
+    $x0 == $x1 && $y0 > $y1
+}
 
 /// Check if a point is to the right of another point (increase in Y).
-public macro fun is_right($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool { $x0 == $x1 && $y0 < $y1 }
+public macro fun is_right<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
+    $x0 == $x1 && $y0 < $y1
+}
 
 /// Check if a point is up-right of another point (decrease in X, increase in Y).
-public macro fun is_up_right($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool {
+public macro fun is_up_right<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
     $x0 > $x1 && $y0 < $y1
 }
 
 /// Check if a point is down-right of another point (increase in X, increase in Y).
-public macro fun is_down_right($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool {
+public macro fun is_down_right<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
     $x0 < $x1 && $y0 < $y1
 }
 
 /// Check if a point is down-left of another point (increase in X, decrease in Y).
-public macro fun is_down_left($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool {
+public macro fun is_down_left<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
     $x0 < $x1 && $y0 > $y1
 }
 
 /// Check if a point is up-left of another point (decrease in X, decrease in Y).
-public macro fun is_up_left($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool {
+public macro fun is_up_left<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
     $x0 > $x1 && $y0 > $y1
 }
 
 /// Check if a point is on the same tile as another point.
-public macro fun is_same_tile($x0: u16, $y0: u16, $x1: u16, $y1: u16): bool {
+public macro fun is_same_tile<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
     $x0 == $x1 && $y0 == $y1
 }
 
@@ -185,7 +207,8 @@ public macro fun inverse($direction: u8): u8 {
 // === Determine Direction ===
 
 /// Get the attack direction from point `(x0, y0)` to point `(x1, y1)`.
-public macro fun direction($x0: u16, $y0: u16, $x1: u16, $y1: u16): u8 {
+/// For convenience, takes any integer type, but `Grid` uses `u16`.
+public macro fun direction<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): u8 {
     let diff_x = num_diff!($x0, $x1);
     let diff_y = num_diff!($y0, $y1);
 

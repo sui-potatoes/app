@@ -88,3 +88,16 @@ fun cursor() {
     assert_eq!(x, 0);
     assert_eq!(y, 0);
 }
+
+#[test]
+fun cursor_to_from_point() {
+    let cursor = direction::new_cursor(10, 10);
+    let point = cursor.to_point();
+    let cursor = point.to_cursor();
+
+    let (xc, yc) = cursor.to_values();
+    let (xp, yp) = point.to_values();
+
+    assert_eq!(xc, xp);
+    assert_eq!(yc, yp);
+}
