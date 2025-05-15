@@ -6,9 +6,13 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
 BitField = { local = "../bit-field" }
-Codec = { local = "../codec" }
+# Codec = { local = "../codec" }
 Grid = { local = "../grid" }
 NameGenerator = { local = "../name-gen" }
+codec = { r.mvr = "@potatoes/codec" }
 
 [addresses]
 commander = "0x0"
+
+[r.mvr]
+network = "testnet"
