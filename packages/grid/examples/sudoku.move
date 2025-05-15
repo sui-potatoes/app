@@ -1,7 +1,11 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Simple Sudoku Generator and verifier.
+/// Simple Sudoku Generator and solution verifier.
+///
+/// This example illustrates how to:
+/// - Create a grid with a `u8` type.
+/// - Access the grid using the `[x, y]` syntax.
 module grid::sudoku;
 
 use grid::grid::{Self, Grid};
@@ -21,10 +25,14 @@ public struct Sudoku has key {
 
 /// Create a new `Sudoku` object and transfer it to the caller.
 entry fun new(r: &Random, level: u8, ctx: &mut TxContext) {
+    let mut seed = vector[1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let mut gen = r.new_generator(ctx);
+    gen.shuffle(&mut seed); // shuffle the initial seed
+
     transfer::transfer(
         Sudoku {
             id: object::new(ctx),
-            grid: generate(&mut r.new_generator(ctx), level),
+            grid: generate(&mut gen, level, seed),
         },
         ctx.sender(),
     )
@@ -56,13 +64,12 @@ public fun solve(sudoku: Sudoku, solution: vector<vector<u8>>) {
 }
 
 /// Generate a new `Sudoku` puzzle with the given level of difficulty.
-/// The level is the percentage of cells that will be removed from the grid.
-/// The seed for the first row is 1, 2, 3, 4, 5, 6, 7, 8, 9.
-/// The numbers are then rotated with shifts (each row is rotated with a different shift): 3 3 1 3 3 1 3 3
-/// 3. Remove X% of the cells
-fun generate(rng: &mut RandomGenerator, level: u8): Grid<u8> {
-    let mut seed = vector[8, 9, 3, 2, 7, 6, 4, 5, 1];
-    let mut sudoku = grid::from_vector_unchecked(vector[
+/// - The level is the percentage of cells that will be removed from the grid.
+/// - The seed for the first row is shuffled sequence of [1, 2, 3, 4, 5, 6, 7, 8, 9].
+/// - The numbers are then rotated with shifts (each row is rotated with a different shift): 3 3 1 3 3 1 3 3
+/// - The rows are then shuffled.
+fun generate(rng: &mut RandomGenerator, level: u8, mut seed: vector<u8>): Grid<u8> {
+    let mut initial = vector[
         seed,
         seed.rotate(3),
         seed.rotate(3),
@@ -72,9 +79,13 @@ fun generate(rng: &mut RandomGenerator, level: u8): Grid<u8> {
         seed.rotate(1),
         seed.rotate(3),
         seed.rotate(3),
-    ]);
+    ];
 
-    // Remove 40% of the cells
+    // shuffle the initial rows too
+    rng.shuffle(&mut initial);
+    let mut sudoku = grid::from_vector_unchecked(initial);
+
+    // Remove X% of the cells
     9u16.do!(|i| 9u16.do!(|j| {
         if (rng.generate_u8() % 10 < level) {
             *&mut sudoku[i, j] = 0;
@@ -84,6 +95,7 @@ fun generate(rng: &mut RandomGenerator, level: u8): Grid<u8> {
     sudoku
 }
 
+/// Simple hack to assign `.rotate` to the `vector` type.
 use fun rotate as vector.rotate;
 
 /// Rotate the vector num times by removing the first element and appending it to the end.
@@ -98,7 +110,10 @@ fun test_generate_verify(seed: vector<u8>) {
 
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(seed);
-    let grid = generate(&mut rng, 0);
+    let mut seed = vector[8, 9, 3, 2, 7, 6, 4, 5, 1];
+    rng.shuffle(&mut seed);
+
+    let grid = generate(&mut rng, 0, seed);
     let solution = (copy grid).into_vector();
     let sudoku = Sudoku { id: object::new(ctx), grid };
 
@@ -111,12 +126,17 @@ fun test_modify_puzzle_fail(seed: vector<u8>) {
 
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(seed);
-    let grid = generate(&mut rng, 0);
+    let mut seed = vector[1, 2, 3, 4, 5, 6, 7, 8, 9];
+    rng.shuffle(&mut seed);
+
+    let grid = generate(&mut rng, 0, seed);
     let solution = (copy grid).into_vector();
     let mut sudoku = Sudoku { id: object::new(ctx), grid };
 
     // perform modification to the grid
-    *&mut sudoku.grid[0, 0] = 3;
+    let value = sudoku.grid[0, 0];
+    *&mut sudoku.grid[0, 0] = if (value == 9) 1
+    else { value + 1 };
 
     solve(sudoku, solution);
 }
@@ -139,7 +159,8 @@ fun test_incorrect_solution_fail() {
 
     let ctx = &mut tx_context::dummy();
     let mut rng = random::new_generator_from_seed_for_testing(b"");
-    let grid = generate(&mut rng, 1);
+    let seed = vector[8, 9, 3, 2, 7, 6, 4, 5, 1]; // no shuffling
+    let grid = generate(&mut rng, 1, seed);
     let mut solution = (copy grid).into_vector();
     let sudoku = Sudoku { id: object::new(ctx), grid };
 

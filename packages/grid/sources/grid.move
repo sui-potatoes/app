@@ -85,7 +85,7 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
 
 /// Get a Manhattan distance between two points. Useful for calculating distances
 /// or ranges for ranged attacks or walking, for example.
-public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {
+public macro fun range<$U: drop>($x0: $U, $y0: $U, $x1: $U, $y1: $U): $U {
     macros::num_diff!($x0, $x1) + macros::num_diff!($y0, $y1)
 }
 
@@ -105,10 +105,10 @@ public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<P
 
 /// Create a grid of the specified size by applying the function `f` to each cell.
 /// The function receives the x and y coordinates of the cell.
-public macro fun tabulate<$T>($width: u16, $height: u16, $f: |u16, u16| -> $T): Grid<$T> {
+public macro fun tabulate<$T, $U: drop>($width: $U, $height: $U, $f: |$U, $U| -> $T): Grid<$T> {
     let width = $width as u64;
     let height = $height as u64;
-    let grid = vector::tabulate!(width, |x| vector::tabulate!(height, |y| $f(x as u16, y as u16)));
+    let grid = vector::tabulate!(width, |x| vector::tabulate!(height, |y| $f(x as $U, y as $U)));
     from_vector_unchecked(grid)
 }
 
