@@ -18,6 +18,7 @@ public enum Tile has copy, drop, store {
     Blue,
 }
 
+/// A single instance of a Checkers game.
 public struct Checkers has key, store {
     id: UID,
     grid: Grid<Tile>,
@@ -25,6 +26,7 @@ public struct Checkers has key, store {
     turn: bool,
 }
 
+/// Create a new `Checkers` game.
 public fun new(ctx: &mut TxContext): Checkers {
     Checkers {
         id: object::new(ctx),
@@ -38,7 +40,9 @@ public fun new(ctx: &mut TxContext): Checkers {
     }
 }
 
-/// Play a move on the checkers board.
+/// Play a move on the checkers board, x0 and y0 are the starting position, and
+/// x1 and y1 are the ending position. This implementation is incomplete, and
+/// only supports moving a single tile or a jump over an opponent's piece.
 public fun play(game: &mut Checkers, x0: u8, y0: u8, x1: u8, y1: u8) {
     let is_red = game.turn;
     let distance = num_diff!(x0, x1) + num_diff!(y0, y1);
@@ -70,6 +74,7 @@ public fun destroy(game: Checkers) {
     id.delete();
 }
 
+/// Alias to support `grid.debug!()` macro.
 public use fun tile_to_string as Tile.to_string;
 
 /// Print a tile as a `String`.
