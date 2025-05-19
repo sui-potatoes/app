@@ -8,7 +8,7 @@ module grid::minesweeper;
 
 use grid::{grid::{Self, Grid}, point::{Self, Point}};
 use std::string::String;
-use sui::{random::RandomGenerator, vec_map::{Self, VecMap}};
+use sui::random::RandomGenerator;
 
 public enum Tile has copy, drop {
     Hidden,
@@ -28,7 +28,7 @@ public struct Minesweeper has drop {
 public enum SolverTile has copy, drop {
     Unknown,
     SolutionScore(u8, u8),
-    Solved(u8, bool),
+    Solved(u8, bool), // score, is_solved
     Mine,
 }
 
@@ -124,6 +124,12 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
                         _ => false,
                     }
                 });
+
+                // early exit if we have no mines to place; the tile is solved
+                if (to_place == 0) {
+                    solver_grid.swap(x, y, SolverTile::Solved(*n, true));
+                    return
+                };
 
                 // Filter out Mines for fields that are already solved;
                 // This is to prevent duplicate symmetric solutions, like this:
