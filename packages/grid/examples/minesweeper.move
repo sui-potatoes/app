@@ -60,9 +60,6 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
 
     // sweep the board, mark tiles that can be a mine, and then calculate the
     // total number of 100% defined mines.
-    let mut score_map: VecMap<u8, vector<Point>> = vec_map::empty();
-    let mut target_tile_score = 0;
-    let mut highest_score = 0;
     let mut solver_grid = grid::tabulate!(ms.grid.width(), ms.grid.height(), |x, y| {
         let mut score = 0;
         let mut tiles_score = 0;
@@ -90,15 +87,6 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
             }
         });
 
-        if (score_map.contains(&score)) score_map[&score].push_back(point::new(x, y))
-        else score_map.insert(score, vector[point::new(x, y)]);
-
-        // mark the target tile score
-        if (x == x0 && y == y0) target_tile_score = score;
-
-        // track the highest score
-        if (score > highest_score) highest_score = score;
-
         // if the score is 0, we don't know anything about the tile
         if (score == 0) SolverTile::Unknown else SolverTile::SolutionScore(score, tiles_score)
     });
@@ -116,14 +104,41 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
                 // and pick highest score neighbors, that would be one of the
                 // solutions.
 
+                // keep track of how many mines we already marked around this
+                // tile, so we don't try to place more than possible.
+                let mut to_place = *n;
+
                 // we want to pick `n` highest scores out of all neighbors
-                let mut points = solver_grid.neighbors(point::new(x, y)).filter!(|p| {
+                let points = solver_grid.neighbors(point::new(x, y)).filter!(|p| {
                     let (x, y) = p.to_values();
                     match (solver_grid[x, y]) {
                         SolverTile::SolutionScore(_, _) => true,
-                        SolverTile::Mine => true,
+                        SolverTile::Mine => {
+                            // Trick: use this iteration to decrement the number
+                            // of mines to place. Still return false to decrease
+                            // number of points to check.
+                            // TODO: verify that this is the right strategy.
+                            to_place = to_place - 1;
+                            false
+                        },
                         _ => false,
                     }
+                });
+
+                // Filter out Mines for fields that are already solved;
+                // This is to prevent duplicate symmetric solutions, like this:
+                // |_|1|_|
+                // |_|2|_|
+                // |_|_|_|
+                let mut points = points.filter!(|p| 'search: {
+                    solver_grid.neighbors(*p).destroy!(|p| {
+                        let (x, y) = p.to_values();
+                        match (solver_grid[x, y]) {
+                            SolverTile::Solved(_, true) => return 'search false,
+                            _ => (),
+                        }
+                    });
+                    true
                 });
 
                 ms.rng.shuffle(&mut points);
@@ -146,60 +161,15 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
                     score_2 <= score_1
                 });
 
-                // Filter out Mines for fields that are already solved;
-                // This is to prevent duplicate symmetric solutions, like this:
-                // |_|1|_|
-                // |_|2|_|
-                // |_|_|_|
-                std::debug::print(&b"points before filter:".to_string());
-                std::debug::print(&point::new(x, y).to_string());
-                std::debug::print(&points.length().to_string());
-                let points = points.filter!(|p| 'search: {
-                    let score_point = *p;
-                    solver_grid.neighbors(*p).destroy!(|p| {
-                        let (x, y) = p.to_values();
-
-                        if (x == 0 && y == 1) {
-                            std::debug::print(&b"should be caught and filter out mines surrounding it".to_string());
-                        } else {
-                            std::debug::print(&b"nooo".to_string());
-                            std::debug::print(&p.to_string());
-                        };
-
-                        match (solver_grid[x, y]) {
-                            SolverTile::Solved(_, true) => {
-                                std::debug::print(&b"filtering out".to_string());
-                                std::debug::print(&p.to_string());
-                                return 'search false;
-                            },
-                            SolverTile::Solved(_, false) => {
-                                std::debug::print(&b"didn't filter out".to_string());
-                                std::debug::print(&score_point.to_string());
-                                return 'search true;
-                            },
-                            _ => return 'search true,
-                        }
-                    });
-                    true
-                });
-
-                std::debug::print(&b"points after filter:".to_string());
-                std::debug::print(&points.length().to_string());
-
                 // take the first `n` points
-                (*n as u64).do!(|i| {
+                (to_place as u64).do!(|i| {
                     let (x, y) = points[i].to_values();
                     if (!mines.contains(&points[i])) mines.push_back(points[i]);
                     solver_grid.swap(x, y, SolverTile::Mine);
                 });
 
-                std::debug::print(&b"mines after filter:".to_string());
-                std::debug::print(&mines.map!(|p| p.to_string()));
-
                 // mark the number of mines surronding the tile now
                 solver_grid.swap(x, y, SolverTile::Solved(*n, true));
-                std::debug::print(&b"marked solved".to_string());
-                std::debug::print(&point::new(x, y).to_string());
             },
             Tile::Hidden | Tile::Flagged | Tile::Revealed(_) => (),
         }
@@ -415,5 +385,25 @@ fun test_random_solution_2() {
 
     ms.reveal(0, 1);
     ms.reveal(0, 2);
+    ms.debug();
+}
+
+#[test]
+fun test_random_solution_2_1() {
+    use sui::random;
+
+    let rng = random::new_generator_from_seed_for_testing(b"seed");
+    let mut ms = from_vector(
+        rng,
+        2,
+        vector[
+            // 3x3 grid with revealed tile (2) in the middle
+            vector[9, 1, 9],
+            vector[9, 2, 9],
+            vector[9, 9, 9],
+        ],
+    );
+
+    ms.reveal(1, 2);
     ms.debug();
 }
