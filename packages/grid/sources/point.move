@@ -9,9 +9,6 @@ module grid::point;
 use std::string::String;
 use sui::bcs::{Self, BCS};
 
-/// Error code for not implemented functions.
-const ENotImplemented: u64 = 264;
-
 /// A point in 2D space.
 public struct Point(u16, u16) has copy, drop, store;
 
