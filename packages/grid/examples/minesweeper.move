@@ -60,8 +60,7 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
         _ => (),
     };
 
-    std::debug::print(&b"grid before reveal".to_string());
-    ms.grid.debug!();
+    dbg!(b"turn: {}, grid before reveal\n{}", vector[ms.turn.to_string(), ms.grid.to_string!()]);
 
     // sweep the board, mark tiles that can be a mine, and then calculate the
     // total number of 100% defined mines.
@@ -77,7 +76,7 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
             //       tile as solved. but haven't figured out how to do it so
             //       early in the algorithm.
             Tile::Revealed(0) => return SolverTile::Solved(0, true),
-            // Tile::Revealed(_) => return SolverTile::Solved(0, false),
+            Tile::Revealed(_) => return SolverTile::Solved(0, false),
             _ => (),
         };
 
@@ -97,8 +96,7 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
         if (score == 0) SolverTile::Unknown else SolverTile::SolutionScore(score, tiles_score)
     });
 
-    std::debug::print(&b"solver grid: initial state (scores calculated)".to_string());
-    solver_grid.debug!();
+    dbg!(b"solver grid: initial state (scores calculated)\n{}", vector[solver_grid.to_string!()]);
 
     // now with all the weights in place, we can do another pass to mark the
     // tiles that have the highest score as solved.
@@ -174,7 +172,7 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
                 });
 
                 // take the first `n` points
-                (to_place as u64).do!(|i| {
+                (to_place as u64).min(points.length()).do!(|i| {
                     let (x, y) = points[i].to_values();
                     if (!mines.contains(&points[i])) mines.push_back(points[i]);
                     solver_grid.swap(x, y, SolverTile::Mine);
@@ -188,9 +186,7 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
     });
 
     // solving ambiguous cases - the final pass;
-
-    std::debug::print(&b"solver grid: after marking mines".to_string());
-    solver_grid.debug!();
+    dbg!(b"solver grid: after marking mines\n{}", vector[solver_grid.to_string!()]);
 
     assert!(mines.length() <= ms.mines as u64);
 
@@ -243,7 +239,7 @@ public use fun solver_tile_to_string as SolverTile.to_string;
 public fun solver_tile_to_string(t: &SolverTile): String {
     match (t) {
         SolverTile::Unknown => b"_".to_string(),
-        SolverTile::SolutionScore(n, _) => (*n).to_string(),
+        SolverTile::SolutionScore(_, n) => (*n).to_string(),
         SolverTile::Solved(n, _) => (*n).to_string(),
         SolverTile::Mine => b"M".to_string(),
     }
@@ -263,7 +259,8 @@ public fun debug(self: &Minesweeper) {
 }
 
 #[test_only]
-public fun from_vector(rng: RandomGenerator, mines: u16, v: vector<vector<u8>>): Minesweeper {
+public fun from_vector(mines: u16, v: vector<vector<u8>>): Minesweeper {
+    let rng = sui::random::new_generator_from_seed_for_testing(b"seed");
     Minesweeper {
         grid: grid::tabulate!(v.length() as u16, v[0].length() as u16, |x, y| {
             match (v[x as u64][y as u64]) {
@@ -281,9 +278,7 @@ public fun from_vector(rng: RandomGenerator, mines: u16, v: vector<vector<u8>>):
 
 #[test]
 fun test_minesweeper() {
-    use sui::random;
-
-    let rng = random::new_generator_from_seed_for_testing(b"seed");
+    let rng = sui::random::new_generator_from_seed_for_testing(b"seed");
     let mut ms = new(rng, 4, 4, 4); // 10x10, 10 mines
 
     ms.debug();
@@ -297,11 +292,7 @@ fun test_minesweeper() {
 
 #[test]
 fun test_known_solution() {
-    use sui::random;
-
-    let rng = random::new_generator_from_seed_for_testing(b"seed");
     let mut ms = from_vector(
-        rng,
         8,
         vector[
             vector[9, 9, 9, 9, 9, 9],
@@ -325,11 +316,7 @@ fun test_known_solution() {
 
 #[test]
 fun test_random_solution_0() {
-    use sui::random;
-
-    let rng = random::new_generator_from_seed_for_testing(b"seed");
     let mut ms = from_vector(
-        rng,
         1,
         vector[
             // 3x3 no
@@ -358,11 +345,7 @@ fun test_random_solution_0() {
 
 #[test]
 fun test_random_solution_1() {
-    use sui::random;
-
-    let rng = random::new_generator_from_seed_for_testing(b"seed");
     let mut ms = from_vector(
-        rng,
         1,
         vector[
             // 3x3 grid with revealed tile (1) in the middle
@@ -380,11 +363,7 @@ fun test_random_solution_1() {
 
 #[test]
 fun test_random_solution_2() {
-    use sui::random;
-
-    let rng = random::new_generator_from_seed_for_testing(b"seed");
     let mut ms = from_vector(
-        rng,
         2,
         vector[
             // 3x3 grid with revealed tile (2) in the middle
@@ -401,11 +380,7 @@ fun test_random_solution_2() {
 
 #[test]
 fun test_random_solution_2_1() {
-    use sui::random;
-
-    let rng = random::new_generator_from_seed_for_testing(b"seed");
     let mut ms = from_vector(
-        rng,
         2,
         vector[
             // 3x3 grid with revealed tile (2) in the middle
@@ -421,11 +396,7 @@ fun test_random_solution_2_1() {
 
 #[test]
 fun test_random_solution_3_1() {
-    use sui::random;
-
-    let rng = random::new_generator_from_seed_for_testing(b"seed");
     let mut ms = from_vector(
-        rng,
         3,
         vector[
             // 3x3 grid with 3 mines, and two revealed tiles 1 and 3
@@ -437,4 +408,69 @@ fun test_random_solution_3_1() {
 
     ms.reveal(1, 2);
     ms.debug();
+}
+
+#[test, allow(unused_variable)]
+// Notes: given the order of iteration, the (1, 0) is always a mine in any setup.
+// ...which is not totally random.
+//
+// I believe the `wire` case should not be predictable.
+fun test_binary_wire() {
+    let mut ms = from_vector(
+        5,
+        vector[
+            vector[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            vector[9, 1, 9, 9, 1, 9, 9, 1, 9, 9, 1, 9, 9],
+            vector[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ],
+    );
+
+    ms.reveal(1, 2);
+    ms.reveal(1, 8);
+    ms.debug();
+}
+
+#[allow(unused_function)]
+macro fun dbg($t: vector<u8>, $v: vector<String>) {
+    std::debug::print(&format!($t, $v))
+}
+
+#[allow(unused_function)]
+macro fun format($t: vector<u8>, $v: vector<String>): String {
+    let t = $t;
+    let v = $v;
+    let mut indices = vector[];
+    let len = t.length();
+
+    // push all the indices of the braces, so we can reference them
+    // their number must match the length of `v`
+    len.do!(|i| if (t[i] == 0x7b || t[i.min(len - 3) + 1] == 0x7d) {
+        indices.push_back(i);
+    });
+
+    // enforce the invariant
+    assert!(v.length() == indices.length());
+
+    // now construct the string `s`
+    let t = t.to_ascii_string();
+    let mut s = b"".to_string();
+    let mut offset = 0;
+
+    // iterate over the indices, and concat substrings
+    indices.length().do!(|i| {
+        s.append(t.substring(offset, indices[i]).to_string());
+        s.append(v[i]);
+        offset = indices[i] + 2;
+    });
+
+    s
+}
+
+#[test]
+fun test_format() {
+    let v = vector[b"world".to_string(), b"foo".to_string(), b"bar".to_string()];
+    std::unit_test::assert_eq!(
+        format!(b"Hello {} haha {} yoyo {}", v),
+        b"Hello world haha foo yoyo bar".to_string(),
+    );
 }
