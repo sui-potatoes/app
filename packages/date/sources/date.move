@@ -269,7 +269,7 @@ public fun format(date: &Date, format: vector<u8>): String {
             // Year: yyyy / yy / y
             // prettier-ignore
             y @ (Y | YY) => if (
-                i + 3 < len && format[i + 1] == y && format[i + 2] == y && format[i + 3] == y
+                i + 3 < len && &format[i + 1] == &y && &format[i + 2] == &y && &format[i + 3] == &y
             ) {
                 // The year number in four digits. For example, in this format, 2005 would be represented as 2005.
                 formatted.append(date.year.to_string());
@@ -304,7 +304,7 @@ public fun format(date: &Date, format: vector<u8>): String {
             // Day: dddd / ddd / dd / d OR DDDD / DDD / DD / D
             // prettier-ignore
             d @ (D | DD) => if (
-                i + 3 < len && format[i + 1] == d && format[i + 2] == d && format[i + 3] == d
+                i + 3 < len && &format[i + 1] == &d && &format[i + 2] == &d && &format[i + 3] == &d
             ) {
                 // The full name of the day of the week. For example, Saturday is displayed in full. Note: This format is only supported for the output format.
                 formatted.append_utf8(days_full[date.day_of_week as u64]);
