@@ -373,10 +373,7 @@ public fun format(date: &Date, format: vector<u8>): String {
                 // A.M. or P.M. as two letters: A.M. or P.M. as defined on your system.
                 formatted.append_utf8(if (date.hour < 12) b"AM" else b"PM");
                 i = i + 1;
-            } else {
-                // TODO: consider failing here
-                formatted.append_utf8(b"t");
-            },
+            } else abort,
             // Z: for ISO 8601
             Z if (date.timezone_offset_m != 720) => {
                 formatted.append(to_timezone_offset_string!(date.timezone_offset_m));

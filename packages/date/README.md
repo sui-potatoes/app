@@ -49,6 +49,29 @@ public fun utc_date(clock: &Clock): String {
 
 ## Formatting
 
+| pattern | alternative | description |
+| `yyyy` | `YYYY` | The year number in four digits (e.g. 2005) |
+| `yy` | `YY` | The last two digits of the year (e.g. 05) |
+| `y` | - | The last digit of the year (e.g. 5) |
+| `MMMM` | - | Full month name (output only) |
+| `MMM` | - | Three letter month name (e.g. Aug) |
+| `MM` | - | Two digit month with leading zero |
+| `M` | - | Month number 1-12 without leading zero |
+| `dddd` | `DDDD` | Full day name (output only) |
+| `ddd` | `DDD` | Three letter day name (e.g. Sat) |
+| `dd` | `DD` | Two digit day with leading zero |
+| `d` | `D` | Day number 1-31 without leading zero |
+| `HH` | - | Two digit 24-hour with leading zero |
+| `H` | - | 24-hour 0-23 without leading zero |
+| `hh` | - | Two digit 12-hour with leading zero |
+| `h` | - | 12-hour 1-12 without leading zero |
+| `mm` | - | Two digit minutes with leading zero |
+| `m` | - | Minutes 0-59 without leading zero |
+| `ss` | - | Two digit seconds with leading zero |
+| `s` | - | Seconds 0-59 without leading zero |
+| `tt` | - | A.M. or P.M. |
+| `z` | - | UTC offset (e.g. +01:00, -05:00) |
+
 ## License
 
 This package is licensed under MIT.
