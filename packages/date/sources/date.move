@@ -12,9 +12,32 @@
 /// Does not support:
 /// - IANA Timezone names
 ///
+/// Formatting:
+/// - `yyyy` or `YYYY` - The year number in four digits. For example, in this format, 2005 would be represented as 2005.
+/// - `yy` or `YY` - The last two digits of the year number. For example, in this format, 2005 would be represented as 05.
+/// - `y` - The last digit of the year. For example, 2005 would be represented as 5.
+/// - `MMMM` - The name of the month spelled in full. This format is supported only for output time. Note: This format is only supported for the output format.
+/// - `MMM` - The name of the month in three letters. For example, August would be represented as Aug.
+/// - `MM` - Month in two digits. If the month number is a single-digit number, it's displayed with a leading zero.
+/// - `M` - Month as a number from 1 to 12. If the month number is a single-digit number, it's displayed without a leading zero.
+/// - `dddd` or `DDDD` - The full name of the day of the week. For example, Saturday is displayed in full. Note: This format is only supported for the output format.
+/// - `ddd` or `DDD` - The abbreviated name of the day of the week in three letters. For example, Saturday is abbreviated as “Sat”.
+/// - `dd` or `DD` - Day in two digits. If the day number is a single-digit number, it's displayed with a leading zero.
+/// - `d` or `D` - Day as a number from 1 to 31. If the day number is a single-digit number, it's displayed without a leading zero.
+/// - `HH` - Hour in two digits using the 24-hour clock. For example, in this format, 1 pm would be represented as 13. If the hour number is a single-digit number, it's displayed with a leading zero.
+/// - `H` - Hour as a number from 0 to 23 when using the 24-hour clock. For example, in this format, 1 pm would be represented as 13. If the hour number is a single-digit number, it's displayed without a leading zero.
+/// - `hh` - Hour in two digits using the 12-hour clock. For example, in this format, 1 pm would be represented as 01. If the hour number is a single-digit number, it's displayed with a leading zero.
+/// - `h` - Hour as a number from 1 to 12 when using the 12-hour clock. If the hour number is a single-digit number, it's displayed without a leading zero.
+/// - `mm` - Minutes in two digits. If the minute number is a single-digit number, it's displayed with a leading zero.
+/// - `m` - Minutes as a number from 0 to 59. If the minute number is a single-digit number, it's displayed without a leading zero.
+/// - `ss` - Seconds in two digits. If the second number is a single-digit number, it's displayed with a leading zero.
+/// - `s` - Seconds as a number from 0 to 59. If the second number is a single-digit number, it's displayed without a leading zero.
+/// - `tt` - A.M. or P.M. as two letters: A.M. or P.M. as defined on your system.
+/// - `t` - TODO: consider failing here
+///
 /// Resources:
-/// - https://learn.microsoft.com/en-us/system-center/orchestrator/standard-activities/format-date-time?view=sc-orch-2025
-/// - https://en.wikipedia.org/wiki/ISO_8601
+/// - ISO 8601: https://en.wikipedia.org/wiki/ISO_8601
+/// - Microsoft Orchestrator: https://learn.microsoft.com/en-us/system-center/orchestrator/standard-activities/format-date-time?view=sc-orch-2025
 module date::date;
 
 use std::{macros::num_to_string, string::String};
@@ -138,18 +161,6 @@ public fun new(timestamp_ms: u64): Date {
         timezone_offset_m: 720, // UTC by default
         timestamp_ms,
     }
-}
-
-/// Shift the timezone offset by minutes.
-public fun tz_west_m(date: &mut Date, minutes: u16): &mut Date {
-    date.timezone_offset_m = date.timezone_offset_m.max(minutes) - minutes;
-    date
-}
-
-/// Shift the timezone offset by minutes.
-public fun tz_east_m(date: &mut Date, minutes: u16): &mut Date {
-    date.timezone_offset_m = date.timezone_offset_m + minutes;
-    date
 }
 
 /// Get the second of a `Date`.

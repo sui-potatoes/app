@@ -41,11 +41,7 @@ fun utc_date_time() {
 fun iso_date_time() {
     assert_eq!(date::new(0).to_iso_string(), b"1970-01-01T00:00:00.000Z".to_string());
     assert_eq!(date::new(15).to_iso_string(), b"1970-01-01T00:00:00.015Z".to_string());
-
-    assert_eq!(
-        date::new(0).tz_east_m(90).to_iso_string(),
-        b"1970-01-01T01:30:00.000+01:30".to_string(),
-    );
+    assert_eq!(date::new(1747901403000).to_iso_string(), b"2025-05-22T08:10:03.000Z".to_string());
 }
 
 #[test]
