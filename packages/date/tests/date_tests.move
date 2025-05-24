@@ -38,17 +38,6 @@ fun utc_date_time() {
 }
 
 #[test]
-fun from_to_utc() {
-    assert_from_to_utc_string!(b"Thu, 01 Jan 1970 00:00:00 GMT");
-    assert_from_to_utc_string!(b"Fri, 02 Jan 1970 00:00:00 GMT");
-    assert_from_to_utc_string!(b"Fri, 16 May 2025 15:39:27 GMT");
-    assert_from_to_utc_string!(b"Fri, 01 Jan 2021 00:00:00 GMT");
-    assert_from_to_utc_string!(b"Thu, 16 May 2024 10:00:00 GMT");
-    assert_from_to_utc_string!(b"Tue, 01 Jan 2030 00:00:00 GMT");
-    assert_from_to_utc_string!(b"Fri, 01 Jan 2038 00:00:00 GMT");
-}
-
-#[test]
 fun iso_date_time() {
     assert_eq!(date::new(0).to_iso_string(), b"1970-01-01T00:00:00.000Z".to_string());
     assert_eq!(date::new(15).to_iso_string(), b"1970-01-01T00:00:00.015Z".to_string());
@@ -219,6 +208,78 @@ fun format_eq_utc() {
     assert_utc_format!(2145916800000);
 }
 
+// === From UTC String ===
+
+#[test]
+fun from_to_utc() {
+    assert_from_to_utc_string!(b"Thu, 01 Jan 1970 00:00:00 GMT");
+    assert_from_to_utc_string!(b"Fri, 02 Jan 1970 00:00:00 GMT");
+    assert_from_to_utc_string!(b"Fri, 16 May 2025 15:39:27 GMT");
+    assert_from_to_utc_string!(b"Fri, 01 Jan 2021 00:00:00 GMT");
+    assert_from_to_utc_string!(b"Thu, 16 May 2024 10:00:00 GMT");
+    assert_from_to_utc_string!(b"Tue, 01 Jan 2030 00:00:00 GMT");
+    assert_from_to_utc_string!(b"Fri, 01 Jan 2038 00:00:00 GMT");
+}
+
+#[test]
+fun from_utc_to_utc() {
+    assert_from_utc_timestamp_eq!(b"Fri, 16 May 2025 15:39:27 GMT");
+    assert_from_utc_timestamp_eq!(b"Tue, 01 Jan 2030 10:15:03 GMT");
+    assert_from_utc_timestamp_eq!(b"Thu, 01 Jan 1970 01:11:01 GMT");
+}
+
+#[test, expected_failure(abort_code = date::EInvalidFormat)]
+fun from_utc_string_invalid_length() {
+    date::from_utc_string(b"Bad, 01 Jan 1970 00:00:00".to_string());
+}
+
+#[test, expected_failure(abort_code = date::EInvalidDay)]
+fun from_utc_string_invalid_day() {
+    date::from_utc_string(b"Bad, 01 Jan 1970 00:00:00 GMT".to_string());
+}
+
+#[test, expected_failure(abort_code = date::EInvalidMonth)]
+fun from_utc_string_invalid_month() {
+    date::from_utc_string(b"Thu, 01 Bad 1970 00:00:00 GMT".to_string());
+}
+
+#[test, expected_failure(abort_code = date::EExpectedComma)]
+fun from_utc_string_invalid_comma() {
+    date::from_utc_string(b"Thu 01 Jan 1970 00:00:00 GMT ".to_string());
+}
+
+#[test, expected_failure(abort_code = date::EExpectedSpace)]
+fun from_utc_string_invalid_space() {
+    date::from_utc_string(b"Thu,01 Jan 1970 00:00:00 GMT ".to_string());
+}
+
+#[test, expected_failure(abort_code = date::EExpectedSpace)]
+fun from_utc_string_invalid_space_2() {
+    date::from_utc_string(b"Thu, 01 Jan 197000:00:00 GMT ".to_string());
+}
+
+#[test, expected_failure(abort_code = date::EExpectedSpace)]
+fun from_utc_string_invalid_space_3() {
+    date::from_utc_string(b"Thu, 01 Jan 1970 00:00:00GMT ".to_string());
+}
+
+#[test, expected_failure(abort_code = date::EExpectedColon)]
+fun from_utc_string_invalid_colon() {
+    date::from_utc_string(b"Thu, 01 Jan 1970 0000:00 GMT ".to_string());
+}
+
+#[test, expected_failure(abort_code = date::EExpectedColon)]
+fun from_utc_string_invalid_colon_2() {
+    date::from_utc_string(b"Thu, 01 Jan 1970 00:0000 GMT ".to_string());
+}
+
+#[test, expected_failure(abort_code = date::EExpectedTimezone)]
+fun from_utc_string_invalid_timezone() {
+    date::from_utc_string(b"Thu, 01 Jan 1970 00:00:00    ".to_string());
+}
+
+// === Other ===
+
 #[test]
 fun format_juzy() {
     assert_format!(
@@ -226,6 +287,17 @@ fun format_juzy() {
         b"'You are a man of culture' YYYY-MM-DD",
         b"You are a man of culture 2025-05-22",
     );
+}
+
+/// Constructs a date from a UTC string; Use its timestamp to construct new Date
+/// and asserts that the timestamp matches the original UTC string.
+macro fun assert_from_utc_timestamp_eq($utc: vector<u8>) {
+    let utc = $utc;
+    let utc_string = utc.to_string();
+    let date = date::from_utc_string(utc_string);
+    let timestamp_ms = date.timestamp_ms();
+
+    assert_eq!(date::new(timestamp_ms).to_utc_string(), utc_string);
 }
 
 macro fun assert_from_to_utc_string($utc: vector<u8>) {

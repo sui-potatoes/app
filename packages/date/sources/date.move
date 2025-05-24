@@ -1,16 +1,16 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Module: date
+/// Implementation of the Date type and related functions in Move.
 ///
 /// Supports:
 /// - ISO 8601
-/// - RFC 1123 (UTC string format)
+/// - RFC 7231 (HTTP-date format)
 /// - Date / Time formatting
-/// - Timezone Offsets according to ISO 8601
 ///
 /// Does not support:
 /// - IANA Timezone names
+/// - Timezone Offsets (ISO 8601)
 ///
 /// Formatting:
 /// - `yyyy` or `YYYY` - The year number in four digits. For example, in this format, 2005 would be represented as 2005.
@@ -37,7 +37,7 @@
 ///
 /// Resources:
 /// - ISO 8601: https://en.wikipedia.org/wiki/ISO_8601
-/// - Microsoft Orchestrator: https://learn.microsoft.com/en-us/system-center/orchestrator/standard-activities/format-date-time?view=sc-orch-2025
+/// - RFC 7231 (HTTP-date format: https://datatracker.ietf.org/doc/html/rfc7231#section-7.1.1.1)
 module date::date;
 
 use std::{macros::num_to_string, string::String};
@@ -45,6 +45,11 @@ use sui::clock::Clock;
 
 const EInvalidMonth: u64 = 0;
 const EInvalidDay: u64 = 1;
+const EExpectedComma: u64 = 2;
+const EExpectedSpace: u64 = 3;
+const EExpectedColon: u64 = 4;
+const EExpectedTimezone: u64 = 5;
+const EInvalidFormat: u64 = 6;
 
 /// The days of the week.
 const DAYS: vector<vector<u8>> = vector[b"Sun", b"Mon", b"Tue", b"Wed", b"Thu", b"Fri", b"Sat"];
@@ -85,6 +90,33 @@ const MONTH_NAMES: vector<vector<u8>> = vector[
     b"November",
     b"December",
 ];
+
+// === ASCII Symbols ===
+
+/// Capital: Y
+const Y: u8 = 89;
+/// Capital: Z
+const Z: u8 = 90;
+/// Capital: YY
+const YY: u8 = 121;
+/// Capital: M
+const M: u8 = 77;
+/// Capital: D
+const D: u8 = 68;
+/// Small: d
+const DD: u8 = 100;
+/// Capital: H
+const H: u8 = 72;
+/// Small: h
+const HH: u8 = 104;
+/// Small: m
+const MM: u8 = 109;
+/// Small: s
+const SS: u8 = 115;
+/// Small: t
+const TT: u8 = 116;
+/// Single quote. Used to escape text in the formatted string.
+const SINGLE_QUOTE: u8 = 39;
 
 /// A struct representing a date.
 public struct Date has copy, drop, store {
@@ -172,7 +204,9 @@ public fun from_clock(clock: &Clock): Date {
     new(clock.timestamp_ms())
 }
 
-/// Create a new `Date` from a UTC string.
+/// Create a new `Date` from a UTC String (RFC 1123).
+/// See HTTP-date format: https://www.rfc-editor.org/rfc/rfc7231#section-7.1.1.1
+///
 /// According to the RFC 1123, the UTC string is in the format of:
 /// `ddd, DD MMM YYYY HH:MM:SS GMT`
 ///
@@ -181,51 +215,95 @@ public fun from_clock(clock: &Clock): Date {
 /// - `DD` is the day of the month in two digits.
 /// - `MMM` is the month in three letters.
 /// - `YYYY` is the year in four digits.
+///
+/// Aborts if:
+/// - The UTC string is not in the correct format.
+/// - Incorrect values are used for month or day of the week.
 public fun from_utc_string(utc: String): Date {
     let days = DAYS;
     let months = MONTHS;
+    let days_in_month = DAYS_IN_MONTH;
     let mut utc = utc.into_bytes();
+
+    assert!(utc.length() == 29, EInvalidFormat);
+
     utc.reverse();
 
     // First 3 elements are the day of the week.
     let day_of_week = vector::tabulate!(3, |_| utc.pop_back());
     let day_of_week = days.find_index!(|d| d == &day_of_week).destroy_or!(abort EInvalidDay) as u8;
-    assert!(utc.pop_back() == 44); // comma in ascii is 44
-    assert!(utc.pop_back() == 32); // space in ascii is 32
+    assert!(utc.pop_back() == 44, EExpectedComma); // comma in ascii is 44
+    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
 
-    let day = vector::tabulate!(2, |_| utc.pop_back());
-    assert!(utc.pop_back() == 32); // space in ascii is 32
+    let day = parse_u16!(vector::tabulate!(2, |_| utc.pop_back())) as u8;
+    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
 
     let month = vector::tabulate!(3, |_| utc.pop_back());
     let month = months.find_index!(|m| m == &month).destroy_or!(abort EInvalidMonth) as u8;
-    assert!(utc.pop_back() == 32); // space in ascii is 32
+    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
 
-    let year = vector::tabulate!(4, |_| utc.pop_back());
-    assert!(utc.pop_back() == 32); // space in ascii is 32
+    let year = parse_u16!(vector::tabulate!(4, |_| utc.pop_back()));
+    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
 
-    let hour = vector::tabulate!(2, |_| utc.pop_back());
-    assert!(utc.pop_back() == 58); // colon in ascii is 58
+    let hour = parse_u16!(vector::tabulate!(2, |_| utc.pop_back())) as u8;
+    assert!(utc.pop_back() == 58, EExpectedColon); // colon in ascii is 58
 
-    let minute = vector::tabulate!(2, |_| utc.pop_back());
-    assert!(utc.pop_back() == 58); // colon in ascii is 58
+    let minute = parse_u16!(vector::tabulate!(2, |_| utc.pop_back())) as u8;
+    assert!(utc.pop_back() == 58, EExpectedColon); // colon in ascii is 58
 
-    let second = vector::tabulate!(2, |_| utc.pop_back());
-    assert!(utc.pop_back() == 32); // space in ascii is 32
+    let second = parse_u16!(vector::tabulate!(2, |_| utc.pop_back())) as u8;
+    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
 
     let timezone = vector::tabulate!(3, |_| utc.pop_back());
-    assert!(timezone == b"GMT");
+    assert!(timezone == b"GMT", EExpectedTimezone);
+
+    // Convert year/month/day/hour/minute/second to timestamp_ms.
+    let mut days = 0;
+
+    // Add days for each year since 1970.
+    let mut y = 1970;
+    while (y < year) {
+        days = days + 365;
+        // Add leap year day if applicable.
+        if (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) {
+            days = days + 1;
+        };
+        y = y + 1;
+    };
+
+    // Add days for each month.
+    let mut m = 0; // Start from 0 instead of 1 to fix off-by-one error
+    while (m < month) {
+        days = days + days_in_month[m as u64];
+        // Add leap year day in February if applicable
+        if (m == 1 && year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
+            // m == 1 for February
+            days = days + 1;
+        };
+        m = m + 1;
+    };
+
+    // Add remaining days
+    days = days + (day as u64) - 1;
+
+    // Convert to milliseconds
+    let timestamp_ms = days * 24 * 60 * 60;
+    let timestamp_ms = timestamp_ms + (hour as u64) * 60 * 60;
+    let timestamp_ms = timestamp_ms + (minute as u64) * 60;
+    let timestamp_ms = timestamp_ms + (second as u64);
+    let timestamp_ms = timestamp_ms * 1000;
 
     Date {
-        year: parse_u16!(year),
+        year,
         month,
-        day: parse_u16!(day) as u8,
+        day,
         day_of_week,
-        hour: parse_u16!(hour) as u8,
-        minute: parse_u16!(minute) as u8,
-        second: parse_u16!(second) as u8,
+        hour,
+        minute,
+        second,
         millisecond: 0,
         timezone_offset_m: 0,
-        timestamp_ms: 0,
+        timestamp_ms,
     }
 }
 
@@ -247,7 +325,17 @@ public fun month(date: &Date): u8 { date.month }
 /// Get the year of a `Date`.
 public fun year(date: &Date): u16 { date.year }
 
-/// ISO 8601
+/// Get the timestamp in milliseconds of a `Date`.
+public fun timestamp_ms(date: &Date): u64 { date.timestamp_ms }
+
+/// Print a `Date` in ISO 8601 format as a String.
+///
+/// Example:
+/// ```rust
+/// assert!(date.to_iso_string() == b"2025-05-22T15:39:27.000Z".to_string());
+/// ```
+///
+/// See ISO 8601: https://en.wikipedia.org/wiki/ISO_8601
 public fun to_iso_string(date: &Date): String {
     let mut date = *date;
     let offset = date.timezone_offset_m as u64;
@@ -285,13 +373,20 @@ public fun to_iso_string(date: &Date): String {
 }
 
 /// Convert a `Date` to a UTC string.
+/// See RFC 1123: https://www.rfc-editor.org/rfc/rfc7231#section-7.1.1.1
+///
 /// According to the RFC 1123, the UTC string is in the format of:
 /// `ddd, DD MMM YYYY HH:MM:SS GMT`
 ///
 /// Where:
-/// - `ddd` is the day of the week in three letters.
+/// - `DDD` is the day of the week in three letters.
 /// - `DD` is the day of the month in two digits.
 /// - `MMM` is the month in three letters.
+///
+/// Example:
+/// ```rust
+/// assert!(date.to_utc_string() == b"Fri, 16 May 2025 15:39:27 GMT".to_string());
+/// ```
 public fun to_utc_string(date: &Date): String {
     let months = MONTHS;
     let days = DAYS;
@@ -313,31 +408,6 @@ public fun to_utc_string(date: &Date): String {
     date_time.append_utf8(b" GMT");
     date_time
 }
-
-/// Capital: Y
-const Y: u8 = 89;
-/// Capital: Z
-const Z: u8 = 90;
-/// Capital: YY
-const YY: u8 = 121;
-/// Capital: M
-const M: u8 = 77;
-/// Capital: D
-const D: u8 = 68;
-/// Small: d
-const DD: u8 = 100;
-/// Capital: H
-const H: u8 = 72;
-/// Small: h
-const HH: u8 = 104;
-/// Small: m
-const MM: u8 = 109;
-/// Small: s
-const SS: u8 = 115;
-/// Small: t
-const TT: u8 = 116;
-/// Single quote. Used to escape text in the formatted string.
-const SINGLE_QUOTE: u8 = 39;
 
 /// Format a `Date` to a string.
 public fun format(date: &Date, format: vector<u8>): String {
@@ -481,6 +551,8 @@ macro fun u8_pad_zero($num: u8): String { pad_zero!($num) }
 /// Pad a `u16` number with a leading zero.
 macro fun u16_pad_zero($num: u16): String { pad_zero!($num) }
 
+/// Convert a timezone offset in minutes to a string.
+/// Currently not used due to lack of timezone support.
 macro fun to_timezone_offset_string($offset_m: u16): String {
     let mut res = b"".to_string();
     if ($offset_m > 720) {
