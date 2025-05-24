@@ -40,6 +40,7 @@
 /// - RFC 7231 (HTTP-date format: https://datatracker.ietf.org/doc/html/rfc7231#section-7.1.1.1)
 module date::date;
 
+use ascii::char;
 use std::{macros::num_to_string, string::String};
 use sui::clock::Clock;
 
@@ -160,9 +161,7 @@ public fun new(timestamp_ms: u64): Date {
 
     // == Leap year ==
     loop {
-        let is_leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
-        let days_in_year = if (is_leap) 366 else 365;
-
+        let days_in_year = if (is_leap_year!(year)) 366 else 365;
         if (days < days_in_year) break
         else {
             year = year + 1;
@@ -175,8 +174,11 @@ public fun new(timestamp_ms: u64): Date {
     let days_in_month = DAYS_IN_MONTH;
 
     loop {
-        let is_leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
-        let days_in_month = if (is_leap && month == 1) 29 else days_in_month[month];
+        let days_in_month = if (is_leap_year!(year) && month == 1) {
+            29
+        } else {
+            days_in_month[month]
+        };
 
         if (days < days_in_month) break
         else {
@@ -232,27 +234,27 @@ public fun from_utc_string(utc: String): Date {
     // First 3 elements are the day of the week.
     let day_of_week = vector::tabulate!(3, |_| utc.pop_back());
     let day_of_week = days.find_index!(|d| d == &day_of_week).destroy_or!(abort EInvalidDay) as u8;
-    assert!(utc.pop_back() == 44, EExpectedComma); // comma in ascii is 44
-    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
+    assert!(utc.pop_back() == char::comma!(), EExpectedComma); // comma in ascii is 44
+    assert!(utc.pop_back() == char::space!(), EExpectedSpace); // space in ascii is 32
 
     let day = parse_u16!(vector::tabulate!(2, |_| utc.pop_back())) as u8;
-    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
+    assert!(utc.pop_back() == char::space!(), EExpectedSpace); // space in ascii is 32
 
     let month = vector::tabulate!(3, |_| utc.pop_back());
     let month = months.find_index!(|m| m == &month).destroy_or!(abort EInvalidMonth) as u8;
-    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
+    assert!(utc.pop_back() == char::space!(), EExpectedSpace); // space in ascii is 32
 
     let year = parse_u16!(vector::tabulate!(4, |_| utc.pop_back()));
-    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
+    assert!(utc.pop_back() == char::space!(), EExpectedSpace); // space in ascii is 32
 
     let hour = parse_u16!(vector::tabulate!(2, |_| utc.pop_back())) as u8;
-    assert!(utc.pop_back() == 58, EExpectedColon); // colon in ascii is 58
+    assert!(utc.pop_back() == char::colon!(), EExpectedColon);
 
     let minute = parse_u16!(vector::tabulate!(2, |_| utc.pop_back())) as u8;
-    assert!(utc.pop_back() == 58, EExpectedColon); // colon in ascii is 58
+    assert!(utc.pop_back() == char::colon!(), EExpectedColon);
 
     let second = parse_u16!(vector::tabulate!(2, |_| utc.pop_back())) as u8;
-    assert!(utc.pop_back() == 32, EExpectedSpace); // space in ascii is 32
+    assert!(utc.pop_back() == char::space!(), EExpectedSpace); // space in ascii is 32
 
     let timezone = vector::tabulate!(3, |_| utc.pop_back());
     assert!(timezone == b"GMT", EExpectedTimezone);
@@ -261,27 +263,18 @@ public fun from_utc_string(utc: String): Date {
     let mut days = 0;
 
     // Add days for each year since 1970.
-    let mut y = 1970;
-    while (y < year) {
+    1970u16.range_do!(year, |y| {
         days = days + 365;
         // Add leap year day if applicable.
-        if (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) {
-            days = days + 1;
-        };
-        y = y + 1;
-    };
+        if (is_leap_year!(y)) days = days + 1;
+    });
 
     // Add days for each month.
-    let mut m = 0; // Start from 0 instead of 1 to fix off-by-one error
-    while (m < month) {
+    month.do!(|m| {
         days = days + days_in_month[m as u64];
         // Add leap year day in February if applicable
-        if (m == 1 && year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
-            // m == 1 for February
-            days = days + 1;
-        };
-        m = m + 1;
-    };
+        if (m == 1 && is_leap_year!(year)) days = days + 1;
+    });
 
     // Add remaining days
     days = days + (day as u64) - 1;
@@ -351,25 +344,25 @@ public fun to_iso_string(date: &Date): String {
         }
     };
 
-    let mut iso = b"".to_string();
-    iso.append(date.year.to_string());
-    iso.append_utf8(b"-");
-    iso.append_utf8(num_to_bytes!(date.month + 1, true));
-    iso.append_utf8(b"-");
-    iso.append_utf8(num_to_bytes!(date.day, true));
-    iso.append_utf8(b"T");
-    iso.append_utf8(num_to_bytes!(date.hour, true));
-    iso.append_utf8(b":");
-    iso.append_utf8(num_to_bytes!(date.minute, true));
-    iso.append_utf8(b":");
-    iso.append_utf8(num_to_bytes!(date.second, true));
-    iso.append_utf8(b".");
+    let mut iso = vector[];
+    iso.append(num_to_bytes!(date.year, false));
+    iso.push_back(char::minus!());
+    iso.append(num_to_bytes!(date.month + 1, true));
+    iso.push_back(char::minus!());
+    iso.append(num_to_bytes!(date.day, true));
+    iso.push_back(char::u_t!());
+    iso.append(num_to_bytes!(date.hour, true));
+    iso.push_back(char::colon!());
+    iso.append(num_to_bytes!(date.minute, true));
+    iso.push_back(char::colon!());
+    iso.append(num_to_bytes!(date.second, true));
+    iso.push_back(char::period!());
 
     // extra 0 for milliseconds
-    if (date.millisecond < 100) iso.append_utf8(b"0");
-    iso.append_utf8(num_to_bytes!(date.millisecond, true));
-    iso.append_utf8(to_timezone_offset_bytestring!(date.timezone_offset_m));
-    iso
+    if (date.millisecond < 100) iso.push_back(char::zero!());
+    iso.append(num_to_bytes!(date.millisecond, true));
+    iso.append(to_timezone_offset_byte_string!(date.timezone_offset_m));
+    iso.to_string()
 }
 
 /// Convert a `Date` to a UTC string.
@@ -390,23 +383,24 @@ public fun to_iso_string(date: &Date): String {
 public fun to_utc_string(date: &Date): String {
     let months = MONTHS;
     let days = DAYS;
-
-    let mut date_time = b"".to_string();
-    date_time.append_utf8(days[date.day_of_week as u64]);
-    date_time.append_utf8(b", ");
-    date_time.append_utf8(num_to_bytes!(date.day, true));
-    date_time.append_utf8(b" ");
-    date_time.append_utf8(months[date.month as u64]);
-    date_time.append_utf8(b" ");
-    date_time.append(date.year.to_string());
-    date_time.append_utf8(b" ");
-    date_time.append_utf8(num_to_bytes!(date.hour, true));
-    date_time.append_utf8(b":");
-    date_time.append_utf8(num_to_bytes!(date.minute, true));
-    date_time.append_utf8(b":");
-    date_time.append_utf8(num_to_bytes!(date.second, true));
-    date_time.append_utf8(b" GMT");
-    date_time
+    let mut date_time = vector[];
+    
+    date_time.append(days[date.day_of_week as u64]);
+    date_time.push_back(char::comma!());
+    date_time.push_back(char::space!());
+    date_time.append(num_to_bytes!(date.day, true));
+    date_time.push_back(char::space!());
+    date_time.append(months[date.month as u64]);
+    date_time.push_back(char::space!());
+    date_time.append(num_to_bytes!(date.year, false));
+    date_time.push_back(char::space!());
+    date_time.append(num_to_bytes!(date.hour, true));
+    date_time.push_back(char::colon!());
+    date_time.append(num_to_bytes!(date.minute, true));
+    date_time.push_back(char::colon!());
+    date_time.append(num_to_bytes!(date.second, true));
+    date_time.append(b" GMT");
+    date_time.to_string()
 }
 
 /// Format a `Date` to a string.
@@ -415,7 +409,7 @@ public fun format(date: &Date, format: vector<u8>): String {
     let days = DAYS;
     let months_full = MONTH_NAMES;
     let days_full = DAYS_FULL;
-    let mut formatted = b"".to_string();
+    let mut formatted = vector[];
     let (mut i, len) = (0, format.length());
 
     while (i < len) {
@@ -426,34 +420,34 @@ public fun format(date: &Date, format: vector<u8>): String {
                 i + 3 < len && &format[i + 1] == &y && &format[i + 2] == &y && &format[i + 3] == &y
             ) {
                 // The year number in four digits. For example, in this format, 2005 would be represented as 2005.
-                formatted.append_utf8(num_to_bytes!(date.year, false));
+                formatted.append(num_to_bytes!(date.year, false));
                 i = i + 3;
             } else if (i + 1 < len && format[i + 1] == y) {
                 // The last two digits of the year number. For example, in this format, 2005 would be represented as 05.
-                formatted.append_utf8(num_to_bytes!(date.year % 100, true));
+                formatted.append(num_to_bytes!(date.year % 100, true));
                 i = i + 1;
             } else {
                 // The last digit of the year. For example, 2005 would be represented as 5.
-                formatted.append_utf8(num_to_bytes!(date.year % 10, false));
+                formatted.append(num_to_bytes!(date.year % 10, false));
             },
             // Month: MMMM / MMM / MM / M
             M => if (
                 i + 3 < len && format[i + 1] == M && format[i + 2] == M && format[i + 3] == M
             ) {
                 // The name of the month spelled in full. This format is supported only for output time. Note: This format is only supported for the output format.
-                formatted.append_utf8(months_full[date.month as u64]);
+                formatted.append(months_full[date.month as u64]);
                 i = i + 3;
             } else if (i + 2 < len && format[i + 1] == M && format[i + 2] == M) {
                 // The name of the month in three letters. For example, August would be represented as Aug.
-                formatted.append_utf8(months[date.month as u64]);
+                formatted.append(months[date.month as u64]);
                 i = i + 2;
             } else if (i + 1 < len && format[i + 1] == M) {
                 // Month in two digits. If the month number is a single-digit number, it's displayed with a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.month + 1, true));
+                formatted.append(num_to_bytes!(date.month + 1, true));
                 i = i + 1;
             } else {
                 // Month as a number from 1 to 12. If the month number is a single-digit number, it's displayed without a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.month + 1, false));
+                formatted.append(num_to_bytes!(date.month + 1, false));
             },
             // Day: dddd / ddd / dd / d OR DDDD / DDD / DD / D
             // prettier-ignore
@@ -461,69 +455,67 @@ public fun format(date: &Date, format: vector<u8>): String {
                 i + 3 < len && &format[i + 1] == &d && &format[i + 2] == &d && &format[i + 3] == &d
             ) {
                 // The full name of the day of the week. For example, Saturday is displayed in full. Note: This format is only supported for the output format.
-                formatted.append_utf8(days_full[date.day_of_week as u64]);
+                formatted.append(days_full[date.day_of_week as u64]);
                 i = i + 3;
             } else if (i + 2 < len && format[i + 1] == d && format[i + 2] == d) {
                 // The abbreviated name of the day of the week in three letters. For example, Saturday is abbreviated as “Sat”.
-                formatted.append_utf8(days[date.day_of_week as u64]);
+                formatted.append(days[date.day_of_week as u64]);
                 i = i + 2;
             } else if (i + 1 < len && format[i + 1] == d) {
                 // Day in two digits. If the day number is a single-digit number, it's displayed with a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.day, true));
+                formatted.append(num_to_bytes!(date.day, true));
                 i = i + 1;
             } else {
                 // Day as a number from 1 to 31. If the day number is a single-digit number, it's displayed without a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.day, false));
+                formatted.append(num_to_bytes!(date.day, false));
             },
             // Hour: HH / H
             H => if (i + 1 < len && format[i + 1] == H) {
                 // Hour in two digits using the 24-hour clock. For example, in this format, 1 pm would be represented as 13. If the hour number is a single-digit number, it's displayed with a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.hour, true));
+                formatted.append(num_to_bytes!(date.hour, true));
                 i = i + 1;
             } else {
                 // Hour as a number from 0 to 23 when using the 24-hour clock. For example, in this format, 1 pm would be represented as 13. If the hour number is a single-digit number, it's displayed without a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.hour, false));
+                formatted.append(num_to_bytes!(date.hour, false));
             },
             // Hour: hh / h
             HH => if (i + 1 < len && format[i + 1] == HH) {
                 // Hour in two digits using the 12-hour clock. For example, in this format, 1 pm would be represented as 01. If the hour number is a single-digit number, it's displayed with a leading zero.
-                formatted.append_utf8(
-                    num_to_bytes!((if (date.hour == 0) 12 else date.hour % 12), true),
-                );
+                let hour = if (date.hour == 0) 12 else date.hour % 12;
+                formatted.append(num_to_bytes!(hour, true));
                 i = i + 1;
             } else {
                 // Hour as a number from 1 to 12 when using the 12-hour clock. If the hour number is a single-digit number, it's displayed without a leading zero.
-                formatted.append_utf8(
-                    num_to_bytes!((if (date.hour == 0) 12 else date.hour % 12), false),
-                );
+                let hour = if (date.hour == 0) 12 else date.hour % 12;
+                formatted.append(num_to_bytes!(hour, false));
             },
             // Minute: m
             MM => if (i + 1 < len && format[i + 1] == MM) {
                 // Minutes in two digits. If the minute number is a single-digit number, it's displayed with a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.minute, true));
+                formatted.append(num_to_bytes!(date.minute, true));
                 i = i + 1;
             } else {
                 // Minutes as a number from 0 to 59. If the minute number is a single-digit number, it's displayed without a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.minute, false));
+                formatted.append(num_to_bytes!(date.minute, false));
             },
             // Second: s
             SS => if (i + 1 < len && format[i + 1] == SS) {
                 // Seconds in two digits. If the second number is a single-digit number, it's displayed with a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.second, true));
+                formatted.append(num_to_bytes!(date.second, true));
                 i = i + 1;
             } else {
                 // Seconds as a number from 0 to 59. If the second number is a single-digit number, it's displayed without a leading zero.
-                formatted.append_utf8(num_to_bytes!(date.second, false));
+                formatted.append(num_to_bytes!(date.second, false));
             },
             // TT: AM/PM
             TT => if (i + 1 < len && format[i + 1] == TT) {
                 // A.M. or P.M. as two letters: A.M. or P.M. as defined on your system.
-                formatted.append_utf8(if (date.hour < 12) b"AM" else b"PM");
+                formatted.append(if (date.hour < 12) b"AM" else b"PM");
                 i = i + 1;
             } else abort,
             // Z: for ISO 8601
             Z if (date.timezone_offset_m != 720) => {
-                formatted.append_utf8(to_timezone_offset_bytestring!(date.timezone_offset_m));
+                formatted.append(to_timezone_offset_byte_string!(date.timezone_offset_m));
             },
             // Single quote. Used to escape text in the formatted string.
             // Once seen, scan next characters until another single quote is seen.
@@ -532,18 +524,18 @@ public fun format(date: &Date, format: vector<u8>): String {
                 (i + 1).range_do!(len, |j| {
                     if (format[j] == SINGLE_QUOTE) {
                         i = j;
-                        formatted.append_utf8(agg);
+                        formatted.append(agg);
                         return 'search
                     };
                     agg.push_back(format[j]);
                 });
             },
-            _ => formatted.append_utf8(vector[format[i]]),
+            _ => formatted.append(vector[format[i]]),
         };
         i = i + 1;
     };
 
-    formatted
+    formatted.to_string()
 }
 
 // === Macros ===
@@ -551,25 +543,27 @@ public fun format(date: &Date, format: vector<u8>): String {
 /// Convert a `u16` number to a `vector<u8>`.
 macro fun num_to_bytes($num: _, $pad: bool): vector<u8> {
     let num = $num as u16;
+    let zero = char::zero!() as u16;
+
     if (num < 10) {
-        if ($pad) vector[48, num as u8 + 48] else vector[num as u8 + 48] // just 1 symbol
+        if ($pad) vector[zero as u8, (num + zero) as u8] else vector[(num + zero) as u8]
     } else if (num < 100) {
-        vector[(num / 10 + 48) as u8, (num % 10 + 48) as u8] // 2 symbols
+        vector[(num / 10 + zero) as u8, (num % 10 + zero) as u8]
     } else if (num < 1000) {
-        vector[(num / 100 + 48) as u8, (num / 10 % 10 + 48) as u8, (num % 10 + 48) as u8] // 3 symbols
+        vector[(num / 100 + zero) as u8, (num / 10 % 10 + zero) as u8, (num % 10 + zero) as u8]
     } else {
         vector[
-            (num / 1000 + 48) as u8,
-            (num / 100 % 10 + 48) as u8,
-            (num / 10 % 10 + 48) as u8,
-            (num % 10 + 48) as u8,
-        ] // 4 symbols
+            (num / 1000 + zero) as u8,
+            (num / 100 % 10 + zero) as u8,
+            (num / 10 % 10 + zero) as u8,
+            (num % 10 + zero) as u8,
+        ]
     }
 }
 
 /// Convert a timezone offset in minutes to a string.
 /// Currently not used due to lack of timezone support.
-macro fun to_timezone_offset_bytestring($offset_m: u16): vector<u8> {
+macro fun to_timezone_offset_byte_string($offset_m: u16): vector<u8> {
     if ($offset_m == 720) {
         return b"Z"
     };
@@ -577,22 +571,27 @@ macro fun to_timezone_offset_bytestring($offset_m: u16): vector<u8> {
     let mut res = vector[];
     let (hours, minutes) = if ($offset_m > 720) {
         // East
-        res.push_back(43); // + sign ASCII: 43
+        res.push_back(char::plus!()); // + sign ASCII: 43
         let hours = ($offset_m - 720) / 60;
         let minutes = ($offset_m - 720) % 60;
         (hours, minutes)
     } else {
         // West
-        res.push_back(45); // - sign ASCII: 45
+        res.push_back(char::minus!()); // - sign ASCII: 45
         let hours = (720 - $offset_m) / 60;
         let minutes = (720 - $offset_m) % 60;
         (hours, minutes)
     };
 
     res.append(num_to_bytes!(hours, true));
-    res.push_back(58); // : sign ASCII: 58
+    res.push_back(char::colon!()); // : sign ASCII: 58
     res.append(num_to_bytes!(minutes, true));
     res
+}
+
+/// Check if a year is a leap year.
+macro fun is_leap_year($year: u16): bool {
+    ($year % 4 == 0 && $year % 100 != 0) || ($year % 400 == 0)
 }
 
 /// Parse `u16` from `vector<u8>`. This implementation is intentionally silly,
