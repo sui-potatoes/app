@@ -38,6 +38,17 @@ fun utc_date_time() {
 }
 
 #[test]
+fun from_to_utc() {
+    assert_from_to_utc_string!(b"Thu, 01 Jan 1970 00:00:00 GMT");
+    assert_from_to_utc_string!(b"Fri, 02 Jan 1970 00:00:00 GMT");
+    assert_from_to_utc_string!(b"Fri, 16 May 2025 15:39:27 GMT");
+    assert_from_to_utc_string!(b"Fri, 01 Jan 2021 00:00:00 GMT");
+    assert_from_to_utc_string!(b"Thu, 16 May 2024 10:00:00 GMT");
+    assert_from_to_utc_string!(b"Tue, 01 Jan 2030 00:00:00 GMT");
+    assert_from_to_utc_string!(b"Fri, 01 Jan 2038 00:00:00 GMT");
+}
+
+#[test]
 fun iso_date_time() {
     assert_eq!(date::new(0).to_iso_string(), b"1970-01-01T00:00:00.000Z".to_string());
     assert_eq!(date::new(15).to_iso_string(), b"1970-01-01T00:00:00.015Z".to_string());
@@ -215,6 +226,11 @@ fun format_juzy() {
         b"'You are a man of culture' YYYY-MM-DD",
         b"You are a man of culture 2025-05-22",
     );
+}
+
+macro fun assert_from_to_utc_string($utc: vector<u8>) {
+    let utc = $utc;
+    assert_eq!(date::from_utc_string(utc.to_string()).to_utc_string(), utc.to_string());
 }
 
 /// Asserts that the formatted date matches the expected string.

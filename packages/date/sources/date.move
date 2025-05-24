@@ -41,6 +41,10 @@
 module date::date;
 
 use std::{macros::num_to_string, string::String};
+use sui::clock::Clock;
+
+const EInvalidMonth: u64 = 0;
+const EInvalidDay: u64 = 1;
 
 /// The days of the week.
 const DAYS: vector<vector<u8>> = vector[b"Sun", b"Mon", b"Tue", b"Wed", b"Thu", b"Fri", b"Sat"];
@@ -160,6 +164,60 @@ public fun new(timestamp_ms: u64): Date {
         millisecond: (timestamp_ms % 1000) as u16,
         timezone_offset_m: 720, // UTC by default
         timestamp_ms,
+    }
+}
+
+/// Create a new `Date` from a `Clock`.
+public fun from_clock(clock: &Clock): Date {
+    new(clock.timestamp_ms())
+}
+
+/// Create a new `Date` from a UTC string.
+public fun from_utc_string(utc: String): Date {
+    let days = DAYS;
+    let months = MONTHS;
+    let mut utc = utc.into_bytes();
+    utc.reverse();
+
+    // First 3 elements are the day of the week.
+    let day_of_week = vector::tabulate!(3, |_| utc.pop_back());
+    let day_of_week = days.find_index!(|d| d == &day_of_week).destroy_or!(abort EInvalidDay) as u8;
+    assert!(utc.pop_back() == 44); // comma in ascii is 44
+    assert!(utc.pop_back() == 32); // space in ascii is 32
+
+    let day = vector::tabulate!(2, |_| utc.pop_back());
+    assert!(utc.pop_back() == 32); // space in ascii is 32
+
+    let month = vector::tabulate!(3, |_| utc.pop_back());
+    let month = months.find_index!(|m| m == &month).destroy_or!(abort EInvalidMonth) as u8;
+    assert!(utc.pop_back() == 32); // space in ascii is 32
+
+    let year = vector::tabulate!(4, |_| utc.pop_back());
+    assert!(utc.pop_back() == 32); // space in ascii is 32
+
+    let hour = vector::tabulate!(2, |_| utc.pop_back());
+    assert!(utc.pop_back() == 58); // colon in ascii is 58
+
+    let minute = vector::tabulate!(2, |_| utc.pop_back());
+    assert!(utc.pop_back() == 58); // colon in ascii is 58
+
+    let second = vector::tabulate!(2, |_| utc.pop_back());
+    assert!(utc.pop_back() == 32); // space in ascii is 32
+
+    let timezone = vector::tabulate!(3, |_| utc.pop_back());
+    assert!(timezone == b"GMT");
+
+    Date {
+        year: parse_u16!(year),
+        month,
+        day: parse_u16!(day) as u8,
+        day_of_week,
+        hour: parse_u16!(hour) as u8,
+        minute: parse_u16!(minute) as u8,
+        second: parse_u16!(second) as u8,
+        millisecond: 0,
+        timezone_offset_m: 0,
+        timestamp_ms: 0,
     }
 }
 
@@ -431,6 +489,38 @@ macro fun to_timezone_offset_string($offset_m: u16): String {
     } else {
         b"Z".to_string()
     }
+}
+
+/// Parse `u16` from `vector<u8>`. This implementation is intentionally silly,
+/// because we know that the max value is 4 digits.
+macro fun parse_u16($bytes: vector<u8>): u16 {
+    let mut bytes = $bytes;
+    bytes.reverse();
+
+    // Skip leading zeros.
+    let (mut res, len) = (0u16, bytes.length());
+    len.do!(
+        |i| match (bytes.pop_back()) {
+            n @ _ if (*n >= 48 && *n <= 57) => {
+                res = res + (n as u16 - 48) * 10u16.pow(((len - 1) - i) as u8);
+            },
+            _ => abort,
+        },
+    );
+    res
+}
+
+#[test]
+fun test_parse_u16() {
+    use std::unit_test::assert_eq;
+
+    assert_eq!(parse_u16!(b"0"), 0);
+    assert_eq!(parse_u16!(b"01"), 1);
+    assert_eq!(parse_u16!(b"02"), 2);
+    assert_eq!(parse_u16!(b"10"), 10);
+    assert_eq!(parse_u16!(b"2015"), 2015);
+    assert_eq!(parse_u16!(b"12"), 12);
+    assert_eq!(parse_u16!(b"012"), 12);
 }
 
 /// Pad a number with a leading zero.
