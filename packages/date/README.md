@@ -75,13 +75,16 @@ public fun utc_date(clock: &Clock): String {
 
 ## Examples
 
-### Constructing From Clock or RFC 1123 String
+### Constructing From Clock or RFC 7231 String
 
 ```move
 use sui::clock::Clock;
 use date::date;
 
 public fun date_from_clock(c: &Clock) {
+    // Construct from timestamp.
+    let date = date::new(c.timestamp_ms());
+
     // Handy method for passing `Clock`.
     let date = date::from_clock(c);
 
@@ -89,7 +92,7 @@ public fun date_from_clock(c: &Clock) {
     let utc_string = date.to_utc_string();
 
     // Construct the `Date` from an RFC 1123 String.
-    let _date = date.from_utc_string(utc_string);
+    let _date = date::from_utc_string(utc_string);
 }
 ```
 
@@ -101,7 +104,7 @@ use std::unit_test::assert_eq;
 #[test]
 fun try_utc_and_iso() {
     assert_eq!(
-        date::new(1747409967000).to_utc_string(), // utc!
+        date::new(1747409967000).to_utc_string(), // rfc 7231
         b"Fri, 16 May 2025 15:39:27 GMT".to_string(),
     );
 
