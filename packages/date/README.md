@@ -43,7 +43,7 @@ public fun utc_date(clock: &Clock): String {
 
 -   supports timestamp -> parsed date conversion with the ability to get current
     minutes, seconds, year and so on
--   supports utc date string printing
+-   supports RFC 1123 (UTC) string printing
 -   supports ISO 8601 string printing
 -   supports custom date formatting, [see Format](#formatting) for rules
 
@@ -75,9 +75,29 @@ public fun utc_date(clock: &Clock): String {
 
 ## Examples
 
+### Constructing From Clock or RFC 1123 String
+
+```move
+use sui::clock::Clock;
+use date::date;
+
+public fun date_from_clock(c: &Clock) {
+    // Handy method for passing `Clock`.
+    let date = date::from_clock(c);
+
+    // Print the `Date` as an RFC 1123 String.
+    let utc_string = date.to_utc_string();
+
+    // Construct the `Date` from an RFC 1123 String.
+    let _date = date.from_utc_string(utc_string);
+}
+```
+
 ### UTC and ISO printing
 
 ```move
+use std::unit_test::assert_eq;
+
 #[test]
 fun try_utc_and_iso() {
     assert_eq!(
@@ -95,10 +115,10 @@ fun try_utc_and_iso() {
 ### Different Formatting
 
 ```move
+use std::unit_test::assert_eq;
+
 #[test]
 fun try_different_formats() {
-    use std::unit_test::assert_eq;
-
     let d = date::new(1747901403000).format(b"dd/MM/yyyy HH:mm:ss");
     assert_eq!(d, b"22/05/2025 08:10:03",to_string());
 

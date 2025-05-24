@@ -5,7 +5,7 @@
 ///
 /// Supports:
 /// - ISO 8601
-/// - UTC
+/// - RFC 1123 (UTC string format)
 /// - Date / Time formatting
 /// - Timezone Offsets according to ISO 8601
 ///
@@ -173,6 +173,14 @@ public fun from_clock(clock: &Clock): Date {
 }
 
 /// Create a new `Date` from a UTC string.
+/// According to the RFC 1123, the UTC string is in the format of:
+/// `ddd, DD MMM YYYY HH:MM:SS GMT`
+///
+/// Where:
+/// - `ddd` is the day of the week in three letters.
+/// - `DD` is the day of the month in two digits.
+/// - `MMM` is the month in three letters.
+/// - `YYYY` is the year in four digits.
 public fun from_utc_string(utc: String): Date {
     let days = DAYS;
     let months = MONTHS;
@@ -277,6 +285,13 @@ public fun to_iso_string(date: &Date): String {
 }
 
 /// Convert a `Date` to a UTC string.
+/// According to the RFC 1123, the UTC string is in the format of:
+/// `ddd, DD MMM YYYY HH:MM:SS GMT`
+///
+/// Where:
+/// - `ddd` is the day of the week in three letters.
+/// - `DD` is the day of the month in two digits.
+/// - `MMM` is the month in three letters.
 public fun to_utc_string(date: &Date): String {
     let months = MONTHS;
     let days = DAYS;
