@@ -43,7 +43,7 @@ public fun utc_date(clock: &Clock): String {
 
 -   supports timestamp -> parsed date conversion with the ability to get current
     minutes, seconds, year and so on
--   supports RFC 1123 (UTC) string printing
+-   supports RFC 7231 (UTC) string printing
 -   supports ISO 8601 string printing
 -   supports custom date formatting, [see Format](#formatting) for rules
 
@@ -88,10 +88,10 @@ public fun date_from_clock(c: &Clock) {
     // Handy method for passing `Clock`.
     let date = date::from_clock(c);
 
-    // Print the `Date` as an RFC 1123 String.
+    // Print the `Date` as an RFC 7231 String.
     let utc_string = date.to_utc_string();
 
-    // Construct the `Date` from an RFC 1123 String.
+    // Construct the `Date` from an RFC 7231 String.
     let _date = date::from_utc_string(utc_string);
 }
 ```

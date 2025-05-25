@@ -1,22 +1,17 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Module: ascii
-///
 /// Table of printable ASCII characters, each macro returns the corresponding
 /// ASCII code.
 ///
-/// - Lowercase letters are spelled without a prefix.
-/// - Uppercase letters are spelled with a prefix `u_`. Eg `u_a` is the ASCII `A`.
+/// - Lowercase letters are spelled without a prefix, eg `a` is the ASCII `97`.
+/// - Uppercase letters are spelled in uppercase, eg `A` is the ASCII `65`.
 module ascii::char;
 
 // === Checks ===
 
 /// Check if a character is printable.
 public macro fun is_printable($char: u8): bool { $char >= 32 && $char <= 126 }
-
-/// Check if a character is a control character.
-public macro fun is_control($char: u8): bool { $char <= 31 }
 
 /// Check if a character is a digit.
 public macro fun is_digit($char: u8): bool { $char >= 48 && $char <= 57 }
@@ -29,6 +24,11 @@ public macro fun is_lowercase($char: u8): bool { $char >= 97 && $char <= 122 }
 
 /// Check if a character is an uppercase letter.
 public macro fun is_uppercase($char: u8): bool { $char >= 65 && $char <= 90 }
+
+/// Check if a character is alphanumeric.
+public macro fun is_alphanumeric($char: u8): bool {
+    $char >= 48 && $char <= 57 || $char >= 65 && $char <= 90 || $char >= 97 && $char <= 122
+}
 
 // === Characters ===
 
@@ -132,82 +132,82 @@ public macro fun question_mark(): u8 { 63 }
 public macro fun at(): u8 { 64 }
 
 /// Uppercase A character.
-public macro fun u_a(): u8 { 65 }
+public macro fun A(): u8 { 65 }
 
 /// Uppercase B character.
-public macro fun u_b(): u8 { 66 }
+public macro fun B(): u8 { 66 }
 
 /// Uppercase C character.
-public macro fun u_c(): u8 { 67 }
+public macro fun C(): u8 { 67 }
 
 /// Uppercase D character.
-public macro fun u_d(): u8 { 68 }
+public macro fun D(): u8 { 68 }
 
 /// Uppercase E character.
-public macro fun u_e(): u8 { 69 }
+public macro fun E(): u8 { 69 }
 
 /// Uppercase F character.
-public macro fun u_f(): u8 { 70 }
+public macro fun F(): u8 { 70 }
 
 /// Uppercase G character.
-public macro fun u_g(): u8 { 71 }
+public macro fun G(): u8 { 71 }
 
 /// Uppercase H character.
-public macro fun u_h(): u8 { 72 }
+public macro fun H(): u8 { 72 }
 
 /// Uppercase I character.
-public macro fun u_i(): u8 { 73 }
+public macro fun I(): u8 { 73 }
 
 /// Uppercase J character.
-public macro fun u_j(): u8 { 74 }
+public macro fun J(): u8 { 74 }
 
 /// Uppercase K character.
-public macro fun u_k(): u8 { 75 }
+public macro fun K(): u8 { 75 }
 
 /// Uppercase L character.
-public macro fun u_l(): u8 { 76 }
+public macro fun L(): u8 { 76 }
 
 /// Uppercase M character.
-public macro fun u_m(): u8 { 77 }
+public macro fun M(): u8 { 77 }
 
 /// Uppercase N character.
-public macro fun u_n(): u8 { 78 }
+public macro fun N(): u8 { 78 }
 
 /// Uppercase O character.
-public macro fun u_o(): u8 { 79 }
+public macro fun O(): u8 { 79 }
 
 /// Uppercase P character.
-public macro fun u_p(): u8 { 80 }
+public macro fun P(): u8 { 80 }
 
 /// Uppercase Q character.
-public macro fun u_q(): u8 { 81 }
+public macro fun Q(): u8 { 81 }
 
 /// Uppercase R character.
-public macro fun u_r(): u8 { 82 }
+public macro fun R(): u8 { 82 }
 
 /// Uppercase S character.
-public macro fun u_s(): u8 { 83 }
+public macro fun S(): u8 { 83 }
 
 /// Uppercase T character.
-public macro fun u_t(): u8 { 84 }
+public macro fun T(): u8 { 84 }
 
 /// Uppercase U character.
-public macro fun u_u(): u8 { 85 }
+public macro fun U(): u8 { 85 }
 
 /// Uppercase V character.
-public macro fun u_v(): u8 { 86 }
+public macro fun V(): u8 { 86 }
 
 /// Uppercase W character.
-public macro fun u_w(): u8 { 87 }
+public macro fun W(): u8 { 87 }
 
 /// Uppercase X character.
-public macro fun u_x(): u8 { 88 }
+public macro fun X(): u8 { 88 }
 
 /// Uppercase Y character.
-public macro fun u_y(): u8 { 89 }
+public macro fun Y(): u8 { 89 }
 
 /// Uppercase Z character.
-public macro fun u_z(): u8 { 90 }
+public macro fun Z(): u8 { 90 }
 
 /// Left square bracket character.
 public macro fun left_bracket(): u8 { 91 }
