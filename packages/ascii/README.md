@@ -19,7 +19,7 @@ To add this library to your project, add this to your `Move.toml` file under
 
 ```toml
 # goes into [dependencies] section
-Date = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/ascii", rev = "ascii@v1" }
+ascii = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/ascii", rev = "ascii@v1" }
 ```
 
 Exported address of this package is:

@@ -6,3 +6,6 @@ authors = ["Damir Shamanaev <damirka.ru@gmail.com>"]
 
 [addresses]
 ascii = "0x0"
+
+# testnet: upgrade_cap = "0xe03549eaeab8d9461977ff1e993adf37a7d320f688a787b30fbdd30ce53c939c"
+# mainnet: 

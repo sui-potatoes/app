@@ -1,8 +1,8 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Table of printable ASCII characters, each macro returns the corresponding
-/// ASCII code.
+/// Table of non-extended, printable ASCII characters, each macro returns the
+/// corresponding ASCII code.
 ///
 /// - Lowercase letters are spelled without a prefix, eg `a` is the ASCII `97`.
 /// - Uppercase letters are spelled in uppercase, eg `A` is the ASCII `65`.
