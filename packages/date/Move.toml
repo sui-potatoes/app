@@ -1,0 +1,10 @@
+[package]
+name = "date"
+edition = "2024"
+authors = ["Damir Shamanaev <damirka.ru@gmail.com>"]
+
+[dependencies]
+ascii = { local = "../ascii" }
+
+[addresses]
+date = "0x0"
