@@ -350,7 +350,7 @@ public fun to_iso_string(date: &Date): String {
     iso.append(num_to_bytes!(date.month + 1, true));
     iso.push_back(char::minus!());
     iso.append(num_to_bytes!(date.day, true));
-    iso.push_back(char::u_t!());
+    iso.push_back(char::T!());
     iso.append(num_to_bytes!(date.hour, true));
     iso.push_back(char::colon!());
     iso.append(num_to_bytes!(date.minute, true));
@@ -384,7 +384,7 @@ public fun to_utc_string(date: &Date): String {
     let months = MONTHS;
     let days = DAYS;
     let mut date_time = vector[];
-    
+
     date_time.append(days[date.day_of_week as u64]);
     date_time.push_back(char::comma!());
     date_time.push_back(char::space!());
