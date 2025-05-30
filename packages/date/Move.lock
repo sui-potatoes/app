@@ -2,24 +2,24 @@
 
 [move]
 version = 3
-manifest_digest = "512BC88A7502BE48DF72CCFD604E4F8C567341C99B9899DC1E229865E9BA1B39"
-deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
+manifest_digest = "85238C252B7B5CF8C88AF46A5AD178C15AA214262E414ED404C102C188318DAA"
+deps_digest = "52B406A7A21811BEF51751CF88DA0E76DAEFFEAC888D4F4060B1A72BBE7D8D35"
 dependencies = [
-  { id = "Bridge", name = "Bridge" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
   { id = "ascii", name = "ascii" },
+]
+dev-dependencies = [
+  { id = "svg", name = "svg" },
 ]
 
 [[move.package]]
-id = "Bridge"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "6a2fc3c8f555", subdir = "crates/sui-framework/packages/bridge" }
+id = "Codec"
+source = { local = "../codec" }
 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
@@ -35,23 +35,33 @@ dependencies = [
 ]
 
 [[move.package]]
-id = "SuiSystem"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "6a2fc3c8f555", subdir = "crates/sui-framework/packages/sui-system" }
-
-dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-]
-
-[[move.package]]
 id = "ascii"
 source = { local = "../ascii" }
 
 dependencies = [
-  { id = "Bridge", name = "Bridge" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+]
+
+[[move.package]]
+id = "suifrens"
+source = { git = "https://github.com/MystenLabs/apps.git", rev = "main", subdir = "suifrens/suifrens" }
+
+dependencies = [
+  { id = "Sui", name = "Sui" },
+]
+
+[[move.package]]
+id = "svg"
+source = { local = "../svg" }
+
+dependencies = [
+  { id = "Codec", name = "Codec" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
+]
+
+dev-dependencies = [
+  { id = "suifrens", name = "Suifrens" },
 ]
 
 [move.toolchain-version]

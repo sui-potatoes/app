@@ -32,8 +32,7 @@
 /// - `m` - Minutes as a number from 0 to 59. If the minute number is a single-digit number, it's displayed without a leading zero.
 /// - `ss` - Seconds in two digits. If the second number is a single-digit number, it's displayed with a leading zero.
 /// - `s` - Seconds as a number from 0 to 59. If the second number is a single-digit number, it's displayed without a leading zero.
-/// - `tt` - A.M. or P.M. as two letters: A.M. or P.M. as defined on your system.
-/// - `t` - TODO: consider failing here
+/// - `tt` - A.M. or P.M. as two letters: AM or PM.
 ///
 /// Resources:
 /// - ISO 8601: https://en.wikipedia.org/wiki/ISO_8601
@@ -51,6 +50,7 @@ const EExpectedSpace: u64 = 3;
 const EExpectedColon: u64 = 4;
 const EExpectedTimezone: u64 = 5;
 const EInvalidFormat: u64 = 6;
+const EExpectedTT: u64 = 7;
 
 /// The days of the week.
 const DAYS: vector<vector<u8>> = vector[b"Sun", b"Mon", b"Tue", b"Wed", b"Thu", b"Fri", b"Sat"];
@@ -280,11 +280,11 @@ public fun from_utc_string(utc: String): Date {
     days = days + (day as u64) - 1;
 
     // Convert to milliseconds
-    let timestamp_ms = days * 24 * 60 * 60;
-    let timestamp_ms = timestamp_ms + (hour as u64) * 60 * 60;
-    let timestamp_ms = timestamp_ms + (minute as u64) * 60;
-    let timestamp_ms = timestamp_ms + (second as u64);
-    let timestamp_ms = timestamp_ms * 1000;
+    let timestamp =
+        days * 24 * 60 * 60 +
+        (hour as u64) * 60 * 60 +
+        (minute as u64) * 60 +
+        (second as u64);
 
     Date {
         year,
@@ -296,7 +296,7 @@ public fun from_utc_string(utc: String): Date {
         second,
         millisecond: 0,
         timezone_offset_m: 0,
-        timestamp_ms,
+        timestamp_ms: timestamp * 1000,
     }
 }
 
@@ -509,10 +509,10 @@ public fun format(date: &Date, format: vector<u8>): String {
             },
             // TT: AM/PM
             TT => if (i + 1 < len && format[i + 1] == TT) {
-                // A.M. or P.M. as two letters: A.M. or P.M. as defined on your system.
+                // A.M. or P.M. as two letters: AM or PM.
                 formatted.append(if (date.hour < 12) b"AM" else b"PM");
                 i = i + 1;
-            } else abort,
+            } else abort EExpectedTT,
             // Z: for ISO 8601
             Z if (date.timezone_offset_m != 720) => {
                 formatted.append(to_timezone_offset_byte_string!(date.timezone_offset_m));

@@ -4,7 +4,7 @@ edition = "2024.beta"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
-SVG = { local = "../svg" }
+svg = { local = "../svg" }
 Codec = { local = "../codec" }
 
 [addresses]

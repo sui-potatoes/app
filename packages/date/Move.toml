@@ -8,3 +8,6 @@ ascii = { local = "../ascii" }
 
 [addresses]
 date = "0x0"
+
+[dev-dependencies]
+svg = { local = "../svg" }
