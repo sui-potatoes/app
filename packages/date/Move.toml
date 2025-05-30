@@ -8,3 +8,9 @@ ascii = { local = "../ascii" }
 
 [addresses]
 date = "0x0"
+
+[dev-dependencies]
+svg = { local = "../svg" }
+
+# testnet_upgrade_cap = "0xb8eff943998cd73bad03a369116a2e70792821cc9c750e761ce00f56e28bd1b1"
+# mainnet_upgrade_cap = "0x5585093931f19cefd395a9f5c6312539ab08fcd3920576129109a94840234f22"

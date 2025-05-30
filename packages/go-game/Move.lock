@@ -5,22 +5,10 @@ version = 3
 manifest_digest = "A9F9C5DFBFC0DDBA6912C691BC908F769D08D0376DA112EB40FC96FD17F8F13D"
 deps_digest = "52B406A7A21811BEF51751CF88DA0E76DAEFFEAC888D4F4060B1A72BBE7D8D35"
 dependencies = [
-  { id = "Bridge", name = "Bridge" },
   { id = "Codec", name = "Codec" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "SVG", name = "SVG" },
   { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
-]
-
-[[move.package]]
-id = "Bridge"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "04f11afaf5e0", subdir = "crates/sui-framework/packages/bridge" }
-
-dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
@@ -43,11 +31,9 @@ id = "SVG"
 source = { local = "../svg" }
 
 dependencies = [
-  { id = "Bridge", name = "Bridge" },
   { id = "Codec", name = "Codec" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 dev-dependencies = [
@@ -60,15 +46,6 @@ source = { git = "https://github.com/MystenLabs/sui.git", rev = "04f11afaf5e0", 
 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
-]
-
-[[move.package]]
-id = "SuiSystem"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "04f11afaf5e0", subdir = "crates/sui-framework/packages/sui-system" }
-
-dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
 ]
 
 [[move.package]]

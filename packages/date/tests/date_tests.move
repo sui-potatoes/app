@@ -47,24 +47,25 @@ fun iso_date_time() {
 #[test]
 fun format_year() {
     // Thu, 01 Jan 1970 00:00:00 GMT
-    assert_format!(0, b"y", b"0");
     assert_format!(0, b"yy", b"70");
     assert_format!(0, b"yyyy", b"1970");
 
     // Fri, 16 May 2025 15:39:27 GMT
-    assert_format!(1747409967000, b"y", b"5");
     assert_format!(1747409967000, b"yy", b"25");
     assert_format!(1747409967000, b"yyyy", b"2025");
 
     // Thu, 22 May 2025 08:10:03 GMT
-    assert_format!(1747901403000, b"y", b"5");
     assert_format!(1747901403000, b"yy", b"25");
     assert_format!(1747901403000, b"yyyy", b"2025");
 
     // Fri, 01 Jan 2038 00:00:00 GMT
-    assert_format!(2145916800000, b"y", b"8");
     assert_format!(2145916800000, b"yy", b"38");
     assert_format!(2145916800000, b"yyyy", b"2038");
+}
+
+#[test, expected_failure(abort_code = date::EExpectedYear)]
+fun format_year_invalid() {
+    assert_format!(0, b"y", b"0");
 }
 
 #[test]
@@ -163,6 +164,18 @@ fun format_second() {
 }
 
 #[test]
+fun format_millisecond() {
+    // Thu, 01 Jan 1970 00:00:00 GMT
+    assert_format!(0, b"SSS", b"000");
+    assert_format!(999, b"SSS", b"999");
+}
+
+#[test, expected_failure(abort_code = date::EExpectedSSS)]
+fun format_millisecond_invalid() {
+    assert_format!(0, b"SS", b"00");
+}
+
+#[test]
 fun format_am_pm() {
     // Thu, 01 Jan 1970 00:00:00 GMT
     assert_format!(0, b"hh tt", b"12 AM");
@@ -187,14 +200,24 @@ fun combo_format() {
     assert_format!(0, b"dd/MM/yyyy", b"01/01/1970");
     assert_format!(0, b"dd/MM/yyyy HH:mm:ss", b"01/01/1970 00:00:00");
 
-    // Thu, 22 May 2025 08:10:03 GMT
-    assert_format!(1747901403000, b"MM/yyyy", b"05/2025");
-    assert_format!(1747901403000, b"dd/MM/yyyy", b"22/05/2025");
-    assert_format!(1747901403000, b"dd/MM/yyyy HH:mm:ss", b"22/05/2025 08:10:03");
+    // Thu, 22 May 2025 08:10:03.123 GMT
+    assert_format!(1747901403123, b"MM/yyyy", b"05/2025");
+    assert_format!(1747901403123, b"dd/MM/yyyy", b"22/05/2025");
+    assert_format!(1747901403123, b"dd/MM/yyyy HH:mm:ss.SSS", b"22/05/2025 08:10:03.123");
 
     // Fri, 01 Jan 2038 00:00:00 GMT
     assert_format!(2145916899000, b"dd-MM-yy - tt - HH::mm::ss", b"01-01-38 - AM - 00::01::39");
     assert_format!(1747409967000, b"ddd, dd MMM yyyy HH:mm:ss", b"Fri, 16 May 2025 15:39:27");
+
+    // Glued together;
+    // Thu, 22 May 2025 08:10:03.123 GMT
+    assert_format!(1747901403123, b"YYMMSSS", b"2505123");
+}
+
+#[test]
+fun keep_unknown_symbols() {
+    assert_format!(0, b"XXVV", b"XXVV");
+    assert_format!(0, b"XXVV,!@#$%^&*()", b"XXVV,!@#$%^&*()");
 }
 
 #[test]
