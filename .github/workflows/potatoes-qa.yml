@@ -9,7 +9,7 @@ env:
 
 jobs:
     test-move-packages:
-        name: Test Move Packages
+        name: Build and Test Move Packages
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -23,8 +23,9 @@ jobs:
                   platform: ubuntu
                   version: testnet
                   cache: enable
-            # List all directories in the packages folder, and run sui move test on
-            # each of them
+            # List all directories in the packages folder, and run sui move build
+            # and then sui move test on each of them
+            - run: ls -d ./*/ | xargs -I {} bash -c "sui move build --path '{}'"
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
 
     prettier-move:
