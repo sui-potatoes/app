@@ -1,7 +1,7 @@
 # Date
 
-This package implements date and time in Move: standard UTC string implementation as well
-as ISO 8601.
+This package implements date and time formatting in Move: RFC 7231 (UTC) string implementation
+as well as ISO 8601. Also supports user-defined formats.
 
 ## Installing
 
@@ -118,7 +118,7 @@ fun try_utc_and_iso() {
 }
 ```
 
-### Different Formatting
+### Custom Formatting
 
 ```move
 use std::unit_test::assert_eq;
@@ -132,7 +132,7 @@ fun try_different_formats() {
     assert_eq!(d, b"01-01-38 - AM - 00::01::39".to_string());
 
     // use single quotes for escapes
-    let d = date::new(2145916899000).format(b"MM:YY:DD'@potatoes');
+    let d = date::new(2145916899000).format(b"MM:YY:DD'@potatoes'");
     assert_eq!(d, b"01:38:01@potatoes".to_string());
 }
 ```

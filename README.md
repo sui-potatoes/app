@@ -11,10 +11,12 @@ Monorepo for the Potatoes project. Contains all the applications and services th
 
 ## Packages
 
-- [Codec](/packages/codec) - ultimate encoding solution for Sui
-- [Grid](/packages/grid) - all in one solution for 2D-grid applications or games
-- [Bit Field](/packages/bit_field) - 0-cost bit packing library
+- [ASCII](/packages/ascii) ([mvr](https://www.moveregistry.com/package/@potatoes/ascii)) - ASCII codes table and utilities
+- [Codec](/packages/codec) ([mvr](https://www.moveregistry.com/package/@potatoes/codec)) - ultimate encoding solution for Sui
+- [Date](/packages/date) ([mvr](https://www.moveregistry.com/package/@potatoes/date)) - date and time formatting library
+- [Bit Field](/packages/bit_field) ([mvr](https://www.moveregistry.com/package/@potatoes/bit-field)) - 0-cost bit packing library
 - [SVG](/packages/svg) - SVG (XML) standard implemented in Move
+- [Grid](/packages/grid) - all in one solution for 2D-grid applications or games
 - [Name Generator](/packages/name-gen/) - Cyberpunk Name Generator, uses on-chain randomness
 
 ## License
