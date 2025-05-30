@@ -45,7 +45,7 @@ public fun utc_date(clock: &Clock): String {
     minutes, seconds, year and so on
 -   supports RFC 7231 (UTC) string printing
 -   supports ISO 8601 string printing
--   supports custom date formatting, [see Format](#formatting) for rules
+-   supports custom date formatting, see [Formatting](#formatting) for rules
 
 ## Formatting
 
