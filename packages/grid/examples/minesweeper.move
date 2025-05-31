@@ -10,6 +10,8 @@ use grid::{grid::{Self, Grid}, point::{Self, Point}};
 use std::string::String;
 use sui::random::RandomGenerator;
 
+const ENumMinesExceeded: u64 = 0;
+
 public enum Tile has copy, drop {
     Hidden,
     Flagged,
@@ -53,18 +55,16 @@ public fun flag(ms: &mut Minesweeper, x: u16, y: u16) {
     ms.grid.swap(x, y, Tile::Flagged);
 }
 
-public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
-    // Tile already revealed. Abort.
-    match (ms.grid[x0, y0]) {
-        Tile::Revealed(_) => abort,
-        _ => (),
-    };
-
-    dbg!(b"turn: {}, grid before reveal\n{}", vector[ms.turn.to_string(), ms.grid.to_string!()]);
-
+fun new_solver_grid(
+    ms: &Minesweeper,
+    x0: u16,
+    y0: u16,
+): (Grid<SolverTile>, vector<CheckedTile>, u8) {
     // sweep the board, mark tiles that can be a mine, and then calculate the
     // total number of 100% defined mines.
-    let mut solver_grid = grid::tabulate!(ms.grid.width(), ms.grid.height(), |x, y| {
+    let mut num_neighbors = 0;
+    let mut check_tiles = vector<CheckedTile>[];
+    let solver_grid = grid::tabulate!(ms.grid.width(), ms.grid.height(), |x, y| {
         let mut score = 0;
         let mut tiles_score = 0;
 
@@ -76,12 +76,21 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
             //       tile as solved. but haven't figured out how to do it so
             //       early in the algorithm.
             Tile::Revealed(0) => return SolverTile::Solved(0, true),
-            Tile::Revealed(_) => return SolverTile::Solved(0, false),
+            Tile::Revealed(score) => {
+                // TODO: insert at the right idx to avoid sorting
+                check_tiles.push_back(CheckedTile { point: point::new(x, y), score });
+                return SolverTile::Solved(0, false)
+            },
             _ => (),
         };
 
+        let neighbors = ms.grid.neighbors(point::new(x, y));
+
+        // Count number of neighbors for the (x0, y0) tile.
+        if (x == x0 && y == y0) num_neighbors = neighbors.length();
+
         // count the number of mines in the neighborhood
-        ms.grid.neighbors(point::new(x, y)).destroy!(|p| {
+        neighbors.destroy!(|p| {
             let (x, y) = p.to_values();
             match (ms.grid[x, y]) {
                 Tile::Revealed(n) if (*n > 0) => {
@@ -96,93 +105,125 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
         if (score == 0) SolverTile::Unknown else SolverTile::SolutionScore(score, tiles_score)
     });
 
+    check_tiles.insertion_sort_by!(|a, b| a.score >= b.score);
+
+    (solver_grid, check_tiles, num_neighbors as u8)
+}
+
+public struct CheckedTile has copy, drop {
+    point: Point,
+    score: u8,
+}
+
+public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
+    // Tile already revealed. Abort.
+    match (ms.grid[x0, y0]) {
+        Tile::Revealed(_) => abort,
+        _ => (),
+    };
+
+    dbg!(b"turn: {}, grid before reveal\n{}", vector[ms.turn.to_string(), ms.grid.to_string!()]);
+
+    let (mut solver_grid, check_tiles, num_neighbors) = new_solver_grid(ms, x0, y0);
+
     dbg!(b"solver grid: initial state (scores calculated)\n{}", vector[solver_grid.to_string!()]);
+
+    // ms.rng.shuffle(&mut check_tiles);
+    // std::debug::print(&check_tiles);
 
     // now with all the weights in place, we can do another pass to mark the
     // tiles that have the highest score as solved.
     let mut mines = vector[];
-    ms.grid.traverse!(|tile, x, y| {
-        match (tile) {
-            Tile::Revealed(n) if (*n > 0) => {
-                // keep track of how many mines we already marked around this
-                // tile, so we don't try to place more than possible.
-                let mut to_place = *n;
+    check_tiles.destroy!(|CheckedTile { point, score }| {
+        let (x, y) = point.to_values();
+        // keep track of how many mines we already marked around this
+        // tile, so we don't try to place more than possible.
+        let mut to_place = score;
 
-                // Take all the neighbors of the tile and filter out everything
-                // that is not a potential mine. For existing mines, we decrement
-                // the number of mines to place.
-                let points = solver_grid.neighbors(point::new(x, y)).filter!(|p| {
-                    let (x, y) = p.to_values();
-                    match (solver_grid[x, y]) {
-                        SolverTile::SolutionScore(_, _) => true,
-                        SolverTile::Mine => {
-                            // Trick: use this iteration to decrement the number
-                            // of mines to place. Still return false to decrease
-                            // number of points to check.
-                            // TODO: verify that this is the right strategy.
-                            to_place = to_place - 1;
-                            false
-                        },
-                        _ => false,
-                    }
-                });
+        // Take all the neighbors of the tile and filter out everything
+        // that is not a potential mine. For existing mines, we decrement
+        // the number of mines to place.
+        let points = solver_grid.neighbors(point::new(x, y)).filter!(|p| {
+            let (x, y) = p.to_values();
+            match (solver_grid[x, y]) {
+                SolverTile::SolutionScore(_, _) => true,
+                SolverTile::Mine => {
+                    // Trick: use this iteration to decrement the number
+                    // of mines to place. Still return false to decrease
+                    // number of points to check.
+                    // TODO: verify that this is the right strategy.
 
-                // Early exit if we have no mines to place; the tile is solved.
-                if (to_place == 0) {
-                    solver_grid.swap(x, y, SolverTile::Solved(*n, true));
-                    return
-                };
-
-                // Filter out Mines for fields that are already solved;
-                // This is to prevent duplicate symmetric solutions, like this:
-                // |_|1|_|
-                // |_|2|_|
-                // |_|_|_|
-                // TODO: merge this iteration with the previous one.
-                let mut points = points.filter!(|p| 'search: {
-                    solver_grid.neighbors(*p).destroy!(|p| {
-                        let (x, y) = p.to_values();
-                        match (solver_grid[x, y]) {
-                            SolverTile::Solved(_, true) => return 'search false,
-                            _ => (),
-                        }
-                    });
-                    true
-                });
-
-                // Shuffle the points to get random order, then do stable sort
-                // by score. This way even same score points will have different
-                // order depending on the random.
-                ms.rng.shuffle(&mut points);
-                points.insertion_sort_by!(|a, b| {
-                    let (x1, y1) = a.to_values();
-                    let (x2, y2) = b.to_values();
-
-                    let score_1 = match (solver_grid[x1, y1]) {
-                        SolverTile::SolutionScore(s, _) => s,
-                        _ => 0,
+                    if (to_place == 0) {
+                        // dbg!(
+                        //     b"breaking on a tile: {}; score: {}",
+                        //     vector[point.to_string(), score.to_string()],
+                        // );
+                        solver_grid.debug!();
                     };
 
-                    let score_2 = match (solver_grid[x2, y2]) {
-                        SolverTile::SolutionScore(s, _) => s,
-                        _ => 0,
-                    };
+                    // Makes sure we don't break the invariant.
+                    // Very important assertion.
+                    assert!(to_place > 0, ENumMinesExceeded);
+                    to_place = to_place - 1;
+                    false
+                },
+                _ => false,
+            }
+        });
 
-                    score_2 <= score_1
-                });
+        // Early exit if we have no mines to place; the tile is solved.
+        if (to_place == 0) {
+            solver_grid.swap(x, y, SolverTile::Solved(score, true));
+            return
+        };
 
-                // take the first `n` points
-                (to_place as u64).min(points.length()).do!(|i| {
-                    let (x, y) = points[i].to_values();
-                    if (!mines.contains(&points[i])) mines.push_back(points[i]);
-                    solver_grid.swap(x, y, SolverTile::Mine);
-                });
+        // Filter out Mines for fields that are already solved;
+        // This is to prevent duplicate symmetric solutions, like this:
+        // |_|1|_|
+        // |_|2|_|
+        // |_|_|_|
+        // TODO: merge this iteration with the previous one.
+        let mut points = points.filter!(|p| 'search: {
+            solver_grid.neighbors(*p).destroy!(|p| {
+                let (x, y) = p.to_values();
+                match (solver_grid[x, y]) {
+                    SolverTile::Solved(_, true) => return 'search false,
+                    _ => (),
+                }
+            });
+            true
+        });
 
-                // mark the number of mines surronding the tile now
-                solver_grid.swap(x, y, SolverTile::Solved(*n, true));
-            },
-            Tile::Hidden | Tile::Flagged | Tile::Revealed(_) => (),
-        }
+        // Shuffle the points to get random order, then do stable sort
+        // by score. This way even same score points will have different
+        // order depending on the random.
+        ms.rng.shuffle(&mut points);
+        points.insertion_sort_by!(|a, b| {
+            let (x1, y1) = a.to_values();
+            let (x2, y2) = b.to_values();
+
+            let score_1 = match (solver_grid[x1, y1]) {
+                SolverTile::SolutionScore(s, _) => s,
+                _ => 0,
+            };
+
+            let score_2 = match (solver_grid[x2, y2]) {
+                SolverTile::SolutionScore(s, _) => s,
+                _ => 0,
+            };
+
+            score_2 <= score_1
+        });
+
+        // take the first `n` points
+        (to_place as u64).min(points.length()).do!(|i| {
+            let (x, y) = points[i].to_values();
+            if (!mines.contains(&points[i])) mines.push_back(points[i]);
+            solver_grid.swap(x, y, SolverTile::Mine);
+        });
+
+        // mark the number of mines surrounding the tile now
+        solver_grid.swap(x, y, SolverTile::Solved(score, true));
     });
 
     // solving ambiguous cases - the final pass;
@@ -219,8 +260,13 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
 
     // TODO: we currently fail on scores if the first tile is 0.
     let min = if (ms.turn == 0) 1 else 0;
-    let num = ms.rng.generate_u8_in_range(min, ms.mines as u8 - (mines.length() as u8));
+    let max = (ms.mines as u8 - (mines.length() as u8)).min(num_neighbors as u8);
+    let num = ms.rng.generate_u8_in_range(min, max);
+
     ms.grid.swap(x0, y0, Tile::Revealed(num));
+
+    dbg!(b"num picked: {}; num neighbors: {}", vector[num.to_string(), num_neighbors.to_string()]);
+
     ms.turn = ms.turn + 1;
 }
 
@@ -410,7 +456,7 @@ fun test_random_solution_3_1() {
     ms.debug();
 }
 
-#[test, allow(unused_variable)]
+#[test]
 // Notes: given the order of iteration, the (1, 0) is always a mine in any setup.
 // ...which is not totally random.
 //
@@ -430,15 +476,49 @@ fun test_binary_wire() {
     ms.debug();
 }
 
-#[allow(unused_function)]
-macro fun dbg($t: vector<u8>, $v: vector<String>) {
-    std::debug::print(&format!($t, $v))
+#[test]
+fun test_not_gate() {
+    let mut ms = from_vector(
+        9,
+        vector[
+            vector[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            vector[1, 1, 1, 1, 1, 1, 1, 1, 2, 9, 2, 1, 1, 1, 1, 1, 1, 1, 1],
+            vector[9, 9, 1, 9, 9, 1, 9, 9, 3, 9, 3, 9, 9, 1, 9, 9, 1, 9, 9],
+            vector[1, 1, 1, 1, 1, 1, 1, 1, 2, 9, 2, 1, 1, 1, 1, 1, 1, 1, 1],
+            vector[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        ],
+    );
+
+    ms.reveal(2, 1);
+    ms.reveal(2, 4);
+    ms.reveal(2, 7); // center
+    ms.debug();
+}
+
+#[test]
+fun test_large_map() {
+    let mut ms = from_vector(
+        5,
+        vector[
+            vector[2, 9, 9, 9, 9],
+            vector[9, 9, 9, 9, 9],
+            vector[1, 9, 9, 9, 9],
+            vector[9, 9, 9, 9, 9],
+            vector[9, 9, 9, 9, 9],
+        ],
+    );
+
+    ms.reveal(3, 0);
+    ms.debug();
 }
 
 #[allow(unused_function)]
-macro fun format($t: vector<u8>, $v: vector<String>): String {
-    let t = $t;
-    let v = $v;
+macro fun dbg($t: vector<u8>, $v: vector<String>) {
+    std::debug::print(&format($t, $v))
+}
+
+#[allow(unused_function)]
+fun format(t: vector<u8>, v: vector<String>): String {
     let mut indices = vector[];
     let len = t.length();
 
@@ -470,7 +550,7 @@ macro fun format($t: vector<u8>, $v: vector<String>): String {
 fun test_format() {
     let v = vector[b"world".to_string(), b"foo".to_string(), b"bar".to_string()];
     std::unit_test::assert_eq!(
-        format!(b"Hello {} haha {} yoyo {}", v),
+        format(b"Hello {} haha {} yoyo {}", v),
         b"Hello world haha foo yoyo bar".to_string(),
     );
 }
