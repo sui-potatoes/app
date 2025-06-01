@@ -19,7 +19,7 @@ public struct Life has key, store {
 }
 
 /// Represents the game state. We use the wrapper type to implement `to_string`,
-/// and be able to print the result.
+/// for debug printing.
 public struct Cell(bool) has copy, drop, store;
 
 /// Create a new instance of the `Game`.
@@ -70,7 +70,7 @@ public fun cell_to_string(c: &Cell): String {
 }
 
 #[test]
-fun test_game_of_life() {
+fun test_game_of_life_bar_swap() {
     let ctx = &mut tx_context::dummy();
     let mut life = new(3, 3, ctx);
 
@@ -80,6 +80,35 @@ fun test_game_of_life() {
 
     life.tick();
     life.grid.debug!();
+    life.tick();
+
+    let Life { id, .. } = life;
+    id.delete();
+}
+
+#[test]
+fun test_game_of_life_square() {
+    let ctx = &mut tx_context::dummy();
+    let mut life = new(3, 3, ctx);
+
+    life.place(0, 0);
+    life.place(0, 1);
+    life.place(1, 0);
+    life.place(1, 1);
+
+    // |•|•|_|
+    // |•|•|_|
+    // |_|_|_|
+    life.tick();
+
+    // |•|•|_|
+    // |•|•|_|
+    // |_|_|•|
+    life.place(2, 2);
+
+    // |•|•|_|
+    // |•|_|•|
+    // |_|•|_|
     life.tick();
 
     let Life { id, .. } = life;
