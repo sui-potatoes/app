@@ -8,9 +8,10 @@ module grid::minesweeper;
 
 use grid::{grid::{Self, Grid}, point::{Self, Point}};
 use std::string::String;
-use sui::random::RandomGenerator;
+use sui::{random::RandomGenerator, vec_map::{Self, VecMap}};
 
 const ENumMinesExceeded: u64 = 0;
+const ENotAllMinesFound: u64 = 1;
 
 public enum Tile has copy, drop {
     Hidden,
@@ -59,10 +60,10 @@ fun new_solver_grid(
     ms: &Minesweeper,
     x0: u16,
     y0: u16,
-): (Grid<SolverTile>, vector<CheckedTile>, u8) {
+): (Grid<SolverTile>, vector<CheckedTile>, VecMap<u16, Point>) {
     // sweep the board, mark tiles that can be a mine, and then calculate the
     // total number of 100% defined mines.
-    let mut num_neighbors = 0;
+    let mut indexes = vec_map::empty<u16, Point>();
     let mut check_tiles = vector<CheckedTile>[];
     let solver_grid = grid::tabulate!(ms.grid.width(), ms.grid.height(), |x, y| {
         let mut score = 0;
@@ -77,8 +78,25 @@ fun new_solver_grid(
             //       early in the algorithm.
             Tile::Revealed(0) => return SolverTile::Solved(0, true),
             Tile::Revealed(score) => {
+                let mut solutions = vector[];
+                ms.grid.neighbors(point::new(x, y)).destroy!(|p| {
+                    let (x, y) = p.to_values();
+                    match (ms.grid[x, y]) {
+                        Tile::Revealed(_) => (),
+                        _ => {
+                            let idx = (x + 1) * 100 + (y + 1);
+                            if (!indexes.contains(&idx)) indexes.insert(idx, p);
+                            solutions.push_back(idx);
+                        },
+                    }
+                });
+
                 // TODO: insert at the right idx to avoid sorting
-                check_tiles.push_back(CheckedTile { point: point::new(x, y), score });
+                check_tiles.push_back(CheckedTile {
+                    point: point::new(x, y),
+                    score,
+                    solutions,
+                });
                 return SolverTile::Solved(0, false)
             },
             _ => (),
@@ -87,7 +105,7 @@ fun new_solver_grid(
         let neighbors = ms.grid.neighbors(point::new(x, y));
 
         // Count number of neighbors for the (x0, y0) tile.
-        if (x == x0 && y == y0) num_neighbors = neighbors.length();
+        // if (x == x0 && y == y0) num_neighbors = neighbors.length();
 
         // count the number of mines in the neighborhood
         neighbors.destroy!(|p| {
@@ -105,17 +123,35 @@ fun new_solver_grid(
         if (score == 0) SolverTile::Unknown else SolverTile::SolutionScore(score, tiles_score)
     });
 
-    check_tiles.insertion_sort_by!(|a, b| a.score >= b.score);
+    check_tiles.insertion_sort_by!(|a, b| a.solutions.length() >= b.solutions.length());
 
-    (solver_grid, check_tiles, num_neighbors as u8)
+    (solver_grid, check_tiles, indexes)
 }
 
 public struct CheckedTile has copy, drop {
     point: Point,
     score: u8,
+    solutions: vector<u16>,
 }
 
-public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
+public fun reveal(ms: &mut Minesweeper, x: u16, y: u16) {
+    // Tile already revealed. Abort.
+    match (ms.grid[x, y]) {
+        Tile::Revealed(_) => abort,
+        _ => (),
+    };
+
+    dbg!(b"turn: {}, grid before reveal\n{}", vector[ms.turn.to_string(), ms.grid.to_string!()]);
+
+    let (mut solver_grid, check_tiles, indexes) = new_solver_grid(ms, x, y);
+
+    solver_grid.debug!();
+    std::debug::print(&check_tiles.map!(|CheckedTile { solutions, .. }| solutions));
+
+    verify_solution(&solver_grid, check_tiles);
+}
+
+public fun reveal_(ms: &mut Minesweeper, x0: u16, y0: u16) {
     // Tile already revealed. Abort.
     match (ms.grid[x0, y0]) {
         Tile::Revealed(_) => abort,
@@ -134,7 +170,15 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
     // now with all the weights in place, we can do another pass to mark the
     // tiles that have the highest score as solved.
     let mut mines = vector[];
-    check_tiles.destroy!(|CheckedTile { point, score }| {
+
+    check_tiles.do_ref!(|CheckedTile { point, score, solutions }| {
+        dbg!(
+            b"point: {}; score: {}; solutions: {}",
+            vector[point.to_string(), (*score).to_string(), solutions.length().to_string()],
+        );
+    });
+
+    check_tiles.destroy!(|CheckedTile { point, score, .. }| {
         let (x, y) = point.to_values();
         // keep track of how many mines we already marked around this
         // tile, so we don't try to place more than possible.
@@ -153,14 +197,6 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
                     // number of points to check.
                     // TODO: verify that this is the right strategy.
 
-                    if (to_place == 0) {
-                        // dbg!(
-                        //     b"breaking on a tile: {}; score: {}",
-                        //     vector[point.to_string(), score.to_string()],
-                        // );
-                        solver_grid.debug!();
-                    };
-
                     // Makes sure we don't break the invariant.
                     // Very important assertion.
                     assert!(to_place > 0, ENumMinesExceeded);
@@ -171,8 +207,17 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
             }
         });
 
+        // if (x == 0 && y == 0) std::debug::print(&points);
+        // if (x == 0 && y == 0) {
+        //     dbg!(b"(0,0) score {}, to_place: {}", vector[score.to_string(), to_place.to_string()]);
+        // };
+
         // Early exit if we have no mines to place; the tile is solved.
         if (to_place == 0) {
+            dbg!(
+                b"early exit on a tile: {}; score: {}",
+                vector[point.to_string(), score.to_string()],
+            );
             solver_grid.swap(x, y, SolverTile::Solved(score, true));
             return
         };
@@ -229,6 +274,9 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
     // solving ambiguous cases - the final pass;
     dbg!(b"solver grid: after marking mines\n{}", vector[solver_grid.to_string!()]);
 
+    // verify that the solution is valid
+    verify_solution(&solver_grid, check_tiles);
+
     assert!(mines.length() <= ms.mines as u64);
 
     // means we solved it all (?)
@@ -259,6 +307,7 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
     solver_grid.debug!();
 
     // TODO: we currently fail on scores if the first tile is 0.
+    let num_neighbors = 8u64;
     let min = if (ms.turn == 0) 1 else 0;
     let max = (ms.mines as u8 - (mines.length() as u8)).min(num_neighbors as u8);
     let num = ms.rng.generate_u8_in_range(min, max);
@@ -268,6 +317,26 @@ public fun reveal(ms: &mut Minesweeper, x0: u16, y0: u16) {
     dbg!(b"num picked: {}; num neighbors: {}", vector[num.to_string(), num_neighbors.to_string()]);
 
     ms.turn = ms.turn + 1;
+}
+
+fun verify_solution(solution: &Grid<SolverTile>, check_tiles: vector<CheckedTile>) {
+    check_tiles.destroy!(|CheckedTile { point, score, .. }| {
+        let mines = solution.neighbors(point).count!(|p| {
+            let (x, y) = p.to_values();
+            match (solution[x, y]) {
+                SolverTile::Mine => true,
+                _ => false,
+            }
+        });
+
+        if (mines as u8 != score) {
+            dbg!(
+                b"not all mines found for point {}: {} != {}",
+                vector[point.to_string(), mines.to_string(), score.to_string()],
+            );
+            abort ENotAllMinesFound
+        };
+    });
 }
 
 public use fun tile_to_string as Tile.to_string;
@@ -500,15 +569,15 @@ fun test_large_map() {
     let mut ms = from_vector(
         5,
         vector[
-            vector[2, 9, 9, 9, 9],
             vector[9, 9, 9, 9, 9],
-            vector[1, 9, 9, 9, 9],
-            vector[9, 9, 9, 9, 9],
+            vector[9, 9, 1, 9, 9],
+            vector[9, 1, 2, 9, 9],
+            vector[9, 1, 1, 9, 9],
             vector[9, 9, 9, 9, 9],
         ],
     );
 
-    ms.reveal(3, 0);
+    ms.reveal(1, 1);
     ms.debug();
 }
 
