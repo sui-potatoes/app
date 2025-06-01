@@ -79,7 +79,6 @@ fun test_game_of_life_bar_swap() {
     life.place(2, 1);
 
     life.tick();
-    life.grid.debug!();
     life.tick();
 
     let Life { id, .. } = life;

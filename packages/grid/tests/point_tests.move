@@ -7,7 +7,7 @@ use grid::point;
 use std::unit_test::assert_eq;
 
 #[test]
-fun test_point() {
+fun point() {
     let p = point::new(1, 2);
     assert_eq!(p.x(), 1);
     assert_eq!(p.y(), 2);
@@ -32,7 +32,7 @@ fun test_point() {
 }
 
 #[test]
-fun test_von_neumann() {
+fun von_neumann() {
     let p = point::new(1, 1);
     assert!(p.von_neumann(0) == vector[]);
 

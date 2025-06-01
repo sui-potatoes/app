@@ -54,10 +54,10 @@ public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
 }
 
 /// Get the width of the grid.
-public fun width<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
+public fun width<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
 
 /// Get the height of the grid.
-public fun height<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
+public fun height<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
 
 // === Indexing ===
 
@@ -128,7 +128,7 @@ public macro fun moore<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> 
 public macro fun tabulate<$T>($width: u16, $height: u16, $f: |u16, u16| -> $T): Grid<$T> {
     let width = $width as u64;
     let height = $height as u64;
-    let grid = vector::tabulate!(width, |x| vector::tabulate!(height, |y| $f(x as u16, y as u16)));
+    let grid = vector::tabulate!(height, |x| vector::tabulate!(width, |y| $f(x as u16, y as u16)));
     from_vector_unchecked(grid)
 }
 

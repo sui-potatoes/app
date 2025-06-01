@@ -204,11 +204,8 @@ public fun moves(card: &MoveCard, turn: bool): vector<vector<u8>> {
         ],
     };
 
-    if (turn) {
-        moves
-    } else {
-        moves.map!(|m| m.map!(|d| direction::inverse!(d)))
-    }
+    // inverse direction if it's the second player's turn
+    if (turn) moves else moves.map!(|m| m.map!(|d| direction::inverse!(d)))
 }
 
 public fun card_from_index(idx: u8): MoveCard {

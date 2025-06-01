@@ -158,10 +158,10 @@ fun test_moore() {
     use std::unit_test::assert_eq;
 
     let neighbors = Point(0, 0).moore(1);
-    neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
+    // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
     assert_eq!(neighbors.length(), 3);
 
     let neighbors = Point(1, 1).moore(1);
-    neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
+    // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
     assert_eq!(neighbors.length(), 8);
 }
