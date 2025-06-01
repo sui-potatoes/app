@@ -114,3 +114,37 @@ fun test_game_of_life_square() {
     let Life { id, .. } = life;
     id.delete();
 }
+
+#[test]
+fun test_game_of_life_glider() {
+    let ctx = &mut tx_context::dummy();
+    let mut life = new(8, 8, ctx);
+
+    // building a simple glider
+    // |•|_|_|_|_|_|_|_|_|_|
+    // |_|•|•|_|_|_|_|_|_|_|
+    // |•|•|_|_|_|_|_|_|_|_|
+    // |_|_|_|_|_|_|_|_|_|_|
+    life.place(0, 0);
+    life.place(2, 0);
+    life.place(2, 1);
+    life.place(1, 1);
+    life.place(1, 2);
+    life.place(1, 1);
+
+    // moving it
+    // |_|•|_|_|_|_|_|_|_|_|
+    // |_|_|•|_|_|_|_|_|_|_|
+    // |•|•|•|_|_|_|_|_|_|_|
+    // |_|_|_|_|_|_|_|_|_|_|
+    life.tick();
+
+    // do 10 more ticks, see how it moves
+    10u8.do!(|_| {
+        life.tick();
+        // life.grid.debug!();
+    });
+
+    let Life { id, .. } = life;
+    id.delete();
+}
