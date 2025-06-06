@@ -77,12 +77,8 @@ public fun tick(l: &mut Life) {
         }
     });
 
-    dead_cells.destroy!(|p| {
-        *&mut l.grid.borrow_point_mut(&p).0 = false;
-    });
-    live_cells.destroy!(|p| {
-        *&mut l.grid.borrow_point_mut(&p).0 = true;
-    });
+    dead_cells.destroy!(|p| *&mut l.grid.borrow_point_mut(&p).0 = false);
+    live_cells.destroy!(|p| *&mut l.grid.borrow_point_mut(&p).0 = true);
 
     l.live_cells = live_cells;
 }
