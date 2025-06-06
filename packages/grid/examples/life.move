@@ -41,6 +41,9 @@ public fun place(l: &mut Life, x: u16, y: u16) {
 
 /// Perform a single tick of the game, calculate the next state.
 public fun tick(l: &mut Life) {
+    // Keep track of visited cells. Using `Grid` instead of `vec_set`-likes
+    // significantly improves performance by avoiding `contains` loops.
+    let mut visited = grid::tabulate!(l.grid.width(), l.grid.height(), |_, _| false);
     let mut live_cells = vector[];
     let mut dead_cells = vector[];
     let mut to_check = vector[];
@@ -48,7 +51,8 @@ public fun tick(l: &mut Life) {
     // first check current live cells;
     l.live_cells.do_ref!(|p| {
         l.grid.moore!(*p, 1).destroy!(|p| {
-            if (to_check.contains(&p)) return;
+            if (*visited.borrow_point(&p)) return;
+            *visited.borrow_point_mut(&p) = true;
             to_check.push_back(p);
         });
     });
