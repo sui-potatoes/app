@@ -70,7 +70,7 @@ function solveMines(constraints) {
     }
 }
 
-function 7(constraints, mineSet) {
+function validateAll(constraints, mineSet) {
     for (const { solutions, pick } of constraints) {
         let count = 0;
         for (const cell of solutions) {

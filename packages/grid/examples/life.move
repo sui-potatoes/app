@@ -4,7 +4,7 @@
 /// Implements Conway's game of life using grid.
 module grid::life;
 
-use grid::{grid::{Self, Grid}, point};
+use grid::{grid::{Self, Grid}, point::{Self, Point}};
 use std::string::String;
 
 /// Rules:
@@ -16,6 +16,8 @@ public struct Life has key, store {
     id: UID,
     /// Each cell is represented as a boolean value.
     grid: Grid<Cell>,
+    /// Keep track of live cells to avoid traversing the grid.
+    live_cells: vector<Point>,
 }
 
 /// Represents the game state. We use the wrapper type to implement `to_string`,
@@ -27,11 +29,13 @@ public fun new(width: u16, height: u16, ctx: &mut TxContext): Life {
     Life {
         id: object::new(ctx),
         grid: grid::tabulate!(width, height, |_, _| Cell(false)),
+        live_cells: vector[],
     }
 }
 
 /// Place a live cell on the grid at (x, y).
 public fun place(l: &mut Life, x: u16, y: u16) {
+    l.live_cells.push_back(point::new(x, y));
     let _ = l.grid.swap(x, y, Cell(true));
 }
 
@@ -39,17 +43,30 @@ public fun place(l: &mut Life, x: u16, y: u16) {
 public fun tick(l: &mut Life) {
     let mut live_cells = vector[];
     let mut dead_cells = vector[];
+    let mut to_check = vector[];
 
-    l.grid.traverse!(|Cell(is_live), x, y| {
-        let point = point::new(x, y);
-        let count = l.grid.moore!(point, 1).count!(|p| {
+    // first check current live cells;
+    l.live_cells.do_ref!(|p| {
+        l.grid.moore!(*p, 1).destroy!(|p| {
+            if (to_check.contains(&p)) return;
+            to_check.push_back(p);
+        });
+    });
+
+    to_check.destroy!(|p| {
+        let (x, y) = p.into_values();
+        let is_live = l.grid[x, y].0;
+        let count = l.grid.moore!(p, 1).count!(|p| {
             let (x, y) = p.to_values();
             l.grid[x, y].0
         });
 
-        if (*is_live && count < 2 || count > 3) dead_cells.push_back(point);
-        if (!*is_live && count == 3) live_cells.push_back(point);
+        if (is_live && (count < 2 || count > 3)) dead_cells.push_back(p)
+        else if (!is_live && count == 3) live_cells.push_back(p)
+        else if (is_live && (count == 2 || count == 3)) live_cells.push_back(p)
     });
+
+    l.live_cells = live_cells;
 
     live_cells.destroy!(|p| {
         let (x, y) = p.into_values();
