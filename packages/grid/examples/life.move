@@ -45,7 +45,6 @@ public fun tick(l: &mut Life) {
     // significantly improves performance by avoiding `contains` loops.
     let mut visited = grid::tabulate!(l.grid.width(), l.grid.height(), |_, _| false);
     let mut live_cells = vector[];
-    let mut dead_cells = vector[];
     let mut to_check = vector[];
 
     // first check current live cells;
@@ -61,20 +60,21 @@ public fun tick(l: &mut Life) {
         let is_live = l.grid.borrow_point(&p).0;
         let count = l.grid.moore_count!(p, 1, |v| v.0);
 
-        if (is_live && (count < 2 || count > 3)) dead_cells.push_back(p)
-        else if (!is_live && count == 3) live_cells.push_back(p)
-        else if (is_live && (count == 2 || count == 3)) live_cells.push_back(p)
+        if (is_live && (count < 2 || count > 3)) {
+            // Mark as dead.
+            *&mut l.grid.borrow_point_mut(&p).0 = false;
+            live_cells.push_back(p);
+        } else if (!is_live && count == 3) {
+            // Mark as newborn, live.
+            *&mut l.grid.borrow_point_mut(&p).0 = true;
+        } else if (is_live && (count == 2 || count == 3)) {
+            // Mark as live.
+            *&mut l.grid.borrow_point_mut(&p).0 = true;
+            live_cells.push_back(p);
+        }
     });
 
     l.live_cells = live_cells;
-
-    live_cells.destroy!(|p| {
-        *&mut l.grid.borrow_point_mut(&p).0 = true;
-    });
-
-    dead_cells.destroy!(|p| {
-        *&mut l.grid.borrow_point_mut(&p).0 = false;
-    });
 }
 
 public use fun cell_to_string as Cell.to_string;
