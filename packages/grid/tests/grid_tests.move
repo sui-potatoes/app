@@ -35,6 +35,63 @@ fun borrows() {
     assert_eq!(grid[0, 0], 1);
 }
 
+// #[test]
+// fun von_neumann_bitmap() {
+//     let grid = grid::from_vector(vector[
+//         vector[0, 1, 0],
+//         vector[1, 0, 1],
+//         vector[0, 1, 0],
+//     ]);
+
+//     let bitmap = grid.von_neumann_bitmap!(point::new(1, 1), |cell| *cell == 1);
+//     assert!(bitmap & direction::up!() > 0);
+//     assert!(bitmap & direction::down!() > 0);
+//     assert!(bitmap & direction::left!() > 0);
+//     assert!(bitmap & direction::right!() > 0);
+
+//     let bitmap = grid.von_neumann_bitmap!(point::new(1, 1), |cell| *cell == 0);
+//     assert_eq!(bitmap, 0);
+
+//     let bitmap = grid.von_neumann_bitmap!(point::new(0, 0), |cell| *cell == 1);
+//     assert!(bitmap & direction::down!() > 0);
+//     assert!(bitmap & direction::right!() > 0);
+//     assert_eq!(bitmap & direction::left!(), 0);
+//     assert_eq!(bitmap & direction::up!(), 0);
+// }
+
+// #[test]
+// fun moore_bitmap() {
+//     let grid = grid::from_vector(vector[
+//         vector[1, 1, 1],
+//         vector[1, 1, 1],
+//         vector[1, 1, 1],
+//     ]);
+
+//     let bitmap = grid.moore_bitmap!(point::new(1, 1), |cell| *cell == 1);
+//     assert!(bitmap & direction::up!() > 0);
+//     assert!(bitmap & direction::down!() > 0);
+//     assert!(bitmap & direction::left!() > 0);
+//     assert!(bitmap & direction::right!() > 0);
+//     assert!(bitmap & (1 << 4) > 0);
+//     assert!(bitmap & (1 << 5) > 0);
+//     assert!(bitmap & (1 << 6) > 0);
+//     assert!(bitmap & (1 << 7) > 0);
+
+//     let bitmap = grid.moore_bitmap!(point::new(1, 1), |cell| *cell == 0);
+//     assert_eq!(bitmap, 0);
+
+//     let bitmap = grid.moore_bitmap!(point::new(0, 0), |cell| *cell == 1);
+//     assert!(bitmap & direction::down!() > 0);
+//     assert!(bitmap & direction::right!() > 0);
+//     assert!(bitmap & (1 << 7) > 0);
+
+//     assert_eq!(bitmap & direction::left!(), 0);
+//     assert_eq!(bitmap & direction::up!(), 0);
+//     assert_eq!(bitmap & (1 << 4), 0);
+//     assert_eq!(bitmap & (1 << 5), 0);
+//     assert_eq!(bitmap & (1 << 6), 0);
+// }
+
 #[test]
 fun swap() {
     let mut grid = grid::from_vector_unchecked(vector[

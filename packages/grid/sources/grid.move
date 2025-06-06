@@ -68,9 +68,21 @@ public fun inner<T>(g: &Grid<T>): &vector<vector<T>> { &g.grid }
 /// Get a reference to a cell in the grid.
 public fun borrow<T>(g: &Grid<T>, x: u16, y: u16): &T { &g.grid[x as u64][y as u64] }
 
+/// Get a reference to a cell in the grid.
+public fun borrow_point<T>(g: &Grid<T>, p: &Point): &T {
+    let (x, y) = p.to_values();
+    &g.grid[x as u64][y as u64]
+}
+
 #[syntax(index)]
 /// Borrow a mutable reference to a cell in the grid.
 public fun borrow_mut<T>(g: &mut Grid<T>, x: u16, y: u16): &mut T {
+    &mut g.grid[x as u64][y as u64]
+}
+
+/// Get a mutable reference to a cell in the grid.
+public fun borrow_point_mut<T>(g: &mut Grid<T>, p: &Point): &mut T {
+    let (x, y) = p.to_values();
     &mut g.grid[x as u64][y as u64]
 }
 
@@ -109,6 +121,29 @@ public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<P
     })
 }
 
+/// Count the number of Von Neumann neighbors of a point that pass the predicate $f.
+public macro fun von_neumann_count<$T>(
+    $g: &Grid<$T>,
+    $p: Point,
+    $size: u16,
+    $f: |&$T| -> bool,
+): u8 {
+    let p = $p;
+    let g = $g;
+    let (width, height) = (g.width(), g.height());
+    let mut count = 0u8;
+
+    p.von_neumann($size).destroy!(|point| {
+        let (x1, y1) = point.to_values();
+        if (x1 >= width || y1 >= height) return;
+        if (!$f(&g[x1, y1])) return;
+
+        count = count + 1;
+    });
+
+    count
+}
+
 /// Get all Moore neighbors of a point, checking if the point is within the
 /// bounds of the grid. The size parameter specifies the size of the neighborhood.
 ///
@@ -121,6 +156,24 @@ public macro fun moore<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> 
         let (x, y) = point.to_values();
         x < width && y < height
     })
+}
+
+/// Count the number of Moore neighbors of a point that pass the predicate $f.
+public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T| -> bool): u8 {
+    let p = $p;
+    let g = $g;
+    let (width, height) = (g.width(), g.height());
+    let mut count = 0u8;
+
+    p.moore($size).destroy!(|point| {
+        let (x1, y1) = point.to_values();
+        if (x1 >= width || y1 >= height) return;
+        if (!$f(&g[x1, y1])) return;
+
+        count = count + 1;
+    });
+
+    count
 }
 
 /// Create a grid of the specified size by applying the function `f` to each cell.

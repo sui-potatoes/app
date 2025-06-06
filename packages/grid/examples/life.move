@@ -54,12 +54,8 @@ public fun tick(l: &mut Life) {
     });
 
     to_check.destroy!(|p| {
-        let (x, y) = p.into_values();
-        let is_live = l.grid[x, y].0;
-        let count = l.grid.moore!(p, 1).count!(|p| {
-            let (x, y) = p.to_values();
-            l.grid[x, y].0
-        });
+        let is_live = l.grid.borrow_point(&p).0;
+        let count = l.grid.moore_count!(p, 1, |v| v.0);
 
         if (is_live && (count < 2 || count > 3)) dead_cells.push_back(p)
         else if (!is_live && count == 3) live_cells.push_back(p)
@@ -69,13 +65,11 @@ public fun tick(l: &mut Life) {
     l.live_cells = live_cells;
 
     live_cells.destroy!(|p| {
-        let (x, y) = p.into_values();
-        l.grid.swap(x, y, Cell(true));
+        *&mut l.grid.borrow_point_mut(&p).0 = true;
     });
 
     dead_cells.destroy!(|p| {
-        let (x, y) = p.into_values();
-        l.grid.swap(x, y, Cell(false));
+        *&mut l.grid.borrow_point_mut(&p).0 = false;
     });
 }
 
