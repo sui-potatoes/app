@@ -74,7 +74,7 @@ public fun play(field: &mut Field, card_idx: u8, x0: u16, y0: u16, x1: u16, y1: 
     stack.push_back(swap_card);
 
     let play_card = stack.swap_remove(card_idx as u64);
-    let mut cursor = direction::new_cursor(x0, y0);
+    let mut cursor = cursor::new(x0, y0);
     let moves = play_card.moves(is_red);
     let is_valid = moves.any!(|moves| {
         cursor.reset(x0, y0);
@@ -244,6 +244,7 @@ public fun figure_to_string(figure: &Figure): String {
 }
 
 public use fun card_to_string as MoveCard.to_string;
+use grid::cursor;
 
 public fun card_to_string(card: &MoveCard): String {
     match (card) {

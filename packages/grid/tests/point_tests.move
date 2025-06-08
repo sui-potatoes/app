@@ -32,6 +32,42 @@ fun point() {
 }
 
 #[test]
+fun moore() {
+    let neighbors = point::new(0, 0).moore(1);
+    // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
+    assert_eq!(neighbors.length(), 3);
+
+    let neighbors = point::new(1, 1).moore(1);
+    // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
+    assert_eq!(neighbors.length(), 8);
+}
+
+#[test]
+fun compare() {
+    let mut points = vector[
+        point::new(1, 1),
+        point::new(0, 0),
+        point::new(2, 2),
+        point::new(2, 0),
+        point::new(0, 1),
+        point::new(1, 0),
+    ];
+    points.insertion_sort_by!(|a, b| a.compare(b));
+    assert!(points.is_sorted_by!(|a, b| a.compare(b)));
+    assert_eq!(
+        points,
+        vector[
+            point::new(0, 0),
+            point::new(0, 1),
+            point::new(1, 0),
+            point::new(1, 1),
+            point::new(2, 0),
+            point::new(2, 2),
+        ],
+    );
+}
+
+#[test]
 fun von_neumann() {
     let p = point::new(1, 1);
     assert!(p.von_neumann(0) == vector[]);

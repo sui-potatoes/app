@@ -21,7 +21,7 @@ public macro fun from_vector($v: vector<u16>): Point {
     new(v[0], v[1])
 }
 
-public use fun grid::direction::cursor_from_point as Point.to_cursor;
+public use fun grid::cursor::from_point as Point.to_cursor;
 
 /// Get a tuple of two values from a point.
 public fun to_values(p: &Point): (u16, u16) { let Point(x, y) = p; (*x, *y) }
@@ -157,37 +157,4 @@ public fun to_string(p: &Point): String {
     str.append(y.to_string());
     str.append_utf8(b")");
     str
-}
-
-#[test]
-fun test_moore() {
-    use std::unit_test::assert_eq;
-
-    let neighbors = Point(0, 0).moore(1);
-    // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
-    assert_eq!(neighbors.length(), 3);
-
-    let neighbors = Point(1, 1).moore(1);
-    // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
-    assert_eq!(neighbors.length(), 8);
-}
-
-#[test]
-fun test_compare() {
-    use std::unit_test::assert_eq;
-
-    let mut points = vector[
-        Point(1, 1),
-        Point(0, 0),
-        Point(2, 2),
-        Point(2, 0),
-        Point(0, 1),
-        Point(1, 0),
-    ];
-    points.insertion_sort_by!(|a, b| a.compare(b));
-    assert!(points.is_sorted_by!(|a, b| a.compare(b)));
-    assert_eq!(
-        points,
-        vector[Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1), Point(2, 0), Point(2, 2)],
-    );
 }
