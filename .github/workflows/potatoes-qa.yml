@@ -25,6 +25,8 @@ jobs:
                   cache: enable
             # List all directories in the packages folder, and run sui move build
             # and then sui move test on each of them
+            - name: Check version
+              run: sui --version
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move build --path '{}'"
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
 
