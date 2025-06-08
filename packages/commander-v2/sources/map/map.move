@@ -11,7 +11,7 @@
 module commander::map;
 
 use commander::{history::{Self, Record}, recruit::Recruit, unit::{Self, Unit}};
-use grid::{direction, grid::{Self, Grid}, point};
+use grid::{cursor, direction, grid::{Self, Grid}, point};
 use std::{macros::{num_min, num_max}, string::String};
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
@@ -417,7 +417,7 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
 
     // first two values are X and Y coordinates, the rest are directions
     let (x0, y0) = (path.pop_back(), path.pop_back());
-    let mut cursor = direction::new_cursor(x0 as u16, y0 as u16);
+    let mut cursor = cursor::new(x0 as u16, y0 as u16);
 
     'path: {
         path.destroy!(|direction| {

@@ -180,7 +180,6 @@ public fun reveal(ms: &mut Minesweeper, x: u16, y: u16) {
 
     // the first row is the one with the smallest number of solutions * mines
     // so we start with it and try to solve;
-
     // let mut solutions = check_tiles[0].solutions;
     // 'solution: {
     //     solutions.do_ref!(|p| {
@@ -192,11 +191,9 @@ public fun reveal(ms: &mut Minesweeper, x: u16, y: u16) {
     //         // length.
     //         check_tiles.print_tiles();
     //         dbg!(b"Length (after this attempt): {}", vector[check_tiles.length().to_string()]);
-
     //         // return 'solution ()
     //     });
     // };
-
     // check_tiles.print_tiles();
     // dbg!(b"length: {}", vector[check_tiles.length().to_string()]);
     // solver_grid.debug!();
@@ -372,6 +369,10 @@ public fun debug(self: &Minesweeper) {
 public fun from_vector(mines: u16, v: vector<vector<u8>>): Minesweeper {
     let rng = sui::random::new_generator_from_seed_for_testing(b"seed");
     Minesweeper {
+        rng,
+        mines,
+        turn: 0,
+        revealed: 0,
         grid: grid::tabulate!(v.length() as u16, v[0].length() as u16, |x, y| {
             match (v[x as u64][y as u64]) {
                 9 => Tile::Hidden,
@@ -379,10 +380,6 @@ public fun from_vector(mines: u16, v: vector<vector<u8>>): Minesweeper {
                 _ => abort,
             }
         }),
-        rng,
-        turn: 0,
-        mines,
-        revealed: 0,
     }
 }
 
