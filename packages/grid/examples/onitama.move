@@ -244,6 +244,7 @@ public fun figure_to_string(figure: &Figure): String {
 }
 
 public use fun card_to_string as MoveCard.to_string;
+
 public fun card_to_string(card: &MoveCard): String {
     match (card) {
         MoveCard::Tiger => b"Tiger",
