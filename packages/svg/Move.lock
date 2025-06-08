@@ -5,24 +5,12 @@ version = 3
 manifest_digest = "8270D100158FEC4B2EB706CC8430C4DEBE1E788C6563512A958E9708EDDB9D3C"
 deps_digest = "52B406A7A21811BEF51751CF88DA0E76DAEFFEAC888D4F4060B1A72BBE7D8D35"
 dependencies = [
-  { id = "Bridge", name = "Bridge" },
   { id = "Codec", name = "Codec" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
 ]
 dev-dependencies = [
   { id = "suifrens", name = "Suifrens" },
-]
-
-[[move.package]]
-id = "Bridge"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "3802482bd4e3", subdir = "crates/sui-framework/packages/bridge" }
-
-dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
@@ -47,15 +35,6 @@ dependencies = [
 ]
 
 [[move.package]]
-id = "SuiSystem"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "3802482bd4e3", subdir = "crates/sui-framework/packages/sui-system" }
-
-dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-]
-
-[[move.package]]
 id = "suifrens"
 source = { git = "https://github.com/MystenLabs/apps.git", rev = "main", subdir = "suifrens/suifrens" }
 
@@ -64,6 +43,6 @@ dependencies = [
 ]
 
 [move.toolchain-version]
-compiler-version = "1.48.4"
+compiler-version = "1.49.2"
 edition = "2024.beta"
 flavor = "sui"

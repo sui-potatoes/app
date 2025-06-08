@@ -13,7 +13,7 @@ id = "MoveStdlib"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "6a2fc3c8f555", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [move.toolchain-version]
-compiler-version = "1.48.4"
+compiler-version = "1.49.2"
 edition = "2024"
 flavor = "sui"
 

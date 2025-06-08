@@ -160,23 +160,23 @@ public fun reveal(ms: &mut Minesweeper, x: u16, y: u16) {
         _ => (),
     };
 
-    dbg!(b"turn: {}, grid before reveal\n{}", vector[ms.turn.to_string(), ms.grid.to_string!()]);
+    // dbg!(b"turn: {}, grid before reveal\n{}", vector[ms.turn.to_string(), ms.grid.to_string!()]);
 
     let (mut solver_grid, mut check_tiles) = new_solver_grid(ms);
 
-    dbg!(b"Length: {}", vector[check_tiles.length().to_string()]);
+    // dbg!(b"Length: {}", vector[check_tiles.length().to_string()]);
 
     first_stage(&mut solver_grid, &mut check_tiles);
 
-    dbg!(b"Length: {}", vector[check_tiles.length().to_string()]);
+    // dbg!(b"Length: {}", vector[check_tiles.length().to_string()]);
 
     if (check_tiles.length() == 0) return; // SUCCESS!
 
-    check_tiles.print_tiles();
+    // check_tiles.print_tiles();
     remove_duplicates(&mut solver_grid, &mut check_tiles);
-    check_tiles.print_tiles();
+    // check_tiles.print_tiles();
 
-    dbg!(b"Length: {}", vector[check_tiles.length().to_string()]);
+    // dbg!(b"Length: {}", vector[check_tiles.length().to_string()]);
 
     // the first row is the one with the smallest number of solutions * mines
     // so we start with it and try to solve;
@@ -318,10 +318,10 @@ fun find_mismatch(solution: &Grid<SolverTile>, check_tiles: vector<CheckedTile>)
             let CheckedTile { point, score, .. } = check_tiles[i];
             let mines = solution.moore_count!(point, 1, |tile| tile == SolverTile::Mine);
             if (mines as u8 != score) {
-                dbg!(
-                    b"not all mines found for point {}: {} != {}; at index {}",
-                    vector[point.to_string(), mines.to_string(), score.to_string(), i.to_string()],
-                );
+                // dbg!(
+                //     b"not all mines found for point {}: {} != {}; at index {}",
+                //     vector[point.to_string(), mines.to_string(), score.to_string(), i.to_string()],
+                // );
                 return 'search option::some(i)
             };
         });
