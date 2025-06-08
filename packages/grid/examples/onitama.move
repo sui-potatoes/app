@@ -5,7 +5,7 @@
 /// See https://en.wikipedia.org/wiki/Onitama for more information.
 module grid::onitama;
 
-use grid::{direction::{Self, up, down, left, right}, grid::{Self, Grid}};
+use grid::{cursor, direction::{Self, up, down, left, right}, grid::{Self, Grid}};
 use std::string::String;
 
 const EIllegalMove: u64 = 1;
@@ -244,8 +244,6 @@ public fun figure_to_string(figure: &Figure): String {
 }
 
 public use fun card_to_string as MoveCard.to_string;
-use grid::cursor;
-
 public fun card_to_string(card: &MoveCard): String {
     match (card) {
         MoveCard::Tiger => b"Tiger",

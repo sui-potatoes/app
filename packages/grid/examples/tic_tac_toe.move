@@ -83,6 +83,7 @@ public fun destroy(game: TicTacToe) {
 }
 
 public use fun tile_to_string as Tile.to_string;
+
 /// Utility function to allow printing the `TicTacToe` Grid.
 public fun tile_to_string(tile: &Tile): String {
     match (tile) {
