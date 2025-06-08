@@ -36,8 +36,8 @@ public struct Grid<T> has copy, drop, store {
 /// have different lengths.
 public fun from_vector<T>(grid: vector<vector<T>>): Grid<T> {
     assert!(grid.length() > 0, EIncorrectLength);
-    let height = grid[0].length();
-    grid.do_ref!(|row| assert!(row.length() == height, EIncorrectLength));
+    let width = grid[0].length();
+    grid.do_ref!(|row| assert!(row.length() == width, EIncorrectLength));
     Grid { grid }
 }
 
@@ -154,7 +154,7 @@ public macro fun moore<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> 
     let (width, height) = (g.width(), g.height());
     p.moore($size).filter!(|point| {
         let (x, y) = point.to_values();
-        x < width && y < height
+        x < height && y < width
     })
 }
 
@@ -167,7 +167,7 @@ public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T|
 
     p.moore($size).destroy!(|point| {
         let (x1, y1) = point.to_values();
-        if (x1 >= width || y1 >= height) return;
+        if (x1 >= height || y1 >= width) return;
         if (!$f(&g[x1, y1])) return;
 
         count = count + 1;
@@ -178,10 +178,10 @@ public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T|
 
 /// Create a grid of the specified size by applying the function `f` to each cell.
 /// The function receives the x and y coordinates of the cell.
-public macro fun tabulate<$T>($width: u16, $height: u16, $f: |u16, u16| -> $T): Grid<$T> {
-    let width = $width as u64;
-    let height = $height as u64;
-    let grid = vector::tabulate!(height, |x| vector::tabulate!(width, |y| $f(x as u16, y as u16)));
+public macro fun tabulate<$T>($rows: u16, $cols: u16, $f: |u16, u16| -> $T): Grid<$T> {
+    let rows = $rows as u64;
+    let cols = $cols as u64;
+    let grid = vector::tabulate!(rows, |x| vector::tabulate!(cols, |y| $f(x as u16, y as u16)));
     from_vector_unchecked(grid)
 }
 
@@ -206,9 +206,9 @@ public macro fun find_group<$T>(
 ): vector<Point> {
     let (x, y) = ($x, $y);
     let map = $map;
-    let (width, height) = (map.width(), map.height());
+    let (height, width) = (map.width(), map.height());
     let mut group = vector[];
-    let mut visited = tabulate!(width, height, |_, _| false);
+    let mut visited = tabulate!(height, width, |_, _| false);
 
     if (!$f(&map[x, y])) return group;
 
@@ -222,7 +222,7 @@ public macro fun find_group<$T>(
         map.von_neumann!(point, 1).do!(|point| {
             let (x, y) = point.into_values();
 
-            if (x >= width || y >= height || visited[x, y]) return;
+            if (x >= height || y >= width || visited[x, y]) return;
 
             if ($f(&map[x, y])) {
                 *&mut visited[x, y] = true;
@@ -262,17 +262,17 @@ public macro fun trace<$T>(
     };
 
     let map = $map;
-    let (width, height) = (map.width(), map.height());
+    let (height, width) = (map.width(), map.height());
 
     // if the points are out of bounds, return none
-    if (x0 >= width || y0 >= height || x1 >= width || y1 >= height) {
+    if (x0 >= height || y0 >= width || x1 >= height || y1 >= width) {
         return option::none()
     };
 
     // surround the first element with 1s
     let mut num = 1;
     let mut queue = vector[point::new(x0, y0)];
-    let mut grid = tabulate!(width, height, |_, _| 0);
+    let mut grid = tabulate!(height, width, |_, _| 0);
 
     *&mut grid[x0, y0] = num;
 
@@ -345,10 +345,10 @@ public macro fun to_string<$T>($grid: &Grid<$T>): String {
     let (width, height) = (grid.width(), grid.height());
 
     // the layout is vertical, so we iterate over the height first
-    width.do!(|y| {
+    height.do!(|x| {
         result.append_utf8(b"|");
-        height.do!(|x| {
-            result.append(grid[y, x].to_string());
+        width.do!(|y| {
+            result.append(grid[x, y].to_string());
             result.append_utf8(b"|");
         });
         result.append_utf8(b"\n");

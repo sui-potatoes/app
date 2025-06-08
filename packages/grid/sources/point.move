@@ -131,6 +131,12 @@ public fun moore(p: &Point, size: u16): vector<Point> {
 
 // === Convenience & Compatibility ===
 
+/// Compare two points. To be used in sorting macros. Returns less or equal,
+/// based on the x coordinate (1st) and then the y coordinate (2nd).
+public fun compare(a: &Point, b: &Point): bool {
+    (a.0 == b.0 && a.1 <= b.1) || a.0 < b.0
+}
+
 /// Parse bytes (encoded as BCS) into a point.
 public fun from_bytes(bytes: vector<u8>): Point {
     from_bcs(&mut bcs::new(bytes))
@@ -164,4 +170,24 @@ fun test_moore() {
     let neighbors = Point(1, 1).moore(1);
     // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
     assert_eq!(neighbors.length(), 8);
+}
+
+#[test]
+fun test_compare() {
+    use std::unit_test::assert_eq;
+
+    let mut points = vector[
+        Point(1, 1),
+        Point(0, 0),
+        Point(2, 2),
+        Point(2, 0),
+        Point(0, 1),
+        Point(1, 0),
+    ];
+    points.insertion_sort_by!(|a, b| a.compare(b));
+    assert!(points.is_sorted_by!(|a, b| a.compare(b)));
+    assert_eq!(
+        points,
+        vector[Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1), Point(2, 0), Point(2, 2)],
+    );
 }

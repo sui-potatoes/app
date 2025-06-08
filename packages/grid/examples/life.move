@@ -91,7 +91,7 @@ public fun cell_to_string(c: &Cell): String {
 }
 
 #[test]
-fun test_game_of_life_bar_swap() {
+fun test_bar_swap() {
     let ctx = &mut tx_context::dummy();
     let mut life = new(3, 3, ctx);
 
@@ -115,7 +115,7 @@ fun test_game_of_life_bar_swap() {
 }
 
 #[test]
-fun test_game_of_life_square() {
+fun test_square() {
     let ctx = &mut tx_context::dummy();
     let mut life = new(3, 3, ctx);
 
@@ -152,7 +152,7 @@ fun test_game_of_life_square() {
 }
 
 #[test]
-fun test_game_of_life_glider() {
+fun test_glider() {
     let ctx = &mut tx_context::dummy();
     let mut life = new(8, 8, ctx);
 
