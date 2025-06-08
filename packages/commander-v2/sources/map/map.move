@@ -11,7 +11,7 @@
 module commander::map;
 
 use commander::{history::{Self, Record}, recruit::Recruit, unit::{Self, Unit}};
-use grid::{cursor, direction, grid::{Self, Grid}, point};
+use grid::{cursor, grid::{Self, Grid}, point};
 use std::{macros::{num_min, num_max}, string::String};
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
