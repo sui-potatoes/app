@@ -20,9 +20,8 @@ jobs:
             - uses: actions-rust-lang/setup-rust-toolchain@v1
             - run: cargo install --git https://github.com/Mystenlabs/suiup.git --locked
             - run: suiup install sui
-              with:
-                env:
-                  SUIUP_DEFAULT_BIN_DIR: /usr/local/bin
+              env:
+                SUIUP_DEFAULT_BIN_DIR: /usr/local/bin
             - run: sui --version
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move build --path '{}'"
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
