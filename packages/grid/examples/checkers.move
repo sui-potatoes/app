@@ -5,7 +5,7 @@
 /// See https://en.wikipedia.org/wiki/Checkers for more information.
 module grid::checkers;
 
-use grid::{direction, grid::{Self, Grid}};
+use grid::{cursor, direction, grid::{Self, Grid}};
 use std::{macros::num_diff, string::String};
 
 /// The type of a tile on the checkers board. Black tiles are unavailable,
@@ -58,7 +58,7 @@ public fun play(game: &mut Checkers, x0: u8, y0: u8, x1: u8, y1: u8) {
         // if a move is a jump over a piece, it can only move to an empty tile, but
         // the piece in between must be a piece of the opposite color
         let direction = direction::direction!(x0, y0, x1, y1);
-        let mut cursor = direction::new_cursor(x0 as u16, y0 as u16);
+        let mut cursor = cursor::new(x0 as u16, y0 as u16);
         cursor.move_to(direction); // get to the piece in between
         let (xp, yp) = cursor.to_values();
         let piece = game.grid.swap(xp, yp, Tile::Empty);

@@ -26,7 +26,7 @@ fun creation() {
 }
 
 #[test]
-fun test_borrows() {
+fun borrows() {
     let mut grid = grid::from_vector(vector[vector[0]]);
     assert_eq!(grid[0, 0], 0);
 
@@ -35,8 +35,65 @@ fun test_borrows() {
     assert_eq!(grid[0, 0], 1);
 }
 
+// #[test]
+// fun von_neumann_bitmap() {
+//     let grid = grid::from_vector(vector[
+//         vector[0, 1, 0],
+//         vector[1, 0, 1],
+//         vector[0, 1, 0],
+//     ]);
+
+//     let bitmap = grid.von_neumann_bitmap!(point::new(1, 1), |cell| *cell == 1);
+//     assert!(bitmap & direction::up!() > 0);
+//     assert!(bitmap & direction::down!() > 0);
+//     assert!(bitmap & direction::left!() > 0);
+//     assert!(bitmap & direction::right!() > 0);
+
+//     let bitmap = grid.von_neumann_bitmap!(point::new(1, 1), |cell| *cell == 0);
+//     assert_eq!(bitmap, 0);
+
+//     let bitmap = grid.von_neumann_bitmap!(point::new(0, 0), |cell| *cell == 1);
+//     assert!(bitmap & direction::down!() > 0);
+//     assert!(bitmap & direction::right!() > 0);
+//     assert_eq!(bitmap & direction::left!(), 0);
+//     assert_eq!(bitmap & direction::up!(), 0);
+// }
+
+// #[test]
+// fun moore_bitmap() {
+//     let grid = grid::from_vector(vector[
+//         vector[1, 1, 1],
+//         vector[1, 1, 1],
+//         vector[1, 1, 1],
+//     ]);
+
+//     let bitmap = grid.moore_bitmap!(point::new(1, 1), |cell| *cell == 1);
+//     assert!(bitmap & direction::up!() > 0);
+//     assert!(bitmap & direction::down!() > 0);
+//     assert!(bitmap & direction::left!() > 0);
+//     assert!(bitmap & direction::right!() > 0);
+//     assert!(bitmap & (1 << 4) > 0);
+//     assert!(bitmap & (1 << 5) > 0);
+//     assert!(bitmap & (1 << 6) > 0);
+//     assert!(bitmap & (1 << 7) > 0);
+
+//     let bitmap = grid.moore_bitmap!(point::new(1, 1), |cell| *cell == 0);
+//     assert_eq!(bitmap, 0);
+
+//     let bitmap = grid.moore_bitmap!(point::new(0, 0), |cell| *cell == 1);
+//     assert!(bitmap & direction::down!() > 0);
+//     assert!(bitmap & direction::right!() > 0);
+//     assert!(bitmap & (1 << 7) > 0);
+
+//     assert_eq!(bitmap & direction::left!(), 0);
+//     assert_eq!(bitmap & direction::up!(), 0);
+//     assert_eq!(bitmap & (1 << 4), 0);
+//     assert_eq!(bitmap & (1 << 5), 0);
+//     assert_eq!(bitmap & (1 << 6), 0);
+// }
+
 #[test]
-fun test_swap() {
+fun swap() {
     let mut grid = grid::from_vector_unchecked(vector[
         // simple 3x3 grid
         vector[0, 0, 0],
@@ -53,7 +110,7 @@ fun test_swap() {
 }
 
 #[test]
-fun test_path_tracing() {
+fun path_tracing() {
     let grid = grid::from_vector(vector[
         vector[1, 0, 0, 0, 0],
         vector[0, 0, 0, 0, 2],
@@ -95,8 +152,8 @@ fun test_path_tracing() {
 }
 
 #[test]
-fun test_find_group() {
-    let grid = grid::from_vector /* ERROR: */ (vector[
+fun find_group() {
+    let grid = grid::from_vector(vector[
         vector[0, 0, 1, 0, 0],
         vector[0, 0, 1, 0, 2],
         vector[0, 0, 1, 0, 0],
@@ -110,13 +167,13 @@ fun test_find_group() {
 }
 
 #[test]
-fun test_to_string() {
+fun to_string() {
     let grid = grid::from_vector<u8>(vector[vector[1, 2, 3], vector[4, 5, 6], vector[7, 8, 9]]);
     assert_eq!(grid.to_string!(), b"|1|2|3|\n|4|5|6|\n|7|8|9|\n".to_string());
 }
 
 #[test]
-fun test_from_bcs() {
+fun from_bcs() {
     let grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
     let bytes = bcs::to_bytes(&grid);
     let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| bcs.peel_u8());
@@ -126,7 +183,7 @@ fun test_from_bcs() {
 }
 
 #[test]
-fun test_from_bcs_with_custom_type() {
+fun from_bcs_with_custom_type() {
     let grid = grid::tabulate!(3, 3, |x, y| point::new(x, y));
     let bytes = bcs::to_bytes(&grid);
     let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| point::from_bcs(bcs));

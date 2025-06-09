@@ -6,7 +6,7 @@
 /// could, for example, be a `10x10` grid with `5` in a row.
 module grid::tic_tac_toe;
 
-use grid::{direction, grid::{Self, Grid}};
+use grid::{cursor, direction, grid::{Self, Grid}};
 use std::string::String;
 
 const EInvalidMove: u64 = 0;
@@ -64,7 +64,7 @@ public fun prove_victory(game: &mut TicTacToe, tiles: vector<vector<u8>>) {
     // 3. Move cursor one by one in the given direction, check each tile.
     // 4. If succeeds, then the player has won.
     let direction = direction::direction!(start[0], start[1], end[0], end[1]);
-    let mut cursor = direction::new_cursor(start[0] as u16, start[1] as u16);
+    let mut cursor = cursor::new(start[0] as u16, start[1] as u16);
     let is_x = game.grid[start[0] as u16, start[1] as u16] == Tile::X;
 
     // skips the first tile

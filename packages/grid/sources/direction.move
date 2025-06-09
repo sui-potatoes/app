@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 /// Direction module provides macros to check the relative positions of points
-/// on a grid. Additionally, it provides a `Cursor` struct to represent a cursor
-/// on a grid which can be moved using the `move_to` function.
+/// on a grid.
 ///
 /// Grid axes are defined as follows:
 /// - X-axis: vertical axis (top->down)
@@ -32,87 +31,9 @@
 ///     assert!(is_left);
 /// }
 /// ```
-///
-/// The `Cursor` struct represents a point on the grid, and can be used to move
-/// a point in a given direction.
-/// ```
-/// use grid::direction;
-///
-/// #[test]
-/// fun test_cursor() {
-///     let mut cursor = direction::new_cursor(0, 0);
-///     cursor.move_to(direction::down!());
-///     cursor.move_to(direction::down_right!())
-///
-///     let (x, y) = cursor.to_values();
-///     assert!(x == 2 && y == 1);
-/// }
-/// ```
 module grid::direction;
 
-use grid::point::{Self, Point};
 use std::macros::{num_min, num_diff};
-
-const EOutOfBounds: u64 = 0;
-
-/// A point on the grid, represented by its X and Y coordinates.
-public struct Cursor(u16, u16) has copy, drop, store;
-
-/// Get the X coordinate of the cursor.
-public fun new_cursor(x: u16, y: u16): Cursor { Cursor(x, y) }
-
-public use fun cursor_to_values as Cursor.to_values;
-
-/// Get both coordinates of the cursor.
-public fun cursor_to_values(c: &Cursor): (u16, u16) {
-    let Cursor(x, y) = c;
-    (*x, *y)
-}
-
-public use fun cursor_to_point as Cursor.to_point;
-
-/// Construct a `Point` from a `Cursor`.
-public fun cursor_to_point(c: &Cursor): Point {
-    point::new(c.0, c.1)
-}
-
-/// Construct a `Cursor` from a `Point`.
-public fun cursor_from_point(p: &Point): Cursor {
-    let (x, y) = p.to_values();
-    Cursor(x, y)
-}
-
-/// Reset the cursor to a given point.
-public fun reset(c: &mut Cursor, x: u16, y: u16) {
-    c.0 = x;
-    c.1 = y;
-}
-
-/// Move cursor in a given direction. Aborts if the cursor is out of bounds.
-public fun move_to(c: &mut Cursor, direction: u8) {
-    let Cursor(x, y) = c;
-    if (direction & up!() > 0) {
-        assert!(*x > 0, EOutOfBounds);
-        *x = *x - 1;
-    } else if (direction & down!() > 0) {
-        *x = *x + 1;
-    };
-
-    if (direction & left!() > 0) {
-        assert!(*y > 0, EOutOfBounds);
-        *y = *y - 1;
-    } else if (direction & right!() > 0) {
-        *y = *y + 1;
-    };
-}
-
-/// Check if a cursor can move in a given direction. Checks 0-index bounds.
-public fun can_move_to(c: &Cursor, direction: u8): bool {
-    let Cursor(x, y) = c;
-    let is_up = direction & up!() > 0;
-    let is_left = direction & left!() > 0;
-    (is_up && *x > 0 || !is_up) && (is_left && *y > 0 || !is_left)
-}
 
 // === Check Directions ===
 

@@ -7,7 +7,7 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 [dependencies]
 BitField = { local = "../bit-field" }
 Codec = { local = "../codec" }
-Grid = { local = "../grid" }
+grid = { local = "../grid" }
 NameGenerator = { local = "../name-gen" }
 
 [addresses]

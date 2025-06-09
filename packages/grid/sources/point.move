@@ -9,9 +9,6 @@ module grid::point;
 use std::string::String;
 use sui::bcs::{Self, BCS};
 
-/// Error code for not implemented functions.
-const ENotImplemented: u64 = 264;
-
 /// A point in 2D space.
 public struct Point(u16, u16) has copy, drop, store;
 
@@ -24,7 +21,7 @@ public macro fun from_vector($v: vector<u16>): Point {
     new(v[0], v[1])
 }
 
-public use fun grid::direction::cursor_from_point as Point.to_cursor;
+public use fun grid::cursor::from_point as Point.to_cursor;
 
 /// Get a tuple of two values from a point.
 public fun to_values(p: &Point): (u16, u16) { let Point(x, y) = p; (*x, *y) }
@@ -93,7 +90,52 @@ public fun von_neumann(p: &Point, size: u16): vector<Point> {
     neighbors
 }
 
+/// Get all Moore neighbors of a point. Moore neighborhood is a set of points
+/// that are adjacent to the given point. In 2D space, it's the point to the
+/// left, right, up, down, and diagonals from the given point.
+///
+/// ```
+///    0 1 2 3 4
+/// 0: |2|2|2|2|2|
+/// 1: |2|1|1|1|2|
+/// 2: |2|1|0|1|2|
+/// 3: |2|1|1|1|2|
+/// 4: |2|2|2|2|2|
+/// ```
+public fun moore(p: &Point, size: u16): vector<Point> {
+    if (size == 0) return vector[];
+
+    let mut neighbors = vector[];
+    let Point(x, y) = *p;
+
+    size.do!(|i| {
+        let i = i + 1;
+        neighbors.push_back(Point(x + i, y));
+        neighbors.push_back(Point(x, y + i));
+
+        if (x >= i) neighbors.push_back(Point(x - i, y));
+        if (y >= i) neighbors.push_back(Point(x, y - i));
+
+        // top left
+        if (x >= i && y >= i) neighbors.push_back(Point(x - i, y - i));
+        // top right
+        if (x >= i) neighbors.push_back(Point(x - i, y + i));
+        // bottom left
+        if (y >= i) neighbors.push_back(Point(x + i, y - i));
+        // bottom right
+        neighbors.push_back(Point(x + i, y + i));
+    });
+
+    neighbors
+}
+
 // === Convenience & Compatibility ===
+
+/// Compare two points. To be used in sorting macros. Returns less or equal,
+/// based on the x coordinate (1st) and then the y coordinate (2nd).
+public fun compare(a: &Point, b: &Point): bool {
+    (a.0 == b.0 && a.1 <= b.1) || a.0 < b.0
+}
 
 /// Parse bytes (encoded as BCS) into a point.
 public fun from_bytes(bytes: vector<u8>): Point {
@@ -115,21 +157,4 @@ public fun to_string(p: &Point): String {
     str.append(y.to_string());
     str.append_utf8(b")");
     str
-}
-
-#[allow(unused_function)]
-/// Get all Moore neighbors of a point. Moore neighborhood is a set of points
-/// that are adjacent to the given point. In 2D space, it's the point to the
-/// left, right, up, down, and diagonals from the given point.
-///
-/// ```
-///    0 1 2 3 4
-/// 0: |2|2|2|2|2|
-/// 1: |2|1|1|1|2|
-/// 2: |2|1|0|1|2|
-/// 3: |2|1|1|1|2|
-/// 4: |2|2|2|2|2|
-/// ```
-fun moore(_p: &Point, _size: u16): vector<Point> {
-    abort ENotImplemented
 }
