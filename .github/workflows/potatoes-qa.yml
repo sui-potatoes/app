@@ -4,6 +4,7 @@ on:
     pull_request:
 
 env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     MOVE_PACKAGES_PATH: packages
     APP_PATH: app
 
@@ -16,17 +17,11 @@ jobs:
                 working-directory: ${{ env.MOVE_PACKAGES_PATH }}
         steps:
             - uses: actions/checkout@v2
-            - name: Download Sui
-              uses: jaxxstorm/action-install-gh-release@v1.12.0
-              with:
-                  repo: MystenLabs/sui
-                  platform: ubuntu
-                  version: testnet
-                  cache: enable
-            # List all directories in the packages folder, and run sui move build
-            # and then sui move test on each of them
-            - name: Check version
-              run: sui --version
+            - uses: actions-rust-lang/setup-rust-toolchain@v1
+            - run: cargo install --git https://github.com/Mystenlabs/suiup.git --locked
+            - run: suiup install sui -y
+            - run: echo "$(dirname "$(suiup which sui)")" >> "$GITHUB_PATH"
+            - run: sui --version
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move build --path '{}'"
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
 
