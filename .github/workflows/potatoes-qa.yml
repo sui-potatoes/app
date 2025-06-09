@@ -16,8 +16,10 @@ jobs:
                 working-directory: ${{ env.MOVE_PACKAGES_PATH }}
         steps:
             - uses: actions/checkout@v2
-            - uses: actions-rust-lang/setup-rust-toolchain@v1
-            - run: cargo install --git https://github.com/Mystenlabs/suiup.git --locked
+            - uses: baptiste0928/cargo-install@v3
+              with:
+                git: https://github.com/Mystenlabs/suiup
+                locked: true
             - run: suiup install sui
             - run: sui --version
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move build --path '{}'"
