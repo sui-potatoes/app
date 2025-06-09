@@ -7,8 +7,6 @@ module go_game::go;
 use grid::{grid::{Self, Grid}, point::{Self, Point}};
 use std::string::String;
 
-/// The size of the board is invalid, it must be `9`, `13`, or `19`.
-const EInvalidSize: u64 = 0;
 /// The move is invalid, the field is already occupied.
 const EInvalidMove: u64 = 1;
 /// The move is a suicide move.
@@ -22,8 +20,16 @@ public struct Board has copy, drop, store {
     grid: Grid<Tile>,
     /// The current player. `true` if black, `false` if white.
     is_black: bool,
+    /// Captured stones.
+    captured: Score,
     /// Stores history of moves.
     moves: vector<Point>,
+}
+
+/// The score of the game, black and white stones.
+public struct Score has copy, drop, store {
+    black: u16,
+    white: u16,
 }
 
 /// A group of stones on the board. Tile marks the color of the group.
@@ -39,12 +45,12 @@ public enum Tile has copy, drop, store {
 
 /// Create a new `Board` of the given `size`. Size can be `9`, `13`, or `19`.
 public fun new(size: u16): Board {
-    assert!(size == 9 || size == 13 || size == 19, EInvalidSize);
     Board {
         size,
         grid: grid::tabulate!(size, size, |_, _| Tile::Empty),
         is_black: true,
         moves: vector[],
+        captured: Score { black: 0, white: 0 },
     }
 }
 
@@ -75,13 +81,13 @@ public fun place(board: &mut Board, x: u16, y: u16) {
     });
 
     // Now we need to get unique groups of enemy stones. It is possible that the
-    // stones are connected to each other in any arbitrary way.
+    // surrounding stones are connected to each other.
     let mut enemy_groups = vector[];
     enemy_stones.destroy!(|p| {
-        enemy_groups.find_index!(|Group(_, points)| points.contains(&p)).destroy_or!({
-            enemy_groups.push_back(board.find_group(p.x(), p.y()));
-            0 // don't ask
-        });
+        enemy_groups
+            // Check if the point is already in a group.
+            .find_index!(|Group(_, points)| points.contains(&p))
+            .destroy_or!({ enemy_groups.push_back(board.find_group(p.x(), p.y())); 0 });
     });
 
     // Now we need to check if any of the enemy groups are surrounded.
@@ -89,9 +95,14 @@ public fun place(board: &mut Board, x: u16, y: u16) {
 
     // If any of the enemy groups are surrounded, we capture them.
     if (surrounded_groups.length() > 0) {
-        surrounded_groups.destroy!(|Group(_, points)| points.destroy!(|p| {
-            board.grid.swap(p.x(), p.y(), Tile::Empty);
-        }));
+        surrounded_groups.destroy!(|Group(_, points)| {
+            // Increase score by the number of stones in the group.
+            if (board.is_black) board.captured.black = points.length() as u16 + board.captured.black
+            else board.captured.white = points.length() as u16 + board.captured.white;
+
+            // Remove the group from the board.
+            points.destroy!(|p| board.grid.swap(p.x(), p.y(), Tile::Empty));
+        });
     } else if (empty_num == 0) {
         // If there are no empty neighbors, we need to check if the move is a
         // suicide by checking if the new group is surrounded.
@@ -140,6 +151,29 @@ public fun is_group_surrounded(board: &Board, group: &Group): bool {
     }
 }
 
+// === Getters ===
+
+/// Get the size of the board.
+public fun size(b: &Board): u16 { b.size }
+
+#[syntax(index)]
+/// Borrow a tile
+public fun borrow(b: &Board, x: u16, y: u16): &Tile { &b.grid[x, y] }
+
+/// Return true if the current turn is black.
+public fun is_black_turn(b: &Board): bool { b.is_black }
+
+// === Convenience ===
+
+/// Return true if the tile is empty.
+public fun is_empty(t: &Tile): bool { t == &Tile::Empty }
+
+/// Return true if the tile is black.
+public fun is_black(t: &Tile): bool { t == &Tile::Black }
+
+/// Return true if the tile is white.
+public fun is_white(t: &Tile): bool { t == &Tile::White }
+
 /// As long as `Tile.to_string()` exists, we allow debug printing.
 public use fun tile_to_string as Tile.to_string;
 
@@ -152,8 +186,8 @@ public fun tile_to_string(tile: &Tile): String {
     }.to_string()
 }
 
-#[allow(unused_function)]
-fun from_vector(data: vector<vector<u8>>): Board {
+#[test_only, allow(unused_function)]
+public(package) fun from_vector(data: vector<vector<u8>>): Board {
     let grid = grid::tabulate!(data.length() as u16, data[0].length() as u16, |i, j| {
         match (data[i as u64][j as u64]) {
             0 => Tile::Empty,
@@ -168,6 +202,7 @@ fun from_vector(data: vector<vector<u8>>): Board {
         is_black: true,
         moves: vector[],
         size: data.length() as u16,
+        captured: Score { black: 0, white: 0 },
     }
 }
 
@@ -235,6 +270,8 @@ fun test_suicide_success_move() {
     // |B|_|_|
     // |_|_|_|
     board.place(0, 0);
+
+    assert_eq!(board.captured.black, 7);
 }
 
 #[test]
@@ -250,4 +287,6 @@ fun test_take_multiple_groups() {
     // |B|_|B|
     // |_|_|_|
     board.place(0, 1);
+
+    assert_eq!(board.captured.black, 2);
 }
