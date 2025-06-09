@@ -48,3 +48,57 @@ public fun is_bytes_control(bytes: &vector<u8>): bool {
 public fun is_bytes_extended(bytes: &vector<u8>): bool {
     bytes.all!(|c| extended::is_extended!(*c))
 }
+
+/// Compare two vectors of ASCII bytes, returns true if lhs is less or equal to rhs.
+/// This function is extremely helpful for sorting vectors of ASCII bytes.
+///
+/// Example:
+/// ```rust
+/// let mut iso_dates = vector[
+///     b"2025-05-30T00:00:00Z",
+///     b"2025-05-30T01:00:00Z",
+///     b"2025-03-10T00:00:00Z",
+///     b"2020-10-30T00:00:00Z",
+///     b"2025-01-22T00:00:00Z",
+/// ];
+///
+/// // No need to implement a custom comparator!
+/// iso_dates.insertion_sort_by!(|a, b| cmp_bytes(a, b));
+/// ```
+public fun cmp_bytes(a: &vector<u8>, b: &vector<u8>): bool {
+    let (a_len, b_len) = (a.length(), b.length());
+    'search: {
+        a_len.min(b_len).do!(|i| {
+            if (a[i] > b[i]) return 'search false;
+            if (a[i] < b[i]) return 'search true;
+        });
+        a_len <= b_len
+    }
+}
+
+#[test]
+fun test_compare() {
+    use std::unit_test::assert_eq;
+
+    assert!(cmp_bytes(&b"aaaa", &b"bbbb"));
+    assert!(cmp_bytes(&b"aaaa", &b"aaaa"));
+    assert!(!cmp_bytes(&b"aaab", &b"aaaa"));
+
+    let mut iso_dates = vector[
+        b"2025-05-30T00:00:00Z",
+        b"2025-05-30T01:00:00Z",
+        b"2025-03-10T00:00:00Z",
+        b"2020-10-30T00:00:00Z",
+        b"2025-01-22T00:00:00Z",
+    ];
+
+    iso_dates.insertion_sort_by!(|a, b| cmp_bytes(a, b));
+
+    assert_eq!(iso_dates, vector[
+        b"2020-10-30T00:00:00Z",
+        b"2025-01-22T00:00:00Z",
+        b"2025-03-10T00:00:00Z",
+        b"2025-05-30T00:00:00Z",
+        b"2025-05-30T01:00:00Z",
+    ]);
+}
