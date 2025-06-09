@@ -20,7 +20,6 @@ jobs:
             - uses: actions-rust-lang/setup-rust-toolchain@v1
             - run: cargo install --git https://github.com/Mystenlabs/suiup.git --locked
             - run: suiup install sui -y
-            - run: echo "$(dirname "$(suiup which sui)")" >> "$GITHUB_PATH"
             - run: sui --version
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move build --path '{}'"
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
