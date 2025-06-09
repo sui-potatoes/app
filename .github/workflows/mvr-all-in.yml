@@ -5,6 +5,7 @@ on:
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    MVR_FALLBACK_NETWORK: mainnet
 
 jobs:
     test-all-mvr-packages:
