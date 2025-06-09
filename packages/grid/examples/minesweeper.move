@@ -388,11 +388,11 @@ fun test_minesweeper() {
     let rng = sui::random::new_generator_from_seed_for_testing(b"seed");
     let mut ms = new(rng, 4, 4, 4); // 10x10, 10 mines
 
-    ms.debug();
+    // ms.debug();
     ms.reveal(1, 1);
     ms.reveal(0, 1);
 
-    ms.debug();
+    // ms.debug();
     ms.flag(0, 0);
     ms.reveal(0, 2);
 }
@@ -418,7 +418,7 @@ fun test_known_solution() {
     ms.reveal(0, 5);
     ms.reveal(1, 5);
 
-    ms.debug();
+    // ms.debug();
 }
 
 #[test]
@@ -439,7 +439,7 @@ fun test_random_solution_0() {
     ms.reveal(0, 2);
     ms.flag(2, 2);
 
-    ms.debug();
+    // ms.debug();
 }
 
 #[test]
@@ -457,7 +457,7 @@ fun test_random_solution_1() {
     ms.reveal(0, 0);
     ms.reveal(0, 1);
     ms.reveal(1, 0);
-    ms.debug();
+    // ms.debug();
 }
 
 #[test]
@@ -474,7 +474,7 @@ fun test_random_solution_2() {
 
     ms.reveal(0, 1);
     ms.reveal(0, 2);
-    ms.debug();
+    // ms.debug();
 }
 
 #[test]
@@ -490,7 +490,7 @@ fun test_random_solution_2_1() {
     );
 
     ms.reveal(1, 2);
-    ms.debug();
+    // ms.debug();
 }
 
 #[test]
@@ -506,7 +506,7 @@ fun test_random_solution_3_1() {
     );
 
     ms.reveal(1, 2);
-    ms.debug();
+    // ms.debug();
 }
 
 #[test]
@@ -526,7 +526,7 @@ fun test_binary_wire() {
 
     ms.reveal(1, 2);
     ms.reveal(1, 8);
-    ms.debug();
+    // ms.debug();
 }
 
 #[test]
@@ -545,7 +545,7 @@ fun test_not_gate() {
     ms.reveal(2, 1);
     ms.reveal(2, 4);
     ms.reveal(2, 7); // center
-    ms.debug();
+    // ms.debug();
 }
 
 #[test]
@@ -562,7 +562,7 @@ fun test_large_map() {
     );
 
     ms.reveal(1, 1);
-    ms.debug();
+    // ms.debug();
 }
 
 #[allow(unused_function)]
