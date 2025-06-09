@@ -269,6 +269,11 @@ public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T|
 /// current point. For Von Neumann neighborhood, use `von_neumann` as the
 /// function. For Moore neighborhood, use `moore` as the function.
 ///
+/// Takes the `$n` function to get the neighbors of the current point. Expected
+/// to be used with the `von_neumann` and `moore` macros to get the neighbors.
+/// However, it is possible to pass in a custom callback with exotic
+/// configurations, eg. only return diagonal neighbors.
+///
 /// ```move
 /// // finds a group of cells with value 1 in von Neumann neighborhood
 /// grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
