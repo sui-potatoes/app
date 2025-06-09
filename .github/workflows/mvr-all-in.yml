@@ -19,7 +19,7 @@ jobs:
               run: |
                 sui move new test
                 cp .github/snippets/test_mvr.move test/sources/test.move
-                cd beep
+                cd test
                 mvr add @potatoes/ascii
                 mvr add @potatoes/bit-field
                 mvr add @potatoes/codec
