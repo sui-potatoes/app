@@ -2,15 +2,15 @@
 
 [move]
 version = 3
-manifest_digest = "2A753F6D7C495ECABC8DDA8D79BA3F45FFA3D850D44E4FFFD39BFD1CCF6D3672"
+manifest_digest = "7BE40DAE7A9CEE4C6F6834BDFAF36FF2BC7D2C52D3D93EE01F14D4CAD4EEB3E0"
 deps_digest = "04732BFEF428F74DE262001DC455D76B909EBC394B034A9A15CC095E4BDD9CEF"
 dependencies = [
   { id = "BitField", name = "BitField" },
   { id = "Codec", name = "Codec" },
-  { id = "Grid", name = "Grid" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "NameGenerator", name = "NameGenerator" },
   { id = "Sui", name = "Sui" },
+  { id = "grid", name = "grid" },
 ]
 
 [[move.package]]
@@ -32,17 +32,8 @@ dependencies = [
 ]
 
 [[move.package]]
-id = "Grid"
-source = { local = "../grid" }
-
-dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-]
-
-[[move.package]]
 id = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "04f11afaf5e0", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "25804c243d07", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
 id = "NameGenerator"
@@ -55,10 +46,19 @@ dependencies = [
 
 [[move.package]]
 id = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "04f11afaf5e0", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "25804c243d07", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
+]
+
+[[move.package]]
+id = "grid"
+source = { local = "../grid" }
+
+dependencies = [
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
 ]
 
 [move.toolchain-version]

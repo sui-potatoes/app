@@ -343,5 +343,4 @@ fun test_deserialize_map() {
     // assert!(positions.length() > 0);
 
     map.destroy();
-    std::debug::print(&positions);
 }
