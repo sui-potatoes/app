@@ -4,37 +4,28 @@ on:
     pull_request:
 
 env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     MOVE_PACKAGES_PATH: packages
     APP_PATH: app
 
 jobs:
     test-move-packages:
-        name: Test Move Packages
+        name: Build and Test Move Packages
         runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: ${{ env.MOVE_PACKAGES_PATH }}
         steps:
             - uses: actions/checkout@v2
-            - name: Download MVR
-              uses: jaxxstorm/action-install-gh-release@v1.12.0
-              with:
-                  repo: MystenLabs/mvr
-                  extension-matching: disable
-                  rename-to: mvr
-                  platform: ubuntu
-                  cache: enable
-                  chmod: 0755
-            - run: mvr search @potatoes
-            - name: Download Sui
-              uses: jaxxstorm/action-install-gh-release@v1.12.0
-              with:
-                  repo: MystenLabs/sui
-                  platform: ubuntu
-                  version: testnet
-                  cache: enable
-            # # List all directories in the packages folder, and run sui move test on
-            # # each of them
+            - uses: actions-rust-lang/setup-rust-toolchain@v1
+            - run: cargo install --git https://github.com/Mystenlabs/suiup.git --locked
+            - run: suiup install sui -y
+            - run: suiup install mvr -y
+            - run: echo "$(dirname "$(suiup which sui)")" >> "$GITHUB_PATH"
+            - run: sui --version; mvr --version; mvr search @potatoes
+            # List all directories in the packages folder, and run sui move test on
+            # each of them
+            - run: ls -d ./*/ | xargs -I {} bash -c "sui move build --path '{}'"
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
 
     move-formatter:

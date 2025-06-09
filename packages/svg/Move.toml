@@ -1,5 +1,5 @@
 [package]
-name = "SVG"
+name = "svg"
 edition = "2024.beta"
 license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
