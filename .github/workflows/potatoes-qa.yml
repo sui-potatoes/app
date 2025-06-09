@@ -21,7 +21,7 @@ jobs:
             - run: cargo install --git https://github.com/Mystenlabs/suiup.git --locked
             - run: suiup install sui
               env:
-                SUIUP_DEFAULT_BIN_DIR: /usr/local/bin
+                SUIUP_DEFAULT_BIN_DIR: $(dirname $(which suiup))
             - run: sui --version
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move build --path '{}'"
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
