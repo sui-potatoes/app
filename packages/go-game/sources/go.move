@@ -11,6 +11,8 @@ use std::string::String;
 const EInvalidMove: u64 = 1;
 /// The move is a suicide move.
 const ESuicideMove: u64 = 2;
+/// The move repeats previous state of the board.
+const EKoRuleBroken: u64 = 3;
 
 /// The game board.
 public struct Board has copy, drop, store {
@@ -21,9 +23,11 @@ public struct Board has copy, drop, store {
     /// The current player. `true` if black, `false` if white.
     is_black: bool,
     /// Captured stones.
-    captured: Score,
+    score: Score,
     /// Stores history of moves.
     moves: vector<Point>,
+    /// Stores last 2 states to implement the ko rule.
+    prev_states: vector<Grid<Tile>>,
 }
 
 /// The score of the game, black and white stones.
@@ -50,7 +54,8 @@ public fun new(size: u16): Board {
         grid: grid::tabulate!(size, size, |_, _| Tile::Empty),
         is_black: true,
         moves: vector[],
-        captured: Score { black: 0, white: 0 },
+        score: Score { black: 0, white: 0 },
+        prev_states: vector[],
     }
 }
 
@@ -70,7 +75,9 @@ public fun place(board: &mut Board, x: u16, y: u16) {
     // All my stones which are neighbors, actually form a group. The only tricky
     // part is checking the enemy stones and their groups.
     point::new(x, y).von_neumann(1).destroy!(|p| {
-        match (board.grid[p.x(), p.y()]) {
+        let (x, y) = p.into_values();
+        if (x >= board.size || y >= board.size) return;
+        match (board.grid[x, y]) {
             Tile::Empty => (empty_num = empty_num + 1),
             t @ _ => if (t == stone) {
                 my_stones.push_back(p);
@@ -97,8 +104,8 @@ public fun place(board: &mut Board, x: u16, y: u16) {
     if (surrounded_groups.length() > 0) {
         surrounded_groups.destroy!(|Group(_, points)| {
             // Increase score by the number of stones in the group.
-            if (board.is_black) board.captured.black = points.length() as u16 + board.captured.black
-            else board.captured.white = points.length() as u16 + board.captured.white;
+            if (board.is_black) board.score.black = points.length() as u16 + board.score.black
+            else board.score.white = points.length() as u16 + board.score.white;
 
             // Remove the group from the board.
             points.destroy!(|p| board.grid.swap(p.x(), p.y(), Tile::Empty));
@@ -109,7 +116,17 @@ public fun place(board: &mut Board, x: u16, y: u16) {
         assert!(!board.is_group_surrounded(&board.find_group(x, y)), ESuicideMove);
     };
 
-    // Add the move to the history.
+    board
+        .prev_states
+        .find_index!(|history| history == &board.grid)
+        .is_some_and!(|_| abort EKoRuleBroken);
+
+    if (board.prev_states.length() == 2) {
+        board.prev_states.swap_remove(0);
+    };
+
+    // Add the move and the current state to the history.
+    board.prev_states.push_back(copy board.grid);
     board.moves.push_back(point::new(x, y));
     board.is_black = !board.is_black;
 }
@@ -156,6 +173,9 @@ public fun is_group_surrounded(board: &Board, group: &Group): bool {
 /// Get the size of the board.
 public fun size(b: &Board): u16 { b.size }
 
+/// Get a reference to the inner `Grid`.
+public fun grid(b: &Board): &Grid<Tile> { &b.grid }
+
 #[syntax(index)]
 /// Borrow a tile
 public fun borrow(b: &Board, x: u16, y: u16): &Tile { &b.grid[x, y] }
@@ -178,12 +198,24 @@ public fun is_white(t: &Tile): bool { t == &Tile::White }
 public use fun tile_to_string as Tile.to_string;
 
 /// Convert a `Tile` to a `String`.
-public fun tile_to_string(tile: &Tile): String {
-    match (tile) {
+public fun tile_to_string(t: &Tile): String {
+    match (t) {
         Tile::Empty => b"_",
         Tile::Black => b"B",
         Tile::White => b"W",
     }.to_string()
+}
+
+/// Alias for `tile_to_number`
+public use fun tile_to_number as Tile.to_number;
+
+/// Convert tile to `u8` representation.
+public fun tile_to_number(t: &Tile): u8 {
+    match (t) {
+        Tile::Empty => 0,
+        Tile::Black => 1,
+        Tile::White => 2,
+    }
 }
 
 #[test_only, allow(unused_function)]
@@ -202,7 +234,8 @@ public(package) fun from_vector(data: vector<vector<u8>>): Board {
         is_black: true,
         moves: vector[],
         size: data.length() as u16,
-        captured: Score { black: 0, white: 0 },
+        score: Score { black: 0, white: 0 },
+        prev_states: vector[grid],
     }
 }
 
@@ -257,6 +290,21 @@ fun test_suicide_move() {
     board.place(0, 0);
 }
 
+#[test, expected_failure(abort_code = ESuicideMove)]
+fun test_suicide_move_two_eyes() {
+    // prettier-ignore
+    let mut board = from_vector(vector[
+        vector[0, 2, 2],
+        vector[1, 2, 2],
+        vector[2, 2, 0],
+    ]);
+
+    // |B|W|_|
+    // |B|W|_|
+    // |W|W|_|
+    board.place(0, 0);
+}
+
 #[test]
 fun test_suicide_success_move() {
     // prettier-ignore
@@ -271,7 +319,7 @@ fun test_suicide_success_move() {
     // |_|_|_|
     board.place(0, 0);
 
-    assert_eq!(board.captured.black, 7);
+    assert_eq!(board.score.black, 7);
 }
 
 #[test]
@@ -288,5 +336,58 @@ fun test_take_multiple_groups() {
     // |_|_|_|
     board.place(0, 1);
 
-    assert_eq!(board.captured.black, 2);
+    assert_eq!(board.score.black, 2);
+}
+
+#[test, expected_failure(abort_code = EKoRuleBroken)]
+fun test_ko_rule() {
+    // prettier-ignore
+    let mut board = from_vector(vector[
+        vector[2, 0, 2],
+        vector[1, 2, 0],
+        vector[0, 0, 0],
+    ]);
+
+    // |_|B|W|
+    // |B|W|_|
+    // |_|_|_|
+    board.place(0, 1); // take the white stone
+
+    // |W|_|W|
+    // |B|W|_|
+    // |_|_|_|
+    board.place(0, 0); // place the white stone back
+}
+
+#[test]
+fun test_ko_rule_bypassed() {
+    // prettier-ignore
+    let mut board = from_vector(vector[
+        vector[2, 0, 2],
+        vector[1, 2, 0],
+        vector[0, 0, 0],
+    ]);
+
+    // |_|B|W|
+    // |B|W|_|
+    // |_|_|_|
+    board.place(0, 1); // take the white stone
+
+    // |_|B|W|
+    // |B|W|_|
+    // |W|_|_|
+    board.place(2, 0); // place the white stone somewhere else
+
+    // |_|B|W|
+    // |B|W|_|
+    // |W|_|B|
+    board.place(2, 2); // another move
+
+    // |W|_|W|
+    // |_|W|_|
+    // |W|_|B|
+    board.place(0, 0); // previously illegal move
+
+    assert_eq!(board.score.black, 1);
+    assert_eq!(board.score.white, 2);
 }

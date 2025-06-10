@@ -8,9 +8,9 @@ use svg::{shape, svg::{Self, Svg}};
 
 /// Print the board as an SVG.
 public(package) fun svg(b: &Board): Svg {
-    let padding = 1;
-    let cell_size = 20;
-    let size = b.size() as u64;
+    let padding = 1u16;
+    let cell_size = 20u16;
+    let size = b.size() as u16;
     let width = ((size * (cell_size + 1)) + (size * padding)) as u16;
 
     // create a new SVG document
@@ -30,28 +30,22 @@ public(package) fun svg(b: &Board): Svg {
     });
 
     // pattern + background definition
-    let pattern = shape::custom(b"<pattern id='g' width='21' height='21' x='10' y='10' patternUnits='userSpaceOnUse'><path d='M 40 0 L 0 0 0 40' fill='none' stroke='gray' stroke-width='0.8'/></pattern>".to_string());
+    let pattern = shape::custom(b"<pattern id='g' width='21' height='21' x='20' y='20' patternUnits='userSpaceOnUse'><path d='M 40 0 L 0 0 0 40' fill='none' stroke='gray' stroke-width='0.8'/></pattern>".to_string());
     let mut background = shape::rect(width, width);
     background.attributes_mut().insert(b"fill".to_string(), b"url(#g)".to_string());
 
     svg.add_defs(vector[black, white, pattern]);
 
     let mut elements = vector[background];
-    size.do!(|i| {
-        size.do!(|j| {
-            let t = &b[i as u16, j as u16];
-            if (t.is_empty()) return;
+    b.grid().traverse!(|tile, row, col| {
+        let num = tile.to_number();
+        if (num == 0) return;
+        let stone = if (num == 1) b"#b" else { b"#w" }.to_string();
 
-            let cx = (i * cell_size) + (i * padding) + 10;
-            let cy = (j * cell_size) + (j * padding) + 10;
-            let stone = if (t.is_black()) {
-                shape::use_(b"#b".to_string())
-            } else {
-                shape::use_(b"#w".to_string())
-            };
+        let cx = (row * cell_size) + (row * padding) + 10;
+        let cy = (col * cell_size) + (col * padding) + 10;
 
-            elements.push_back(stone.move_to(cx as u16, cy as u16));
-        });
+        elements.push_back(shape::use_(stone).move_to(cx, cy));
     });
 
     svg.add_root(elements);
@@ -76,7 +70,7 @@ fun test_rendering_safari() {
     // let mut data_url = b"data:image/svg+xml;charset=utf8,";
     // data_url.append(res.into_bytes());
 
-    svg(&board).to_url();
+    std::debug::print(&svg(&board).to_url());
 
     // print the data URL
     // std::debug::print(&data_url.to_ascii_string());
