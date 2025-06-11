@@ -194,41 +194,46 @@ public macro fun destroy<$T>($grid: Grid<$T>, $f: |$T|) {
 /// the cell at the current position, and returns whether the cell is part of the
 /// group.
 ///
+/// Takes the `$n` function to get the neighbors of the current point. Expected
+/// to be used with the `von_neumann` and `moore` macros to get the neighbors.
+/// However, it is possible to pass in a custom callback with exotic
+/// configurations, eg. only return diagonal neighbors.
+///
 /// ```move
-/// // finds a group of cells with value 1
-/// grid.find_group!(0, 2, |el| *el == 1);
+/// // finds a group of cells with value 1 using the Von Neumann neighborhood
+/// grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
+///
+/// // finds a group of cells with value 0 using the Moore neighborhood
+/// grid.find_group!(0, 2, |p| p.moore(1), |el| *el == 0);
 /// ```
 public macro fun find_group<$T>(
     $map: &Grid<$T>,
     $x: u16,
     $y: u16,
+    $n: |Point| -> vector<Point>,
     $f: |&$T| -> bool,
 ): vector<Point> {
     let (x, y) = ($x, $y);
     let map = $map;
     let (height, width) = (map.width(), map.height());
-    let mut group = vector[];
+
+    if (!$f(&map[x, y])) return vector[];
+
     let mut visited = tabulate!(height, width, |_, _| false);
-
-    if (!$f(&map[x, y])) return group;
-
-    group.push_back(point::new(x, y));
     *&mut visited[x, y] = true;
 
+    let mut group = vector[point::new(x, y)];
     let mut queue = vector[point::new(x, y)];
 
     while (queue.length() != 0) {
-        let point = queue.pop_back();
-        map.von_neumann!(point, 1).do!(|point| {
+        $n(queue.pop_back()).destroy!(|point| {
             let (x, y) = point.into_values();
-
             if (x >= height || y >= width || visited[x, y]) return;
+            if (!$f(&map[x, y])) return;
 
-            if ($f(&map[x, y])) {
-                *&mut visited[x, y] = true;
-                group.push_back(point);
-                queue.push_back(point);
-            }
+            *&mut visited[x, y] = true;
+            group.push_back(point);
+            queue.push_back(point);
         });
     };
 
