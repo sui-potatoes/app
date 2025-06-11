@@ -66,13 +66,5 @@ fun test_rendering_safari() {
         vector[1, 0, 1, 2, 2, 2, 0, 0, 0],
     ]);
 
-    // let res = svg(&board).to_url();
-    // let mut data_url = b"data:image/svg+xml;charset=utf8,";
-    // data_url.append(res.into_bytes());
-
-    std::debug::print(&svg(&board).to_url());
-
-    // print the data URL
-    // std::debug::print(&data_url.to_ascii_string());
-    // std::debug::print(&data_url.length());
+    svg(&board).to_url();
 }
