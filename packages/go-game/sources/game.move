@@ -85,14 +85,7 @@ public fun join(game: &mut Game, acc: &mut Account, ctx: &mut TxContext) {
 }
 
 ///
-public fun play(
-    game: &mut Game,
-    cap: &Account,
-    x: u16,
-    y: u16,
-    clock: &Clock,
-    ctx: &mut TxContext,
-) {
+public fun play(game: &mut Game, cap: &Account, x: u16, y: u16, clock: &Clock, ctx: &mut TxContext) {
     assert!(cap.games.contains(game.id.as_inner()), ENotInGame);
     let Players(p1, p2) = &game.players;
     let is_p1 = p1.borrow() == cap.id.as_inner();
