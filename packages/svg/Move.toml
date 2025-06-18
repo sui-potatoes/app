@@ -3,12 +3,10 @@ name = "svg"
 edition = "2024.beta"
 license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
+flavor = "vanilla"
 
 [dependencies]
 Codec = { local = "../codec" }
-
-[addresses]
-svg = "0x0"
 
 [dev-dependencies]
 Suifrens = { git = "https://github.com/MystenLabs/apps.git", subdir = "suifrens/suifrens", rev = "main" }

@@ -2,15 +2,27 @@
 
 [move]
 version = 3
-manifest_digest = "8061273F03245BE76A2AFF1CB06B201A6991F70696269F6CDC33EBC2D3A6BEE1"
+manifest_digest = "795AAF59141D7D5208D18108BC784958D41BE0401ACFFB01F36C91FD1DF6810C"
 deps_digest = "52B406A7A21811BEF51751CF88DA0E76DAEFFEAC888D4F4060B1A72BBE7D8D35"
 dependencies = [
+  { id = "Bridge", name = "Bridge" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
   { id = "ascii", name = "ascii" },
 ]
 dev-dependencies = [
   { id = "svg", name = "svg" },
+]
+
+[[move.package]]
+id = "Bridge"
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "af5297b292c3", subdir = "crates/sui-framework/packages/bridge" }
+
+dependencies = [
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]
@@ -24,22 +36,34 @@ dependencies = [
 
 [[move.package]]
 id = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "3802482bd4e3", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "af5297b292c3", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
 id = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "3802482bd4e3", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "af5297b292c3", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
 ]
 
 [[move.package]]
-id = "ascii"
-source = { local = "../ascii" }
+id = "SuiSystem"
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "af5297b292c3", subdir = "crates/sui-framework/packages/sui-system" }
 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+]
+
+[[move.package]]
+id = "ascii"
+source = { git = "https://github.com/sui-potatoes/app.git", rev = "ascii@v1", subdir = "packages/ascii" }
+
+dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [[move.package]]

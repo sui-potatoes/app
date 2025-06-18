@@ -1,13 +1,16 @@
 [package]
 name = "date"
 edition = "2024"
+license = "MIT"
 authors = ["Damir Shamanaev <damirka.ru@gmail.com>"]
+flavor = "vanilla"
+
+[environments]
+mainnet = "35834a8a"
+testnet = "4c78adac"
 
 [dependencies]
 ascii = { r.mvr = "@potatoes/ascii/1" }
-
-[addresses]
-date = "0x0"
 
 [dev-dependencies]
 svg = { local = "../svg" }

@@ -1,9 +1,10 @@
 [package]
-name = "CommanderSuins"
+name = "commander-names"
 edition = "2024"
+flavor = "vanilla"
+
+[environments]
+testnet = "4c78adac"
 
 [dependencies]
 suins = { git = "https://github.com/MystenLabs/suins-contracts.git", subdir = "packages/suins", rev = "main" }
-
-[addresses]
-commander_names = "0x0"

@@ -1,10 +1,10 @@
 [package]
-name = "BitField"
+name = "bit-field"
 edition = "2024"
 license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
+flavor = "vanilla"
 
-[dependencies]
-
-[addresses]
-bit_field = "0x0"
+[environments]
+mainnet = "35834a8a"
+testnet = "4c78adac"
