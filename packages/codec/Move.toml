@@ -2,9 +2,11 @@
 name = "Codec"
 edition = "2024"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
+flavor = "vanilla"
 
-[addresses]
-codec = "0x0"
+[environments]
+mainnet = "35834a8a"
+testnet = "4c78adac"
 
 # testnet
 # v1: 0xa11d4e236d3456c14edd263859c475bc539b43afb8b41fa10974ca0abca6a1c0

@@ -3,9 +3,11 @@ name = "ascii"
 edition = "2024"
 license = "MIT"
 authors = ["Damir Shamanaev <damirka.ru@gmail.com>"]
+flavor = "vanilla"
 
-[addresses]
-ascii = "0x0"
+[environments]
+mainnet = "35834a8a"
+testnet = "4c78adac"
 
 # testnet: upgrade_cap = "0xe03549eaeab8d9461977ff1e993adf37a7d320f688a787b30fbdd30ce53c939c"
 # mainnet: upgrade_cap = "0x7804be7ba062dcd09e7adfeda7be090b9fe35cda9c02ad2c417b88d6c419ca52"
