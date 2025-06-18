@@ -2,12 +2,13 @@
 
 [move]
 version = 3
-manifest_digest = "3DD94C5999D123E5AAFAF27CD1F9E4BF72BC4E3588BDDCC39BCA67C49193D071"
-deps_digest = "52B406A7A21811BEF51751CF88DA0E76DAEFFEAC888D4F4060B1A72BBE7D8D35"
+manifest_digest = "0B5149FE802BA132DD81FEA945AAE47E8509F581A2071CB76F76AB8646E70699"
+deps_digest = "CAFAD8A7CF51067FB4358215BECB86BD100DD64E57C2AC8A7AE7D74B688F5965"
 dependencies = [
   { id = "Codec", name = "Codec" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
+  { id = "grid", name = "grid" },
   { id = "svg", name = "svg" },
 ]
 
@@ -22,14 +23,23 @@ dependencies = [
 
 [[move.package]]
 id = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "3802482bd4e3", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "25804c243d07", subdir = "crates/sui-framework/packages/move-stdlib" }
 
 [[move.package]]
 id = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "3802482bd4e3", subdir = "crates/sui-framework/packages/sui-framework" }
+source = { git = "https://github.com/MystenLabs/sui.git", rev = "25804c243d07", subdir = "crates/sui-framework/packages/sui-framework" }
 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
+]
+
+[[move.package]]
+id = "grid"
+source = { local = "../grid" }
+
+dependencies = [
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
 ]
 
 [[move.package]]
@@ -39,6 +49,11 @@ source = { git = "https://github.com/MystenLabs/apps.git", rev = "main", subdir 
 dependencies = [
   { id = "Sui", name = "Sui" },
 ]
+
+[move.toolchain-version]
+compiler-version = "1.49.2"
+edition = "2024.beta"
+flavor = "sui"
 
 [[move.package]]
 id = "svg"
@@ -53,8 +68,3 @@ dependencies = [
 dev-dependencies = [
   { id = "suifrens", name = "Suifrens" },
 ]
-
-[move.toolchain-version]
-compiler-version = "1.49.2"
-edition = "2024.beta"
-flavor = "sui"

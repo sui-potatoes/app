@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 #[allow(unused_const, unused_variable)]
-module gogame::game;
+module go_game::game;
 
-use gogame::go::{Self, Board};
+use go_game::go::{Self, Board};
 use std::string::String;
 use sui::{clock::Clock, display, package, vec_set::{Self, VecSet}};
 
-use fun gogame::render::svg as Board.to_svg;
+use fun go_game::render::svg as Board.to_svg;
 
 /// The size of the board is invalid (not 9, 13, or 19)
 const EInvalidSize: u64 = 0;
@@ -62,13 +62,13 @@ public fun new(acc: &mut Account, size: u8, ctx: &mut TxContext) {
     assert!(size == 9 || size == 13 || size == 19, EInvalidSize);
 
     let id = object::new(ctx);
-    let board = go::new(size);
+    let board = go::new(size as u16);
 
     acc.games.insert(id.to_inner());
 
     transfer::share_object(Game {
         id,
-        board: go::new(size),
+        board: go::new(size as u16),
         players: Players(option::some(acc.id.to_inner()), option::none()),
         image_blob: board.to_svg().to_url(),
     });
@@ -85,13 +85,20 @@ public fun join(game: &mut Game, acc: &mut Account, ctx: &mut TxContext) {
 }
 
 ///
-public fun play(game: &mut Game, cap: &Account, x: u8, y: u8, clock: &Clock, ctx: &mut TxContext) {
+public fun play(
+    game: &mut Game,
+    cap: &Account,
+    x: u16,
+    y: u16,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
     assert!(cap.games.contains(game.id.as_inner()), ENotInGame);
     let Players(p1, p2) = &game.players;
     let is_p1 = p1.borrow() == cap.id.as_inner();
     let is_p2 = p2.borrow() == cap.id.as_inner();
 
-    match (game.board.moves().length() % 2 == 0) {
+    match (game.board.is_black_turn()) {
         true => assert!(is_p1, ENotYourTurn),
         false => assert!(is_p2, ENotYourTurn),
     };
@@ -129,7 +136,7 @@ public fun wrap_up(game: Game, acc: &mut Account) {
 }
 
 #[allow(unused_function)]
-fun board_state(game: &mut Game, x: u8, y: u8) {
+fun board_state(game: &mut Game, x: u16, y: u16) {
     game.board.place(x, y);
 }
 
