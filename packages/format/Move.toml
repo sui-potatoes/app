@@ -1,0 +1,12 @@
+[package]
+name = "format"
+edition = "2024"
+license = "MIT"
+authors = ["Damir Shamanaev <damirka.ru@gmail.com>"]
+
+[dependencies]
+ascii = { r.mvr = "@potatoes/ascii" }
+
+
+[addresses]
+format = "0x0"
