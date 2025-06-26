@@ -6,6 +6,7 @@ on:
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     MOVE_PACKAGES_PATH: packages
+    MVR_FALLBACK_NETWORK: testnet
     APP_PATH: app
 
 jobs:
