@@ -11,13 +11,14 @@ Monorepo for the Potatoes project. Contains all the applications and services th
 
 ## Packages
 
-- [ASCII](/packages/ascii) ([mvr](https://www.moveregistry.com/package/@potatoes/ascii)) - ASCII codes table and utilities
-- [Codec](/packages/codec) ([mvr](https://www.moveregistry.com/package/@potatoes/codec)) - ultimate encoding solution for Sui
-- [Date](/packages/date) ([mvr](https://www.moveregistry.com/package/@potatoes/date)) - date and time formatting library
-- [Bit Field](/packages/bit_field) ([mvr](https://www.moveregistry.com/package/@potatoes/bit-field)) - 0-cost bit packing library
-- [SVG](/packages/svg) - SVG (XML) standard implemented in Move
+- [ascii](/packages/ascii) ([mvr](https://www.moveregistry.com/package/@potatoes/ascii)) - ASCII codes table and utilities
+- [bit-field](/packages/bit_field) ([mvr](https://www.moveregistry.com/package/@potatoes/bit-field)) - 0-cost bit packing library
+- [codec](/packages/codec) ([mvr](https://www.moveregistry.com/package/@potatoes/codec)) - ultimate encoding solution for Sui
+- [date](/packages/date) ([mvr](https://www.moveregistry.com/package/@potatoes/date)) - date and time formatting library
+- [format!](/packages/format) ([mvr](https://www.moveregistry.com/package/@potatoes/format)) - string formatting library, inspired by Rust's `format!` macro
 - [Grid](/packages/grid) - all in one solution for 2D-grid applications or games
 - [Name Generator](/packages/name-gen/) - Cyberpunk Name Generator, uses on-chain randomness
+- [SVG](/packages/svg) - SVG (XML) standard implemented in Move
 
 ## License
 
