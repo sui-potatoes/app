@@ -2,7 +2,7 @@
 
 [move]
 version = 3
-manifest_digest = "63229A7593AF77F6ADFDD39CA706DAE215A6F1B50DDB147805A4C5842AF73561"
+manifest_digest = "B7C0BF602A92684C81ABD24BBCC5F155BF1F76447DF235BC437D6436A9D1ED6C"
 deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
@@ -45,7 +45,7 @@ dependencies = [
 
 [[move.package]]
 id = "ascii"
-source = { local = "../ascii" }
+source = { git = "https://github.com/sui-potatoes/app.git", rev = "ascii@v1", subdir = "packages/ascii" }
 
 dependencies = [
   { id = "Bridge", name = "Bridge" },
