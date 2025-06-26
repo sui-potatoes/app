@@ -1,4 +1,4 @@
-# format && dbg!
+# format & dbg!
 
 This library implements a handy string templating function, inspired by the Rust's `format!`
 macro. Additionally, adds a `dbg!` macro wrapper for `format` and `std::debug::print`.
