@@ -72,10 +72,7 @@ fun test_format() {
     use std::unit_test::assert_eq;
 
     // early return if the values are empty
-    assert_eq!(
-        b"Hello world!".to_string(),
-        format(b"Hello world!".to_string(), vector[]),
-    );
+    assert_eq!(b"Hello world!".to_string(), format(b"Hello world!".to_string(), vector[]));
 
     // simple case
     assert_eq!(
