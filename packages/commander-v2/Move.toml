@@ -1,14 +1,15 @@
 [package]
-name = "Commander"
+name = "commander"
 edition = "2024.beta"
 license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
+flavor = "vanilla"
+
+[environments]
+testnet = "4c78adac"
 
 [dependencies]
 BitField = { local = "../bit-field" }
 Codec = { local = "../codec" }
 grid = { local = "../grid" }
 NameGenerator = { local = "../name-gen" }
-
-[addresses]
-commander = "0x0"
