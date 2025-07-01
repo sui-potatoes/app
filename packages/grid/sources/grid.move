@@ -21,7 +21,7 @@
 module grid::grid;
 
 use grid::point::{Self, Point};
-use std::{macros, string::String};
+use std::{macros::num_diff, string::String};
 use sui::bcs::BCS;
 
 const EIncorrectLength: u64 = 0;
@@ -96,12 +96,38 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
 // === Macros ===
 
 /// Get a Manhattan distance between two points. Useful for calculating distances
-/// or ranges for ranged attacks or walking, for example.
-public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {
-    macros::num_diff!($x0, $x1) + macros::num_diff!($y0, $y1)
+/// or ranges for ranged attacks or walking, for example. Takes any `unit` value
+/// and returns the same type.
+public macro fun range<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
+    num_diff!($x0, $x1) + num_diff!($y0, $y1)
 }
 
-public macro fun traverse<$T, $R>($g: &Grid<$T>, $f: |&$T, u16, u16| -> $R) {
+/// Create a grid of the specified size by applying the function `f` to each cell.
+/// The function receives the x and y coordinates of the cell.
+public macro fun tabulate<$T>($rows: u16, $cols: u16, $f: |u16, u16| -> $T): Grid<$T> {
+    let rows = $rows as u64;
+    let cols = $cols as u64;
+    let grid = vector::tabulate!(rows, |x| vector::tabulate!(cols, |y| $f(x as u16, y as u16)));
+    from_vector_unchecked(grid)
+}
+
+/// Gracefully destroy the `Grid` by consuming the elements in the passed function $f.
+/// Goes in reverse order (bottom to top, right to left). Cheaper than `do` because it
+/// doesn't need to reverse the elements.
+public macro fun destroy<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
+    into_vector($grid).destroy!(|row| row.destroy!(|cell| $f(cell)));
+}
+
+/// Consume the `Grid` by calling the function `f` for each element. Preserves the
+/// order of elements (goes from top to bottom, left to right). If the order does not
+/// matter, use `destroy` instead.
+public macro fun do<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
+    into_vector($grid).do!(|row| row.do!(|cell| $f(cell)));
+}
+
+/// Traverse the grid, calling the function `f` for each cell. The function
+/// receives the reference to the cell, the x and y coordinates of the cell.
+public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, u16, u16| -> $R) {
     let g = $g;
     let (width, height) = (g.width(), g.height());
     width.do!(|x| height.do!(|y| $f(&g[x, y], x, y)));
@@ -176,20 +202,6 @@ public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T|
     count
 }
 
-/// Create a grid of the specified size by applying the function `f` to each cell.
-/// The function receives the x and y coordinates of the cell.
-public macro fun tabulate<$T>($rows: u16, $cols: u16, $f: |u16, u16| -> $T): Grid<$T> {
-    let rows = $rows as u64;
-    let cols = $cols as u64;
-    let grid = vector::tabulate!(rows, |x| vector::tabulate!(cols, |y| $f(x as u16, y as u16)));
-    from_vector_unchecked(grid)
-}
-
-/// Gracefully destroy the grid by consuming the elements in the passed function $f.
-public macro fun destroy<$T>($grid: Grid<$T>, $f: |$T|) {
-    into_vector($grid).destroy!(|row| row.destroy!(|cell| $f(cell)));
-}
-
 /// Finds a group of cells that satisfy the predicate `f`. The function receives
 /// the cell at the current position, and returns whether the cell is part of the
 /// group.
@@ -218,10 +230,8 @@ public macro fun find_group<$T>(
     let mut queue = vector[point::new(x, y)];
 
     while (queue.length() != 0) {
-        let point = queue.pop_back();
-        map.von_neumann!(point, 1).do!(|point| {
+        queue.pop_back().von_neumann(1).destroy!(|point| {
             let (x, y) = point.into_values();
-
             if (x >= height || y >= width || visited[x, y]) return;
 
             if ($f(&map[x, y])) {
@@ -280,9 +290,10 @@ public macro fun trace<$T>(
         num = num + 1;
 
         // flush the queue, marking all cells around the current number
-        queue.destroy!(|source| grid.von_neumann!(source, 1).destroy!(|point| {
+        queue.destroy!(|source| source.von_neumann(1).destroy!(|point| {
             let (x0, y0) = source.into_values();
             let (x, y) = point.into_values();
+            if (x >= height || y >= width) return;
 
             // if we reached the destination, break the loop
             if (x == x1 && y == y1) {

@@ -39,9 +39,10 @@ public fun to_values(c: &Cursor): (u16, u16) {
 }
 
 /// Construct a `Point` from a `Cursor`.
-public fun to_point(c: &Cursor): Point {
-    point::new(c.0, c.1)
-}
+public fun to_point(c: &Cursor): Point { point::new(c.0, c.1) }
+
+/// Convert a `Cursor` to a vector of two values.
+public fun to_vector(c: &Cursor): vector<u16> { vector[c.0, c.1] }
 
 /// Construct a `Cursor` from a `Point`.
 public fun from_point(p: &Point): Cursor {

@@ -6,33 +6,36 @@
 /// a point in 2D space.
 module grid::point;
 
-use std::string::String;
+use std::{macros::num_diff, string::String};
 use sui::bcs::{Self, BCS};
+
+public use fun grid::cursor::from_point as Point.to_cursor;
 
 /// A point in 2D space.
 public struct Point(u16, u16) has copy, drop, store;
 
-/// Create a new point.
+/// Create a new `Point` at `(x, y)`.
 public fun new(x: u16, y: u16): Point { Point(x, y) }
 
-/// Create a point from a vector of two values.
-public macro fun from_vector($v: vector<u16>): Point {
-    let v = $v;
-    new(v[0], v[1])
+/// Create a `Point` from a vector of two values.
+/// Ignores the rest of the values in the vector.
+public fun from_vector(v: vector<u16>): Point {
+    Point(v[0], v[1])
 }
 
-public use fun grid::cursor::from_point as Point.to_cursor;
-
-/// Get a tuple of two values from a point.
+/// Get a tuple of two values from a `Point`.
 public fun to_values(p: &Point): (u16, u16) { let Point(x, y) = p; (*x, *y) }
 
-/// Convert a point to a tuple of two values.
+/// Unpack a `Point` into a tuple of two values.
 public fun into_values(p: Point): (u16, u16) { let Point(x, y) = p; (x, y) }
 
-/// Get the x coordinate of a point.
+/// Convert a `Point` to a vector of two values.
+public fun to_vector(p: &Point): vector<u16> { vector[p.0, p.1] }
+
+/// Get the `x` coordinate of a `Point`.
 public fun x(p: &Point): u16 { p.0 }
 
-/// Get the y coordinate of a point.
+/// Get the `y` coordinate of a `Point`.
 public fun y(p: &Point): u16 { p.1 }
 
 /// Get the Manhattan distance between two points.
@@ -44,7 +47,7 @@ public fun y(p: &Point): u16 { p.1 }
 ///
 /// assert!(range == 6);
 /// ```
-public fun range(p1: &Point, p2: &Point): u16 { p1.0.diff(p2.0) + p1.0.diff(p2.0) }
+public fun range(p1: &Point, p2: &Point): u16 { num_diff!(p1.0, p2.0) + num_diff!(p1.1, p2.1) }
 
 /// Get all von Neumann neighbors of a point within a given range. Von Neumann
 /// neighborhood is a set of points that are adjacent to the given point. In 2D
@@ -94,6 +97,12 @@ public fun von_neumann(p: &Point, size: u16): vector<Point> {
 /// that are adjacent to the given point. In 2D space, it's the point to the
 /// left, right, up, down, and diagonals from the given point.
 ///
+/// The `size` parameter determines the range of the neighborhood. For example,
+/// if `size` is 1, the function will return the immediate neighbors of the
+/// point. If `size` is 2, the function will return the neighbors of the
+/// neighbors, and so on.
+///
+/// Note: does not include the point itself!
 /// ```
 ///    0 1 2 3 4
 /// 0: |2|2|2|2|2|
@@ -133,22 +142,28 @@ public fun moore(p: &Point, size: u16): vector<Point> {
 
 /// Compare two points. To be used in sorting macros. Returns less or equal,
 /// based on the x coordinate (1st) and then the y coordinate (2nd).
-public fun compare(a: &Point, b: &Point): bool {
+public fun le(a: &Point, b: &Point): bool {
     (a.0 == b.0 && a.1 <= b.1) || a.0 < b.0
 }
 
-/// Parse bytes (encoded as BCS) into a point.
+/// Serialize a `Point` into BCS bytes.
+public fun to_bytes(p: &Point): vector<u8> {
+    bcs::to_bytes(p)
+}
+
+/// Construct a `Point` from BCS bytes.
 public fun from_bytes(bytes: vector<u8>): Point {
     from_bcs(&mut bcs::new(bytes))
 }
 
-/// Parse `BCS` bytes into a point. Useful when `Point` is a field of another
-/// struct that is being deserialized from BCS.
+/// Construct a `Point` from `BCS` bytes wrapped in a `BCS` struct.
+/// Useful, when `Point` is a field of another struct that is being
+/// deserialized from BCS.
 public fun from_bcs(bcs: &mut BCS): Point {
     Point(bcs.peel_u16(), bcs.peel_u16())
 }
 
-/// Print a point as a string.
+/// Print a point as a `String`.
 public fun to_string(p: &Point): String {
     let mut str = b"(".to_string();
     let Point(x, y) = *p;

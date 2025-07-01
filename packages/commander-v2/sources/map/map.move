@@ -410,7 +410,6 @@ public fun tile_to_string(tile: &Tile): String {
 /// Returns `None` if the path is not walkable, otherwise returns the end point
 /// of the path.
 public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
-    use std::option::none;
     use grid::direction::{up, down, left, right};
 
     path.reverse();
@@ -418,6 +417,7 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
     // first two values are X and Y coordinates, the rest are directions
     let (x0, y0) = (path.pop_back(), path.pop_back());
     let mut cursor = cursor::new(x0 as u16, y0 as u16);
+    let none = option::none();
 
     'path: {
         path.destroy!(|direction| {
@@ -429,32 +429,31 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
             let target = &map.grid[x1, y1];
 
             // units, high covers and unwalkable tiles block the path
-            if (target.unit.is_some()) return 'path none();
+            if (target.unit.is_some()) return 'path none;
             match (source.tile_type) {
                 TileType::Empty => (),
-                TileType::Unwalkable => return 'path none(),
+                TileType::Unwalkable => return 'path none,
                 TileType::Cover { left, right, top, bottom } => {
-                    if (direction == left!() && left == HIGH_COVER) return 'path none();
-                    if (direction == right!() && right == HIGH_COVER) return 'path none();
-                    if (direction == up!() && top == HIGH_COVER) return 'path none();
-                    if (direction == down!() && bottom == HIGH_COVER) return 'path none();
+                    if (direction == left!() && left == HIGH_COVER) return 'path none;
+                    if (direction == right!() && right == HIGH_COVER) return 'path none;
+                    if (direction == up!() && top == HIGH_COVER) return 'path none;
+                    if (direction == down!() && bottom == HIGH_COVER) return 'path none;
                 },
             };
 
             match (target.tile_type) {
                 TileType::Empty => (),
-                TileType::Unwalkable => return 'path none(),
+                TileType::Unwalkable => return 'path none,
                 TileType::Cover { left, right, top, bottom } => {
-                    if (direction == left!() && right == HIGH_COVER) return 'path none();
-                    if (direction == right!() && left == HIGH_COVER) return 'path none();
-                    if (direction == up!() && bottom == HIGH_COVER) return 'path none();
-                    if (direction == down!() && top == HIGH_COVER) return 'path none();
+                    if (direction == left!() && right == HIGH_COVER) return 'path none;
+                    if (direction == right!() && left == HIGH_COVER) return 'path none;
+                    if (direction == up!() && bottom == HIGH_COVER) return 'path none;
+                    if (direction == down!() && top == HIGH_COVER) return 'path none;
                 },
             };
         });
 
-        let (x, y) = cursor.to_values();
-        option::some(vector[x, y])
+        option::some(cursor.to_vector())
     }
 }
 

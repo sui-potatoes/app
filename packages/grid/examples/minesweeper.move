@@ -91,7 +91,7 @@ fun new_solver_grid(ms: &Minesweeper): (Grid<SolverTile>, vector<CheckedTile>) {
                     }
                 });
 
-                solutions.insertion_sort_by!(|a, b| a.compare(b));
+                solutions.insertion_sort_by!(|a, b| a.le(b));
 
                 // TODO: insert at the right idx to avoid sorting
                 check_tiles.push_back(CheckedTile {

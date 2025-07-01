@@ -6,7 +6,7 @@
 module grid::checkers;
 
 use grid::{cursor, direction, grid::{Self, Grid}};
-use std::{macros::num_diff, string::String};
+use std::string::String;
 
 /// The type of a tile on the checkers board. Black tiles are unavailable,
 /// white tiles are empty, red tiles are red checkers, and blue tiles are blue
@@ -45,7 +45,7 @@ public fun new(ctx: &mut TxContext): Checkers {
 /// only supports moving a single tile or a jump over an opponent's piece.
 public fun play(game: &mut Checkers, x0: u8, y0: u8, x1: u8, y1: u8) {
     let is_red = game.turn;
-    let distance = num_diff!(x0, x1) + num_diff!(y0, y1);
+    let distance = grid::range!(x0, y0, x1, y1);
 
     assert!(distance == 2 || distance == 4);
 

@@ -8,7 +8,10 @@
 /// - X-axis: vertical axis (top->down)
 /// - Y-axis: horizontal axis (left->right)
 ///
-/// Direction is packed as a bit field in a single byte.
+/// Direction is packed as a bit field in a single byte. Diagonals are represented
+/// as a combination of two orthogonal directions. For example, `up_right!()` is
+/// `up!() | right!()`.
+///
 /// - `b00000000` - none - 0
 /// - `b00000001` - up - 1
 /// - `b00000010` - right - 2
@@ -18,6 +21,7 @@
 /// - `b00000110` - right | down - 6
 /// - `b00001100` - down | left - 12
 /// - `b00001001` - up | left - 9
+///
 /// Directions can be combined using bitwise OR or checked using bitwise AND.
 /// ```
 /// use grid::direction;
