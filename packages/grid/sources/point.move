@@ -6,7 +6,7 @@
 /// a point in 2D space.
 module grid::point;
 
-use std::{macros::num_diff, string::String};
+use std::{macros::{num_diff, num_max}, string::String};
 use sui::bcs::{Self, BCS};
 
 public use fun grid::cursor::from_point as Point.to_cursor;
@@ -38,7 +38,8 @@ public fun x(p: &Point): u16 { p.0 }
 /// Get the `y` coordinate of a `Point`.
 public fun y(p: &Point): u16 { p.1 }
 
-/// Get the Manhattan distance between two points.
+/// Get the Manhattan distance between two points. Manhattan distance is the
+/// sum of the absolute differences of the x and y coordinates.
 ///
 /// Example:
 /// ```rust
@@ -47,7 +48,23 @@ public fun y(p: &Point): u16 { p.1 }
 ///
 /// assert!(range == 6);
 /// ```
-public fun range(p1: &Point, p2: &Point): u16 { num_diff!(p1.0, p2.0) + num_diff!(p1.1, p2.1) }
+public fun manhattan_distance(p1: &Point, p2: &Point): u16 {
+    num_diff!(p1.0, p2.0) + num_diff!(p1.1, p2.1)
+}
+
+/// Get the Chebyshev distance between two points. Chebyshev distance is the
+/// maximum of the absolute differences of the x and y coordinates.
+///
+/// Example:
+/// ```rust
+/// let (p1, p2) = (new(1, 0), new(4, 3));
+/// let range = p1.range(&p2);
+///
+/// assert!(range == 3);
+/// ```
+public fun chebyshev_distance(p1: &Point, p2: &Point): u16 {
+    num_max!(num_diff!(p1.0, p2.0), num_diff!(p1.1, p2.1))
+}
 
 /// Get all von Neumann neighbors of a point within a given range. Von Neumann
 /// neighborhood is a set of points that are adjacent to the given point. In 2D

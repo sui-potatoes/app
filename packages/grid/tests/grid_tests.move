@@ -119,7 +119,7 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace!(&grid, 0, 0, 1, 4, 6, |_, _, x, y| grid[x, y] == &0);
+    let path = grid::trace_von_neumann!(&grid, 0, 0, 1, 4, 6, |_, _, x, y| grid[x, y] == &0);
 
     assert!(path.is_some());
     assert!(path.borrow().length() == 5);
@@ -133,7 +133,7 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace!(&grid, 0, 1, 3, 0, 10, |_, _, x, y| grid[x, y] == &0);
+    let path = grid::trace_von_neumann!(&grid, 0, 1, 3, 0, 10, |_, _, x, y| grid[x, y] == &0);
 
     assert!(path.is_some());
     assert_ref_eq!(

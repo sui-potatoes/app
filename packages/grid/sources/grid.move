@@ -21,7 +21,7 @@
 module grid::grid;
 
 use grid::point::{Self, Point};
-use std::{macros::num_diff, string::String};
+use std::{macros::{num_diff, num_max}, string::String};
 use sui::bcs::BCS;
 
 const EIncorrectLength: u64 = 0;
@@ -95,11 +95,30 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
 
 // === Macros ===
 
-/// Get a Manhattan distance between two points. Useful for calculating distances
-/// or ranges for ranged attacks or walking, for example. Takes any `unit` value
-/// and returns the same type.
-public macro fun range<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
+/// Get a Manhattan distance between two points. Manhattan distance is the
+/// sum of the absolute differences of the x and y coordinates.
+///
+/// Example:
+/// ```rust
+/// let distance = grid::manhattan_distance!(0, 0, 1, 2);
+///
+/// assert!(distance == 3);
+/// ```
+public macro fun manhattan_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
     num_diff!($x0, $x1) + num_diff!($y0, $y1)
+}
+
+/// Get a Chebyshev distance between two points. Chebyshev distance is the
+/// maximum of the absolute differences of the x and y coordinates.
+///
+/// Example:
+/// ```rust
+/// let distance = grid::chebyshev_distance!(0, 0, 1, 2);
+///
+/// assert!(distance == 2);
+/// ```
+public macro fun chebyshev_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
+    num_max!(num_diff!($x0, $x1), num_diff!($y0, $y1))
 }
 
 /// Create a grid of the specified size by applying the function `f` to each cell.
@@ -253,7 +272,7 @@ public macro fun find_group<$T>(
 /// ```
 ///
 /// TODO: consider using a A* algorithm for better performance.
-public macro fun trace<$T>(
+public macro fun trace_von_neumann<$T>(
     $map: &Grid<$T>,
     $x0: u16,
     $y0: u16,
@@ -267,7 +286,7 @@ public macro fun trace<$T>(
     let limit = 1 + $limit;
 
     // if the difference between A and B is greater than the limit, return none
-    if (range!(x0, y0, x1, y1) > limit) {
+    if (manhattan_distance!(x0, y0, x1, y1) > limit) {
         return option::none()
     };
 

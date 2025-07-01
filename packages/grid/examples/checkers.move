@@ -45,9 +45,9 @@ public fun new(ctx: &mut TxContext): Checkers {
 /// only supports moving a single tile or a jump over an opponent's piece.
 public fun play(game: &mut Checkers, x0: u8, y0: u8, x1: u8, y1: u8) {
     let is_red = game.turn;
-    let distance = grid::range!(x0, y0, x1, y1);
+    let distance = grid::chebyshev_distance!(x0, y0, x1, y1);
 
-    assert!(distance == 2 || distance == 4);
+    assert!(distance == 1 || distance == 2);
 
     let piece = game.grid.swap(x0 as u16, y0 as u16, Tile::Empty);
     assert!(piece == if (is_red) Tile::Red else Tile::Blue);

@@ -129,6 +129,7 @@ public macro fun inverse($direction: u8): u8 {
         _ => abort,
     }
 }
+
 // === Determine Direction ===
 
 /// Get the attack direction from point `(x0, y0)` to point `(x1, y1)`.

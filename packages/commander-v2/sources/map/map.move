@@ -180,7 +180,7 @@ public fun perform_attack(
     y1: u16,
 ): vector<Record> {
     let mut history = vector[history::new_attack(vector[x0, y0], vector[x1, y1])];
-    let range = grid::range!(x0, y0, x1, y1) as u8;
+    let range = grid::manhattan_distance!(x0, y0, x1, y1) as u8;
     let defense_bonus = if (range > 0) map.cover_bonus(x0, y0, x1, y1) else 0;
     let attacker = &mut map.grid[x0, y0].unit;
     assert!(attacker.is_some(), ENoUnit);
@@ -311,7 +311,7 @@ public fun perform_grenade(
 ): vector<Record> {
     let radius = 2; // 5x5 area of effect
     let unit = &mut map.grid[x, y].unit;
-    assert!(grid::range!(x, y, x1, y1) <= GRENADE_RANGE, EPathTooShort);
+    assert!(grid::manhattan_distance!(x, y, x1, y1) <= GRENADE_RANGE, EPathTooShort);
     assert!(unit.is_some(), ENoUnit);
 
     // update unit's stats

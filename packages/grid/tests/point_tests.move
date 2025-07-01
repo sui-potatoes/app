@@ -18,7 +18,7 @@ fun point() {
     assert_eq!(y, 2);
 
     let p2 = point::new(3, 4);
-    assert_eq!(p.range(&p2), 4);
+    assert_eq!(p.manhattan_distance(&p2), 4);
 
     let n = p.von_neumann(1);
     assert_eq!(n.length(), 4);
