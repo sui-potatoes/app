@@ -18,7 +18,7 @@ fun point() {
     assert_eq!(y, 2);
 
     let p2 = point::new(3, 4);
-    assert_eq!(p.range(&p2), 4);
+    assert_eq!(p.manhattan_distance(&p2), 4);
 
     let n = p.von_neumann(1);
     assert_eq!(n.length(), 4);
@@ -43,7 +43,7 @@ fun moore() {
 }
 
 #[test]
-fun compare() {
+fun le_compare() {
     let mut points = vector[
         point::new(1, 1),
         point::new(0, 0),
@@ -52,8 +52,8 @@ fun compare() {
         point::new(0, 1),
         point::new(1, 0),
     ];
-    points.insertion_sort_by!(|a, b| a.compare(b));
-    assert!(points.is_sorted_by!(|a, b| a.compare(b)));
+    points.insertion_sort_by!(|a, b| a.le(b));
+    assert!(points.is_sorted_by!(|a, b| a.le(b)));
     assert_eq!(
         points,
         vector[

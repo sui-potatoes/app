@@ -5,7 +5,7 @@ license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
-BitField = { local = "../bit-field" }
+bit-field = { local = "../bit-field" }
 Codec = { local = "../codec" }
 grid = { local = "../grid" }
 NameGenerator = { local = "../name-gen" }

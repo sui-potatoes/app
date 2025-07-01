@@ -69,7 +69,7 @@ fun new_solver_grid(ms: &Minesweeper): (Grid<SolverTile>, vector<CheckedTile>) {
     // sweep the board, mark tiles that can be a mine, and then calculate the
     // total number of 100% defined mines.
     let mut check_tiles = vector<CheckedTile>[];
-    let solver_grid = grid::tabulate!(ms.grid.height(), ms.grid.width(), |x, y| {
+    let solver_grid = grid::tabulate!(ms.grid.rows(), ms.grid.cols(), |x, y| {
         let mut score = 0;
         let mut tiles_score = 0;
 
@@ -91,7 +91,7 @@ fun new_solver_grid(ms: &Minesweeper): (Grid<SolverTile>, vector<CheckedTile>) {
                     }
                 });
 
-                solutions.insertion_sort_by!(|a, b| a.compare(b));
+                solutions.insertion_sort_by!(|a, b| a.le(b));
 
                 // TODO: insert at the right idx to avoid sorting
                 check_tiles.push_back(CheckedTile {
