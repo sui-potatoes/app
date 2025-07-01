@@ -43,7 +43,7 @@ public fun place(l: &mut Life, x: u16, y: u16) {
 public fun tick(l: &mut Life) {
     // Keep track of visited cells. Using `Grid` instead of `vec_set`-likes
     // significantly improves performance by avoiding `contains` loops.
-    let (width, height) = (l.grid.width(), l.grid.height());
+    let (width, height) = (l.grid.cols(), l.grid.rows());
     let mut visited = grid::tabulate!(width, height, |_, _| false);
     let mut live_cells = vector[];
     let mut dead_cells = vector[];

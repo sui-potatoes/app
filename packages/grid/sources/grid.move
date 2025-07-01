@@ -5,7 +5,7 @@
 /// provides guarantees that the elements are stored in a rectangular shape.
 ///
 /// Additionally, the module provides functions to work with the grid, such as
-/// getting the width and height, borrowing elements, and finding the shortest
+/// getting the cols and rows, borrowing elements, and finding the shortest
 /// path between two points using the Wave Algorithm.
 ///
 /// Structure, printing and directions:
@@ -36,8 +36,8 @@ public struct Grid<T> has copy, drop, store {
 /// have different lengths.
 public fun from_vector<T>(grid: vector<vector<T>>): Grid<T> {
     assert!(grid.length() > 0, EIncorrectLength);
-    let width = grid[0].length();
-    grid.do_ref!(|row| assert!(row.length() == width, EIncorrectLength));
+    let cols = grid[0].length();
+    grid.do_ref!(|row| assert!(row.length() == cols, EIncorrectLength));
     Grid { grid }
 }
 
@@ -53,11 +53,11 @@ public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
     grid
 }
 
-/// Get the width of the grid.
-public fun width<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
+/// Get the number of columns of the `Grid`.
+public fun cols<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
 
-/// Get the height of the grid.
-public fun height<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
+/// Get the number of rows of the `Grid`.
+public fun rows<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
 
 // === Indexing ===
 
@@ -125,6 +125,16 @@ public macro fun chebyshev_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T
 
 /// Create a grid of the specified size by applying the function `f` to each cell.
 /// The function receives the x and y coordinates of the cell.
+///
+/// Example:
+/// ```rust
+/// public enum Tile {
+///   Empty,
+///   // ...
+/// }
+///
+/// let grid = grid::tabulate!(3, 3, |_x, _y| Tile::Empty);
+/// ```
 public macro fun tabulate<$T>($rows: u16, $cols: u16, $f: |u16, u16| -> $T): Grid<$T> {
     let rows = $rows as u64;
     let cols = $cols as u64;
@@ -135,6 +145,11 @@ public macro fun tabulate<$T>($rows: u16, $cols: u16, $f: |u16, u16| -> $T): Gri
 /// Gracefully destroy the `Grid` by consuming the elements in the passed function $f.
 /// Goes in reverse order (bottom to top, right to left). Cheaper than `do` because it
 /// doesn't need to reverse the elements.
+///
+/// Example:
+/// ```rust
+/// grid.destroy!(|tile| tile.destroy());
+/// ```
 public macro fun destroy<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
     into_vector($grid).destroy!(|row| row.destroy!(|cell| $f(cell)));
 }
@@ -156,8 +171,8 @@ public macro fun do_ref<$T, $R: drop>($grid: &Grid<$T>, $f: |&$T| -> $R) {
 /// receives the reference to the cell, the x and y coordinates of the cell.
 public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, u16, u16| -> $R) {
     let g = $g;
-    let (width, height) = (g.width(), g.height());
-    width.do!(|x| height.do!(|y| $f(&g[x, y], x, y)));
+    let (rows, cols) = (g.rows(), g.cols());
+    rows.do!(|x| cols.do!(|y| $f(&g[x, y], x, y)));
 }
 
 /// Map the grid to a new grid by applying the function `f` to each cell.
@@ -178,10 +193,10 @@ public macro fun map_ref<$T, $U>($grid: &Grid<$T>, $f: |&$T| -> $U): Grid<$U> {
 public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> {
     let p = $p;
     let g = $g;
-    let (width, height) = (g.width(), g.height());
+    let (rows, cols) = (g.rows(), g.cols());
     p.von_neumann($size).filter!(|point| {
         let (x, y) = point.to_values();
-        x < width && y < height
+        x < rows && y < cols
     })
 }
 
@@ -194,12 +209,12 @@ public macro fun von_neumann_count<$T>(
 ): u8 {
     let p = $p;
     let g = $g;
-    let (width, height) = (g.width(), g.height());
+    let (rows, cols) = (g.rows(), g.cols());
     let mut count = 0u8;
 
     p.von_neumann($size).destroy!(|point| {
         let (x1, y1) = point.to_values();
-        if (x1 >= width || y1 >= height) return;
+        if (x1 >= rows || y1 >= cols) return;
         if (!$f(&g[x1, y1])) return;
 
         count = count + 1;
@@ -215,10 +230,10 @@ public macro fun von_neumann_count<$T>(
 public macro fun moore<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> {
     let p = $p;
     let g = $g;
-    let (width, height) = (g.width(), g.height());
+    let (rows, cols) = (g.rows(), g.cols());
     p.moore($size).filter!(|point| {
         let (x, y) = point.to_values();
-        x < height && y < width
+        x < rows && y < cols
     })
 }
 
@@ -226,12 +241,12 @@ public macro fun moore<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> 
 public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T| -> bool): u8 {
     let p = $p;
     let g = $g;
-    let (width, height) = (g.width(), g.height());
+    let (rows, cols) = (g.rows(), g.cols());
     let mut count = 0u8;
 
     p.moore($size).destroy!(|point| {
         let (x1, y1) = point.to_values();
-        if (x1 >= height || y1 >= width) return;
+        if (x1 >= rows || y1 >= cols) return;
         if (!$f(&g[x1, y1])) return;
 
         count = count + 1;
@@ -263,9 +278,9 @@ public macro fun find_group<$T>(
 ): vector<Point> {
     let p = $p;
     let map = $map;
-    let (height, width) = (map.height(), map.width());
+    let (rows, cols) = (map.rows(), map.cols());
     let mut group = vector[];
-    let mut visited = tabulate!(height, width, |_, _| false);
+    let mut visited = tabulate!(rows, cols, |_, _| false);
 
     if (!$f(map.borrow_point(&p))) return group;
 
@@ -276,7 +291,7 @@ public macro fun find_group<$T>(
 
     while (queue.length() != 0) {
         $n(&queue.pop_back()).destroy!(|p| {
-            if (!p.is_within_bounds(height, width) || *visited.borrow_point(&p)) return;
+            if (!p.is_within_bounds(rows, cols) || *visited.borrow_point(&p)) return;
             if ($f(map.borrow_point(&p))) {
                 *visited.borrow_point_mut(&p) = true;
                 group.push_back(p);
@@ -312,17 +327,17 @@ public macro fun trace<$T>(
     let limit = $limit + 1; // we start from 1, not 0.
 
     let map = $map;
-    let (height, width) = (map.height(), map.width());
+    let (rows, cols) = (map.rows(), map.cols());
 
     // if the points are out of bounds, return none
-    if (!p0.is_within_bounds(height, width) || !p1.is_within_bounds(height, width)) {
+    if (!p0.is_within_bounds(rows, cols) || !p1.is_within_bounds(rows, cols)) {
         return option::none()
     };
 
     // surround the first element with 1s
     let mut num = 1;
     let mut queue = vector[p0];
-    let mut grid = tabulate!(height, width, |_, _| 0);
+    let mut grid = tabulate!(rows, cols, |_, _| 0);
 
     *grid.borrow_point_mut(&p0) = num;
 
@@ -331,7 +346,7 @@ public macro fun trace<$T>(
 
         // flush the queue, marking all cells around the current number
         queue.destroy!(|from| $n(&from).destroy!(|to| {
-            if (!to.is_within_bounds(height, width)) return;
+            if (!to.is_within_bounds(rows, cols)) return;
 
             // if we reached the destination, break the loop
             if (to == p1) {
@@ -392,12 +407,12 @@ public macro fun trace<$T>(
 public macro fun to_string<$T>($grid: &Grid<$T>): String {
     let grid = $grid;
     let mut result = b"".to_string();
-    let (width, height) = (grid.width(), grid.height());
+    let (rows, cols) = (grid.rows(), grid.cols());
 
-    // the layout is vertical, so we iterate over the height first
-    height.do!(|x| {
+    // the layout is vertical, so we iterate over the rows first
+    rows.do!(|x| {
         result.append_utf8(b"|");
-        width.do!(|y| {
+        cols.do!(|y| {
             result.append(grid[x, y].to_string());
             result.append_utf8(b"|");
         });

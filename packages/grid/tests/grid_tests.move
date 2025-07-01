@@ -10,8 +10,8 @@ use sui::bcs;
 #[test]
 fun creation() {
     let grid = grid::from_vector(vector[vector[0]]);
-    assert_eq!(grid.width(), 1);
-    assert_eq!(grid.height(), 1);
+    assert_eq!(grid.cols(), 1);
+    assert_eq!(grid.rows(), 1);
     assert_eq!(grid[0, 0], 0);
 
     let inner = grid.into_vector();
@@ -20,8 +20,8 @@ fun creation() {
     assert_eq!(inner[0][0], 0);
 
     let grid2 = grid::from_vector_unchecked(inner);
-    assert_eq!(grid2.width(), 1);
-    assert_eq!(grid2.height(), 1);
+    assert_eq!(grid2.cols(), 1);
+    assert_eq!(grid2.rows(), 1);
     assert_eq!(grid2[0, 0], 0);
 }
 
@@ -44,8 +44,8 @@ fun map_and_map_ref() {
     let mapped_ref = grid.map_ref!(|cell| (*cell * 2) as u16);
     let new_grid = grid.map!(|cell| (cell * 2) as u16);
 
-    assert_eq!(new_grid.width(), 3);
-    assert_eq!(new_grid.height(), 3);
+    assert_eq!(new_grid.cols(), 3);
+    assert_eq!(new_grid.rows(), 3);
     assert_eq!(mapped_ref, new_grid);
 }
 
@@ -168,7 +168,7 @@ fun from_bcs() {
     let bytes = bcs::to_bytes(&grid);
     let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| bcs.peel_u8());
 
-    assert!(grid2.width() == 3);
+    assert!(grid2.cols() == 3);
     assert_ref_eq!(&grid, &grid2);
 }
 
@@ -178,6 +178,6 @@ fun from_bcs_with_custom_type() {
     let bytes = bcs::to_bytes(&grid);
     let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| point::from_bcs(bcs));
 
-    assert!(grid2.width() == 3);
+    assert!(grid2.cols() == 3);
     assert_ref_eq!(&grid, &grid2);
 }
