@@ -22,6 +22,7 @@ use std::string::String;
 
 /// Error code for incorrect number of characters.
 const EIncorrectNumberOfCharacters: u64 = 0;
+const ENotValidPotatoCharacter: u64 = 1;
 
 // prettier-ignore
 /// Each byte is encoded to one of these sub-characters.
@@ -82,7 +83,7 @@ macro fun decode_byte($byte: u8): u8 {
     else if (byte == char::a!() || byte == char::A!()) 13 // a or A
     else if (byte == char::e!() || byte == char::E!()) 14 // e or E
     else if (byte == char::s!() || byte == char::S!()) 15 // s or S
-    else abort 1
+    else abort ENotValidPotatoCharacter
 }
 
 #[test_only]

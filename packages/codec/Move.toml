@@ -7,7 +7,7 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 codec = "0x0"
 
 [dependencies]
-ascii = { r.mvr = "@potatoes/ascii" }
+ascii = { local = "../ascii" }
 
 # testnet
 # v1: 0xa11d4e236d3456c14edd263859c475bc539b43afb8b41fa10974ca0abca6a1c0
