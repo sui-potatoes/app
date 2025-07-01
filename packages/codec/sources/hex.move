@@ -15,8 +15,8 @@
 /// ```
 module codec::hex;
 
-use std::string::String;
 use ascii::char;
+use std::string::String;
 
 const EIncorrectNumberOfCharacters: u64 = 0;
 const ENotValidHexCharacter: u64 = 1;
