@@ -39,12 +39,12 @@ Module: container
 -  [Function `to_string`](#(svg=0x0)_container_to_string)
 
 
-<pre><code><b>use</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/animation.md#(svg=0x0)_animation">animation</a>;
-<b>use</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/desc.md#(svg=0x0)_desc">desc</a>;
-<b>use</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/filter.md#(svg=0x0)_filter">filter</a>;
-<b>use</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/point.md#(svg=0x0)_point">point</a>;
-<b>use</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/print.md#(svg=0x0)_print">print</a>;
-<b>use</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape">shape</a>;
+<pre><code><b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation">animation</a>;
+<b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./desc.md#(svg=0x0)_desc">desc</a>;
+<b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./filter.md#(svg=0x0)_filter">filter</a>;
+<b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point">point</a>;
+<b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./print.md#(svg=0x0)_print">print</a>;
+<b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape">shape</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
 <b>use</b> <a href="../../.doc-deps/std/string.md#std_string">std::string</a>;
@@ -64,15 +64,15 @@ support <code>Shape</code>s placed inside them, and most of them support attribu
 which will be rendered as XML attributes in the SVG output.
 
 Containers are created via one of:
-- <code><a href="../svg/container.md#(svg=0x0)_container_root">container::root</a></code> - no container, just a list of shapes.
-- <code><a href="../svg/container.md#(svg=0x0)_container_a">container::a</a></code> - hyperlink container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_a">a</a>&gt;</code>.
-- <code><a href="../svg/container.md#(svg=0x0)_container_defs">container::defs</a></code> - definition container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_defs">defs</a>&gt;</code>, to be used for reusable shapes.
-- <code><a href="../svg/container.md#(svg=0x0)_container_g">container::g</a></code> - group container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_g">g</a>&gt;</code>, to group shapes.
-- <code><a href="../svg/container.md#(svg=0x0)_container_marker">container::marker</a></code> - marker container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_marker">marker</a>&gt;</code>, to define a marker symbol.
-- <code><a href="../svg/container.md#(svg=0x0)_container_symbol">container::symbol</a></code> - symbol container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_symbol">symbol</a>&gt;</code>, to define a reusable graphic.
+- <code><a href="./container.md#(svg=0x0)_container_root">container::root</a></code> - no container, just a list of shapes.
+- <code><a href="./container.md#(svg=0x0)_container_a">container::a</a></code> - hyperlink container, <code>&lt;<a href="./container.md#(svg=0x0)_container_a">a</a>&gt;</code>.
+- <code><a href="./container.md#(svg=0x0)_container_defs">container::defs</a></code> - definition container, <code>&lt;<a href="./container.md#(svg=0x0)_container_defs">defs</a>&gt;</code>, to be used for reusable shapes.
+- <code><a href="./container.md#(svg=0x0)_container_g">container::g</a></code> - group container, <code>&lt;<a href="./container.md#(svg=0x0)_container_g">g</a>&gt;</code>, to group shapes.
+- <code><a href="./container.md#(svg=0x0)_container_marker">container::marker</a></code> - marker container, <code>&lt;<a href="./container.md#(svg=0x0)_container_marker">marker</a>&gt;</code>, to define a marker symbol.
+- <code><a href="./container.md#(svg=0x0)_container_symbol">container::symbol</a></code> - symbol container, <code>&lt;<a href="./container.md#(svg=0x0)_container_symbol">symbol</a>&gt;</code>, to define a reusable graphic.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="./container.md#(svg=0x0)_container_Container">Container</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -83,14 +83,14 @@ Containers are created via one of:
 
 <dl>
 <dt>
-<code><a href="../svg/container.md#(svg=0x0)_container">container</a>: u8</code>
+<code><a href="./container.md#(svg=0x0)_container">container</a>: u8</code>
 </dt>
 <dd>
  Uses <code>u8</code> instead of <code>ContainerType</code> to avoid verifier conflict on type
  signatures being too large.
 </dd>
 <dt>
-<code>shapes: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;</code>
+<code>shapes: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -100,12 +100,12 @@ Containers are created via one of:
 <dd>
 </dd>
 <dt>
-<code><a href="../svg/animation.md#(svg=0x0)_animation">animation</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>&gt;</code>
+<code><a href="./animation.md#(svg=0x0)_animation">animation</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>&gt;</code>
 </dt>
 <dd>
 </dd>
 <dt>
-<code><a href="../svg/desc.md#(svg=0x0)_desc">desc</a>: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/desc.md#(svg=0x0)_desc_Desc">desc::Desc</a>&gt;</code>
+<code><a href="./desc.md#(svg=0x0)_desc">desc</a>: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./desc.md#(svg=0x0)_desc_Desc">desc::Desc</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -123,7 +123,7 @@ Containers are created via one of:
 
 
 
-<pre><code><b>const</b> <a href="../svg/container.md#(svg=0x0)_container_TYPE_ROOT">TYPE_ROOT</a>: u8 = 0;
+<pre><code><b>const</b> <a href="./container.md#(svg=0x0)_container_TYPE_ROOT">TYPE_ROOT</a>: u8 = 0;
 </code></pre>
 
 
@@ -132,7 +132,7 @@ Containers are created via one of:
 
 
 
-<pre><code><b>const</b> <a href="../svg/container.md#(svg=0x0)_container_TYPE_A">TYPE_A</a>: u8 = 1;
+<pre><code><b>const</b> <a href="./container.md#(svg=0x0)_container_TYPE_A">TYPE_A</a>: u8 = 1;
 </code></pre>
 
 
@@ -141,7 +141,7 @@ Containers are created via one of:
 
 
 
-<pre><code><b>const</b> <a href="../svg/container.md#(svg=0x0)_container_TYPE_DEFS">TYPE_DEFS</a>: u8 = 2;
+<pre><code><b>const</b> <a href="./container.md#(svg=0x0)_container_TYPE_DEFS">TYPE_DEFS</a>: u8 = 2;
 </code></pre>
 
 
@@ -150,7 +150,7 @@ Containers are created via one of:
 
 
 
-<pre><code><b>const</b> <a href="../svg/container.md#(svg=0x0)_container_TYPE_G">TYPE_G</a>: u8 = 3;
+<pre><code><b>const</b> <a href="./container.md#(svg=0x0)_container_TYPE_G">TYPE_G</a>: u8 = 3;
 </code></pre>
 
 
@@ -159,7 +159,7 @@ Containers are created via one of:
 
 
 
-<pre><code><b>const</b> <a href="../svg/container.md#(svg=0x0)_container_TYPE_MARKER">TYPE_MARKER</a>: u8 = 4;
+<pre><code><b>const</b> <a href="./container.md#(svg=0x0)_container_TYPE_MARKER">TYPE_MARKER</a>: u8 = 4;
 </code></pre>
 
 
@@ -168,7 +168,7 @@ Containers are created via one of:
 
 
 
-<pre><code><b>const</b> <a href="../svg/container.md#(svg=0x0)_container_TYPE_CLIP_PATH">TYPE_CLIP_PATH</a>: u8 = 5;
+<pre><code><b>const</b> <a href="./container.md#(svg=0x0)_container_TYPE_CLIP_PATH">TYPE_CLIP_PATH</a>: u8 = 5;
 </code></pre>
 
 
@@ -177,7 +177,7 @@ Containers are created via one of:
 
 
 
-<pre><code><b>const</b> <a href="../svg/container.md#(svg=0x0)_container_TYPE_SYMBOL">TYPE_SYMBOL</a>: u8 = 6;
+<pre><code><b>const</b> <a href="./container.md#(svg=0x0)_container_TYPE_SYMBOL">TYPE_SYMBOL</a>: u8 = 6;
 </code></pre>
 
 
@@ -186,7 +186,7 @@ Containers are created via one of:
 
 
 
-<pre><code><b>const</b> <a href="../svg/container.md#(svg=0x0)_container_TYPE_MASK">TYPE_MASK</a>: u8 = 7;
+<pre><code><b>const</b> <a href="./container.md#(svg=0x0)_container_TYPE_MASK">TYPE_MASK</a>: u8 = 7;
 </code></pre>
 
 
@@ -223,7 +223,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_root">root</a>(shapes: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_root">root</a>(shapes: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -232,13 +232,13 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_root">root</a>(shapes: vector&lt;Shape&gt;): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-    <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>: <a href="../svg/container.md#(svg=0x0)_container_TYPE_ROOT">TYPE_ROOT</a>,
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_root">root</a>(shapes: vector&lt;Shape&gt;): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+    <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+        <a href="./container.md#(svg=0x0)_container">container</a>: <a href="./container.md#(svg=0x0)_container_TYPE_ROOT">TYPE_ROOT</a>,
         shapes,
         attributes: vec_map::empty(),
-        <a href="../svg/animation.md#(svg=0x0)_animation">animation</a>: option::none(),
-        <a href="../svg/desc.md#(svg=0x0)_desc">desc</a>: vector[],
+        <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
+        <a href="./desc.md#(svg=0x0)_desc">desc</a>: vector[],
     }
 }
 </code></pre>
@@ -259,9 +259,9 @@ Create a new hyperlink container.
 #### Description
 
 
-Hyperlink container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_a">a</a>&gt;</code>. Must be initialized with an <code>href</code>.
+Hyperlink container, <code>&lt;<a href="./container.md#(svg=0x0)_container_a">a</a>&gt;</code>. Must be initialized with an <code>href</code>.
 
-- Element: <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_a">a</a>&gt;</code>.
+- Element: <code>&lt;<a href="./container.md#(svg=0x0)_container_a">a</a>&gt;</code>.
 - Own properties: <code>href</code>.
 - Extended properties: None.
 
@@ -284,7 +284,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_a">a</a>(href: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, shapes: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_a">a</a>(href: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, shapes: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -293,17 +293,17 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_a">a</a>(href: String, shapes: vector&lt;Shape&gt;): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_a">a</a>(href: String, shapes: vector&lt;Shape&gt;): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
     <b>let</b> <b>mut</b> attributes = vec_map::empty();
     <b>if</b> (href.length() &gt; 0) {
-        attributes.insert(b"href".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(), href);
+        attributes.insert(b"href".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(), href);
     };
-    <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>: <a href="../svg/container.md#(svg=0x0)_container_TYPE_A">TYPE_A</a>,
+    <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+        <a href="./container.md#(svg=0x0)_container">container</a>: <a href="./container.md#(svg=0x0)_container_TYPE_A">TYPE_A</a>,
         shapes,
         attributes,
-        <a href="../svg/animation.md#(svg=0x0)_animation">animation</a>: option::none(),
-        <a href="../svg/desc.md#(svg=0x0)_desc">desc</a>: vector[],
+        <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
+        <a href="./desc.md#(svg=0x0)_desc">desc</a>: vector[],
     }
 }
 </code></pre>
@@ -324,10 +324,10 @@ Create a new <code>Defs</code> container.
 #### Description
 
 
-A <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_defs">defs</a>&gt;</code> container, to be used for reusable shapes. It's like a
+A <code>&lt;<a href="./container.md#(svg=0x0)_container_defs">defs</a>&gt;</code> container, to be used for reusable shapes. It's like a
 dictionary of shapes.
 
-- Element: <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_defs">defs</a>&gt;</code>.
+- Element: <code>&lt;<a href="./container.md#(svg=0x0)_container_defs">defs</a>&gt;</code>.
 - Own properties: None.
 - Extended properties: None.
 
@@ -351,7 +351,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_defs">defs</a>(shapes: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_defs">defs</a>(shapes: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -360,13 +360,13 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_defs">defs</a>(shapes: vector&lt;Shape&gt;): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-    <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>: <a href="../svg/container.md#(svg=0x0)_container_TYPE_DEFS">TYPE_DEFS</a>,
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_defs">defs</a>(shapes: vector&lt;Shape&gt;): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+    <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+        <a href="./container.md#(svg=0x0)_container">container</a>: <a href="./container.md#(svg=0x0)_container_TYPE_DEFS">TYPE_DEFS</a>,
         shapes,
         attributes: vec_map::empty(),
-        <a href="../svg/animation.md#(svg=0x0)_animation">animation</a>: option::none(),
-        <a href="../svg/desc.md#(svg=0x0)_desc">desc</a>: vector[],
+        <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
+        <a href="./desc.md#(svg=0x0)_desc">desc</a>: vector[],
     }
 }
 </code></pre>
@@ -387,10 +387,10 @@ Create a new <code>G</code> container.
 #### Description
 
 
-Group container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_g">g</a>&gt;</code>, to group shapes and apply transformations to groups
+Group container, <code>&lt;<a href="./container.md#(svg=0x0)_container_g">g</a>&gt;</code>, to group shapes and apply transformations to groups
 of elements.
 
-- Element: <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_g">g</a>&gt;</code>.
+- Element: <code>&lt;<a href="./container.md#(svg=0x0)_container_g">g</a>&gt;</code>.
 - Own properties: None.
 - Extended properties: None.
 
@@ -418,7 +418,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_g">g</a>(shapes: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_g">g</a>(shapes: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -427,13 +427,13 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_g">g</a>(shapes: vector&lt;Shape&gt;): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-    <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>: <a href="../svg/container.md#(svg=0x0)_container_TYPE_G">TYPE_G</a>,
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_g">g</a>(shapes: vector&lt;Shape&gt;): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+    <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+        <a href="./container.md#(svg=0x0)_container">container</a>: <a href="./container.md#(svg=0x0)_container_TYPE_G">TYPE_G</a>,
         shapes,
         attributes: vec_map::empty(),
-        <a href="../svg/animation.md#(svg=0x0)_animation">animation</a>: option::none(),
-        <a href="../svg/desc.md#(svg=0x0)_desc">desc</a>: vector[],
+        <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
+        <a href="./desc.md#(svg=0x0)_desc">desc</a>: vector[],
     }
 }
 </code></pre>
@@ -453,8 +453,8 @@ Create a new <code>_Marker</code> container.
 
 #### Description
 
-Marker container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_marker">marker</a>&gt;</code>, to define a marker symbol.
-- Element: <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_marker">marker</a>&gt;</code>.
+Marker container, <code>&lt;<a href="./container.md#(svg=0x0)_container_marker">marker</a>&gt;</code>, to define a marker symbol.
+- Element: <code>&lt;<a href="./container.md#(svg=0x0)_container_marker">marker</a>&gt;</code>.
 - Own properties: None.
 - Extended properties: None.
 
@@ -478,7 +478,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_marker">marker</a>(id: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, _shapes: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_marker">marker</a>(id: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, _shapes: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -487,15 +487,15 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_marker">marker</a>(id: String, _shapes: vector&lt;Shape&gt;): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_marker">marker</a>(id: String, _shapes: vector&lt;Shape&gt;): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
     <b>let</b> <b>mut</b> attributes = vec_map::empty();
-    attributes.insert(b"id".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(), id);
-    <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>: <a href="../svg/container.md#(svg=0x0)_container_TYPE_MARKER">TYPE_MARKER</a>,
+    attributes.insert(b"id".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(), id);
+    <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+        <a href="./container.md#(svg=0x0)_container">container</a>: <a href="./container.md#(svg=0x0)_container_TYPE_MARKER">TYPE_MARKER</a>,
         shapes: vector[],
         attributes: vec_map::empty(),
-        <a href="../svg/animation.md#(svg=0x0)_animation">animation</a>: option::none(),
-        <a href="../svg/desc.md#(svg=0x0)_desc">desc</a>: vector[],
+        <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
+        <a href="./desc.md#(svg=0x0)_desc">desc</a>: vector[],
     }
 }
 </code></pre>
@@ -515,15 +515,15 @@ Create a new <code>Mask</code> container.
 
 #### Description
 
-Mask container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_mask">mask</a>&gt;</code>, to define a mask.
-- Element: <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_mask">mask</a>&gt;</code>.
+Mask container, <code>&lt;<a href="./container.md#(svg=0x0)_container_mask">mask</a>&gt;</code>, to define a mask.
+- Element: <code>&lt;<a href="./container.md#(svg=0x0)_container_mask">mask</a>&gt;</code>.
 - Own properties: None.
 - Extended properties: None.
 
 See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/mask).
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_mask">mask</a>(id: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, _shapes: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_mask">mask</a>(id: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, _shapes: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -532,15 +532,15 @@ See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/mask
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_mask">mask</a>(id: String, _shapes: vector&lt;Shape&gt;): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_mask">mask</a>(id: String, _shapes: vector&lt;Shape&gt;): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
     <b>let</b> <b>mut</b> attributes = vec_map::empty();
-    attributes.insert(b"id".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(), id);
-    <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>: <a href="../svg/container.md#(svg=0x0)_container_TYPE_MASK">TYPE_MASK</a>,
+    attributes.insert(b"id".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(), id);
+    <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+        <a href="./container.md#(svg=0x0)_container">container</a>: <a href="./container.md#(svg=0x0)_container_TYPE_MASK">TYPE_MASK</a>,
         shapes: vector[],
         attributes: vec_map::empty(),
-        <a href="../svg/animation.md#(svg=0x0)_animation">animation</a>: option::none(),
-        <a href="../svg/desc.md#(svg=0x0)_desc">desc</a>: vector[],
+        <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
+        <a href="./desc.md#(svg=0x0)_desc">desc</a>: vector[],
     }
 }
 </code></pre>
@@ -560,15 +560,15 @@ Create a new <code>Symbol</code> container.
 
 #### Description
 
-Symbol container, <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_symbol">symbol</a>&gt;</code>, to define a reusable graphic.
-- Element: <code>&lt;<a href="../svg/container.md#(svg=0x0)_container_symbol">symbol</a>&gt;</code>.
+Symbol container, <code>&lt;<a href="./container.md#(svg=0x0)_container_symbol">symbol</a>&gt;</code>, to define a reusable graphic.
+- Element: <code>&lt;<a href="./container.md#(svg=0x0)_container_symbol">symbol</a>&gt;</code>.
 - Own properties: None.
 - Extended properties: None.
 
 See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/symbol).
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_symbol">symbol</a>(id: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, _shapes: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_symbol">symbol</a>(id: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, _shapes: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -577,15 +577,15 @@ See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/symb
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_symbol">symbol</a>(id: String, _shapes: vector&lt;Shape&gt;): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_symbol">symbol</a>(id: String, _shapes: vector&lt;Shape&gt;): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
     <b>let</b> <b>mut</b> attributes = vec_map::empty();
-    attributes.insert(b"id".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(), id);
-    <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>: <a href="../svg/container.md#(svg=0x0)_container_TYPE_SYMBOL">TYPE_SYMBOL</a>,
+    attributes.insert(b"id".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(), id);
+    <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+        <a href="./container.md#(svg=0x0)_container">container</a>: <a href="./container.md#(svg=0x0)_container_TYPE_SYMBOL">TYPE_SYMBOL</a>,
         shapes: vector[],
         attributes: vec_map::empty(),
-        <a href="../svg/animation.md#(svg=0x0)_animation">animation</a>: option::none(),
-        <a href="../svg/desc.md#(svg=0x0)_desc">desc</a>: vector[],
+        <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
+        <a href="./desc.md#(svg=0x0)_desc">desc</a>: vector[],
     }
 }
 </code></pre>
@@ -628,7 +628,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_clip_path">clip_path</a>(shapes: vector&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_clip_path">clip_path</a>(shapes: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -637,13 +637,13 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_clip_path">clip_path</a>(shapes: vector&lt;Shape&gt;): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-    <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>: <a href="../svg/container.md#(svg=0x0)_container_TYPE_CLIP_PATH">TYPE_CLIP_PATH</a>,
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_clip_path">clip_path</a>(shapes: vector&lt;Shape&gt;): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+    <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+        <a href="./container.md#(svg=0x0)_container">container</a>: <a href="./container.md#(svg=0x0)_container_TYPE_CLIP_PATH">TYPE_CLIP_PATH</a>,
         shapes,
         attributes: vec_map::empty(),
-        <a href="../svg/animation.md#(svg=0x0)_animation">animation</a>: option::none(),
-        <a href="../svg/desc.md#(svg=0x0)_desc">desc</a>: vector[],
+        <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
+        <a href="./desc.md#(svg=0x0)_desc">desc</a>: vector[],
     }
 }
 </code></pre>
@@ -659,7 +659,7 @@ let str = svg.to_string();
 Move a container, keep the interface consistent with shapes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_move_to">move_to</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>, x: u16, y: u16): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_move_to">move_to</a>(<a href="./container.md#(svg=0x0)_container">container</a>: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>, x: u16, y: u16): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -668,18 +668,18 @@ Move a container, keep the interface consistent with shapes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_move_to">move_to</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a>, x: u16, y: u16): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
-    <a href="../svg/container.md#(svg=0x0)_container">container</a>.<a href="../svg/container.md#(svg=0x0)_container_map_attributes">map_attributes</a>!(|attributes| {
-        <b>let</b> x_key = b"x".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>();
-        <b>let</b> y_key = b"y".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>();
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_move_to">move_to</a>(<a href="./container.md#(svg=0x0)_container">container</a>: <a href="./container.md#(svg=0x0)_container_Container">Container</a>, x: u16, y: u16): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
+    <a href="./container.md#(svg=0x0)_container">container</a>.<a href="./container.md#(svg=0x0)_container_map_attributes">map_attributes</a>!(|attributes| {
+        <b>let</b> x_key = b"x".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>();
+        <b>let</b> y_key = b"y".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>();
         <b>if</b> (attributes.contains(&x_key)) {
             attributes.remove(&x_key);
         };
         <b>if</b> (attributes.contains(&y_key)) {
             attributes.remove(&y_key);
         };
-        attributes.insert(x_key, x.<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>());
-        attributes.insert(y_key, y.<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>());
+        attributes.insert(x_key, x.<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>());
+        attributes.insert(y_key, y.<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>());
     })
 }
 </code></pre>
@@ -695,7 +695,7 @@ Move a container, keep the interface consistent with shapes.
 Add a shape to a container.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_add">add</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &<b>mut</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>, <a href="../svg/shape.md#(svg=0x0)_shape">shape</a>: (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_add">add</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &<b>mut</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>, <a href="./shape.md#(svg=0x0)_shape">shape</a>: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape_Shape">shape::Shape</a>)
 </code></pre>
 
 
@@ -704,8 +704,8 @@ Add a shape to a container.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_add">add</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &<b>mut</b> <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a>, <a href="../svg/shape.md#(svg=0x0)_shape">shape</a>: Shape) {
-    <a href="../svg/container.md#(svg=0x0)_container">container</a>.shapes.push_back(<a href="../svg/shape.md#(svg=0x0)_shape">shape</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_add">add</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &<b>mut</b> <a href="./container.md#(svg=0x0)_container_Container">Container</a>, <a href="./shape.md#(svg=0x0)_shape">shape</a>: Shape) {
+    <a href="./container.md#(svg=0x0)_container">container</a>.shapes.push_back(<a href="./shape.md#(svg=0x0)_shape">shape</a>);
 }
 </code></pre>
 
@@ -720,7 +720,7 @@ Add a shape to a container.
 Access Option with <code>Animation</code>, fill, extract and so on.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_animation_mut">animation_mut</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &<b>mut</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>): &<b>mut</b> <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_animation_mut">animation_mut</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &<b>mut</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>): &<b>mut</b> <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>&gt;
 </code></pre>
 
 
@@ -729,8 +729,8 @@ Access Option with <code>Animation</code>, fill, extract and so on.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_animation_mut">animation_mut</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &<b>mut</b> <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a>): &<b>mut</b> Option&lt;Animation&gt; {
-    &<b>mut</b> <a href="../svg/container.md#(svg=0x0)_container">container</a>.<a href="../svg/animation.md#(svg=0x0)_animation">animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_animation_mut">animation_mut</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &<b>mut</b> <a href="./container.md#(svg=0x0)_container_Container">Container</a>): &<b>mut</b> Option&lt;Animation&gt; {
+    &<b>mut</b> <a href="./container.md#(svg=0x0)_container">container</a>.<a href="./animation.md#(svg=0x0)_animation">animation</a>
 }
 </code></pre>
 
@@ -745,7 +745,7 @@ Access Option with <code>Animation</code>, fill, extract and so on.
 Get a mutable reference to the attributes of a container.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_attributes_mut">attributes_mut</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &<b>mut</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>): &<b>mut</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_attributes_mut">attributes_mut</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &<b>mut</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>): &<b>mut</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;
 </code></pre>
 
 
@@ -754,8 +754,8 @@ Get a mutable reference to the attributes of a container.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_attributes_mut">attributes_mut</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &<b>mut</b> <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a>): &<b>mut</b> VecMap&lt;String, String&gt; {
-    &<b>mut</b> <a href="../svg/container.md#(svg=0x0)_container">container</a>.attributes
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_attributes_mut">attributes_mut</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &<b>mut</b> <a href="./container.md#(svg=0x0)_container_Container">Container</a>): &<b>mut</b> VecMap&lt;String, String&gt; {
+    &<b>mut</b> <a href="./container.md#(svg=0x0)_container">container</a>.attributes
 }
 </code></pre>
 
@@ -767,7 +767,7 @@ Get a mutable reference to the attributes of a container.
 
 ## Macro function `map_attributes`
 
-Map attributes of the <code><a href="../svg/container.md#(svg=0x0)_container_Container">Container</a></code>.
+Map attributes of the <code><a href="./container.md#(svg=0x0)_container_Container">Container</a></code>.
 
 ```rust
 let mut container = container::g(vector[
@@ -780,7 +780,7 @@ attrs.insert(b"stroke".to_string(), b"black".to_string());
 ```
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_map_attributes">map_attributes</a>($self: (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>, $f: |&<b>mut</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;| -&gt; ()): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_map_attributes">map_attributes</a>($self: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>, $f: |&<b>mut</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;| -&gt; ()): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>
 </code></pre>
 
 
@@ -789,9 +789,9 @@ attrs.insert(b"stroke".to_string(), b"black".to_string());
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_map_attributes">map_attributes</a>($self: <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a>, $f: |&<b>mut</b> VecMap&lt;String, String&gt;|): <a href="../svg/container.md#(svg=0x0)_container_Container">Container</a> {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_map_attributes">map_attributes</a>($self: <a href="./container.md#(svg=0x0)_container_Container">Container</a>, $f: |&<b>mut</b> VecMap&lt;String, String&gt;|): <a href="./container.md#(svg=0x0)_container_Container">Container</a> {
     <b>let</b> <b>mut</b> self = $self;
-    <b>let</b> attributes = self.<a href="../svg/container.md#(svg=0x0)_container_attributes_mut">attributes_mut</a>();
+    <b>let</b> attributes = self.<a href="./container.md#(svg=0x0)_container_attributes_mut">attributes_mut</a>();
     $f(attributes);
     self
 }
@@ -810,7 +810,7 @@ Simplification to not create functions for each container invariant.
 TODO: replace with constants in the future release, when compiler bug is fixed.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_name">name</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_name">name</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -819,16 +819,16 @@ TODO: replace with constants in the future release, when compiler bug is fixed.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_name">name</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &<a href="../svg/container.md#(svg=0x0)_container_Container">Container</a>): String {
-    match (&<a href="../svg/container.md#(svg=0x0)_container">container</a>.<a href="../svg/container.md#(svg=0x0)_container">container</a>) {
-        0 =&gt; b"".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(),
-        1 =&gt; b"<a href="../svg/container.md#(svg=0x0)_container_a">a</a>".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(),
-        2 =&gt; b"<a href="../svg/container.md#(svg=0x0)_container_defs">defs</a>".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(),
-        3 =&gt; b"<a href="../svg/container.md#(svg=0x0)_container_g">g</a>".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(),
-        4 =&gt; b"<a href="../svg/container.md#(svg=0x0)_container_marker">marker</a>".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(),
-        5 =&gt; b"clipPath".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(),
-        6 =&gt; b"<a href="../svg/container.md#(svg=0x0)_container_symbol">symbol</a>".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(),
-        7 =&gt; b"<a href="../svg/container.md#(svg=0x0)_container_mask">mask</a>".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(),
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_name">name</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &<a href="./container.md#(svg=0x0)_container_Container">Container</a>): String {
+    match (&<a href="./container.md#(svg=0x0)_container">container</a>.<a href="./container.md#(svg=0x0)_container">container</a>) {
+        0 =&gt; b"".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(),
+        1 =&gt; b"<a href="./container.md#(svg=0x0)_container_a">a</a>".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(),
+        2 =&gt; b"<a href="./container.md#(svg=0x0)_container_defs">defs</a>".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(),
+        3 =&gt; b"<a href="./container.md#(svg=0x0)_container_g">g</a>".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(),
+        4 =&gt; b"<a href="./container.md#(svg=0x0)_container_marker">marker</a>".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(),
+        5 =&gt; b"clipPath".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(),
+        6 =&gt; b"<a href="./container.md#(svg=0x0)_container_symbol">symbol</a>".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(),
+        7 =&gt; b"<a href="./container.md#(svg=0x0)_container_mask">mask</a>".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(),
         _ =&gt; <b>abort</b>,
     }
 }
@@ -845,7 +845,7 @@ TODO: replace with constants in the future release, when compiler bug is fixed.
 Print the container as an <code>SVG</code> element.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/container.md#(svg=0x0)_container_Container">container::Container</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./container.md#(svg=0x0)_container_Container">container::Container</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -854,18 +854,18 @@ Print the container as an <code>SVG</code> element.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(<a href="../svg/container.md#(svg=0x0)_container">container</a>: &<a href="../svg/container.md#(svg=0x0)_container_Container">Container</a>): String {
-    <b>if</b> (<a href="../svg/container.md#(svg=0x0)_container">container</a>.<a href="../svg/container.md#(svg=0x0)_container">container</a> == <a href="../svg/container.md#(svg=0x0)_container_TYPE_ROOT">TYPE_ROOT</a>) {
-        <b>return</b> <a href="../svg/container.md#(svg=0x0)_container">container</a>.shapes.fold!(b"".<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>(), |<b>mut</b> acc, <a href="../svg/shape.md#(svg=0x0)_shape">shape</a>| {
-            acc.append(<a href="../svg/shape.md#(svg=0x0)_shape">shape</a>.<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>());
+<pre><code><b>public</b> <b>fun</b> <a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(<a href="./container.md#(svg=0x0)_container">container</a>: &<a href="./container.md#(svg=0x0)_container_Container">Container</a>): String {
+    <b>if</b> (<a href="./container.md#(svg=0x0)_container">container</a>.<a href="./container.md#(svg=0x0)_container">container</a> == <a href="./container.md#(svg=0x0)_container_TYPE_ROOT">TYPE_ROOT</a>) {
+        <b>return</b> <a href="./container.md#(svg=0x0)_container">container</a>.shapes.fold!(b"".<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>(), |<b>mut</b> acc, <a href="./shape.md#(svg=0x0)_shape">shape</a>| {
+            acc.append(<a href="./shape.md#(svg=0x0)_shape">shape</a>.<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>());
             acc
         })
     };
-    <b>let</b> <b>mut</b> contents = <a href="../svg/container.md#(svg=0x0)_container">container</a>.shapes.map!(|<a href="../svg/shape.md#(svg=0x0)_shape">shape</a>| <a href="../svg/shape.md#(svg=0x0)_shape">shape</a>.<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>());
-    <a href="../svg/container.md#(svg=0x0)_container">container</a>.<a href="../svg/animation.md#(svg=0x0)_animation">animation</a>.do_ref!(|<a href="../svg/animation.md#(svg=0x0)_animation">animation</a>| contents.push_back(<a href="../svg/animation.md#(svg=0x0)_animation">animation</a>.<a href="../svg/container.md#(svg=0x0)_container_to_string">to_string</a>()));
-    <a href="../svg/print.md#(svg=0x0)_print_print">print::print</a>(
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>.<a href="../svg/container.md#(svg=0x0)_container_name">name</a>(),
-        <a href="../svg/container.md#(svg=0x0)_container">container</a>.attributes,
+    <b>let</b> <b>mut</b> contents = <a href="./container.md#(svg=0x0)_container">container</a>.shapes.map!(|<a href="./shape.md#(svg=0x0)_shape">shape</a>| <a href="./shape.md#(svg=0x0)_shape">shape</a>.<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>());
+    <a href="./container.md#(svg=0x0)_container">container</a>.<a href="./animation.md#(svg=0x0)_animation">animation</a>.do_ref!(|<a href="./animation.md#(svg=0x0)_animation">animation</a>| contents.push_back(<a href="./animation.md#(svg=0x0)_animation">animation</a>.<a href="./container.md#(svg=0x0)_container_to_string">to_string</a>()));
+    <a href="./print.md#(svg=0x0)_print_print">print::print</a>(
+        <a href="./container.md#(svg=0x0)_container">container</a>.<a href="./container.md#(svg=0x0)_container_name">name</a>(),
+        <a href="./container.md#(svg=0x0)_container">container</a>.attributes,
         option::some(contents),
     )
 }

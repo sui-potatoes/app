@@ -3,7 +3,7 @@
 
 # Module `grid::point`
 
-Defines the <code><a href="../grid/point.md#grid_point_Point">Point</a></code> type and its methods. Point is a tuple-like struct that
+Defines the <code><a href="./point.md#grid_point_Point">Point</a></code> type and its methods. Point is a tuple-like struct that
 holds two unsigned 16-bit integers, representing the x and y coordinates of
 a point in 2D space.
 
@@ -48,7 +48,7 @@ a point in 2D space.
 A point in 2D space. A row (x) and a column (y).
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../grid/point.md#grid_point_Point">Point</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="./point.md#grid_point_Point">Point</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -77,10 +77,10 @@ A point in 2D space. A row (x) and a column (y).
 
 ## Function `new`
 
-Create a new <code><a href="../grid/point.md#grid_point_Point">Point</a></code> at <code>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a>)</code>.
+Create a new <code><a href="./point.md#grid_point_Point">Point</a></code> at <code>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>)</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_new">new</a>(<a href="../grid/point.md#grid_point_x">x</a>: u16, <a href="../grid/point.md#grid_point_y">y</a>: u16): <a href="../grid/point.md#grid_point_Point">grid::point::Point</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_new">new</a>(<a href="./point.md#grid_point_x">x</a>: u16, <a href="./point.md#grid_point_y">y</a>: u16): <a href="./point.md#grid_point_Point">grid::point::Point</a>
 </code></pre>
 
 
@@ -89,7 +89,7 @@ Create a new <code><a href="../grid/point.md#grid_point_Point">Point</a></code> 
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_new">new</a>(<a href="../grid/point.md#grid_point_x">x</a>: u16, <a href="../grid/point.md#grid_point_y">y</a>: u16): <a href="../grid/point.md#grid_point_Point">Point</a> { <a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a>) }
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_new">new</a>(<a href="./point.md#grid_point_x">x</a>: u16, <a href="./point.md#grid_point_y">y</a>: u16): <a href="./point.md#grid_point_Point">Point</a> { <a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>) }
 </code></pre>
 
 
@@ -100,11 +100,11 @@ Create a new <code><a href="../grid/point.md#grid_point_Point">Point</a></code> 
 
 ## Function `from_vector`
 
-Create a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> from a vector of two values.
+Create a <code><a href="./point.md#grid_point_Point">Point</a></code> from a vector of two values.
 Ignores the rest of the values in the vector.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_from_vector">from_vector</a>(v: vector&lt;u16&gt;): <a href="../grid/point.md#grid_point_Point">grid::point::Point</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_from_vector">from_vector</a>(v: vector&lt;u16&gt;): <a href="./point.md#grid_point_Point">grid::point::Point</a>
 </code></pre>
 
 
@@ -113,8 +113,8 @@ Ignores the rest of the values in the vector.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_from_vector">from_vector</a>(v: vector&lt;u16&gt;): <a href="../grid/point.md#grid_point_Point">Point</a> {
-    <a href="../grid/point.md#grid_point_Point">Point</a>(v[0], v[1])
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_from_vector">from_vector</a>(v: vector&lt;u16&gt;): <a href="./point.md#grid_point_Point">Point</a> {
+    <a href="./point.md#grid_point_Point">Point</a>(v[0], v[1])
 }
 </code></pre>
 
@@ -126,10 +126,10 @@ Ignores the rest of the values in the vector.
 
 ## Function `to_values`
 
-Get a tuple of two values from a <code><a href="../grid/point.md#grid_point_Point">Point</a></code>.
+Get a tuple of two values from a <code><a href="./point.md#grid_point_Point">Point</a></code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_to_values">to_values</a>(p: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): (u16, u16)
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_to_values">to_values</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): (u16, u16)
 </code></pre>
 
 
@@ -138,7 +138,7 @@ Get a tuple of two values from a <code><a href="../grid/point.md#grid_point_Poin
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_to_values">to_values</a>(p: &<a href="../grid/point.md#grid_point_Point">Point</a>): (u16, u16) { <b>let</b> <a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a>) = p; (*<a href="../grid/point.md#grid_point_x">x</a>, *<a href="../grid/point.md#grid_point_y">y</a>) }
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_to_values">to_values</a>(p: &<a href="./point.md#grid_point_Point">Point</a>): (u16, u16) { <b>let</b> <a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>) = p; (*<a href="./point.md#grid_point_x">x</a>, *<a href="./point.md#grid_point_y">y</a>) }
 </code></pre>
 
 
@@ -149,10 +149,10 @@ Get a tuple of two values from a <code><a href="../grid/point.md#grid_point_Poin
 
 ## Function `into_values`
 
-Unpack a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> into a tuple of two values.
+Unpack a <code><a href="./point.md#grid_point_Point">Point</a></code> into a tuple of two values.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_into_values">into_values</a>(p: <a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): (u16, u16)
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_into_values">into_values</a>(p: <a href="./point.md#grid_point_Point">grid::point::Point</a>): (u16, u16)
 </code></pre>
 
 
@@ -161,7 +161,7 @@ Unpack a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> into
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_into_values">into_values</a>(p: <a href="../grid/point.md#grid_point_Point">Point</a>): (u16, u16) { <b>let</b> <a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a>) = p; (<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a>) }
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_into_values">into_values</a>(p: <a href="./point.md#grid_point_Point">Point</a>): (u16, u16) { <b>let</b> <a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>) = p; (<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>) }
 </code></pre>
 
 
@@ -172,10 +172,10 @@ Unpack a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> into
 
 ## Function `to_vector`
 
-Convert a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> to a vector of two values.
+Convert a <code><a href="./point.md#grid_point_Point">Point</a></code> to a vector of two values.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_to_vector">to_vector</a>(p: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): vector&lt;u16&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_to_vector">to_vector</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): vector&lt;u16&gt;
 </code></pre>
 
 
@@ -184,7 +184,7 @@ Convert a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> to 
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_to_vector">to_vector</a>(p: &<a href="../grid/point.md#grid_point_Point">Point</a>): vector&lt;u16&gt; { vector[p.0, p.1] }
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_to_vector">to_vector</a>(p: &<a href="./point.md#grid_point_Point">Point</a>): vector&lt;u16&gt; { vector[p.0, p.1] }
 </code></pre>
 
 
@@ -195,10 +195,10 @@ Convert a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> to 
 
 ## Function `x`
 
-Get the <code><a href="../grid/point.md#grid_point_x">x</a></code> coordinate of a <code><a href="../grid/point.md#grid_point_Point">Point</a></code>. On the <code>Grid</code>, this is the row.
+Get the <code><a href="./point.md#grid_point_x">x</a></code> coordinate of a <code><a href="./point.md#grid_point_Point">Point</a></code>. On the <code>Grid</code>, this is the row.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_x">x</a>(p: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): u16
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_x">x</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): u16
 </code></pre>
 
 
@@ -207,7 +207,7 @@ Get the <code><a href="../grid/point.md#grid_point_x">x</a></code> coordinate of
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_x">x</a>(p: &<a href="../grid/point.md#grid_point_Point">Point</a>): u16 { p.0 }
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_x">x</a>(p: &<a href="./point.md#grid_point_Point">Point</a>): u16 { p.0 }
 </code></pre>
 
 
@@ -218,10 +218,10 @@ Get the <code><a href="../grid/point.md#grid_point_x">x</a></code> coordinate of
 
 ## Function `y`
 
-Get the <code><a href="../grid/point.md#grid_point_y">y</a></code> coordinate of a <code><a href="../grid/point.md#grid_point_Point">Point</a></code>. On the <code>Grid</code>, this is the column.
+Get the <code><a href="./point.md#grid_point_y">y</a></code> coordinate of a <code><a href="./point.md#grid_point_Point">Point</a></code>. On the <code>Grid</code>, this is the column.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_y">y</a>(p: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): u16
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_y">y</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): u16
 </code></pre>
 
 
@@ -230,7 +230,7 @@ Get the <code><a href="../grid/point.md#grid_point_y">y</a></code> coordinate of
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_y">y</a>(p: &<a href="../grid/point.md#grid_point_Point">Point</a>): u16 { p.1 }
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_y">y</a>(p: &<a href="./point.md#grid_point_Point">Point</a>): u16 { p.1 }
 </code></pre>
 
 
@@ -245,7 +245,7 @@ Returns whether the point is within the given bounds: <code>rows</code> and <cod
 mapping to <code>height</code> (x) and <code>width</code> (y).
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_is_within_bounds">is_within_bounds</a>(p: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>, rows: u16, cols: u16): bool
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_is_within_bounds">is_within_bounds</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>, rows: u16, cols: u16): bool
 </code></pre>
 
 
@@ -254,7 +254,7 @@ mapping to <code>height</code> (x) and <code>width</code> (y).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_is_within_bounds">is_within_bounds</a>(p: &<a href="../grid/point.md#grid_point_Point">Point</a>, rows: u16, cols: u16): bool {
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_is_within_bounds">is_within_bounds</a>(p: &<a href="./point.md#grid_point_Point">Point</a>, rows: u16, cols: u16): bool {
     p.0 &lt; rows && p.1 &lt; cols
 }
 </code></pre>
@@ -279,7 +279,7 @@ assert!(range == 6);
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_manhattan_distance">manhattan_distance</a>(p1: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>, p2: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): u16
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_manhattan_distance">manhattan_distance</a>(p1: &<a href="./point.md#grid_point_Point">grid::point::Point</a>, p2: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): u16
 </code></pre>
 
 
@@ -288,7 +288,7 @@ assert!(range == 6);
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_manhattan_distance">manhattan_distance</a>(p1: &<a href="../grid/point.md#grid_point_Point">Point</a>, p2: &<a href="../grid/point.md#grid_point_Point">Point</a>): u16 {
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_manhattan_distance">manhattan_distance</a>(p1: &<a href="./point.md#grid_point_Point">Point</a>, p2: &<a href="./point.md#grid_point_Point">Point</a>): u16 {
     num_diff!(p1.0, p2.0) + num_diff!(p1.1, p2.1)
 }
 </code></pre>
@@ -313,7 +313,7 @@ assert!(range == 3);
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_chebyshev_distance">chebyshev_distance</a>(p1: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>, p2: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): u16
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_chebyshev_distance">chebyshev_distance</a>(p1: &<a href="./point.md#grid_point_Point">grid::point::Point</a>, p2: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): u16
 </code></pre>
 
 
@@ -322,7 +322,7 @@ assert!(range == 3);
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_chebyshev_distance">chebyshev_distance</a>(p1: &<a href="../grid/point.md#grid_point_Point">Point</a>, p2: &<a href="../grid/point.md#grid_point_Point">Point</a>): u16 {
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_chebyshev_distance">chebyshev_distance</a>(p1: &<a href="./point.md#grid_point_Point">Point</a>, p2: &<a href="./point.md#grid_point_Point">Point</a>): u16 {
     num_max!(num_diff!(p1.0, p2.0), num_diff!(p1.1, p2.1))
 }
 </code></pre>
@@ -355,7 +355,7 @@ Note: does not include the point itself!
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_von_neumann">von_neumann</a>(p: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_von_neumann">von_neumann</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
 </code></pre>
 
 
@@ -364,23 +364,23 @@ Note: does not include the point itself!
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_von_neumann">von_neumann</a>(p: &<a href="../grid/point.md#grid_point_Point">Point</a>, size: u16): vector&lt;<a href="../grid/point.md#grid_point_Point">Point</a>&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_von_neumann">von_neumann</a>(p: &<a href="./point.md#grid_point_Point">Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">Point</a>&gt; {
     <b>if</b> (size == 0) <b>return</b> vector[];
     <b>let</b> <b>mut</b> neighbors = vector[];
-    <b>let</b> <a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a>) = *p;
+    <b>let</b> <a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>) = *p;
     size.do!(|i| {
         <b>let</b> i = i + 1;
-        neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> + i, <a href="../grid/point.md#grid_point_y">y</a>));
-        neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a> + i));
-        <b>if</b> (<a href="../grid/point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> - i, <a href="../grid/point.md#grid_point_y">y</a>));
-        <b>if</b> (<a href="../grid/point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a> - i));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a>));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a> + i));
+        <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a>));
+        <b>if</b> (<a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a> - i));
         // add diagonals <b>if</b> i &gt; 1
         <b>if</b> (i &gt; 1) {
             <b>let</b> i = i - 1;
-            neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> + i, <a href="../grid/point.md#grid_point_y">y</a> + i));
-            <b>if</b> (<a href="../grid/point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> - i, <a href="../grid/point.md#grid_point_y">y</a> + i));
-            <b>if</b> (<a href="../grid/point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> + i, <a href="../grid/point.md#grid_point_y">y</a> - i));
-            <b>if</b> (<a href="../grid/point.md#grid_point_x">x</a> &gt;= i && <a href="../grid/point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> - i, <a href="../grid/point.md#grid_point_y">y</a> - i));
+            neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a> + i));
+            <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a> + i));
+            <b>if</b> (<a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a> - i));
+            <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i && <a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a> - i));
         }
     });
     neighbors
@@ -415,7 +415,7 @@ Note: does not include the point itself!
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_moore">moore</a>(p: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_moore">moore</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
 </code></pre>
 
 
@@ -424,24 +424,24 @@ Note: does not include the point itself!
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_moore">moore</a>(p: &<a href="../grid/point.md#grid_point_Point">Point</a>, size: u16): vector&lt;<a href="../grid/point.md#grid_point_Point">Point</a>&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_moore">moore</a>(p: &<a href="./point.md#grid_point_Point">Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">Point</a>&gt; {
     <b>if</b> (size == 0) <b>return</b> vector[];
     <b>let</b> <b>mut</b> neighbors = vector[];
-    <b>let</b> <a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a>) = *p;
+    <b>let</b> <a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>) = *p;
     size.do!(|i| {
         <b>let</b> i = i + 1;
-        neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> + i, <a href="../grid/point.md#grid_point_y">y</a>));
-        neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a> + i));
-        <b>if</b> (<a href="../grid/point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> - i, <a href="../grid/point.md#grid_point_y">y</a>));
-        <b>if</b> (<a href="../grid/point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a> - i));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a>));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a> + i));
+        <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a>));
+        <b>if</b> (<a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a> - i));
         // top left
-        <b>if</b> (<a href="../grid/point.md#grid_point_x">x</a> &gt;= i && <a href="../grid/point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> - i, <a href="../grid/point.md#grid_point_y">y</a> - i));
+        <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i && <a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a> - i));
         // top right
-        <b>if</b> (<a href="../grid/point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> - i, <a href="../grid/point.md#grid_point_y">y</a> + i));
+        <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a> + i));
         // bottom left
-        <b>if</b> (<a href="../grid/point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> + i, <a href="../grid/point.md#grid_point_y">y</a> - i));
+        <b>if</b> (<a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a> - i));
         // bottom right
-        neighbors.push_back(<a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a> + i, <a href="../grid/point.md#grid_point_y">y</a> + i));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a> + i));
     });
     neighbors
 }
@@ -459,7 +459,7 @@ Compare two points. To be used in sorting macros. Returns less or equal,
 based on the x coordinate (1st) and then the y coordinate (2nd).
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_le">le</a>(a: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>, b: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): bool
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_le">le</a>(a: &<a href="./point.md#grid_point_Point">grid::point::Point</a>, b: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): bool
 </code></pre>
 
 
@@ -468,7 +468,7 @@ based on the x coordinate (1st) and then the y coordinate (2nd).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_le">le</a>(a: &<a href="../grid/point.md#grid_point_Point">Point</a>, b: &<a href="../grid/point.md#grid_point_Point">Point</a>): bool {
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_le">le</a>(a: &<a href="./point.md#grid_point_Point">Point</a>, b: &<a href="./point.md#grid_point_Point">Point</a>): bool {
     (a.0 == b.0 && a.1 &lt;= b.1) || a.0 &lt; b.0
 }
 </code></pre>
@@ -481,10 +481,10 @@ based on the x coordinate (1st) and then the y coordinate (2nd).
 
 ## Function `to_bytes`
 
-Serialize a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> into BCS bytes.
+Serialize a <code><a href="./point.md#grid_point_Point">Point</a></code> into BCS bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_to_bytes">to_bytes</a>(p: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_to_bytes">to_bytes</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -493,7 +493,7 @@ Serialize a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> i
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_to_bytes">to_bytes</a>(p: &<a href="../grid/point.md#grid_point_Point">Point</a>): vector&lt;u8&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_to_bytes">to_bytes</a>(p: &<a href="./point.md#grid_point_Point">Point</a>): vector&lt;u8&gt; {
     bcs::to_bytes(p)
 }
 </code></pre>
@@ -506,10 +506,10 @@ Serialize a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> i
 
 ## Function `from_bytes`
 
-Construct a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> from BCS bytes.
+Construct a <code><a href="./point.md#grid_point_Point">Point</a></code> from BCS bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_from_bytes">from_bytes</a>(bytes: vector&lt;u8&gt;): <a href="../grid/point.md#grid_point_Point">grid::point::Point</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_from_bytes">from_bytes</a>(bytes: vector&lt;u8&gt;): <a href="./point.md#grid_point_Point">grid::point::Point</a>
 </code></pre>
 
 
@@ -518,8 +518,8 @@ Construct a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> f
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_from_bytes">from_bytes</a>(bytes: vector&lt;u8&gt;): <a href="../grid/point.md#grid_point_Point">Point</a> {
-    <a href="../grid/point.md#grid_point_from_bcs">from_bcs</a>(&<b>mut</b> bcs::new(bytes))
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_from_bytes">from_bytes</a>(bytes: vector&lt;u8&gt;): <a href="./point.md#grid_point_Point">Point</a> {
+    <a href="./point.md#grid_point_from_bcs">from_bcs</a>(&<b>mut</b> bcs::new(bytes))
 }
 </code></pre>
 
@@ -531,12 +531,12 @@ Construct a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> f
 
 ## Function `from_bcs`
 
-Construct a <code><a href="../grid/point.md#grid_point_Point">Point</a></code> from <code>BCS</code> bytes wrapped in a <code>BCS</code> struct.
-Useful, when <code><a href="../grid/point.md#grid_point_Point">Point</a></code> is a field of another struct that is being
+Construct a <code><a href="./point.md#grid_point_Point">Point</a></code> from <code>BCS</code> bytes wrapped in a <code>BCS</code> struct.
+Useful, when <code><a href="./point.md#grid_point_Point">Point</a></code> is a field of another struct that is being
 deserialized from BCS.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_from_bcs">from_bcs</a>(bcs: &<b>mut</b> <a href="../../.doc-deps/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../grid/point.md#grid_point_Point">grid::point::Point</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_from_bcs">from_bcs</a>(bcs: &<b>mut</b> <a href="../../.doc-deps/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="./point.md#grid_point_Point">grid::point::Point</a>
 </code></pre>
 
 
@@ -545,8 +545,8 @@ deserialized from BCS.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_from_bcs">from_bcs</a>(bcs: &<b>mut</b> BCS): <a href="../grid/point.md#grid_point_Point">Point</a> {
-    <a href="../grid/point.md#grid_point_Point">Point</a>(bcs.peel_u16(), bcs.peel_u16())
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_from_bcs">from_bcs</a>(bcs: &<b>mut</b> BCS): <a href="./point.md#grid_point_Point">Point</a> {
+    <a href="./point.md#grid_point_Point">Point</a>(bcs.peel_u16(), bcs.peel_u16())
 }
 </code></pre>
 
@@ -561,7 +561,7 @@ deserialized from BCS.
 Print a point as a <code>String</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_to_string">to_string</a>(p: &<a href="../grid/point.md#grid_point_Point">grid::point::Point</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_to_string">to_string</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -570,12 +570,12 @@ Print a point as a <code>String</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../grid/point.md#grid_point_to_string">to_string</a>(p: &<a href="../grid/point.md#grid_point_Point">Point</a>): String {
-    <b>let</b> <b>mut</b> str = b"(".<a href="../grid/point.md#grid_point_to_string">to_string</a>();
-    <b>let</b> <a href="../grid/point.md#grid_point_Point">Point</a>(<a href="../grid/point.md#grid_point_x">x</a>, <a href="../grid/point.md#grid_point_y">y</a>) = *p;
-    str.append(<a href="../grid/point.md#grid_point_x">x</a>.<a href="../grid/point.md#grid_point_to_string">to_string</a>());
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_to_string">to_string</a>(p: &<a href="./point.md#grid_point_Point">Point</a>): String {
+    <b>let</b> <b>mut</b> str = b"(".<a href="./point.md#grid_point_to_string">to_string</a>();
+    <b>let</b> <a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>) = *p;
+    str.append(<a href="./point.md#grid_point_x">x</a>.<a href="./point.md#grid_point_to_string">to_string</a>());
     str.append_utf8(b", ");
-    str.append(<a href="../grid/point.md#grid_point_y">y</a>.<a href="../grid/point.md#grid_point_to_string">to_string</a>());
+    str.append(<a href="./point.md#grid_point_y">y</a>.<a href="./point.md#grid_point_to_string">to_string</a>());
     str.append_utf8(b")");
     str
 }

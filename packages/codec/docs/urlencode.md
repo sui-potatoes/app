@@ -43,7 +43,7 @@ Encode a string into URL format. Supports non-printable characters, takes
 a vector of bytes as input. This function is safe to use with UTF8 strings.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/urlencode.md#codec_urlencode_encode">encode</a>(string: vector&lt;u8&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./urlencode.md#codec_urlencode_encode">encode</a>(string: vector&lt;u8&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -52,7 +52,7 @@ a vector of bytes as input. This function is safe to use with UTF8 strings.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/urlencode.md#codec_urlencode_encode">encode</a>(string: vector&lt;u8&gt;): String {
+<pre><code><b>public</b> <b>fun</b> <a href="./urlencode.md#codec_urlencode_encode">encode</a>(string: vector&lt;u8&gt;): String {
     <b>let</b> <b>mut</b> res = vector[];
     string.do!(|c| {
         // 32 = space
@@ -84,7 +84,7 @@ Decode a URL-encoded string.
 Supports legacy <code>+</code> encoding for spaces.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/urlencode.md#codec_urlencode_decode">decode</a>(s: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./urlencode.md#codec_urlencode_decode">decode</a>(s: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -93,7 +93,7 @@ Supports legacy <code>+</code> encoding for spaces.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/urlencode.md#codec_urlencode_decode">decode</a>(s: String): vector&lt;u8&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="./urlencode.md#codec_urlencode_decode">decode</a>(s: String): vector&lt;u8&gt; {
     <b>let</b> <b>mut</b> res = vector[];
     <b>let</b> <b>mut</b> bytes = s.into_bytes();
     <b>let</b> <b>mut</b> len = bytes.length();

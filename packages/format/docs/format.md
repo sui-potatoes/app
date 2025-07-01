@@ -3,7 +3,7 @@
 
 # Module `(format=0x0)::format`
 
-Implementation of the <code><a href="../format/format.md#(format=0x0)_format">format</a>!</code> macro in Move. Fills the template with the
+Implementation of the <code><a href="./format.md#(format=0x0)_format">format</a>!</code> macro in Move. Fills the template with the
 given values, using the <code>{}</code> syntax.
 
 
@@ -29,7 +29,7 @@ given values, using the <code>{}</code> syntax.
 
 
 
-<pre><code><b>const</b> <a href="../format/format.md#(format=0x0)_format_EIndicesLengthMismatch">EIndicesLengthMismatch</a>: u64 = 0;
+<pre><code><b>const</b> <a href="./format.md#(format=0x0)_format_EIndicesLengthMismatch">EIndicesLengthMismatch</a>: u64 = 0;
 </code></pre>
 
 
@@ -38,7 +38,7 @@ given values, using the <code>{}</code> syntax.
 
 ## Function `format`
 
-Format a string with the given values. Similar to <code><a href="../format/format.md#(format=0x0)_format">format</a>!</code> in Rust.
+Format a string with the given values. Similar to <code><a href="./format.md#(format=0x0)_format">format</a>!</code> in Rust.
 
 Example:
 ```
@@ -51,7 +51,7 @@ assert!(result == b"Hello, John! It's good to see you, Jane!".to_string());
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../format/format.md#(format=0x0)_format">format</a>(template: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, values: vector&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./format.md#(format=0x0)_format">format</a>(template: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, values: vector&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -60,7 +60,7 @@ assert!(result == b"Hello, John! It's good to see you, Jane!".to_string());
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../format/format.md#(format=0x0)_format">format</a>(template: String, values: vector&lt;String&gt;): String {
+<pre><code><b>public</b> <b>fun</b> <a href="./format.md#(format=0x0)_format">format</a>(template: String, values: vector&lt;String&gt;): String {
     <b>let</b> (t, v) = (template, values);
     <b>let</b> <b>mut</b> indices = vector[];
     <b>let</b> len = t.length();
@@ -77,7 +77,7 @@ assert!(result == b"Hello, John! It's good to see you, Jane!".to_string());
         },
     );
     // enforce the <b>invariant</b>
-    <b>assert</b>!(v_len == indices.length(), <a href="../format/format.md#(format=0x0)_format_EIndicesLengthMismatch">EIndicesLengthMismatch</a>);
+    <b>assert</b>!(v_len == indices.length(), <a href="./format.md#(format=0x0)_format_EIndicesLengthMismatch">EIndicesLengthMismatch</a>);
     // now construct the string `s`
     <b>let</b> t = t;
     <b>let</b> <b>mut</b> s = b"".to_string();
@@ -103,10 +103,10 @@ assert!(result == b"Hello, John! It's good to see you, Jane!".to_string());
 Test-only function to print the values to the stdout. Inner call to
 <code>debug::print</code> cannot be published.
 
-Named <code><a href="../format/format.md#(format=0x0)_format_dbg">dbg</a></code> to make it shorter (compared to <code><a href="../format/format.md#(format=0x0)_format">format</a></code>).
+Named <code><a href="./format.md#(format=0x0)_format_dbg">dbg</a></code> to make it shorter (compared to <code><a href="./format.md#(format=0x0)_format">format</a></code>).
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../format/format.md#(format=0x0)_format_dbg">dbg</a>($template: vector&lt;u8&gt;, $values: vector&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;)
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./format.md#(format=0x0)_format_dbg">dbg</a>($template: vector&lt;u8&gt;, $values: vector&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;)
 </code></pre>
 
 
@@ -115,9 +115,9 @@ Named <code><a href="../format/format.md#(format=0x0)_format_dbg">dbg</a></code>
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../format/format.md#(format=0x0)_format_dbg">dbg</a>($template: vector&lt;u8&gt;, $values: vector&lt;String&gt;) {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./format.md#(format=0x0)_format_dbg">dbg</a>($template: vector&lt;u8&gt;, $values: vector&lt;String&gt;) {
     <b>let</b> t = $template;
-    <a href="../../.doc-deps/std/debug.md#std_debug_print">std::debug::print</a>(&<a href="../format/format.md#(format=0x0)_format">format</a>(t.to_string(), $values));
+    <a href="../../.doc-deps/std/debug.md#std_debug_print">std::debug::print</a>(&<a href="./format.md#(format=0x0)_format">format</a>(t.to_string(), $values));
 }
 </code></pre>
 

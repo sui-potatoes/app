@@ -46,7 +46,7 @@ option::none(), // empty option for single tags
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/print.md#(svg=0x0)_print">print</a>(name: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, attributes: <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;, elements: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;vector&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./print.md#(svg=0x0)_print">print</a>(name: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, attributes: <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;, elements: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;vector&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -55,32 +55,32 @@ option::none(), // empty option for single tags
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/print.md#(svg=0x0)_print">print</a>(
+<pre><code><b>public</b> <b>fun</b> <a href="./print.md#(svg=0x0)_print">print</a>(
     name: String,
     attributes: VecMap&lt;String, String&gt;,
     elements: Option&lt;vector&lt;String&gt;&gt;,
 ): String {
-    <b>let</b> <b>mut</b> <a href="../svg/svg.md#(svg=0x0)_svg">svg</a> = b"&lt;".to_string();
-    <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(name);
+    <b>let</b> <b>mut</b> <a href="./svg.md#(svg=0x0)_svg">svg</a> = b"&lt;".to_string();
+    <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(name);
     <b>let</b> (keys, values) = attributes.into_keys_values();
     <b>let</b> length = keys.length();
-    <b>if</b> (length &gt; 0) <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(b" ".to_string());
+    <b>if</b> (length &gt; 0) <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(b" ".to_string());
     length.do!(|i| {
-        <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(keys[i]);
-        <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(b"='".to_string());
-        <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(values[i]);
-        <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(<b>if</b> (i &lt; length - 1) { b"' " } <b>else</b> { b"'" }.to_string());
+        <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(keys[i]);
+        <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(b"='".to_string());
+        <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(values[i]);
+        <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(<b>if</b> (i &lt; length - 1) { b"' " } <b>else</b> { b"'" }.to_string());
     });
     <b>if</b> (elements.is_none()) {
-        <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(b"/&gt;".to_string());
-        <b>return</b> <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>
+        <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(b"/&gt;".to_string());
+        <b>return</b> <a href="./svg.md#(svg=0x0)_svg">svg</a>
     };
-    <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(b"&gt;".to_string());
-    elements.do!(|vec| vec.do!(|el| <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(el)));
-    <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(b"&lt;/".to_string());
-    <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(name);
-    <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>.append(b"&gt;".to_string());
-    <a href="../svg/svg.md#(svg=0x0)_svg">svg</a>
+    <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(b"&gt;".to_string());
+    elements.do!(|vec| vec.do!(|el| <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(el)));
+    <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(b"&lt;/".to_string());
+    <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(name);
+    <a href="./svg.md#(svg=0x0)_svg">svg</a>.append(b"&gt;".to_string());
+    <a href="./svg.md#(svg=0x0)_svg">svg</a>
 }
 </code></pre>
 

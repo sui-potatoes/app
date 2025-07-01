@@ -49,7 +49,7 @@ assert!(decoded == b"hello, potato!");
 Error code for illegal character.
 
 
-<pre><code><b>const</b> <a href="../codec/base64url.md#codec_base64url_EIllegalCharacter">EIllegalCharacter</a>: u64 = 0;
+<pre><code><b>const</b> <a href="./base64url.md#codec_base64url_EIllegalCharacter">EIllegalCharacter</a>: u64 = 0;
 </code></pre>
 
 
@@ -59,7 +59,7 @@ Error code for illegal character.
 Base64url keys
 
 
-<pre><code><b>const</b> <a href="../codec/base64url.md#codec_base64url_KEYS">KEYS</a>: vector&lt;u8&gt; = vector[65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 95];
+<pre><code><b>const</b> <a href="./base64url.md#codec_base64url_KEYS">KEYS</a>: vector&lt;u8&gt; = vector[65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 45, 95];
 </code></pre>
 
 
@@ -71,7 +71,7 @@ Base64url keys
 Encode the <code>bytes</code> into base64url String.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/base64url.md#codec_base64url_encode">encode</a>(bytes: vector&lt;u8&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./base64url.md#codec_base64url_encode">encode</a>(bytes: vector&lt;u8&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -80,8 +80,8 @@ Encode the <code>bytes</code> into base64url String.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/base64url.md#codec_base64url_encode">encode</a>(bytes: vector&lt;u8&gt;): String {
-    <a href="../codec/base64.md#codec_base64_encode_impl">base64::encode_impl</a>!(bytes, <a href="../codec/base64url.md#codec_base64url_KEYS">KEYS</a>, <b>true</b>)
+<pre><code><b>public</b> <b>fun</b> <a href="./base64url.md#codec_base64url_encode">encode</a>(bytes: vector&lt;u8&gt;): String {
+    <a href="./base64.md#codec_base64_encode_impl">base64::encode_impl</a>!(bytes, <a href="./base64url.md#codec_base64url_KEYS">KEYS</a>, <b>true</b>)
 }
 </code></pre>
 
@@ -96,7 +96,7 @@ Encode the <code>bytes</code> into base64url String.
 Decode the base64url <code>str</code> into bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/base64url.md#codec_base64url_decode">decode</a>(str: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./base64url.md#codec_base64url_decode">decode</a>(str: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -105,8 +105,8 @@ Decode the base64url <code>str</code> into bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/base64url.md#codec_base64url_decode">decode</a>(str: String): vector&lt;u8&gt; {
-    <a href="../codec/base64.md#codec_base64_decode_impl">base64::decode_impl</a>!(str, <a href="../codec/base64url.md#codec_base64url_KEYS">KEYS</a>, <b>true</b>)
+<pre><code><b>public</b> <b>fun</b> <a href="./base64url.md#codec_base64url_decode">decode</a>(str: String): vector&lt;u8&gt; {
+    <a href="./base64.md#codec_base64_decode_impl">base64::decode_impl</a>!(str, <a href="./base64url.md#codec_base64url_KEYS">KEYS</a>, <b>true</b>)
 }
 </code></pre>
 

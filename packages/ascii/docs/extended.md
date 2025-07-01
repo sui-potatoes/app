@@ -7,8 +7,8 @@ Defines ASCII extended characters (range 128-255).
 
 All characters are defined as macros, so they can be used in <code>all!</code> checks.
 
-- Characters that mark capital letters have uppercase letter + suffix, eg <code><a href="../ascii/extended.md#ascii_extended_A_grave">A_grave</a>()</code>.
-- Characters that mark lowercase letters have lowercase letter + suffix, eg <code><a href="../ascii/extended.md#ascii_extended_a_grave">a_grave</a>()</code>.
+- Characters that mark capital letters have uppercase letter + suffix, eg <code><a href="./extended.md#ascii_extended_A_grave">A_grave</a>()</code>.
+- Characters that mark lowercase letters have lowercase letter + suffix, eg <code><a href="./extended.md#ascii_extended_a_grave">a_grave</a>()</code>.
 
 
 -  [Macro function `is_extended`](#ascii_extended_is_extended)
@@ -153,7 +153,7 @@ All characters are defined as macros, so they can be used in <code>all!</code> c
 Check if a character is an extended character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_is_extended">is_extended</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_is_extended">is_extended</a>($<a href="./char.md#ascii_char">char</a>: u8): bool
 </code></pre>
 
 
@@ -162,7 +162,7 @@ Check if a character is an extended character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_is_extended">is_extended</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool { $<a href="../ascii/char.md#ascii_char">char</a> &gt;= 128 && $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 255 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_is_extended">is_extended</a>($<a href="./char.md#ascii_char">char</a>: u8): bool { $<a href="./char.md#ascii_char">char</a> &gt;= 128 && $<a href="./char.md#ascii_char">char</a> &lt;= 255 }
 </code></pre>
 
 
@@ -176,7 +176,7 @@ Check if a character is an extended character.
 Euro sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_euro_sign">euro_sign</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_euro_sign">euro_sign</a>(): u8
 </code></pre>
 
 
@@ -185,7 +185,7 @@ Euro sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_euro_sign">euro_sign</a>(): u8 { 128 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_euro_sign">euro_sign</a>(): u8 { 128 }
 </code></pre>
 
 
@@ -199,7 +199,7 @@ Euro sign character.
 Not used character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_129">not_used_129</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_129">not_used_129</a>(): u8
 </code></pre>
 
 
@@ -208,7 +208,7 @@ Not used character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_129">not_used_129</a>(): u8 { 129 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_129">not_used_129</a>(): u8 { 129 }
 </code></pre>
 
 
@@ -222,7 +222,7 @@ Not used character.
 Single low quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_single_low_quote">single_low_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_single_low_quote">single_low_quote</a>(): u8
 </code></pre>
 
 
@@ -231,7 +231,7 @@ Single low quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_single_low_quote">single_low_quote</a>(): u8 { 130 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_single_low_quote">single_low_quote</a>(): u8 { 130 }
 </code></pre>
 
 
@@ -245,7 +245,7 @@ Single low quotation mark character.
 Function symbol character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_function">function</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_function">function</a>(): u8
 </code></pre>
 
 
@@ -254,7 +254,7 @@ Function symbol character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_function">function</a>(): u8 { 131 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_function">function</a>(): u8 { 131 }
 </code></pre>
 
 
@@ -268,7 +268,7 @@ Function symbol character.
 Double low quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_double_low_quote">double_low_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_double_low_quote">double_low_quote</a>(): u8
 </code></pre>
 
 
@@ -277,7 +277,7 @@ Double low quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_double_low_quote">double_low_quote</a>(): u8 { 132 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_double_low_quote">double_low_quote</a>(): u8 { 132 }
 </code></pre>
 
 
@@ -291,7 +291,7 @@ Double low quotation mark character.
 Horizontal ellipsis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_ellipsis">ellipsis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_ellipsis">ellipsis</a>(): u8
 </code></pre>
 
 
@@ -300,7 +300,7 @@ Horizontal ellipsis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_ellipsis">ellipsis</a>(): u8 { 133 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_ellipsis">ellipsis</a>(): u8 { 133 }
 </code></pre>
 
 
@@ -314,7 +314,7 @@ Horizontal ellipsis character.
 Dagger character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_dagger">dagger</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_dagger">dagger</a>(): u8
 </code></pre>
 
 
@@ -323,7 +323,7 @@ Dagger character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_dagger">dagger</a>(): u8 { 134 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_dagger">dagger</a>(): u8 { 134 }
 </code></pre>
 
 
@@ -337,7 +337,7 @@ Dagger character.
 Double dagger character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_double_dagger">double_dagger</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_double_dagger">double_dagger</a>(): u8
 </code></pre>
 
 
@@ -346,7 +346,7 @@ Double dagger character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_double_dagger">double_dagger</a>(): u8 { 135 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_double_dagger">double_dagger</a>(): u8 { 135 }
 </code></pre>
 
 
@@ -360,7 +360,7 @@ Double dagger character.
 Circumflex accent character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_circumflex">circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_circumflex">circumflex</a>(): u8
 </code></pre>
 
 
@@ -369,7 +369,7 @@ Circumflex accent character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_circumflex">circumflex</a>(): u8 { 136 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_circumflex">circumflex</a>(): u8 { 136 }
 </code></pre>
 
 
@@ -383,7 +383,7 @@ Circumflex accent character.
 Per mille sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_per_mille">per_mille</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_per_mille">per_mille</a>(): u8
 </code></pre>
 
 
@@ -392,7 +392,7 @@ Per mille sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_per_mille">per_mille</a>(): u8 { 137 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_per_mille">per_mille</a>(): u8 { 137 }
 </code></pre>
 
 
@@ -406,7 +406,7 @@ Per mille sign character.
 Latin capital letter S with caron character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_S_caron">S_caron</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_S_caron">S_caron</a>(): u8
 </code></pre>
 
 
@@ -415,7 +415,7 @@ Latin capital letter S with caron character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_S_caron">S_caron</a>(): u8 { 138 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_S_caron">S_caron</a>(): u8 { 138 }
 </code></pre>
 
 
@@ -429,7 +429,7 @@ Latin capital letter S with caron character.
 Single left angle quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_single_left_angle_quote">single_left_angle_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_single_left_angle_quote">single_left_angle_quote</a>(): u8
 </code></pre>
 
 
@@ -438,7 +438,7 @@ Single left angle quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_single_left_angle_quote">single_left_angle_quote</a>(): u8 { 139 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_single_left_angle_quote">single_left_angle_quote</a>(): u8 { 139 }
 </code></pre>
 
 
@@ -452,7 +452,7 @@ Single left angle quotation mark character.
 Latin capital ligature OE character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_OE">OE</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_OE">OE</a>(): u8
 </code></pre>
 
 
@@ -461,7 +461,7 @@ Latin capital ligature OE character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_OE">OE</a>(): u8 { 140 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_OE">OE</a>(): u8 { 140 }
 </code></pre>
 
 
@@ -475,7 +475,7 @@ Latin capital ligature OE character.
 Not used character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_141">not_used_141</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_141">not_used_141</a>(): u8
 </code></pre>
 
 
@@ -484,7 +484,7 @@ Not used character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_141">not_used_141</a>(): u8 { 141 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_141">not_used_141</a>(): u8 { 141 }
 </code></pre>
 
 
@@ -498,7 +498,7 @@ Not used character.
 Latin capital letter Z with caron character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_Z_caron">Z_caron</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_Z_caron">Z_caron</a>(): u8
 </code></pre>
 
 
@@ -507,7 +507,7 @@ Latin capital letter Z with caron character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_Z_caron">Z_caron</a>(): u8 { 142 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_Z_caron">Z_caron</a>(): u8 { 142 }
 </code></pre>
 
 
@@ -521,7 +521,7 @@ Latin capital letter Z with caron character.
 Not used character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_143">not_used_143</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_143">not_used_143</a>(): u8
 </code></pre>
 
 
@@ -530,7 +530,7 @@ Not used character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_143">not_used_143</a>(): u8 { 143 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_143">not_used_143</a>(): u8 { 143 }
 </code></pre>
 
 
@@ -544,7 +544,7 @@ Not used character.
 Not used character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_144">not_used_144</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_144">not_used_144</a>(): u8
 </code></pre>
 
 
@@ -553,7 +553,7 @@ Not used character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_144">not_used_144</a>(): u8 { 144 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_144">not_used_144</a>(): u8 { 144 }
 </code></pre>
 
 
@@ -567,7 +567,7 @@ Not used character.
 Left single quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_left_single_quote">left_single_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_left_single_quote">left_single_quote</a>(): u8
 </code></pre>
 
 
@@ -576,7 +576,7 @@ Left single quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_left_single_quote">left_single_quote</a>(): u8 { 145 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_left_single_quote">left_single_quote</a>(): u8 { 145 }
 </code></pre>
 
 
@@ -590,7 +590,7 @@ Left single quotation mark character.
 Right single quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_right_single_quote">right_single_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_right_single_quote">right_single_quote</a>(): u8
 </code></pre>
 
 
@@ -599,7 +599,7 @@ Right single quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_right_single_quote">right_single_quote</a>(): u8 { 146 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_right_single_quote">right_single_quote</a>(): u8 { 146 }
 </code></pre>
 
 
@@ -613,7 +613,7 @@ Right single quotation mark character.
 Left double quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_left_double_quote">left_double_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_left_double_quote">left_double_quote</a>(): u8
 </code></pre>
 
 
@@ -622,7 +622,7 @@ Left double quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_left_double_quote">left_double_quote</a>(): u8 { 147 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_left_double_quote">left_double_quote</a>(): u8 { 147 }
 </code></pre>
 
 
@@ -636,7 +636,7 @@ Left double quotation mark character.
 Right double quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_right_double_quote">right_double_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_right_double_quote">right_double_quote</a>(): u8
 </code></pre>
 
 
@@ -645,7 +645,7 @@ Right double quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_right_double_quote">right_double_quote</a>(): u8 { 148 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_right_double_quote">right_double_quote</a>(): u8 { 148 }
 </code></pre>
 
 
@@ -659,7 +659,7 @@ Right double quotation mark character.
 Bullet character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_bullet">bullet</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_bullet">bullet</a>(): u8
 </code></pre>
 
 
@@ -668,7 +668,7 @@ Bullet character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_bullet">bullet</a>(): u8 { 149 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_bullet">bullet</a>(): u8 { 149 }
 </code></pre>
 
 
@@ -682,7 +682,7 @@ Bullet character.
 En dash character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_en_dash">en_dash</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_en_dash">en_dash</a>(): u8
 </code></pre>
 
 
@@ -691,7 +691,7 @@ En dash character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_en_dash">en_dash</a>(): u8 { 150 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_en_dash">en_dash</a>(): u8 { 150 }
 </code></pre>
 
 
@@ -705,7 +705,7 @@ En dash character.
 Em dash character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_em_dash">em_dash</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_em_dash">em_dash</a>(): u8
 </code></pre>
 
 
@@ -714,7 +714,7 @@ Em dash character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_em_dash">em_dash</a>(): u8 { 151 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_em_dash">em_dash</a>(): u8 { 151 }
 </code></pre>
 
 
@@ -728,7 +728,7 @@ Em dash character.
 Small tilde character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_small_tilde">small_tilde</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_small_tilde">small_tilde</a>(): u8
 </code></pre>
 
 
@@ -737,7 +737,7 @@ Small tilde character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_small_tilde">small_tilde</a>(): u8 { 152 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_small_tilde">small_tilde</a>(): u8 { 152 }
 </code></pre>
 
 
@@ -751,7 +751,7 @@ Small tilde character.
 Trade mark sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_trade_mark">trade_mark</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_trade_mark">trade_mark</a>(): u8
 </code></pre>
 
 
@@ -760,7 +760,7 @@ Trade mark sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_trade_mark">trade_mark</a>(): u8 { 153 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_trade_mark">trade_mark</a>(): u8 { 153 }
 </code></pre>
 
 
@@ -774,7 +774,7 @@ Trade mark sign character.
 Latin small letter s with caron character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_s_caron">s_caron</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_s_caron">s_caron</a>(): u8
 </code></pre>
 
 
@@ -783,7 +783,7 @@ Latin small letter s with caron character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_s_caron">s_caron</a>(): u8 { 154 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_s_caron">s_caron</a>(): u8 { 154 }
 </code></pre>
 
 
@@ -797,7 +797,7 @@ Latin small letter s with caron character.
 Single right angle quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_single_right_angle_quote">single_right_angle_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_single_right_angle_quote">single_right_angle_quote</a>(): u8
 </code></pre>
 
 
@@ -806,7 +806,7 @@ Single right angle quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_single_right_angle_quote">single_right_angle_quote</a>(): u8 { 155 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_single_right_angle_quote">single_right_angle_quote</a>(): u8 { 155 }
 </code></pre>
 
 
@@ -820,7 +820,7 @@ Single right angle quotation mark character.
 Latin small ligature oe character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_oe">oe</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_oe">oe</a>(): u8
 </code></pre>
 
 
@@ -829,7 +829,7 @@ Latin small ligature oe character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_oe">oe</a>(): u8 { 156 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_oe">oe</a>(): u8 { 156 }
 </code></pre>
 
 
@@ -843,7 +843,7 @@ Latin small ligature oe character.
 Not used character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_157">not_used_157</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_157">not_used_157</a>(): u8
 </code></pre>
 
 
@@ -852,7 +852,7 @@ Not used character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not_used_157">not_used_157</a>(): u8 { 157 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not_used_157">not_used_157</a>(): u8 { 157 }
 </code></pre>
 
 
@@ -866,7 +866,7 @@ Not used character.
 Latin small letter z with caron character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_z_caron">z_caron</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_z_caron">z_caron</a>(): u8
 </code></pre>
 
 
@@ -875,7 +875,7 @@ Latin small letter z with caron character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_z_caron">z_caron</a>(): u8 { 158 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_z_caron">z_caron</a>(): u8 { 158 }
 </code></pre>
 
 
@@ -889,7 +889,7 @@ Latin small letter z with caron character.
 Latin capital letter Y with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_Y_diaeresis">Y_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_Y_diaeresis">Y_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -898,7 +898,7 @@ Latin capital letter Y with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_Y_diaeresis">Y_diaeresis</a>(): u8 { 159 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_Y_diaeresis">Y_diaeresis</a>(): u8 { 159 }
 </code></pre>
 
 
@@ -912,7 +912,7 @@ Latin capital letter Y with diaeresis character.
 Non-breaking space character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_non_breaking_space">non_breaking_space</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_non_breaking_space">non_breaking_space</a>(): u8
 </code></pre>
 
 
@@ -921,7 +921,7 @@ Non-breaking space character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_non_breaking_space">non_breaking_space</a>(): u8 { 160 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_non_breaking_space">non_breaking_space</a>(): u8 { 160 }
 </code></pre>
 
 
@@ -935,7 +935,7 @@ Non-breaking space character.
 Inverted exclamation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_inverted_exclamation">inverted_exclamation</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_inverted_exclamation">inverted_exclamation</a>(): u8
 </code></pre>
 
 
@@ -944,7 +944,7 @@ Inverted exclamation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_inverted_exclamation">inverted_exclamation</a>(): u8 { 161 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_inverted_exclamation">inverted_exclamation</a>(): u8 { 161 }
 </code></pre>
 
 
@@ -958,7 +958,7 @@ Inverted exclamation mark character.
 Cent sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_cent">cent</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_cent">cent</a>(): u8
 </code></pre>
 
 
@@ -967,7 +967,7 @@ Cent sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_cent">cent</a>(): u8 { 162 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_cent">cent</a>(): u8 { 162 }
 </code></pre>
 
 
@@ -981,7 +981,7 @@ Cent sign character.
 Pound sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_pound">pound</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_pound">pound</a>(): u8
 </code></pre>
 
 
@@ -990,7 +990,7 @@ Pound sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_pound">pound</a>(): u8 { 163 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_pound">pound</a>(): u8 { 163 }
 </code></pre>
 
 
@@ -1004,7 +1004,7 @@ Pound sign character.
 Currency sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_currency">currency</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_currency">currency</a>(): u8
 </code></pre>
 
 
@@ -1013,7 +1013,7 @@ Currency sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_currency">currency</a>(): u8 { 164 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_currency">currency</a>(): u8 { 164 }
 </code></pre>
 
 
@@ -1027,7 +1027,7 @@ Currency sign character.
 Yen sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_yen">yen</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_yen">yen</a>(): u8
 </code></pre>
 
 
@@ -1036,7 +1036,7 @@ Yen sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_yen">yen</a>(): u8 { 165 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_yen">yen</a>(): u8 { 165 }
 </code></pre>
 
 
@@ -1050,7 +1050,7 @@ Yen sign character.
 Broken vertical bar character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_broken_vertical_bar">broken_vertical_bar</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_broken_vertical_bar">broken_vertical_bar</a>(): u8
 </code></pre>
 
 
@@ -1059,7 +1059,7 @@ Broken vertical bar character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_broken_vertical_bar">broken_vertical_bar</a>(): u8 { 166 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_broken_vertical_bar">broken_vertical_bar</a>(): u8 { 166 }
 </code></pre>
 
 
@@ -1073,7 +1073,7 @@ Broken vertical bar character.
 Section sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_section">section</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_section">section</a>(): u8
 </code></pre>
 
 
@@ -1082,7 +1082,7 @@ Section sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_section">section</a>(): u8 { 167 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_section">section</a>(): u8 { 167 }
 </code></pre>
 
 
@@ -1096,7 +1096,7 @@ Section sign character.
 Diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_diaeresis">diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_diaeresis">diaeresis</a>(): u8
 </code></pre>
 
 
@@ -1105,7 +1105,7 @@ Diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_diaeresis">diaeresis</a>(): u8 { 168 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_diaeresis">diaeresis</a>(): u8 { 168 }
 </code></pre>
 
 
@@ -1119,7 +1119,7 @@ Diaeresis character.
 Copyright sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_copyright">copyright</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_copyright">copyright</a>(): u8
 </code></pre>
 
 
@@ -1128,7 +1128,7 @@ Copyright sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_copyright">copyright</a>(): u8 { 169 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_copyright">copyright</a>(): u8 { 169 }
 </code></pre>
 
 
@@ -1142,7 +1142,7 @@ Copyright sign character.
 Feminine ordinal indicator character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_feminine_ordinal">feminine_ordinal</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_feminine_ordinal">feminine_ordinal</a>(): u8
 </code></pre>
 
 
@@ -1151,7 +1151,7 @@ Feminine ordinal indicator character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_feminine_ordinal">feminine_ordinal</a>(): u8 { 170 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_feminine_ordinal">feminine_ordinal</a>(): u8 { 170 }
 </code></pre>
 
 
@@ -1165,7 +1165,7 @@ Feminine ordinal indicator character.
 Left double angle quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_left_double_angle_quote">left_double_angle_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_left_double_angle_quote">left_double_angle_quote</a>(): u8
 </code></pre>
 
 
@@ -1174,7 +1174,7 @@ Left double angle quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_left_double_angle_quote">left_double_angle_quote</a>(): u8 { 171 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_left_double_angle_quote">left_double_angle_quote</a>(): u8 { 171 }
 </code></pre>
 
 
@@ -1188,7 +1188,7 @@ Left double angle quotation mark character.
 Not sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not">not</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not">not</a>(): u8
 </code></pre>
 
 
@@ -1197,7 +1197,7 @@ Not sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_not">not</a>(): u8 { 172 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_not">not</a>(): u8 { 172 }
 </code></pre>
 
 
@@ -1211,7 +1211,7 @@ Not sign character.
 Soft hyphen character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_soft_hyphen">soft_hyphen</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_soft_hyphen">soft_hyphen</a>(): u8
 </code></pre>
 
 
@@ -1220,7 +1220,7 @@ Soft hyphen character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_soft_hyphen">soft_hyphen</a>(): u8 { 173 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_soft_hyphen">soft_hyphen</a>(): u8 { 173 }
 </code></pre>
 
 
@@ -1234,7 +1234,7 @@ Soft hyphen character.
 Registered trade mark sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_registered">registered</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_registered">registered</a>(): u8
 </code></pre>
 
 
@@ -1243,7 +1243,7 @@ Registered trade mark sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_registered">registered</a>(): u8 { 174 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_registered">registered</a>(): u8 { 174 }
 </code></pre>
 
 
@@ -1257,7 +1257,7 @@ Registered trade mark sign character.
 Macron character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_macron">macron</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_macron">macron</a>(): u8
 </code></pre>
 
 
@@ -1266,7 +1266,7 @@ Macron character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_macron">macron</a>(): u8 { 175 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_macron">macron</a>(): u8 { 175 }
 </code></pre>
 
 
@@ -1280,7 +1280,7 @@ Macron character.
 Degree sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_degree">degree</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_degree">degree</a>(): u8
 </code></pre>
 
 
@@ -1289,7 +1289,7 @@ Degree sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_degree">degree</a>(): u8 { 176 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_degree">degree</a>(): u8 { 176 }
 </code></pre>
 
 
@@ -1303,7 +1303,7 @@ Degree sign character.
 Plus-minus sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_plus_minus">plus_minus</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_plus_minus">plus_minus</a>(): u8
 </code></pre>
 
 
@@ -1312,7 +1312,7 @@ Plus-minus sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_plus_minus">plus_minus</a>(): u8 { 177 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_plus_minus">plus_minus</a>(): u8 { 177 }
 </code></pre>
 
 
@@ -1326,7 +1326,7 @@ Plus-minus sign character.
 Superscript two character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_superscript_two">superscript_two</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_superscript_two">superscript_two</a>(): u8
 </code></pre>
 
 
@@ -1335,7 +1335,7 @@ Superscript two character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_superscript_two">superscript_two</a>(): u8 { 178 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_superscript_two">superscript_two</a>(): u8 { 178 }
 </code></pre>
 
 
@@ -1349,7 +1349,7 @@ Superscript two character.
 Superscript three character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_superscript_three">superscript_three</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_superscript_three">superscript_three</a>(): u8
 </code></pre>
 
 
@@ -1358,7 +1358,7 @@ Superscript three character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_superscript_three">superscript_three</a>(): u8 { 179 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_superscript_three">superscript_three</a>(): u8 { 179 }
 </code></pre>
 
 
@@ -1372,7 +1372,7 @@ Superscript three character.
 Acute accent character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_acute">acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_acute">acute</a>(): u8
 </code></pre>
 
 
@@ -1381,7 +1381,7 @@ Acute accent character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_acute">acute</a>(): u8 { 180 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_acute">acute</a>(): u8 { 180 }
 </code></pre>
 
 
@@ -1395,7 +1395,7 @@ Acute accent character.
 Micro sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_micro">micro</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_micro">micro</a>(): u8
 </code></pre>
 
 
@@ -1404,7 +1404,7 @@ Micro sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_micro">micro</a>(): u8 { 181 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_micro">micro</a>(): u8 { 181 }
 </code></pre>
 
 
@@ -1418,7 +1418,7 @@ Micro sign character.
 Pilcrow sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_pilcrow">pilcrow</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_pilcrow">pilcrow</a>(): u8
 </code></pre>
 
 
@@ -1427,7 +1427,7 @@ Pilcrow sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_pilcrow">pilcrow</a>(): u8 { 182 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_pilcrow">pilcrow</a>(): u8 { 182 }
 </code></pre>
 
 
@@ -1441,7 +1441,7 @@ Pilcrow sign character.
 Middle dot character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_middle_dot">middle_dot</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_middle_dot">middle_dot</a>(): u8
 </code></pre>
 
 
@@ -1450,7 +1450,7 @@ Middle dot character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_middle_dot">middle_dot</a>(): u8 { 183 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_middle_dot">middle_dot</a>(): u8 { 183 }
 </code></pre>
 
 
@@ -1464,7 +1464,7 @@ Middle dot character.
 Cedilla character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_cedilla">cedilla</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_cedilla">cedilla</a>(): u8
 </code></pre>
 
 
@@ -1473,7 +1473,7 @@ Cedilla character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_cedilla">cedilla</a>(): u8 { 184 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_cedilla">cedilla</a>(): u8 { 184 }
 </code></pre>
 
 
@@ -1487,7 +1487,7 @@ Cedilla character.
 Superscript one character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_superscript_one">superscript_one</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_superscript_one">superscript_one</a>(): u8
 </code></pre>
 
 
@@ -1496,7 +1496,7 @@ Superscript one character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_superscript_one">superscript_one</a>(): u8 { 185 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_superscript_one">superscript_one</a>(): u8 { 185 }
 </code></pre>
 
 
@@ -1510,7 +1510,7 @@ Superscript one character.
 Masculine ordinal indicator character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_masculine_ordinal">masculine_ordinal</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_masculine_ordinal">masculine_ordinal</a>(): u8
 </code></pre>
 
 
@@ -1519,7 +1519,7 @@ Masculine ordinal indicator character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_masculine_ordinal">masculine_ordinal</a>(): u8 { 186 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_masculine_ordinal">masculine_ordinal</a>(): u8 { 186 }
 </code></pre>
 
 
@@ -1533,7 +1533,7 @@ Masculine ordinal indicator character.
 Right double angle quotation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_right_double_angle_quote">right_double_angle_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_right_double_angle_quote">right_double_angle_quote</a>(): u8
 </code></pre>
 
 
@@ -1542,7 +1542,7 @@ Right double angle quotation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_right_double_angle_quote">right_double_angle_quote</a>(): u8 { 187 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_right_double_angle_quote">right_double_angle_quote</a>(): u8 { 187 }
 </code></pre>
 
 
@@ -1556,7 +1556,7 @@ Right double angle quotation mark character.
 Vulgar fraction one quarter character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_one_quarter">one_quarter</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_one_quarter">one_quarter</a>(): u8
 </code></pre>
 
 
@@ -1565,7 +1565,7 @@ Vulgar fraction one quarter character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_one_quarter">one_quarter</a>(): u8 { 188 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_one_quarter">one_quarter</a>(): u8 { 188 }
 </code></pre>
 
 
@@ -1579,7 +1579,7 @@ Vulgar fraction one quarter character.
 Vulgar fraction one half character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_one_half">one_half</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_one_half">one_half</a>(): u8
 </code></pre>
 
 
@@ -1588,7 +1588,7 @@ Vulgar fraction one half character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_one_half">one_half</a>(): u8 { 189 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_one_half">one_half</a>(): u8 { 189 }
 </code></pre>
 
 
@@ -1602,7 +1602,7 @@ Vulgar fraction one half character.
 Vulgar fraction three quarters character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_three_quarters">three_quarters</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_three_quarters">three_quarters</a>(): u8
 </code></pre>
 
 
@@ -1611,7 +1611,7 @@ Vulgar fraction three quarters character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_three_quarters">three_quarters</a>(): u8 { 190 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_three_quarters">three_quarters</a>(): u8 { 190 }
 </code></pre>
 
 
@@ -1625,7 +1625,7 @@ Vulgar fraction three quarters character.
 Inverted question mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_inverted_question">inverted_question</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_inverted_question">inverted_question</a>(): u8
 </code></pre>
 
 
@@ -1634,7 +1634,7 @@ Inverted question mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_inverted_question">inverted_question</a>(): u8 { 191 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_inverted_question">inverted_question</a>(): u8 { 191 }
 </code></pre>
 
 
@@ -1648,7 +1648,7 @@ Inverted question mark character.
 Latin capital letter A with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_grave">A_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_grave">A_grave</a>(): u8
 </code></pre>
 
 
@@ -1657,7 +1657,7 @@ Latin capital letter A with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_grave">A_grave</a>(): u8 { 192 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_grave">A_grave</a>(): u8 { 192 }
 </code></pre>
 
 
@@ -1671,7 +1671,7 @@ Latin capital letter A with grave character.
 Latin capital letter A with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_acute">A_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_acute">A_acute</a>(): u8
 </code></pre>
 
 
@@ -1680,7 +1680,7 @@ Latin capital letter A with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_acute">A_acute</a>(): u8 { 193 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_acute">A_acute</a>(): u8 { 193 }
 </code></pre>
 
 
@@ -1694,7 +1694,7 @@ Latin capital letter A with acute character.
 Latin capital letter A with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_circumflex">A_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_circumflex">A_circumflex</a>(): u8
 </code></pre>
 
 
@@ -1703,7 +1703,7 @@ Latin capital letter A with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_circumflex">A_circumflex</a>(): u8 { 194 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_circumflex">A_circumflex</a>(): u8 { 194 }
 </code></pre>
 
 
@@ -1717,7 +1717,7 @@ Latin capital letter A with circumflex character.
 Latin capital letter A with tilde character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_tilde">A_tilde</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_tilde">A_tilde</a>(): u8
 </code></pre>
 
 
@@ -1726,7 +1726,7 @@ Latin capital letter A with tilde character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_tilde">A_tilde</a>(): u8 { 195 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_tilde">A_tilde</a>(): u8 { 195 }
 </code></pre>
 
 
@@ -1740,7 +1740,7 @@ Latin capital letter A with tilde character.
 Latin capital letter A with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_diaeresis">A_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_diaeresis">A_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -1749,7 +1749,7 @@ Latin capital letter A with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_diaeresis">A_diaeresis</a>(): u8 { 196 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_diaeresis">A_diaeresis</a>(): u8 { 196 }
 </code></pre>
 
 
@@ -1763,7 +1763,7 @@ Latin capital letter A with diaeresis character.
 Latin capital letter A with ring above character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_ring">A_ring</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_ring">A_ring</a>(): u8
 </code></pre>
 
 
@@ -1772,7 +1772,7 @@ Latin capital letter A with ring above character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_A_ring">A_ring</a>(): u8 { 197 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_A_ring">A_ring</a>(): u8 { 197 }
 </code></pre>
 
 
@@ -1786,7 +1786,7 @@ Latin capital letter A with ring above character.
 Latin capital letter AE character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_AE">AE</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_AE">AE</a>(): u8
 </code></pre>
 
 
@@ -1795,7 +1795,7 @@ Latin capital letter AE character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_AE">AE</a>(): u8 { 198 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_AE">AE</a>(): u8 { 198 }
 </code></pre>
 
 
@@ -1809,7 +1809,7 @@ Latin capital letter AE character.
 Latin capital letter C with cedilla character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_C_cedilla">C_cedilla</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_C_cedilla">C_cedilla</a>(): u8
 </code></pre>
 
 
@@ -1818,7 +1818,7 @@ Latin capital letter C with cedilla character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_C_cedilla">C_cedilla</a>(): u8 { 199 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_C_cedilla">C_cedilla</a>(): u8 { 199 }
 </code></pre>
 
 
@@ -1832,7 +1832,7 @@ Latin capital letter C with cedilla character.
 Latin capital letter E with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_E_grave">E_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_E_grave">E_grave</a>(): u8
 </code></pre>
 
 
@@ -1841,7 +1841,7 @@ Latin capital letter E with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_E_grave">E_grave</a>(): u8 { 200 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_E_grave">E_grave</a>(): u8 { 200 }
 </code></pre>
 
 
@@ -1855,7 +1855,7 @@ Latin capital letter E with grave character.
 Latin capital letter E with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_E_acute">E_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_E_acute">E_acute</a>(): u8
 </code></pre>
 
 
@@ -1864,7 +1864,7 @@ Latin capital letter E with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_E_acute">E_acute</a>(): u8 { 201 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_E_acute">E_acute</a>(): u8 { 201 }
 </code></pre>
 
 
@@ -1878,7 +1878,7 @@ Latin capital letter E with acute character.
 Latin capital letter E with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_E_circumflex">E_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_E_circumflex">E_circumflex</a>(): u8
 </code></pre>
 
 
@@ -1887,7 +1887,7 @@ Latin capital letter E with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_E_circumflex">E_circumflex</a>(): u8 { 202 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_E_circumflex">E_circumflex</a>(): u8 { 202 }
 </code></pre>
 
 
@@ -1901,7 +1901,7 @@ Latin capital letter E with circumflex character.
 Latin capital letter E with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_E_diaeresis">E_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_E_diaeresis">E_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -1910,7 +1910,7 @@ Latin capital letter E with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_E_diaeresis">E_diaeresis</a>(): u8 { 203 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_E_diaeresis">E_diaeresis</a>(): u8 { 203 }
 </code></pre>
 
 
@@ -1924,7 +1924,7 @@ Latin capital letter E with diaeresis character.
 Latin capital letter I with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_I_grave">I_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_I_grave">I_grave</a>(): u8
 </code></pre>
 
 
@@ -1933,7 +1933,7 @@ Latin capital letter I with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_I_grave">I_grave</a>(): u8 { 204 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_I_grave">I_grave</a>(): u8 { 204 }
 </code></pre>
 
 
@@ -1947,7 +1947,7 @@ Latin capital letter I with grave character.
 Latin capital letter I with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_I_acute">I_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_I_acute">I_acute</a>(): u8
 </code></pre>
 
 
@@ -1956,7 +1956,7 @@ Latin capital letter I with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_I_acute">I_acute</a>(): u8 { 205 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_I_acute">I_acute</a>(): u8 { 205 }
 </code></pre>
 
 
@@ -1970,7 +1970,7 @@ Latin capital letter I with acute character.
 Latin capital letter I with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_I_circumflex">I_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_I_circumflex">I_circumflex</a>(): u8
 </code></pre>
 
 
@@ -1979,7 +1979,7 @@ Latin capital letter I with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_I_circumflex">I_circumflex</a>(): u8 { 206 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_I_circumflex">I_circumflex</a>(): u8 { 206 }
 </code></pre>
 
 
@@ -1993,7 +1993,7 @@ Latin capital letter I with circumflex character.
 Latin capital letter I with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_I_diaeresis">I_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_I_diaeresis">I_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -2002,7 +2002,7 @@ Latin capital letter I with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_I_diaeresis">I_diaeresis</a>(): u8 { 207 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_I_diaeresis">I_diaeresis</a>(): u8 { 207 }
 </code></pre>
 
 
@@ -2016,7 +2016,7 @@ Latin capital letter I with diaeresis character.
 Latin capital letter ETH character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_ETH">ETH</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_ETH">ETH</a>(): u8
 </code></pre>
 
 
@@ -2025,7 +2025,7 @@ Latin capital letter ETH character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_ETH">ETH</a>(): u8 { 208 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_ETH">ETH</a>(): u8 { 208 }
 </code></pre>
 
 
@@ -2039,7 +2039,7 @@ Latin capital letter ETH character.
 Latin capital letter N with tilde character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_N_tilde">N_tilde</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_N_tilde">N_tilde</a>(): u8
 </code></pre>
 
 
@@ -2048,7 +2048,7 @@ Latin capital letter N with tilde character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_N_tilde">N_tilde</a>(): u8 { 209 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_N_tilde">N_tilde</a>(): u8 { 209 }
 </code></pre>
 
 
@@ -2062,7 +2062,7 @@ Latin capital letter N with tilde character.
 Latin capital letter O with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_grave">O_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_grave">O_grave</a>(): u8
 </code></pre>
 
 
@@ -2071,7 +2071,7 @@ Latin capital letter O with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_grave">O_grave</a>(): u8 { 210 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_grave">O_grave</a>(): u8 { 210 }
 </code></pre>
 
 
@@ -2085,7 +2085,7 @@ Latin capital letter O with grave character.
 Latin capital letter O with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_acute">O_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_acute">O_acute</a>(): u8
 </code></pre>
 
 
@@ -2094,7 +2094,7 @@ Latin capital letter O with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_acute">O_acute</a>(): u8 { 211 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_acute">O_acute</a>(): u8 { 211 }
 </code></pre>
 
 
@@ -2108,7 +2108,7 @@ Latin capital letter O with acute character.
 Latin capital letter O with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_circumflex">O_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_circumflex">O_circumflex</a>(): u8
 </code></pre>
 
 
@@ -2117,7 +2117,7 @@ Latin capital letter O with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_circumflex">O_circumflex</a>(): u8 { 212 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_circumflex">O_circumflex</a>(): u8 { 212 }
 </code></pre>
 
 
@@ -2131,7 +2131,7 @@ Latin capital letter O with circumflex character.
 Latin capital letter O with tilde character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_tilde">O_tilde</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_tilde">O_tilde</a>(): u8
 </code></pre>
 
 
@@ -2140,7 +2140,7 @@ Latin capital letter O with tilde character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_tilde">O_tilde</a>(): u8 { 213 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_tilde">O_tilde</a>(): u8 { 213 }
 </code></pre>
 
 
@@ -2154,7 +2154,7 @@ Latin capital letter O with tilde character.
 Latin capital letter O with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_diaeresis">O_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_diaeresis">O_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -2163,7 +2163,7 @@ Latin capital letter O with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_diaeresis">O_diaeresis</a>(): u8 { 214 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_diaeresis">O_diaeresis</a>(): u8 { 214 }
 </code></pre>
 
 
@@ -2177,7 +2177,7 @@ Latin capital letter O with diaeresis character.
 Multiplication sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_multiplication">multiplication</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_multiplication">multiplication</a>(): u8
 </code></pre>
 
 
@@ -2186,7 +2186,7 @@ Multiplication sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_multiplication">multiplication</a>(): u8 { 215 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_multiplication">multiplication</a>(): u8 { 215 }
 </code></pre>
 
 
@@ -2200,7 +2200,7 @@ Multiplication sign character.
 Latin capital letter O with stroke character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_stroke">O_stroke</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_stroke">O_stroke</a>(): u8
 </code></pre>
 
 
@@ -2209,7 +2209,7 @@ Latin capital letter O with stroke character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_O_stroke">O_stroke</a>(): u8 { 216 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_O_stroke">O_stroke</a>(): u8 { 216 }
 </code></pre>
 
 
@@ -2223,7 +2223,7 @@ Latin capital letter O with stroke character.
 Latin capital letter U with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_U_grave">U_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_U_grave">U_grave</a>(): u8
 </code></pre>
 
 
@@ -2232,7 +2232,7 @@ Latin capital letter U with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_U_grave">U_grave</a>(): u8 { 217 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_U_grave">U_grave</a>(): u8 { 217 }
 </code></pre>
 
 
@@ -2246,7 +2246,7 @@ Latin capital letter U with grave character.
 Latin capital letter U with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_U_acute">U_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_U_acute">U_acute</a>(): u8
 </code></pre>
 
 
@@ -2255,7 +2255,7 @@ Latin capital letter U with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_U_acute">U_acute</a>(): u8 { 218 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_U_acute">U_acute</a>(): u8 { 218 }
 </code></pre>
 
 
@@ -2269,7 +2269,7 @@ Latin capital letter U with acute character.
 Latin capital letter U with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_U_circumflex">U_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_U_circumflex">U_circumflex</a>(): u8
 </code></pre>
 
 
@@ -2278,7 +2278,7 @@ Latin capital letter U with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_U_circumflex">U_circumflex</a>(): u8 { 219 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_U_circumflex">U_circumflex</a>(): u8 { 219 }
 </code></pre>
 
 
@@ -2292,7 +2292,7 @@ Latin capital letter U with circumflex character.
 Latin capital letter U with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_U_diaeresis">U_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_U_diaeresis">U_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -2301,7 +2301,7 @@ Latin capital letter U with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_U_diaeresis">U_diaeresis</a>(): u8 { 220 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_U_diaeresis">U_diaeresis</a>(): u8 { 220 }
 </code></pre>
 
 
@@ -2315,7 +2315,7 @@ Latin capital letter U with diaeresis character.
 Latin capital letter Y with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_Y_acute">Y_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_Y_acute">Y_acute</a>(): u8
 </code></pre>
 
 
@@ -2324,7 +2324,7 @@ Latin capital letter Y with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_Y_acute">Y_acute</a>(): u8 { 221 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_Y_acute">Y_acute</a>(): u8 { 221 }
 </code></pre>
 
 
@@ -2338,7 +2338,7 @@ Latin capital letter Y with acute character.
 Latin capital letter THORN character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_THORN">THORN</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_THORN">THORN</a>(): u8
 </code></pre>
 
 
@@ -2347,7 +2347,7 @@ Latin capital letter THORN character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_THORN">THORN</a>(): u8 { 222 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_THORN">THORN</a>(): u8 { 222 }
 </code></pre>
 
 
@@ -2361,7 +2361,7 @@ Latin capital letter THORN character.
 Latin small letter sharp s character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_sharp_s">sharp_s</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_sharp_s">sharp_s</a>(): u8
 </code></pre>
 
 
@@ -2370,7 +2370,7 @@ Latin small letter sharp s character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_sharp_s">sharp_s</a>(): u8 { 223 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_sharp_s">sharp_s</a>(): u8 { 223 }
 </code></pre>
 
 
@@ -2384,7 +2384,7 @@ Latin small letter sharp s character.
 Latin small letter a with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_grave">a_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_grave">a_grave</a>(): u8
 </code></pre>
 
 
@@ -2393,7 +2393,7 @@ Latin small letter a with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_grave">a_grave</a>(): u8 { 224 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_grave">a_grave</a>(): u8 { 224 }
 </code></pre>
 
 
@@ -2407,7 +2407,7 @@ Latin small letter a with grave character.
 Latin small letter a with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_acute">a_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_acute">a_acute</a>(): u8
 </code></pre>
 
 
@@ -2416,7 +2416,7 @@ Latin small letter a with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_acute">a_acute</a>(): u8 { 225 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_acute">a_acute</a>(): u8 { 225 }
 </code></pre>
 
 
@@ -2430,7 +2430,7 @@ Latin small letter a with acute character.
 Latin small letter a with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_circumflex">a_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_circumflex">a_circumflex</a>(): u8
 </code></pre>
 
 
@@ -2439,7 +2439,7 @@ Latin small letter a with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_circumflex">a_circumflex</a>(): u8 { 226 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_circumflex">a_circumflex</a>(): u8 { 226 }
 </code></pre>
 
 
@@ -2453,7 +2453,7 @@ Latin small letter a with circumflex character.
 Latin small letter a with tilde character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_tilde">a_tilde</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_tilde">a_tilde</a>(): u8
 </code></pre>
 
 
@@ -2462,7 +2462,7 @@ Latin small letter a with tilde character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_tilde">a_tilde</a>(): u8 { 227 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_tilde">a_tilde</a>(): u8 { 227 }
 </code></pre>
 
 
@@ -2476,7 +2476,7 @@ Latin small letter a with tilde character.
 Latin small letter a with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_diaeresis">a_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_diaeresis">a_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -2485,7 +2485,7 @@ Latin small letter a with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_diaeresis">a_diaeresis</a>(): u8 { 228 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_diaeresis">a_diaeresis</a>(): u8 { 228 }
 </code></pre>
 
 
@@ -2499,7 +2499,7 @@ Latin small letter a with diaeresis character.
 Latin small letter a with ring above character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_ring">a_ring</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_ring">a_ring</a>(): u8
 </code></pre>
 
 
@@ -2508,7 +2508,7 @@ Latin small letter a with ring above character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_a_ring">a_ring</a>(): u8 { 229 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_a_ring">a_ring</a>(): u8 { 229 }
 </code></pre>
 
 
@@ -2522,7 +2522,7 @@ Latin small letter a with ring above character.
 Latin small letter ae character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_ae">ae</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_ae">ae</a>(): u8
 </code></pre>
 
 
@@ -2531,7 +2531,7 @@ Latin small letter ae character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_ae">ae</a>(): u8 { 230 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_ae">ae</a>(): u8 { 230 }
 </code></pre>
 
 
@@ -2545,7 +2545,7 @@ Latin small letter ae character.
 Latin small letter c with cedilla character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_c_cedilla">c_cedilla</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_c_cedilla">c_cedilla</a>(): u8
 </code></pre>
 
 
@@ -2554,7 +2554,7 @@ Latin small letter c with cedilla character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_c_cedilla">c_cedilla</a>(): u8 { 231 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_c_cedilla">c_cedilla</a>(): u8 { 231 }
 </code></pre>
 
 
@@ -2568,7 +2568,7 @@ Latin small letter c with cedilla character.
 Latin small letter e with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_e_grave">e_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_e_grave">e_grave</a>(): u8
 </code></pre>
 
 
@@ -2577,7 +2577,7 @@ Latin small letter e with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_e_grave">e_grave</a>(): u8 { 232 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_e_grave">e_grave</a>(): u8 { 232 }
 </code></pre>
 
 
@@ -2591,7 +2591,7 @@ Latin small letter e with grave character.
 Latin small letter e with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_e_acute">e_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_e_acute">e_acute</a>(): u8
 </code></pre>
 
 
@@ -2600,7 +2600,7 @@ Latin small letter e with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_e_acute">e_acute</a>(): u8 { 233 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_e_acute">e_acute</a>(): u8 { 233 }
 </code></pre>
 
 
@@ -2614,7 +2614,7 @@ Latin small letter e with acute character.
 Latin small letter e with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_e_circumflex">e_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_e_circumflex">e_circumflex</a>(): u8
 </code></pre>
 
 
@@ -2623,7 +2623,7 @@ Latin small letter e with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_e_circumflex">e_circumflex</a>(): u8 { 234 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_e_circumflex">e_circumflex</a>(): u8 { 234 }
 </code></pre>
 
 
@@ -2637,7 +2637,7 @@ Latin small letter e with circumflex character.
 Latin small letter e with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_e_diaeresis">e_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_e_diaeresis">e_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -2646,7 +2646,7 @@ Latin small letter e with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_e_diaeresis">e_diaeresis</a>(): u8 { 235 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_e_diaeresis">e_diaeresis</a>(): u8 { 235 }
 </code></pre>
 
 
@@ -2660,7 +2660,7 @@ Latin small letter e with diaeresis character.
 Latin small letter i with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_i_grave">i_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_i_grave">i_grave</a>(): u8
 </code></pre>
 
 
@@ -2669,7 +2669,7 @@ Latin small letter i with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_i_grave">i_grave</a>(): u8 { 236 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_i_grave">i_grave</a>(): u8 { 236 }
 </code></pre>
 
 
@@ -2683,7 +2683,7 @@ Latin small letter i with grave character.
 Latin small letter i with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_i_acute">i_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_i_acute">i_acute</a>(): u8
 </code></pre>
 
 
@@ -2692,7 +2692,7 @@ Latin small letter i with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_i_acute">i_acute</a>(): u8 { 237 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_i_acute">i_acute</a>(): u8 { 237 }
 </code></pre>
 
 
@@ -2706,7 +2706,7 @@ Latin small letter i with acute character.
 Latin small letter i with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_i_circumflex">i_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_i_circumflex">i_circumflex</a>(): u8
 </code></pre>
 
 
@@ -2715,7 +2715,7 @@ Latin small letter i with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_i_circumflex">i_circumflex</a>(): u8 { 238 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_i_circumflex">i_circumflex</a>(): u8 { 238 }
 </code></pre>
 
 
@@ -2729,7 +2729,7 @@ Latin small letter i with circumflex character.
 Latin small letter i with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_i_diaeresis">i_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_i_diaeresis">i_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -2738,7 +2738,7 @@ Latin small letter i with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_i_diaeresis">i_diaeresis</a>(): u8 { 239 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_i_diaeresis">i_diaeresis</a>(): u8 { 239 }
 </code></pre>
 
 
@@ -2752,7 +2752,7 @@ Latin small letter i with diaeresis character.
 Latin small letter eth character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_eth">eth</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_eth">eth</a>(): u8
 </code></pre>
 
 
@@ -2761,7 +2761,7 @@ Latin small letter eth character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_eth">eth</a>(): u8 { 240 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_eth">eth</a>(): u8 { 240 }
 </code></pre>
 
 
@@ -2775,7 +2775,7 @@ Latin small letter eth character.
 Latin small letter n with tilde character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_n_tilde">n_tilde</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_n_tilde">n_tilde</a>(): u8
 </code></pre>
 
 
@@ -2784,7 +2784,7 @@ Latin small letter n with tilde character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_n_tilde">n_tilde</a>(): u8 { 241 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_n_tilde">n_tilde</a>(): u8 { 241 }
 </code></pre>
 
 
@@ -2798,7 +2798,7 @@ Latin small letter n with tilde character.
 Latin small letter o with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_grave">o_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_grave">o_grave</a>(): u8
 </code></pre>
 
 
@@ -2807,7 +2807,7 @@ Latin small letter o with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_grave">o_grave</a>(): u8 { 242 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_grave">o_grave</a>(): u8 { 242 }
 </code></pre>
 
 
@@ -2821,7 +2821,7 @@ Latin small letter o with grave character.
 Latin small letter o with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_acute">o_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_acute">o_acute</a>(): u8
 </code></pre>
 
 
@@ -2830,7 +2830,7 @@ Latin small letter o with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_acute">o_acute</a>(): u8 { 243 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_acute">o_acute</a>(): u8 { 243 }
 </code></pre>
 
 
@@ -2844,7 +2844,7 @@ Latin small letter o with acute character.
 Latin small letter o with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_circumflex">o_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_circumflex">o_circumflex</a>(): u8
 </code></pre>
 
 
@@ -2853,7 +2853,7 @@ Latin small letter o with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_circumflex">o_circumflex</a>(): u8 { 244 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_circumflex">o_circumflex</a>(): u8 { 244 }
 </code></pre>
 
 
@@ -2867,7 +2867,7 @@ Latin small letter o with circumflex character.
 Latin small letter o with tilde character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_tilde">o_tilde</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_tilde">o_tilde</a>(): u8
 </code></pre>
 
 
@@ -2876,7 +2876,7 @@ Latin small letter o with tilde character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_tilde">o_tilde</a>(): u8 { 245 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_tilde">o_tilde</a>(): u8 { 245 }
 </code></pre>
 
 
@@ -2890,7 +2890,7 @@ Latin small letter o with tilde character.
 Latin small letter o with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_diaeresis">o_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_diaeresis">o_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -2899,7 +2899,7 @@ Latin small letter o with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_diaeresis">o_diaeresis</a>(): u8 { 246 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_diaeresis">o_diaeresis</a>(): u8 { 246 }
 </code></pre>
 
 
@@ -2913,7 +2913,7 @@ Latin small letter o with diaeresis character.
 Division sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_division">division</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_division">division</a>(): u8
 </code></pre>
 
 
@@ -2922,7 +2922,7 @@ Division sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_division">division</a>(): u8 { 247 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_division">division</a>(): u8 { 247 }
 </code></pre>
 
 
@@ -2936,7 +2936,7 @@ Division sign character.
 Latin small letter o with stroke character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_stroke">o_stroke</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_stroke">o_stroke</a>(): u8
 </code></pre>
 
 
@@ -2945,7 +2945,7 @@ Latin small letter o with stroke character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_o_stroke">o_stroke</a>(): u8 { 248 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_o_stroke">o_stroke</a>(): u8 { 248 }
 </code></pre>
 
 
@@ -2959,7 +2959,7 @@ Latin small letter o with stroke character.
 Latin small letter u with grave character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_u_grave">u_grave</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_u_grave">u_grave</a>(): u8
 </code></pre>
 
 
@@ -2968,7 +2968,7 @@ Latin small letter u with grave character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_u_grave">u_grave</a>(): u8 { 249 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_u_grave">u_grave</a>(): u8 { 249 }
 </code></pre>
 
 
@@ -2982,7 +2982,7 @@ Latin small letter u with grave character.
 Latin small letter u with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_u_acute">u_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_u_acute">u_acute</a>(): u8
 </code></pre>
 
 
@@ -2991,7 +2991,7 @@ Latin small letter u with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_u_acute">u_acute</a>(): u8 { 250 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_u_acute">u_acute</a>(): u8 { 250 }
 </code></pre>
 
 
@@ -3005,7 +3005,7 @@ Latin small letter u with acute character.
 Latin small letter u with circumflex character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_u_circumflex">u_circumflex</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_u_circumflex">u_circumflex</a>(): u8
 </code></pre>
 
 
@@ -3014,7 +3014,7 @@ Latin small letter u with circumflex character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_u_circumflex">u_circumflex</a>(): u8 { 251 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_u_circumflex">u_circumflex</a>(): u8 { 251 }
 </code></pre>
 
 
@@ -3028,7 +3028,7 @@ Latin small letter u with circumflex character.
 Latin small letter u with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_u_diaeresis">u_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_u_diaeresis">u_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -3037,7 +3037,7 @@ Latin small letter u with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_u_diaeresis">u_diaeresis</a>(): u8 { 252 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_u_diaeresis">u_diaeresis</a>(): u8 { 252 }
 </code></pre>
 
 
@@ -3051,7 +3051,7 @@ Latin small letter u with diaeresis character.
 Latin small letter y with acute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_y_acute">y_acute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_y_acute">y_acute</a>(): u8
 </code></pre>
 
 
@@ -3060,7 +3060,7 @@ Latin small letter y with acute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_y_acute">y_acute</a>(): u8 { 253 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_y_acute">y_acute</a>(): u8 { 253 }
 </code></pre>
 
 
@@ -3074,7 +3074,7 @@ Latin small letter y with acute character.
 Latin small letter thorn character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_thorn">thorn</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_thorn">thorn</a>(): u8
 </code></pre>
 
 
@@ -3083,7 +3083,7 @@ Latin small letter thorn character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_thorn">thorn</a>(): u8 { 254 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_thorn">thorn</a>(): u8 { 254 }
 </code></pre>
 
 
@@ -3097,7 +3097,7 @@ Latin small letter thorn character.
 Latin small letter y with diaeresis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_y_diaeresis">y_diaeresis</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_y_diaeresis">y_diaeresis</a>(): u8
 </code></pre>
 
 
@@ -3106,7 +3106,7 @@ Latin small letter y with diaeresis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/extended.md#ascii_extended_y_diaeresis">y_diaeresis</a>(): u8 { 255 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./extended.md#ascii_extended_y_diaeresis">y_diaeresis</a>(): u8 { 255 }
 </code></pre>
 
 

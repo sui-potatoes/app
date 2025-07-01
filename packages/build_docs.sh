@@ -37,8 +37,13 @@ for dir in */ ; do
     echo "No docs found in build/docs/$upkg_name"
   fi
 
-  # Step 4: Replace ../dependencies/* with ./dependencies/* in Markdown files
+  # Step 4.1: Replace ../dependencies/* with ./dependencies/* in Markdown files
   find docs -name '*.md' -exec sed -i '' -e 's|\.\./dependencies/|\.\./\.\./\.doc-deps/|g' {} +
+
+  # Step 4.2: Replace ../$upkg_name/* with ./* in Markdown files
+  find docs -name '*.md' -exec sed -i '' -e "s|\.\.\/$upkg_name/|./|g" {} +
+
+  rm -rf $(pwd)/../.doc-deps/$pkg_name;
 
   # Step 5: Create symlink to this docs folder in ../dependencies
   ln -sf "$(pwd)/docs" "$(pwd)/../.doc-deps/$pkg_name"

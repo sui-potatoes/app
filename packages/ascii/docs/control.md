@@ -53,7 +53,7 @@ Defines ASCII control characters (range 0-31 and 127 (DELETE)).
 Check if a character is a control character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_is_control">is_control</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_is_control">is_control</a>($<a href="./char.md#ascii_char">char</a>: u8): bool
 </code></pre>
 
 
@@ -62,7 +62,7 @@ Check if a character is a control character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_is_control">is_control</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool { $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 31 || $<a href="../ascii/char.md#ascii_char">char</a> == 127 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_is_control">is_control</a>($<a href="./char.md#ascii_char">char</a>: u8): bool { $<a href="./char.md#ascii_char">char</a> &lt;= 31 || $<a href="./char.md#ascii_char">char</a> == 127 }
 </code></pre>
 
 
@@ -76,7 +76,7 @@ Check if a character is a control character.
 Null character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_null">null</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_null">null</a>(): u8
 </code></pre>
 
 
@@ -85,7 +85,7 @@ Null character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_null">null</a>(): u8 { 0 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_null">null</a>(): u8 { 0 }
 </code></pre>
 
 
@@ -99,7 +99,7 @@ Null character.
 Start of heading character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_start_of_heading">start_of_heading</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_start_of_heading">start_of_heading</a>(): u8
 </code></pre>
 
 
@@ -108,7 +108,7 @@ Start of heading character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_start_of_heading">start_of_heading</a>(): u8 { 1 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_start_of_heading">start_of_heading</a>(): u8 { 1 }
 </code></pre>
 
 
@@ -122,7 +122,7 @@ Start of heading character.
 Start of text character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_start_of_text">start_of_text</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_start_of_text">start_of_text</a>(): u8
 </code></pre>
 
 
@@ -131,7 +131,7 @@ Start of text character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_start_of_text">start_of_text</a>(): u8 { 2 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_start_of_text">start_of_text</a>(): u8 { 2 }
 </code></pre>
 
 
@@ -145,7 +145,7 @@ Start of text character.
 End of text character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_end_of_text">end_of_text</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_end_of_text">end_of_text</a>(): u8
 </code></pre>
 
 
@@ -154,7 +154,7 @@ End of text character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_end_of_text">end_of_text</a>(): u8 { 3 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_end_of_text">end_of_text</a>(): u8 { 3 }
 </code></pre>
 
 
@@ -168,7 +168,7 @@ End of text character.
 End of transmission character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_end_of_transmission">end_of_transmission</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_end_of_transmission">end_of_transmission</a>(): u8
 </code></pre>
 
 
@@ -177,7 +177,7 @@ End of transmission character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_end_of_transmission">end_of_transmission</a>(): u8 { 4 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_end_of_transmission">end_of_transmission</a>(): u8 { 4 }
 </code></pre>
 
 
@@ -191,7 +191,7 @@ End of transmission character.
 Enquiry character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_enquiry">enquiry</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_enquiry">enquiry</a>(): u8
 </code></pre>
 
 
@@ -200,7 +200,7 @@ Enquiry character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_enquiry">enquiry</a>(): u8 { 5 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_enquiry">enquiry</a>(): u8 { 5 }
 </code></pre>
 
 
@@ -214,7 +214,7 @@ Enquiry character.
 Acknowledge character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_acknowledge">acknowledge</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_acknowledge">acknowledge</a>(): u8
 </code></pre>
 
 
@@ -223,7 +223,7 @@ Acknowledge character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_acknowledge">acknowledge</a>(): u8 { 6 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_acknowledge">acknowledge</a>(): u8 { 6 }
 </code></pre>
 
 
@@ -237,7 +237,7 @@ Acknowledge character.
 Bell character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_bell">bell</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_bell">bell</a>(): u8
 </code></pre>
 
 
@@ -246,7 +246,7 @@ Bell character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_bell">bell</a>(): u8 { 7 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_bell">bell</a>(): u8 { 7 }
 </code></pre>
 
 
@@ -260,7 +260,7 @@ Bell character.
 Backspace character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_backspace">backspace</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_backspace">backspace</a>(): u8
 </code></pre>
 
 
@@ -269,7 +269,7 @@ Backspace character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_backspace">backspace</a>(): u8 { 8 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_backspace">backspace</a>(): u8 { 8 }
 </code></pre>
 
 
@@ -283,7 +283,7 @@ Backspace character.
 Horizontal tab character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_horizontal_tab">horizontal_tab</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_horizontal_tab">horizontal_tab</a>(): u8
 </code></pre>
 
 
@@ -292,7 +292,7 @@ Horizontal tab character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_horizontal_tab">horizontal_tab</a>(): u8 { 9 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_horizontal_tab">horizontal_tab</a>(): u8 { 9 }
 </code></pre>
 
 
@@ -306,7 +306,7 @@ Horizontal tab character.
 Line feed character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_line_feed">line_feed</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_line_feed">line_feed</a>(): u8
 </code></pre>
 
 
@@ -315,7 +315,7 @@ Line feed character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_line_feed">line_feed</a>(): u8 { 10 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_line_feed">line_feed</a>(): u8 { 10 }
 </code></pre>
 
 
@@ -329,7 +329,7 @@ Line feed character.
 Vertical tab character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_vertical_tab">vertical_tab</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_vertical_tab">vertical_tab</a>(): u8
 </code></pre>
 
 
@@ -338,7 +338,7 @@ Vertical tab character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_vertical_tab">vertical_tab</a>(): u8 { 11 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_vertical_tab">vertical_tab</a>(): u8 { 11 }
 </code></pre>
 
 
@@ -352,7 +352,7 @@ Vertical tab character.
 Form feed character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_form_feed">form_feed</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_form_feed">form_feed</a>(): u8
 </code></pre>
 
 
@@ -361,7 +361,7 @@ Form feed character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_form_feed">form_feed</a>(): u8 { 12 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_form_feed">form_feed</a>(): u8 { 12 }
 </code></pre>
 
 
@@ -375,7 +375,7 @@ Form feed character.
 Carriage return character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_carriage_return">carriage_return</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_carriage_return">carriage_return</a>(): u8
 </code></pre>
 
 
@@ -384,7 +384,7 @@ Carriage return character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_carriage_return">carriage_return</a>(): u8 { 13 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_carriage_return">carriage_return</a>(): u8 { 13 }
 </code></pre>
 
 
@@ -398,7 +398,7 @@ Carriage return character.
 Shift out character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_shift_out">shift_out</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_shift_out">shift_out</a>(): u8
 </code></pre>
 
 
@@ -407,7 +407,7 @@ Shift out character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_shift_out">shift_out</a>(): u8 { 14 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_shift_out">shift_out</a>(): u8 { 14 }
 </code></pre>
 
 
@@ -421,7 +421,7 @@ Shift out character.
 Shift in character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_shift_in">shift_in</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_shift_in">shift_in</a>(): u8
 </code></pre>
 
 
@@ -430,7 +430,7 @@ Shift in character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_shift_in">shift_in</a>(): u8 { 15 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_shift_in">shift_in</a>(): u8 { 15 }
 </code></pre>
 
 
@@ -444,7 +444,7 @@ Shift in character.
 Data link escape character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_data_link_escape">data_link_escape</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_data_link_escape">data_link_escape</a>(): u8
 </code></pre>
 
 
@@ -453,7 +453,7 @@ Data link escape character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_data_link_escape">data_link_escape</a>(): u8 { 16 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_data_link_escape">data_link_escape</a>(): u8 { 16 }
 </code></pre>
 
 
@@ -467,7 +467,7 @@ Data link escape character.
 Device control 1 character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_device_control_1">device_control_1</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_device_control_1">device_control_1</a>(): u8
 </code></pre>
 
 
@@ -476,7 +476,7 @@ Device control 1 character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_device_control_1">device_control_1</a>(): u8 { 17 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_device_control_1">device_control_1</a>(): u8 { 17 }
 </code></pre>
 
 
@@ -490,7 +490,7 @@ Device control 1 character.
 Device control 2 character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_device_control_2">device_control_2</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_device_control_2">device_control_2</a>(): u8
 </code></pre>
 
 
@@ -499,7 +499,7 @@ Device control 2 character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_device_control_2">device_control_2</a>(): u8 { 18 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_device_control_2">device_control_2</a>(): u8 { 18 }
 </code></pre>
 
 
@@ -513,7 +513,7 @@ Device control 2 character.
 Device control 3 character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_device_control_3">device_control_3</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_device_control_3">device_control_3</a>(): u8
 </code></pre>
 
 
@@ -522,7 +522,7 @@ Device control 3 character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_device_control_3">device_control_3</a>(): u8 { 19 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_device_control_3">device_control_3</a>(): u8 { 19 }
 </code></pre>
 
 
@@ -536,7 +536,7 @@ Device control 3 character.
 Device control 4 character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_device_control_4">device_control_4</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_device_control_4">device_control_4</a>(): u8
 </code></pre>
 
 
@@ -545,7 +545,7 @@ Device control 4 character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_device_control_4">device_control_4</a>(): u8 { 20 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_device_control_4">device_control_4</a>(): u8 { 20 }
 </code></pre>
 
 
@@ -559,7 +559,7 @@ Device control 4 character.
 Negative acknowledge character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_negative_acknowledge">negative_acknowledge</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_negative_acknowledge">negative_acknowledge</a>(): u8
 </code></pre>
 
 
@@ -568,7 +568,7 @@ Negative acknowledge character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_negative_acknowledge">negative_acknowledge</a>(): u8 { 21 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_negative_acknowledge">negative_acknowledge</a>(): u8 { 21 }
 </code></pre>
 
 
@@ -582,7 +582,7 @@ Negative acknowledge character.
 Synchronous idle character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_synchronous_idle">synchronous_idle</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_synchronous_idle">synchronous_idle</a>(): u8
 </code></pre>
 
 
@@ -591,7 +591,7 @@ Synchronous idle character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_synchronous_idle">synchronous_idle</a>(): u8 { 22 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_synchronous_idle">synchronous_idle</a>(): u8 { 22 }
 </code></pre>
 
 
@@ -605,7 +605,7 @@ Synchronous idle character.
 End of transmission block character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_end_of_transmission_block">end_of_transmission_block</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_end_of_transmission_block">end_of_transmission_block</a>(): u8
 </code></pre>
 
 
@@ -614,7 +614,7 @@ End of transmission block character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_end_of_transmission_block">end_of_transmission_block</a>(): u8 { 23 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_end_of_transmission_block">end_of_transmission_block</a>(): u8 { 23 }
 </code></pre>
 
 
@@ -628,7 +628,7 @@ End of transmission block character.
 Cancel character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_cancel">cancel</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_cancel">cancel</a>(): u8
 </code></pre>
 
 
@@ -637,7 +637,7 @@ Cancel character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_cancel">cancel</a>(): u8 { 24 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_cancel">cancel</a>(): u8 { 24 }
 </code></pre>
 
 
@@ -651,7 +651,7 @@ Cancel character.
 End of medium character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_end_of_medium">end_of_medium</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_end_of_medium">end_of_medium</a>(): u8
 </code></pre>
 
 
@@ -660,7 +660,7 @@ End of medium character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_end_of_medium">end_of_medium</a>(): u8 { 25 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_end_of_medium">end_of_medium</a>(): u8 { 25 }
 </code></pre>
 
 
@@ -674,7 +674,7 @@ End of medium character.
 Substitute character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_substitute">substitute</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_substitute">substitute</a>(): u8
 </code></pre>
 
 
@@ -683,7 +683,7 @@ Substitute character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_substitute">substitute</a>(): u8 { 26 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_substitute">substitute</a>(): u8 { 26 }
 </code></pre>
 
 
@@ -697,7 +697,7 @@ Substitute character.
 Escape character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_escape">escape</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_escape">escape</a>(): u8
 </code></pre>
 
 
@@ -706,7 +706,7 @@ Escape character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_escape">escape</a>(): u8 { 27 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_escape">escape</a>(): u8 { 27 }
 </code></pre>
 
 
@@ -720,7 +720,7 @@ Escape character.
 File separator character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_file_separator">file_separator</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_file_separator">file_separator</a>(): u8
 </code></pre>
 
 
@@ -729,7 +729,7 @@ File separator character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_file_separator">file_separator</a>(): u8 { 28 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_file_separator">file_separator</a>(): u8 { 28 }
 </code></pre>
 
 
@@ -743,7 +743,7 @@ File separator character.
 Group separator character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_group_separator">group_separator</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_group_separator">group_separator</a>(): u8
 </code></pre>
 
 
@@ -752,7 +752,7 @@ Group separator character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_group_separator">group_separator</a>(): u8 { 29 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_group_separator">group_separator</a>(): u8 { 29 }
 </code></pre>
 
 
@@ -766,7 +766,7 @@ Group separator character.
 Record separator character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_record_separator">record_separator</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_record_separator">record_separator</a>(): u8
 </code></pre>
 
 
@@ -775,7 +775,7 @@ Record separator character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_record_separator">record_separator</a>(): u8 { 30 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_record_separator">record_separator</a>(): u8 { 30 }
 </code></pre>
 
 
@@ -789,7 +789,7 @@ Record separator character.
 Unit separator character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_unit_separator">unit_separator</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_unit_separator">unit_separator</a>(): u8
 </code></pre>
 
 
@@ -798,7 +798,7 @@ Unit separator character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_unit_separator">unit_separator</a>(): u8 { 31 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_unit_separator">unit_separator</a>(): u8 { 31 }
 </code></pre>
 
 
@@ -812,7 +812,7 @@ Unit separator character.
 Delete character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_delete">delete</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_delete">delete</a>(): u8
 </code></pre>
 
 
@@ -821,7 +821,7 @@ Delete character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/control.md#ascii_control_delete">delete</a>(): u8 { 127 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./control.md#ascii_control_delete">delete</a>(): u8 { 127 }
 </code></pre>
 
 

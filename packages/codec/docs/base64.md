@@ -48,7 +48,7 @@ assert!(decoded == b"hello, potato!");
 Error code for illegal character.
 
 
-<pre><code><b>const</b> <a href="../codec/base64.md#codec_base64_EIllegalCharacter">EIllegalCharacter</a>: u64 = 0;
+<pre><code><b>const</b> <a href="./base64.md#codec_base64_EIllegalCharacter">EIllegalCharacter</a>: u64 = 0;
 </code></pre>
 
 
@@ -58,7 +58,7 @@ Error code for illegal character.
 Error code for incorrect number of characters.
 
 
-<pre><code><b>const</b> <a href="../codec/base64.md#codec_base64_EIncorrectNumberOfCharacters">EIncorrectNumberOfCharacters</a>: u64 = 1;
+<pre><code><b>const</b> <a href="./base64.md#codec_base64_EIncorrectNumberOfCharacters">EIncorrectNumberOfCharacters</a>: u64 = 1;
 </code></pre>
 
 
@@ -68,7 +68,7 @@ Error code for incorrect number of characters.
 Dictionary for base64 encoding.
 
 
-<pre><code><b>const</b> <a href="../codec/base64.md#codec_base64_KEYS">KEYS</a>: vector&lt;u8&gt; = vector[65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 43, 47, 61];
+<pre><code><b>const</b> <a href="./base64.md#codec_base64_KEYS">KEYS</a>: vector&lt;u8&gt; = vector[65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 43, 47, 61];
 </code></pre>
 
 
@@ -80,7 +80,7 @@ Dictionary for base64 encoding.
 Encode the <code>bytes</code> into base64 String.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/base64.md#codec_base64_encode">encode</a>(bytes: vector&lt;u8&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./base64.md#codec_base64_encode">encode</a>(bytes: vector&lt;u8&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -89,8 +89,8 @@ Encode the <code>bytes</code> into base64 String.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/base64.md#codec_base64_encode">encode</a>(bytes: vector&lt;u8&gt;): String {
-    <a href="../codec/base64.md#codec_base64_encode_impl">encode_impl</a>!(bytes, <a href="../codec/base64.md#codec_base64_KEYS">KEYS</a>, <b>false</b>)
+<pre><code><b>public</b> <b>fun</b> <a href="./base64.md#codec_base64_encode">encode</a>(bytes: vector&lt;u8&gt;): String {
+    <a href="./base64.md#codec_base64_encode_impl">encode_impl</a>!(bytes, <a href="./base64.md#codec_base64_KEYS">KEYS</a>, <b>false</b>)
 }
 </code></pre>
 
@@ -105,7 +105,7 @@ Encode the <code>bytes</code> into base64 String.
 Decode the base64 <code>str</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/base64.md#codec_base64_decode">decode</a>(str: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./base64.md#codec_base64_decode">decode</a>(str: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -114,8 +114,8 @@ Decode the base64 <code>str</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/base64.md#codec_base64_decode">decode</a>(str: String): vector&lt;u8&gt; {
-    <a href="../codec/base64.md#codec_base64_decode_impl">decode_impl</a>!(str, <a href="../codec/base64.md#codec_base64_KEYS">KEYS</a>, <b>false</b>)
+<pre><code><b>public</b> <b>fun</b> <a href="./base64.md#codec_base64_decode">decode</a>(str: String): vector&lt;u8&gt; {
+    <a href="./base64.md#codec_base64_decode_impl">decode_impl</a>!(str, <a href="./base64.md#codec_base64_KEYS">KEYS</a>, <b>false</b>)
 }
 </code></pre>
 
@@ -131,7 +131,7 @@ Internal macro for base64-based encodings, allows to use different dictionaries
 and control padding.
 
 
-<pre><code><b>public</b>(package) <b>macro</b> <b>fun</b> <a href="../codec/base64.md#codec_base64_encode_impl">encode_impl</a>($bytes: vector&lt;u8&gt;, $dictionary: vector&lt;u8&gt;, $url_safe: bool): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b>(package) <b>macro</b> <b>fun</b> <a href="./base64.md#codec_base64_encode_impl">encode_impl</a>($bytes: vector&lt;u8&gt;, $dictionary: vector&lt;u8&gt;, $url_safe: bool): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -140,7 +140,7 @@ and control padding.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>macro</b> <b>fun</b> <a href="../codec/base64.md#codec_base64_encode_impl">encode_impl</a>(
+<pre><code><b>public</b>(package) <b>macro</b> <b>fun</b> <a href="./base64.md#codec_base64_encode_impl">encode_impl</a>(
     $bytes: vector&lt;u8&gt;,
     $dictionary: vector&lt;u8&gt;,
     $url_safe: bool,
@@ -181,7 +181,7 @@ Internal macro for base64-based decodings, allows to use different dictionaries
 and control padding (for url-safe encoding).
 
 
-<pre><code><b>public</b>(package) <b>macro</b> <b>fun</b> <a href="../codec/base64.md#codec_base64_decode_impl">decode_impl</a>($str: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, $dictionary: vector&lt;u8&gt;, $url_safe: bool): vector&lt;u8&gt;
+<pre><code><b>public</b>(package) <b>macro</b> <b>fun</b> <a href="./base64.md#codec_base64_decode_impl">decode_impl</a>($str: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, $dictionary: vector&lt;u8&gt;, $url_safe: bool): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -190,7 +190,7 @@ and control padding (for url-safe encoding).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>macro</b> <b>fun</b> <a href="../codec/base64.md#codec_base64_decode_impl">decode_impl</a>(
+<pre><code><b>public</b>(package) <b>macro</b> <b>fun</b> <a href="./base64.md#codec_base64_decode_impl">decode_impl</a>(
     $str: String,
     $dictionary: vector&lt;u8&gt;,
     $url_safe: bool,

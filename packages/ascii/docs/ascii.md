@@ -6,7 +6,7 @@
 Defines common ASCII utilities, including checks for printable and control
 characters.
 
-For checks on individual characters, see <code><a href="../ascii/char.md#ascii_char">ascii::char</a></code> and <code><a href="../ascii/control.md#ascii_control">ascii::control</a></code>.
+For checks on individual characters, see <code><a href="./char.md#ascii_char">ascii::char</a></code> and <code><a href="./control.md#ascii_control">ascii::control</a></code>.
 While this module provides checks for bytes, its calls can be performed on
 <code>String</code> or <code>vector&lt;u8&gt;</code> directly. See example below.
 
@@ -49,7 +49,7 @@ b"\xFA".all!(|c| extended::is_extended!(*c)); // alternative!
 Check if a <code>String</code> is ASCII.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../ascii/ascii.md#ascii_ascii_is_ascii">is_ascii</a>(s: &<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): bool
+<pre><code><b>public</b> <b>fun</b> <a href="./ascii.md#ascii_ascii_is_ascii">is_ascii</a>(s: &<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): bool
 </code></pre>
 
 
@@ -58,7 +58,7 @@ Check if a <code>String</code> is ASCII.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../ascii/ascii.md#ascii_ascii_is_ascii">is_ascii</a>(s: &String): bool {
+<pre><code><b>public</b> <b>fun</b> <a href="./ascii.md#ascii_ascii_is_ascii">is_ascii</a>(s: &String): bool {
     s.as_bytes().all!(|c| *c &gt;= 32 && *c &lt;= 127)
 }
 </code></pre>
@@ -74,7 +74,7 @@ Check if a <code>String</code> is ASCII.
 Check if bytes are printable.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../ascii/ascii.md#ascii_ascii_is_bytes_printable">is_bytes_printable</a>(bytes: &vector&lt;u8&gt;): bool
+<pre><code><b>public</b> <b>fun</b> <a href="./ascii.md#ascii_ascii_is_bytes_printable">is_bytes_printable</a>(bytes: &vector&lt;u8&gt;): bool
 </code></pre>
 
 
@@ -83,8 +83,8 @@ Check if bytes are printable.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../ascii/ascii.md#ascii_ascii_is_bytes_printable">is_bytes_printable</a>(bytes: &vector&lt;u8&gt;): bool {
-    bytes.all!(|c| <a href="../ascii/char.md#ascii_char_is_printable">char::is_printable</a>!(*c))
+<pre><code><b>public</b> <b>fun</b> <a href="./ascii.md#ascii_ascii_is_bytes_printable">is_bytes_printable</a>(bytes: &vector&lt;u8&gt;): bool {
+    bytes.all!(|c| <a href="./char.md#ascii_char_is_printable">char::is_printable</a>!(*c))
 }
 </code></pre>
 
@@ -99,7 +99,7 @@ Check if bytes are printable.
 Check if bytes are control characters.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../ascii/ascii.md#ascii_ascii_is_bytes_control">is_bytes_control</a>(bytes: &vector&lt;u8&gt;): bool
+<pre><code><b>public</b> <b>fun</b> <a href="./ascii.md#ascii_ascii_is_bytes_control">is_bytes_control</a>(bytes: &vector&lt;u8&gt;): bool
 </code></pre>
 
 
@@ -108,8 +108,8 @@ Check if bytes are control characters.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../ascii/ascii.md#ascii_ascii_is_bytes_control">is_bytes_control</a>(bytes: &vector&lt;u8&gt;): bool {
-    bytes.all!(|c| <a href="../ascii/control.md#ascii_control_is_control">control::is_control</a>!(*c))
+<pre><code><b>public</b> <b>fun</b> <a href="./ascii.md#ascii_ascii_is_bytes_control">is_bytes_control</a>(bytes: &vector&lt;u8&gt;): bool {
+    bytes.all!(|c| <a href="./control.md#ascii_control_is_control">control::is_control</a>!(*c))
 }
 </code></pre>
 
@@ -124,7 +124,7 @@ Check if bytes are control characters.
 Check if bytes are extended characters.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../ascii/ascii.md#ascii_ascii_is_bytes_extended">is_bytes_extended</a>(bytes: &vector&lt;u8&gt;): bool
+<pre><code><b>public</b> <b>fun</b> <a href="./ascii.md#ascii_ascii_is_bytes_extended">is_bytes_extended</a>(bytes: &vector&lt;u8&gt;): bool
 </code></pre>
 
 
@@ -133,8 +133,8 @@ Check if bytes are extended characters.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../ascii/ascii.md#ascii_ascii_is_bytes_extended">is_bytes_extended</a>(bytes: &vector&lt;u8&gt;): bool {
-    bytes.all!(|c| <a href="../ascii/extended.md#ascii_extended_is_extended">extended::is_extended</a>!(*c))
+<pre><code><b>public</b> <b>fun</b> <a href="./ascii.md#ascii_ascii_is_bytes_extended">is_bytes_extended</a>(bytes: &vector&lt;u8&gt;): bool {
+    bytes.all!(|c| <a href="./extended.md#ascii_extended_is_extended">extended::is_extended</a>!(*c))
 }
 </code></pre>
 

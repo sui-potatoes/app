@@ -43,7 +43,7 @@ assert!(decoded == b"hello, potato!");
 Encode a string to hex format.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/hex.md#codec_hex_encode">encode</a>(bytes: vector&lt;u8&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./hex.md#codec_hex_encode">encode</a>(bytes: vector&lt;u8&gt;): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -52,8 +52,8 @@ Encode a string to hex format.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/hex.md#codec_hex_encode">encode</a>(bytes: vector&lt;u8&gt;): String {
-    <a href="../codec/hex.md#codec_hex_encode">hex::encode</a>(bytes).to_string()
+<pre><code><b>public</b> <b>fun</b> <a href="./hex.md#codec_hex_encode">encode</a>(bytes: vector&lt;u8&gt;): String {
+    <a href="./hex.md#codec_hex_encode">hex::encode</a>(bytes).to_string()
 }
 </code></pre>
 
@@ -68,7 +68,7 @@ Encode a string to hex format.
 Decode a hex-encoded string.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/hex.md#codec_hex_decode">decode</a>(string: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./hex.md#codec_hex_decode">decode</a>(string: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -77,8 +77,8 @@ Decode a hex-encoded string.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../codec/hex.md#codec_hex_decode">decode</a>(string: String): vector&lt;u8&gt; {
-    <a href="../codec/hex.md#codec_hex_decode">hex::decode</a>(string.into_bytes())
+<pre><code><b>public</b> <b>fun</b> <a href="./hex.md#codec_hex_decode">decode</a>(string: String): vector&lt;u8&gt; {
+    <a href="./hex.md#codec_hex_decode">hex::decode</a>(string.into_bytes())
 }
 </code></pre>
 

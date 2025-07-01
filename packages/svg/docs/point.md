@@ -24,7 +24,7 @@ is extensively used in the SVG library.
 Point struct, represents a point in 2D space.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../svg/point.md#(svg=0x0)_point_Point">Point</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="./point.md#(svg=0x0)_point_Point">Point</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -56,7 +56,7 @@ Point struct, represents a point in 2D space.
 Create a new point.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/point.md#(svg=0x0)_point">point</a>(x: u16, y: u16): (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/point.md#(svg=0x0)_point_Point">point::Point</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#(svg=0x0)_point">point</a>(x: u16, y: u16): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point_Point">point::Point</a>
 </code></pre>
 
 
@@ -65,7 +65,7 @@ Create a new point.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/point.md#(svg=0x0)_point">point</a>(x: u16, y: u16): <a href="../svg/point.md#(svg=0x0)_point_Point">Point</a> { <a href="../svg/point.md#(svg=0x0)_point_Point">Point</a>(x, y) }
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#(svg=0x0)_point">point</a>(x: u16, y: u16): <a href="./point.md#(svg=0x0)_point_Point">Point</a> { <a href="./point.md#(svg=0x0)_point_Point">Point</a>(x, y) }
 </code></pre>
 
 
@@ -79,7 +79,7 @@ Create a new point.
 Move a point to a new location. Recreates the point with the new x and y.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/point.md#(svg=0x0)_point_move_to">move_to</a>(<a href="../svg/point.md#(svg=0x0)_point">point</a>: &<b>mut</b> (<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/point.md#(svg=0x0)_point_Point">point::Point</a>, x: u16, y: u16)
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#(svg=0x0)_point_move_to">move_to</a>(<a href="./point.md#(svg=0x0)_point">point</a>: &<b>mut</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point_Point">point::Point</a>, x: u16, y: u16)
 </code></pre>
 
 
@@ -88,9 +88,9 @@ Move a point to a new location. Recreates the point with the new x and y.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/point.md#(svg=0x0)_point_move_to">move_to</a>(<a href="../svg/point.md#(svg=0x0)_point">point</a>: &<b>mut</b> <a href="../svg/point.md#(svg=0x0)_point_Point">Point</a>, x: u16, y: u16) {
-    <a href="../svg/point.md#(svg=0x0)_point">point</a>.0 = x;
-    <a href="../svg/point.md#(svg=0x0)_point">point</a>.1 = y;
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#(svg=0x0)_point_move_to">move_to</a>(<a href="./point.md#(svg=0x0)_point">point</a>: &<b>mut</b> <a href="./point.md#(svg=0x0)_point_Point">Point</a>, x: u16, y: u16) {
+    <a href="./point.md#(svg=0x0)_point">point</a>.0 = x;
+    <a href="./point.md#(svg=0x0)_point">point</a>.1 = y;
 }
 </code></pre>
 
@@ -105,7 +105,7 @@ Move a point to a new location. Recreates the point with the new x and y.
 Get the x and y values of a point.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/point.md#(svg=0x0)_point_to_values">to_values</a>(<a href="../svg/point.md#(svg=0x0)_point">point</a>: &(<a href="../svg/svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="../svg/point.md#(svg=0x0)_point_Point">point::Point</a>): (u16, u16)
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#(svg=0x0)_point_to_values">to_values</a>(<a href="./point.md#(svg=0x0)_point">point</a>: &(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point_Point">point::Point</a>): (u16, u16)
 </code></pre>
 
 
@@ -114,7 +114,7 @@ Get the x and y values of a point.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../svg/point.md#(svg=0x0)_point_to_values">to_values</a>(<a href="../svg/point.md#(svg=0x0)_point">point</a>: &<a href="../svg/point.md#(svg=0x0)_point_Point">Point</a>): (u16, u16) { (<a href="../svg/point.md#(svg=0x0)_point">point</a>.0, <a href="../svg/point.md#(svg=0x0)_point">point</a>.1) }
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#(svg=0x0)_point_to_values">to_values</a>(<a href="./point.md#(svg=0x0)_point">point</a>: &<a href="./point.md#(svg=0x0)_point_Point">Point</a>): (u16, u16) { (<a href="./point.md#(svg=0x0)_point">point</a>.0, <a href="./point.md#(svg=0x0)_point">point</a>.1) }
 </code></pre>
 
 

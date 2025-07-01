@@ -6,8 +6,8 @@
 Table of non-extended, printable ASCII characters, each macro returns the
 corresponding ASCII code.
 
-- Lowercase letters are spelled without a prefix, eg <code><a href="../ascii/char.md#ascii_char_a">a</a></code> is the ASCII <code>97</code>.
-- Uppercase letters are spelled in uppercase, eg <code><a href="../ascii/char.md#ascii_char_A">A</a></code> is the ASCII <code>65</code>.
+- Lowercase letters are spelled without a prefix, eg <code><a href="./char.md#ascii_char_a">a</a></code> is the ASCII <code>97</code>.
+- Uppercase letters are spelled in uppercase, eg <code><a href="./char.md#ascii_char_A">A</a></code> is the ASCII <code>65</code>.
 
 
 -  [Macro function `is_printable`](#ascii_char_is_printable)
@@ -124,7 +124,7 @@ corresponding ASCII code.
 Check if a character is printable.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_printable">is_printable</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_printable">is_printable</a>($<a href="./char.md#ascii_char">char</a>: u8): bool
 </code></pre>
 
 
@@ -133,7 +133,7 @@ Check if a character is printable.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_printable">is_printable</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool { $<a href="../ascii/char.md#ascii_char">char</a> &gt;= 32 && $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 126 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_printable">is_printable</a>($<a href="./char.md#ascii_char">char</a>: u8): bool { $<a href="./char.md#ascii_char">char</a> &gt;= 32 && $<a href="./char.md#ascii_char">char</a> &lt;= 126 }
 </code></pre>
 
 
@@ -147,7 +147,7 @@ Check if a character is printable.
 Check if a character is a digit.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_digit">is_digit</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_digit">is_digit</a>($<a href="./char.md#ascii_char">char</a>: u8): bool
 </code></pre>
 
 
@@ -156,7 +156,7 @@ Check if a character is a digit.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_digit">is_digit</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool { $<a href="../ascii/char.md#ascii_char">char</a> &gt;= 48 && $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 57 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_digit">is_digit</a>($<a href="./char.md#ascii_char">char</a>: u8): bool { $<a href="./char.md#ascii_char">char</a> &gt;= 48 && $<a href="./char.md#ascii_char">char</a> &lt;= 57 }
 </code></pre>
 
 
@@ -170,7 +170,7 @@ Check if a character is a digit.
 Check if a character is a letter.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_letter">is_letter</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_letter">is_letter</a>($<a href="./char.md#ascii_char">char</a>: u8): bool
 </code></pre>
 
 
@@ -179,7 +179,7 @@ Check if a character is a letter.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_letter">is_letter</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool { $<a href="../ascii/char.md#ascii_char">char</a> &gt;= 65 && $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 90 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_letter">is_letter</a>($<a href="./char.md#ascii_char">char</a>: u8): bool { $<a href="./char.md#ascii_char">char</a> &gt;= 65 && $<a href="./char.md#ascii_char">char</a> &lt;= 90 }
 </code></pre>
 
 
@@ -193,7 +193,7 @@ Check if a character is a letter.
 Check if a character is a lowercase letter.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_lowercase">is_lowercase</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_lowercase">is_lowercase</a>($<a href="./char.md#ascii_char">char</a>: u8): bool
 </code></pre>
 
 
@@ -202,7 +202,7 @@ Check if a character is a lowercase letter.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_lowercase">is_lowercase</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool { $<a href="../ascii/char.md#ascii_char">char</a> &gt;= 97 && $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 122 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_lowercase">is_lowercase</a>($<a href="./char.md#ascii_char">char</a>: u8): bool { $<a href="./char.md#ascii_char">char</a> &gt;= 97 && $<a href="./char.md#ascii_char">char</a> &lt;= 122 }
 </code></pre>
 
 
@@ -216,7 +216,7 @@ Check if a character is a lowercase letter.
 Check if a character is an uppercase letter.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_uppercase">is_uppercase</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_uppercase">is_uppercase</a>($<a href="./char.md#ascii_char">char</a>: u8): bool
 </code></pre>
 
 
@@ -225,7 +225,7 @@ Check if a character is an uppercase letter.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_uppercase">is_uppercase</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool { $<a href="../ascii/char.md#ascii_char">char</a> &gt;= 65 && $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 90 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_uppercase">is_uppercase</a>($<a href="./char.md#ascii_char">char</a>: u8): bool { $<a href="./char.md#ascii_char">char</a> &gt;= 65 && $<a href="./char.md#ascii_char">char</a> &lt;= 90 }
 </code></pre>
 
 
@@ -239,7 +239,7 @@ Check if a character is an uppercase letter.
 Check if a character is alphanumeric.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_alphanumeric">is_alphanumeric</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_alphanumeric">is_alphanumeric</a>($<a href="./char.md#ascii_char">char</a>: u8): bool
 </code></pre>
 
 
@@ -248,8 +248,8 @@ Check if a character is alphanumeric.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_is_alphanumeric">is_alphanumeric</a>($<a href="../ascii/char.md#ascii_char">char</a>: u8): bool {
-    $<a href="../ascii/char.md#ascii_char">char</a> &gt;= 48 && $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 57 || $<a href="../ascii/char.md#ascii_char">char</a> &gt;= 65 && $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 90 || $<a href="../ascii/char.md#ascii_char">char</a> &gt;= 97 && $<a href="../ascii/char.md#ascii_char">char</a> &lt;= 122
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_is_alphanumeric">is_alphanumeric</a>($<a href="./char.md#ascii_char">char</a>: u8): bool {
+    $<a href="./char.md#ascii_char">char</a> &gt;= 48 && $<a href="./char.md#ascii_char">char</a> &lt;= 57 || $<a href="./char.md#ascii_char">char</a> &gt;= 65 && $<a href="./char.md#ascii_char">char</a> &lt;= 90 || $<a href="./char.md#ascii_char">char</a> &gt;= 97 && $<a href="./char.md#ascii_char">char</a> &lt;= 122
 }
 </code></pre>
 
@@ -264,7 +264,7 @@ Check if a character is alphanumeric.
 Space character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_space">space</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_space">space</a>(): u8
 </code></pre>
 
 
@@ -273,7 +273,7 @@ Space character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_space">space</a>(): u8 { 32 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_space">space</a>(): u8 { 32 }
 </code></pre>
 
 
@@ -287,7 +287,7 @@ Space character.
 Exclamation mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_exclamation_mark">exclamation_mark</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_exclamation_mark">exclamation_mark</a>(): u8
 </code></pre>
 
 
@@ -296,7 +296,7 @@ Exclamation mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_exclamation_mark">exclamation_mark</a>(): u8 { 33 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_exclamation_mark">exclamation_mark</a>(): u8 { 33 }
 </code></pre>
 
 
@@ -310,7 +310,7 @@ Exclamation mark character.
 Double quote character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_double_quote">double_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_double_quote">double_quote</a>(): u8
 </code></pre>
 
 
@@ -319,7 +319,7 @@ Double quote character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_double_quote">double_quote</a>(): u8 { 34 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_double_quote">double_quote</a>(): u8 { 34 }
 </code></pre>
 
 
@@ -333,7 +333,7 @@ Double quote character.
 Hash character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_hash">hash</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_hash">hash</a>(): u8
 </code></pre>
 
 
@@ -342,7 +342,7 @@ Hash character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_hash">hash</a>(): u8 { 35 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_hash">hash</a>(): u8 { 35 }
 </code></pre>
 
 
@@ -356,7 +356,7 @@ Hash character.
 Dollar character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_dollar">dollar</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_dollar">dollar</a>(): u8
 </code></pre>
 
 
@@ -365,7 +365,7 @@ Dollar character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_dollar">dollar</a>(): u8 { 36 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_dollar">dollar</a>(): u8 { 36 }
 </code></pre>
 
 
@@ -379,7 +379,7 @@ Dollar character.
 Percent character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_percent">percent</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_percent">percent</a>(): u8
 </code></pre>
 
 
@@ -388,7 +388,7 @@ Percent character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_percent">percent</a>(): u8 { 37 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_percent">percent</a>(): u8 { 37 }
 </code></pre>
 
 
@@ -402,7 +402,7 @@ Percent character.
 Ampersand character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_ampersand">ampersand</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_ampersand">ampersand</a>(): u8
 </code></pre>
 
 
@@ -411,7 +411,7 @@ Ampersand character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_ampersand">ampersand</a>(): u8 { 38 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_ampersand">ampersand</a>(): u8 { 38 }
 </code></pre>
 
 
@@ -425,7 +425,7 @@ Ampersand character.
 Single quote character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_single_quote">single_quote</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_single_quote">single_quote</a>(): u8
 </code></pre>
 
 
@@ -434,7 +434,7 @@ Single quote character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_single_quote">single_quote</a>(): u8 { 39 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_single_quote">single_quote</a>(): u8 { 39 }
 </code></pre>
 
 
@@ -448,7 +448,7 @@ Single quote character.
 Left parenthesis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_left_paren">left_paren</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_left_paren">left_paren</a>(): u8
 </code></pre>
 
 
@@ -457,7 +457,7 @@ Left parenthesis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_left_paren">left_paren</a>(): u8 { 40 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_left_paren">left_paren</a>(): u8 { 40 }
 </code></pre>
 
 
@@ -471,7 +471,7 @@ Left parenthesis character.
 Right parenthesis character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_right_paren">right_paren</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_right_paren">right_paren</a>(): u8
 </code></pre>
 
 
@@ -480,7 +480,7 @@ Right parenthesis character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_right_paren">right_paren</a>(): u8 { 41 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_right_paren">right_paren</a>(): u8 { 41 }
 </code></pre>
 
 
@@ -494,7 +494,7 @@ Right parenthesis character.
 Asterisk character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_asterisk">asterisk</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_asterisk">asterisk</a>(): u8
 </code></pre>
 
 
@@ -503,7 +503,7 @@ Asterisk character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_asterisk">asterisk</a>(): u8 { 42 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_asterisk">asterisk</a>(): u8 { 42 }
 </code></pre>
 
 
@@ -517,7 +517,7 @@ Asterisk character.
 Plus character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_plus">plus</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_plus">plus</a>(): u8
 </code></pre>
 
 
@@ -526,7 +526,7 @@ Plus character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_plus">plus</a>(): u8 { 43 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_plus">plus</a>(): u8 { 43 }
 </code></pre>
 
 
@@ -540,7 +540,7 @@ Plus character.
 Comma character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_comma">comma</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_comma">comma</a>(): u8
 </code></pre>
 
 
@@ -549,7 +549,7 @@ Comma character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_comma">comma</a>(): u8 { 44 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_comma">comma</a>(): u8 { 44 }
 </code></pre>
 
 
@@ -563,7 +563,7 @@ Comma character.
 Minus character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_minus">minus</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_minus">minus</a>(): u8
 </code></pre>
 
 
@@ -572,7 +572,7 @@ Minus character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_minus">minus</a>(): u8 { 45 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_minus">minus</a>(): u8 { 45 }
 </code></pre>
 
 
@@ -586,7 +586,7 @@ Minus character.
 Period character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_period">period</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_period">period</a>(): u8
 </code></pre>
 
 
@@ -595,7 +595,7 @@ Period character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_period">period</a>(): u8 { 46 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_period">period</a>(): u8 { 46 }
 </code></pre>
 
 
@@ -609,7 +609,7 @@ Period character.
 Forward slash character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_forward_slash">forward_slash</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_forward_slash">forward_slash</a>(): u8
 </code></pre>
 
 
@@ -618,7 +618,7 @@ Forward slash character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_forward_slash">forward_slash</a>(): u8 { 47 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_forward_slash">forward_slash</a>(): u8 { 47 }
 </code></pre>
 
 
@@ -632,7 +632,7 @@ Forward slash character.
 Zero character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_zero">zero</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_zero">zero</a>(): u8
 </code></pre>
 
 
@@ -641,7 +641,7 @@ Zero character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_zero">zero</a>(): u8 { 48 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_zero">zero</a>(): u8 { 48 }
 </code></pre>
 
 
@@ -655,7 +655,7 @@ Zero character.
 One character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_one">one</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_one">one</a>(): u8
 </code></pre>
 
 
@@ -664,7 +664,7 @@ One character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_one">one</a>(): u8 { 49 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_one">one</a>(): u8 { 49 }
 </code></pre>
 
 
@@ -678,7 +678,7 @@ One character.
 Two character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_two">two</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_two">two</a>(): u8
 </code></pre>
 
 
@@ -687,7 +687,7 @@ Two character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_two">two</a>(): u8 { 50 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_two">two</a>(): u8 { 50 }
 </code></pre>
 
 
@@ -701,7 +701,7 @@ Two character.
 Three character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_three">three</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_three">three</a>(): u8
 </code></pre>
 
 
@@ -710,7 +710,7 @@ Three character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_three">three</a>(): u8 { 51 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_three">three</a>(): u8 { 51 }
 </code></pre>
 
 
@@ -724,7 +724,7 @@ Three character.
 Four character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_four">four</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_four">four</a>(): u8
 </code></pre>
 
 
@@ -733,7 +733,7 @@ Four character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_four">four</a>(): u8 { 52 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_four">four</a>(): u8 { 52 }
 </code></pre>
 
 
@@ -747,7 +747,7 @@ Four character.
 Five character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_five">five</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_five">five</a>(): u8
 </code></pre>
 
 
@@ -756,7 +756,7 @@ Five character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_five">five</a>(): u8 { 53 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_five">five</a>(): u8 { 53 }
 </code></pre>
 
 
@@ -770,7 +770,7 @@ Five character.
 Six character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_six">six</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_six">six</a>(): u8
 </code></pre>
 
 
@@ -779,7 +779,7 @@ Six character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_six">six</a>(): u8 { 54 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_six">six</a>(): u8 { 54 }
 </code></pre>
 
 
@@ -793,7 +793,7 @@ Six character.
 Seven character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_seven">seven</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_seven">seven</a>(): u8
 </code></pre>
 
 
@@ -802,7 +802,7 @@ Seven character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_seven">seven</a>(): u8 { 55 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_seven">seven</a>(): u8 { 55 }
 </code></pre>
 
 
@@ -816,7 +816,7 @@ Seven character.
 Eight character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_eight">eight</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_eight">eight</a>(): u8
 </code></pre>
 
 
@@ -825,7 +825,7 @@ Eight character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_eight">eight</a>(): u8 { 56 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_eight">eight</a>(): u8 { 56 }
 </code></pre>
 
 
@@ -839,7 +839,7 @@ Eight character.
 Nine character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_nine">nine</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_nine">nine</a>(): u8
 </code></pre>
 
 
@@ -848,7 +848,7 @@ Nine character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_nine">nine</a>(): u8 { 57 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_nine">nine</a>(): u8 { 57 }
 </code></pre>
 
 
@@ -862,7 +862,7 @@ Nine character.
 Colon character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_colon">colon</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_colon">colon</a>(): u8
 </code></pre>
 
 
@@ -871,7 +871,7 @@ Colon character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_colon">colon</a>(): u8 { 58 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_colon">colon</a>(): u8 { 58 }
 </code></pre>
 
 
@@ -885,7 +885,7 @@ Colon character.
 Semicolon character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_semicolon">semicolon</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_semicolon">semicolon</a>(): u8
 </code></pre>
 
 
@@ -894,7 +894,7 @@ Semicolon character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_semicolon">semicolon</a>(): u8 { 59 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_semicolon">semicolon</a>(): u8 { 59 }
 </code></pre>
 
 
@@ -908,7 +908,7 @@ Semicolon character.
 Less than character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_less_than">less_than</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_less_than">less_than</a>(): u8
 </code></pre>
 
 
@@ -917,7 +917,7 @@ Less than character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_less_than">less_than</a>(): u8 { 60 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_less_than">less_than</a>(): u8 { 60 }
 </code></pre>
 
 
@@ -931,7 +931,7 @@ Less than character.
 Equals character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_equals">equals</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_equals">equals</a>(): u8
 </code></pre>
 
 
@@ -940,7 +940,7 @@ Equals character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_equals">equals</a>(): u8 { 61 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_equals">equals</a>(): u8 { 61 }
 </code></pre>
 
 
@@ -954,7 +954,7 @@ Equals character.
 Greater than character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_greater_than">greater_than</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_greater_than">greater_than</a>(): u8
 </code></pre>
 
 
@@ -963,7 +963,7 @@ Greater than character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_greater_than">greater_than</a>(): u8 { 62 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_greater_than">greater_than</a>(): u8 { 62 }
 </code></pre>
 
 
@@ -977,7 +977,7 @@ Greater than character.
 Question mark character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_question_mark">question_mark</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_question_mark">question_mark</a>(): u8
 </code></pre>
 
 
@@ -986,7 +986,7 @@ Question mark character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_question_mark">question_mark</a>(): u8 { 63 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_question_mark">question_mark</a>(): u8 { 63 }
 </code></pre>
 
 
@@ -1000,7 +1000,7 @@ Question mark character.
 At sign character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_at">at</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_at">at</a>(): u8
 </code></pre>
 
 
@@ -1009,7 +1009,7 @@ At sign character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_at">at</a>(): u8 { 64 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_at">at</a>(): u8 { 64 }
 </code></pre>
 
 
@@ -1023,7 +1023,7 @@ At sign character.
 Uppercase A character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_A">A</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_A">A</a>(): u8
 </code></pre>
 
 
@@ -1032,7 +1032,7 @@ Uppercase A character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_A">A</a>(): u8 { 65 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_A">A</a>(): u8 { 65 }
 </code></pre>
 
 
@@ -1046,7 +1046,7 @@ Uppercase A character.
 Uppercase B character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_B">B</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_B">B</a>(): u8
 </code></pre>
 
 
@@ -1055,7 +1055,7 @@ Uppercase B character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_B">B</a>(): u8 { 66 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_B">B</a>(): u8 { 66 }
 </code></pre>
 
 
@@ -1069,7 +1069,7 @@ Uppercase B character.
 Uppercase C character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_C">C</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_C">C</a>(): u8
 </code></pre>
 
 
@@ -1078,7 +1078,7 @@ Uppercase C character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_C">C</a>(): u8 { 67 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_C">C</a>(): u8 { 67 }
 </code></pre>
 
 
@@ -1092,7 +1092,7 @@ Uppercase C character.
 Uppercase D character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_D">D</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_D">D</a>(): u8
 </code></pre>
 
 
@@ -1101,7 +1101,7 @@ Uppercase D character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_D">D</a>(): u8 { 68 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_D">D</a>(): u8 { 68 }
 </code></pre>
 
 
@@ -1115,7 +1115,7 @@ Uppercase D character.
 Uppercase E character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_E">E</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_E">E</a>(): u8
 </code></pre>
 
 
@@ -1124,7 +1124,7 @@ Uppercase E character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_E">E</a>(): u8 { 69 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_E">E</a>(): u8 { 69 }
 </code></pre>
 
 
@@ -1138,7 +1138,7 @@ Uppercase E character.
 Uppercase F character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_F">F</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_F">F</a>(): u8
 </code></pre>
 
 
@@ -1147,7 +1147,7 @@ Uppercase F character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_F">F</a>(): u8 { 70 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_F">F</a>(): u8 { 70 }
 </code></pre>
 
 
@@ -1161,7 +1161,7 @@ Uppercase F character.
 Uppercase G character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_G">G</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_G">G</a>(): u8
 </code></pre>
 
 
@@ -1170,7 +1170,7 @@ Uppercase G character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_G">G</a>(): u8 { 71 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_G">G</a>(): u8 { 71 }
 </code></pre>
 
 
@@ -1184,7 +1184,7 @@ Uppercase G character.
 Uppercase H character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_H">H</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_H">H</a>(): u8
 </code></pre>
 
 
@@ -1193,7 +1193,7 @@ Uppercase H character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_H">H</a>(): u8 { 72 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_H">H</a>(): u8 { 72 }
 </code></pre>
 
 
@@ -1207,7 +1207,7 @@ Uppercase H character.
 Uppercase I character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_I">I</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_I">I</a>(): u8
 </code></pre>
 
 
@@ -1216,7 +1216,7 @@ Uppercase I character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_I">I</a>(): u8 { 73 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_I">I</a>(): u8 { 73 }
 </code></pre>
 
 
@@ -1230,7 +1230,7 @@ Uppercase I character.
 Uppercase J character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_J">J</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_J">J</a>(): u8
 </code></pre>
 
 
@@ -1239,7 +1239,7 @@ Uppercase J character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_J">J</a>(): u8 { 74 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_J">J</a>(): u8 { 74 }
 </code></pre>
 
 
@@ -1253,7 +1253,7 @@ Uppercase J character.
 Uppercase K character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_K">K</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_K">K</a>(): u8
 </code></pre>
 
 
@@ -1262,7 +1262,7 @@ Uppercase K character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_K">K</a>(): u8 { 75 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_K">K</a>(): u8 { 75 }
 </code></pre>
 
 
@@ -1276,7 +1276,7 @@ Uppercase K character.
 Uppercase L character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_L">L</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_L">L</a>(): u8
 </code></pre>
 
 
@@ -1285,7 +1285,7 @@ Uppercase L character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_L">L</a>(): u8 { 76 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_L">L</a>(): u8 { 76 }
 </code></pre>
 
 
@@ -1299,7 +1299,7 @@ Uppercase L character.
 Uppercase M character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_M">M</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_M">M</a>(): u8
 </code></pre>
 
 
@@ -1308,7 +1308,7 @@ Uppercase M character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_M">M</a>(): u8 { 77 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_M">M</a>(): u8 { 77 }
 </code></pre>
 
 
@@ -1322,7 +1322,7 @@ Uppercase M character.
 Uppercase N character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_N">N</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_N">N</a>(): u8
 </code></pre>
 
 
@@ -1331,7 +1331,7 @@ Uppercase N character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_N">N</a>(): u8 { 78 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_N">N</a>(): u8 { 78 }
 </code></pre>
 
 
@@ -1345,7 +1345,7 @@ Uppercase N character.
 Uppercase O character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_O">O</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_O">O</a>(): u8
 </code></pre>
 
 
@@ -1354,7 +1354,7 @@ Uppercase O character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_O">O</a>(): u8 { 79 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_O">O</a>(): u8 { 79 }
 </code></pre>
 
 
@@ -1368,7 +1368,7 @@ Uppercase O character.
 Uppercase P character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_P">P</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_P">P</a>(): u8
 </code></pre>
 
 
@@ -1377,7 +1377,7 @@ Uppercase P character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_P">P</a>(): u8 { 80 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_P">P</a>(): u8 { 80 }
 </code></pre>
 
 
@@ -1391,7 +1391,7 @@ Uppercase P character.
 Uppercase Q character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_Q">Q</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_Q">Q</a>(): u8
 </code></pre>
 
 
@@ -1400,7 +1400,7 @@ Uppercase Q character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_Q">Q</a>(): u8 { 81 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_Q">Q</a>(): u8 { 81 }
 </code></pre>
 
 
@@ -1414,7 +1414,7 @@ Uppercase Q character.
 Uppercase R character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_R">R</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_R">R</a>(): u8
 </code></pre>
 
 
@@ -1423,7 +1423,7 @@ Uppercase R character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_R">R</a>(): u8 { 82 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_R">R</a>(): u8 { 82 }
 </code></pre>
 
 
@@ -1437,7 +1437,7 @@ Uppercase R character.
 Uppercase S character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_S">S</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_S">S</a>(): u8
 </code></pre>
 
 
@@ -1446,7 +1446,7 @@ Uppercase S character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_S">S</a>(): u8 { 83 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_S">S</a>(): u8 { 83 }
 </code></pre>
 
 
@@ -1460,7 +1460,7 @@ Uppercase S character.
 Uppercase T character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_T">T</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_T">T</a>(): u8
 </code></pre>
 
 
@@ -1469,7 +1469,7 @@ Uppercase T character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_T">T</a>(): u8 { 84 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_T">T</a>(): u8 { 84 }
 </code></pre>
 
 
@@ -1483,7 +1483,7 @@ Uppercase T character.
 Uppercase U character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_U">U</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_U">U</a>(): u8
 </code></pre>
 
 
@@ -1492,7 +1492,7 @@ Uppercase U character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_U">U</a>(): u8 { 85 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_U">U</a>(): u8 { 85 }
 </code></pre>
 
 
@@ -1506,7 +1506,7 @@ Uppercase U character.
 Uppercase V character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_V">V</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_V">V</a>(): u8
 </code></pre>
 
 
@@ -1515,7 +1515,7 @@ Uppercase V character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_V">V</a>(): u8 { 86 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_V">V</a>(): u8 { 86 }
 </code></pre>
 
 
@@ -1529,7 +1529,7 @@ Uppercase V character.
 Uppercase W character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_W">W</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_W">W</a>(): u8
 </code></pre>
 
 
@@ -1538,7 +1538,7 @@ Uppercase W character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_W">W</a>(): u8 { 87 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_W">W</a>(): u8 { 87 }
 </code></pre>
 
 
@@ -1552,7 +1552,7 @@ Uppercase W character.
 Uppercase X character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_X">X</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_X">X</a>(): u8
 </code></pre>
 
 
@@ -1561,7 +1561,7 @@ Uppercase X character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_X">X</a>(): u8 { 88 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_X">X</a>(): u8 { 88 }
 </code></pre>
 
 
@@ -1575,7 +1575,7 @@ Uppercase X character.
 Uppercase Y character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_Y">Y</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_Y">Y</a>(): u8
 </code></pre>
 
 
@@ -1584,7 +1584,7 @@ Uppercase Y character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_Y">Y</a>(): u8 { 89 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_Y">Y</a>(): u8 { 89 }
 </code></pre>
 
 
@@ -1598,7 +1598,7 @@ Uppercase Y character.
 Uppercase Z character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_Z">Z</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_Z">Z</a>(): u8
 </code></pre>
 
 
@@ -1607,7 +1607,7 @@ Uppercase Z character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_Z">Z</a>(): u8 { 90 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_Z">Z</a>(): u8 { 90 }
 </code></pre>
 
 
@@ -1621,7 +1621,7 @@ Uppercase Z character.
 Left square bracket character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_left_bracket">left_bracket</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_left_bracket">left_bracket</a>(): u8
 </code></pre>
 
 
@@ -1630,7 +1630,7 @@ Left square bracket character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_left_bracket">left_bracket</a>(): u8 { 91 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_left_bracket">left_bracket</a>(): u8 { 91 }
 </code></pre>
 
 
@@ -1644,7 +1644,7 @@ Left square bracket character.
 Backslash character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_backslash">backslash</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_backslash">backslash</a>(): u8
 </code></pre>
 
 
@@ -1653,7 +1653,7 @@ Backslash character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_backslash">backslash</a>(): u8 { 92 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_backslash">backslash</a>(): u8 { 92 }
 </code></pre>
 
 
@@ -1667,7 +1667,7 @@ Backslash character.
 Right square bracket character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_right_bracket">right_bracket</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_right_bracket">right_bracket</a>(): u8
 </code></pre>
 
 
@@ -1676,7 +1676,7 @@ Right square bracket character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_right_bracket">right_bracket</a>(): u8 { 93 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_right_bracket">right_bracket</a>(): u8 { 93 }
 </code></pre>
 
 
@@ -1690,7 +1690,7 @@ Right square bracket character.
 Caret character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_caret">caret</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_caret">caret</a>(): u8
 </code></pre>
 
 
@@ -1699,7 +1699,7 @@ Caret character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_caret">caret</a>(): u8 { 94 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_caret">caret</a>(): u8 { 94 }
 </code></pre>
 
 
@@ -1713,7 +1713,7 @@ Caret character.
 Underscore character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_underscore">underscore</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_underscore">underscore</a>(): u8
 </code></pre>
 
 
@@ -1722,7 +1722,7 @@ Underscore character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_underscore">underscore</a>(): u8 { 95 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_underscore">underscore</a>(): u8 { 95 }
 </code></pre>
 
 
@@ -1736,7 +1736,7 @@ Underscore character.
 Backtick character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_backtick">backtick</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_backtick">backtick</a>(): u8
 </code></pre>
 
 
@@ -1745,7 +1745,7 @@ Backtick character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_backtick">backtick</a>(): u8 { 96 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_backtick">backtick</a>(): u8 { 96 }
 </code></pre>
 
 
@@ -1759,7 +1759,7 @@ Backtick character.
 Lowercase a character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_a">a</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_a">a</a>(): u8
 </code></pre>
 
 
@@ -1768,7 +1768,7 @@ Lowercase a character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_a">a</a>(): u8 { 97 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_a">a</a>(): u8 { 97 }
 </code></pre>
 
 
@@ -1782,7 +1782,7 @@ Lowercase a character.
 Lowercase b character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_b">b</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_b">b</a>(): u8
 </code></pre>
 
 
@@ -1791,7 +1791,7 @@ Lowercase b character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_b">b</a>(): u8 { 98 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_b">b</a>(): u8 { 98 }
 </code></pre>
 
 
@@ -1805,7 +1805,7 @@ Lowercase b character.
 Lowercase c character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_c">c</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_c">c</a>(): u8
 </code></pre>
 
 
@@ -1814,7 +1814,7 @@ Lowercase c character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_c">c</a>(): u8 { 99 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_c">c</a>(): u8 { 99 }
 </code></pre>
 
 
@@ -1828,7 +1828,7 @@ Lowercase c character.
 Lowercase d character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_d">d</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_d">d</a>(): u8
 </code></pre>
 
 
@@ -1837,7 +1837,7 @@ Lowercase d character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_d">d</a>(): u8 { 100 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_d">d</a>(): u8 { 100 }
 </code></pre>
 
 
@@ -1851,7 +1851,7 @@ Lowercase d character.
 Lowercase e character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_e">e</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_e">e</a>(): u8
 </code></pre>
 
 
@@ -1860,7 +1860,7 @@ Lowercase e character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_e">e</a>(): u8 { 101 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_e">e</a>(): u8 { 101 }
 </code></pre>
 
 
@@ -1874,7 +1874,7 @@ Lowercase e character.
 Lowercase f character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_f">f</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_f">f</a>(): u8
 </code></pre>
 
 
@@ -1883,7 +1883,7 @@ Lowercase f character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_f">f</a>(): u8 { 102 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_f">f</a>(): u8 { 102 }
 </code></pre>
 
 
@@ -1897,7 +1897,7 @@ Lowercase f character.
 Lowercase g character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_g">g</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_g">g</a>(): u8
 </code></pre>
 
 
@@ -1906,7 +1906,7 @@ Lowercase g character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_g">g</a>(): u8 { 103 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_g">g</a>(): u8 { 103 }
 </code></pre>
 
 
@@ -1920,7 +1920,7 @@ Lowercase g character.
 Lowercase h character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_h">h</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_h">h</a>(): u8
 </code></pre>
 
 
@@ -1929,7 +1929,7 @@ Lowercase h character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_h">h</a>(): u8 { 104 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_h">h</a>(): u8 { 104 }
 </code></pre>
 
 
@@ -1943,7 +1943,7 @@ Lowercase h character.
 Lowercase i character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_i">i</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_i">i</a>(): u8
 </code></pre>
 
 
@@ -1952,7 +1952,7 @@ Lowercase i character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_i">i</a>(): u8 { 105 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_i">i</a>(): u8 { 105 }
 </code></pre>
 
 
@@ -1966,7 +1966,7 @@ Lowercase i character.
 Lowercase j character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_j">j</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_j">j</a>(): u8
 </code></pre>
 
 
@@ -1975,7 +1975,7 @@ Lowercase j character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_j">j</a>(): u8 { 106 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_j">j</a>(): u8 { 106 }
 </code></pre>
 
 
@@ -1989,7 +1989,7 @@ Lowercase j character.
 Lowercase k character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_k">k</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_k">k</a>(): u8
 </code></pre>
 
 
@@ -1998,7 +1998,7 @@ Lowercase k character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_k">k</a>(): u8 { 107 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_k">k</a>(): u8 { 107 }
 </code></pre>
 
 
@@ -2012,7 +2012,7 @@ Lowercase k character.
 Lowercase l character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_l">l</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_l">l</a>(): u8
 </code></pre>
 
 
@@ -2021,7 +2021,7 @@ Lowercase l character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_l">l</a>(): u8 { 108 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_l">l</a>(): u8 { 108 }
 </code></pre>
 
 
@@ -2035,7 +2035,7 @@ Lowercase l character.
 Lowercase m character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_m">m</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_m">m</a>(): u8
 </code></pre>
 
 
@@ -2044,7 +2044,7 @@ Lowercase m character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_m">m</a>(): u8 { 109 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_m">m</a>(): u8 { 109 }
 </code></pre>
 
 
@@ -2058,7 +2058,7 @@ Lowercase m character.
 Lowercase n character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_n">n</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_n">n</a>(): u8
 </code></pre>
 
 
@@ -2067,7 +2067,7 @@ Lowercase n character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_n">n</a>(): u8 { 110 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_n">n</a>(): u8 { 110 }
 </code></pre>
 
 
@@ -2081,7 +2081,7 @@ Lowercase n character.
 Lowercase o character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_o">o</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_o">o</a>(): u8
 </code></pre>
 
 
@@ -2090,7 +2090,7 @@ Lowercase o character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_o">o</a>(): u8 { 111 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_o">o</a>(): u8 { 111 }
 </code></pre>
 
 
@@ -2104,7 +2104,7 @@ Lowercase o character.
 Lowercase p character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_p">p</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_p">p</a>(): u8
 </code></pre>
 
 
@@ -2113,7 +2113,7 @@ Lowercase p character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_p">p</a>(): u8 { 112 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_p">p</a>(): u8 { 112 }
 </code></pre>
 
 
@@ -2127,7 +2127,7 @@ Lowercase p character.
 Lowercase q character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_q">q</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_q">q</a>(): u8
 </code></pre>
 
 
@@ -2136,7 +2136,7 @@ Lowercase q character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_q">q</a>(): u8 { 113 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_q">q</a>(): u8 { 113 }
 </code></pre>
 
 
@@ -2150,7 +2150,7 @@ Lowercase q character.
 Lowercase r character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_r">r</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_r">r</a>(): u8
 </code></pre>
 
 
@@ -2159,7 +2159,7 @@ Lowercase r character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_r">r</a>(): u8 { 114 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_r">r</a>(): u8 { 114 }
 </code></pre>
 
 
@@ -2173,7 +2173,7 @@ Lowercase r character.
 Lowercase s character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_s">s</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_s">s</a>(): u8
 </code></pre>
 
 
@@ -2182,7 +2182,7 @@ Lowercase s character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_s">s</a>(): u8 { 115 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_s">s</a>(): u8 { 115 }
 </code></pre>
 
 
@@ -2196,7 +2196,7 @@ Lowercase s character.
 Lowercase t character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_t">t</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_t">t</a>(): u8
 </code></pre>
 
 
@@ -2205,7 +2205,7 @@ Lowercase t character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_t">t</a>(): u8 { 116 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_t">t</a>(): u8 { 116 }
 </code></pre>
 
 
@@ -2219,7 +2219,7 @@ Lowercase t character.
 Lowercase u character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_u">u</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_u">u</a>(): u8
 </code></pre>
 
 
@@ -2228,7 +2228,7 @@ Lowercase u character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_u">u</a>(): u8 { 117 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_u">u</a>(): u8 { 117 }
 </code></pre>
 
 
@@ -2242,7 +2242,7 @@ Lowercase u character.
 Lowercase v character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_v">v</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_v">v</a>(): u8
 </code></pre>
 
 
@@ -2251,7 +2251,7 @@ Lowercase v character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_v">v</a>(): u8 { 118 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_v">v</a>(): u8 { 118 }
 </code></pre>
 
 
@@ -2265,7 +2265,7 @@ Lowercase v character.
 Lowercase w character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_w">w</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_w">w</a>(): u8
 </code></pre>
 
 
@@ -2274,7 +2274,7 @@ Lowercase w character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_w">w</a>(): u8 { 119 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_w">w</a>(): u8 { 119 }
 </code></pre>
 
 
@@ -2288,7 +2288,7 @@ Lowercase w character.
 Lowercase x character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_x">x</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_x">x</a>(): u8
 </code></pre>
 
 
@@ -2297,7 +2297,7 @@ Lowercase x character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_x">x</a>(): u8 { 120 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_x">x</a>(): u8 { 120 }
 </code></pre>
 
 
@@ -2311,7 +2311,7 @@ Lowercase x character.
 Lowercase y character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_y">y</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_y">y</a>(): u8
 </code></pre>
 
 
@@ -2320,7 +2320,7 @@ Lowercase y character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_y">y</a>(): u8 { 121 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_y">y</a>(): u8 { 121 }
 </code></pre>
 
 
@@ -2334,7 +2334,7 @@ Lowercase y character.
 Lowercase z character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_z">z</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_z">z</a>(): u8
 </code></pre>
 
 
@@ -2343,7 +2343,7 @@ Lowercase z character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_z">z</a>(): u8 { 122 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_z">z</a>(): u8 { 122 }
 </code></pre>
 
 
@@ -2357,7 +2357,7 @@ Lowercase z character.
 Left curly brace character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_left_brace">left_brace</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_left_brace">left_brace</a>(): u8
 </code></pre>
 
 
@@ -2366,7 +2366,7 @@ Left curly brace character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_left_brace">left_brace</a>(): u8 { 123 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_left_brace">left_brace</a>(): u8 { 123 }
 </code></pre>
 
 
@@ -2380,7 +2380,7 @@ Left curly brace character.
 Vertical bar character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_vertical_bar">vertical_bar</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_vertical_bar">vertical_bar</a>(): u8
 </code></pre>
 
 
@@ -2389,7 +2389,7 @@ Vertical bar character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_vertical_bar">vertical_bar</a>(): u8 { 124 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_vertical_bar">vertical_bar</a>(): u8 { 124 }
 </code></pre>
 
 
@@ -2403,7 +2403,7 @@ Vertical bar character.
 Right curly brace character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_right_brace">right_brace</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_right_brace">right_brace</a>(): u8
 </code></pre>
 
 
@@ -2412,7 +2412,7 @@ Right curly brace character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_right_brace">right_brace</a>(): u8 { 125 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_right_brace">right_brace</a>(): u8 { 125 }
 </code></pre>
 
 
@@ -2426,7 +2426,7 @@ Right curly brace character.
 Tilde character.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_tilde">tilde</a>(): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_tilde">tilde</a>(): u8
 </code></pre>
 
 
@@ -2435,7 +2435,7 @@ Tilde character.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../ascii/char.md#ascii_char_tilde">tilde</a>(): u8 { 126 }
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./char.md#ascii_char_tilde">tilde</a>(): u8 { 126 }
 </code></pre>
 
 
