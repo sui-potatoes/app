@@ -4,7 +4,7 @@ edition = "2024"
 authors = ["Damir Shamanaev <damirka.ru@gmail.com>"]
 
 [dependencies]
-ascii = { r.mvr = "@potatoes/ascii/1" }
+ascii = { r.mvr = "@potatoes/ascii" }
 
 [addresses]
 date = "0x0"

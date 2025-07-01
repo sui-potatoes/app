@@ -6,9 +6,9 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
 bit-field = { local = "../bit-field" }
-Codec = { local = "../codec" }
+codec = { local = "../codec" }
 grid = { local = "../grid" }
-NameGenerator = { local = "../name-gen" }
+name-gen = { local = "../name-gen" }
 
 [addresses]
 commander = "0x0"

@@ -7,6 +7,5 @@ authors = ["Damir Shamanaev <damirka.ru@gmail.com>"]
 [dependencies]
 ascii = { r.mvr = "@potatoes/ascii" }
 
-
 [addresses]
 format = "0x0"

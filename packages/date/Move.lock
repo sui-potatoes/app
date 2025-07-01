@@ -2,7 +2,7 @@
 
 [move]
 version = 3
-manifest_digest = "795AAF59141D7D5208D18108BC784958D41BE0401ACFFB01F36C91FD1DF6810C"
+manifest_digest = "ADD476C844ACB284C2C2F42D55CCD33F6FFC26BE27A42FE64BB0646E102B39A5"
 deps_digest = "52B406A7A21811BEF51751CF88DA0E76DAEFFEAC888D4F4060B1A72BBE7D8D35"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
@@ -23,15 +23,6 @@ dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
   { id = "SuiSystem", name = "SuiSystem" },
-]
-
-[[move.package]]
-id = "Codec"
-source = { local = "../codec" }
-
-dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
 ]
 
 [[move.package]]
@@ -67,6 +58,17 @@ dependencies = [
 ]
 
 [[move.package]]
+id = "codec"
+source = { local = "../codec" }
+
+dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+]
+
+[[move.package]]
 id = "suifrens"
 source = { git = "https://github.com/MystenLabs/apps.git", rev = "main", subdir = "suifrens/suifrens" }
 
@@ -79,9 +81,11 @@ id = "svg"
 source = { local = "../svg" }
 
 dependencies = [
-  { id = "Codec", name = "Codec" },
+  { id = "Bridge", name = "Bridge" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+  { id = "codec", name = "codec" },
 ]
 
 dev-dependencies = [

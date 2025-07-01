@@ -21,14 +21,14 @@ To add this library to your project, add this to your `Move.toml` file under
 
 ```toml
 # goes into [dependencies] section
-BitField = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/bit-field", rev = "bit-field@v1" }
+bit-field = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/bit-field", rev = "bit-field@v1" }
 ```
 
 If you need a **mainnet** version of this package, use the `mainnet-v1` tag instead:
 
 ```toml
 # goes into [dependencies] section
-BitField = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/bit-field", rev = "bit-field@v1" }
+bit-field = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/bit-field", rev = "bit-field@v1" }
 ```
 
 Exported address of this package is:

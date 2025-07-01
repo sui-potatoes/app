@@ -1,11 +1,11 @@
 [package]
-name = "Character"
+name = "character"
 edition = "2024"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
 svg = { local = "../svg" }
-Codec = { local = "../codec" }
+codec = { local = "../codec" }
 
 [addresses]
 character = "0x0"

@@ -9,10 +9,7 @@ Additionally, it implements `base64url` and a `potatoes` encoding scheme which i
 ### [Move Registry CLI](https://docs.suins.io/move-registry)
 
 ```bash
-mvr add @potatoes/codec --network testnet
-
-# or for mainnet
-mvr add @potatoes/codec --network mainnet
+mvr add @potatoes/codec
 ```
 
 ### Manual
@@ -22,7 +19,7 @@ To add this library to your project, add this to your `Move.toml` file under
 
 ```toml
 # goes into [dependencies] section
-Codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@v3" }
+codec = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "codec@v3" }
 ```
 
 Exported address of this package is:

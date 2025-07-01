@@ -2,17 +2,17 @@
 
 [move]
 version = 3
-manifest_digest = "FAE3BBE7CE4972B37DCF751CAF4BC0784467068CBE747C370024465B26C98005"
+manifest_digest = "98D454F6D110BB14424C1AAA1D3E8710263C42A4E838A44BD8288E006ADB695F"
 deps_digest = "04732BFEF428F74DE262001DC455D76B909EBC394B034A9A15CC095E4BDD9CEF"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
-  { id = "Codec", name = "Codec" },
   { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "NameGenerator", name = "NameGenerator" },
   { id = "Sui", name = "Sui" },
   { id = "SuiSystem", name = "SuiSystem" },
   { id = "bit-field", name = "bit-field" },
+  { id = "codec", name = "codec" },
   { id = "grid", name = "grid" },
+  { id = "name-gen", name = "name-gen" },
 ]
 
 [[move.package]]
@@ -26,26 +26,8 @@ dependencies = [
 ]
 
 [[move.package]]
-id = "Codec"
-source = { local = "../codec" }
-
-dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-]
-
-[[move.package]]
 id = "MoveStdlib"
 source = { git = "https://github.com/MystenLabs/sui.git", rev = "af5297b292c3", subdir = "crates/sui-framework/packages/move-stdlib" }
-
-[[move.package]]
-id = "NameGenerator"
-source = { local = "../name-gen" }
-
-dependencies = [
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-]
 
 [[move.package]]
 id = "Sui"
@@ -76,8 +58,30 @@ dependencies = [
 ]
 
 [[move.package]]
+id = "codec"
+source = { local = "../codec" }
+
+dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+]
+
+[[move.package]]
 id = "grid"
 source = { local = "../grid" }
+
+dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+]
+
+[[move.package]]
+id = "name-gen"
+source = { local = "../name-gen" }
 
 dependencies = [
   { id = "Bridge", name = "Bridge" },

@@ -2,10 +2,11 @@
 
 # 1. Enter each folder, run `sui move build --doc`
 # 2. Create a new folder `docs` in each path
-# 3. Put the `build/docs/<package>/*` into docs
+# 3. Copy the `build/docs/<package>/*` into docs
 # 4. Grep replace `../dependencies/*` to `./dependencies/*` in each .md file
-# 5. Add a simlink to this folder in ../dependencies folder
-# 6. Add a simlink in docs/dependencies to ../dependencies
+# 5. Grep replace `../<package>/*` to `./` in each .md file
+# 6. Remove old symlink in ../.doc-deps/<package>
+# 7. Create a new symlink in ../.doc-deps/<package> to this docs folder
 
 set -euo pipefail
 
@@ -19,16 +20,16 @@ for dir in */ ; do
 
   echo "Building documentation in $dir"
 
-  # Step 0: Remove docs folder if exists
+  # Step 1: Remove docs folder if exists
   rm -rf docs;
 
-  # Step 1: Build docs
+  # Step 2: Build docs
   sui move build --doc;
 
-  # Step 2: Create docs folder if not exists
+  # Step 3: Create docs folder if not exists
   mkdir -p docs;
 
-  # Step 3: Copy generated docs to ./docs
+  # Step 4: Copy generated docs to ./docs
   pkg_name=$(basename "$(pwd)")
   upkg_name=$(basename "$(pwd)" | sed 's/-/_/g')
   if [ -d "build/$pkg_name/docs/$upkg_name" ]; then
@@ -37,15 +38,16 @@ for dir in */ ; do
     echo "No docs found in build/docs/$upkg_name"
   fi
 
-  # Step 4.1: Replace ../dependencies/* with ./dependencies/* in Markdown files
+  # Step 5: Replace ../dependencies/* with ./dependencies/* in Markdown files
   find docs -name '*.md' -exec sed -i '' -e 's|\.\./dependencies/|\.\./\.\./\.doc-deps/|g' {} +
 
-  # Step 4.2: Replace ../$upkg_name/* with ./* in Markdown files
+  # Step 6: Replace ../$upkg_name/* with ./* in Markdown files
   find docs -name '*.md' -exec sed -i '' -e "s|\.\.\/$upkg_name/|./|g" {} +
 
+  # Step 7: Remove old symlink
   rm -rf $(pwd)/../.doc-deps/$pkg_name;
 
-  # Step 5: Create symlink to this docs folder in ../dependencies
+  # Step 8: Create symlink to this docs folder in ../dependencies
   ln -sf "$(pwd)/docs" "$(pwd)/../.doc-deps/$pkg_name"
 
   cd ..

@@ -5,7 +5,7 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
 svg = { local = "../svg" }
-Codec = { local = "../codec" }
+codec = { local = "../codec" }
 
 [addresses]
 gogame = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
