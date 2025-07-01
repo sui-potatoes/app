@@ -11,10 +11,7 @@ The library does not contain a single public function, instead, it provides a se
 ### [Move Registry CLI](https://docs.suins.io/move-registry)
 
 ```bash
-mvr add @potatoes/bit-field --network testnet
-
-# or for mainnet
-mvr add @potatoes/bit-field --network mainnet
+mvr add @potatoes/bit-field
 ```
 
 ### Manual
