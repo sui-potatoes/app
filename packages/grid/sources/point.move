@@ -38,6 +38,11 @@ public fun x(p: &Point): u16 { p.0 }
 /// Get the `y` coordinate of a `Point`.
 public fun y(p: &Point): u16 { p.1 }
 
+/// Returns whether the point is within the given bounds: `height` and `width`.
+public fun is_within_bounds(p: &Point, height: u16, width: u16): bool {
+    p.0 < width && p.1 < height
+}
+
 /// Get the Manhattan distance between two points. Manhattan distance is the
 /// sum of the absolute differences of the x and y coordinates.
 ///

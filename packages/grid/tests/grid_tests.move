@@ -26,6 +26,28 @@ fun creation() {
 }
 
 #[test]
+fun do_and_do_ref() {
+    let grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
+
+    let mut sum = 0;
+    grid.do_ref!(|cell| sum = sum + *cell);
+    assert_eq!(sum, 36);
+
+    let mut sum = 0;
+    grid.do!(|cell| sum = sum + cell);
+    assert_eq!(sum, 36);
+}
+
+#[test]
+fun traverse() {
+    let grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
+
+    let mut sum = 0;
+    grid.traverse!(|cell, _, _| sum = sum + *cell);
+    assert_eq!(sum, 36);
+}
+
+#[test]
 fun borrows() {
     let mut grid = grid::from_vector(vector[vector[0]]);
     assert_eq!(grid[0, 0], 0);
@@ -34,63 +56,6 @@ fun borrows() {
     *&mut grid[0, 0] = 1;
     assert_eq!(grid[0, 0], 1);
 }
-
-// #[test]
-// fun von_neumann_bitmap() {
-//     let grid = grid::from_vector(vector[
-//         vector[0, 1, 0],
-//         vector[1, 0, 1],
-//         vector[0, 1, 0],
-//     ]);
-
-//     let bitmap = grid.von_neumann_bitmap!(point::new(1, 1), |cell| *cell == 1);
-//     assert!(bitmap & direction::up!() > 0);
-//     assert!(bitmap & direction::down!() > 0);
-//     assert!(bitmap & direction::left!() > 0);
-//     assert!(bitmap & direction::right!() > 0);
-
-//     let bitmap = grid.von_neumann_bitmap!(point::new(1, 1), |cell| *cell == 0);
-//     assert_eq!(bitmap, 0);
-
-//     let bitmap = grid.von_neumann_bitmap!(point::new(0, 0), |cell| *cell == 1);
-//     assert!(bitmap & direction::down!() > 0);
-//     assert!(bitmap & direction::right!() > 0);
-//     assert_eq!(bitmap & direction::left!(), 0);
-//     assert_eq!(bitmap & direction::up!(), 0);
-// }
-
-// #[test]
-// fun moore_bitmap() {
-//     let grid = grid::from_vector(vector[
-//         vector[1, 1, 1],
-//         vector[1, 1, 1],
-//         vector[1, 1, 1],
-//     ]);
-
-//     let bitmap = grid.moore_bitmap!(point::new(1, 1), |cell| *cell == 1);
-//     assert!(bitmap & direction::up!() > 0);
-//     assert!(bitmap & direction::down!() > 0);
-//     assert!(bitmap & direction::left!() > 0);
-//     assert!(bitmap & direction::right!() > 0);
-//     assert!(bitmap & (1 << 4) > 0);
-//     assert!(bitmap & (1 << 5) > 0);
-//     assert!(bitmap & (1 << 6) > 0);
-//     assert!(bitmap & (1 << 7) > 0);
-
-//     let bitmap = grid.moore_bitmap!(point::new(1, 1), |cell| *cell == 0);
-//     assert_eq!(bitmap, 0);
-
-//     let bitmap = grid.moore_bitmap!(point::new(0, 0), |cell| *cell == 1);
-//     assert!(bitmap & direction::down!() > 0);
-//     assert!(bitmap & direction::right!() > 0);
-//     assert!(bitmap & (1 << 7) > 0);
-
-//     assert_eq!(bitmap & direction::left!(), 0);
-//     assert_eq!(bitmap & direction::up!(), 0);
-//     assert_eq!(bitmap & (1 << 4), 0);
-//     assert_eq!(bitmap & (1 << 5), 0);
-//     assert_eq!(bitmap & (1 << 6), 0);
-// }
 
 #[test]
 fun swap() {
@@ -119,11 +84,18 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace_von_neumann!(&grid, 0, 0, 1, 4, 6, |_, _, x, y| grid[x, y] == &0);
+    let path = grid::trace!(
+        &grid,
+        point::new(0, 0),
+        point::new(1, 4),
+        |p| p.von_neumann(1),
+        |_, _| true,
+        6,
+    );
 
     assert!(path.is_some());
-    assert!(path.borrow().length() == 5);
-    assert!(path.borrow()[4] == point::new(1, 4));
+    assert_eq!(path.borrow().length(), 5);
+    assert_eq!(path.borrow()[4], point::new(1, 4));
 
     let grid = grid::from_vector(vector[
         vector[0, 1, 0, 0, 0],
@@ -133,7 +105,14 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace_von_neumann!(&grid, 0, 1, 3, 0, 10, |_, _, x, y| grid[x, y] == &0);
+    let path = grid::trace!(
+        &grid,
+        point::new(0, 1),
+        point::new(3, 0),
+        |p| p.von_neumann(1),
+        |_, to| *grid.borrow_point(to) == 0,
+        8,
+    );
 
     assert!(path.is_some());
     assert_ref_eq!(
@@ -162,7 +141,7 @@ fun find_group() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let group = grid.find_group!(0, 2, |el| *el == 1);
+    let group = grid.find_group!(point::new(0, 2), |p| p.von_neumann(1), |el| *el == 1);
     assert_eq!(group.length(), 6);
 }
 

@@ -20,7 +20,7 @@
 /// the left or to the right of another point
 module grid::grid;
 
-use grid::point::{Self, Point};
+use grid::point::Point;
 use std::{macros::{num_diff, num_max}, string::String};
 use sui::bcs::BCS;
 
@@ -144,6 +144,13 @@ public macro fun do<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
     into_vector($grid).do!(|row| row.do!(|cell| $f(cell)));
 }
 
+/// Apply the function `f` for each element of the `Grid`.
+/// The function receives a reference to the cell.
+public macro fun do_ref<$T, $R: drop>($grid: &Grid<$T>, $f: |&$T| -> $R) {
+    let grid = $grid;
+    grid.inner().do_ref!(|row| row.do_ref!(|cell| $f(cell)));
+}
+
 /// Traverse the grid, calling the function `f` for each cell. The function
 /// receives the reference to the cell, the x and y coordinates of the cell.
 public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, u16, u16| -> $R) {
@@ -221,42 +228,47 @@ public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T|
     count
 }
 
-/// Finds a group of cells that satisfy the predicate `f`. The function receives
-/// the cell at the current position, and returns whether the cell is part of the
-/// group.
+/// Finds a group of cells that satisfy the predicate `f` amongst the neighbors
+/// of the given point. The function `n` is used to get the neighbors of the
+/// current point. For Von Neumann neighborhood, use `von_neumann` as the
+/// function. For Moore neighborhood, use `moore` as the function.
 ///
 /// ```move
-/// // finds a group of cells with value 1
-/// grid.find_group!(0, 2, |el| *el == 1);
+/// // finds a group of cells with value 1 in von Neumann neighborhood
+/// grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
+///
+/// // finds a group of cells with value 1 in Moore neighborhood
+/// grid.find_group!(0, 2, |p| p.moore(1), |el| *el == 1);
+///
+/// // custom neighborhood, only checks the neighbor to the right
+/// grid.find_group!(0, 2, |p| vector[point::new(p.x(), p.y() + 1)], |el| *el == 1);
 /// ```
 public macro fun find_group<$T>(
     $map: &Grid<$T>,
-    $x: u16,
-    $y: u16,
+    $p: Point,
+    $n: |&Point| -> vector<Point>,
     $f: |&$T| -> bool,
 ): vector<Point> {
-    let (x, y) = ($x, $y);
+    let p = $p;
     let map = $map;
-    let (height, width) = (map.width(), map.height());
+    let (height, width) = (map.height(), map.width());
     let mut group = vector[];
     let mut visited = tabulate!(height, width, |_, _| false);
 
-    if (!$f(&map[x, y])) return group;
+    if (!$f(map.borrow_point(&p))) return group;
 
-    group.push_back(point::new(x, y));
-    *&mut visited[x, y] = true;
+    group.push_back(p);
+    *visited.borrow_point_mut(&p) = true;
 
-    let mut queue = vector[point::new(x, y)];
+    let mut queue = vector[p];
 
     while (queue.length() != 0) {
-        queue.pop_back().von_neumann(1).destroy!(|point| {
-            let (x, y) = point.into_values();
-            if (x >= height || y >= width || visited[x, y]) return;
-
-            if ($f(&map[x, y])) {
-                *&mut visited[x, y] = true;
-                group.push_back(point);
-                queue.push_back(point);
+        $n(&queue.pop_back()).destroy!(|p| {
+            if (!p.is_within_bounds(height, width) || *visited.borrow_point(&p)) return;
+            if ($f(map.borrow_point(&p))) {
+                *visited.borrow_point_mut(&p) = true;
+                group.push_back(p);
+                queue.push_back(p);
             }
         });
     };
@@ -264,7 +276,10 @@ public macro fun find_group<$T>(
     group
 }
 
-/// Use Wave Algorithm to find the shortest path between two points.
+/// Use Wave Algorithm to find the shortest path between two points. The function
+/// `n` returns the neighbors of the current point. The function `f` is used to
+/// check if the cell is passable - it takes two arguments: the current point
+/// and the next point.
 ///
 /// ```move
 /// // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
@@ -272,83 +287,74 @@ public macro fun find_group<$T>(
 /// ```
 ///
 /// TODO: consider using a A* algorithm for better performance.
-public macro fun trace_von_neumann<$T>(
+public macro fun trace<$T>(
     $map: &Grid<$T>,
-    $x0: u16,
-    $y0: u16,
-    $x1: u16,
-    $y1: u16,
+    $p0: Point,
+    $p1: Point,
+    $n: |&Point| -> vector<Point>,
+    $f: |&Point, &Point| -> bool, // whether the cell is passable
     $limit: u16,
-    $f: |u16, u16, u16, u16| -> bool, // whether the cell is passable
 ): Option<vector<Point>> {
-    let (x0, y0) = ($x0, $y0);
-    let (x1, y1) = ($x1, $y1);
-    let limit = 1 + $limit;
-
-    // if the difference between A and B is greater than the limit, return none
-    if (manhattan_distance!(x0, y0, x1, y1) > limit) {
-        return option::none()
-    };
+    let p0 = $p0;
+    let p1 = $p1;
+    let limit = $limit + 1; // we start from 1, not 0.
 
     let map = $map;
-    let (height, width) = (map.width(), map.height());
+    let (height, width) = (map.height(), map.width());
 
     // if the points are out of bounds, return none
-    if (x0 >= height || y0 >= width || x1 >= height || y1 >= width) {
+    if (!p0.is_within_bounds(height, width) || !p1.is_within_bounds(height, width)) {
         return option::none()
     };
 
     // surround the first element with 1s
     let mut num = 1;
-    let mut queue = vector[point::new(x0, y0)];
+    let mut queue = vector[p0];
     let mut grid = tabulate!(height, width, |_, _| 0);
 
-    *&mut grid[x0, y0] = num;
+    *grid.borrow_point_mut(&p0) = num;
 
     'search: while (num < limit && !queue.is_empty()) {
         num = num + 1;
 
         // flush the queue, marking all cells around the current number
-        queue.destroy!(|source| source.von_neumann(1).destroy!(|point| {
-            let (x0, y0) = source.into_values();
-            let (x, y) = point.into_values();
-            if (x >= height || y >= width) return;
+        queue.destroy!(|from| $n(&from).destroy!(|to| {
+            if (!to.is_within_bounds(height, width)) return;
 
             // if we reached the destination, break the loop
-            if (x == x1 && y == y1) {
-                *&mut grid[x, y] = num;
+            if (to == p1) {
+                *grid.borrow_point_mut(&to) = num;
                 break 'search
             };
 
             // if we can't pass through the cell, skip it
-            if (!$f(x0, y0, x, y)) return;
+            if (!$f(&from, &to)) return;
 
             // if the cell is empty, mark it with the current number
-            if (grid[x, y] == 0) {
-                *&mut grid[x, y] = num;
-                queue.push_back(point);
+            if (grid.borrow_point(&to) == 0) {
+                *grid.borrow_point_mut(&to) = num;
+                queue.push_back(to);
             }
         }));
     };
 
     // we never reached the destination within the limit
-    if (grid[x1, y1] == 0) {
+    if (grid.borrow_point(&p1) == 0) {
         return option::none()
     };
 
     // reconstruct the path by going from the destination to the source
-    let mut last_point = point::new(x1, y1);
-    let mut path = vector[last_point];
-    let mut num = grid[x1, y1];
+    let mut path = vector[p1];
+    let mut num = *grid.borrow_point(&p1);
+    let mut last_point = p1;
 
     'reconstruct: while (num > 1) {
         num = num - 1;
-        grid.von_neumann!(last_point, 1).destroy!(|point| {
-            let (x, y) = point.into_values();
-            if (x == x0 && y == y0) break 'reconstruct;
-            if (grid[x, y] == num) {
-                path.push_back(point::new(x, y));
-                last_point = point;
+        $n(&last_point).destroy!(|p| {
+            if (p == p0) break 'reconstruct;
+            if (grid.borrow_point(&p) == num) {
+                path.push_back(p);
+                last_point = p;
                 continue 'reconstruct
             }
         });
