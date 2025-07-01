@@ -1,336 +1,393 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Implements the game of Go. The game of Go is a board game for two players
-/// that originated in China more than 2,500 years ago. The game is rich in
-/// strategy despite its simple rules. The game is played on a square grid of
-/// size 19x19, 13x13, or 9x9. Players take turns placing stones of their
-/// color on the intersections of the grid. The goal is to surround territory
-/// and capture the opponent's stones. The game ends when both players pass
-/// consecutively, and the player with the most territory wins.
-///
-/// TODO: Implement scoring
-module gogame::go;
+/// Implements the actual game of Go.
+module go_game::go;
 
-public use fun gogame::render::svg as Board.print_svg;
+use grid::{grid::{Self, Grid}, point::{Self, Point}};
+use std::string::String;
 
-/// Trying to place a stone on an invalid field (already occupied).
-const EInvalidMove: u64 = 0;
-/// The move would result in the group being surrounded.
-const ESuicideMove: u64 = 1;
-/// The move would violate the Ko rule (repeating the board state).
-const EKoRule: u64 = 2;
+/// The move is invalid, the field is already occupied.
+const EInvalidMove: u64 = 1;
+/// The move is a suicide move.
+const ESuicideMove: u64 = 2;
+/// The move repeats previous state of the board.
+const EKoRuleBroken: u64 = 3;
 
-/// A color of a player or `Empty` when the field is not taken.
-public enum Color has copy, drop, store {
+/// The game board.
+public struct Board has copy, drop, store {
+    /// The size of the board.
+    size: u16,
+    /// The internal grid of the Game.
+    grid: Grid<Tile>,
+    /// The current player. `true` if black, `false` if white.
+    is_black: bool,
+    /// Captured stones.
+    score: Score,
+    /// Stores history of moves.
+    moves: vector<Point>,
+    /// Stores last 2 states to implement the ko rule.
+    prev_states: vector<Grid<Tile>>,
+}
+
+/// The score of the game, black and white stones.
+public struct Score has copy, drop, store {
+    black: u16,
+    white: u16,
+}
+
+/// A group of stones on the board. Tile marks the color of the group.
+/// Empty tile returns an empty group.
+public struct Group(Tile, vector<Point>) has copy, drop;
+
+/// A tile on the board. Implements a `to_string` method to allow printing.
+public enum Tile has copy, drop, store {
     Empty,
     Black,
     White,
 }
 
-/// The current turn of the game. The turn is either `Black` or `White`.
-public enum Turn has copy, drop, store {
-    Black,
-    White,
-}
-
-/// A player's move on the board, simply a pair of coordinates.
-public struct Point(u8, u8) has copy, drop, store;
-
-/// A group of stones on the board. A group is a set of connected stones of
-/// the same color. A group can be captured if all its liberties are taken.
-/// The first element is the color of the group, the second element is the
-/// set of points that make up the group.
-public struct Group(Color, vector<Point>) has copy, drop, store;
-
-/// The game board. The board is a square grid of size `size` by `size`.
-/// Normally, the board is 19x19, but casual games can be played on smaller
-/// boards, such as 9x9 or 13x13.
-public struct Board has copy, drop, store {
-    /// The board data. The board is a 2D vector of `u8` values. The values
-    /// can be `EMPTY`, `BLACK`, or `WHITE`.
-    data: vector<vector<Color>>,
-    /// The size of the board. The board is a square grid of size `size` by
-    /// `size`.
-    size: u8,
-    /// The current turn. The turn is either `BLACK` or `WHITE`.
-    /// The game starts with the black player.
-    turn: Turn,
-    /// The moves made on the board. The moves are stored as a vector of
-    /// points, where each point represents a stone placed on the board.
-    moves: vector<Point>,
-    /// The score of the game. The score is a vector of three elements:
-    /// - the neutral score (empty intersections)
-    /// - the score of the black player
-    /// - the score of the white player
-    scores: vector<u64>,
-    /// Stores the last two board states to check for the Ko rule.
-    ko_store: vector<vector<vector<Color>>>,
-}
-
-/// Create a new board.
-public fun new(size: u8): Board {
-    let row = vector::tabulate!(size as u64, |_| Color::Empty);
-    let data = vector::tabulate!(size as u64, |_| row);
-
+/// Create a new `Board` of the given `size`. Size can be `9`, `13`, or `19`.
+public fun new(size: u16): Board {
     Board {
-        data,
         size,
-        turn: Turn::Black,
+        grid: grid::tabulate!(size, size, |_, _| Tile::Empty),
+        is_black: true,
         moves: vector[],
-        scores: vector[0, 0, 0],
-        ko_store: vector[],
+        score: Score { black: 0, white: 0 },
+        prev_states: vector[],
     }
 }
 
-/// Place a stone on the board at the given coordinates. The stone is placed
-/// on the intersection of the grid at the coordinates `(x, y)`. The stone
-/// is placed by the current player. The player's turn is then switched.
-public fun place(board: &mut Board, x: u8, y: u8) {
-    let point = &mut board.data[x as u64][y as u64];
-    let turn = board.turn;
+/// Place a stone on the board at the given position.
+public fun place(board: &mut Board, x: u16, y: u16) {
+    let stone = if (board.is_black) Tile::Black else Tile::White;
 
-    assert!(point.is_empty(), EInvalidMove); // #[can't on a non-empty field]
+    assert!(board.grid.swap(x, y, stone) == Tile::Empty, EInvalidMove);
 
-    *point = board.turn.to_color();
-    board.turn.switch();
-    board.moves.push_back(Point(x, y));
+    // Check for suicide move: count neighbors of the point, if all of them are
+    // opponent's stones, the move is suicide. However, if the surrounding group
+    // is surrounded, the move is a capture.
+    let (mut my_stones, mut enemy_stones) = (vector[], vector[]);
+    let mut empty_num = 0;
 
-    let neighbors = neighbors(board.size, Point(x, y));
-    let mut opponent_stones = vector[];
-    let mut score = 0;
-
-    // quick scan through the neighbors for the following reasons:
-    // 1. find enemy groups for the "sacrifice move"
-    // 2. learn the state of the points around the put stone
-    neighbors.length().do!(|i| {
-        let stone = board[neighbors[i]];
-        if (stone != turn.to_color() && !stone.is_empty()) {
-            opponent_stones.push_back(neighbors[i]);
-        };
-    });
-
-    // kill all opponent stones if they're affected by this move
-    opponent_stones.destroy!(|point| {
-        if (board[point].is_empty()) return; // already killed
-        let group = board.get_group(point);
-        if (board.is_group_surrounded(&group)) {
-            score = score + board.replace_group(group, Color::Empty);
+    // Get all neighbors of the point. Split them into my stones and enemy stones.
+    // All my stones which are neighbors, actually form a group. The only tricky
+    // part is checking the enemy stones and their groups.
+    point::new(x, y).von_neumann(1).destroy!(|p| {
+        let (x, y) = p.into_values();
+        if (x >= board.size || y >= board.size) return;
+        match (board.grid[x, y]) {
+            Tile::Empty => (empty_num = empty_num + 1),
+            t @ _ => if (t == stone) {
+                my_stones.push_back(p);
+            } else {
+                enemy_stones.push_back(p);
+            },
         }
     });
 
-    // check if the move is a suicide move
-    let group = board.get_group(Point(x, y));
-    assert!(!board.is_group_surrounded(&group), ESuicideMove);
-
-    // deal with the Ko Rule: check the state against 2 previous rounds
-    board.ko_store.insert(board.data, 0);
-    if (board.ko_store.length() > 2) {
-        assert!(&board.data != &board.ko_store.pop_back(), EKoRule);
-    };
-
-    // update the score with taken stones
-    let idx = turn.to_color().to_index();
-    *&mut board.scores[idx] = board.scores[idx] + score;
-}
-
-/// Calculates the territory taken by each of the players.
-/// Supposed to use the flood fill algorithm eventually :wink:
-public fun score(_board: &Board): vector<u64> {
-    abort 0
-}
-
-public fun get_group(board: &Board, point: Point): Group {
-    let mut visited = vector[point];
-    get_group_int(board, point, &mut visited);
-    Group(board[point], visited)
-}
-
-/// Removes the group from the field, returns the size of the group.
-public fun replace_group(board: &mut Board, group: Group, with: Color): u64 {
-    let Group(_, group) = group;
-    let size = group.length();
-    group.destroy!(|el| *board.get_mut(el) = with);
-    size
-}
-
-/// Checks if the group is surrounded, eg has no liberties.
-public fun is_group_surrounded(board: &Board, group: &Group): bool {
-    let mut i = 0;
-    let Group(_, group) = group;
-    while (i < group.length()) {
-        let neighbors = neighbors(board.size, group[i]);
-        let mut j = 0;
-        while (j < neighbors.length()) {
-            let neighbor = neighbors[j];
-            if (board[neighbor].is_empty()) return false;
-            j = j + 1;
-        };
-        i = i + 1;
-    };
-
-    true
-}
-
-/// Helper function to get the `Point` neighbors of a given point. Helps
-/// ignore out-of-bounds neighbors for points on the edge of the board.
-public fun neighbors(size: u8, p: Point): vector<Point> {
-    let Point(x, y) = p;
-    let mut neighbors = vector[];
-
-    if (x > 0) neighbors.push_back(Point(x - 1, y)); // left
-    if (y > 0) neighbors.push_back(Point(x, y - 1)); // top
-    if (x < size - 1) neighbors.push_back(Point(x + 1, y)); // right
-    if (y < size - 1) neighbors.push_back(Point(x, y + 1)); // bottom
-
-    neighbors
-}
-
-/// Public accessor for the board size.
-public fun size(b: &Board): u8 { b.size }
-
-/// Public accessor for the current turn.
-public fun turn(b: &Board): Turn { b.turn }
-
-/// Public accessor for the moves made on the board.
-public fun moves(b: &Board): &vector<Point> { &b.moves }
-
-/// Public accessor for the scores of the game (captured stones).
-public fun scores(b: &Board): &vector<u64> { &b.scores }
-
-/// Public accessor for the board data.
-public fun data(b: &Board): &vector<vector<Color>> { &b.data }
-
-/// Public accessor for the x coordinate of a point.
-public fun x(p: &Point): u8 { p.0 }
-
-/// Public accessor for the y coordinate of a point.
-public fun y(p: &Point): u8 { p.1 }
-
-/// Convert a `u64` index to a `Color`.
-public fun from_index(index: u64): Color {
-    if (index == 0) {
-        Color::Empty
-    } else if (index == 1) {
-        Color::Black
-    } else if (index == 2) {
-        Color::White
-    } else {
-        abort 0
-    }
-}
-
-/// Convert a `Color` to a `u64` index.
-public fun to_index(p: &Color): u64 {
-    match (p) {
-        Color::Empty => 0,
-        Color::Black => 1,
-        Color::White => 2,
-    }
-}
-
-/// Is the field empty or taken?
-public fun is_empty(p: &Color): bool {
-    match (p) {
-        Color::Empty => true,
-        _ => false,
-    }
-}
-
-/// Is the Color black?
-public fun is_black(p: &Color): bool {
-    match (p) {
-        Color::Black => true,
-        _ => false,
-    }
-}
-
-/// Is the Color white?
-public fun is_white(p: &Color): bool {
-    match (p) {
-        Color::White => true,
-        _ => false,
-    }
-}
-
-/// Switch the turn to the other player.
-public fun switch(turn: &mut Turn) {
-    match (turn) {
-        Turn::Black => *turn = Turn::White,
-        Turn::White => *turn = Turn::Black,
-    }
-}
-
-/// Convert the turn to a color.
-public fun to_color(turn: &Turn): Color {
-    match (turn) {
-        Turn::Black => Color::Black,
-        Turn::White => Color::White,
-    }
-}
-
-#[syntax(index)]
-public fun get(b: &Board, p: Point): &Color {
-    let Point(x, y) = p;
-    &b.data[x as u64][y as u64]
-}
-
-/// Mutable accessor for the board data.
-fun get_mut(b: &mut Board, p: Point): &mut Color {
-    let Point(x, y) = p;
-    &mut b.data[x as u64][y as u64]
-}
-
-/// Internal function to get the group of stones that a point belongs to.
-/// Uses a depth-first search to find all connected stones of the same color.
-/// Returns a vector of points that make up the group.
-fun get_group_int(b: &Board, p: Point, visited: &mut vector<Point>) {
-    let mut stack = vector[];
-    let color = b[p];
-
-    neighbors(b.size, p).destroy!(|neighbor| {
-        if (visited.contains(&neighbor)) return;
-        if (b[neighbor] == color) {
-            visited.push_back(neighbor);
-            stack.push_back(neighbor);
-        };
+    // Now we need to get unique groups of enemy stones. It is possible that the
+    // surrounding stones are connected to each other.
+    let mut enemy_groups = vector[];
+    enemy_stones.destroy!(|p| {
+        enemy_groups
+            // Check if the point is already in a group.
+            .find_index!(|Group(_, points)| points.contains(&p))
+            .destroy_or!({ enemy_groups.push_back(board.find_group(p.x(), p.y())); 0 });
     });
 
-    stack.destroy!(|e| get_group_int(b, e, visited));
+    // Now we need to check if any of the enemy groups are surrounded.
+    let surrounded_groups = enemy_groups.filter!(|g| board.is_group_surrounded(g));
+
+    // If any of the enemy groups are surrounded, we capture them.
+    if (surrounded_groups.length() > 0) {
+        surrounded_groups.destroy!(|Group(_, points)| {
+            // Increase score by the number of stones in the group.
+            if (board.is_black) board.score.black = points.length() as u16 + board.score.black
+            else board.score.white = points.length() as u16 + board.score.white;
+
+            // Remove the group from the board.
+            points.destroy!(|p| board.grid.swap(p.x(), p.y(), Tile::Empty));
+        });
+    } else if (empty_num == 0) {
+        // If there are no empty neighbors, we need to check if the move is a
+        // suicide by checking if the new group is surrounded.
+        assert!(!board.is_group_surrounded(&board.find_group(x, y)), ESuicideMove);
+    };
+
+    board
+        .prev_states
+        .find_index!(|history| history == &board.grid)
+        .is_some_and!(|_| abort EKoRuleBroken);
+
+    if (board.prev_states.length() == 2) {
+        board.prev_states.swap_remove(0);
+    };
+
+    // Add the move and the current state to the history.
+    board.prev_states.push_back(copy board.grid);
+    board.moves.push_back(point::new(x, y));
+    board.is_black = !board.is_black;
 }
 
-// === Testing ===
+/// Find a group of stones on the board. Returns an empty group if the Tile is
+/// empty, alternatively goes through Von Neumann neighbors and adds them to the
+/// group if they are of the same color.
+public fun find_group(board: &Board, x: u16, y: u16): Group {
+    // Store the stone color or return an empty group if the field is empty.
+    let stone = match (board.grid[x, y]) {
+        Tile::Empty => return Group(Tile::Empty, vector[]),
+        _ => board.grid[x, y],
+    };
 
-#[test_only]
-use sui::bcs;
+    // Find the group of stones of the same color.
+    let mut group = board
+        .grid // Go Game relies on the Von Neumann neighborhood.
+        .find_group!(point::new(x, y), |p| p.von_neumann(1), |tile| tile == &stone);
 
-#[test_only]
-/// Asserts that the board is in a certain state. Used for testing.
-public fun assert_state(board: &Board, state: vector<vector<u8>>) {
-    assert!(bcs::to_bytes(&board.data) == bcs::to_bytes(&state), 0);
+    // Sort the group to make them comparable.
+    group.insertion_sort_by!(|a, b| a.le(b));
+
+    Group(stone, group)
 }
 
-#[test_only]
-/// Asserts the score of the game. Used for testing.
-public fun assert_score(board: &Board, scores: vector<u64>) {
-    assert!(&board.scores == &scores, 0);
+/// Checks if the group is surrounded.
+public fun is_group_surrounded(board: &Board, group: &Group): bool {
+    'search: {
+        let Group(_, points) = group;
+        points.do_ref!(|p| {
+            // To make a call whether a group is surrounded, we need to check
+            // for a single empty field neighboring the group. If there isn't
+            // one, the group is surrounded. That is, assuming that the group
+            // is homogeneous and exhaustive.
+            let count = board.grid.von_neumann_count!(*p, 1, |t| t == &Tile::Empty);
+            if (count > 0) return 'search false;
+        });
+        true
+    }
 }
 
-#[test_only]
-// TODO: ignores scores!
-// TODO: lacks validation, used only in tests!
-public fun from_vector(data: vector<vector<u8>>): Board {
-    let size = data.length();
-    let board = data.map!(|row| {
-        row.map!(|cell| from_index(cell as u64))
+// === Getters ===
+
+/// Get the size of the board.
+public fun size(b: &Board): u16 { b.size }
+
+/// Get a reference to the inner `Grid`.
+public fun grid(b: &Board): &Grid<Tile> { &b.grid }
+
+#[syntax(index)]
+/// Borrow a tile
+public fun borrow(b: &Board, x: u16, y: u16): &Tile { &b.grid[x, y] }
+
+/// Return true if the current turn is black.
+public fun is_black_turn(b: &Board): bool { b.is_black }
+
+// === Convenience ===
+
+/// Return true if the tile is empty.
+public fun is_empty(t: &Tile): bool { t == &Tile::Empty }
+
+/// Return true if the tile is black.
+public fun is_black(t: &Tile): bool { t == &Tile::Black }
+
+/// Return true if the tile is white.
+public fun is_white(t: &Tile): bool { t == &Tile::White }
+
+/// As long as `Tile.to_string()` exists, we allow debug printing.
+public use fun tile_to_string as Tile.to_string;
+
+/// Convert a `Tile` to a `String`.
+public fun tile_to_string(t: &Tile): String {
+    match (t) {
+        Tile::Empty => b"_",
+        Tile::Black => b"B",
+        Tile::White => b"W",
+    }.to_string()
+}
+
+/// Alias for `tile_to_number`
+public use fun tile_to_number as Tile.to_number;
+
+/// Convert tile to `u8` representation.
+public fun tile_to_number(t: &Tile): u8 {
+    match (t) {
+        Tile::Empty => 0,
+        Tile::Black => 1,
+        Tile::White => 2,
+    }
+}
+
+#[test_only, allow(unused_function)]
+public(package) fun from_vector(data: vector<vector<u8>>): Board {
+    let grid = grid::tabulate!(data.length() as u16, data[0].length() as u16, |i, j| {
+        match (data[i as u64][j as u64]) {
+            0 => Tile::Empty,
+            1 => Tile::Black,
+            2 => Tile::White,
+            _ => abort,
+        }
     });
 
     Board {
-        data: board,
-        size: size as u8,
-        turn: Turn::Black,
+        grid,
+        is_black: true,
         moves: vector[],
-        scores: vector[0, 0, 0],
-        ko_store: vector[board],
+        size: data.length() as u16,
+        score: Score { black: 0, white: 0 },
+        prev_states: vector[grid],
     }
+}
+
+#[test_only]
+use std::unit_test::assert_eq;
+
+#[test]
+fun test_find_group() {
+    let board = from_vector(vector[
+        vector[0, 1, 0, 0],
+        vector[0, 1, 0, 0],
+        vector[0, 1, 0, 2],
+        vector[0, 0, 0, 0],
+    ]);
+
+    assert_eq!(board.find_group(0, 0), Group(Tile::Empty, vector[]));
+    assert_eq!(
+        board.find_group(0, 1),
+        Group(Tile::Black, vector[point::new(0, 1), point::new(1, 1), point::new(2, 1)]),
+    );
+
+    assert_eq!(board.find_group(2, 3), Group(Tile::White, vector[point::new(2, 3)]));
+}
+
+#[test]
+fun test_is_group_surrounded() {
+    let board = from_vector(vector[
+        vector[2, 1, 2, 1],
+        vector[2, 1, 2, 1],
+        vector[2, 1, 2, 2],
+        vector[1, 0, 0, 0],
+    ]);
+
+    assert!(board.is_group_surrounded(&board.find_group(0, 0)));
+    assert!(!board.is_group_surrounded(&board.find_group(0, 1)));
+    assert!(!board.is_group_surrounded(&board.find_group(0, 2)));
+    assert!(board.is_group_surrounded(&board.find_group(0, 3)));
+}
+
+#[test, expected_failure(abort_code = ESuicideMove)]
+fun test_suicide_move() {
+    // prettier-ignore
+    let mut board = from_vector(vector[
+        vector[0, 2, 0],
+        vector[1, 2, 0],
+        vector[2, 2, 0],
+    ]);
+
+    // |B|W|_|
+    // |B|W|_|
+    // |W|W|_|
+    board.place(0, 0);
+}
+
+#[test, expected_failure(abort_code = ESuicideMove)]
+fun test_suicide_move_two_eyes() {
+    // prettier-ignore
+    let mut board = from_vector(vector[
+        vector[0, 2, 2],
+        vector[1, 2, 2],
+        vector[2, 2, 0],
+    ]);
+
+    // |B|W|_|
+    // |B|W|_|
+    // |W|W|_|
+    board.place(0, 0);
+}
+
+#[test]
+fun test_suicide_success_move() {
+    // prettier-ignore
+    let mut board = from_vector(vector[
+        vector[0, 2, 2],
+        vector[1, 2, 2],
+        vector[2, 2, 2],
+    ]);
+
+    // |B|_|_|
+    // |B|_|_|
+    // |_|_|_|
+    board.place(0, 0);
+
+    assert_eq!(board.score.black, 7);
+}
+
+#[test]
+fun test_take_multiple_groups() {
+    // prettier-ignore
+    let mut board = from_vector(vector[
+        vector[2, 0, 2],
+        vector[1, 0, 1],
+        vector[0, 0, 0],
+    ]);
+
+    // |_|B|_|
+    // |B|_|B|
+    // |_|_|_|
+    board.place(0, 1);
+
+    assert_eq!(board.score.black, 2);
+}
+
+#[test, expected_failure(abort_code = EKoRuleBroken)]
+fun test_ko_rule() {
+    // prettier-ignore
+    let mut board = from_vector(vector[
+        vector[2, 0, 2],
+        vector[1, 2, 0],
+        vector[0, 0, 0],
+    ]);
+
+    // |_|B|W|
+    // |B|W|_|
+    // |_|_|_|
+    board.place(0, 1); // take the white stone
+
+    // |W|_|W|
+    // |B|W|_|
+    // |_|_|_|
+    board.place(0, 0); // place the white stone back
+}
+
+#[test]
+fun test_ko_rule_bypassed() {
+    // prettier-ignore
+    let mut board = from_vector(vector[
+        vector[2, 0, 2],
+        vector[1, 2, 0],
+        vector[0, 0, 0],
+    ]);
+
+    // |_|B|W|
+    // |B|W|_|
+    // |_|_|_|
+    board.place(0, 1); // take the white stone
+
+    // |_|B|W|
+    // |B|W|_|
+    // |W|_|_|
+    board.place(2, 0); // place the white stone somewhere else
+
+    // |_|B|W|
+    // |B|W|_|
+    // |W|_|B|
+    board.place(2, 2); // another move
+
+    // |W|_|W|
+    // |_|W|_|
+    // |W|_|B|
+    board.place(0, 0); // previously illegal move
+
+    assert_eq!(board.score.black, 1);
+    assert_eq!(board.score.white, 2);
 }

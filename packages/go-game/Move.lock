@@ -2,14 +2,15 @@
 
 [move]
 version = 3
-manifest_digest = "0AF5F940EB782AB40A039A8EFA23AC3058AB3B599D02526E56B46B29DF5EF6A4"
-deps_digest = "52B406A7A21811BEF51751CF88DA0E76DAEFFEAC888D4F4060B1A72BBE7D8D35"
+manifest_digest = "A3B2643274F8DCABBF19AA333F92080E9B9703CBB12CB7995420FEF030E3AE18"
+deps_digest = "CAFAD8A7CF51067FB4358215BECB86BD100DD64E57C2AC8A7AE7D74B688F5965"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
   { id = "SuiSystem", name = "SuiSystem" },
   { id = "codec", name = "codec" },
+  { id = "grid", name = "grid" },
   { id = "svg", name = "svg" },
 ]
 
@@ -47,6 +48,17 @@ dependencies = [
 [[move.package]]
 id = "codec"
 source = { local = "../codec" }
+
+dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
+]
+
+[[move.package]]
+id = "grid"
+source = { local = "../grid" }
 
 dependencies = [
   { id = "Bridge", name = "Bridge" },

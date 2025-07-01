@@ -6,7 +6,7 @@ module svg::shape;
 
 use std::string::String;
 use sui::vec_map::{Self, VecMap};
-use svg::{animation::Animation, filter::Filter, point::{Self, Point}, print};
+use svg::{animation::Animation, coordinate::{Self, Coordinate}, filter::Filter, print};
 
 /// Abort code for the `NotImplemented` error.
 const ENotImplemented: u64 = 264;
@@ -20,20 +20,20 @@ public struct Shape has copy, drop, store {
     /// An optional animation to apply to the shape.
     animation: Option<Animation>,
     /// An optional position for the shape, changed in the `move_to` function.
-    position: Option<Point>,
+    position: Option<Coordinate>,
 }
 
 /// SVG shape enum. Each variant represents a different shape, all of them
 /// containing a set of attributes as a `VecMap`.
 public enum ShapeType has copy, drop, store {
     Circle(u16),
-    Ellipse(Point, u16, u16),
+    Ellipse(Coordinate, u16, u16),
     Filter(String, vector<Filter>),
     ForeignObject(String),
-    Line(Point, Point),
+    Line(Coordinate, Coordinate),
     Image(String),
-    Polygon(vector<Point>),
-    Polyline(vector<Point>),
+    Polygon(vector<Coordinate>),
+    Polyline(vector<Coordinate>),
     Rect(u16, u16),
     Text(String),
     /// Text with text path shape, a text element with a string and a path.
@@ -126,7 +126,7 @@ public fun circle(r: u16): Shape {
 /// ```
 public fun ellipse(cx: u16, cy: u16, rx: u16, ry: u16): Shape {
     Shape {
-        shape: ShapeType::Ellipse(point::point(cx, cy), rx, ry),
+        shape: ShapeType::Ellipse(coordinate::new(cx, cy), rx, ry),
         attributes: vec_map::empty(),
         animation: option::none(),
         position: option::none(),
@@ -189,7 +189,7 @@ public fun filter(id: String, filters: vector<Filter>): Shape {
 /// See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
 public fun line(x1: u16, y1: u16, x2: u16, y2: u16): Shape {
     Shape {
-        shape: ShapeType::Line(point::point(x1, y1), point::point(x2, y2)),
+        shape: ShapeType::Line(coordinate::new(x1, y1), coordinate::new(x2, y2)),
         attributes: vec_map::empty(),
         animation: option::none(),
         position: option::none(),
@@ -459,7 +459,7 @@ public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
 
     match (shape_type) {
         ShapeType::Circle(_) => {
-            let (cx, cy) = point::point(x, y).to_values();
+            let (cx, cy) = coordinate::new(x, y).to_values();
             shape.attributes.insert(b"cx".to_string(), cx.to_string());
             shape.attributes.insert(b"cy".to_string(), cy.to_string());
         },
@@ -467,8 +467,8 @@ public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
             let (x1, y1) = p0.to_values();
             let (x2, y2) = p1.to_values();
 
-            *p0 = point::point(x, y);
-            *p1 = point::point(x + x2 - x1, y + y2 - y1);
+            *p0 = coordinate::new(x, y);
+            *p1 = coordinate::new(x + x2 - x1, y + y2 - y1);
         },
         ShapeType::Polygon(_points) => abort ENotImplemented,
         ShapeType::Polyline(_points) => abort ENotImplemented,
@@ -482,7 +482,7 @@ public fun move_to(mut shape: Shape, x: u16, y: u16): Shape {
             shape.attributes_mut().insert(b"transform".to_string(), value);
         },
         _ => {
-            shape.position = option::some(point::point(x, y));
+            shape.position = option::some(coordinate::new(x, y));
         },
     };
 
