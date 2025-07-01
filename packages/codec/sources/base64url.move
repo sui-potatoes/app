@@ -39,10 +39,11 @@ public fun decode(str: String): vector<u8> {
     base64::decode_impl!(str, KEYS, true)
 }
 
+#[test_only]
+use std::unit_test::assert_eq;
+
 #[test]
 fun test_encode_decode() {
-    use std::unit_test::assert_eq;
-
     let annoying_str =
         b"abc def ghi jkl mno pqrs tuv wxyz ABC DEF GHI JKL MNO PQRS TUV WXYZ /() =?* ' {} abc def ghi jkl mno pqrs tuv wxyz ABC DEF GHI JKL MNO PQRS TUV WXYZ !";
 
@@ -76,13 +77,11 @@ fun test_encode_decode() {
 
 #[random_test]
 fun test_encode_random(bytes: vector<u8>) {
-    use std::unit_test::assert_eq;
     assert_eq!(decode(encode(bytes)), bytes);
 }
 
 #[random_test]
 fun test_encode_random_u256(value: u256) {
-    use std::unit_test::assert_eq;
     let bytes = std::bcs::to_bytes(&value);
     assert_eq!(decode(encode(bytes)), bytes);
 }

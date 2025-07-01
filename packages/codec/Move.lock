@@ -2,13 +2,14 @@
 
 [move]
 version = 3
-manifest_digest = "9841E040D52DE3E7BD0D55138BCB93B6A21F8DDB785732F2E61172A8A05D42D0"
-deps_digest = "F9B494B64F0615AED0E98FC12A85B85ECD2BC5185C22D30E7F67786BB52E507C"
+manifest_digest = "A09D4518F81F6707F6AB8BF2DF8BBA0DA2726DD00C68B0797A034B398C1F476F"
+deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
   { id = "SuiSystem", name = "SuiSystem" },
+  { id = "ascii", name = "ascii" },
 ]
 
 [[move.package]]
@@ -40,6 +41,17 @@ source = { git = "https://github.com/MystenLabs/sui.git", rev = "af5297b292c3", 
 dependencies = [
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
+]
+
+[[move.package]]
+id = "ascii"
+source = { git = "https://github.com/sui-potatoes/app.git", rev = "ascii@v1", subdir = "packages/ascii" }
+
+dependencies = [
+  { id = "Bridge", name = "Bridge" },
+  { id = "MoveStdlib", name = "MoveStdlib" },
+  { id = "Sui", name = "Sui" },
+  { id = "SuiSystem", name = "SuiSystem" },
 ]
 
 [move.toolchain-version]

@@ -17,6 +17,7 @@
 /// ```
 module codec::potatoes;
 
+use ascii::char;
 use std::string::String;
 
 /// Error code for incorrect number of characters.
@@ -47,12 +48,10 @@ const CHARACTER_SET: vector<vector<u8>> = vector[
 /// Now let's play with the encoding and decoding functions.
 public fun encode(bytes: vector<u8>): String {
     let chars = CHARACTER_SET;
-    let result = bytes.fold!(vector[], |mut acc, b| {
+    bytes.fold!(vector[], |mut acc, b| {
         acc.append(chars[b as u64]);
         acc
-    });
-
-    result.to_string()
+    }).to_string()
 }
 
 /// Decode a potato-encoded string.
@@ -76,34 +75,32 @@ public fun decode(str: String): vector<u8> {
 // Codes for A,B,C,D,E,F are: 65, 66, 67, 68, 69, 70, which are 10, 11, 12, 13, 14, 15
 macro fun decode_byte($byte: u8): u8 {
     let byte = $byte;
-    if (48 <= byte && byte < 58) byte - 48 // 0 .. 9
-    else if (byte == 112 || byte == 80) 10 // p or P
-    else if (byte == 111 || byte == 79) 11 // o or O
-    else if (byte == 116 || byte == 84) 12 // t or T
-    else if (byte == 97 || byte == 65) 13 // a or A
-    else if (byte == 101 || byte == 69) 14 // e or E
-    else if (byte == 115 || byte == 83) 15 // s or S
+    if (char::zero!() <= byte && byte <= char::nine!()) byte - char::zero!() // 0 .. 9
+    else if (byte == char::p!() || byte == char::P!()) 10 // p or P
+    else if (byte == char::o!() || byte == char::O!()) 11 // o or O
+    else if (byte == char::t!() || byte == char::T!()) 12 // t or T
+    else if (byte == char::a!() || byte == char::A!()) 13 // a or A
+    else if (byte == char::e!() || byte == char::E!()) 14 // e or E
+    else if (byte == char::s!() || byte == char::S!()) 15 // s or S
     else abort 1
 }
 
+#[test_only]
+use std::unit_test::assert_eq;
+
 #[test]
 fun test_check_character_set_length() {
-    use std::unit_test::assert_eq;
-
     let set = CHARACTER_SET;
     assert_eq!(set.length(), 256);
 }
 
 #[random_test]
 fun test_decode_random(bytes: vector<u8>) {
-    use std::unit_test::assert_eq;
     assert_eq!(decode(encode(bytes)), bytes);
 }
 
 #[test]
 fun test_encode() {
-    use std::unit_test::assert_eq;
-
     assert_eq!(encode(vector[0, 1, 2, 3]), b"00010203".to_string());
     assert_eq!(encode(decode(b"potatoes".to_string())), b"potatoes".to_string());
     assert_eq!(encode(decode(b"potato4tea".to_string())), b"potato4tea".to_string());
