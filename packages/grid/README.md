@@ -3,14 +3,14 @@
 Grid is a library which helps implement grid-based games and applications. It provides the `Grid`
 type and a set of utilities and macros to work with it.
 
--   [Installing](#installing)
--   [Usage](#usage)
-    -   [Using Grid](#using-grid)
-    -   [Point](#point)
-    -   [Direction](#direction)
-    -   [Cursor](#cursor)
--   [Examples](#examples)
--   [License](#license)
+- [Installing](#installing)
+- [Usage](#usage)
+    - [Using Grid](#using-grid)
+    - [Point](#point)
+    - [Direction](#direction)
+    - [Cursor](#cursor)
+- [Examples](#examples)
+- [License](#license)
 
 ## Installing
 
@@ -40,10 +40,10 @@ grid = "0x..."
 
 The package features 4 modules, each implementing a feature:
 
--   `grid::grid` - defines the `Grid` type and its methods
--   `grid::point` - defines the `Point` type
--   `grid::direction` - implements direction bitmaps
--   `grid::cursor` - defines the `Cursor` type and its methods
+- `grid::grid` - defines the `Grid` type and its methods
+- `grid::point` - defines the `Point` type
+- `grid::direction` - implements direction bitmaps
+- `grid::cursor` - defines the `Cursor` type and its methods
 
 ### Using Grid
 

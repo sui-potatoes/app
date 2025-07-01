@@ -11,7 +11,7 @@ use sui::bcs::{Self, BCS};
 
 public use fun grid::cursor::from_point as Point.to_cursor;
 
-/// A point in 2D space.
+/// A point in 2D space. A row (x) and a column (y).
 public struct Point(u16, u16) has copy, drop, store;
 
 /// Create a new `Point` at `(x, y)`.
@@ -32,10 +32,10 @@ public fun into_values(p: Point): (u16, u16) { let Point(x, y) = p; (x, y) }
 /// Convert a `Point` to a vector of two values.
 public fun to_vector(p: &Point): vector<u16> { vector[p.0, p.1] }
 
-/// Get the `x` coordinate of a `Point`.
+/// Get the `x` coordinate of a `Point`. On the `Grid`, this is the row.
 public fun x(p: &Point): u16 { p.0 }
 
-/// Get the `y` coordinate of a `Point`.
+/// Get the `y` coordinate of a `Point`. On the `Grid`, this is the column.
 public fun y(p: &Point): u16 { p.1 }
 
 /// Returns whether the point is within the given bounds: `rows` and `cols`,

@@ -54,7 +54,7 @@ public fun tick(l: &mut Life) {
     l.live_cells.do!(|p| {
         p.moore(1).destroy!(|p| {
             let (x, y) = p.into_values();
-            if (x >= width || y >= height) return;
+            if (x >= height || y >= width) return;
             let mut_ref = &mut visited[x, y];
             if (*mut_ref) return;
             *mut_ref = true;
