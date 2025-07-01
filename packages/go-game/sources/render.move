@@ -37,7 +37,7 @@ public(package) fun svg(b: &Board): Svg {
     svg.add_defs(vector[black, white, pattern]);
 
     let mut elements = vector[background];
-    b.grid().traverse!(|tile, row, col| {
+    b.grid().traverse!(|tile, (row, col)| {
         let num = tile.to_number();
         if (num == 0) return;
         let stone = if (num == 1) b"#b" else { b"#w" }.to_string();
