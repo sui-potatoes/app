@@ -53,36 +53,31 @@ public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
     grid
 }
 
-/// Get the number of columns of the `Grid`.
-public fun cols<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
+// === Accessors ===
 
 /// Get the number of rows of the `Grid`.
 public fun rows<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
 
-// === Indexing ===
+/// Get the number of columns of the `Grid`.
+public fun cols<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
 
 /// Get a reference to the inner vector of the grid.
 public fun inner<T>(g: &Grid<T>): &vector<vector<T>> { &g.grid }
 
 #[syntax(index)]
 /// Get a reference to a cell in the grid.
+/// ```move
+/// let value_ref = &grid[0, 0];
+/// let copied_value = grid[0, 0];
+/// ```
 public fun borrow<T>(g: &Grid<T>, x: u16, y: u16): &T { &g.grid[x as u64][y as u64] }
-
-/// Get a reference to a cell in the grid.
-public fun borrow_point<T>(g: &Grid<T>, p: &Point): &T {
-    let (x, y) = p.to_values();
-    &g.grid[x as u64][y as u64]
-}
 
 #[syntax(index)]
 /// Borrow a mutable reference to a cell in the grid.
+/// ```move
+/// let value_mut = &mut grid[0, 0];
+/// ```
 public fun borrow_mut<T>(g: &mut Grid<T>, x: u16, y: u16): &mut T {
-    &mut g.grid[x as u64][y as u64]
-}
-
-/// Get a mutable reference to a cell in the grid.
-public fun borrow_point_mut<T>(g: &mut Grid<T>, p: &Point): &mut T {
-    let (x, y) = p.to_values();
     &mut g.grid[x as u64][y as u64]
 }
 
@@ -91,6 +86,20 @@ public fun borrow_point_mut<T>(g: &mut Grid<T>, p: &Point): &mut T {
 public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
     g.grid[x as u64].push_back(element);
     g.grid[x as u64].swap_remove(y as u64)
+}
+
+// === Accessors: Point ===
+
+/// Get a reference to a cell in the `Grid` at the given `Point`.
+public fun borrow_point<T>(g: &Grid<T>, p: &Point): &T {
+    let (x, y) = p.to_values();
+    &g.grid[x as u64][y as u64]
+}
+
+/// Get a mutable reference to a cell in the `Grid` at the given `Point`.
+public fun borrow_point_mut<T>(g: &mut Grid<T>, p: &Point): &mut T {
+    let (x, y) = p.to_values();
+    &mut g.grid[x as u64][y as u64]
 }
 
 // === Macros: Utility ===
@@ -169,10 +178,10 @@ public macro fun do_ref<$T, $R: drop>($grid: &Grid<$T>, $f: |&$T| -> $R) {
 
 /// Traverse the grid, calling the function `f` for each cell. The function
 /// receives the reference to the cell, the x and y coordinates of the cell.
-public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, u16, u16| -> $R) {
+public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, (u16, u16)| -> $R) {
     let g = $g;
     let (rows, cols) = (g.rows(), g.cols());
-    rows.do!(|x| cols.do!(|y| $f(&g[x, y], x, y)));
+    rows.do!(|x| cols.do!(|y| $f(&g[x, y], (x, y))));
 }
 
 /// Map the grid to a new grid by applying the function `f` to each cell.
@@ -310,7 +319,12 @@ public macro fun find_group<$T>(
 ///
 /// ```move
 /// // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
-/// grid.trace!(0, 0, 1, 4, 6, |prev_x, prev_y, next_x, next_y| cell == 0);
+/// grid.trace!(
+///     point::new(0, 0),
+///     point::new(1, 4),
+///     |(prev_x, prev_y), (next_x, next_y)| cell == 0,
+///     6,
+/// );
 /// ```
 ///
 /// TODO: consider using a A* algorithm for better performance.
@@ -319,7 +333,7 @@ public macro fun trace<$T>(
     $p0: Point,
     $p1: Point,
     $n: |&Point| -> vector<Point>,
-    $f: |&Point, &Point| -> bool, // whether the cell is passable
+    $f: |(u16, u16), (u16, u16)| -> bool, // whether the cell is passable
     $limit: u16,
 ): Option<vector<Point>> {
     let p0 = $p0;
@@ -329,35 +343,39 @@ public macro fun trace<$T>(
     let map = $map;
     let (rows, cols) = (map.rows(), map.cols());
 
-    // if the points are out of bounds, return none
+    // If the points are out of bounds, return none.
     if (!p0.is_within_bounds(rows, cols) || !p1.is_within_bounds(rows, cols)) {
         return option::none()
     };
 
-    // surround the first element with 1s
+    // Surround the first element with 1s.
     let mut num = 1;
     let mut queue = vector[p0];
     let mut grid = tabulate!(rows, cols, |_, _| 0);
 
     *grid.borrow_point_mut(&p0) = num;
 
+    let mut found = false;
     'search: while (num < limit && !queue.is_empty()) {
         num = num + 1;
 
-        // flush the queue, marking all cells around the current number
+        // Flush the queue, marking all cells around the current number.
         queue.destroy!(|from| $n(&from).destroy!(|to| {
-            if (!to.is_within_bounds(rows, cols)) return;
-
-            // if we reached the destination, break the loop
+            // If we reached the destination, break the loop.
             if (to == p1) {
                 *grid.borrow_point_mut(&to) = num;
+                found = true;
                 break 'search
             };
 
-            // if we can't pass through the cell, skip it
-            if (!$f(&from, &to)) return;
+            let (x0, y0) = from.into_values();
+            let (x1, y1) = to.into_values();
+            if (x1 >= rows || y1 >= cols) return;
 
-            // if the cell is empty, mark it with the current number
+            // If we can't pass through the cell, skip it.
+            if (!$f((x0, y0), (x1, y1))) return;
+
+            // If the cell is empty, mark it with the current number.
             if (grid.borrow_point(&to) == 0) {
                 *grid.borrow_point_mut(&to) = num;
                 queue.push_back(to);
@@ -365,14 +383,13 @@ public macro fun trace<$T>(
         }));
     };
 
-    // we never reached the destination within the limit
-    if (grid.borrow_point(&p1) == 0) {
+    // If we never reached the destination within the limit, return none.
+    if (!found) {
         return option::none()
     };
 
-    // reconstruct the path by going from the destination to the source
+    // Reconstruct the path by going from the destination to the source.
     let mut path = vector[p1];
-    let mut num = *grid.borrow_point(&p1);
     let mut last_point = p1;
 
     'reconstruct: while (num > 1) {

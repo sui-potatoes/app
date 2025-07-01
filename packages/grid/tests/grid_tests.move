@@ -54,7 +54,7 @@ fun traverse() {
     let grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
 
     let mut sum = 0;
-    grid.traverse!(|cell, _, _| sum = sum + *cell);
+    grid.traverse!(|cell, (_, _)| sum = sum + *cell);
     assert_eq!(sum, 36);
 }
 
@@ -100,7 +100,7 @@ fun path_tracing() {
         point::new(0, 0),
         point::new(1, 4),
         |p| p.von_neumann(1),
-        |_, _| true,
+        |(_, _), (_, _)| true,
         6,
     );
 
@@ -121,7 +121,7 @@ fun path_tracing() {
         point::new(0, 1),
         point::new(3, 0),
         |p| p.von_neumann(1),
-        |_, to| *grid.borrow_point(to) == 0,
+        |(_, _), (x1, y1)| grid[x1, y1] == 0,
         8,
     );
 

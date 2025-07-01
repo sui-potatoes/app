@@ -5,7 +5,7 @@
 /// a point in a given direction. It is tightly coupled with the `direction`
 /// module, and is used to represent a "moving point" on the grid.
 ///
-/// ```
+/// ```move
 /// use grid::direction;
 ///
 /// #[test]

@@ -151,12 +151,12 @@ public fun move_unit(map: &mut Map, path: vector<u8>): Record {
 
     let distance = path.length() - 2;
     let (x0, y0) = (path[0] as u16, path[1] as u16);
-    let (width, height) = (map.grid.width(), map.grid.height());
+    let (width, height) = (map.grid.rows(), map.grid.cols());
 
-    assert!(y0 < height && x0 < width, ETileOutOfBounds);
+    assert!(y0 < width && x0 < height, ETileOutOfBounds);
     let search = map.check_path(path).destroy_or!(abort EPathUnwalkable);
     let (x1, y1) = (search[0], search[1]);
-    assert!(y1 < height && x1 < width, ETileOutOfBounds);
+    assert!(y1 < width && x1 < height, ETileOutOfBounds);
 
     let mut unit = map.grid[x0, y0].unit.extract();
     unit.try_reset_ap(map.turn);
