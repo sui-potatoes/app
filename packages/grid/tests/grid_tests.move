@@ -39,6 +39,17 @@ fun do_and_do_ref() {
 }
 
 #[test]
+fun map_and_map_ref() {
+    let grid = grid::from_vector<u8>(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
+    let mapped_ref = grid.map_ref!(|cell| (*cell * 2) as u16);
+    let new_grid = grid.map!(|cell| (cell * 2) as u16);
+
+    assert_eq!(new_grid.width(), 3);
+    assert_eq!(new_grid.height(), 3);
+    assert_eq!(mapped_ref, new_grid);
+}
+
+#[test]
 fun traverse() {
     let grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
 

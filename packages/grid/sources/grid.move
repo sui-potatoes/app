@@ -93,7 +93,7 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
     g.grid[x as u64].swap_remove(y as u64)
 }
 
-// === Macros ===
+// === Macros: Utility ===
 
 /// Get a Manhattan distance between two points. Manhattan distance is the
 /// sum of the absolute differences of the x and y coordinates.
@@ -121,6 +121,8 @@ public macro fun chebyshev_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T
     num_max!(num_diff!($x0, $x1), num_diff!($y0, $y1))
 }
 
+// === Macros: Grid ===
+
 /// Create a grid of the specified size by applying the function `f` to each cell.
 /// The function receives the x and y coordinates of the cell.
 public macro fun tabulate<$T>($rows: u16, $cols: u16, $f: |u16, u16| -> $T): Grid<$T> {
@@ -147,8 +149,7 @@ public macro fun do<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
 /// Apply the function `f` for each element of the `Grid`.
 /// The function receives a reference to the cell.
 public macro fun do_ref<$T, $R: drop>($grid: &Grid<$T>, $f: |&$T| -> $R) {
-    let grid = $grid;
-    grid.inner().do_ref!(|row| row.do_ref!(|cell| $f(cell)));
+    inner($grid).do_ref!(|row| row.do_ref!(|cell| $f(cell)));
 }
 
 /// Traverse the grid, calling the function `f` for each cell. The function
@@ -157,6 +158,17 @@ public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, u16, u16| -> $R
     let g = $g;
     let (width, height) = (g.width(), g.height());
     width.do!(|x| height.do!(|y| $f(&g[x, y], x, y)));
+}
+
+/// Map the grid to a new grid by applying the function `f` to each cell.
+public macro fun map<$T, $U>($grid: Grid<$T>, $f: |$T| -> $U): Grid<$U> {
+    from_vector_unchecked(into_vector($grid).map!(|row| row.map!(|cell| $f(cell))))
+}
+
+/// Map the grid to a new grid by applying the function `f` to each cell.
+/// Callback `f` takes the reference to the cell.
+public macro fun map_ref<$T, $U>($grid: &Grid<$T>, $f: |&$T| -> $U): Grid<$U> {
+    from_vector_unchecked(inner($grid).map_ref!(|row| row.map_ref!(|cell| $f(cell))))
 }
 
 /// Get all von Neumann neighbors of a point, checking if the point is within
@@ -363,6 +375,8 @@ public macro fun trace<$T>(
     path.reverse();
     option::some(path)
 }
+
+// === Macros: Compatibility ===
 
 /// Print the grid to a string. Only works if `$T` has a `.to_string()` method.
 ///
