@@ -6,6 +6,9 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 [addresses]
 codec = "0x0"
 
+[dependencies]
+ascii = { local = "../ascii" }
+
 # testnet
 # v1: 0xa11d4e236d3456c14edd263859c475bc539b43afb8b41fa10974ca0abca6a1c0
 # v2: 0x8ded9a4a5d5dc19eb2302441da8db49afe0c784ab81347ae2a515950f6fa2a5d

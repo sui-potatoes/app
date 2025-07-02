@@ -16,6 +16,7 @@
 /// ```
 module codec::urlencode;
 
+use ascii::char;
 use std::string::String;
 
 /// Encode a string into URL format. Supports non-printable characters, takes
@@ -24,7 +25,7 @@ public fun encode(string: vector<u8>): String {
     let mut res = vector[];
     string.do!(|c| {
         // 32 = space
-        if (c == 32) {
+        if (c == char::space!()) {
             res.push_back(37); // %
             res.push_back(50); // 2
             res.push_back(48); // 0
