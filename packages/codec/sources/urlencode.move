@@ -16,8 +16,8 @@
 /// ```
 module codec::urlencode;
 
-use std::string::String;
 use ascii::char;
+use std::string::String;
 
 /// Encode a string into URL format. Supports non-printable characters, takes
 /// a vector of bytes as input. This function is safe to use with UTF8 strings.
