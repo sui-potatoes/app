@@ -16,6 +16,7 @@
 /// ```
 module codec::base64;
 
+use ascii::char;
 use std::string::String;
 
 #[allow(unused_const)]
@@ -91,7 +92,7 @@ public(package) macro fun decode_impl(
     let mut bits_collected = 0;
 
     str.into_bytes().do!(|byte| {
-        if (byte == 61) return; // ascii for '='
+        if (byte == char::equals!()) return; // ascii for '='
         let (res1, val) = keys.index_of(&byte);
         assert!(res1, 0);
         buffer = (buffer << 6) | (val as u32);
@@ -107,10 +108,11 @@ public(package) macro fun decode_impl(
     res
 }
 
+#[test_only]
+use std::unit_test::assert_eq;
+
 #[test]
 fun test_encode() {
-    use std::unit_test::assert_eq;
-
     assert_eq!(encode(b"hello"), b"aGVsbG8=".to_string());
     assert_eq!(encode(b"world"), b"d29ybGQ=".to_string());
     assert_eq!(encode(b"hello world"), b"aGVsbG8gd29ybGQ=".to_string());
@@ -124,14 +126,11 @@ fun test_encode() {
 
 #[random_test]
 fun test_decode_random(bytes: vector<u8>) {
-    use std::unit_test::assert_eq;
     assert_eq!(decode(encode(bytes)), bytes);
 }
 
 #[test]
 fun test_decode() {
-    use std::unit_test::assert_eq;
-
     assert_eq!(decode(b"aGVsbG8=".to_string()), b"hello");
     assert_eq!(decode(b"d29ybGQ=".to_string()), b"world");
     assert_eq!(decode(b"aGVsbG8gd29ybGQ=".to_string()), b"hello world");
