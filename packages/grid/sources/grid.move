@@ -182,6 +182,13 @@ public macro fun do_ref<$T, $R: drop>($grid: &Grid<$T>, $f: |&$T| -> $R) {
 
 /// Traverse the grid, calling the function `f` for each cell. The function
 /// receives the reference to the cell, the x and y coordinates of the cell.
+///
+/// Example:
+/// ```rust
+/// grid.traverse!(|cell, (x, y)| {
+///     // do something with the cell and the coordinates
+/// });
+/// ```
 public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, (u16, u16)| -> $R) {
     let g = $g;
     let (rows, cols) = (g.rows(), g.cols());

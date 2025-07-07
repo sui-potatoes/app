@@ -595,6 +595,13 @@ The function receives a reference to the cell.
 Traverse the grid, calling the function <code>f</code> for each cell. The function
 receives the reference to the cell, the x and y coordinates of the cell.
 
+Example:
+```rust
+grid.traverse!(|cell, (x, y)| {
+// do something with the cell and the coordinates
+});
+```
+
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_traverse">traverse</a>&lt;$T, $R: drop&gt;($g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $f: |&$T, (u16, u16)| -&gt; $R)
 </code></pre>
