@@ -187,6 +187,14 @@ public macro fun do_ref<$T, $R: drop>($grid: &Grid<$T>, $f: |&$T| -> $R) {
     inner($grid).do_ref!(|row| row.do_ref!(|cell| $f(cell)));
 }
 
+/// Apply the function `f` for each element of the `Grid`. The function receives
+/// a mutable reference to the cell.
+public macro fun do_mut<$T, $R: drop>($grid: &mut Grid<$T>, $f: |&mut $T| -> $R) {
+    let grid = $grid;
+    let (rows, cols) = (grid.rows(), grid.cols());
+    rows.do!(|row| cols.do!(|col| $f(&mut grid[row, col])));
+}
+
 /// Traverse the grid, calling the function `f` for each cell. The function
 /// receives the reference to the cell, the x and y coordinates of the cell.
 ///
@@ -357,7 +365,7 @@ public macro fun find_group<$T>(
 /// check if the cell is passable - it takes two arguments: the current point
 /// and the next point.
 ///
-/// ```move
+/// ```rust
 /// // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
 /// grid.trace!(
 ///     point::new(0, 0),
@@ -368,7 +376,7 @@ public macro fun find_group<$T>(
 /// );
 /// ```
 ///
-/// TODO: consider using a A* algorithm for better performance.
+/// Transition to the last tile must match the predicate `f`.
 public macro fun trace<$T>(
     $map: &Grid<$T>,
     $p0: Point,

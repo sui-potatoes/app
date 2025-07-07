@@ -26,8 +26,8 @@ fun creation() {
 }
 
 #[test]
-fun do_and_do_ref() {
-    let grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
+fun do_and_do_ref_mut() {
+    let mut grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
 
     let mut sum = 0;
     grid.do_ref!(|cell| sum = sum + *cell);
@@ -36,6 +36,12 @@ fun do_and_do_ref() {
     let mut sum = 0;
     grid.do!(|cell| sum = sum + cell);
     assert_eq!(sum, 36);
+
+    grid.do_mut!(|cell| *cell = 0);
+
+    let zero_vec = vector[0, 0, 0];
+
+    assert_eq!(grid, grid::from_vector(vector::tabulate!(3, |_| zero_vec)));
 }
 
 #[test]
@@ -121,7 +127,9 @@ fun path_tracing() {
         point::new(0, 1),
         point::new(3, 0),
         |p| p.von_neumann(1),
-        |(_, _), (x1, y1)| grid[x1, y1] == 0,
+        |(_, _), (x1, y1)| {
+            grid[x1, y1] == 0 || (x1 == 3 && y1 == 0)
+        },
         8,
     );
 

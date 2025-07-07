@@ -65,24 +65,25 @@ wrapping macro calls.
 | method        | description                                                                            |
 | ------------- | -------------------------------------------------------------------------------------- |
 | `from_vector` | construct the `Grid` from 2-dimensional vector                                         |
-| `tabulate!`   | constructs the `Grid` with elements returned from function `$f`                        |
-| `destroy!`    | destroys the `Grid` by calling `$f` on each element                                    |
+| `tabulate!`   | constructs the `Grid` with elements returned from function `f`                         |
+| `destroy!`    | destroys the `Grid` by calling `f` on each element                                     |
 | `do!`         | same as `destroy` but preserves the order of elements (top -> bottom, left -> right)   |
-| `do_ref!`     | apply function `$f` to an immutable reference to an element                            |
-| `map!`        | construct a new `Grid` by calling a function `$f` on each element, consumes the value  |
+| `do_ref!`     | apply function `f` to an immutable reference to an element                             |
+| `do_mut!`     | apply function `f` to a mutable reference to an element                                |
+| `map!`        | construct a new `Grid` by calling a function `f` on each element, consumes the value   |
 | `map_ref!`    | same as `map!` but does not consume the value, creates a new instance from a reference |
-| `traverse!`   | similar to `do_ref!` but the callback `$f` receives coordinates of the Point as well   |
+| `traverse!`   | similar to `do_ref!` but the callback `f` receives coordinates of the Point as well    |
 
 #### Working with Points
 
-| method               | description                                                                                             |
-| -------------------- | ------------------------------------------------------------------------------------------------------- |
-| `moore`              | get all Moore neighbors of a `Point` in a distance `s`                                                  |
-| `von_neumann`        | get all Von Neumann neighbors of a `Point` in a distance `s`                                            |
-| `moore_count!`       | count all Moore neighbors of a `Point` in a distance `s` that satisfy predicate `$f`                    |
-| `von_neumann_count!` | count all Von Neumann neighbors of a `Point` in a distance `s` that satisfy predicate `$f`              |
-| `find_group!`        | finds a group of points that match the predicate `$f` in the neighborhood `$n`                          |
-| `trace!`             | traces path from `$p0` to `$p1` in the neighborhood `$n` with `$f` marking if the tile can be walked on |
+| method               | description                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------ |
+| `moore`              | get all Moore neighbors of a `Point` in a distance `s`                                                 |
+| `von_neumann`        | get all Von Neumann neighbors of a `Point` in a distance `s`                                           |
+| `moore_count!`       | count all Moore neighbors of a `Point` in a distance `s` that satisfy predicate `f`                    |
+| `von_neumann_count!` | count all Von Neumann neighbors of a `Point` in a distance `s` that satisfy predicate `f`              |
+| `find_group!`        | finds a group of points that match the predicate `f` in the neighborhood `$n`                          |
+| `trace!`             | traces path from `$p0` to `$p1` in the neighborhood `$n` with `f` marking if the tile can be walked on |
 
 #### Utilities
 
@@ -90,7 +91,7 @@ wrapping macro calls.
 | --------------------- | --------------------------------------------------------------------------------- |
 | `debug!`              | print the `Grid` to `stdout`. _Only works if `T` implements `to_string()` method_ |
 | `to_string!`          | print `Grid` as a `String`. _Only works if `T` implements `to_string()` method_   |
-| `from_bcs!`           | peel the `Grid` from `BCS` instance, parse each element with function `$f`        |
+| `from_bcs!`           | peel the `Grid` from `BCS` instance, parse each element with function `f`         |
 | `manhattan_distance!` | get Manhattan distance between two pairs of coordinates                           |
 | `chebyshev_distance!` | get Chebyshev distance between two pairs of coordinates                           |
 

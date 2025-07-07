@@ -41,6 +41,7 @@ the left or to the right of another point
 -  [Macro function `destroy`](#grid_grid_destroy)
 -  [Macro function `do`](#grid_grid_do)
 -  [Macro function `do_ref`](#grid_grid_do_ref)
+-  [Macro function `do_mut`](#grid_grid_do_mut)
 -  [Macro function `traverse`](#grid_grid_traverse)
 -  [Macro function `map`](#grid_grid_map)
 -  [Macro function `map_ref`](#grid_grid_map_ref)
@@ -589,6 +590,34 @@ The function receives a reference to the cell.
 
 </details>
 
+<a name="grid_grid_do_mut"></a>
+
+## Macro function `do_mut`
+
+Apply the function <code>f</code> for each element of the <code><a href="./grid.md#grid_grid_Grid">Grid</a></code>. The function receives
+a mutable reference to the cell.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_do_mut">do_mut</a>&lt;$T, $R: drop&gt;($<a href="./grid.md#grid_grid">grid</a>: &<b>mut</b> <a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $f: |&<b>mut</b> $T| -&gt; $R)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_do_mut">do_mut</a>&lt;$T, $R: drop&gt;($<a href="./grid.md#grid_grid">grid</a>: &<b>mut</b> <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $f: |&<b>mut</b> $T| -&gt; $R) {
+    <b>let</b> <a href="./grid.md#grid_grid">grid</a> = $<a href="./grid.md#grid_grid">grid</a>;
+    <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_rows">rows</a>(), <a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_cols">cols</a>());
+    <a href="./grid.md#grid_grid_rows">rows</a>.<a href="./grid.md#grid_grid_do">do</a>!(|row| <a href="./grid.md#grid_grid_cols">cols</a>.<a href="./grid.md#grid_grid_do">do</a>!(|col| $f(&<b>mut</b> <a href="./grid.md#grid_grid">grid</a>[row, col])));
+}
+</code></pre>
+
+
+
+</details>
+
 <a name="grid_grid_traverse"></a>
 
 ## Macro function `traverse`
@@ -912,7 +941,7 @@ Use Wave Algorithm to find the shortest path between two points. The function
 check if the cell is passable - it takes two arguments: the current point
 and the next point.
 
-```move
+```rust
 // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
 grid.trace!(
 point::new(0, 0),
@@ -923,7 +952,7 @@ point::new(1, 4),
 );
 ```
 
-TODO: consider using a A* algorithm for better performance.
+Transition to the last tile must match the predicate <code>f</code>.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_trace">trace</a>&lt;$T&gt;($<a href="./grid.md#grid_grid_map">map</a>: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p0: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $p1: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $n: |&<a href="./point.md#grid_point_Point">grid::point::Point</a>| -&gt; vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;, $f: |(u16, u16), (u16, u16)| -&gt; bool, $limit: u16): <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;&gt;
