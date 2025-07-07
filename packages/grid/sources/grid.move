@@ -113,6 +113,8 @@ public fun borrow_point_mut<T>(g: &mut Grid<T>, p: &Point): &mut T {
 ///
 /// assert!(distance == 3);
 /// ```
+///
+/// See https://en.wikipedia.org/wiki/Taxicab_geometry for more information.
 public macro fun manhattan_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
     num_diff!($x0, $x1) + num_diff!($y0, $y1)
 }
@@ -126,6 +128,8 @@ public macro fun manhattan_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T
 ///
 /// assert!(distance == 2);
 /// ```
+///
+/// See https://en.wikipedia.org/wiki/Chebyshev_distance for more information.
 public macro fun chebyshev_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
     num_max!(num_diff!($x0, $x1), num_diff!($y0, $y1))
 }
@@ -199,11 +203,10 @@ public macro fun map_ref<$T, $U>($grid: &Grid<$T>, $f: |&$T| -> $U): Grid<$U> {
 /// the bounds of the grid. The size parameter specifies the size of the neighborhood.
 ///
 /// See `Point` for more information on the von Neumann neighborhood.
-public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> {
-    let p = $p;
-    let g = $g;
+/// See https://en.wikipedia.org/wiki/Von_Neumann_neighborhood for more information.
+public fun von_neumann<T>(g: &Grid<T>, p: Point, size: u16): vector<Point> {
     let (rows, cols) = (g.rows(), g.cols());
-    p.von_neumann($size).filter!(|point| {
+    p.von_neumann(size).filter!(|point| {
         let (x, y) = point.to_values();
         x < rows && y < cols
     })
@@ -232,15 +235,14 @@ public macro fun von_neumann_count<$T>(
     count
 }
 
-/// Get all Moore neighbors of a point, checking if the point is within the
+/// Get all Moore neighbors of a `Point`, checking if the point is within the
 /// bounds of the grid. The size parameter specifies the size of the neighborhood.
 ///
 /// See `Point` for more information on the Moore neighborhood.
-public macro fun moore<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> {
-    let p = $p;
-    let g = $g;
+/// See https://en.wikipedia.org/wiki/Moore_neighborhood for more information.
+public fun moore<T>(g: &Grid<T>, p: Point, size: u16): vector<Point> {
     let (rows, cols) = (g.rows(), g.cols());
-    p.moore($size).filter!(|point| {
+    p.moore(size).filter!(|point| {
         let (x, y) = point.to_values();
         x < rows && y < cols
     })
@@ -327,6 +329,7 @@ public macro fun find_group<$T>(
 /// grid.trace!(
 ///     point::new(0, 0),
 ///     point::new(1, 4),
+///     |p| p.moore(1), // use moore neighborhood
 ///     |(prev_x, prev_y), (next_x, next_y)| cell == 0,
 ///     6,
 /// );

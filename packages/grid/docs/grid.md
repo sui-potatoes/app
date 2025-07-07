@@ -44,9 +44,9 @@ the left or to the right of another point
 -  [Macro function `traverse`](#grid_grid_traverse)
 -  [Macro function `map`](#grid_grid_map)
 -  [Macro function `map_ref`](#grid_grid_map_ref)
--  [Macro function `von_neumann`](#grid_grid_von_neumann)
+-  [Function `von_neumann`](#grid_grid_von_neumann)
 -  [Macro function `von_neumann_count`](#grid_grid_von_neumann_count)
--  [Macro function `moore`](#grid_grid_moore)
+-  [Function `moore`](#grid_grid_moore)
 -  [Macro function `moore_count`](#grid_grid_moore_count)
 -  [Macro function `find_group`](#grid_grid_find_group)
 -  [Macro function `trace`](#grid_grid_trace)
@@ -408,6 +408,8 @@ let distance = grid::manhattan_distance!(0, 0, 1, 2);
 assert!(distance == 3);
 ```
 
+See https://en.wikipedia.org/wiki/Taxicab_geometry for more information.
+
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_manhattan_distance">manhattan_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T
 </code></pre>
@@ -440,6 +442,8 @@ let distance = grid::chebyshev_distance!(0, 0, 1, 2);
 
 assert!(distance == 2);
 ```
+
+See https://en.wikipedia.org/wiki/Chebyshev_distance for more information.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_chebyshev_distance">chebyshev_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T
@@ -665,15 +669,16 @@ Callback <code>f</code> takes the reference to the cell.
 
 <a name="grid_grid_von_neumann"></a>
 
-## Macro function `von_neumann`
+## Function `von_neumann`
 
 Get all von Neumann neighbors of a point, checking if the point is within
 the bounds of the grid. The size parameter specifies the size of the neighborhood.
 
 See <code>Point</code> for more information on the von Neumann neighborhood.
+See https://en.wikipedia.org/wiki/Von_Neumann_neighborhood for more information.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann">von_neumann</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann">von_neumann</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
 </code></pre>
 
 
@@ -682,11 +687,9 @@ See <code>Point</code> for more information on the von Neumann neighborhood.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann">von_neumann</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $p: Point, $size: u16): vector&lt;Point&gt; {
-    <b>let</b> p = $p;
-    <b>let</b> g = $g;
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann">von_neumann</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: Point, size: u16): vector&lt;Point&gt; {
     <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (g.<a href="./grid.md#grid_grid_rows">rows</a>(), g.<a href="./grid.md#grid_grid_cols">cols</a>());
-    p.<a href="./grid.md#grid_grid_von_neumann">von_neumann</a>($size).filter!(|<a href="./point.md#grid_point">point</a>| {
+    p.<a href="./grid.md#grid_grid_von_neumann">von_neumann</a>(size).filter!(|<a href="./point.md#grid_point">point</a>| {
         <b>let</b> (x, y) = <a href="./point.md#grid_point">point</a>.to_values();
         x &lt; <a href="./grid.md#grid_grid_rows">rows</a> && y &lt; <a href="./grid.md#grid_grid_cols">cols</a>
     })
@@ -739,15 +742,16 @@ Count the number of Von Neumann neighbors of a point that pass the predicate $f.
 
 <a name="grid_grid_moore"></a>
 
-## Macro function `moore`
+## Function `moore`
 
-Get all Moore neighbors of a point, checking if the point is within the
+Get all Moore neighbors of a <code>Point</code>, checking if the point is within the
 bounds of the grid. The size parameter specifies the size of the neighborhood.
 
 See <code>Point</code> for more information on the Moore neighborhood.
+See https://en.wikipedia.org/wiki/Moore_neighborhood for more information.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_moore">moore</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_moore">moore</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
 </code></pre>
 
 
@@ -756,11 +760,9 @@ See <code>Point</code> for more information on the Moore neighborhood.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_moore">moore</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $p: Point, $size: u16): vector&lt;Point&gt; {
-    <b>let</b> p = $p;
-    <b>let</b> g = $g;
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_moore">moore</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: Point, size: u16): vector&lt;Point&gt; {
     <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (g.<a href="./grid.md#grid_grid_rows">rows</a>(), g.<a href="./grid.md#grid_grid_cols">cols</a>());
-    p.<a href="./grid.md#grid_grid_moore">moore</a>($size).filter!(|<a href="./point.md#grid_point">point</a>| {
+    p.<a href="./grid.md#grid_grid_moore">moore</a>(size).filter!(|<a href="./point.md#grid_point">point</a>| {
         <b>let</b> (x, y) = <a href="./point.md#grid_point">point</a>.to_values();
         x &lt; <a href="./grid.md#grid_grid_rows">rows</a> && y &lt; <a href="./grid.md#grid_grid_cols">cols</a>
     })
@@ -888,6 +890,7 @@ and the next point.
 grid.trace!(
 point::new(0, 0),
 point::new(1, 4),
+|p| p.moore(1), // use moore neighborhood
 |(prev_x, prev_y), (next_x, next_y)| cell == 0,
 6,
 );
