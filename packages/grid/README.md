@@ -127,11 +127,52 @@ fun test_point() {
 
 > For full reference, refer to the [documentation](https://github.com/sui-potatoes/app/tree/main/packages/grid/docs/direction.md).
 
-Direction defines
+Grid directions are defined as a bitmap of 4 bits, where each each bit marks `up`, `down`, `left` or `right`, and a mix gives the
+diagonals: `up` | `right` = `up_right`. Because of this property, direction macros can be combined and compared using bitwise operators.
+
+```move
+use grid::direction;
+
+#[test]
+fun test_direction() {
+    let up = direction::up!();
+    let up_left = up | direction::left!(); // bitwise OR sums directions
+    let is_up = up_left & direction::up!() > 0; // bitwise AND can be used to check if a specific direction is present
+
+    // inverse! returns an opposite direction
+    let _down_right = direction::inverse!(up_left);
+
+    // lastly, `direction!` macro computes the direction bitmap from coordinates
+    let down = direction::direction!(0, 0, 2, 0); // x increase -> direction = down
+
+    assert!(down & direction::down!() > 0);
+}
+```
 
 ### Cursor
 
 > For full reference, refer to the [documentation](https://github.com/sui-potatoes/app/tree/main/packages/grid/docs/cursor.md).
+
+Cursor is a special type which can be moved using directions. It can come handy in certain scenarios by abstracting away
+coordinates. It is tightly coupled with `direction` module and supports conversion to and from `Point`.
+
+```move
+use grid::cursor;
+use grid::direction;
+
+#[test]
+fun test_cursor() {
+    let mut cursor = cursor::new(0, 0);
+    cursor.move_to(direction::down!());
+
+    assert!(cursor.to_vector() == vector[1, 0]);
+
+    // additionally, it has "memory" and can go back
+    cursor.move_back();
+
+    assert!(cursor.to_vector() == vector[0, 0]);
+}
+```
 
 ## Examples
 
