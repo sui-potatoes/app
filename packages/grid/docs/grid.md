@@ -102,6 +102,7 @@ A generic 2D grid, each cell stores <code>T</code>.
 
 <a name="grid_grid_EIncorrectLength"></a>
 
+Error code for incorrect vector length during initialization.
 
 
 <pre><code><b>const</b> <a href="./grid.md#grid_grid_EIncorrectLength">EIncorrectLength</a>: u64 = 0;
@@ -711,7 +712,14 @@ See https://en.wikipedia.org/wiki/Von_Neumann_neighborhood for more information.
 
 ## Macro function `von_neumann_count`
 
-Count the number of Von Neumann neighbors of a point that pass the predicate $f.
+Count the number of Von Neumann neighbors of a point that satisfy the predicate $f.
+
+Example:
+```rust
+let count = grid.von_neumann_count!(0, 2, 1, |el| *el == 1);
+
+assert!(count == 1);
+```
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann_count">von_neumann_count</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $size: u16, $f: |&$T| -&gt; bool): u8
@@ -757,6 +765,12 @@ bounds of the grid. The size parameter specifies the size of the neighborhood.
 See <code>Point</code> for more information on the Moore neighborhood.
 See https://en.wikipedia.org/wiki/Moore_neighborhood for more information.
 
+Example:
+```rust
+let neighbors = grid.moore!(0, 2, 1);
+neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
+```
+
 
 <pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_moore">moore</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
 </code></pre>
@@ -785,6 +799,12 @@ See https://en.wikipedia.org/wiki/Moore_neighborhood for more information.
 ## Macro function `moore_count`
 
 Count the number of Moore neighbors of a point that pass the predicate $f.
+
+Example:
+```rust
+let count = grid.moore_count!(0, 2, 1, |el| *el == 1);
+std::debug::print(&count); // result varies based on the Grid
+```
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_moore_count">moore_count</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $size: u16, $f: |&$T| -&gt; bool): u8
@@ -829,7 +849,7 @@ to be used with the <code><a href="./grid.md#grid_grid_von_neumann">von_neumann<
 However, it is possible to pass in a custom callback with exotic
 configurations, eg. only return diagonal neighbors.
 
-```move
+```rust
 // finds a group of cells with value 1 in von Neumann neighborhood
 grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
 
@@ -942,17 +962,17 @@ TODO: consider using a A* algorithm for better performance.
         num = num + 1;
         // Flush the queue, marking all cells around the current number.
         queue.<a href="./grid.md#grid_grid_destroy">destroy</a>!(|from| $n(&from).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|to| {
+            <b>let</b> (x0, y0) = from.into_values();
+            <b>let</b> (x1, y1) = to.into_values();
+            <b>if</b> (x1 &gt;= <a href="./grid.md#grid_grid_rows">rows</a> || y1 &gt;= <a href="./grid.md#grid_grid_cols">cols</a>) <b>return</b>;
+            // If we can't pass through the cell, skip it.
+            <b>if</b> (!$f((x0, y0), (x1, y1))) <b>return</b>;
             // If we reached the destination, <b>break</b> the <b>loop</b>.
             <b>if</b> (to == p1) {
                 *<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>(&to) = num;
                 found = <b>true</b>;
                 <b>break</b> 'search
             };
-            <b>let</b> (x0, y0) = from.into_values();
-            <b>let</b> (x1, y1) = to.into_values();
-            <b>if</b> (x1 &gt;= <a href="./grid.md#grid_grid_rows">rows</a> || y1 &gt;= <a href="./grid.md#grid_grid_cols">cols</a>) <b>return</b>;
-            // If we can't pass through the cell, skip it.
-            <b>if</b> (!$f((x0, y0), (x1, y1))) <b>return</b>;
             // If the cell is empty, mark it with the current number.
             <b>if</b> (<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point">borrow_point</a>(&to) == 0) {
                 *<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>(&to) = num;

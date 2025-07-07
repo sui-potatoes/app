@@ -24,6 +24,7 @@ use grid::point::Point;
 use std::{macros::{num_diff, num_max}, string::String};
 use sui::bcs::BCS;
 
+/// Error code for incorrect vector length during initialization.
 const EIncorrectLength: u64 = 0;
 
 /// A generic 2D grid, each cell stores `T`.
@@ -55,8 +56,14 @@ public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
 
 // === Accessors ===
 
+/// Alias for the `rows` function.
+public use fun rows as Grid.height;
+
 /// Get the number of rows of the `Grid`.
 public fun rows<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
+
+/// Alias for the `cols` function.
+public use fun cols as Grid.width;
 
 /// Get the number of columns of the `Grid`.
 public fun cols<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
@@ -219,7 +226,14 @@ public fun von_neumann<T>(g: &Grid<T>, p: Point, size: u16): vector<Point> {
     })
 }
 
-/// Count the number of Von Neumann neighbors of a point that pass the predicate $f.
+/// Count the number of Von Neumann neighbors of a point that satisfy the predicate $f.
+///
+/// Example:
+/// ```rust
+/// let count = grid.von_neumann_count!(0, 2, 1, |el| *el == 1);
+///
+/// assert!(count == 1);
+/// ```
 public macro fun von_neumann_count<$T>(
     $g: &Grid<$T>,
     $p: Point,
@@ -247,6 +261,12 @@ public macro fun von_neumann_count<$T>(
 ///
 /// See `Point` for more information on the Moore neighborhood.
 /// See https://en.wikipedia.org/wiki/Moore_neighborhood for more information.
+///
+/// Example:
+/// ```rust
+/// let neighbors = grid.moore!(0, 2, 1);
+/// neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
+/// ```
 public fun moore<T>(g: &Grid<T>, p: Point, size: u16): vector<Point> {
     let (rows, cols) = (g.rows(), g.cols());
     p.moore(size).filter!(|point| {
@@ -256,6 +276,12 @@ public fun moore<T>(g: &Grid<T>, p: Point, size: u16): vector<Point> {
 }
 
 /// Count the number of Moore neighbors of a point that pass the predicate $f.
+///
+/// Example:
+/// ```rust
+/// let count = grid.moore_count!(0, 2, 1, |el| *el == 1);
+/// std::debug::print(&count); // result varies based on the Grid
+/// ```
 public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T| -> bool): u8 {
     let p = $p;
     let g = $g;
@@ -283,7 +309,7 @@ public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T|
 /// However, it is possible to pass in a custom callback with exotic
 /// configurations, eg. only return diagonal neighbors.
 ///
-/// ```move
+/// ```rust
 /// // finds a group of cells with value 1 in von Neumann neighborhood
 /// grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
 ///
@@ -376,19 +402,19 @@ public macro fun trace<$T>(
 
         // Flush the queue, marking all cells around the current number.
         queue.destroy!(|from| $n(&from).destroy!(|to| {
-            // If we reached the destination, break the loop.
-            if (to == p1) {
-                *grid.borrow_point_mut(&to) = num;
-                found = true;
-                break 'search
-            };
-
             let (x0, y0) = from.into_values();
             let (x1, y1) = to.into_values();
             if (x1 >= rows || y1 >= cols) return;
 
             // If we can't pass through the cell, skip it.
             if (!$f((x0, y0), (x1, y1))) return;
+
+            // If we reached the destination, break the loop.
+            if (to == p1) {
+                *grid.borrow_point_mut(&to) = num;
+                found = true;
+                break 'search
+            };
 
             // If the cell is empty, mark it with the current number.
             if (grid.borrow_point(&to) == 0) {
