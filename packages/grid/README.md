@@ -75,6 +75,11 @@ fun test_point() {
 
 ### Direction
 
+> For full reference, refer to the [documentation](https://github.com/sui-potatoes/app/tree/main/packages/grid/docs/direction.md).
+
+Direction defines
+
+
 ### Cursor
 
 ## License

@@ -93,7 +93,7 @@ dev-dependencies = [
 ]
 
 [move.toolchain-version]
-compiler-version = "1.50.1"
+compiler-version = "1.51.1"
 edition = "2024"
 flavor = "sui"
 

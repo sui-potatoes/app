@@ -815,6 +815,11 @@ of the given point. The function <code>n</code> is used to get the neighbors of 
 current point. For Von Neumann neighborhood, use <code><a href="./grid.md#grid_grid_von_neumann">von_neumann</a></code> as the
 function. For Moore neighborhood, use <code><a href="./grid.md#grid_grid_moore">moore</a></code> as the function.
 
+Takes the <code>$n</code> function to get the neighbors of the current point. Expected
+to be used with the <code><a href="./grid.md#grid_grid_von_neumann">von_neumann</a></code> and <code><a href="./grid.md#grid_grid_moore">moore</a></code> macros to get the neighbors.
+However, it is possible to pass in a custom callback with exotic
+configurations, eg. only return diagonal neighbors.
+
 ```move
 // finds a group of cells with value 1 in von Neumann neighborhood
 grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);

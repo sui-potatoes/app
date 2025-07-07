@@ -53,10 +53,39 @@ fun cursor() {
     let (x, y) = cursor.to_values();
     assert_eq!(x, 0);
     assert_eq!(y, 0);
+
+    // === move back ===
+
+    cursor.move_back();
+    let (x, y) = cursor.to_values();
+    assert_eq!(x, 1);
+    assert_eq!(y, 1);
+
+    cursor.move_back();
+    let (x, y) = cursor.to_values();
+    assert_eq!(x, 2);
+    assert_eq!(y, 0);
+
+    cursor.move_back();
+    let (x, y) = cursor.to_values();
+    assert_eq!(x, 1);
+    assert_eq!(y, 1);
+}
+
+#[test, expected_failure(abort_code = cursor::EOutOfBounds)]
+fun move_back_out_of_bounds_fail() {
+    let mut cursor = cursor::new(0, 0);
+    cursor.move_to(up!());
+}
+
+#[test, expected_failure(abort_code = cursor::ENoHistory)]
+fun move_back_no_history_fail() {
+    let mut cursor = cursor::new(0, 0);
+    cursor.move_back();
 }
 
 #[test]
-fun cursor_to_from_point() {
+fun to_from_point() {
     let cursor = cursor::new(10, 10);
     let point = cursor.to_point();
     let cursor = point.to_cursor();
