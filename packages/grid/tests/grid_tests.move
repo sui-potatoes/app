@@ -25,6 +25,16 @@ fun creation() {
     assert_eq!(grid2[0, 0], 0);
 }
 
+#[test, expected_failure(abort_code = grid::EIncorrectLength)]
+fun from_vector_fail() {
+    grid::from_vector<u8>(vector[]);
+}
+
+#[test, expected_failure(abort_code = grid::EIncorrectLength)]
+fun from_vector_inconsistent_lengths_fail() {
+    grid::from_vector<u8>(vector[vector[], vector[1]]);
+}
+
 #[test]
 fun do_and_do_ref_mut() {
     let mut grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
@@ -93,44 +103,24 @@ fun swap() {
 
 #[test]
 fun rotate() {
-    let mut grid = grid::from_vector(vector[
-        vector[1, 2, 3],
-        vector[4, 5, 6],
-        vector[7, 8, 9],
-    ]);
+    let mut grid = grid::from_vector(vector[vector[1, 2, 3], vector[4, 5, 6], vector[7, 8, 9]]);
 
     grid.rotate(0);
 
-    assert_eq!(grid.into_vector(), vector[
-        vector[1, 2, 3],
-        vector[4, 5, 6],
-        vector[7, 8, 9],
-    ]);
+    assert_eq!(grid.into_vector(), vector[vector[1, 2, 3], vector[4, 5, 6], vector[7, 8, 9]]);
 
     grid.rotate(1); // 90º
 
-    assert_eq!(grid.into_vector(), vector[
-        vector[7, 4, 1],
-        vector[8, 5, 2],
-        vector[9, 6, 3],
-    ]);
+    assert_eq!(grid.into_vector(), vector[vector[7, 4, 1], vector[8, 5, 2], vector[9, 6, 3]]);
 
     grid.rotate(2); // 180º
 
-    assert_eq!(grid.into_vector(), vector[
-        vector[3, 6, 9],
-        vector[2, 5, 8],
-        vector[1, 4, 7],
-    ]);
+    assert_eq!(grid.into_vector(), vector[vector[3, 6, 9], vector[2, 5, 8], vector[1, 4, 7]]);
 
     grid.rotate(1); // 90º
     grid.rotate(3); // 270º
 
-    assert_eq!(grid.into_vector(), vector[
-        vector[3, 6, 9],
-        vector[2, 5, 8],
-        vector[1, 4, 7],
-    ]);
+    assert_eq!(grid.into_vector(), vector[vector[3, 6, 9], vector[2, 5, 8], vector[1, 4, 7]]);
 
     grid.rotate(4);
 
@@ -144,6 +134,57 @@ fun rotate() {
 
     // check the first column that it's 14 to 28
     size.do!(|i| assert_eq!(grid[i, 0], i + size - 1));
+}
+
+#[test]
+fun moore() {
+    let grid = grid::from_vector(vector[
+        vector[0, 1, 2, 3, 0],
+        vector[0, 8, 1, 4, 0],
+        vector[0, 7, 6, 5, 0],
+        vector[0, 0, 0, 0, 0],
+    ]);
+
+    let mut neighbors = grid.moore(point::new(1, 2), 1);
+    neighbors.insertion_sort_by!(|a, b| a.le(b));
+
+    assert_eq!(
+        neighbors,
+        vector[
+            vector[0, 1],
+            vector[0, 2],
+            vector[0, 3],
+            vector[1, 1],
+            vector[1, 3],
+            vector[2, 1],
+            vector[2, 2],
+            vector[2, 3],
+        ].map!(|v| point::from_vector(v)),
+    );
+
+    assert_eq!(grid.moore_count!(point::new(1, 2), 1, |v| *v > 4), 4);
+}
+
+#[test]
+fun von_neumann() {
+    let grid = grid::from_vector(vector[
+        vector[0, 1, 2, 3, 0],
+        vector[0, 8, 1, 4, 0],
+        vector[0, 7, 6, 5, 0],
+        vector[0, 0, 0, 0, 0],
+    ]);
+
+    let mut neighbors = grid.von_neumann(point::new(1, 2), 1);
+    neighbors.insertion_sort_by!(|a, b| a.le(b));
+
+    assert_eq!(neighbors, vector[
+        vector[0, 2],
+        vector[1, 1],
+        vector[1, 3],
+        vector[2, 2],
+    ].map!(|v| point::from_vector(v)));
+
+    assert_eq!(grid.von_neumann_count!(point::new(1, 2), 1, |v| *v > 4), 2);
 }
 
 #[test]
