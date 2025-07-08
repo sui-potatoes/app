@@ -24,7 +24,7 @@ use grid::point::Point;
 use std::{macros::{num_diff, num_max}, string::String};
 use sui::bcs::BCS;
 
-/// Error code for incorrect vector length during initialization.
+/// Vector length is incorrect during initialization.
 const EIncorrectLength: u64 = 0;
 
 /// A generic 2D grid, each cell stores `T`.
@@ -54,7 +54,7 @@ public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
     grid
 }
 
-// === Accessors ===
+// === Accessors & Mutators ===
 
 /// Alias for the `rows` function.
 public use fun rows as Grid.height;
@@ -93,6 +93,56 @@ public fun borrow_mut<T>(g: &mut Grid<T>, x: u16, y: u16): &mut T {
 public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
     g.grid[x as u64].push_back(element);
     g.grid[x as u64].swap_remove(y as u64)
+}
+
+/// Rotate the grid `times` * 90º degrees clockwise. Mutates the grid in place.
+/// If `times` is greater than 3, it will be reduced to the equivalent rotation.
+public fun rotate<T>(g: &mut Grid<T>, times: u8) {
+    let times = times % 4;
+
+    // no rotation
+    if (times == 0) return;
+
+    // first deal with times = 1, keep the grid value, only modify it
+    // if we're only rotating 90º, we can perform swaps
+    if (times == 1) {
+        let Grid { grid: source } = g;
+        let mut target = vector[];
+        let (rows, cols) = (source.length(), source[0].length());
+        source.pop_back().do!(|el| target.push_back(vector[el]));
+
+        (rows - 1).do!(|_| {
+            let mut row = source.pop_back();
+            cols.do!(|i| target[cols - i - 1].push_back(row.pop_back()));
+            row.destroy_empty();
+        });
+
+        target.do!(|row| source.push_back(row));
+    };
+
+    // 180º degrees rotation
+    // mirror the grid diagonally, reverse the rows and columns
+    if (times == 2) {
+        g.grid.reverse();
+        g.grid.do_mut!(|row| row.reverse());
+    };
+
+    // 270º degrees rotation
+    if (times == 3) {
+        let Grid { grid: source } = g;
+        let (rows, cols) = (source.length(), source[0].length());
+        let mut target = vector[];
+        source.reverse();
+        source.pop_back().do!(|el| target.push_back(vector[el]));
+
+        (rows - 1).do!(|_| {
+            let mut row = source.pop_back();
+            cols.do!(|i| target[cols - i - 1].push_back(row.pop_back()));
+            row.destroy_empty();
+        });
+
+        target.destroy!(|row| source.push_back(row));
+    };
 }
 
 // === Accessors: Point ===
@@ -155,7 +205,7 @@ public macro fun chebyshev_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T
 ///
 /// let grid = grid::tabulate!(3, 3, |_x, _y| Tile::Empty);
 /// ```
-public macro fun tabulate<$T>($rows: u16, $cols: u16, $f: |u16, u16| -> $T): Grid<$T> {
+public macro fun tabulate<$U: drop, $T>($rows: $U, $cols: $U, $f: |u16, u16| -> $T): Grid<$T> {
     let rows = $rows as u64;
     let cols = $cols as u64;
     let grid = vector::tabulate!(rows, |x| vector::tabulate!(cols, |y| $f(x as u16, y as u16)));

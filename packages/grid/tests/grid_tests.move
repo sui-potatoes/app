@@ -92,6 +92,61 @@ fun swap() {
 }
 
 #[test]
+fun rotate() {
+    let mut grid = grid::from_vector(vector[
+        vector[1, 2, 3],
+        vector[4, 5, 6],
+        vector[7, 8, 9],
+    ]);
+
+    grid.rotate(0);
+
+    assert_eq!(grid.into_vector(), vector[
+        vector[1, 2, 3],
+        vector[4, 5, 6],
+        vector[7, 8, 9],
+    ]);
+
+    grid.rotate(1); // 90º
+
+    assert_eq!(grid.into_vector(), vector[
+        vector[7, 4, 1],
+        vector[8, 5, 2],
+        vector[9, 6, 3],
+    ]);
+
+    grid.rotate(2); // 180º
+
+    assert_eq!(grid.into_vector(), vector[
+        vector[3, 6, 9],
+        vector[2, 5, 8],
+        vector[1, 4, 7],
+    ]);
+
+    grid.rotate(1); // 90º
+    grid.rotate(3); // 270º
+
+    assert_eq!(grid.into_vector(), vector[
+        vector[3, 6, 9],
+        vector[2, 5, 8],
+        vector[1, 4, 7],
+    ]);
+
+    grid.rotate(4);
+
+    // rotate large grid
+    let size = 15u16;
+    let mut grid = grid::tabulate!(size, size, |x, y| x + y);
+    grid.rotate(5); // 5 is equivalent to 1
+
+    // check the last column that it's 0 to 14
+    size.do!(|i| assert_eq!(grid[i, size - 1], i));
+
+    // check the first column that it's 14 to 28
+    size.do!(|i| assert_eq!(grid[i, 0], i + size - 1));
+}
+
+#[test]
 fun path_tracing() {
     let grid = grid::from_vector(vector[
         vector[1, 0, 0, 0, 0],

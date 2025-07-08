@@ -33,6 +33,7 @@ the left or to the right of another point
 -  [Function `borrow`](#grid_grid_borrow)
 -  [Function `borrow_mut`](#grid_grid_borrow_mut)
 -  [Function `swap`](#grid_grid_swap)
+-  [Function `rotate`](#grid_grid_rotate)
 -  [Function `borrow_point`](#grid_grid_borrow_point)
 -  [Function `borrow_point_mut`](#grid_grid_borrow_point_mut)
 -  [Macro function `manhattan_distance`](#grid_grid_manhattan_distance)
@@ -103,7 +104,7 @@ A generic 2D grid, each cell stores <code>T</code>.
 
 <a name="grid_grid_EIncorrectLength"></a>
 
-Error code for incorrect vector length during initialization.
+Vector length is incorrect during initialization.
 
 
 <pre><code><b>const</b> <a href="./grid.md#grid_grid_EIncorrectLength">EIncorrectLength</a>: u64 = 0;
@@ -344,6 +345,68 @@ This is important for <code>T</code> types that don't have <code>drop</code>.
 
 </details>
 
+<a name="grid_grid_rotate"></a>
+
+## Function `rotate`
+
+Rotate the grid <code>times</code> * 90º degrees clockwise. Mutates the grid in place.
+If <code>times</code> is greater than 3, it will be reduced to the equivalent rotation.
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_rotate">rotate</a>&lt;T&gt;(g: &<b>mut</b> <a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, times: u8)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_rotate">rotate</a>&lt;T&gt;(g: &<b>mut</b> <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, times: u8) {
+    <b>let</b> times = times % 4;
+    // no rotation
+    <b>if</b> (times == 0) <b>return</b>;
+    // first deal with times = 1, keep the <a href="./grid.md#grid_grid">grid</a> value, only modify it
+    // <b>if</b> we're only rotating 90º, we can perform swaps
+    <b>if</b> (times == 1) {
+        <b>let</b> <a href="./grid.md#grid_grid_Grid">Grid</a> { <a href="./grid.md#grid_grid">grid</a>: source } = g;
+        <b>let</b> <b>mut</b> target = vector[];
+        <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (source.length(), source[0].length());
+        source.pop_back().<a href="./grid.md#grid_grid_do">do</a>!(|el| target.push_back(vector[el]));
+        (<a href="./grid.md#grid_grid_rows">rows</a> - 1).<a href="./grid.md#grid_grid_do">do</a>!(|_| {
+            <b>let</b> <b>mut</b> row = source.pop_back();
+            <a href="./grid.md#grid_grid_cols">cols</a>.<a href="./grid.md#grid_grid_do">do</a>!(|i| target[<a href="./grid.md#grid_grid_cols">cols</a> - i - 1].push_back(row.pop_back()));
+            row.destroy_empty();
+        });
+        target.<a href="./grid.md#grid_grid_do">do</a>!(|row| source.push_back(row));
+    };
+    // 180º degrees rotation
+    // mirror the <a href="./grid.md#grid_grid">grid</a> diagonally, reverse the <a href="./grid.md#grid_grid_rows">rows</a> and columns
+    <b>if</b> (times == 2) {
+        g.<a href="./grid.md#grid_grid">grid</a>.reverse();
+        g.<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_do_mut">do_mut</a>!(|row| row.reverse());
+    };
+    // 270º degrees rotation
+    <b>if</b> (times == 3) {
+        <b>let</b> <a href="./grid.md#grid_grid_Grid">Grid</a> { <a href="./grid.md#grid_grid">grid</a>: source } = g;
+        <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (source.length(), source[0].length());
+        <b>let</b> <b>mut</b> target = vector[];
+        source.reverse();
+        source.pop_back().<a href="./grid.md#grid_grid_do">do</a>!(|el| target.push_back(vector[el]));
+        (<a href="./grid.md#grid_grid_rows">rows</a> - 1).<a href="./grid.md#grid_grid_do">do</a>!(|_| {
+            <b>let</b> <b>mut</b> row = source.pop_back();
+            <a href="./grid.md#grid_grid_cols">cols</a>.<a href="./grid.md#grid_grid_do">do</a>!(|i| target[<a href="./grid.md#grid_grid_cols">cols</a> - i - 1].push_back(row.pop_back()));
+            row.destroy_empty();
+        });
+        target.<a href="./grid.md#grid_grid_destroy">destroy</a>!(|row| source.push_back(row));
+    };
+}
+</code></pre>
+
+
+
+</details>
+
 <a name="grid_grid_borrow_point"></a>
 
 ## Function `borrow_point`
@@ -484,7 +547,7 @@ let grid = grid::tabulate!(3, 3, |_x, _y| Tile::Empty);
 ```
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_tabulate">tabulate</a>&lt;$T&gt;($<a href="./grid.md#grid_grid_rows">rows</a>: u16, $<a href="./grid.md#grid_grid_cols">cols</a>: u16, $f: |u16, u16| -&gt; $T): <a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_tabulate">tabulate</a>&lt;$U: drop, $T&gt;($<a href="./grid.md#grid_grid_rows">rows</a>: $U, $<a href="./grid.md#grid_grid_cols">cols</a>: $U, $f: |u16, u16| -&gt; $T): <a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;
 </code></pre>
 
 
@@ -493,7 +556,7 @@ let grid = grid::tabulate!(3, 3, |_x, _y| Tile::Empty);
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_tabulate">tabulate</a>&lt;$T&gt;($<a href="./grid.md#grid_grid_rows">rows</a>: u16, $<a href="./grid.md#grid_grid_cols">cols</a>: u16, $f: |u16, u16| -&gt; $T): <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt; {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_tabulate">tabulate</a>&lt;$U: drop, $T&gt;($<a href="./grid.md#grid_grid_rows">rows</a>: $U, $<a href="./grid.md#grid_grid_cols">cols</a>: $U, $f: |u16, u16| -&gt; $T): <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt; {
     <b>let</b> <a href="./grid.md#grid_grid_rows">rows</a> = $<a href="./grid.md#grid_grid_rows">rows</a> <b>as</b> u64;
     <b>let</b> <a href="./grid.md#grid_grid_cols">cols</a> = $<a href="./grid.md#grid_grid_cols">cols</a> <b>as</b> u64;
     <b>let</b> <a href="./grid.md#grid_grid">grid</a> = vector::tabulate!(<a href="./grid.md#grid_grid_rows">rows</a>, |x| vector::tabulate!(<a href="./grid.md#grid_grid_cols">cols</a>, |y| $f(x <b>as</b> u16, y <b>as</b> u16)));
