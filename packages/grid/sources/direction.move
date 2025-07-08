@@ -1,12 +1,15 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Direction module provides macros to check the relative positions of points
-/// on a grid.
+/// The `direction` module provides macros to check the relative positions of
+/// points on a grid as well as constants for the directions. Currently, the
+/// main consumer of this module is `cursor`.
 ///
 /// Grid axes are defined as follows:
 /// - X-axis: vertical axis (top->down)
 /// - Y-axis: horizontal axis (left->right)
+///
+/// Hence, the (0, 0) point is at the top-left corner of the grid.
 ///
 /// Direction is packed as a bit field in a single byte. Diagonals are represented
 /// as a combination of two orthogonal directions. For example, `up_right!()` is
@@ -81,8 +84,8 @@ public macro fun is_up_left<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool 
     $x0 > $x1 && $y0 > $y1
 }
 
-/// Check if a point is on the same tile as another point.
-public macro fun is_same_tile<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
+/// Check if a point is equal to another point.
+public macro fun is_equal<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
     $x0 == $x1 && $y0 == $y1
 }
 
@@ -100,16 +103,20 @@ public macro fun down(): u8 { 1 << 2 }
 /// Direction: left
 public macro fun left(): u8 { 1 << 3 }
 
-/// Direction: up & right
+/// Direction: up | right
+/// Can be represented as `up!() | right!()`.
 public macro fun up_right(): u8 { up!() | right!() }
 
-/// Direction: down & right
+/// Direction: down | right
+/// Can be represented as `down!() | right!()`.
 public macro fun down_right(): u8 { down!() | right!() }
 
-/// Direction: down & left
+/// Direction: down | left
+/// Can be represented as `down!() | left!()`.
 public macro fun down_left(): u8 { down!() | left!() }
 
-/// Direction: up & left
+/// Direction: up | left
+/// Can be represented as `up!() | left!()`.
 public macro fun up_left(): u8 { up!() | left!() }
 
 /// Direction: none
@@ -132,8 +139,18 @@ public macro fun inverse($direction: u8): u8 {
 
 // === Determine Direction ===
 
-/// Get the attack direction from point `(x0, y0)` to point `(x1, y1)`.
+/// Get the direction from point `(x0, y0)` to point `(x1, y1)`.
 /// For convenience, takes any integer type, but `Grid` uses `u16`.
+///
+/// ```rust
+/// use grid::direction;
+///
+/// #[test]
+/// fun test_direction() {
+///     let dir = direction::direction!(0, 0, 1, 0);
+///     assert_eq!(dir, direction::right!());
+/// }
+/// ```
 public macro fun direction<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): u8 {
     let diff_x = num_diff!($x0, $x1);
     let diff_y = num_diff!($y0, $y1);

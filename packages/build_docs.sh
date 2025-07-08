@@ -48,7 +48,8 @@ for dir in */ ; do
   rm -rf $(pwd)/../.doc-deps/$pkg_name;
 
   # Step 8: Create symlink to this docs folder in ../dependencies
-  ln -sf "$(pwd)/docs" "$(pwd)/../.doc-deps/$pkg_name"
+  echo "Creating symlink to $pkg_name/docs in .doc-deps/$pkg_name"
+  ln -sf ../$pkg_name/docs ../.doc-deps/$pkg_name
 
   cd ..
 done

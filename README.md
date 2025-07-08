@@ -12,7 +12,7 @@ Monorepo for the Potatoes project. Contains all the applications and services th
 ## Packages
 
 - [ascii](/packages/ascii) ([mvr](https://www.moveregistry.com/package/@potatoes/ascii)) - ASCII codes table and utilities
-- [bit-field](/packages/bit_field) ([mvr](https://www.moveregistry.com/package/@potatoes/bit-field)) - 0-cost bit packing library
+- [bit-field](/packages/bit-field) ([mvr](https://www.moveregistry.com/package/@potatoes/bit-field)) - 0-cost bit packing library
 - [codec](/packages/codec) ([mvr](https://www.moveregistry.com/package/@potatoes/codec)) - ultimate encoding solution for Sui
 - [date](/packages/date) ([mvr](https://www.moveregistry.com/package/@potatoes/date)) - date and time formatting library
 - [format!](/packages/format) ([mvr](https://www.moveregistry.com/package/@potatoes/format)) - string formatting library, inspired by Rust's `format!` macro

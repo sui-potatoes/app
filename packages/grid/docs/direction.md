@@ -3,12 +3,15 @@
 
 # Module `grid::direction`
 
-Direction module provides macros to check the relative positions of points
-on a grid.
+The <code><a href="./direction.md#grid_direction">direction</a></code> module provides macros to check the relative positions of
+points on a grid as well as constants for the directions. Currently, the
+main consumer of this module is <code><a href="./cursor.md#grid_cursor">cursor</a></code>.
 
 Grid axes are defined as follows:
 - X-axis: vertical axis (top->down)
 - Y-axis: horizontal axis (left->right)
+
+Hence, the (0, 0) point is at the top-left corner of the grid.
 
 Direction is packed as a bit field in a single byte. Diagonals are represented
 as a combination of two orthogonal directions. For example, <code><a href="./direction.md#grid_direction_up_right">up_right</a>!()</code> is
@@ -52,7 +55,7 @@ assert!(is_left);
 -  [Macro function `is_down_right`](#grid_direction_is_down_right)
 -  [Macro function `is_down_left`](#grid_direction_is_down_left)
 -  [Macro function `is_up_left`](#grid_direction_is_up_left)
--  [Macro function `is_same_tile`](#grid_direction_is_same_tile)
+-  [Macro function `is_equal`](#grid_direction_is_equal)
 -  [Macro function `up`](#grid_direction_up)
 -  [Macro function `right`](#grid_direction_right)
 -  [Macro function `down`](#grid_direction_down)
@@ -64,6 +67,7 @@ assert!(is_left);
 -  [Macro function `none`](#grid_direction_none)
 -  [Macro function `inverse`](#grid_direction_inverse)
 -  [Macro function `direction`](#grid_direction_direction)
+    -  [[test]](#@[test]_1)
 
 
 <pre><code></code></pre>
@@ -270,14 +274,14 @@ Check if a point is up-left of another point (decrease in X, decrease in Y).
 
 </details>
 
-<a name="grid_direction_is_same_tile"></a>
+<a name="grid_direction_is_equal"></a>
 
-## Macro function `is_same_tile`
+## Macro function `is_equal`
 
-Check if a point is on the same tile as another point.
+Check if a point is equal to another point.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_same_tile">is_same_tile</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_equal">is_equal</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
 </code></pre>
 
 
@@ -286,7 +290,7 @@ Check if a point is on the same tile as another point.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_same_tile">is_same_tile</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_equal">is_equal</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
     $x0 == $x1 && $y0 == $y1
 }
 </code></pre>
@@ -391,7 +395,8 @@ Direction: left
 
 ## Macro function `up_right`
 
-Direction: up & right
+Direction: up | right
+Can be represented as <code><a href="./direction.md#grid_direction_up">up</a>!() | <a href="./direction.md#grid_direction_right">right</a>!()</code>.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_up_right">up_right</a>(): u8
@@ -414,7 +419,8 @@ Direction: up & right
 
 ## Macro function `down_right`
 
-Direction: down & right
+Direction: down | right
+Can be represented as <code><a href="./direction.md#grid_direction_down">down</a>!() | <a href="./direction.md#grid_direction_right">right</a>!()</code>.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_down_right">down_right</a>(): u8
@@ -437,7 +443,8 @@ Direction: down & right
 
 ## Macro function `down_left`
 
-Direction: down & left
+Direction: down | left
+Can be represented as <code><a href="./direction.md#grid_direction_down">down</a>!() | <a href="./direction.md#grid_direction_left">left</a>!()</code>.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_down_left">down_left</a>(): u8
@@ -460,7 +467,8 @@ Direction: down & left
 
 ## Macro function `up_left`
 
-Direction: up & left
+Direction: up | left
+Can be represented as <code><a href="./direction.md#grid_direction_up">up</a>!() | <a href="./direction.md#grid_direction_left">left</a>!()</code>.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_up_left">up_left</a>(): u8
@@ -541,8 +549,22 @@ Get the inverse direction of a given direction.
 
 ## Macro function `direction`
 
-Get the attack direction from point <code>(x0, y0)</code> to point <code>(x1, y1)</code>.
+Get the direction from point <code>(x0, y0)</code> to point <code>(x1, y1)</code>.
 For convenience, takes any integer type, but <code>Grid</code> uses <code>u16</code>.
+
+```rust
+use grid::direction;
+
+
+<a name="@[test]_1"></a>
+
+### [test]
+
+fun test_direction() {
+let dir = direction::direction!(0, 0, 1, 0);
+assert_eq!(dir, direction::right!());
+}
+```
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction">direction</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): u8

@@ -1,5 +1,5 @@
 [package]
-name = "go_game"
+name = "go-game"
 edition = "2024.beta"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 

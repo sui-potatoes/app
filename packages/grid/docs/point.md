@@ -344,7 +344,6 @@ if <code>size</code> is 1, the function will return the immediate neighbors of t
 point. If <code>size</code> is 2, the function will return the neighbors of the
 neighbors, and so on.
 
-Note: does not include the point itself!
 ```
 0 1 2 3 4
 0: | | |2| | |
@@ -353,6 +352,8 @@ Note: does not include the point itself!
 3: | |3|1|2| |
 4: | | |2| | |
 ```
+
+Note: does not include the point itself!
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_von_neumann">von_neumann</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
@@ -456,7 +457,7 @@ Note: does not include the point itself!
 ## Function `le`
 
 Compare two points. To be used in sorting macros. Returns less or equal,
-based on the x coordinate (1st) and then the y coordinate (2nd).
+based on the <code><a href="./point.md#grid_point_x">x</a></code> coordinate (1st) and then the <code><a href="./point.md#grid_point_y">y</a></code> coordinate (2nd).
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_le">le</a>(a: &<a href="./point.md#grid_point_Point">grid::point::Point</a>, b: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): bool

@@ -26,8 +26,8 @@ than building paths on every step (unless absolutely necessary).
 
 
 <pre><code><b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation">animation</a>;
+<b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./coordinate.md#(svg=0x0)_coordinate">coordinate</a>;
 <b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./filter.md#(svg=0x0)_filter">filter</a>;
-<b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point">point</a>;
 <b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./print.md#(svg=0x0)_print">print</a>;
 <b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./shape.md#(svg=0x0)_shape">shape</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
