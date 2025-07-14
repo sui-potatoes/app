@@ -65,7 +65,6 @@ wrapping macro calls.
 | method        | description                                                                            |
 | ------------- | -------------------------------------------------------------------------------------- |
 | `from_vector` | construct the `Grid` from 2-dimensional vector                                         |
-<<<<<<< Updated upstream
 | `tabulate!`   | constructs the `Grid` with elements returned from function `f`                         |
 | `destroy!`    | destroys the `Grid` by calling `f` on each element                                     |
 | `do!`         | same as `destroy` but preserves the order of elements (top -> bottom, left -> right)   |
@@ -74,15 +73,7 @@ wrapping macro calls.
 | `map!`        | construct a new `Grid` by calling a function `f` on each element, consumes the value   |
 | `map_ref!`    | same as `map!` but does not consume the value, creates a new instance from a reference |
 | `traverse!`   | similar to `do_ref!` but the callback `f` receives coordinates of the Point as well    |
-=======
-| `tabulate!`   | constructs the `Grid` with elements returned from function `$f`                        |
-| destroy!      | destroys the `Grid` by calling `$f` on each element                                    |
-| do!           | same as `destroy` but preserves the order of elements (top -> bottom, left -> right)   |
-| do_ref!       | apply function `$f` to an immutable reference to an element                            |
-| map!          | construct a new `Grid` by calling a function `$f` on each element, consumes the value  |
-| map_ref!      | same as `map!` but does not consume the value, creates a new instance from a reference |
-| traverse!     | similar to `do_ref!` but the callback `$f` receives coordinates of the Point as well   |
->>>>>>> Stashed changes
+| `rotate`      | rotate the grid 90º clockwise `times` times                                            |
 
 #### Working with Points
 

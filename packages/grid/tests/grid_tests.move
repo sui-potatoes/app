@@ -177,12 +177,12 @@ fun von_neumann() {
     let mut neighbors = grid.von_neumann(point::new(1, 2), 1);
     neighbors.insertion_sort_by!(|a, b| a.le(b));
 
-    assert_eq!(neighbors, vector[
-        vector[0, 2],
-        vector[1, 1],
-        vector[1, 3],
-        vector[2, 2],
-    ].map!(|v| point::from_vector(v)));
+    assert_eq!(
+        neighbors,
+        vector[vector[0, 2], vector[1, 1], vector[1, 3], vector[2, 2]].map!(
+            |v| point::from_vector(v),
+        ),
+    );
 
     assert_eq!(grid.von_neumann_count!(point::new(1, 2), 1, |v| *v > 4), 2);
 }
