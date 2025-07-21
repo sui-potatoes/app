@@ -22,7 +22,7 @@ Should be converted to a native function.
 Current implementation only works for Sui.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/address.md#std_address_length">length</a>(): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../std/address.md#std_address_length">length</a>(): u64
 </code></pre>
 
 
@@ -31,7 +31,7 @@ Current implementation only works for Sui.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/address.md#std_address_length">length</a>(): u64 {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/address.md#std_address_length">length</a>(): u64 {
     32
 }
 </code></pre>

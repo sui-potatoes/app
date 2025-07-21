@@ -17,10 +17,10 @@ Functionality for converting Move types into values. Use with care!
 -  [Function `into_string`](#std_type_name_into_string)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/address.md#std_address">std::address</a>;
-<b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
+<pre><code><b>use</b> <a href="../std/address.md#std_address">std::address</a>;
+<b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
 </code></pre>
 
 
@@ -31,7 +31,7 @@ Functionality for converting Move types into values. Use with care!
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/std/type_name.md#std_type_name_TypeName">TypeName</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="../std/type_name.md#std_type_name_TypeName">TypeName</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -42,7 +42,7 @@ Functionality for converting Move types into values. Use with care!
 
 <dl>
 <dt>
-<code>name: <a href="../../dependencies/std/ascii.md#std_ascii_String">std::ascii::String</a></code>
+<code>name: <a href="../std/ascii.md#std_ascii_String">std::ascii::String</a></code>
 </dt>
 <dd>
  String representation of the type. All types are represented
@@ -68,7 +68,7 @@ Functionality for converting Move types into values. Use with care!
 ASCII Character code for the <code>:</code> (colon) symbol.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_COLON">ASCII_COLON</a>: u8 = 58;
+<pre><code><b>const</b> <a href="../std/type_name.md#std_type_name_ASCII_COLON">ASCII_COLON</a>: u8 = 58;
 </code></pre>
 
 
@@ -78,7 +78,7 @@ ASCII Character code for the <code>:</code> (colon) symbol.
 ASCII Character code for the <code>v</code> (lowercase v) symbol.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_V">ASCII_V</a>: u8 = 118;
+<pre><code><b>const</b> <a href="../std/type_name.md#std_type_name_ASCII_V">ASCII_V</a>: u8 = 118;
 </code></pre>
 
 
@@ -88,7 +88,7 @@ ASCII Character code for the <code>v</code> (lowercase v) symbol.
 ASCII Character code for the <code>e</code> (lowercase e) symbol.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_E">ASCII_E</a>: u8 = 101;
+<pre><code><b>const</b> <a href="../std/type_name.md#std_type_name_ASCII_E">ASCII_E</a>: u8 = 101;
 </code></pre>
 
 
@@ -98,7 +98,7 @@ ASCII Character code for the <code>e</code> (lowercase e) symbol.
 ASCII Character code for the <code>c</code> (lowercase c) symbol.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_C">ASCII_C</a>: u8 = 99;
+<pre><code><b>const</b> <a href="../std/type_name.md#std_type_name_ASCII_C">ASCII_C</a>: u8 = 99;
 </code></pre>
 
 
@@ -108,7 +108,7 @@ ASCII Character code for the <code>c</code> (lowercase c) symbol.
 ASCII Character code for the <code>t</code> (lowercase t) symbol.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_T">ASCII_T</a>: u8 = 116;
+<pre><code><b>const</b> <a href="../std/type_name.md#std_type_name_ASCII_T">ASCII_T</a>: u8 = 116;
 </code></pre>
 
 
@@ -118,7 +118,7 @@ ASCII Character code for the <code>t</code> (lowercase t) symbol.
 ASCII Character code for the <code>o</code> (lowercase o) symbol.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_O">ASCII_O</a>: u8 = 111;
+<pre><code><b>const</b> <a href="../std/type_name.md#std_type_name_ASCII_O">ASCII_O</a>: u8 = 111;
 </code></pre>
 
 
@@ -128,7 +128,7 @@ ASCII Character code for the <code>o</code> (lowercase o) symbol.
 ASCII Character code for the <code>r</code> (lowercase r) symbol.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_R">ASCII_R</a>: u8 = 114;
+<pre><code><b>const</b> <a href="../std/type_name.md#std_type_name_ASCII_R">ASCII_R</a>: u8 = 114;
 </code></pre>
 
 
@@ -138,7 +138,7 @@ ASCII Character code for the <code>r</code> (lowercase r) symbol.
 The type is not from a package/module. It is a primitive type.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/type_name.md#std_type_name_ENonModuleType">ENonModuleType</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../std/type_name.md#std_type_name_ENonModuleType">ENonModuleType</a>: u64 = 0;
 </code></pre>
 
 
@@ -153,7 +153,7 @@ this function are defining IDs (the ID of the package in
 storage that first introduced the type).
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_get">get</a>&lt;T&gt;(): <a href="../../dependencies/std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_get">get</a>&lt;T&gt;(): <a href="../std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>
 </code></pre>
 
 
@@ -162,7 +162,7 @@ storage that first introduced the type).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_get">get</a>&lt;T&gt;(): <a href="../../dependencies/std/type_name.md#std_type_name_TypeName">TypeName</a>;
+<pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_get">get</a>&lt;T&gt;(): <a href="../std/type_name.md#std_type_name_TypeName">TypeName</a>;
 </code></pre>
 
 
@@ -180,7 +180,7 @@ the package, even if the type in question was introduced in a
 later upgrade).
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_get_with_original_ids">get_with_original_ids</a>&lt;T&gt;(): <a href="../../dependencies/std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_get_with_original_ids">get_with_original_ids</a>&lt;T&gt;(): <a href="../std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>
 </code></pre>
 
 
@@ -189,7 +189,7 @@ later upgrade).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_get_with_original_ids">get_with_original_ids</a>&lt;T&gt;(): <a href="../../dependencies/std/type_name.md#std_type_name_TypeName">TypeName</a>;
+<pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_get_with_original_ids">get_with_original_ids</a>&lt;T&gt;(): <a href="../std/type_name.md#std_type_name_TypeName">TypeName</a>;
 </code></pre>
 
 
@@ -204,7 +204,7 @@ Returns true iff the TypeName represents a primitive type, i.e. one of
 u8, u16, u32, u64, u128, u256, bool, address, vector.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_is_primitive">is_primitive</a>(self: &<a href="../../dependencies/std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_is_primitive">is_primitive</a>(self: &<a href="../std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): bool
 </code></pre>
 
 
@@ -213,7 +213,7 @@ u8, u16, u32, u64, u128, u256, bool, address, vector.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_is_primitive">is_primitive</a>(self: &<a href="../../dependencies/std/type_name.md#std_type_name_TypeName">TypeName</a>): bool {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_is_primitive">is_primitive</a>(self: &<a href="../std/type_name.md#std_type_name_TypeName">TypeName</a>): bool {
     <b>let</b> bytes = self.name.as_bytes();
     bytes == &b"bool" ||
         bytes == &b"u8" ||
@@ -225,12 +225,12 @@ u8, u16, u32, u64, u128, u256, bool, address, vector.
         bytes == &b"<b>address</b>" ||
         (
             bytes.length() &gt;= 6 &&
-            bytes[0] == <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_V">ASCII_V</a> &&
-            bytes[1] == <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_E">ASCII_E</a> &&
-            bytes[2] == <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_C">ASCII_C</a> &&
-            bytes[3] == <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_T">ASCII_T</a> &&
-            bytes[4] == <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_O">ASCII_O</a> &&
-            bytes[5] == <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_R">ASCII_R</a>,
+            bytes[0] == <a href="../std/type_name.md#std_type_name_ASCII_V">ASCII_V</a> &&
+            bytes[1] == <a href="../std/type_name.md#std_type_name_ASCII_E">ASCII_E</a> &&
+            bytes[2] == <a href="../std/type_name.md#std_type_name_ASCII_C">ASCII_C</a> &&
+            bytes[3] == <a href="../std/type_name.md#std_type_name_ASCII_T">ASCII_T</a> &&
+            bytes[4] == <a href="../std/type_name.md#std_type_name_ASCII_O">ASCII_O</a> &&
+            bytes[5] == <a href="../std/type_name.md#std_type_name_ASCII_R">ASCII_R</a>,
         )
 }
 </code></pre>
@@ -246,7 +246,7 @@ u8, u16, u32, u64, u128, u256, bool, address, vector.
 Get the String representation of <code>self</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_borrow_string">borrow_string</a>(self: &<a href="../../dependencies/std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): &<a href="../../dependencies/std/ascii.md#std_ascii_String">std::ascii::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_borrow_string">borrow_string</a>(self: &<a href="../std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): &<a href="../std/ascii.md#std_ascii_String">std::ascii::String</a>
 </code></pre>
 
 
@@ -255,7 +255,7 @@ Get the String representation of <code>self</code>
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_borrow_string">borrow_string</a>(self: &<a href="../../dependencies/std/type_name.md#std_type_name_TypeName">TypeName</a>): &String {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_borrow_string">borrow_string</a>(self: &<a href="../std/type_name.md#std_type_name_TypeName">TypeName</a>): &String {
     &self.name
 }
 </code></pre>
@@ -272,7 +272,7 @@ Get Address string (Base16 encoded), first part of the TypeName.
 Aborts if given a primitive type.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_get_address">get_address</a>(self: &<a href="../../dependencies/std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): <a href="../../dependencies/std/ascii.md#std_ascii_String">std::ascii::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_get_address">get_address</a>(self: &<a href="../std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): <a href="../std/ascii.md#std_ascii_String">std::ascii::String</a>
 </code></pre>
 
 
@@ -281,8 +281,8 @@ Aborts if given a primitive type.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_get_address">get_address</a>(self: &<a href="../../dependencies/std/type_name.md#std_type_name_TypeName">TypeName</a>): String {
-    <b>assert</b>!(!self.<a href="../../dependencies/std/type_name.md#std_type_name_is_primitive">is_primitive</a>(), <a href="../../dependencies/std/type_name.md#std_type_name_ENonModuleType">ENonModuleType</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_get_address">get_address</a>(self: &<a href="../std/type_name.md#std_type_name_TypeName">TypeName</a>): String {
+    <b>assert</b>!(!self.<a href="../std/type_name.md#std_type_name_is_primitive">is_primitive</a>(), <a href="../std/type_name.md#std_type_name_ENonModuleType">ENonModuleType</a>);
     // Base16 (string) representation of an <b>address</b> <b>has</b> 2 symbols per byte.
     <b>let</b> len = address::length() * 2;
     <b>let</b> str_bytes = self.name.as_bytes();
@@ -309,7 +309,7 @@ Get name of the module.
 Aborts if given a primitive type.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_get_module">get_module</a>(self: &<a href="../../dependencies/std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): <a href="../../dependencies/std/ascii.md#std_ascii_String">std::ascii::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_get_module">get_module</a>(self: &<a href="../std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): <a href="../std/ascii.md#std_ascii_String">std::ascii::String</a>
 </code></pre>
 
 
@@ -318,17 +318,17 @@ Aborts if given a primitive type.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_get_module">get_module</a>(self: &<a href="../../dependencies/std/type_name.md#std_type_name_TypeName">TypeName</a>): String {
-    <b>assert</b>!(!self.<a href="../../dependencies/std/type_name.md#std_type_name_is_primitive">is_primitive</a>(), <a href="../../dependencies/std/type_name.md#std_type_name_ENonModuleType">ENonModuleType</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_get_module">get_module</a>(self: &<a href="../std/type_name.md#std_type_name_TypeName">TypeName</a>): String {
+    <b>assert</b>!(!self.<a href="../std/type_name.md#std_type_name_is_primitive">is_primitive</a>(), <a href="../std/type_name.md#std_type_name_ENonModuleType">ENonModuleType</a>);
     // Starts after <b>address</b> and a double colon: `&lt;addr <b>as</b> HEX&gt;::`
     <b>let</b> <b>mut</b> i = address::length() * 2 + 2;
     <b>let</b> str_bytes = self.name.as_bytes();
     <b>let</b> <b>mut</b> module_name = vector[];
-    <b>let</b> colon = <a href="../../dependencies/std/type_name.md#std_type_name_ASCII_COLON">ASCII_COLON</a>;
+    <b>let</b> colon = <a href="../std/type_name.md#std_type_name_ASCII_COLON">ASCII_COLON</a>;
     <b>loop</b> {
-        <b>let</b> <a href="../../ascii/char.md#ascii_char">char</a> = &str_bytes[i];
-        <b>if</b> (<a href="../../ascii/char.md#ascii_char">char</a> != &colon) {
-            module_name.push_back(*<a href="../../ascii/char.md#ascii_char">char</a>);
+        <b>let</b> char = &str_bytes[i];
+        <b>if</b> (char != &colon) {
+            module_name.push_back(*char);
             i = i + 1;
         } <b>else</b> {
             <b>break</b>
@@ -349,7 +349,7 @@ Aborts if given a primitive type.
 Convert <code>self</code> into its inner String
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_into_string">into_string</a>(self: <a href="../../dependencies/std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): <a href="../../dependencies/std/ascii.md#std_ascii_String">std::ascii::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_into_string">into_string</a>(self: <a href="../std/type_name.md#std_type_name_TypeName">std::type_name::TypeName</a>): <a href="../std/ascii.md#std_ascii_String">std::ascii::String</a>
 </code></pre>
 
 
@@ -358,7 +358,7 @@ Convert <code>self</code> into its inner String
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/type_name.md#std_type_name_into_string">into_string</a>(self: <a href="../../dependencies/std/type_name.md#std_type_name_TypeName">TypeName</a>): String {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/type_name.md#std_type_name_into_string">into_string</a>(self: <a href="../std/type_name.md#std_type_name_TypeName">TypeName</a>): String {
     self.name
 }
 </code></pre>

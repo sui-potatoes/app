@@ -25,7 +25,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/vdf.md#sui_vdf_EInvalidInput">EInvalidInput</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../sui/vdf.md#sui_vdf_EInvalidInput">EInvalidInput</a>: u64 = 0;
 </code></pre>
 
 
@@ -34,12 +34,12 @@
 
 ## Function `hash_to_input`
 
-Hash an arbitrary binary <code>message</code> to a class group element to be used as input for <code><a href="../../dependencies/sui/vdf.md#sui_vdf_vdf_verify">vdf_verify</a></code>.
+Hash an arbitrary binary <code>message</code> to a class group element to be used as input for <code><a href="../sui/vdf.md#sui_vdf_vdf_verify">vdf_verify</a></code>.
 
 This function is currently only enabled on Devnet.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vdf.md#sui_vdf_hash_to_input">hash_to_input</a>(message: &vector&lt;u8&gt;): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vdf.md#sui_vdf_hash_to_input">hash_to_input</a>(message: &vector&lt;u8&gt;): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -48,8 +48,8 @@ This function is currently only enabled on Devnet.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vdf.md#sui_vdf_hash_to_input">hash_to_input</a>(message: &vector&lt;u8&gt;): vector&lt;u8&gt; {
-    <a href="../../dependencies/sui/vdf.md#sui_vdf_hash_to_input_internal">hash_to_input_internal</a>(message)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vdf.md#sui_vdf_hash_to_input">hash_to_input</a>(message: &vector&lt;u8&gt;): vector&lt;u8&gt; {
+    <a href="../sui/vdf.md#sui_vdf_hash_to_input_internal">hash_to_input_internal</a>(message)
 }
 </code></pre>
 
@@ -61,10 +61,10 @@ This function is currently only enabled on Devnet.
 
 ## Function `hash_to_input_internal`
 
-The internal functions for <code><a href="../../dependencies/sui/vdf.md#sui_vdf_hash_to_input">hash_to_input</a></code>.
+The internal functions for <code><a href="../sui/vdf.md#sui_vdf_hash_to_input">hash_to_input</a></code>.
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/vdf.md#sui_vdf_hash_to_input_internal">hash_to_input_internal</a>(message: &vector&lt;u8&gt;): vector&lt;u8&gt;
+<pre><code><b>fun</b> <a href="../sui/vdf.md#sui_vdf_hash_to_input_internal">hash_to_input_internal</a>(message: &vector&lt;u8&gt;): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -73,7 +73,7 @@ The internal functions for <code><a href="../../dependencies/sui/vdf.md#sui_vdf_
 <summary>Implementation</summary>
 
 
-<pre><code><b>native</b> <b>fun</b> <a href="../../dependencies/sui/vdf.md#sui_vdf_hash_to_input_internal">hash_to_input_internal</a>(message: &vector&lt;u8&gt;): vector&lt;u8&gt;;
+<pre><code><b>native</b> <b>fun</b> <a href="../sui/vdf.md#sui_vdf_hash_to_input_internal">hash_to_input_internal</a>(message: &vector&lt;u8&gt;): vector&lt;u8&gt;;
 </code></pre>
 
 
@@ -100,7 +100,7 @@ process.
 This function is currently only enabled on Devnet.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vdf.md#sui_vdf_vdf_verify">vdf_verify</a>(input: &vector&lt;u8&gt;, output: &vector&lt;u8&gt;, proof: &vector&lt;u8&gt;, iterations: u64): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vdf.md#sui_vdf_vdf_verify">vdf_verify</a>(input: &vector&lt;u8&gt;, output: &vector&lt;u8&gt;, proof: &vector&lt;u8&gt;, iterations: u64): bool
 </code></pre>
 
 
@@ -109,13 +109,13 @@ This function is currently only enabled on Devnet.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vdf.md#sui_vdf_vdf_verify">vdf_verify</a>(
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vdf.md#sui_vdf_vdf_verify">vdf_verify</a>(
     input: &vector&lt;u8&gt;,
     output: &vector&lt;u8&gt;,
     proof: &vector&lt;u8&gt;,
     iterations: u64,
 ): bool {
-    <a href="../../dependencies/sui/vdf.md#sui_vdf_vdf_verify_internal">vdf_verify_internal</a>(input, output, proof, iterations)
+    <a href="../sui/vdf.md#sui_vdf_vdf_verify_internal">vdf_verify_internal</a>(input, output, proof, iterations)
 }
 </code></pre>
 
@@ -127,10 +127,10 @@ This function is currently only enabled on Devnet.
 
 ## Function `vdf_verify_internal`
 
-The internal functions for <code><a href="../../dependencies/sui/vdf.md#sui_vdf_vdf_verify_internal">vdf_verify_internal</a></code>.
+The internal functions for <code><a href="../sui/vdf.md#sui_vdf_vdf_verify_internal">vdf_verify_internal</a></code>.
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/vdf.md#sui_vdf_vdf_verify_internal">vdf_verify_internal</a>(input: &vector&lt;u8&gt;, output: &vector&lt;u8&gt;, proof: &vector&lt;u8&gt;, iterations: u64): bool
+<pre><code><b>fun</b> <a href="../sui/vdf.md#sui_vdf_vdf_verify_internal">vdf_verify_internal</a>(input: &vector&lt;u8&gt;, output: &vector&lt;u8&gt;, proof: &vector&lt;u8&gt;, iterations: u64): bool
 </code></pre>
 
 
@@ -139,7 +139,7 @@ The internal functions for <code><a href="../../dependencies/sui/vdf.md#sui_vdf_
 <summary>Implementation</summary>
 
 
-<pre><code><b>native</b> <b>fun</b> <a href="../../dependencies/sui/vdf.md#sui_vdf_vdf_verify_internal">vdf_verify_internal</a>(
+<pre><code><b>native</b> <b>fun</b> <a href="../sui/vdf.md#sui_vdf_vdf_verify_internal">vdf_verify_internal</a>(
     input: &vector&lt;u8&gt;,
     output: &vector&lt;u8&gt;,
     proof: &vector&lt;u8&gt;,

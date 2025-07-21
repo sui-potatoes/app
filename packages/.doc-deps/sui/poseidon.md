@@ -11,14 +11,14 @@ Module which defines instances of the poseidon hash functions. Available in Devn
 -  [Function `poseidon_bn254_internal`](#sui_poseidon_poseidon_bn254_internal)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/bcs.md#std_bcs">std::bcs</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/string.md#std_string">std::string</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
-<b>use</b> <a href="../../dependencies/sui/address.md#sui_address">sui::address</a>;
-<b>use</b> <a href="../../dependencies/sui/bcs.md#sui_bcs">sui::bcs</a>;
-<b>use</b> <a href="../../dependencies/sui/hex.md#sui_hex">sui::hex</a>;
+<pre><code><b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/bcs.md#std_bcs">std::bcs</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/string.md#std_string">std::string</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
+<b>use</b> <a href="../sui/address.md#sui_address">sui::address</a>;
+<b>use</b> <a href="../sui/bcs.md#sui_bcs">sui::bcs</a>;
+<b>use</b> <a href="../sui/hex.md#sui_hex">sui::hex</a>;
 </code></pre>
 
 
@@ -33,7 +33,7 @@ Module which defines instances of the poseidon hash functions. Available in Devn
 Error if any of the inputs are larger than or equal to the BN254 field size.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/poseidon.md#sui_poseidon_ENonCanonicalInput">ENonCanonicalInput</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../sui/poseidon.md#sui_poseidon_ENonCanonicalInput">ENonCanonicalInput</a>: u64 = 0;
 </code></pre>
 
 
@@ -43,7 +43,7 @@ Error if any of the inputs are larger than or equal to the BN254 field size.
 Error if an empty vector is passed as input.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/poseidon.md#sui_poseidon_EEmptyInput">EEmptyInput</a>: u64 = 1;
+<pre><code><b>const</b> <a href="../sui/poseidon.md#sui_poseidon_EEmptyInput">EEmptyInput</a>: u64 = 1;
 </code></pre>
 
 
@@ -53,7 +53,7 @@ Error if an empty vector is passed as input.
 The field size for BN254 curve.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/poseidon.md#sui_poseidon_BN254_MAX">BN254_MAX</a>: u256 = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
+<pre><code><b>const</b> <a href="../sui/poseidon.md#sui_poseidon_BN254_MAX">BN254_MAX</a>: u256 = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
 </code></pre>
 
 
@@ -72,7 +72,7 @@ scalar field size which is 21888242871839275222246405745257275088548364400416034
 This function is currently only enabled on Devnet.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/poseidon.md#sui_poseidon_poseidon_bn254">poseidon_bn254</a>(data: &vector&lt;u256&gt;): u256
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/poseidon.md#sui_poseidon_poseidon_bn254">poseidon_bn254</a>(data: &vector&lt;u256&gt;): u256
 </code></pre>
 
 
@@ -81,16 +81,16 @@ This function is currently only enabled on Devnet.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/poseidon.md#sui_poseidon_poseidon_bn254">poseidon_bn254</a>(data: &vector&lt;u256&gt;): u256 {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/poseidon.md#sui_poseidon_poseidon_bn254">poseidon_bn254</a>(data: &vector&lt;u256&gt;): u256 {
     <b>let</b> (<b>mut</b> i, <b>mut</b> b, l) = (0, vector[], data.length());
-    <b>assert</b>!(l &gt; 0, <a href="../../dependencies/sui/poseidon.md#sui_poseidon_EEmptyInput">EEmptyInput</a>);
+    <b>assert</b>!(l &gt; 0, <a href="../sui/poseidon.md#sui_poseidon_EEmptyInput">EEmptyInput</a>);
     <b>while</b> (i &lt; l) {
         <b>let</b> field_element = &data[i];
-        <b>assert</b>!(*field_element &lt; <a href="../../dependencies/sui/poseidon.md#sui_poseidon_BN254_MAX">BN254_MAX</a>, <a href="../../dependencies/sui/poseidon.md#sui_poseidon_ENonCanonicalInput">ENonCanonicalInput</a>);
+        <b>assert</b>!(*field_element &lt; <a href="../sui/poseidon.md#sui_poseidon_BN254_MAX">BN254_MAX</a>, <a href="../sui/poseidon.md#sui_poseidon_ENonCanonicalInput">ENonCanonicalInput</a>);
         b.push_back(bcs::to_bytes(&data[i]));
         i = i + 1;
     };
-    <b>let</b> binary_output = <a href="../../dependencies/sui/poseidon.md#sui_poseidon_poseidon_bn254_internal">poseidon_bn254_internal</a>(&b);
+    <b>let</b> binary_output = <a href="../sui/poseidon.md#sui_poseidon_poseidon_bn254_internal">poseidon_bn254_internal</a>(&b);
     bcs::new(binary_output).peel_u256()
 }
 </code></pre>
@@ -108,7 +108,7 @@ This function is currently only enabled on Devnet.
 Hash the inputs using poseidon_bn254 and returns a BN254 field element in little-endian representation.
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/poseidon.md#sui_poseidon_poseidon_bn254_internal">poseidon_bn254_internal</a>(data: &vector&lt;vector&lt;u8&gt;&gt;): vector&lt;u8&gt;
+<pre><code><b>fun</b> <a href="../sui/poseidon.md#sui_poseidon_poseidon_bn254_internal">poseidon_bn254_internal</a>(data: &vector&lt;vector&lt;u8&gt;&gt;): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -117,7 +117,7 @@ Hash the inputs using poseidon_bn254 and returns a BN254 field element in little
 <summary>Implementation</summary>
 
 
-<pre><code><b>native</b> <b>fun</b> <a href="../../dependencies/sui/poseidon.md#sui_poseidon_poseidon_bn254_internal">poseidon_bn254_internal</a>(data: &vector&lt;vector&lt;u8&gt;&gt;): vector&lt;u8&gt;;
+<pre><code><b>native</b> <b>fun</b> <a href="../sui/poseidon.md#sui_poseidon_poseidon_bn254_internal">poseidon_bn254_internal</a>(data: &vector&lt;vector&lt;u8&gt;&gt;): vector&lt;u8&gt;;
 </code></pre>
 
 

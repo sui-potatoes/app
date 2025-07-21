@@ -73,13 +73,13 @@ let leftovers = prepared.into_remainder_bytes();
 -  [Function `peel_option_u256`](#sui_bcs_peel_option_u256)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/bcs.md#std_bcs">std::bcs</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/string.md#std_string">std::string</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
-<b>use</b> <a href="../../dependencies/sui/address.md#sui_address">sui::address</a>;
-<b>use</b> <a href="../../dependencies/sui/hex.md#sui_hex">sui::hex</a>;
+<pre><code><b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/bcs.md#std_bcs">std::bcs</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/string.md#std_string">std::string</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
+<b>use</b> <a href="../sui/address.md#sui_address">sui::address</a>;
+<b>use</b> <a href="../sui/hex.md#sui_hex">sui::hex</a>;
 </code></pre>
 
 
@@ -93,7 +93,7 @@ vector performance, it stores reversed bytes of the BCS and
 enables use of <code>vector::pop_back</code>.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -123,7 +123,7 @@ enables use of <code>vector::pop_back</code>.
 For when bytes length is less than required for deserialization.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>: u64 = 0;
 </code></pre>
 
 
@@ -133,7 +133,7 @@ For when bytes length is less than required for deserialization.
 For when the boolean value different than <code>0</code> or <code>1</code>.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_ENotBool">ENotBool</a>: u64 = 1;
+<pre><code><b>const</b> <a href="../sui/bcs.md#sui_bcs_ENotBool">ENotBool</a>: u64 = 1;
 </code></pre>
 
 
@@ -143,7 +143,7 @@ For when the boolean value different than <code>0</code> or <code>1</code>.
 For when ULEB byte is out of range (or not found).
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_ELenOutOfRange">ELenOutOfRange</a>: u64 = 2;
+<pre><code><b>const</b> <a href="../sui/bcs.md#sui_bcs_ELenOutOfRange">ELenOutOfRange</a>: u64 = 2;
 </code></pre>
 
 
@@ -156,7 +156,7 @@ Get BCS serialized bytes for any value.
 Re-exports stdlib <code>bcs::to_bytes</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_to_bytes">to_bytes</a>&lt;T&gt;(value: &T): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_to_bytes">to_bytes</a>&lt;T&gt;(value: &T): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -165,7 +165,7 @@ Re-exports stdlib <code>bcs::to_bytes</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_to_bytes">to_bytes</a>&lt;T&gt;(value: &T): vector&lt;u8&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_to_bytes">to_bytes</a>&lt;T&gt;(value: &T): vector&lt;u8&gt; {
     bcs::to_bytes(value)
 }
 </code></pre>
@@ -182,7 +182,7 @@ Creates a new instance of BCS wrapper that holds inversed
 bytes for better performance.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_new">new</a>(bytes: vector&lt;u8&gt;): <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_new">new</a>(bytes: vector&lt;u8&gt;): <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>
 </code></pre>
 
 
@@ -191,9 +191,9 @@ bytes for better performance.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_new">new</a>(<b>mut</b> bytes: vector&lt;u8&gt;): <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a> {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_new">new</a>(<b>mut</b> bytes: vector&lt;u8&gt;): <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a> {
     bytes.reverse();
-    <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a> { bytes }
+    <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a> { bytes }
 }
 </code></pre>
 
@@ -205,11 +205,11 @@ bytes for better performance.
 
 ## Function `into_remainder_bytes`
 
-Unpack the <code><a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a></code> struct returning the leftover bytes.
+Unpack the <code><a href="../sui/bcs.md#sui_bcs_BCS">BCS</a></code> struct returning the leftover bytes.
 Useful for passing the data further after partial deserialization.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_into_remainder_bytes">into_remainder_bytes</a>(bcs: <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_into_remainder_bytes">into_remainder_bytes</a>(bcs: <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -218,8 +218,8 @@ Useful for passing the data further after partial deserialization.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_into_remainder_bytes">into_remainder_bytes</a>(bcs: <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u8&gt; {
-    <b>let</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a> { <b>mut</b> bytes } = bcs;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_into_remainder_bytes">into_remainder_bytes</a>(bcs: <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u8&gt; {
+    <b>let</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a> { <b>mut</b> bytes } = bcs;
     bytes.reverse();
     bytes
 }
@@ -236,7 +236,7 @@ Useful for passing the data further after partial deserialization.
 Read address from the bcs-serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_address">peel_address</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <b>address</b>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_address">peel_address</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <b>address</b>
 </code></pre>
 
 
@@ -245,8 +245,8 @@ Read address from the bcs-serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_address">peel_address</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): <b>address</b> {
-    <b>assert</b>!(bcs.bytes.length() &gt;= address::length(), <a href="../../dependencies/sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_address">peel_address</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): <b>address</b> {
+    <b>assert</b>!(bcs.bytes.length() &gt;= address::length(), <a href="../sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>);
     <b>let</b> (<b>mut</b> addr_bytes, <b>mut</b> i) = (vector[], 0);
     <b>while</b> (i &lt; address::length()) {
         addr_bytes.push_back(bcs.bytes.pop_back());
@@ -267,7 +267,7 @@ Read address from the bcs-serialized bytes.
 Read a <code>bool</code> value from bcs-serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): bool
 </code></pre>
 
 
@@ -276,11 +276,11 @@ Read a <code>bool</code> value from bcs-serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): bool {
-    <b>let</b> value = bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>();
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): bool {
+    <b>let</b> value = bcs.<a href="../sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>();
     <b>if</b> (value == 0) <b>false</b>
     <b>else</b> <b>if</b> (value == 1) <b>true</b>
-    <b>else</b> <b>abort</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_ENotBool">ENotBool</a>
+    <b>else</b> <b>abort</b> <a href="../sui/bcs.md#sui_bcs_ENotBool">ENotBool</a>
 }
 </code></pre>
 
@@ -295,7 +295,7 @@ Read a <code>bool</code> value from bcs-serialized bytes.
 Read <code>u8</code> value from bcs-serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u8
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u8
 </code></pre>
 
 
@@ -304,8 +304,8 @@ Read <code>u8</code> value from bcs-serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): u8 {
-    <b>assert</b>!(bcs.bytes.length() &gt;= 1, <a href="../../dependencies/sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): u8 {
+    <b>assert</b>!(bcs.bytes.length() &gt;= 1, <a href="../sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>);
     bcs.bytes.pop_back()
 }
 </code></pre>
@@ -320,7 +320,7 @@ Read <code>u8</code> value from bcs-serialized bytes.
 
 
 
-<pre><code><b>macro</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_num">peel_num</a>&lt;$I, $T&gt;($bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>, $len: u64, $bits: $I): $T
+<pre><code><b>macro</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_num">peel_num</a>&lt;$I, $T&gt;($bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>, $len: u64, $bits: $I): $T
 </code></pre>
 
 
@@ -329,9 +329,9 @@ Read <code>u8</code> value from bcs-serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>macro</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_num">peel_num</a>&lt;$I, $T&gt;($bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>, $len: u64, $bits: $I): $T {
+<pre><code><b>macro</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_num">peel_num</a>&lt;$I, $T&gt;($bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>, $len: u64, $bits: $I): $T {
     <b>let</b> bcs = $bcs;
-    <b>assert</b>!(bcs.bytes.length() &gt;= $len, <a href="../../dependencies/sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>);
+    <b>assert</b>!(bcs.bytes.length() &gt;= $len, <a href="../sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>);
     <b>let</b> <b>mut</b> value: $T = 0;
     <b>let</b> <b>mut</b> i: $I = 0;
     <b>let</b> bits = $bits;
@@ -355,7 +355,7 @@ Read <code>u8</code> value from bcs-serialized bytes.
 Read <code>u16</code> value from bcs-serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u16">peel_u16</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u16
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u16">peel_u16</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u16
 </code></pre>
 
 
@@ -364,8 +364,8 @@ Read <code>u16</code> value from bcs-serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u16">peel_u16</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): u16 {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(2, 16u8)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u16">peel_u16</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): u16 {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(2, 16u8)
 }
 </code></pre>
 
@@ -380,7 +380,7 @@ Read <code>u16</code> value from bcs-serialized bytes.
 Read <code>u32</code> value from bcs-serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u32">peel_u32</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u32
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u32">peel_u32</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u32
 </code></pre>
 
 
@@ -389,8 +389,8 @@ Read <code>u32</code> value from bcs-serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u32">peel_u32</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): u32 {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(4, 32u8)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u32">peel_u32</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): u32 {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(4, 32u8)
 }
 </code></pre>
 
@@ -405,7 +405,7 @@ Read <code>u32</code> value from bcs-serialized bytes.
 Read <code>u64</code> value from bcs-serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u64">peel_u64</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u64">peel_u64</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u64
 </code></pre>
 
 
@@ -414,8 +414,8 @@ Read <code>u64</code> value from bcs-serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u64">peel_u64</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): u64 {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(8, 64u8)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u64">peel_u64</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): u64 {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(8, 64u8)
 }
 </code></pre>
 
@@ -430,7 +430,7 @@ Read <code>u64</code> value from bcs-serialized bytes.
 Read <code>u128</code> value from bcs-serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u128">peel_u128</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u128
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u128">peel_u128</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u128
 </code></pre>
 
 
@@ -439,8 +439,8 @@ Read <code>u128</code> value from bcs-serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u128">peel_u128</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): u128 {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(16, 128u8)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u128">peel_u128</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): u128 {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(16, 128u8)
 }
 </code></pre>
 
@@ -455,7 +455,7 @@ Read <code>u128</code> value from bcs-serialized bytes.
 Read <code>u256</code> value from bcs-serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u256">peel_u256</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u256
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u256">peel_u256</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u256
 </code></pre>
 
 
@@ -464,8 +464,8 @@ Read <code>u256</code> value from bcs-serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u256">peel_u256</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): u256 {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(32, 256u16)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_u256">peel_u256</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): u256 {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_num">peel_num</a>!(32, 256u16)
 }
 </code></pre>
 
@@ -484,7 +484,7 @@ In BCS <code>vector</code> length is implemented with ULEB128;
 See more here: https://en.wikipedia.org/wiki/LEB128
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_length">peel_vec_length</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_length">peel_vec_length</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u64
 </code></pre>
 
 
@@ -493,10 +493,10 @@ See more here: https://en.wikipedia.org/wiki/LEB128
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_length">peel_vec_length</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): u64 {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_length">peel_vec_length</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): u64 {
     <b>let</b> (<b>mut</b> total, <b>mut</b> shift, <b>mut</b> len) = (0u64, 0, 0);
     <b>loop</b> {
-        <b>assert</b>!(len &lt;= 4, <a href="../../dependencies/sui/bcs.md#sui_bcs_ELenOutOfRange">ELenOutOfRange</a>);
+        <b>assert</b>!(len &lt;= 4, <a href="../sui/bcs.md#sui_bcs_ELenOutOfRange">ELenOutOfRange</a>);
         <b>let</b> byte = bcs.bytes.pop_back() <b>as</b> u64;
         len = len + 1;
         total = total | ((byte & 0x7f) &lt;&lt; shift);
@@ -515,11 +515,11 @@ See more here: https://en.wikipedia.org/wiki/LEB128
 
 ## Macro function `peel_vec`
 
-Peel <code>vector&lt;$T&gt;</code> from serialized bytes, where <code>$peel: |&<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>| -&gt; $T</code> gives the
+Peel <code>vector&lt;$T&gt;</code> from serialized bytes, where <code>$peel: |&<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>| -&gt; $T</code> gives the
 functionality of peeling each value.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>&lt;$T&gt;($bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>, $peel: |&<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>| -&gt; $T): vector&lt;$T&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>&lt;$T&gt;($bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>, $peel: |&<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>| -&gt; $T): vector&lt;$T&gt;
 </code></pre>
 
 
@@ -528,9 +528,9 @@ functionality of peeling each value.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>&lt;$T&gt;($bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>, $peel: |&<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>| -&gt; $T): vector&lt;$T&gt; {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>&lt;$T&gt;($bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>, $peel: |&<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>| -&gt; $T): vector&lt;$T&gt; {
     <b>let</b> bcs = $bcs;
-    <b>let</b> len = bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_length">peel_vec_length</a>();
+    <b>let</b> len = bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec_length">peel_vec_length</a>();
     <b>let</b> <b>mut</b> i = 0;
     <b>let</b> <b>mut</b> res = vector[];
     <b>while</b> (i &lt; len) {
@@ -552,7 +552,7 @@ functionality of peeling each value.
 Peel a vector of <code><b>address</b></code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_address">peel_vec_address</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;<b>address</b>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_address">peel_vec_address</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;<b>address</b>&gt;
 </code></pre>
 
 
@@ -561,8 +561,8 @@ Peel a vector of <code><b>address</b></code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_address">peel_vec_address</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;<b>address</b>&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_address">peel_address</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_address">peel_vec_address</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;<b>address</b>&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_address">peel_address</a>())
 }
 </code></pre>
 
@@ -577,7 +577,7 @@ Peel a vector of <code><b>address</b></code> from serialized bytes.
 Peel a vector of <code><b>address</b></code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_bool">peel_vec_bool</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;bool&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_bool">peel_vec_bool</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;bool&gt;
 </code></pre>
 
 
@@ -586,8 +586,8 @@ Peel a vector of <code><b>address</b></code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_bool">peel_vec_bool</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;bool&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_bool">peel_vec_bool</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;bool&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>())
 }
 </code></pre>
 
@@ -602,7 +602,7 @@ Peel a vector of <code><b>address</b></code> from serialized bytes.
 Peel a vector of <code>u8</code> (eg string) from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u8">peel_vec_u8</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u8">peel_vec_u8</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -611,8 +611,8 @@ Peel a vector of <code>u8</code> (eg string) from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u8">peel_vec_u8</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u8&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u8">peel_vec_u8</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u8&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>())
 }
 </code></pre>
 
@@ -627,7 +627,7 @@ Peel a vector of <code>u8</code> (eg string) from serialized bytes.
 Peel a <code>vector&lt;vector&lt;u8&gt;&gt;</code> (eg vec of string) from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_vec_u8">peel_vec_vec_u8</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;vector&lt;u8&gt;&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_vec_u8">peel_vec_vec_u8</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;vector&lt;u8&gt;&gt;
 </code></pre>
 
 
@@ -636,8 +636,8 @@ Peel a <code>vector&lt;vector&lt;u8&gt;&gt;</code> (eg vec of string) from seria
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_vec_u8">peel_vec_vec_u8</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;vector&lt;u8&gt;&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u8">peel_vec_u8</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_vec_u8">peel_vec_vec_u8</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;vector&lt;u8&gt;&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec_u8">peel_vec_u8</a>())
 }
 </code></pre>
 
@@ -652,7 +652,7 @@ Peel a <code>vector&lt;vector&lt;u8&gt;&gt;</code> (eg vec of string) from seria
 Peel a vector of <code>u16</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u16">peel_vec_u16</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u16&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u16">peel_vec_u16</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u16&gt;
 </code></pre>
 
 
@@ -661,8 +661,8 @@ Peel a vector of <code>u16</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u16">peel_vec_u16</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u16&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u16">peel_u16</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u16">peel_vec_u16</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u16&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u16">peel_u16</a>())
 }
 </code></pre>
 
@@ -677,7 +677,7 @@ Peel a vector of <code>u16</code> from serialized bytes.
 Peel a vector of <code>u32</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u32">peel_vec_u32</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u32&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u32">peel_vec_u32</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u32&gt;
 </code></pre>
 
 
@@ -686,8 +686,8 @@ Peel a vector of <code>u32</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u32">peel_vec_u32</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u32&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u32">peel_u32</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u32">peel_vec_u32</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u32&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u32">peel_u32</a>())
 }
 </code></pre>
 
@@ -702,7 +702,7 @@ Peel a vector of <code>u32</code> from serialized bytes.
 Peel a vector of <code>u64</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u64">peel_vec_u64</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u64&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u64">peel_vec_u64</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u64&gt;
 </code></pre>
 
 
@@ -711,8 +711,8 @@ Peel a vector of <code>u64</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u64">peel_vec_u64</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u64&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u64">peel_u64</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u64">peel_vec_u64</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u64&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u64">peel_u64</a>())
 }
 </code></pre>
 
@@ -727,7 +727,7 @@ Peel a vector of <code>u64</code> from serialized bytes.
 Peel a vector of <code>u128</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u128">peel_vec_u128</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u128&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u128">peel_vec_u128</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u128&gt;
 </code></pre>
 
 
@@ -736,8 +736,8 @@ Peel a vector of <code>u128</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u128">peel_vec_u128</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u128&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u128">peel_u128</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u128">peel_vec_u128</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u128&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u128">peel_u128</a>())
 }
 </code></pre>
 
@@ -752,7 +752,7 @@ Peel a vector of <code>u128</code> from serialized bytes.
 Peel a vector of <code>u256</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u256">peel_vec_u256</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u256&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u256">peel_vec_u256</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): vector&lt;u256&gt;
 </code></pre>
 
 
@@ -761,8 +761,8 @@ Peel a vector of <code>u256</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_u256">peel_vec_u256</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u256&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u256">peel_u256</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_vec_u256">peel_vec_u256</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): vector&lt;u256&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec">peel_vec</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u256">peel_u256</a>())
 }
 </code></pre>
 
@@ -790,7 +790,7 @@ _ => abort,
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_enum_tag">peel_enum_tag</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u32
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_enum_tag">peel_enum_tag</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): u32
 </code></pre>
 
 
@@ -799,9 +799,9 @@ _ => abort,
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_enum_tag">peel_enum_tag</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): u32 {
-    <b>let</b> tag = bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_vec_length">peel_vec_length</a>();
-    <b>assert</b>!(tag &lt;= <a href="../../dependencies/std/u32.md#std_u32_max_value">std::u32::max_value</a>!() <b>as</b> u64, <a href="../../dependencies/sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_enum_tag">peel_enum_tag</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): u32 {
+    <b>let</b> tag = bcs.<a href="../sui/bcs.md#sui_bcs_peel_vec_length">peel_vec_length</a>();
+    <b>assert</b>!(tag &lt;= <a href="../std/u32.md#std_u32_max_value">std::u32::max_value</a>!() <b>as</b> u64, <a href="../sui/bcs.md#sui_bcs_EOutOfRange">EOutOfRange</a>);
     tag <b>as</b> u32
 }
 </code></pre>
@@ -814,11 +814,11 @@ _ => abort,
 
 ## Macro function `peel_option`
 
-Peel <code>Option&lt;$T&gt;</code> from serialized bytes, where <code>$peel: |&<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>| -&gt; $T</code> gives the
+Peel <code>Option&lt;$T&gt;</code> from serialized bytes, where <code>$peel: |&<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>| -&gt; $T</code> gives the
 functionality of peeling the inner value.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>&lt;$T&gt;($bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>, $peel: |&<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>| -&gt; $T): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>&lt;$T&gt;($bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>, $peel: |&<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>| -&gt; $T): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;
 </code></pre>
 
 
@@ -827,9 +827,9 @@ functionality of peeling the inner value.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>&lt;$T&gt;($bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>, $peel: |&<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>| -&gt; $T): Option&lt;$T&gt; {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>&lt;$T&gt;($bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>, $peel: |&<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>| -&gt; $T): Option&lt;$T&gt; {
     <b>let</b> bcs = $bcs;
-    <b>if</b> (bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>()) option::some($peel(bcs)) <b>else</b> option::none()
+    <b>if</b> (bcs.<a href="../sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>()) option::some($peel(bcs)) <b>else</b> option::none()
 }
 </code></pre>
 
@@ -844,7 +844,7 @@ functionality of peeling the inner value.
 Peel <code>Option&lt;<b>address</b>&gt;</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_address">peel_option_address</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;<b>address</b>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_address">peel_option_address</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;<b>address</b>&gt;
 </code></pre>
 
 
@@ -853,8 +853,8 @@ Peel <code>Option&lt;<b>address</b>&gt;</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_address">peel_option_address</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;<b>address</b>&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_address">peel_address</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_address">peel_option_address</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;<b>address</b>&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_address">peel_address</a>())
 }
 </code></pre>
 
@@ -869,7 +869,7 @@ Peel <code>Option&lt;<b>address</b>&gt;</code> from serialized bytes.
 Peel <code>Option&lt;bool&gt;</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_bool">peel_option_bool</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;bool&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_bool">peel_option_bool</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;bool&gt;
 </code></pre>
 
 
@@ -878,8 +878,8 @@ Peel <code>Option&lt;bool&gt;</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_bool">peel_option_bool</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;bool&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_bool">peel_option_bool</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;bool&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_bool">peel_bool</a>())
 }
 </code></pre>
 
@@ -894,7 +894,7 @@ Peel <code>Option&lt;bool&gt;</code> from serialized bytes.
 Peel <code>Option&lt;u8&gt;</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u8">peel_option_u8</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u8">peel_option_u8</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;u8&gt;
 </code></pre>
 
 
@@ -903,8 +903,8 @@ Peel <code>Option&lt;u8&gt;</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u8">peel_option_u8</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u8&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u8">peel_option_u8</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u8&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u8">peel_u8</a>())
 }
 </code></pre>
 
@@ -919,7 +919,7 @@ Peel <code>Option&lt;u8&gt;</code> from serialized bytes.
 Peel <code>Option&lt;u16&gt;</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u16">peel_option_u16</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;u16&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u16">peel_option_u16</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;u16&gt;
 </code></pre>
 
 
@@ -928,8 +928,8 @@ Peel <code>Option&lt;u16&gt;</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u16">peel_option_u16</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u16&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u16">peel_u16</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u16">peel_option_u16</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u16&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u16">peel_u16</a>())
 }
 </code></pre>
 
@@ -944,7 +944,7 @@ Peel <code>Option&lt;u16&gt;</code> from serialized bytes.
 Peel <code>Option&lt;u32&gt;</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u32">peel_option_u32</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;u32&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u32">peel_option_u32</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;u32&gt;
 </code></pre>
 
 
@@ -953,8 +953,8 @@ Peel <code>Option&lt;u32&gt;</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u32">peel_option_u32</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u32&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u32">peel_u32</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u32">peel_option_u32</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u32&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u32">peel_u32</a>())
 }
 </code></pre>
 
@@ -969,7 +969,7 @@ Peel <code>Option&lt;u32&gt;</code> from serialized bytes.
 Peel <code>Option&lt;u64&gt;</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u64">peel_option_u64</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;u64&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u64">peel_option_u64</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;u64&gt;
 </code></pre>
 
 
@@ -978,8 +978,8 @@ Peel <code>Option&lt;u64&gt;</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u64">peel_option_u64</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u64&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u64">peel_u64</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u64">peel_option_u64</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u64&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u64">peel_u64</a>())
 }
 </code></pre>
 
@@ -994,7 +994,7 @@ Peel <code>Option&lt;u64&gt;</code> from serialized bytes.
 Peel <code>Option&lt;u128&gt;</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u128">peel_option_u128</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;u128&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u128">peel_option_u128</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;u128&gt;
 </code></pre>
 
 
@@ -1003,8 +1003,8 @@ Peel <code>Option&lt;u128&gt;</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u128">peel_option_u128</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u128&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u128">peel_u128</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u128">peel_option_u128</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u128&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u128">peel_u128</a>())
 }
 </code></pre>
 
@@ -1019,7 +1019,7 @@ Peel <code>Option&lt;u128&gt;</code> from serialized bytes.
 Peel <code>Option&lt;u256&gt;</code> from serialized bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u256">peel_option_u256</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;u256&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u256">peel_option_u256</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">sui::bcs::BCS</a>): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;u256&gt;
 </code></pre>
 
 
@@ -1028,8 +1028,8 @@ Peel <code>Option&lt;u256&gt;</code> from serialized bytes.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option_u256">peel_option_u256</a>(bcs: &<b>mut</b> <a href="../../dependencies/sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u256&gt; {
-    bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../../dependencies/sui/bcs.md#sui_bcs_peel_u256">peel_u256</a>())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/bcs.md#sui_bcs_peel_option_u256">peel_option_u256</a>(bcs: &<b>mut</b> <a href="../sui/bcs.md#sui_bcs_BCS">BCS</a>): Option&lt;u256&gt; {
+    bcs.<a href="../sui/bcs.md#sui_bcs_peel_option">peel_option</a>!(|bcs| bcs.<a href="../sui/bcs.md#sui_bcs_peel_u256">peel_u256</a>())
 }
 </code></pre>
 

@@ -3,7 +3,7 @@
 
 # Module `sui::math`
 
-DEPRECATED, use the each integer type's individual module instead, e.g. <code><a href="../../dependencies/std/u64.md#std_u64">std::u64</a></code>
+DEPRECATED, use the each integer type's individual module instead, e.g. <code><a href="../std/u64.md#std_u64">std::u64</a></code>
 
 
 -  [Function `max`](#sui_math_max)
@@ -15,12 +15,12 @@ DEPRECATED, use the each integer type's individual module instead, e.g. <code><a
 -  [Function `divide_and_round_up`](#sui_math_divide_and_round_up)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/string.md#std_string">std::string</a>;
-<b>use</b> <a href="../../dependencies/std/u128.md#std_u128">std::u128</a>;
-<b>use</b> <a href="../../dependencies/std/u64.md#std_u64">std::u64</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
+<pre><code><b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/string.md#std_string">std::string</a>;
+<b>use</b> <a href="../std/u128.md#std_u128">std::u128</a>;
+<b>use</b> <a href="../std/u64.md#std_u64">std::u64</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
 </code></pre>
 
 
@@ -29,10 +29,10 @@ DEPRECATED, use the each integer type's individual module instead, e.g. <code><a
 
 ## Function `max`
 
-DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_max">std::u64::max</a></code> instead
+DEPRECATED, use <code><a href="../std/u64.md#std_u64_max">std::u64::max</a></code> instead
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_max">max</a>(x: u64, y: u64): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_max">max</a>(x: u64, y: u64): u64
 </code></pre>
 
 
@@ -41,8 +41,8 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_max">std::u
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_max">max</a>(x: u64, y: u64): u64 {
-    x.<a href="../../dependencies/sui/math.md#sui_math_max">max</a>(y)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_max">max</a>(x: u64, y: u64): u64 {
+    x.<a href="../sui/math.md#sui_math_max">max</a>(y)
 }
 </code></pre>
 
@@ -54,10 +54,10 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_max">std::u
 
 ## Function `min`
 
-DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_min">std::u64::min</a></code> instead
+DEPRECATED, use <code><a href="../std/u64.md#std_u64_min">std::u64::min</a></code> instead
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_min">min</a>(x: u64, y: u64): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_min">min</a>(x: u64, y: u64): u64
 </code></pre>
 
 
@@ -66,8 +66,8 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_min">std::u
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_min">min</a>(x: u64, y: u64): u64 {
-    x.<a href="../../dependencies/sui/math.md#sui_math_min">min</a>(y)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_min">min</a>(x: u64, y: u64): u64 {
+    x.<a href="../sui/math.md#sui_math_min">min</a>(y)
 }
 </code></pre>
 
@@ -79,10 +79,10 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_min">std::u
 
 ## Function `diff`
 
-DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_diff">std::u64::diff</a></code> instead
+DEPRECATED, use <code><a href="../std/u64.md#std_u64_diff">std::u64::diff</a></code> instead
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_diff">diff</a>(x: u64, y: u64): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_diff">diff</a>(x: u64, y: u64): u64
 </code></pre>
 
 
@@ -91,8 +91,8 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_diff">std::
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_diff">diff</a>(x: u64, y: u64): u64 {
-    x.<a href="../../dependencies/sui/math.md#sui_math_diff">diff</a>(y)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_diff">diff</a>(x: u64, y: u64): u64 {
+    x.<a href="../sui/math.md#sui_math_diff">diff</a>(y)
 }
 </code></pre>
 
@@ -104,10 +104,10 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_diff">std::
 
 ## Function `pow`
 
-DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_pow">std::u64::pow</a></code> instead
+DEPRECATED, use <code><a href="../std/u64.md#std_u64_pow">std::u64::pow</a></code> instead
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_pow">pow</a>(base: u64, exponent: u8): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_pow">pow</a>(base: u64, exponent: u8): u64
 </code></pre>
 
 
@@ -116,8 +116,8 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_pow">std::u
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_pow">pow</a>(base: u64, exponent: u8): u64 {
-    base.<a href="../../dependencies/sui/math.md#sui_math_pow">pow</a>(exponent)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_pow">pow</a>(base: u64, exponent: u8): u64 {
+    base.<a href="../sui/math.md#sui_math_pow">pow</a>(exponent)
 }
 </code></pre>
 
@@ -129,10 +129,10 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_pow">std::u
 
 ## Function `sqrt`
 
-DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_sqrt">std::u64::sqrt</a></code> instead
+DEPRECATED, use <code><a href="../std/u64.md#std_u64_sqrt">std::u64::sqrt</a></code> instead
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_sqrt">sqrt</a>(x: u64): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_sqrt">sqrt</a>(x: u64): u64
 </code></pre>
 
 
@@ -141,8 +141,8 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_sqrt">std::
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_sqrt">sqrt</a>(x: u64): u64 {
-    x.<a href="../../dependencies/sui/math.md#sui_math_sqrt">sqrt</a>()
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_sqrt">sqrt</a>(x: u64): u64 {
+    x.<a href="../sui/math.md#sui_math_sqrt">sqrt</a>()
 }
 </code></pre>
 
@@ -154,10 +154,10 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_sqrt">std::
 
 ## Function `sqrt_u128`
 
-DEPRECATED, use <code><a href="../../dependencies/std/u128.md#std_u128_sqrt">std::u128::sqrt</a></code> instead
+DEPRECATED, use <code><a href="../std/u128.md#std_u128_sqrt">std::u128::sqrt</a></code> instead
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_sqrt_u128">sqrt_u128</a>(x: u128): u128
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_sqrt_u128">sqrt_u128</a>(x: u128): u128
 </code></pre>
 
 
@@ -166,8 +166,8 @@ DEPRECATED, use <code><a href="../../dependencies/std/u128.md#std_u128_sqrt">std
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_sqrt_u128">sqrt_u128</a>(x: u128): u128 {
-    x.<a href="../../dependencies/sui/math.md#sui_math_sqrt">sqrt</a>()
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_sqrt_u128">sqrt_u128</a>(x: u128): u128 {
+    x.<a href="../sui/math.md#sui_math_sqrt">sqrt</a>()
 }
 </code></pre>
 
@@ -179,10 +179,10 @@ DEPRECATED, use <code><a href="../../dependencies/std/u128.md#std_u128_sqrt">std
 
 ## Function `divide_and_round_up`
 
-DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_divide_and_round_up">std::u64::divide_and_round_up</a></code> instead
+DEPRECATED, use <code><a href="../std/u64.md#std_u64_divide_and_round_up">std::u64::divide_and_round_up</a></code> instead
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_divide_and_round_up">divide_and_round_up</a>(x: u64, y: u64): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_divide_and_round_up">divide_and_round_up</a>(x: u64, y: u64): u64
 </code></pre>
 
 
@@ -191,8 +191,8 @@ DEPRECATED, use <code><a href="../../dependencies/std/u64.md#std_u64_divide_and_
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/math.md#sui_math_divide_and_round_up">divide_and_round_up</a>(x: u64, y: u64): u64 {
-    x.<a href="../../dependencies/sui/math.md#sui_math_divide_and_round_up">divide_and_round_up</a>(y)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/math.md#sui_math_divide_and_round_up">divide_and_round_up</a>(x: u64, y: u64): u64 {
+    x.<a href="../sui/math.md#sui_math_divide_and_round_up">divide_and_round_up</a>(y)
 }
 </code></pre>
 

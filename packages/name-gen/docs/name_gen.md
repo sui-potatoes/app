@@ -42,8 +42,8 @@ name
 ```
 
 
--  [Usage](#@Usage_0)
--  [Example](#@Example_1)
+    -  [Usage](#@Usage_0)
+    -  [Example](#@Example_1)
 -  [Constants](#@Constants_2)
 -  [Function `new_male_name`](#name_gen_name_gen_new_male_name)
 -  [Function `new_female_name`](#name_gen_name_gen_new_female_name)
