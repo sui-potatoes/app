@@ -23,7 +23,7 @@ details on BCS.
 Return the binary representation of <code>v</code> in BCS (Binary Canonical Serialization) format
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/bcs.md#std_bcs_to_bytes">to_bytes</a>&lt;MoveValue&gt;(v: &MoveValue): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../std/bcs.md#std_bcs_to_bytes">to_bytes</a>&lt;MoveValue&gt;(v: &MoveValue): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -32,7 +32,7 @@ Return the binary representation of <code>v</code> in BCS (Binary Canonical Seri
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="../../dependencies/std/bcs.md#std_bcs_to_bytes">to_bytes</a>&lt;MoveValue&gt;(v: &MoveValue): vector&lt;u8&gt;;
+<pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="../std/bcs.md#std_bcs_to_bytes">to_bytes</a>&lt;MoveValue&gt;(v: &MoveValue): vector&lt;u8&gt;;
 </code></pre>
 
 

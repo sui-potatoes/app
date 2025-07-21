@@ -33,23 +33,23 @@ More entry functions might be added in the future depending on the use cases.
 -  [Function `add_internal`](#sui_display_add_internal)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/address.md#std_address">std::address</a>;
-<b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/bcs.md#std_bcs">std::bcs</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/string.md#std_string">std::string</a>;
-<b>use</b> <a href="../../dependencies/std/type_name.md#std_type_name">std::type_name</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
-<b>use</b> <a href="../../dependencies/sui/address.md#sui_address">sui::address</a>;
-<b>use</b> <a href="../../dependencies/sui/event.md#sui_event">sui::event</a>;
-<b>use</b> <a href="../../dependencies/sui/hex.md#sui_hex">sui::hex</a>;
-<b>use</b> <a href="../../dependencies/sui/object.md#sui_object">sui::object</a>;
-<b>use</b> <a href="../../dependencies/sui/package.md#sui_package">sui::package</a>;
-<b>use</b> <a href="../../dependencies/sui/party.md#sui_party">sui::party</a>;
-<b>use</b> <a href="../../dependencies/sui/transfer.md#sui_transfer">sui::transfer</a>;
-<b>use</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
-<b>use</b> <a href="../../dependencies/sui/types.md#sui_types">sui::types</a>;
-<b>use</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
+<pre><code><b>use</b> <a href="../std/address.md#std_address">std::address</a>;
+<b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/bcs.md#std_bcs">std::bcs</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/string.md#std_string">std::string</a>;
+<b>use</b> <a href="../std/type_name.md#std_type_name">std::type_name</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
+<b>use</b> <a href="../sui/address.md#sui_address">sui::address</a>;
+<b>use</b> <a href="../sui/event.md#sui_event">sui::event</a>;
+<b>use</b> <a href="../sui/hex.md#sui_hex">sui::hex</a>;
+<b>use</b> <a href="../sui/object.md#sui_object">sui::object</a>;
+<b>use</b> <a href="../sui/package.md#sui_package">sui::package</a>;
+<b>use</b> <a href="../sui/party.md#sui_party">sui::party</a>;
+<b>use</b> <a href="../sui/transfer.md#sui_transfer">sui::transfer</a>;
+<b>use</b> <a href="../sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
+<b>use</b> <a href="../sui/types.md#sui_types">sui::types</a>;
+<b>use</b> <a href="../sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
 </code></pre>
 
 
@@ -81,7 +81,7 @@ Uses only String type due to external-facing nature of the object,
 the property names have a priority over their types.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;<b>phantom</b> T: key&gt; <b>has</b> key, store
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/display.md#sui_display_Display">Display</a>&lt;<b>phantom</b> T: key&gt; <b>has</b> key, store
 </code></pre>
 
 
@@ -92,19 +92,19 @@ the property names have a priority over their types.
 
 <dl>
 <dt>
-<code>id: <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a></code>
+<code>id: <a href="../sui/object.md#sui_object_UID">sui::object::UID</a></code>
 </dt>
 <dd>
 </dd>
 <dt>
-<code><a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>, <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>&gt;</code>
+<code><a href="../sui/display.md#sui_display_fields">fields</a>: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../std/string.md#std_string_String">std::string::String</a>, <a href="../std/string.md#std_string_String">std::string::String</a>&gt;</code>
 </dt>
 <dd>
  Contains fields for display. Currently supported
  fields are: name, link, image and description.
 </dd>
 <dt>
-<code><a href="../../dependencies/sui/display.md#sui_display_version">version</a>: u16</code>
+<code><a href="../sui/display.md#sui_display_version">version</a>: u16</code>
 </dt>
 <dd>
  Version that can only be updated manually by the Publisher.
@@ -123,10 +123,10 @@ Type signature of the event corresponds to the type while id serves for
 the discovery.
 
 Since Sui RPC supports querying events by type, finding a Display for the T
-would be as simple as looking for the first event with <code><a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;</code>.
+would be as simple as looking for the first event with <code><a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;</code>.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/display.md#sui_display_DisplayCreated">DisplayCreated</a>&lt;<b>phantom</b> T: key&gt; <b>has</b> <b>copy</b>, drop
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/display.md#sui_display_DisplayCreated">DisplayCreated</a>&lt;<b>phantom</b> T: key&gt; <b>has</b> <b>copy</b>, drop
 </code></pre>
 
 
@@ -137,7 +137,7 @@ would be as simple as looking for the first event with <code><a href="../../depe
 
 <dl>
 <dt>
-<code>id: <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a></code>
+<code>id: <a href="../sui/object.md#sui_object_ID">sui::object::ID</a></code>
 </dt>
 <dd>
 </dd>
@@ -153,7 +153,7 @@ would be as simple as looking for the first event with <code><a href="../../depe
 Version of Display got updated -
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/display.md#sui_display_VersionUpdated">VersionUpdated</a>&lt;<b>phantom</b> T: key&gt; <b>has</b> <b>copy</b>, drop
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/display.md#sui_display_VersionUpdated">VersionUpdated</a>&lt;<b>phantom</b> T: key&gt; <b>has</b> <b>copy</b>, drop
 </code></pre>
 
 
@@ -164,17 +164,17 @@ Version of Display got updated -
 
 <dl>
 <dt>
-<code>id: <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a></code>
+<code>id: <a href="../sui/object.md#sui_object_ID">sui::object::ID</a></code>
 </dt>
 <dd>
 </dd>
 <dt>
-<code><a href="../../dependencies/sui/display.md#sui_display_version">version</a>: u16</code>
+<code><a href="../sui/display.md#sui_display_version">version</a>: u16</code>
 </dt>
 <dd>
 </dd>
 <dt>
-<code><a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>, <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>&gt;</code>
+<code><a href="../sui/display.md#sui_display_fields">fields</a>: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../std/string.md#std_string_String">std::string::String</a>, <a href="../std/string.md#std_string_String">std::string::String</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -193,7 +193,7 @@ Version of Display got updated -
 For when T does not belong to the package <code>Publisher</code>.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/display.md#sui_display_ENotOwner">ENotOwner</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../sui/display.md#sui_display_ENotOwner">ENotOwner</a>: u64 = 0;
 </code></pre>
 
 
@@ -204,7 +204,7 @@ For when vectors passed into one of the multiple insert functions
 don't match in their lengths.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/display.md#sui_display_EVecLengthMismatch">EVecLengthMismatch</a>: u64 = 1;
+<pre><code><b>const</b> <a href="../sui/display.md#sui_display_EVecLengthMismatch">EVecLengthMismatch</a>: u64 = 1;
 </code></pre>
 
 
@@ -217,7 +217,7 @@ Create an empty Display object. It can either be shared empty or filled
 with data right away via cheaper <code>set_owned</code> method.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_new">new</a>&lt;T: key&gt;(pub: &<a href="../../dependencies/sui/package.md#sui_package_Publisher">sui::package::Publisher</a>, ctx: &<b>mut</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_new">new</a>&lt;T: key&gt;(pub: &<a href="../sui/package.md#sui_package_Publisher">sui::package::Publisher</a>, ctx: &<b>mut</b> <a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;
 </code></pre>
 
 
@@ -226,9 +226,9 @@ with data right away via cheaper <code>set_owned</code> method.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_new">new</a>&lt;T: key&gt;(pub: &Publisher, ctx: &<b>mut</b> TxContext): <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt; {
-    <b>assert</b>!(<a href="../../dependencies/sui/display.md#sui_display_is_authorized">is_authorized</a>&lt;T&gt;(pub), <a href="../../dependencies/sui/display.md#sui_display_ENotOwner">ENotOwner</a>);
-    <a href="../../dependencies/sui/display.md#sui_display_create_internal">create_internal</a>(ctx)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_new">new</a>&lt;T: key&gt;(pub: &Publisher, ctx: &<b>mut</b> TxContext): <a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt; {
+    <b>assert</b>!(<a href="../sui/display.md#sui_display_is_authorized">is_authorized</a>&lt;T&gt;(pub), <a href="../sui/display.md#sui_display_ENotOwner">ENotOwner</a>);
+    <a href="../sui/display.md#sui_display_create_internal">create_internal</a>(ctx)
 }
 </code></pre>
 
@@ -243,7 +243,7 @@ with data right away via cheaper <code>set_owned</code> method.
 Create a new Display<T> object with a set of fields.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_new_with_fields">new_with_fields</a>&lt;T: key&gt;(pub: &<a href="../../dependencies/sui/package.md#sui_package_Publisher">sui::package::Publisher</a>, <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>: vector&lt;<a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>&gt;, values: vector&lt;<a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>&gt;, ctx: &<b>mut</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_new_with_fields">new_with_fields</a>&lt;T: key&gt;(pub: &<a href="../sui/package.md#sui_package_Publisher">sui::package::Publisher</a>, <a href="../sui/display.md#sui_display_fields">fields</a>: vector&lt;<a href="../std/string.md#std_string_String">std::string::String</a>&gt;, values: vector&lt;<a href="../std/string.md#std_string_String">std::string::String</a>&gt;, ctx: &<b>mut</b> <a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;
 </code></pre>
 
 
@@ -252,18 +252,18 @@ Create a new Display<T> object with a set of fields.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_new_with_fields">new_with_fields</a>&lt;T: key&gt;(
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_new_with_fields">new_with_fields</a>&lt;T: key&gt;(
     pub: &Publisher,
-    <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>: vector&lt;String&gt;,
+    <a href="../sui/display.md#sui_display_fields">fields</a>: vector&lt;String&gt;,
     values: vector&lt;String&gt;,
     ctx: &<b>mut</b> TxContext,
-): <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt; {
-    <b>let</b> len = <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>.length();
-    <b>assert</b>!(len == values.length(), <a href="../../dependencies/sui/display.md#sui_display_EVecLengthMismatch">EVecLengthMismatch</a>);
+): <a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt; {
+    <b>let</b> len = <a href="../sui/display.md#sui_display_fields">fields</a>.length();
+    <b>assert</b>!(len == values.length(), <a href="../sui/display.md#sui_display_EVecLengthMismatch">EVecLengthMismatch</a>);
     <b>let</b> <b>mut</b> i = 0;
-    <b>let</b> <b>mut</b> display = <a href="../../dependencies/sui/display.md#sui_display_new">new</a>&lt;T&gt;(pub, ctx);
+    <b>let</b> <b>mut</b> display = <a href="../sui/display.md#sui_display_new">new</a>&lt;T&gt;(pub, ctx);
     <b>while</b> (i &lt; len) {
-        display.<a href="../../dependencies/sui/display.md#sui_display_add_internal">add_internal</a>(<a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>[i], values[i]);
+        display.<a href="../sui/display.md#sui_display_add_internal">add_internal</a>(<a href="../sui/display.md#sui_display_fields">fields</a>[i], values[i]);
         i = i + 1;
     };
     display
@@ -281,7 +281,7 @@ Create a new Display<T> object with a set of fields.
 Create a new empty Display<T> object and keep it.
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_create_and_keep">create_and_keep</a>&lt;T: key&gt;(pub: &<a href="../../dependencies/sui/package.md#sui_package_Publisher">sui::package::Publisher</a>, ctx: &<b>mut</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_create_and_keep">create_and_keep</a>&lt;T: key&gt;(pub: &<a href="../sui/package.md#sui_package_Publisher">sui::package::Publisher</a>, ctx: &<b>mut</b> <a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
 </code></pre>
 
 
@@ -290,8 +290,8 @@ Create a new empty Display<T> object and keep it.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_create_and_keep">create_and_keep</a>&lt;T: key&gt;(pub: &Publisher, ctx: &<b>mut</b> TxContext) {
-    transfer::public_transfer(<a href="../../dependencies/sui/display.md#sui_display_new">new</a>&lt;T&gt;(pub, ctx), ctx.sender())
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_create_and_keep">create_and_keep</a>&lt;T: key&gt;(pub: &Publisher, ctx: &<b>mut</b> TxContext) {
+    transfer::public_transfer(<a href="../sui/display.md#sui_display_new">new</a>&lt;T&gt;(pub, ctx), ctx.sender())
 }
 </code></pre>
 
@@ -306,7 +306,7 @@ Create a new empty Display<T> object and keep it.
 Manually bump the version and emit an event with the updated version's contents.
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_update_version">update_version</a>&lt;T: key&gt;(display: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;)
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_update_version">update_version</a>&lt;T: key&gt;(display: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;)
 </code></pre>
 
 
@@ -315,11 +315,11 @@ Manually bump the version and emit an event with the updated version's contents.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_update_version">update_version</a>&lt;T: key&gt;(display: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;) {
-    display.<a href="../../dependencies/sui/display.md#sui_display_version">version</a> = display.<a href="../../dependencies/sui/display.md#sui_display_version">version</a> + 1;
-    event::emit(<a href="../../dependencies/sui/display.md#sui_display_VersionUpdated">VersionUpdated</a>&lt;T&gt; {
-        <a href="../../dependencies/sui/display.md#sui_display_version">version</a>: display.<a href="../../dependencies/sui/display.md#sui_display_version">version</a>,
-        <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>: *&display.<a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>,
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_update_version">update_version</a>&lt;T: key&gt;(display: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;) {
+    display.<a href="../sui/display.md#sui_display_version">version</a> = display.<a href="../sui/display.md#sui_display_version">version</a> + 1;
+    event::emit(<a href="../sui/display.md#sui_display_VersionUpdated">VersionUpdated</a>&lt;T&gt; {
+        <a href="../sui/display.md#sui_display_version">version</a>: display.<a href="../sui/display.md#sui_display_version">version</a>,
+        <a href="../sui/display.md#sui_display_fields">fields</a>: *&display.<a href="../sui/display.md#sui_display_fields">fields</a>,
         id: display.id.to_inner(),
     })
 }
@@ -336,7 +336,7 @@ Manually bump the version and emit an event with the updated version's contents.
 Sets a custom <code>name</code> field with the <code>value</code>.
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_add">add</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, name: <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>, value: <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>)
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_add">add</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, name: <a href="../std/string.md#std_string_String">std::string::String</a>, value: <a href="../std/string.md#std_string_String">std::string::String</a>)
 </code></pre>
 
 
@@ -345,8 +345,8 @@ Sets a custom <code>name</code> field with the <code>value</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_add">add</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;, name: String, value: String) {
-    self.<a href="../../dependencies/sui/display.md#sui_display_add_internal">add_internal</a>(name, value)
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_add">add</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;, name: String, value: String) {
+    self.<a href="../sui/display.md#sui_display_add_internal">add_internal</a>(name, value)
 }
 </code></pre>
 
@@ -358,10 +358,10 @@ Sets a custom <code>name</code> field with the <code>value</code>.
 
 ## Function `add_multiple`
 
-Sets multiple <code><a href="../../dependencies/sui/display.md#sui_display_fields">fields</a></code> with <code>values</code>.
+Sets multiple <code><a href="../sui/display.md#sui_display_fields">fields</a></code> with <code>values</code>.
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_add_multiple">add_multiple</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>: vector&lt;<a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>&gt;, values: vector&lt;<a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>&gt;)
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_add_multiple">add_multiple</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, <a href="../sui/display.md#sui_display_fields">fields</a>: vector&lt;<a href="../std/string.md#std_string_String">std::string::String</a>&gt;, values: vector&lt;<a href="../std/string.md#std_string_String">std::string::String</a>&gt;)
 </code></pre>
 
 
@@ -370,16 +370,16 @@ Sets multiple <code><a href="../../dependencies/sui/display.md#sui_display_field
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_add_multiple">add_multiple</a>&lt;T: key&gt;(
-    self: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;,
-    <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>: vector&lt;String&gt;,
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_add_multiple">add_multiple</a>&lt;T: key&gt;(
+    self: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;,
+    <a href="../sui/display.md#sui_display_fields">fields</a>: vector&lt;String&gt;,
     values: vector&lt;String&gt;,
 ) {
-    <b>let</b> len = <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>.length();
-    <b>assert</b>!(len == values.length(), <a href="../../dependencies/sui/display.md#sui_display_EVecLengthMismatch">EVecLengthMismatch</a>);
+    <b>let</b> len = <a href="../sui/display.md#sui_display_fields">fields</a>.length();
+    <b>assert</b>!(len == values.length(), <a href="../sui/display.md#sui_display_EVecLengthMismatch">EVecLengthMismatch</a>);
     <b>let</b> <b>mut</b> i = 0;
     <b>while</b> (i &lt; len) {
-        self.<a href="../../dependencies/sui/display.md#sui_display_add_internal">add_internal</a>(<a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>[i], values[i]);
+        self.<a href="../sui/display.md#sui_display_add_internal">add_internal</a>(<a href="../sui/display.md#sui_display_fields">fields</a>[i], values[i]);
         i = i + 1;
     };
 }
@@ -397,7 +397,7 @@ Change the value of the field.
 TODO (long run): version changes;
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_edit">edit</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, name: <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>, value: <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>)
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_edit">edit</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, name: <a href="../std/string.md#std_string_String">std::string::String</a>, value: <a href="../std/string.md#std_string_String">std::string::String</a>)
 </code></pre>
 
 
@@ -406,9 +406,9 @@ TODO (long run): version changes;
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_edit">edit</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;, name: String, value: String) {
-    <b>let</b> (_, _) = self.<a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>.<a href="../../dependencies/sui/display.md#sui_display_remove">remove</a>(&name);
-    self.<a href="../../dependencies/sui/display.md#sui_display_add_internal">add_internal</a>(name, value)
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_edit">edit</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;, name: String, value: String) {
+    <b>let</b> (_, _) = self.<a href="../sui/display.md#sui_display_fields">fields</a>.<a href="../sui/display.md#sui_display_remove">remove</a>(&name);
+    self.<a href="../sui/display.md#sui_display_add_internal">add_internal</a>(name, value)
 }
 </code></pre>
 
@@ -423,7 +423,7 @@ TODO (long run): version changes;
 Remove the key from the Display.
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_remove">remove</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, name: <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>)
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_remove">remove</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, name: <a href="../std/string.md#std_string_String">std::string::String</a>)
 </code></pre>
 
 
@@ -432,8 +432,8 @@ Remove the key from the Display.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_remove">remove</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;, name: String) {
-    self.<a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>.<a href="../../dependencies/sui/display.md#sui_display_remove">remove</a>(&name);
+<pre><code><b>public</b> <b>entry</b> <b>fun</b> <a href="../sui/display.md#sui_display_remove">remove</a>&lt;T: key&gt;(self: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;, name: String) {
+    self.<a href="../sui/display.md#sui_display_fields">fields</a>.<a href="../sui/display.md#sui_display_remove">remove</a>(&name);
 }
 </code></pre>
 
@@ -448,7 +448,7 @@ Remove the key from the Display.
 Authorization check; can be performed externally to implement protection rules for Display.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_is_authorized">is_authorized</a>&lt;T: key&gt;(pub: &<a href="../../dependencies/sui/package.md#sui_package_Publisher">sui::package::Publisher</a>): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_is_authorized">is_authorized</a>&lt;T: key&gt;(pub: &<a href="../sui/package.md#sui_package_Publisher">sui::package::Publisher</a>): bool
 </code></pre>
 
 
@@ -457,7 +457,7 @@ Authorization check; can be performed externally to implement protection rules f
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_is_authorized">is_authorized</a>&lt;T: key&gt;(pub: &Publisher): bool {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_is_authorized">is_authorized</a>&lt;T: key&gt;(pub: &Publisher): bool {
     pub.from_package&lt;T&gt;()
 }
 </code></pre>
@@ -470,10 +470,10 @@ Authorization check; can be performed externally to implement protection rules f
 
 ## Function `version`
 
-Read the <code><a href="../../dependencies/sui/display.md#sui_display_version">version</a></code> field.
+Read the <code><a href="../sui/display.md#sui_display_version">version</a></code> field.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_version">version</a>&lt;T: key&gt;(d: &<a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;): u16
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_version">version</a>&lt;T: key&gt;(d: &<a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;): u16
 </code></pre>
 
 
@@ -482,8 +482,8 @@ Read the <code><a href="../../dependencies/sui/display.md#sui_display_version">v
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_version">version</a>&lt;T: key&gt;(d: &<a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;): u16 {
-    d.<a href="../../dependencies/sui/display.md#sui_display_version">version</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_version">version</a>&lt;T: key&gt;(d: &<a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;): u16 {
+    d.<a href="../sui/display.md#sui_display_version">version</a>
 }
 </code></pre>
 
@@ -495,10 +495,10 @@ Read the <code><a href="../../dependencies/sui/display.md#sui_display_version">v
 
 ## Function `fields`
 
-Read the <code><a href="../../dependencies/sui/display.md#sui_display_fields">fields</a></code> field.
+Read the <code><a href="../sui/display.md#sui_display_fields">fields</a></code> field.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>&lt;T: key&gt;(d: &<a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;): &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>, <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_fields">fields</a>&lt;T: key&gt;(d: &<a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;): &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../std/string.md#std_string_String">std::string::String</a>, <a href="../std/string.md#std_string_String">std::string::String</a>&gt;
 </code></pre>
 
 
@@ -507,8 +507,8 @@ Read the <code><a href="../../dependencies/sui/display.md#sui_display_fields">fi
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>&lt;T: key&gt;(d: &<a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;): &VecMap&lt;String, String&gt; {
-    &d.<a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/display.md#sui_display_fields">fields</a>&lt;T: key&gt;(d: &<a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;): &VecMap&lt;String, String&gt; {
+    &d.<a href="../sui/display.md#sui_display_fields">fields</a>
 }
 </code></pre>
 
@@ -520,10 +520,10 @@ Read the <code><a href="../../dependencies/sui/display.md#sui_display_fields">fi
 
 ## Function `create_internal`
 
-Internal function to create a new <code><a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;</code>.
+Internal function to create a new <code><a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;</code>.
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_create_internal">create_internal</a>&lt;T: key&gt;(ctx: &<b>mut</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;
+<pre><code><b>fun</b> <a href="../sui/display.md#sui_display_create_internal">create_internal</a>&lt;T: key&gt;(ctx: &<b>mut</b> <a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;
 </code></pre>
 
 
@@ -532,15 +532,15 @@ Internal function to create a new <code><a href="../../dependencies/sui/display.
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_create_internal">create_internal</a>&lt;T: key&gt;(ctx: &<b>mut</b> TxContext): <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt; {
+<pre><code><b>fun</b> <a href="../sui/display.md#sui_display_create_internal">create_internal</a>&lt;T: key&gt;(ctx: &<b>mut</b> TxContext): <a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt; {
     <b>let</b> uid = object::new(ctx);
-    event::emit(<a href="../../dependencies/sui/display.md#sui_display_DisplayCreated">DisplayCreated</a>&lt;T&gt; {
+    event::emit(<a href="../sui/display.md#sui_display_DisplayCreated">DisplayCreated</a>&lt;T&gt; {
         id: uid.to_inner(),
     });
-    <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a> {
+    <a href="../sui/display.md#sui_display_Display">Display</a> {
         id: uid,
-        <a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>: vec_map::empty(),
-        <a href="../../dependencies/sui/display.md#sui_display_version">version</a>: 0,
+        <a href="../sui/display.md#sui_display_fields">fields</a>: vec_map::empty(),
+        <a href="../sui/display.md#sui_display_version">version</a>: 0,
     }
 }
 </code></pre>
@@ -556,7 +556,7 @@ Internal function to create a new <code><a href="../../dependencies/sui/display.
 Private method for inserting fields without security checks.
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_add_internal">add_internal</a>&lt;T: key&gt;(display: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, name: <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>, value: <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>)
+<pre><code><b>fun</b> <a href="../sui/display.md#sui_display_add_internal">add_internal</a>&lt;T: key&gt;(display: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">sui::display::Display</a>&lt;T&gt;, name: <a href="../std/string.md#std_string_String">std::string::String</a>, value: <a href="../std/string.md#std_string_String">std::string::String</a>)
 </code></pre>
 
 
@@ -565,8 +565,8 @@ Private method for inserting fields without security checks.
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/display.md#sui_display_add_internal">add_internal</a>&lt;T: key&gt;(display: &<b>mut</b> <a href="../../dependencies/sui/display.md#sui_display_Display">Display</a>&lt;T&gt;, name: String, value: String) {
-    display.<a href="../../dependencies/sui/display.md#sui_display_fields">fields</a>.insert(name, value)
+<pre><code><b>fun</b> <a href="../sui/display.md#sui_display_add_internal">add_internal</a>&lt;T: key&gt;(display: &<b>mut</b> <a href="../sui/display.md#sui_display_Display">Display</a>&lt;T&gt;, name: String, value: String) {
+    display.<a href="../sui/display.md#sui_display_fields">fields</a>.insert(name, value)
 }
 </code></pre>
 

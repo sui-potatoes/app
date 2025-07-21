@@ -15,18 +15,18 @@
 -  [Function `check_zklogin_issuer_internal`](#sui_zklogin_verified_issuer_check_zklogin_issuer_internal)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/bcs.md#std_bcs">std::bcs</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/string.md#std_string">std::string</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
-<b>use</b> <a href="../../dependencies/sui/address.md#sui_address">sui::address</a>;
-<b>use</b> <a href="../../dependencies/sui/hex.md#sui_hex">sui::hex</a>;
-<b>use</b> <a href="../../dependencies/sui/object.md#sui_object">sui::object</a>;
-<b>use</b> <a href="../../dependencies/sui/party.md#sui_party">sui::party</a>;
-<b>use</b> <a href="../../dependencies/sui/transfer.md#sui_transfer">sui::transfer</a>;
-<b>use</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
-<b>use</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
+<pre><code><b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/bcs.md#std_bcs">std::bcs</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/string.md#std_string">std::string</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
+<b>use</b> <a href="../sui/address.md#sui_address">sui::address</a>;
+<b>use</b> <a href="../sui/hex.md#sui_hex">sui::hex</a>;
+<b>use</b> <a href="../sui/object.md#sui_object">sui::object</a>;
+<b>use</b> <a href="../sui/party.md#sui_party">sui::party</a>;
+<b>use</b> <a href="../sui/transfer.md#sui_transfer">sui::transfer</a>;
+<b>use</b> <a href="../sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
+<b>use</b> <a href="../sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
 </code></pre>
 
 
@@ -39,7 +39,7 @@ Possession of a VerifiedIssuer proves that the user's address was created using 
 (identity provider).
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a> <b>has</b> key
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a> <b>has</b> key
 </code></pre>
 
 
@@ -50,19 +50,19 @@ Possession of a VerifiedIssuer proves that the user's address was created using 
 
 <dl>
 <dt>
-<code>id: <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a></code>
+<code>id: <a href="../sui/object.md#sui_object_UID">sui::object::UID</a></code>
 </dt>
 <dd>
  The ID of this VerifiedIssuer
 </dd>
 <dt>
-<code><a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>: <b>address</b></code>
+<code><a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>: <b>address</b></code>
 </dt>
 <dd>
  The address this VerifiedID is associated with
 </dd>
 <dt>
-<code><a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a></code>
+<code><a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: <a href="../std/string.md#std_string_String">std::string::String</a></code>
 </dt>
 <dd>
  The issuer
@@ -82,7 +82,7 @@ Possession of a VerifiedIssuer proves that the user's address was created using 
 Error if the proof consisting of the inputs provided to the verification function is invalid.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidInput">EInvalidInput</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidInput">EInvalidInput</a>: u64 = 0;
 </code></pre>
 
 
@@ -92,7 +92,7 @@ Error if the proof consisting of the inputs provided to the verification functio
 Error if the proof consisting of the inputs provided to the verification function is invalid.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidProof">EInvalidProof</a>: u64 = 1;
+<pre><code><b>const</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidProof">EInvalidProof</a>: u64 = 1;
 </code></pre>
 
 
@@ -104,7 +104,7 @@ Error if the proof consisting of the inputs provided to the verification functio
 Returns the address associated with the given VerifiedIssuer
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>(verified_issuer: &<a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">sui::zklogin_verified_issuer::VerifiedIssuer</a>): <b>address</b>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>(verified_issuer: &<a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">sui::zklogin_verified_issuer::VerifiedIssuer</a>): <b>address</b>
 </code></pre>
 
 
@@ -113,8 +113,8 @@ Returns the address associated with the given VerifiedIssuer
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>(verified_issuer: &<a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a>): <b>address</b> {
-    verified_issuer.<a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>(verified_issuer: &<a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a>): <b>address</b> {
+    verified_issuer.<a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>
 }
 </code></pre>
 
@@ -129,7 +129,7 @@ Returns the address associated with the given VerifiedIssuer
 Returns the issuer associated with the given VerifiedIssuer
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>(verified_issuer: &<a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">sui::zklogin_verified_issuer::VerifiedIssuer</a>): &<a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>(verified_issuer: &<a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">sui::zklogin_verified_issuer::VerifiedIssuer</a>): &<a href="../std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -138,8 +138,8 @@ Returns the issuer associated with the given VerifiedIssuer
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>(verified_issuer: &<a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a>): &String {
-    &verified_issuer.<a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>(verified_issuer: &<a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a>): &String {
+    &verified_issuer.<a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>
 }
 </code></pre>
 
@@ -154,7 +154,7 @@ Returns the issuer associated with the given VerifiedIssuer
 Delete a VerifiedIssuer
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_delete">delete</a>(verified_issuer: <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">sui::zklogin_verified_issuer::VerifiedIssuer</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_delete">delete</a>(verified_issuer: <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">sui::zklogin_verified_issuer::VerifiedIssuer</a>)
 </code></pre>
 
 
@@ -163,9 +163,9 @@ Delete a VerifiedIssuer
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_delete">delete</a>(verified_issuer: <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a>) {
-    <b>let</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a> { id, <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>: _, <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: _ } = verified_issuer;
-    id.<a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_delete">delete</a>();
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_delete">delete</a>(verified_issuer: <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a>) {
+    <b>let</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a> { id, <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>: _, <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: _ } = verified_issuer;
+    id.<a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_delete">delete</a>();
 }
 </code></pre>
 
@@ -180,10 +180,10 @@ Delete a VerifiedIssuer
 Verify that the caller's address was created using zklogin with the given issuer. If so, a VerifiedIssuer object
 with the issuers id transferred to the caller.
 
-Aborts with <code><a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidProof">EInvalidProof</a></code> if the verification fails.
+Aborts with <code><a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidProof">EInvalidProof</a></code> if the verification fails.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_verify_zklogin_issuer">verify_zklogin_issuer</a>(address_seed: u256, <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: <a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>, ctx: &<b>mut</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_verify_zklogin_issuer">verify_zklogin_issuer</a>(address_seed: u256, <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: <a href="../std/string.md#std_string_String">std::string::String</a>, ctx: &<b>mut</b> <a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
 </code></pre>
 
 
@@ -192,14 +192,14 @@ Aborts with <code><a href="../../dependencies/sui/zklogin_verified_issuer.md#sui
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_verify_zklogin_issuer">verify_zklogin_issuer</a>(address_seed: u256, <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: String, ctx: &<b>mut</b> TxContext) {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_verify_zklogin_issuer">verify_zklogin_issuer</a>(address_seed: u256, <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: String, ctx: &<b>mut</b> TxContext) {
     <b>let</b> sender = ctx.sender();
-    <b>assert</b>!(<a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer">check_zklogin_issuer</a>(sender, address_seed, &<a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>), <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidProof">EInvalidProof</a>);
+    <b>assert</b>!(<a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer">check_zklogin_issuer</a>(sender, address_seed, &<a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>), <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidProof">EInvalidProof</a>);
     transfer::transfer(
-        <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a> {
+        <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_VerifiedIssuer">VerifiedIssuer</a> {
             id: object::new(ctx),
-            <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>: sender,
-            <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>,
+            <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_owner">owner</a>: sender,
+            <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>,
         },
         sender,
     )
@@ -217,7 +217,7 @@ Aborts with <code><a href="../../dependencies/sui/zklogin_verified_issuer.md#sui
 Returns true if <code><b>address</b></code> was created using zklogin with the given issuer and address seed.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer">check_zklogin_issuer</a>(<b>address</b>: <b>address</b>, address_seed: u256, <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: &<a href="../../dependencies/std/string.md#std_string_String">std::string::String</a>): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer">check_zklogin_issuer</a>(<b>address</b>: <b>address</b>, address_seed: u256, <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: &<a href="../std/string.md#std_string_String">std::string::String</a>): bool
 </code></pre>
 
 
@@ -226,8 +226,8 @@ Returns true if <code><b>address</b></code> was created using zklogin with the g
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer">check_zklogin_issuer</a>(<b>address</b>: <b>address</b>, address_seed: u256, <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: &String): bool {
-    <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer_internal">check_zklogin_issuer_internal</a>(<b>address</b>, address_seed, <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>.as_bytes())
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer">check_zklogin_issuer</a>(<b>address</b>: <b>address</b>, address_seed: u256, <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: &String): bool {
+    <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer_internal">check_zklogin_issuer_internal</a>(<b>address</b>, address_seed, <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>.as_bytes())
 }
 </code></pre>
 
@@ -241,10 +241,10 @@ Returns true if <code><b>address</b></code> was created using zklogin with the g
 
 Returns true if <code><b>address</b></code> was created using zklogin with the given issuer and address seed.
 
-Aborts with <code><a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidInput">EInvalidInput</a></code> if the <code>iss</code> input is not a valid UTF-8 string.
+Aborts with <code><a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_EInvalidInput">EInvalidInput</a></code> if the <code>iss</code> input is not a valid UTF-8 string.
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer_internal">check_zklogin_issuer_internal</a>(<b>address</b>: <b>address</b>, address_seed: u256, <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: &vector&lt;u8&gt;): bool
+<pre><code><b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer_internal">check_zklogin_issuer_internal</a>(<b>address</b>: <b>address</b>, address_seed: u256, <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: &vector&lt;u8&gt;): bool
 </code></pre>
 
 
@@ -253,10 +253,10 @@ Aborts with <code><a href="../../dependencies/sui/zklogin_verified_issuer.md#sui
 <summary>Implementation</summary>
 
 
-<pre><code><b>native</b> <b>fun</b> <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer_internal">check_zklogin_issuer_internal</a>(
+<pre><code><b>native</b> <b>fun</b> <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_check_zklogin_issuer_internal">check_zklogin_issuer_internal</a>(
     <b>address</b>: <b>address</b>,
     address_seed: u256,
-    <a href="../../dependencies/sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: &vector&lt;u8&gt;,
+    <a href="../sui/zklogin_verified_issuer.md#sui_zklogin_verified_issuer_issuer">issuer</a>: &vector&lt;u8&gt;,
 ): bool;
 </code></pre>
 
