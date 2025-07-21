@@ -5,7 +5,7 @@
 /// See https://en.wikipedia.org/wiki/Onitama for more information.
 module grid::onitama;
 
-use grid::{direction::{Self, up, down, left, right}, grid::{Self, Grid}};
+use grid::{cursor, direction::{Self, up, down, left, right}, grid::{Self, Grid}};
 use std::string::String;
 
 const EIllegalMove: u64 = 1;
@@ -74,7 +74,7 @@ public fun play(field: &mut Field, card_idx: u8, x0: u16, y0: u16, x1: u16, y1: 
     stack.push_back(swap_card);
 
     let play_card = stack.swap_remove(card_idx as u64);
-    let mut cursor = direction::new_cursor(x0, y0);
+    let mut cursor = cursor::new(x0, y0);
     let moves = play_card.moves(is_red);
     let is_valid = moves.any!(|moves| {
         cursor.reset(x0, y0);
@@ -204,11 +204,8 @@ public fun moves(card: &MoveCard, turn: bool): vector<vector<u8>> {
         ],
     };
 
-    if (turn) {
-        moves
-    } else {
-        moves.map!(|m| m.map!(|d| direction::inverse!(d)))
-    }
+    // inverse direction if it's the second player's turn
+    if (turn) moves else moves.map!(|m| m.map!(|d| direction::inverse!(d)))
 }
 
 public fun card_from_index(idx: u8): MoveCard {
@@ -276,12 +273,7 @@ public fun to_string(field: &Field): String {
 
 #[test_only]
 public fun debug(field: &Field) {
-    // prettier-ignore
-    std::debug::print(&{
-        let mut str = b"\n".to_string();
-        str.append(field.to_string());
-        str
-    });
+    field.grid.debug!();
 }
 
 #[test]

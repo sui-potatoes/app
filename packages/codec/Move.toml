@@ -1,5 +1,5 @@
 [package]
-name = "Codec"
+name = "codec"
 edition = "2024"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 

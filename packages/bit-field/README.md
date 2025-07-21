@@ -11,10 +11,7 @@ The library does not contain a single public function, instead, it provides a se
 ### [Move Registry CLI](https://docs.suins.io/move-registry)
 
 ```bash
-mvr add @potatoes/bit-field --network testnet
-
-# or for mainnet
-mvr add @potatoes/bit-field --network mainnet
+mvr add @potatoes/bit-field
 ```
 
 ### Manual
@@ -24,14 +21,7 @@ To add this library to your project, add this to your `Move.toml` file under
 
 ```toml
 # goes into [dependencies] section
-BitField = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/bit-field", rev = "bit-field@v1" }
-```
-
-If you need a **mainnet** version of this package, use the `mainnet-v1` tag instead:
-
-```toml
-# goes into [dependencies] section
-BitField = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/bit-field", rev = "bit-field@v1" }
+bit-field = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/bit-field", rev = "bit-field@v1" }
 ```
 
 Exported address of this package is:

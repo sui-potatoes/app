@@ -1,5 +1,5 @@
 [package]
-name = "NameGenerator"
+name = "name-gen"
 edition = "2024"
 license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com"]

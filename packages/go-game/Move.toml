@@ -1,12 +1,13 @@
 [package]
-name = "GoGame"
+name = "go_game"
 edition = "2024.beta"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
-SVG = { local = "../svg" }
-Codec = { local = "../codec" }
+svg = { local = "../svg" }
+codec = { local = "../codec" }
+grid = { local = "../grid" }
 
 [addresses]
-gogame = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
-gogame_upgrade_cap = "0xe9751f947ea92998fe0500417db9ba2297e7eb394ac82bd69f02abcfa425108e"
+go_game = "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e"
+go_game_upgrade_cap = "0xe9751f947ea92998fe0500417db9ba2297e7eb394ac82bd69f02abcfa425108e"

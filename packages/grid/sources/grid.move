@@ -5,7 +5,7 @@
 /// provides guarantees that the elements are stored in a rectangular shape.
 ///
 /// Additionally, the module provides functions to work with the grid, such as
-/// getting the width and height, borrowing elements, and finding the shortest
+/// getting the cols and rows, borrowing elements, and finding the shortest
 /// path between two points using the Wave Algorithm.
 ///
 /// Structure, printing and directions:
@@ -20,8 +20,8 @@
 /// the left or to the right of another point
 module grid::grid;
 
-use grid::point::{Self, Point};
-use std::{macros, string::String};
+use grid::point::Point;
+use std::{macros::{num_diff, num_max}, string::String};
 use sui::bcs::BCS;
 
 const EIncorrectLength: u64 = 0;
@@ -36,8 +36,8 @@ public struct Grid<T> has copy, drop, store {
 /// have different lengths.
 public fun from_vector<T>(grid: vector<vector<T>>): Grid<T> {
     assert!(grid.length() > 0, EIncorrectLength);
-    let height = grid[0].length();
-    grid.do_ref!(|row| assert!(row.length() == height, EIncorrectLength));
+    let cols = grid[0].length();
+    grid.do_ref!(|row| assert!(row.length() == cols, EIncorrectLength));
     Grid { grid }
 }
 
@@ -53,23 +53,30 @@ public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
     grid
 }
 
-/// Get the width of the grid.
-public fun width<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
+// === Accessors ===
 
-/// Get the height of the grid.
-public fun height<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
+/// Get the number of rows of the `Grid`.
+public fun rows<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
 
-// === Indexing ===
+/// Get the number of columns of the `Grid`.
+public fun cols<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
 
 /// Get a reference to the inner vector of the grid.
 public fun inner<T>(g: &Grid<T>): &vector<vector<T>> { &g.grid }
 
 #[syntax(index)]
 /// Get a reference to a cell in the grid.
+/// ```move
+/// let value_ref = &grid[0, 0];
+/// let copied_value = grid[0, 0];
+/// ```
 public fun borrow<T>(g: &Grid<T>, x: u16, y: u16): &T { &g.grid[x as u64][y as u64] }
 
 #[syntax(index)]
 /// Borrow a mutable reference to a cell in the grid.
+/// ```move
+/// let value_mut = &mut grid[0, 0];
+/// ```
 public fun borrow_mut<T>(g: &mut Grid<T>, x: u16, y: u16): &mut T {
     &mut g.grid[x as u64][y as u64]
 }
@@ -81,12 +88,111 @@ public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
     g.grid[x as u64].swap_remove(y as u64)
 }
 
-// === Macros ===
+// === Accessors: Point ===
 
-/// Get a Manhattan distance between two points. Useful for calculating distances
-/// or ranges for ranged attacks or walking, for example.
-public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {
-    macros::num_diff!($x0, $x1) + macros::num_diff!($y0, $y1)
+/// Get a reference to a cell in the `Grid` at the given `Point`.
+public fun borrow_point<T>(g: &Grid<T>, p: &Point): &T {
+    let (x, y) = p.to_values();
+    &g.grid[x as u64][y as u64]
+}
+
+/// Get a mutable reference to a cell in the `Grid` at the given `Point`.
+public fun borrow_point_mut<T>(g: &mut Grid<T>, p: &Point): &mut T {
+    let (x, y) = p.to_values();
+    &mut g.grid[x as u64][y as u64]
+}
+
+// === Macros: Utility ===
+
+/// Get a Manhattan distance between two points. Manhattan distance is the
+/// sum of the absolute differences of the x and y coordinates.
+///
+/// Example:
+/// ```rust
+/// let distance = grid::manhattan_distance!(0, 0, 1, 2);
+///
+/// assert!(distance == 3);
+/// ```
+public macro fun manhattan_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
+    num_diff!($x0, $x1) + num_diff!($y0, $y1)
+}
+
+/// Get a Chebyshev distance between two points. Chebyshev distance is the
+/// maximum of the absolute differences of the x and y coordinates.
+///
+/// Example:
+/// ```rust
+/// let distance = grid::chebyshev_distance!(0, 0, 1, 2);
+///
+/// assert!(distance == 2);
+/// ```
+public macro fun chebyshev_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
+    num_max!(num_diff!($x0, $x1), num_diff!($y0, $y1))
+}
+
+// === Macros: Grid ===
+
+/// Create a grid of the specified size by applying the function `f` to each cell.
+/// The function receives the x and y coordinates of the cell.
+///
+/// Example:
+/// ```rust
+/// public enum Tile {
+///   Empty,
+///   // ...
+/// }
+///
+/// let grid = grid::tabulate!(3, 3, |_x, _y| Tile::Empty);
+/// ```
+public macro fun tabulate<$T>($rows: u16, $cols: u16, $f: |u16, u16| -> $T): Grid<$T> {
+    let rows = $rows as u64;
+    let cols = $cols as u64;
+    let grid = vector::tabulate!(rows, |x| vector::tabulate!(cols, |y| $f(x as u16, y as u16)));
+    from_vector_unchecked(grid)
+}
+
+/// Gracefully destroy the `Grid` by consuming the elements in the passed function $f.
+/// Goes in reverse order (bottom to top, right to left). Cheaper than `do` because it
+/// doesn't need to reverse the elements.
+///
+/// Example:
+/// ```rust
+/// grid.destroy!(|tile| tile.destroy());
+/// ```
+public macro fun destroy<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
+    into_vector($grid).destroy!(|row| row.destroy!(|cell| $f(cell)));
+}
+
+/// Consume the `Grid` by calling the function `f` for each element. Preserves the
+/// order of elements (goes from top to bottom, left to right). If the order does not
+/// matter, use `destroy` instead.
+public macro fun do<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
+    into_vector($grid).do!(|row| row.do!(|cell| $f(cell)));
+}
+
+/// Apply the function `f` for each element of the `Grid`.
+/// The function receives a reference to the cell.
+public macro fun do_ref<$T, $R: drop>($grid: &Grid<$T>, $f: |&$T| -> $R) {
+    inner($grid).do_ref!(|row| row.do_ref!(|cell| $f(cell)));
+}
+
+/// Traverse the grid, calling the function `f` for each cell. The function
+/// receives the reference to the cell, the x and y coordinates of the cell.
+public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, (u16, u16)| -> $R) {
+    let g = $g;
+    let (rows, cols) = (g.rows(), g.cols());
+    rows.do!(|x| cols.do!(|y| $f(&g[x, y], (x, y))));
+}
+
+/// Map the grid to a new grid by applying the function `f` to each cell.
+public macro fun map<$T, $U>($grid: Grid<$T>, $f: |$T| -> $U): Grid<$U> {
+    from_vector_unchecked(into_vector($grid).map!(|row| row.map!(|cell| $f(cell))))
+}
+
+/// Map the grid to a new grid by applying the function `f` to each cell.
+/// Callback `f` takes the reference to the cell.
+public macro fun map_ref<$T, $U>($grid: &Grid<$T>, $f: |&$T| -> $U): Grid<$U> {
+    from_vector_unchecked(inner($grid).map_ref!(|row| row.map_ref!(|cell| $f(cell))))
 }
 
 /// Get all von Neumann neighbors of a point, checking if the point is within
@@ -96,65 +202,114 @@ public macro fun range($x0: u16, $y0: u16, $x1: u16, $y1: u16): u16 {
 public macro fun von_neumann<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> {
     let p = $p;
     let g = $g;
-    let (width, height) = (g.width(), g.height());
+    let (rows, cols) = (g.rows(), g.cols());
     p.von_neumann($size).filter!(|point| {
         let (x, y) = point.to_values();
-        x < width && y < height
+        x < rows && y < cols
     })
 }
 
-/// Create a grid of the specified size by applying the function `f` to each cell.
-/// The function receives the x and y coordinates of the cell.
-public macro fun tabulate<$T>($width: u16, $height: u16, $f: |u16, u16| -> $T): Grid<$T> {
-    let width = $width as u64;
-    let height = $height as u64;
-    let grid = vector::tabulate!(width, |x| vector::tabulate!(height, |y| $f(x as u16, y as u16)));
-    from_vector_unchecked(grid)
+/// Count the number of Von Neumann neighbors of a point that pass the predicate $f.
+public macro fun von_neumann_count<$T>(
+    $g: &Grid<$T>,
+    $p: Point,
+    $size: u16,
+    $f: |&$T| -> bool,
+): u8 {
+    let p = $p;
+    let g = $g;
+    let (rows, cols) = (g.rows(), g.cols());
+    let mut count = 0u8;
+
+    p.von_neumann($size).destroy!(|point| {
+        let (x1, y1) = point.to_values();
+        if (x1 >= rows || y1 >= cols) return;
+        if (!$f(&g[x1, y1])) return;
+
+        count = count + 1;
+    });
+
+    count
 }
 
-/// Gracefully destroy the grid by consuming the elements in the passed function $f.
-public macro fun destroy<$T>($grid: Grid<$T>, $f: |$T|) {
-    into_vector($grid).destroy!(|row| row.destroy!(|cell| $f(cell)));
+/// Get all Moore neighbors of a point, checking if the point is within the
+/// bounds of the grid. The size parameter specifies the size of the neighborhood.
+///
+/// See `Point` for more information on the Moore neighborhood.
+public macro fun moore<$T>($g: &Grid<$T>, $p: Point, $size: u16): vector<Point> {
+    let p = $p;
+    let g = $g;
+    let (rows, cols) = (g.rows(), g.cols());
+    p.moore($size).filter!(|point| {
+        let (x, y) = point.to_values();
+        x < rows && y < cols
+    })
 }
 
-/// Finds a group of cells that satisfy the predicate `f`. The function receives
-/// the cell at the current position, and returns whether the cell is part of the
-/// group.
+/// Count the number of Moore neighbors of a point that pass the predicate $f.
+public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T| -> bool): u8 {
+    let p = $p;
+    let g = $g;
+    let (rows, cols) = (g.rows(), g.cols());
+    let mut count = 0u8;
+
+    p.moore($size).destroy!(|point| {
+        let (x1, y1) = point.to_values();
+        if (x1 >= rows || y1 >= cols) return;
+        if (!$f(&g[x1, y1])) return;
+
+        count = count + 1;
+    });
+
+    count
+}
+
+/// Finds a group of cells that satisfy the predicate `f` amongst the neighbors
+/// of the given point. The function `n` is used to get the neighbors of the
+/// current point. For Von Neumann neighborhood, use `von_neumann` as the
+/// function. For Moore neighborhood, use `moore` as the function.
+///
+/// Takes the `$n` function to get the neighbors of the current point. Expected
+/// to be used with the `von_neumann` and `moore` macros to get the neighbors.
+/// However, it is possible to pass in a custom callback with exotic
+/// configurations, eg. only return diagonal neighbors.
 ///
 /// ```move
-/// // finds a group of cells with value 1
-/// grid.find_group!(0, 2, |el| *el == 1);
+/// // finds a group of cells with value 1 in von Neumann neighborhood
+/// grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
+///
+/// // finds a group of cells with value 1 in Moore neighborhood
+/// grid.find_group!(0, 2, |p| p.moore(1), |el| *el == 1);
+///
+/// // custom neighborhood, only checks the neighbor to the right
+/// grid.find_group!(0, 2, |p| vector[point::new(p.x(), p.y() + 1)], |el| *el == 1);
 /// ```
 public macro fun find_group<$T>(
     $map: &Grid<$T>,
-    $x: u16,
-    $y: u16,
+    $p: Point,
+    $n: |&Point| -> vector<Point>,
     $f: |&$T| -> bool,
 ): vector<Point> {
-    let (x, y) = ($x, $y);
+    let p = $p;
     let map = $map;
-    let (width, height) = (map.width(), map.height());
+    let (rows, cols) = (map.rows(), map.cols());
     let mut group = vector[];
-    let mut visited = tabulate!(width, height, |_, _| false);
+    let mut visited = tabulate!(rows, cols, |_, _| false);
 
-    if (!$f(&map[x, y])) return group;
+    if (!$f(map.borrow_point(&p))) return group;
 
-    group.push_back(point::new(x, y));
-    *&mut visited[x, y] = true;
+    group.push_back(p);
+    *visited.borrow_point_mut(&p) = true;
 
-    let mut queue = vector[point::new(x, y)];
+    let mut queue = vector[p];
 
     while (queue.length() != 0) {
-        let point = queue.pop_back();
-        map.von_neumann!(point, 1).do!(|point| {
-            let (x, y) = point.into_values();
-
-            if (x >= width || y >= height || visited[x, y]) return;
-
-            if ($f(&map[x, y])) {
-                *&mut visited[x, y] = true;
-                group.push_back(point);
-                queue.push_back(point);
+        $n(&queue.pop_back()).destroy!(|p| {
+            if (!p.is_within_bounds(rows, cols) || *visited.borrow_point(&p)) return;
+            if ($f(map.borrow_point(&p))) {
+                *visited.borrow_point_mut(&p) = true;
+                group.push_back(p);
+                queue.push_back(p);
             }
         });
     };
@@ -162,90 +317,93 @@ public macro fun find_group<$T>(
     group
 }
 
-/// Use Wave Algorithm to find the shortest path between two points.
+/// Use Wave Algorithm to find the shortest path between two points. The function
+/// `n` returns the neighbors of the current point. The function `f` is used to
+/// check if the cell is passable - it takes two arguments: the current point
+/// and the next point.
 ///
 /// ```move
 /// // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
-/// grid.trace!(0, 0, 1, 4, 6, |prev_x, prev_y, next_x, next_y| cell == 0);
+/// grid.trace!(
+///     point::new(0, 0),
+///     point::new(1, 4),
+///     |(prev_x, prev_y), (next_x, next_y)| cell == 0,
+///     6,
+/// );
 /// ```
 ///
 /// TODO: consider using a A* algorithm for better performance.
 public macro fun trace<$T>(
     $map: &Grid<$T>,
-    $x0: u16,
-    $y0: u16,
-    $x1: u16,
-    $y1: u16,
+    $p0: Point,
+    $p1: Point,
+    $n: |&Point| -> vector<Point>,
+    $f: |(u16, u16), (u16, u16)| -> bool, // whether the cell is passable
     $limit: u16,
-    $f: |u16, u16, u16, u16| -> bool, // whether the cell is passable
 ): Option<vector<Point>> {
-    let (x0, y0) = ($x0, $y0);
-    let (x1, y1) = ($x1, $y1);
-    let limit = 1 + $limit;
-
-    // if the difference between A and B is greater than the limit, return none
-    if (range!(x0, y0, x1, y1) > limit) {
-        return option::none()
-    };
+    let p0 = $p0;
+    let p1 = $p1;
+    let limit = $limit + 1; // we start from 1, not 0.
 
     let map = $map;
-    let (width, height) = (map.width(), map.height());
+    let (rows, cols) = (map.rows(), map.cols());
 
-    // if the points are out of bounds, return none
-    if (x0 >= width || y0 >= height || x1 >= width || y1 >= height) {
+    // If the points are out of bounds, return none.
+    if (!p0.is_within_bounds(rows, cols) || !p1.is_within_bounds(rows, cols)) {
         return option::none()
     };
 
-    // surround the first element with 1s
+    // Surround the first element with 1s.
     let mut num = 1;
-    let mut queue = vector[point::new(x0, y0)];
-    let mut grid = tabulate!(width, height, |_, _| 0);
+    let mut queue = vector[p0];
+    let mut grid = tabulate!(rows, cols, |_, _| 0);
 
-    *&mut grid[x0, y0] = num;
+    *grid.borrow_point_mut(&p0) = num;
 
+    let mut found = false;
     'search: while (num < limit && !queue.is_empty()) {
         num = num + 1;
 
-        // flush the queue, marking all cells around the current number
-        queue.destroy!(|source| grid.von_neumann!(source, 1).destroy!(|point| {
-            let (x0, y0) = source.into_values();
-            let (x, y) = point.into_values();
-
-            // if we reached the destination, break the loop
-            if (x == x1 && y == y1) {
-                *&mut grid[x, y] = num;
+        // Flush the queue, marking all cells around the current number.
+        queue.destroy!(|from| $n(&from).destroy!(|to| {
+            // If we reached the destination, break the loop.
+            if (to == p1) {
+                *grid.borrow_point_mut(&to) = num;
+                found = true;
                 break 'search
             };
 
-            // if we can't pass through the cell, skip it
-            if (!$f(x0, y0, x, y)) return;
+            let (x0, y0) = from.into_values();
+            let (x1, y1) = to.into_values();
+            if (x1 >= rows || y1 >= cols) return;
 
-            // if the cell is empty, mark it with the current number
-            if (grid[x, y] == 0) {
-                *&mut grid[x, y] = num;
-                queue.push_back(point);
+            // If we can't pass through the cell, skip it.
+            if (!$f((x0, y0), (x1, y1))) return;
+
+            // If the cell is empty, mark it with the current number.
+            if (grid.borrow_point(&to) == 0) {
+                *grid.borrow_point_mut(&to) = num;
+                queue.push_back(to);
             }
         }));
     };
 
-    // we never reached the destination within the limit
-    if (grid[x1, y1] == 0) {
+    // If we never reached the destination within the limit, return none.
+    if (!found) {
         return option::none()
     };
 
-    // reconstruct the path by going from the destination to the source
-    let mut last_point = point::new(x1, y1);
-    let mut path = vector[last_point];
-    let mut num = grid[x1, y1];
+    // Reconstruct the path by going from the destination to the source.
+    let mut path = vector[p1];
+    let mut last_point = p1;
 
     'reconstruct: while (num > 1) {
         num = num - 1;
-        grid.von_neumann!(last_point, 1).destroy!(|point| {
-            let (x, y) = point.into_values();
-            if (x == x0 && y == y0) break 'reconstruct;
-            if (grid[x, y] == num) {
-                path.push_back(point::new(x, y));
-                last_point = point;
+        $n(&last_point).destroy!(|p| {
+            if (p == p0) break 'reconstruct;
+            if (grid.borrow_point(&p) == num) {
+                path.push_back(p);
+                last_point = p;
                 continue 'reconstruct
             }
         });
@@ -254,6 +412,8 @@ public macro fun trace<$T>(
     path.reverse();
     option::some(path)
 }
+
+// === Macros: Compatibility ===
 
 /// Print the grid to a string. Only works if `$T` has a `.to_string()` method.
 ///
@@ -269,13 +429,13 @@ public macro fun trace<$T>(
 public macro fun to_string<$T>($grid: &Grid<$T>): String {
     let grid = $grid;
     let mut result = b"".to_string();
-    let (width, height) = (grid.width(), grid.height());
+    let (rows, cols) = (grid.rows(), grid.cols());
 
-    // the layout is vertical, so we iterate over the height first
-    width.do!(|y| {
+    // the layout is vertical, so we iterate over the rows first
+    rows.do!(|x| {
         result.append_utf8(b"|");
-        height.do!(|x| {
-            result.append(grid[y, x].to_string());
+        cols.do!(|y| {
+            result.append(grid[x, y].to_string());
             result.append_utf8(b"|");
         });
         result.append_utf8(b"\n");
@@ -295,5 +455,7 @@ public macro fun from_bcs<$T>($bcs: &mut BCS, $f: |&mut BCS| -> $T): Grid<$T> {
 #[test_only]
 /// Test-only function to print the grid to the console.
 public macro fun debug<$T>($grid: &Grid<$T>) {
-    std::debug::print(&to_string!($grid));
+    let mut str = b"\n".to_string();
+    str.append(to_string!($grid));
+    std::debug::print(&str);
 }

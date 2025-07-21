@@ -2,6 +2,10 @@
 
 A simple name generator for creating names for characters in a cyberpunk setting. The generator uses a combination of first names, last names, suffixes, and randomization to create unique names.
 
+> **Warning**
+> This package is still in development and not yet published to MVR.
+> Release will be announced.
+
 ## Installation
 
 ### Using [MVR](https://docs.suins.io/move-registry)
