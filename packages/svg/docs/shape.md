@@ -46,8 +46,8 @@ Module: shapes
 
 
 <pre><code><b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation">animation</a>;
+<b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./coordinate.md#(svg=0x0)_coordinate">coordinate</a>;
 <b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./filter.md#(svg=0x0)_filter">filter</a>;
-<b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point">point</a>;
 <b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./print.md#(svg=0x0)_print">print</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
@@ -95,7 +95,7 @@ SVG shape struct, contains a shape type and a set of attributes.
  An optional animation to apply to the shape.
 </dd>
 <dt>
-<code>position: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point_Point">point::Point</a>&gt;</code>
+<code>position: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./coordinate.md#(svg=0x0)_coordinate_Coordinate">coordinate::Coordinate</a>&gt;</code>
 </dt>
 <dd>
  An optional position for the shape, changed in the <code><a href="./shape.md#(svg=0x0)_shape_move_to">move_to</a></code> function.
@@ -177,7 +177,7 @@ Variant <code>Ellipse</code>
 
 <dl>
 <dt>
-<code>0: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point_Point">point::Point</a></code>
+<code>0: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./coordinate.md#(svg=0x0)_coordinate_Coordinate">coordinate::Coordinate</a></code>
 </dt>
 <dd>
 </dd>
@@ -246,7 +246,7 @@ Variant <code>Line</code>
 
 <dl>
 <dt>
-<code>0: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point_Point">point::Point</a></code>
+<code>0: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./coordinate.md#(svg=0x0)_coordinate_Coordinate">coordinate::Coordinate</a></code>
 </dt>
 <dd>
 </dd>
@@ -255,7 +255,7 @@ Variant <code>Line</code>
 
 <dl>
 <dt>
-<code>1: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point_Point">point::Point</a></code>
+<code>1: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./coordinate.md#(svg=0x0)_coordinate_Coordinate">coordinate::Coordinate</a></code>
 </dt>
 <dd>
 </dd>
@@ -283,7 +283,7 @@ Variant <code>Polygon</code>
 
 <dl>
 <dt>
-<code>0: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point_Point">point::Point</a>&gt;</code>
+<code>0: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./coordinate.md#(svg=0x0)_coordinate_Coordinate">coordinate::Coordinate</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -297,7 +297,7 @@ Variant <code>Polyline</code>
 
 <dl>
 <dt>
-<code>0: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./point.md#(svg=0x0)_point_Point">point::Point</a>&gt;</code>
+<code>0: vector&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./coordinate.md#(svg=0x0)_coordinate_Coordinate">coordinate::Coordinate</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -585,7 +585,7 @@ ellipse.to_string();
 
 <pre><code><b>public</b> <b>fun</b> <a href="./shape.md#(svg=0x0)_shape_ellipse">ellipse</a>(cx: u16, cy: u16, rx: u16, ry: u16): <a href="./shape.md#(svg=0x0)_shape_Shape">Shape</a> {
     <a href="./shape.md#(svg=0x0)_shape_Shape">Shape</a> {
-        <a href="./shape.md#(svg=0x0)_shape">shape</a>: ShapeType::Ellipse(<a href="./point.md#(svg=0x0)_point_point">point::point</a>(cx, cy), rx, ry),
+        <a href="./shape.md#(svg=0x0)_shape">shape</a>: ShapeType::Ellipse(<a href="./coordinate.md#(svg=0x0)_coordinate_new">coordinate::new</a>(cx, cy), rx, ry),
         <a href="./shape.md#(svg=0x0)_shape_attributes">attributes</a>: vec_map::empty(),
         <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
         position: option::none(),
@@ -700,7 +700,7 @@ See https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
 
 <pre><code><b>public</b> <b>fun</b> <a href="./shape.md#(svg=0x0)_shape_line">line</a>(x1: u16, y1: u16, x2: u16, y2: u16): <a href="./shape.md#(svg=0x0)_shape_Shape">Shape</a> {
     <a href="./shape.md#(svg=0x0)_shape_Shape">Shape</a> {
-        <a href="./shape.md#(svg=0x0)_shape">shape</a>: ShapeType::Line(<a href="./point.md#(svg=0x0)_point_point">point::point</a>(x1, y1), <a href="./point.md#(svg=0x0)_point_point">point::point</a>(x2, y2)),
+        <a href="./shape.md#(svg=0x0)_shape">shape</a>: ShapeType::Line(<a href="./coordinate.md#(svg=0x0)_coordinate_new">coordinate::new</a>(x1, y1), <a href="./coordinate.md#(svg=0x0)_coordinate_new">coordinate::new</a>(x2, y2)),
         <a href="./shape.md#(svg=0x0)_shape_attributes">attributes</a>: vec_map::empty(),
         <a href="./animation.md#(svg=0x0)_animation">animation</a>: option::none(),
         position: option::none(),
@@ -1154,15 +1154,15 @@ Move a shape, add <code>x</code> and <code>y</code> to the attributes of the sha
     <b>let</b> shape_type = &<b>mut</b> <a href="./shape.md#(svg=0x0)_shape">shape</a>.<a href="./shape.md#(svg=0x0)_shape">shape</a>;
     match (shape_type) {
         ShapeType::Circle(_) =&gt; {
-            <b>let</b> (cx, cy) = <a href="./point.md#(svg=0x0)_point_point">point::point</a>(x, y).to_values();
+            <b>let</b> (cx, cy) = <a href="./coordinate.md#(svg=0x0)_coordinate_new">coordinate::new</a>(x, y).to_values();
             <a href="./shape.md#(svg=0x0)_shape">shape</a>.<a href="./shape.md#(svg=0x0)_shape_attributes">attributes</a>.insert(b"cx".<a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>(), cx.<a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>());
             <a href="./shape.md#(svg=0x0)_shape">shape</a>.<a href="./shape.md#(svg=0x0)_shape_attributes">attributes</a>.insert(b"cy".<a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>(), cy.<a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>());
         },
         ShapeType::Line(p0, p1) =&gt; {
             <b>let</b> (x1, y1) = p0.to_values();
             <b>let</b> (x2, y2) = p1.to_values();
-            *p0 = <a href="./point.md#(svg=0x0)_point_point">point::point</a>(x, y);
-            *p1 = <a href="./point.md#(svg=0x0)_point_point">point::point</a>(x + x2 - x1, y + y2 - y1);
+            *p0 = <a href="./coordinate.md#(svg=0x0)_coordinate_new">coordinate::new</a>(x, y);
+            *p1 = <a href="./coordinate.md#(svg=0x0)_coordinate_new">coordinate::new</a>(x + x2 - x1, y + y2 - y1);
         },
         ShapeType::Polygon(_points) =&gt; <b>abort</b> <a href="./shape.md#(svg=0x0)_shape_ENotImplemented">ENotImplemented</a>,
         ShapeType::Polyline(_points) =&gt; <b>abort</b> <a href="./shape.md#(svg=0x0)_shape_ENotImplemented">ENotImplemented</a>,
@@ -1175,7 +1175,7 @@ Move a shape, add <code>x</code> and <code>y</code> to the attributes of the sha
             <a href="./shape.md#(svg=0x0)_shape">shape</a>.<a href="./shape.md#(svg=0x0)_shape_attributes_mut">attributes_mut</a>().insert(b"transform".<a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>(), value);
         },
         _ =&gt; {
-            <a href="./shape.md#(svg=0x0)_shape">shape</a>.position = option::some(<a href="./point.md#(svg=0x0)_point_point">point::point</a>(x, y));
+            <a href="./shape.md#(svg=0x0)_shape">shape</a>.position = option::some(<a href="./coordinate.md#(svg=0x0)_coordinate_new">coordinate::new</a>(x, y));
         },
     };
     <a href="./shape.md#(svg=0x0)_shape">shape</a>
@@ -1246,8 +1246,8 @@ Print the shape as an <code>SVG</code> element.
 <pre><code><b>public</b> <b>fun</b> <a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>(base_shape: &<a href="./shape.md#(svg=0x0)_shape_Shape">Shape</a>): String {
     <b>let</b> <a href="./shape.md#(svg=0x0)_shape_Shape">Shape</a> { <a href="./shape.md#(svg=0x0)_shape">shape</a>, position, <a href="./shape.md#(svg=0x0)_shape_attributes">attributes</a>, <a href="./animation.md#(svg=0x0)_animation">animation</a> } = base_shape;
     <b>let</b> <b>mut</b> <a href="./shape.md#(svg=0x0)_shape_attributes">attributes</a> = *<a href="./shape.md#(svg=0x0)_shape_attributes">attributes</a>;
-    position.do_ref!(|<a href="./point.md#(svg=0x0)_point">point</a>| {
-        <b>let</b> (x, y) = <a href="./point.md#(svg=0x0)_point">point</a>.to_values();
+    position.do_ref!(|point| {
+        <b>let</b> (x, y) = point.to_values();
         <a href="./shape.md#(svg=0x0)_shape_attributes">attributes</a>.insert(b"x".<a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>(), x.<a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>());
         <a href="./shape.md#(svg=0x0)_shape_attributes">attributes</a>.insert(b"y".<a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>(), y.<a href="./shape.md#(svg=0x0)_shape_to_string">to_string</a>());
     });

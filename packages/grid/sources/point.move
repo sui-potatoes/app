@@ -81,7 +81,6 @@ public fun chebyshev_distance(p1: &Point, p2: &Point): u16 {
 /// point. If `size` is 2, the function will return the neighbors of the
 /// neighbors, and so on.
 ///
-/// Note: does not include the point itself!
 /// ```
 ///     0 1 2 3 4
 /// 0: | | |2| | |
@@ -90,6 +89,8 @@ public fun chebyshev_distance(p1: &Point, p2: &Point): u16 {
 /// 3: | |3|1|2| |
 /// 4: | | |2| | |
 /// ```
+///
+/// Note: does not include the point itself!
 public fun von_neumann(p: &Point, size: u16): vector<Point> {
     if (size == 0) return vector[];
 
@@ -164,7 +165,7 @@ public fun moore(p: &Point, size: u16): vector<Point> {
 // === Convenience & Compatibility ===
 
 /// Compare two points. To be used in sorting macros. Returns less or equal,
-/// based on the x coordinate (1st) and then the y coordinate (2nd).
+/// based on the `x` coordinate (1st) and then the `y` coordinate (2nd).
 public fun le(a: &Point, b: &Point): bool {
     (a.0 == b.0 && a.1 <= b.1) || a.0 < b.0
 }

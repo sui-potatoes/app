@@ -355,7 +355,7 @@ public fun solver_tile_to_string(t: &SolverTile): String {
 use fun neighbors as Grid.neighbors;
 
 fun neighbors<T>(grid: &Grid<T>, point: Point): vector<Point> {
-    grid.moore!(point, 1)
+    grid.moore(point, 1)
 }
 
 #[test_only]

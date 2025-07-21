@@ -18,38 +18,38 @@
 -  [Function `initial_transfer_limits`](#bridge_limiter_initial_transfer_limits)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/bridge/chain_ids.md#bridge_chain_ids">bridge::chain_ids</a>;
-<b>use</b> <a href="../../dependencies/bridge/treasury.md#bridge_treasury">bridge::treasury</a>;
-<b>use</b> <a href="../../dependencies/std/address.md#std_address">std::address</a>;
-<b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/bcs.md#std_bcs">std::bcs</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/string.md#std_string">std::string</a>;
-<b>use</b> <a href="../../dependencies/std/type_name.md#std_type_name">std::type_name</a>;
-<b>use</b> <a href="../../dependencies/std/u64.md#std_u64">std::u64</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
-<b>use</b> <a href="../../dependencies/sui/address.md#sui_address">sui::address</a>;
-<b>use</b> <a href="../../dependencies/sui/bag.md#sui_bag">sui::bag</a>;
-<b>use</b> <a href="../../dependencies/sui/balance.md#sui_balance">sui::balance</a>;
-<b>use</b> <a href="../../dependencies/sui/clock.md#sui_clock">sui::clock</a>;
-<b>use</b> <a href="../../dependencies/sui/coin.md#sui_coin">sui::coin</a>;
-<b>use</b> <a href="../../dependencies/sui/config.md#sui_config">sui::config</a>;
-<b>use</b> <a href="../../dependencies/sui/deny_list.md#sui_deny_list">sui::deny_list</a>;
-<b>use</b> <a href="../../dependencies/sui/dynamic_field.md#sui_dynamic_field">sui::dynamic_field</a>;
-<b>use</b> <a href="../../dependencies/sui/dynamic_object_field.md#sui_dynamic_object_field">sui::dynamic_object_field</a>;
-<b>use</b> <a href="../../dependencies/sui/event.md#sui_event">sui::event</a>;
-<b>use</b> <a href="../../dependencies/sui/hex.md#sui_hex">sui::hex</a>;
-<b>use</b> <a href="../../dependencies/sui/object.md#sui_object">sui::object</a>;
-<b>use</b> <a href="../../dependencies/sui/object_bag.md#sui_object_bag">sui::object_bag</a>;
-<b>use</b> <a href="../../dependencies/sui/package.md#sui_package">sui::package</a>;
-<b>use</b> <a href="../../dependencies/sui/party.md#sui_party">sui::party</a>;
-<b>use</b> <a href="../../dependencies/sui/table.md#sui_table">sui::table</a>;
-<b>use</b> <a href="../../dependencies/sui/transfer.md#sui_transfer">sui::transfer</a>;
-<b>use</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
-<b>use</b> <a href="../../dependencies/sui/types.md#sui_types">sui::types</a>;
-<b>use</b> <a href="../../dependencies/sui/url.md#sui_url">sui::url</a>;
-<b>use</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
-<b>use</b> <a href="../../dependencies/sui/vec_set.md#sui_vec_set">sui::vec_set</a>;
+<pre><code><b>use</b> <a href="../bridge/chain_ids.md#bridge_chain_ids">bridge::chain_ids</a>;
+<b>use</b> <a href="../bridge/treasury.md#bridge_treasury">bridge::treasury</a>;
+<b>use</b> <a href="../std/address.md#std_address">std::address</a>;
+<b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/bcs.md#std_bcs">std::bcs</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/string.md#std_string">std::string</a>;
+<b>use</b> <a href="../std/type_name.md#std_type_name">std::type_name</a>;
+<b>use</b> <a href="../std/u64.md#std_u64">std::u64</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
+<b>use</b> <a href="../sui/address.md#sui_address">sui::address</a>;
+<b>use</b> <a href="../sui/bag.md#sui_bag">sui::bag</a>;
+<b>use</b> <a href="../sui/balance.md#sui_balance">sui::balance</a>;
+<b>use</b> <a href="../sui/clock.md#sui_clock">sui::clock</a>;
+<b>use</b> <a href="../sui/coin.md#sui_coin">sui::coin</a>;
+<b>use</b> <a href="../sui/config.md#sui_config">sui::config</a>;
+<b>use</b> <a href="../sui/deny_list.md#sui_deny_list">sui::deny_list</a>;
+<b>use</b> <a href="../sui/dynamic_field.md#sui_dynamic_field">sui::dynamic_field</a>;
+<b>use</b> <a href="../sui/dynamic_object_field.md#sui_dynamic_object_field">sui::dynamic_object_field</a>;
+<b>use</b> <a href="../sui/event.md#sui_event">sui::event</a>;
+<b>use</b> <a href="../sui/hex.md#sui_hex">sui::hex</a>;
+<b>use</b> <a href="../sui/object.md#sui_object">sui::object</a>;
+<b>use</b> <a href="../sui/object_bag.md#sui_object_bag">sui::object_bag</a>;
+<b>use</b> <a href="../sui/package.md#sui_package">sui::package</a>;
+<b>use</b> <a href="../sui/party.md#sui_party">sui::party</a>;
+<b>use</b> <a href="../sui/table.md#sui_table">sui::table</a>;
+<b>use</b> <a href="../sui/transfer.md#sui_transfer">sui::transfer</a>;
+<b>use</b> <a href="../sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
+<b>use</b> <a href="../sui/types.md#sui_types">sui::types</a>;
+<b>use</b> <a href="../sui/url.md#sui_url">sui::url</a>;
+<b>use</b> <a href="../sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
+<b>use</b> <a href="../sui/vec_set.md#sui_vec_set">sui::vec_set</a>;
 </code></pre>
 
 
@@ -60,7 +60,7 @@
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a> <b>has</b> store
+<pre><code><b>public</b> <b>struct</b> <a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a> <b>has</b> store
 </code></pre>
 
 
@@ -71,12 +71,12 @@
 
 <dl>
 <dt>
-<code>transfer_limits: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../dependencies/bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, u64&gt;</code>
+<code>transfer_limits: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, u64&gt;</code>
 </dt>
 <dd>
 </dd>
 <dt>
-<code>transfer_records: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../dependencies/bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferRecord">bridge::limiter::TransferRecord</a>&gt;</code>
+<code>transfer_records: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, <a href="../bridge/limiter.md#bridge_limiter_TransferRecord">bridge::limiter::TransferRecord</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -91,7 +91,7 @@
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferRecord">TransferRecord</a> <b>has</b> store
+<pre><code><b>public</b> <b>struct</b> <a href="../bridge/limiter.md#bridge_limiter_TransferRecord">TransferRecord</a> <b>has</b> store
 </code></pre>
 
 
@@ -132,7 +132,7 @@
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_UpdateRouteLimitEvent">UpdateRouteLimitEvent</a> <b>has</b> <b>copy</b>, drop
+<pre><code><b>public</b> <b>struct</b> <a href="../bridge/limiter.md#bridge_limiter_UpdateRouteLimitEvent">UpdateRouteLimitEvent</a> <b>has</b> <b>copy</b>, drop
 </code></pre>
 
 
@@ -171,7 +171,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_ELimitNotFoundForRoute">ELimitNotFoundForRoute</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../bridge/limiter.md#bridge_limiter_ELimitNotFoundForRoute">ELimitNotFoundForRoute</a>: u64 = 0;
 </code></pre>
 
 
@@ -180,7 +180,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>: u64 = 18446744073709551615;
+<pre><code><b>const</b> <a href="../bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>: u64 = 18446744073709551615;
 </code></pre>
 
 
@@ -189,7 +189,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_USD_VALUE_MULTIPLIER">USD_VALUE_MULTIPLIER</a>: u64 = 100000000;
+<pre><code><b>const</b> <a href="../bridge/limiter.md#bridge_limiter_USD_VALUE_MULTIPLIER">USD_VALUE_MULTIPLIER</a>: u64 = 100000000;
 </code></pre>
 
 
@@ -200,7 +200,7 @@
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_get_route_limit">get_route_limit</a>(self: &<a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">bridge::limiter::TransferLimiter</a>, route: &<a href="../../dependencies/bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_get_route_limit">get_route_limit</a>(self: &<a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">bridge::limiter::TransferLimiter</a>, route: &<a href="../bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>): u64
 </code></pre>
 
 
@@ -209,7 +209,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_get_route_limit">get_route_limit</a>(self: &<a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a>, route: &BridgeRoute): u64 {
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_get_route_limit">get_route_limit</a>(self: &<a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a>, route: &BridgeRoute): u64 {
     self.transfer_limits[route]
 }
 </code></pre>
@@ -224,7 +224,7 @@
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_new">new</a>(): <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">bridge::limiter::TransferLimiter</a>
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_new">new</a>(): <a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">bridge::limiter::TransferLimiter</a>
 </code></pre>
 
 
@@ -233,10 +233,10 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_new">new</a>(): <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a> {
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_new">new</a>(): <a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a> {
     // hardcoded limit <b>for</b> bridge genesis
-    <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a> {
-        transfer_limits: <a href="../../dependencies/bridge/limiter.md#bridge_limiter_initial_transfer_limits">initial_transfer_limits</a>(),
+    <a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a> {
+        transfer_limits: <a href="../bridge/limiter.md#bridge_limiter_initial_transfer_limits">initial_transfer_limits</a>(),
         transfer_records: vec_map::empty(),
     }
 }
@@ -252,7 +252,7 @@
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_check_and_record_sending_transfer">check_and_record_sending_transfer</a>&lt;T&gt;(self: &<b>mut</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">bridge::limiter::TransferLimiter</a>, treasury: &<a href="../../dependencies/bridge/treasury.md#bridge_treasury_BridgeTreasury">bridge::treasury::BridgeTreasury</a>, clock: &<a href="../../dependencies/sui/clock.md#sui_clock_Clock">sui::clock::Clock</a>, route: <a href="../../dependencies/bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, amount: u64): bool
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_check_and_record_sending_transfer">check_and_record_sending_transfer</a>&lt;T&gt;(self: &<b>mut</b> <a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">bridge::limiter::TransferLimiter</a>, treasury: &<a href="../bridge/treasury.md#bridge_treasury_BridgeTreasury">bridge::treasury::BridgeTreasury</a>, clock: &<a href="../sui/clock.md#sui_clock_Clock">sui::clock::Clock</a>, route: <a href="../bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, amount: u64): bool
 </code></pre>
 
 
@@ -261,8 +261,8 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_check_and_record_sending_transfer">check_and_record_sending_transfer</a>&lt;T&gt;(
-    self: &<b>mut</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a>,
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_check_and_record_sending_transfer">check_and_record_sending_transfer</a>&lt;T&gt;(
+    self: &<b>mut</b> <a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a>,
     treasury: &BridgeTreasury,
     clock: &Clock,
     route: BridgeRoute,
@@ -274,7 +274,7 @@
             .transfer_records
             .insert(
                 route,
-                <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferRecord">TransferRecord</a> {
+                <a href="../bridge/limiter.md#bridge_limiter_TransferRecord">TransferRecord</a> {
                     hour_head: 0,
                     hour_tail: 0,
                     per_hour_amounts: vector[],
@@ -283,11 +283,11 @@
             )
     };
     <b>let</b> record = self.transfer_records.get_mut(&route);
-    <b>let</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a> = <a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>(clock);
-    record.<a href="../../dependencies/bridge/limiter.md#bridge_limiter_adjust_transfer_records">adjust_transfer_records</a>(<a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>);
+    <b>let</b> <a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a> = <a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>(clock);
+    record.<a href="../bridge/limiter.md#bridge_limiter_adjust_transfer_records">adjust_transfer_records</a>(<a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>);
     // Get limit <b>for</b> the route
     <b>let</b> route_limit = self.transfer_limits.try_get(&route);
-    <b>assert</b>!(route_limit.is_some(), <a href="../../dependencies/bridge/limiter.md#bridge_limiter_ELimitNotFoundForRoute">ELimitNotFoundForRoute</a>);
+    <b>assert</b>!(route_limit.is_some(), <a href="../bridge/limiter.md#bridge_limiter_ELimitNotFoundForRoute">ELimitNotFoundForRoute</a>);
     <b>let</b> route_limit = route_limit.destroy_some();
     <b>let</b> route_limit_adjusted = (route_limit <b>as</b> u128) * (treasury.decimal_multiplier&lt;T&gt;() <b>as</b> u128);
     // Compute notional amount
@@ -326,7 +326,7 @@
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_update_route_limit">update_route_limit</a>(self: &<b>mut</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">bridge::limiter::TransferLimiter</a>, route: &<a href="../../dependencies/bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, new_usd_limit: u64)
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_update_route_limit">update_route_limit</a>(self: &<b>mut</b> <a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">bridge::limiter::TransferLimiter</a>, route: &<a href="../bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, new_usd_limit: u64)
 </code></pre>
 
 
@@ -335,8 +335,8 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_update_route_limit">update_route_limit</a>(
-    self: &<b>mut</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a>,
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_update_route_limit">update_route_limit</a>(
+    self: &<b>mut</b> <a href="../bridge/limiter.md#bridge_limiter_TransferLimiter">TransferLimiter</a>,
     route: &BridgeRoute,
     new_usd_limit: u64,
 ) {
@@ -346,7 +346,7 @@
     } <b>else</b> {
         *&<b>mut</b> self.transfer_limits[route] = new_usd_limit;
     };
-    event::emit(<a href="../../dependencies/bridge/limiter.md#bridge_limiter_UpdateRouteLimitEvent">UpdateRouteLimitEvent</a> {
+    event::emit(<a href="../bridge/limiter.md#bridge_limiter_UpdateRouteLimitEvent">UpdateRouteLimitEvent</a> {
         sending_chain: *route.source(),
         receiving_chain,
         new_limit: new_usd_limit,
@@ -364,7 +364,7 @@
 
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>(clock: &<a href="../../dependencies/sui/clock.md#sui_clock_Clock">sui::clock::Clock</a>): u64
+<pre><code><b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>(clock: &<a href="../sui/clock.md#sui_clock_Clock">sui::clock::Clock</a>): u64
 </code></pre>
 
 
@@ -373,7 +373,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>(clock: &Clock): u64 {
+<pre><code><b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>(clock: &Clock): u64 {
     clock::timestamp_ms(clock) / 3600000
 }
 </code></pre>
@@ -388,7 +388,7 @@
 
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_adjust_transfer_records">adjust_transfer_records</a>(self: &<b>mut</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferRecord">bridge::limiter::TransferRecord</a>, <a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>: u64)
+<pre><code><b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_adjust_transfer_records">adjust_transfer_records</a>(self: &<b>mut</b> <a href="../bridge/limiter.md#bridge_limiter_TransferRecord">bridge::limiter::TransferRecord</a>, <a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>: u64)
 </code></pre>
 
 
@@ -397,11 +397,11 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_adjust_transfer_records">adjust_transfer_records</a>(self: &<b>mut</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_TransferRecord">TransferRecord</a>, <a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>: u64) {
-    <b>if</b> (self.hour_head == <a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>) {
+<pre><code><b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_adjust_transfer_records">adjust_transfer_records</a>(self: &<b>mut</b> <a href="../bridge/limiter.md#bridge_limiter_TransferRecord">TransferRecord</a>, <a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>: u64) {
+    <b>if</b> (self.hour_head == <a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>) {
         <b>return</b> // nothing to backfill
     };
-    <b>let</b> target_tail = <a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a> - 23;
+    <b>let</b> target_tail = <a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a> - 23;
     // If `hour_head` is even older than 24 hours ago, it means all items in
     // `per_hour_amounts` are to be evicted.
     <b>if</b> (self.hour_head &lt; target_tail) {
@@ -420,7 +420,7 @@
         }
     };
     // Backfill from hour_head to current hour
-    <b>while</b> (self.hour_head &lt; <a href="../../dependencies/bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>) {
+    <b>while</b> (self.hour_head &lt; <a href="../bridge/limiter.md#bridge_limiter_current_hour_since_epoch">current_hour_since_epoch</a>) {
         self.per_hour_amounts.push_back(0);
         self.hour_head = self.hour_head + 1;
     }
@@ -437,7 +437,7 @@
 
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_initial_transfer_limits">initial_transfer_limits</a>(): <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../dependencies/bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, u64&gt;
+<pre><code><b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_initial_transfer_limits">initial_transfer_limits</a>(): <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../bridge/chain_ids.md#bridge_chain_ids_BridgeRoute">bridge::chain_ids::BridgeRoute</a>, u64&gt;
 </code></pre>
 
 
@@ -446,29 +446,29 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/bridge/limiter.md#bridge_limiter_initial_transfer_limits">initial_transfer_limits</a>(): VecMap&lt;BridgeRoute, u64&gt; {
+<pre><code><b>fun</b> <a href="../bridge/limiter.md#bridge_limiter_initial_transfer_limits">initial_transfer_limits</a>(): VecMap&lt;BridgeRoute, u64&gt; {
     <b>let</b> <b>mut</b> transfer_limits = vec_map::empty();
     // 5M limit on Sui -&gt; Ethereum mainnet
     transfer_limits.insert(
         chain_ids::get_route(chain_ids::eth_mainnet(), chain_ids::sui_mainnet()),
-        5_000_000 * <a href="../../dependencies/bridge/limiter.md#bridge_limiter_USD_VALUE_MULTIPLIER">USD_VALUE_MULTIPLIER</a>,
+        5_000_000 * <a href="../bridge/limiter.md#bridge_limiter_USD_VALUE_MULTIPLIER">USD_VALUE_MULTIPLIER</a>,
     );
     // MAX limit <b>for</b> testnet and devnet
     transfer_limits.insert(
         chain_ids::get_route(chain_ids::eth_sepolia(), chain_ids::sui_testnet()),
-        <a href="../../dependencies/bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>,
+        <a href="../bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>,
     );
     transfer_limits.insert(
         chain_ids::get_route(chain_ids::eth_sepolia(), chain_ids::sui_custom()),
-        <a href="../../dependencies/bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>,
+        <a href="../bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>,
     );
     transfer_limits.insert(
         chain_ids::get_route(chain_ids::eth_custom(), chain_ids::sui_testnet()),
-        <a href="../../dependencies/bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>,
+        <a href="../bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>,
     );
     transfer_limits.insert(
         chain_ids::get_route(chain_ids::eth_custom(), chain_ids::sui_custom()),
-        <a href="../../dependencies/bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>,
+        <a href="../bridge/limiter.md#bridge_limiter_MAX_TRANSFER_LIMIT">MAX_TRANSFER_LIMIT</a>,
     );
     transfer_limits
 }

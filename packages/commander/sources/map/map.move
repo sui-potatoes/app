@@ -321,7 +321,7 @@ public fun perform_grenade(
 
     // update each tile: Cover -> Empty
     let mut history = vector[history::new_grenade(x1, y1, radius)];
-    let mut points = map.grid.von_neumann!(point::new(x1, y1), radius);
+    let mut points = map.grid.von_neumann(point::new(x1, y1), radius);
 
     points.push_back(point::new(x1, y1));
     points.do!(|p| {

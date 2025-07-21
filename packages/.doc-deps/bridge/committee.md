@@ -22,54 +22,54 @@
 -  [Function `check_uniqueness_bridge_keys`](#bridge_committee_check_uniqueness_bridge_keys)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/bridge/chain_ids.md#bridge_chain_ids">bridge::chain_ids</a>;
-<b>use</b> <a href="../../dependencies/bridge/crypto.md#bridge_crypto">bridge::crypto</a>;
-<b>use</b> <a href="../../dependencies/bridge/message.md#bridge_message">bridge::message</a>;
-<b>use</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types">bridge::message_types</a>;
-<b>use</b> <a href="../../dependencies/std/address.md#std_address">std::address</a>;
-<b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/bcs.md#std_bcs">std::bcs</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/string.md#std_string">std::string</a>;
-<b>use</b> <a href="../../dependencies/std/type_name.md#std_type_name">std::type_name</a>;
-<b>use</b> <a href="../../dependencies/std/u64.md#std_u64">std::u64</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
-<b>use</b> <a href="../../dependencies/sui/address.md#sui_address">sui::address</a>;
-<b>use</b> <a href="../../dependencies/sui/bag.md#sui_bag">sui::bag</a>;
-<b>use</b> <a href="../../dependencies/sui/balance.md#sui_balance">sui::balance</a>;
-<b>use</b> <a href="../../dependencies/sui/bcs.md#sui_bcs">sui::bcs</a>;
-<b>use</b> <a href="../../dependencies/sui/coin.md#sui_coin">sui::coin</a>;
-<b>use</b> <a href="../../dependencies/sui/config.md#sui_config">sui::config</a>;
-<b>use</b> <a href="../../dependencies/sui/deny_list.md#sui_deny_list">sui::deny_list</a>;
-<b>use</b> <a href="../../dependencies/sui/dynamic_field.md#sui_dynamic_field">sui::dynamic_field</a>;
-<b>use</b> <a href="../../dependencies/sui/dynamic_object_field.md#sui_dynamic_object_field">sui::dynamic_object_field</a>;
-<b>use</b> <a href="../../dependencies/sui/ecdsa_k1.md#sui_ecdsa_k1">sui::ecdsa_k1</a>;
-<b>use</b> <a href="../../dependencies/sui/event.md#sui_event">sui::event</a>;
-<b>use</b> <a href="../../dependencies/sui/hash.md#sui_hash">sui::hash</a>;
-<b>use</b> <a href="../../dependencies/sui/hex.md#sui_hex">sui::hex</a>;
-<b>use</b> <a href="../../dependencies/sui/object.md#sui_object">sui::object</a>;
-<b>use</b> <a href="../../dependencies/sui/party.md#sui_party">sui::party</a>;
-<b>use</b> <a href="../../dependencies/sui/priority_queue.md#sui_priority_queue">sui::priority_queue</a>;
-<b>use</b> <a href="../../dependencies/sui/sui.md#sui_sui">sui::sui</a>;
-<b>use</b> <a href="../../dependencies/sui/table.md#sui_table">sui::table</a>;
-<b>use</b> <a href="../../dependencies/sui/table_vec.md#sui_table_vec">sui::table_vec</a>;
-<b>use</b> <a href="../../dependencies/sui/transfer.md#sui_transfer">sui::transfer</a>;
-<b>use</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
-<b>use</b> <a href="../../dependencies/sui/types.md#sui_types">sui::types</a>;
-<b>use</b> <a href="../../dependencies/sui/url.md#sui_url">sui::url</a>;
-<b>use</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
-<b>use</b> <a href="../../dependencies/sui/vec_set.md#sui_vec_set">sui::vec_set</a>;
-<b>use</b> <a href="../../dependencies/sui/versioned.md#sui_versioned">sui::versioned</a>;
-<b>use</b> <a href="../../dependencies/sui_system/stake_subsidy.md#sui_system_stake_subsidy">sui_system::stake_subsidy</a>;
-<b>use</b> <a href="../../dependencies/sui_system/staking_pool.md#sui_system_staking_pool">sui_system::staking_pool</a>;
-<b>use</b> <a href="../../dependencies/sui_system/storage_fund.md#sui_system_storage_fund">sui_system::storage_fund</a>;
-<b>use</b> <a href="../../dependencies/sui_system/sui_system.md#sui_system_sui_system">sui_system::sui_system</a>;
-<b>use</b> <a href="../../dependencies/sui_system/sui_system_state_inner.md#sui_system_sui_system_state_inner">sui_system::sui_system_state_inner</a>;
-<b>use</b> <a href="../../dependencies/sui_system/validator.md#sui_system_validator">sui_system::validator</a>;
-<b>use</b> <a href="../../dependencies/sui_system/validator_cap.md#sui_system_validator_cap">sui_system::validator_cap</a>;
-<b>use</b> <a href="../../dependencies/sui_system/validator_set.md#sui_system_validator_set">sui_system::validator_set</a>;
-<b>use</b> <a href="../../dependencies/sui_system/validator_wrapper.md#sui_system_validator_wrapper">sui_system::validator_wrapper</a>;
-<b>use</b> <a href="../../dependencies/sui_system/voting_power.md#sui_system_voting_power">sui_system::voting_power</a>;
+<pre><code><b>use</b> <a href="../bridge/chain_ids.md#bridge_chain_ids">bridge::chain_ids</a>;
+<b>use</b> <a href="../bridge/crypto.md#bridge_crypto">bridge::crypto</a>;
+<b>use</b> <a href="../bridge/message.md#bridge_message">bridge::message</a>;
+<b>use</b> <a href="../bridge/message_types.md#bridge_message_types">bridge::message_types</a>;
+<b>use</b> <a href="../std/address.md#std_address">std::address</a>;
+<b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/bcs.md#std_bcs">std::bcs</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/string.md#std_string">std::string</a>;
+<b>use</b> <a href="../std/type_name.md#std_type_name">std::type_name</a>;
+<b>use</b> <a href="../std/u64.md#std_u64">std::u64</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
+<b>use</b> <a href="../sui/address.md#sui_address">sui::address</a>;
+<b>use</b> <a href="../sui/bag.md#sui_bag">sui::bag</a>;
+<b>use</b> <a href="../sui/balance.md#sui_balance">sui::balance</a>;
+<b>use</b> <a href="../sui/bcs.md#sui_bcs">sui::bcs</a>;
+<b>use</b> <a href="../sui/coin.md#sui_coin">sui::coin</a>;
+<b>use</b> <a href="../sui/config.md#sui_config">sui::config</a>;
+<b>use</b> <a href="../sui/deny_list.md#sui_deny_list">sui::deny_list</a>;
+<b>use</b> <a href="../sui/dynamic_field.md#sui_dynamic_field">sui::dynamic_field</a>;
+<b>use</b> <a href="../sui/dynamic_object_field.md#sui_dynamic_object_field">sui::dynamic_object_field</a>;
+<b>use</b> <a href="../sui/ecdsa_k1.md#sui_ecdsa_k1">sui::ecdsa_k1</a>;
+<b>use</b> <a href="../sui/event.md#sui_event">sui::event</a>;
+<b>use</b> <a href="../sui/hash.md#sui_hash">sui::hash</a>;
+<b>use</b> <a href="../sui/hex.md#sui_hex">sui::hex</a>;
+<b>use</b> <a href="../sui/object.md#sui_object">sui::object</a>;
+<b>use</b> <a href="../sui/party.md#sui_party">sui::party</a>;
+<b>use</b> <a href="../sui/priority_queue.md#sui_priority_queue">sui::priority_queue</a>;
+<b>use</b> <a href="../sui/sui.md#sui_sui">sui::sui</a>;
+<b>use</b> <a href="../sui/table.md#sui_table">sui::table</a>;
+<b>use</b> <a href="../sui/table_vec.md#sui_table_vec">sui::table_vec</a>;
+<b>use</b> <a href="../sui/transfer.md#sui_transfer">sui::transfer</a>;
+<b>use</b> <a href="../sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
+<b>use</b> <a href="../sui/types.md#sui_types">sui::types</a>;
+<b>use</b> <a href="../sui/url.md#sui_url">sui::url</a>;
+<b>use</b> <a href="../sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
+<b>use</b> <a href="../sui/vec_set.md#sui_vec_set">sui::vec_set</a>;
+<b>use</b> <a href="../sui/versioned.md#sui_versioned">sui::versioned</a>;
+<b>use</b> <a href="../sui_system/stake_subsidy.md#sui_system_stake_subsidy">sui_system::stake_subsidy</a>;
+<b>use</b> <a href="../sui_system/staking_pool.md#sui_system_staking_pool">sui_system::staking_pool</a>;
+<b>use</b> <a href="../sui_system/storage_fund.md#sui_system_storage_fund">sui_system::storage_fund</a>;
+<b>use</b> <a href="../sui_system/sui_system.md#sui_system_sui_system">sui_system::sui_system</a>;
+<b>use</b> <a href="../sui_system/sui_system_state_inner.md#sui_system_sui_system_state_inner">sui_system::sui_system_state_inner</a>;
+<b>use</b> <a href="../sui_system/validator.md#sui_system_validator">sui_system::validator</a>;
+<b>use</b> <a href="../sui_system/validator_cap.md#sui_system_validator_cap">sui_system::validator_cap</a>;
+<b>use</b> <a href="../sui_system/validator_set.md#sui_system_validator_set">sui_system::validator_set</a>;
+<b>use</b> <a href="../sui_system/validator_wrapper.md#sui_system_validator_wrapper">sui_system::validator_wrapper</a>;
+<b>use</b> <a href="../sui_system/voting_power.md#sui_system_voting_power">sui_system::voting_power</a>;
 </code></pre>
 
 
@@ -80,7 +80,7 @@
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BlocklistValidatorEvent">BlocklistValidatorEvent</a> <b>has</b> <b>copy</b>, drop
+<pre><code><b>public</b> <b>struct</b> <a href="../bridge/committee.md#bridge_committee_BlocklistValidatorEvent">BlocklistValidatorEvent</a> <b>has</b> <b>copy</b>, drop
 </code></pre>
 
 
@@ -111,7 +111,7 @@
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a> <b>has</b> store
+<pre><code><b>public</b> <b>struct</b> <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a> <b>has</b> store
 </code></pre>
 
 
@@ -122,12 +122,12 @@
 
 <dl>
 <dt>
-<code>members: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;vector&lt;u8&gt;, <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMember">bridge::committee::CommitteeMember</a>&gt;</code>
+<code>members: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;vector&lt;u8&gt;, <a href="../bridge/committee.md#bridge_committee_CommitteeMember">bridge::committee::CommitteeMember</a>&gt;</code>
 </dt>
 <dd>
 </dd>
 <dt>
-<code>member_registrations: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<b>address</b>, <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMemberRegistration">bridge::committee::CommitteeMemberRegistration</a>&gt;</code>
+<code>member_registrations: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<b>address</b>, <a href="../bridge/committee.md#bridge_committee_CommitteeMemberRegistration">bridge::committee::CommitteeMemberRegistration</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -147,7 +147,7 @@
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeUpdateEvent">CommitteeUpdateEvent</a> <b>has</b> <b>copy</b>, drop
+<pre><code><b>public</b> <b>struct</b> <a href="../bridge/committee.md#bridge_committee_CommitteeUpdateEvent">CommitteeUpdateEvent</a> <b>has</b> <b>copy</b>, drop
 </code></pre>
 
 
@@ -158,7 +158,7 @@
 
 <dl>
 <dt>
-<code>members: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;vector&lt;u8&gt;, <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMember">bridge::committee::CommitteeMember</a>&gt;</code>
+<code>members: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;vector&lt;u8&gt;, <a href="../bridge/committee.md#bridge_committee_CommitteeMember">bridge::committee::CommitteeMember</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -178,7 +178,7 @@
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMemberUrlUpdateEvent">CommitteeMemberUrlUpdateEvent</a> <b>has</b> <b>copy</b>, drop
+<pre><code><b>public</b> <b>struct</b> <a href="../bridge/committee.md#bridge_committee_CommitteeMemberUrlUpdateEvent">CommitteeMemberUrlUpdateEvent</a> <b>has</b> <b>copy</b>, drop
 </code></pre>
 
 
@@ -209,7 +209,7 @@
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMember">CommitteeMember</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="../bridge/committee.md#bridge_committee_CommitteeMember">CommitteeMember</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -261,7 +261,7 @@
 
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMemberRegistration">CommitteeMemberRegistration</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="../bridge/committee.md#bridge_committee_CommitteeMemberRegistration">CommitteeMemberRegistration</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -304,7 +304,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_ESignatureBelowThreshold">ESignatureBelowThreshold</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_ESignatureBelowThreshold">ESignatureBelowThreshold</a>: u64 = 0;
 </code></pre>
 
 
@@ -313,7 +313,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_EDuplicatedSignature">EDuplicatedSignature</a>: u64 = 1;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_EDuplicatedSignature">EDuplicatedSignature</a>: u64 = 1;
 </code></pre>
 
 
@@ -322,7 +322,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_EInvalidSignature">EInvalidSignature</a>: u64 = 2;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_EInvalidSignature">EInvalidSignature</a>: u64 = 2;
 </code></pre>
 
 
@@ -331,7 +331,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_ENotSystemAddress">ENotSystemAddress</a>: u64 = 3;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_ENotSystemAddress">ENotSystemAddress</a>: u64 = 3;
 </code></pre>
 
 
@@ -340,7 +340,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_EValidatorBlocklistContainsUnknownKey">EValidatorBlocklistContainsUnknownKey</a>: u64 = 4;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_EValidatorBlocklistContainsUnknownKey">EValidatorBlocklistContainsUnknownKey</a>: u64 = 4;
 </code></pre>
 
 
@@ -349,7 +349,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_ESenderNotActiveValidator">ESenderNotActiveValidator</a>: u64 = 5;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_ESenderNotActiveValidator">ESenderNotActiveValidator</a>: u64 = 5;
 </code></pre>
 
 
@@ -358,7 +358,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_EInvalidPubkeyLength">EInvalidPubkeyLength</a>: u64 = 6;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_EInvalidPubkeyLength">EInvalidPubkeyLength</a>: u64 = 6;
 </code></pre>
 
 
@@ -367,7 +367,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_ECommitteeAlreadyInitiated">ECommitteeAlreadyInitiated</a>: u64 = 7;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_ECommitteeAlreadyInitiated">ECommitteeAlreadyInitiated</a>: u64 = 7;
 </code></pre>
 
 
@@ -376,7 +376,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_EDuplicatePubkey">EDuplicatePubkey</a>: u64 = 8;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_EDuplicatePubkey">EDuplicatePubkey</a>: u64 = 8;
 </code></pre>
 
 
@@ -385,7 +385,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_ESenderIsNotInBridgeCommittee">ESenderIsNotInBridgeCommittee</a>: u64 = 9;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_ESenderIsNotInBridgeCommittee">ESenderIsNotInBridgeCommittee</a>: u64 = 9;
 </code></pre>
 
 
@@ -394,7 +394,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_SUI_MESSAGE_PREFIX">SUI_MESSAGE_PREFIX</a>: vector&lt;u8&gt; = vector[83, 85, 73, 95, 66, 82, 73, 68, 71, 69, 95, 77, 69, 83, 83, 65, 71, 69];
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_SUI_MESSAGE_PREFIX">SUI_MESSAGE_PREFIX</a>: vector&lt;u8&gt; = vector[83, 85, 73, 95, 66, 82, 73, 68, 71, 69, 95, 77, 69, 83, 83, 65, 71, 69];
 </code></pre>
 
 
@@ -403,7 +403,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_ECDSA_COMPRESSED_PUBKEY_LENGTH">ECDSA_COMPRESSED_PUBKEY_LENGTH</a>: u64 = 33;
+<pre><code><b>const</b> <a href="../bridge/committee.md#bridge_committee_ECDSA_COMPRESSED_PUBKEY_LENGTH">ECDSA_COMPRESSED_PUBKEY_LENGTH</a>: u64 = 33;
 </code></pre>
 
 
@@ -414,7 +414,7 @@
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_verify_signatures">verify_signatures</a>(self: &<a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, message: <a href="../../dependencies/bridge/message.md#bridge_message_BridgeMessage">bridge::message::BridgeMessage</a>, signatures: vector&lt;vector&lt;u8&gt;&gt;)
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/committee.md#bridge_committee_verify_signatures">verify_signatures</a>(self: &<a href="../bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, message: <a href="../bridge/message.md#bridge_message_BridgeMessage">bridge::message::BridgeMessage</a>, signatures: vector&lt;vector&lt;u8&gt;&gt;)
 </code></pre>
 
 
@@ -423,8 +423,8 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_verify_signatures">verify_signatures</a>(
-    self: &<a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/committee.md#bridge_committee_verify_signatures">verify_signatures</a>(
+    self: &<a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
     message: BridgeMessage,
     signatures: vector&lt;vector&lt;u8&gt;&gt;,
 ) {
@@ -432,15 +432,15 @@
     <b>let</b> <b>mut</b> seen_pub_key = vec_set::empty&lt;vector&lt;u8&gt;&gt;();
     <b>let</b> required_voting_power = message.required_voting_power();
     // add prefix to the message bytes
-    <b>let</b> <b>mut</b> message_bytes = <a href="../../dependencies/bridge/committee.md#bridge_committee_SUI_MESSAGE_PREFIX">SUI_MESSAGE_PREFIX</a>;
+    <b>let</b> <b>mut</b> message_bytes = <a href="../bridge/committee.md#bridge_committee_SUI_MESSAGE_PREFIX">SUI_MESSAGE_PREFIX</a>;
     message_bytes.append(message.serialize_message());
     <b>let</b> <b>mut</b> threshold = 0;
     <b>while</b> (i &lt; signature_counts) {
         <b>let</b> pubkey = ecdsa_k1::secp256k1_ecrecover(&signatures[i], &message_bytes, 0);
         // check duplicate
         // and make sure pub key is part of the committee
-        <b>assert</b>!(!seen_pub_key.contains(&pubkey), <a href="../../dependencies/bridge/committee.md#bridge_committee_EDuplicatedSignature">EDuplicatedSignature</a>);
-        <b>assert</b>!(self.members.contains(&pubkey), <a href="../../dependencies/bridge/committee.md#bridge_committee_EInvalidSignature">EInvalidSignature</a>);
+        <b>assert</b>!(!seen_pub_key.contains(&pubkey), <a href="../bridge/committee.md#bridge_committee_EDuplicatedSignature">EDuplicatedSignature</a>);
+        <b>assert</b>!(self.members.contains(&pubkey), <a href="../bridge/committee.md#bridge_committee_EInvalidSignature">EInvalidSignature</a>);
         // get committee signature weight and check pubkey is part of the committee
         <b>let</b> member = &self.members[&pubkey];
         <b>if</b> (!member.blocklisted) {
@@ -449,7 +449,7 @@
         seen_pub_key.insert(pubkey);
         i = i + 1;
     };
-    <b>assert</b>!(threshold &gt;= required_voting_power, <a href="../../dependencies/bridge/committee.md#bridge_committee_ESignatureBelowThreshold">ESignatureBelowThreshold</a>);
+    <b>assert</b>!(threshold &gt;= required_voting_power, <a href="../bridge/committee.md#bridge_committee_ESignatureBelowThreshold">ESignatureBelowThreshold</a>);
 }
 </code></pre>
 
@@ -463,7 +463,7 @@
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_create">create</a>(ctx: &<a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_create">create</a>(ctx: &<a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>
 </code></pre>
 
 
@@ -472,9 +472,9 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_create">create</a>(ctx: &TxContext): <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a> {
-    <b>assert</b>!(tx_context::sender(ctx) == @0x0, <a href="../../dependencies/bridge/committee.md#bridge_committee_ENotSystemAddress">ENotSystemAddress</a>);
-    <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a> {
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_create">create</a>(ctx: &TxContext): <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a> {
+    <b>assert</b>!(tx_context::sender(ctx) == @0x0, <a href="../bridge/committee.md#bridge_committee_ENotSystemAddress">ENotSystemAddress</a>);
+    <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a> {
         members: vec_map::empty(),
         member_registrations: vec_map::empty(),
         last_committee_update_epoch: 0,
@@ -492,7 +492,7 @@
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_register">register</a>(self: &<b>mut</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, system_state: &<b>mut</b> <a href="../../dependencies/sui_system/sui_system.md#sui_system_sui_system_SuiSystemState">sui_system::sui_system::SuiSystemState</a>, bridge_pubkey_bytes: vector&lt;u8&gt;, http_rest_url: vector&lt;u8&gt;, ctx: &<a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_register">register</a>(self: &<b>mut</b> <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, system_state: &<b>mut</b> <a href="../sui_system/sui_system.md#sui_system_sui_system_SuiSystemState">sui_system::sui_system::SuiSystemState</a>, bridge_pubkey_bytes: vector&lt;u8&gt;, http_rest_url: vector&lt;u8&gt;, ctx: &<a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
 </code></pre>
 
 
@@ -501,21 +501,21 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_register">register</a>(
-    self: &<b>mut</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_register">register</a>(
+    self: &<b>mut</b> <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
     system_state: &<b>mut</b> SuiSystemState,
     bridge_pubkey_bytes: vector&lt;u8&gt;,
     http_rest_url: vector&lt;u8&gt;,
     ctx: &TxContext,
 ) {
     // We disallow registration after committee initiated in v1
-    <b>assert</b>!(self.members.is_empty(), <a href="../../dependencies/bridge/committee.md#bridge_committee_ECommitteeAlreadyInitiated">ECommitteeAlreadyInitiated</a>);
+    <b>assert</b>!(self.members.is_empty(), <a href="../bridge/committee.md#bridge_committee_ECommitteeAlreadyInitiated">ECommitteeAlreadyInitiated</a>);
     // Ensure pubkey is valid
-    <b>assert</b>!(bridge_pubkey_bytes.length() == <a href="../../dependencies/bridge/committee.md#bridge_committee_ECDSA_COMPRESSED_PUBKEY_LENGTH">ECDSA_COMPRESSED_PUBKEY_LENGTH</a>, <a href="../../dependencies/bridge/committee.md#bridge_committee_EInvalidPubkeyLength">EInvalidPubkeyLength</a>);
+    <b>assert</b>!(bridge_pubkey_bytes.length() == <a href="../bridge/committee.md#bridge_committee_ECDSA_COMPRESSED_PUBKEY_LENGTH">ECDSA_COMPRESSED_PUBKEY_LENGTH</a>, <a href="../bridge/committee.md#bridge_committee_EInvalidPubkeyLength">EInvalidPubkeyLength</a>);
     // sender must be the same sender that created the validator object, this is to prevent DDoS from non-validator actor.
     <b>let</b> sender = ctx.sender();
     <b>let</b> validators = system_state.active_validator_addresses();
-    <b>assert</b>!(validators.contains(&sender), <a href="../../dependencies/bridge/committee.md#bridge_committee_ESenderNotActiveValidator">ESenderNotActiveValidator</a>);
+    <b>assert</b>!(validators.contains(&sender), <a href="../bridge/committee.md#bridge_committee_ESenderNotActiveValidator">ESenderNotActiveValidator</a>);
     // Sender is active validator, record the registration
     // In case validator need to update the info
     <b>let</b> registration = <b>if</b> (self.member_registrations.contains(&sender)) {
@@ -524,7 +524,7 @@
         registration.bridge_pubkey_bytes = bridge_pubkey_bytes;
         *registration
     } <b>else</b> {
-        <b>let</b> registration = <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMemberRegistration">CommitteeMemberRegistration</a> {
+        <b>let</b> registration = <a href="../bridge/committee.md#bridge_committee_CommitteeMemberRegistration">CommitteeMemberRegistration</a> {
             sui_address: sender,
             bridge_pubkey_bytes,
             http_rest_url,
@@ -533,10 +533,10 @@
         registration
     };
     // check uniqueness of the bridge pubkey.
-    // `<a href="../../dependencies/bridge/committee.md#bridge_committee_try_create_next_committee">try_create_next_committee</a>` will <b>abort</b> <b>if</b> bridge_pubkey_bytes are not unique and
+    // `<a href="../bridge/committee.md#bridge_committee_try_create_next_committee">try_create_next_committee</a>` will <b>abort</b> <b>if</b> bridge_pubkey_bytes are not unique and
     // that will fail the end of epoch transaction (possibly "forever", well, we
     // need to deploy proper validator changes to stop end of epoch from failing).
-    <a href="../../dependencies/bridge/committee.md#bridge_committee_check_uniqueness_bridge_keys">check_uniqueness_bridge_keys</a>(self, bridge_pubkey_bytes);
+    <a href="../bridge/committee.md#bridge_committee_check_uniqueness_bridge_keys">check_uniqueness_bridge_keys</a>(self, bridge_pubkey_bytes);
     emit(registration)
 }
 </code></pre>
@@ -551,7 +551,7 @@
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_try_create_next_committee">try_create_next_committee</a>(self: &<b>mut</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, active_validator_voting_power: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<b>address</b>, u64&gt;, min_stake_participation_percentage: u64, ctx: &<a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_try_create_next_committee">try_create_next_committee</a>(self: &<b>mut</b> <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, active_validator_voting_power: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<b>address</b>, u64&gt;, min_stake_participation_percentage: u64, ctx: &<a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
 </code></pre>
 
 
@@ -560,8 +560,8 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_try_create_next_committee">try_create_next_committee</a>(
-    self: &<b>mut</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_try_create_next_committee">try_create_next_committee</a>(
+    self: &<b>mut</b> <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
     active_validator_voting_power: VecMap&lt;<b>address</b>, u64&gt;,
     min_stake_participation_percentage: u64,
     ctx: &TxContext,
@@ -578,7 +578,7 @@
         <b>if</b> (voting_power.is_some()) {
             <b>let</b> voting_power = voting_power.destroy_some();
             stake_participation_percentage = stake_participation_percentage + voting_power;
-            <b>let</b> member = <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMember">CommitteeMember</a> {
+            <b>let</b> member = <a href="../bridge/committee.md#bridge_committee_CommitteeMember">CommitteeMember</a> {
                 sui_address: registration.sui_address,
                 bridge_pubkey_bytes: registration.bridge_pubkey_bytes,
                 voting_power: (voting_power <b>as</b> u64),
@@ -596,7 +596,7 @@
         // Store new committee info
         self.members = new_members;
         self.last_committee_update_epoch = ctx.epoch();
-        emit(<a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeUpdateEvent">CommitteeUpdateEvent</a> {
+        emit(<a href="../bridge/committee.md#bridge_committee_CommitteeUpdateEvent">CommitteeUpdateEvent</a> {
             members: new_members,
             stake_participation_percentage,
         })
@@ -614,7 +614,7 @@
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_execute_blocklist">execute_blocklist</a>(self: &<b>mut</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, blocklist: <a href="../../dependencies/bridge/message.md#bridge_message_Blocklist">bridge::message::Blocklist</a>)
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_execute_blocklist">execute_blocklist</a>(self: &<b>mut</b> <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, blocklist: <a href="../bridge/message.md#bridge_message_Blocklist">bridge::message::Blocklist</a>)
 </code></pre>
 
 
@@ -623,7 +623,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_execute_blocklist">execute_blocklist</a>(self: &<b>mut</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>, blocklist: Blocklist) {
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_execute_blocklist">execute_blocklist</a>(self: &<b>mut</b> <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>, blocklist: Blocklist) {
     <b>let</b> blocklisted = blocklist.blocklist_type() != 1;
     <b>let</b> eth_addresses = blocklist.blocklist_validator_addresses();
     <b>let</b> list_len = eth_addresses.length();
@@ -645,10 +645,10 @@
             };
             member_idx = member_idx + 1;
         };
-        <b>assert</b>!(found, <a href="../../dependencies/bridge/committee.md#bridge_committee_EValidatorBlocklistContainsUnknownKey">EValidatorBlocklistContainsUnknownKey</a>);
+        <b>assert</b>!(found, <a href="../bridge/committee.md#bridge_committee_EValidatorBlocklistContainsUnknownKey">EValidatorBlocklistContainsUnknownKey</a>);
         list_idx = list_idx + 1;
     };
-    emit(<a href="../../dependencies/bridge/committee.md#bridge_committee_BlocklistValidatorEvent">BlocklistValidatorEvent</a> {
+    emit(<a href="../bridge/committee.md#bridge_committee_BlocklistValidatorEvent">BlocklistValidatorEvent</a> {
         blocklisted,
         public_keys: pub_keys,
     })
@@ -665,7 +665,7 @@
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_committee_members">committee_members</a>(self: &<a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>): &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;vector&lt;u8&gt;, <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMember">bridge::committee::CommitteeMember</a>&gt;
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_committee_members">committee_members</a>(self: &<a href="../bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>): &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;vector&lt;u8&gt;, <a href="../bridge/committee.md#bridge_committee_CommitteeMember">bridge::committee::CommitteeMember</a>&gt;
 </code></pre>
 
 
@@ -674,9 +674,9 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_committee_members">committee_members</a>(
-    self: &<a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
-): &VecMap&lt;vector&lt;u8&gt;, <a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMember">CommitteeMember</a>&gt; {
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_committee_members">committee_members</a>(
+    self: &<a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
+): &VecMap&lt;vector&lt;u8&gt;, <a href="../bridge/committee.md#bridge_committee_CommitteeMember">CommitteeMember</a>&gt; {
     &self.members
 }
 </code></pre>
@@ -691,7 +691,7 @@
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_update_node_url">update_node_url</a>(self: &<b>mut</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, new_url: vector&lt;u8&gt;, ctx: &<a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_update_node_url">update_node_url</a>(self: &<b>mut</b> <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, new_url: vector&lt;u8&gt;, ctx: &<a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
 </code></pre>
 
 
@@ -700,8 +700,8 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_update_node_url">update_node_url</a>(
-    self: &<b>mut</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../bridge/committee.md#bridge_committee_update_node_url">update_node_url</a>(
+    self: &<b>mut</b> <a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>,
     new_url: vector&lt;u8&gt;,
     ctx: &TxContext,
 ) {
@@ -710,7 +710,7 @@
         <b>let</b> (_, member) = self.members.get_entry_by_idx_mut(idx);
         <b>if</b> (member.sui_address == ctx.sender()) {
             member.http_rest_url = new_url;
-            emit(<a href="../../dependencies/bridge/committee.md#bridge_committee_CommitteeMemberUrlUpdateEvent">CommitteeMemberUrlUpdateEvent</a> {
+            emit(<a href="../bridge/committee.md#bridge_committee_CommitteeMemberUrlUpdateEvent">CommitteeMemberUrlUpdateEvent</a> {
                 member: member.bridge_pubkey_bytes,
                 new_url,
             });
@@ -718,7 +718,7 @@
         };
         idx = idx + 1;
     };
-    <b>abort</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_ESenderIsNotInBridgeCommittee">ESenderIsNotInBridgeCommittee</a>
+    <b>abort</b> <a href="../bridge/committee.md#bridge_committee_ESenderIsNotInBridgeCommittee">ESenderIsNotInBridgeCommittee</a>
 }
 </code></pre>
 
@@ -732,7 +732,7 @@
 
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_check_uniqueness_bridge_keys">check_uniqueness_bridge_keys</a>(self: &<a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, bridge_pubkey_bytes: vector&lt;u8&gt;)
+<pre><code><b>fun</b> <a href="../bridge/committee.md#bridge_committee_check_uniqueness_bridge_keys">check_uniqueness_bridge_keys</a>(self: &<a href="../bridge/committee.md#bridge_committee_BridgeCommittee">bridge::committee::BridgeCommittee</a>, bridge_pubkey_bytes: vector&lt;u8&gt;)
 </code></pre>
 
 
@@ -741,7 +741,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/bridge/committee.md#bridge_committee_check_uniqueness_bridge_keys">check_uniqueness_bridge_keys</a>(self: &<a href="../../dependencies/bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>, bridge_pubkey_bytes: vector&lt;u8&gt;) {
+<pre><code><b>fun</b> <a href="../bridge/committee.md#bridge_committee_check_uniqueness_bridge_keys">check_uniqueness_bridge_keys</a>(self: &<a href="../bridge/committee.md#bridge_committee_BridgeCommittee">BridgeCommittee</a>, bridge_pubkey_bytes: vector&lt;u8&gt;) {
     <b>let</b> <b>mut</b> count = self.member_registrations.size();
     // bridge_pubkey_bytes must be found once and once only
     <b>let</b> <b>mut</b> bridge_key_found = <b>false</b>;
@@ -749,7 +749,7 @@
         count = count - 1;
         <b>let</b> (_, registration) = self.member_registrations.get_entry_by_idx(count);
         <b>if</b> (registration.bridge_pubkey_bytes == bridge_pubkey_bytes) {
-            <b>assert</b>!(!bridge_key_found, <a href="../../dependencies/bridge/committee.md#bridge_committee_EDuplicatePubkey">EDuplicatePubkey</a>);
+            <b>assert</b>!(!bridge_key_found, <a href="../bridge/committee.md#bridge_committee_EDuplicatePubkey">EDuplicatePubkey</a>);
             bridge_key_found = <b>true</b>; // bridge_pubkey_bytes found, we must not have another one
         }
     };
