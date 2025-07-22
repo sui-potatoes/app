@@ -1,0 +1,135 @@
+actions:
+  - selectUnit(x, y):
+    - description: |
+        try to select Unit at a given position, set the `selectedUnit` value, set a
+        default mode for selection (may depend on the type / class of the Unit)
+    - events:
+      - unitSelect: unit has been selected
+      - unitDeselect: previous unit has been deselected (if any)
+
+  - selectTile(x, y):
+    - description: |
+        try to select a tile at a given position, set the `selectedTile` value
+    - events:
+      - tileSelect: tile has been selected
+      - tileDeselect: previous tile has been deselected (if any)
+
+  - chooseMode(mode):
+    - description: |
+        set the `mode` value to the given mode
+    - events:
+      - modeChanged: mode has been changed (prev, current)
+
+  - performAction:
+    - description: |
+        depending on the mode, the action varies: for Move it would be moving the Unit,
+        for reload - reloading the weapon on spot, spending 1AP
+    - events:
+      - actionCancel: action was cancelled for some reason (e.g. no target)
+      - actionStart: action has started, but not yet completed
+      - actionEnd: action has been completed
+
+modes:
+  - none:
+    - handlers:
+      - connect: do nothing, activate nothing, unset all values
+      - disconnect: do nothing
+      - tile select: do nothing
+      - perform action: do nothing
+
+  - move:
+    - handlers:
+      - connect: draw walkable tiles
+      - disconnect: clear all drawings
+      - tile select: draw path to the target tile
+      - perform action: perform move action
+    - events:
+      - pathStart: tracing has started
+      - pathTraced: path has been traced
+      - pathCancel: tracing has been cancelled
+      - moveStart: move has started
+      - moveEnd: move has been completed
+
+  - reload:
+    - handlers:
+      - connect: nothing
+      - disconnect: nothing
+      - tile select: nothing
+      - perform action: perform reload action
+
+  - grenade:
+    - handlers:
+      - connect: nothing
+      - disconnect: clear all drawings
+      - tile select: draw trajectory arc
+      - perform action: perform grenade throw
+    - events:
+      - aim: aim has been set
+      - aimCancel: aim has been cancelled
+      - throwStart: throw has started
+      - throwEnd: throw has been completed
+
+  - shoot:
+    - handlers:
+      - connect: select and aim at closest enemy unit / target, show "next / prev"
+      - disconnect: clear all drawings
+      - tile select: none
+      - prev / next: choose next or previous target
+      - perform action: perform shoot action
+    - events:
+      - aim: aim has been set
+      - aimCancel: aim has been cancelled
+      - shootStart: shoot has started
+      - shootEnd: shoot has been completed
+      - shootCancel: shoot has been cancelled
+
+  - edit:
+    - handlers:
+      - connect: create tools menu
+      - disconnect: clear menu and reset temporary visuals
+      - tile select: apply current tool
+      - tool select: perform tool selection
+      - perform action: none
+    - events:
+      - toolSelect: tool has been selected
+      - toolSelectCancel: tool selection has been cancelled
+      - toolApply: tool has been applied
+      - toolModify: tool has been modified
+
+history api:
+  - reload:
+    - type: header
+    - values: unit: (u16, u16)
+  - nextTurn:
+    - type: header
+    - values: turn: (u16)
+  - move:
+    - type: header
+    - values: directions: (u8[])
+  - attack:
+    - type: header
+    - values: (origin, target): ((u16, u16), (u16, u16))
+  - recruitPlaced:
+    - type: header
+    - values: (x, y): (u16, u16)
+  - damage:
+    - type: effect
+    - values: damage: (u8)
+  - miss:
+    - type: effect
+    - values: null
+  - explosion:
+    - type: effect
+    - values: explosion: (u16, u16, u16)
+  - criticalHit:
+    - type: effect
+    - values: criticalHit: (u8)
+  - grenade:
+    - type: effect
+    - values: (radius, x, y): (u16, u16, u16)
+  - unitKIA:
+    - type: effect
+    - values: unit: (u16, u16)
+  - dodged:
+    - type: effect
+    - values: null
