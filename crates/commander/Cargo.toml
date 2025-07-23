@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.98"
-macroquad = "0.4.14"
+macroquad = { version = "0.4.14" }
 serde = { version = "1.0.219", features = ["derive"] }
 sui_sdk = { git = "https://github.com/mystenlabs/sui", package = "sui-sdk"}
 sui_types = { git = "https://github.com/mystenlabs/sui", package = "sui-types" }
