@@ -21,8 +21,8 @@ pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8)) {
     );
 
     draw_rectangle_lines(
-        position.0 as f32 * 20.0 * scale_x,
-        position.1 as f32 * 20.0 * scale_y,
+        position.1 as f32 * 20.0 * scale_x,
+        position.0 as f32 * 20.0 * scale_y,
         20.0 * scale_x,
         20.0 * scale_y,
         4.0,
@@ -41,8 +41,8 @@ pub fn draw_highlight(tiles: Vec<(u8, u8)>, dimensions: (u8, u8)) {
 
     for (x, y) in tiles {
         draw_rectangle(
-            x as f32 * 20.0 * scale_x,
-            y as f32 * 20.0 * scale_y,
+            y as f32 * 20.0 * scale_x,
+            x as f32 * 20.0 * scale_y,
             20.0 * scale_x,
             20.0 * scale_y,
             Color {

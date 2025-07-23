@@ -41,7 +41,7 @@ pub struct Map {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct History(Vec<Record>);
+pub struct History(pub Vec<Record>);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Record {
@@ -259,6 +259,7 @@ impl Map {
 
     pub fn walkable_tiles(&self, start: (u8, u8), limit: u8) -> Vec<(u8, u8)> {
         dbg!(&start);
+        dbg!(&self.grid[start.0 as usize][start.1 as usize]);
 
         let mut tiles = Vec::new();
         let mut map = vec![vec![0; self.width() as usize]; self.height() as usize];
@@ -488,6 +489,17 @@ impl Display for Rank {
                 Rank::Colonel => "Colonel",
             }
         )
+    }
+}
+
+impl Display for ID {
+    /// Split the address into 4 characters at start and 4 at the end.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let addr = self.0.to_string();
+        let start = addr[..4].to_string();
+        let end = addr[addr.len() - 4..].to_string();
+
+        write!(f, "{}..{}", start, end)
     }
 }
 

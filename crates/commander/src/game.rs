@@ -29,6 +29,7 @@ pub struct Game {
 /// Draws the menu based on the items, tracks the currently selected item. Reacts
 /// on keyboard input to navigate the menu.
 pub struct Menu<T: MenuItem> {
+    pub title: Option<String>,
     pub items: Vec<T>,
     pub selected_item: usize,
 }
@@ -52,9 +53,9 @@ pub enum MainMenuItem {
     Recruits,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone)]
 pub enum ReplayMenuItem {
-    Replay,
+    Replay(Replay),
     Back,
 }
 
@@ -100,7 +101,7 @@ impl Game {
                         println!("Starting game");
                     }
                     MainMenuItem::Replays => {
-                        self.screen = Screen::Replays(Menu::replays());
+                        self.screen = Screen::Replays(Menu::replays(&self.replays));
                         self.cursor = (0, 0);
                     }
                     MainMenuItem::Presets => {
@@ -117,8 +118,8 @@ impl Game {
                 KeyCode::Up => menu.previous_item(),
                 KeyCode::Down => menu.next_item(),
                 KeyCode::Enter => match menu.select() {
-                    ReplayMenuItem::Replay => {
-                        println!("Starting replay");
+                    ReplayMenuItem::Replay(replay) => {
+                        println!("Starting replay {}", replay.id);
                     }
                     ReplayMenuItem::Back => {
                         self.screen = Screen::MainMenu(Menu::main());
@@ -144,19 +145,19 @@ impl Game {
             },
             Screen::Preset(preset) => match key {
                 KeyCode::Up => {
-                    self.cursor.1 = (self.cursor.1 + preset.map.height() - 1) % preset.map.height();
+                    self.cursor.0 = (self.cursor.0 + preset.map.height() - 1) % preset.map.height();
                     self.highlight.drain(..);
                 }
                 KeyCode::Down => {
-                    self.cursor.1 = (self.cursor.1 + 1) % preset.map.height();
+                    self.cursor.0 = (self.cursor.0 + 1) % preset.map.height();
                     self.highlight.drain(..);
                 }
                 KeyCode::Left => {
-                    self.cursor.0 = (self.cursor.0 + preset.map.width() - 1) % preset.map.width();
+                    self.cursor.1 = (self.cursor.1 + preset.map.width() - 1) % preset.map.width();
                     self.highlight.drain(..);
                 }
                 KeyCode::Right => {
-                    self.cursor.0 = (self.cursor.0 + 1) % preset.map.width();
+                    self.cursor.1 = (self.cursor.1 + 1) % preset.map.width();
                     self.highlight.drain(..);
                 }
                 KeyCode::Space => {
@@ -197,6 +198,7 @@ impl MenuItem for PresetMenuItem {}
 impl Menu<MainMenuItem> {
     pub fn main() -> Self {
         Self {
+            title: Some("Commander".to_string()),
             items: vec![
                 MainMenuItem::StartGame,
                 MainMenuItem::Presets,
@@ -209,9 +211,13 @@ impl Menu<MainMenuItem> {
 }
 
 impl Menu<ReplayMenuItem> {
-    pub fn replays() -> Self {
+    pub fn replays(replays: &Vec<Replay>) -> Self {
         Self {
-            items: vec![ReplayMenuItem::Replay, ReplayMenuItem::Back],
+            title: Some("Replays".to_string()),
+            items: vec![ReplayMenuItem::Back]
+                .into_iter()
+                .chain(replays.iter().map(|r| ReplayMenuItem::Replay(r.clone())))
+                .collect(),
             selected_item: 0,
         }
     }
@@ -220,6 +226,7 @@ impl Menu<ReplayMenuItem> {
 impl Menu<PresetMenuItem> {
     pub fn presets(presets: &Vec<Preset>) -> Self {
         Self {
+            title: Some("Presets".to_string()),
             items: vec![PresetMenuItem::Back]
                 .into_iter()
                 .chain(presets.iter().map(|p| PresetMenuItem::Preset(p.clone())))
@@ -239,6 +246,13 @@ impl<T: MenuItem> Menu<T> {
     }
 
     pub fn draw(&self) {
+        let offset = if let Some(title) = &self.title {
+            draw_text(&title, 20.0, 40.0, 40.0, WHITE);
+            80.0
+        } else {
+            20.0
+        };
+
         for (i, item) in self.items.iter().enumerate() {
             let color = if i == self.selected_item {
                 WHITE
@@ -248,7 +262,7 @@ impl<T: MenuItem> Menu<T> {
             draw_text(
                 &item.to_string(),
                 20.0,
-                20.0 + (i as f32 * 20.0),
+                offset + (i as f32 * 20.0),
                 20.0,
                 color,
             );
@@ -276,7 +290,9 @@ impl Display for MainMenuItem {
 impl Display for ReplayMenuItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ReplayMenuItem::Replay => write!(f, "Replay"),
+            ReplayMenuItem::Replay(replay) => {
+                write!(f, "{} (Actions: {})", replay.id, replay.history.0.len())
+            }
             ReplayMenuItem::Back => write!(f, "Back"),
         }
     }
