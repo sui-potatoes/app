@@ -258,9 +258,6 @@ impl Map {
     }
 
     pub fn walkable_tiles(&self, start: (u8, u8), limit: u8) -> Vec<(u8, u8)> {
-        dbg!(&start);
-        dbg!(&self.grid[start.0 as usize][start.1 as usize]);
-
         let mut tiles = Vec::new();
         let mut map = vec![vec![0; self.width() as usize]; self.height() as usize];
         let mut queue = vec![start];
@@ -329,8 +326,6 @@ impl Map {
                 }
             }
         }
-
-        dbg!(&tiles);
 
         tiles
     }

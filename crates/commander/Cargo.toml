@@ -7,9 +7,23 @@ edition = "2024"
 anyhow = "1.0.98"
 macroquad = { version = "0.4.14" }
 serde = { version = "1.0.219", features = ["derive"] }
-sui_sdk = { git = "https://github.com/mystenlabs/sui", package = "sui-sdk"}
+sui_sdk = { git = "https://github.com/mystenlabs/sui", package = "sui-sdk" }
 sui_types = { git = "https://github.com/mystenlabs/sui", package = "sui-types" }
 sui_json_rpc_types = { git = "https://github.com/mystenlabs/sui", package = "sui-json-rpc-types" }
 move_core_types = { git = "https://github.com/MystenLabs/sui", package = "move-core-types" }
 tokio = { version = "1.46.1", features = ["full"] }
 bcs = { git = "https://github.com/zefchain/bcs", package = "bcs" }
+open = "5"
+axum = "0.8.4"
+reqwest = "0.12.22"
+serde_json = "1.0.141"
+rand = "0.8.5"
+
+
+# fastcrypto = "0.1.6"
+# fastcrypto-zkp = "0.1.3"
+
+# Must match sui_types
+fastcrypto = { git = "https://github.com/MystenLabs/fastcrypto", rev = "16fa86d0dd943024a9088d46850a72ecd55b7f46" }
+# fastcrypto-tbls = { git = "https://github.com/MystenLabs/fastcrypto", rev = "16fa86d0dd943024a9088d46850a72ecd55b7f46" }
+fastcrypto-zkp = { git = "https://github.com/MystenLabs/fastcrypto", rev = "16fa86d0dd943024a9088d46850a72ecd55b7f46", package = "fastcrypto-zkp" }
