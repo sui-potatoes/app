@@ -3,6 +3,10 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+use crate::config::{
+    ARMOR_STRUCT_TAG, COMMANDER_OBJ, COMMANDER_PKG, PRESET_STRUCT_TAG, RECRUIT_STRUCT_TAG,
+    REPLAY_STRUCT_TAG, WEAPON_STRUCT_TAG,
+};
 use crate::move_types::{Armor, Preset, Recruit, Replay, Weapon};
 use move_core_types::language_storage::StructTag;
 use serde::Deserialize;
@@ -13,24 +17,7 @@ use sui_sdk::{
     SuiClient, SuiClientBuilder,
     rpc_types::{SuiObjectDataOptions, SuiObjectResponseQuery},
 };
-use sui_types::base_types::{ObjectID, SuiAddress};
-
-pub const COMMANDER_OBJ: &'static str =
-    "0x133420084e1dc366bb9a39d77c4c6a64e9caa553b0a16f704b3f9e7058f98cb7";
-pub const PLAYER_ADDRESS: &'static str =
-    "0xddb2d7471a381e5080d7c48d5da5baacdd07ddfada4d4cfeec929e27bff44aa9";
-pub const COMMANDER_PKG: &'static str =
-    "0x6e6770b3554b6bf4997aee770b29e1395aa640979afc84504058f05721ee54a7";
-const REPLAY_STRUCT_TAG: &'static str =
-    "0x6e6770b3554b6bf4997aee770b29e1395aa640979afc84504058f05721ee54a7::replay::Replay";
-const RECRUIT_STRUCT_TAG: &'static str =
-    "0x6e6770b3554b6bf4997aee770b29e1395aa640979afc84504058f05721ee54a7::recruit::Recruit";
-const WEAPON_STRUCT_TAG: &'static str =
-    "0x6e6770b3554b6bf4997aee770b29e1395aa640979afc84504058f05721ee54a7::weapon::Weapon";
-const ARMOR_STRUCT_TAG: &'static str =
-    "0x6e6770b3554b6bf4997aee770b29e1395aa640979afc84504058f05721ee54a7::armor::Armor";
-const PRESET_STRUCT_TAG: &'static str =
-    "0x6e6770b3554b6bf4997aee770b29e1395aa640979afc84504058f05721ee54a7::commander::Preset";
+use sui_types::base_types::{ObjectID, ObjectRef, SuiAddress};
 
 // === Commander Client ===
 
@@ -46,54 +33,68 @@ impl CommanderClient {
     }
 
     /// Get all `Preset`s stored in the registry.
-    pub async fn get_presets(&self) -> Result<Vec<Preset>, anyhow::Error> {
-        let registry = SuiAddress::from_str(COMMANDER_OBJ).unwrap();
-        let objects = self.owned_objects(QueryFilter::Preset, registry).await?;
+    pub async fn get_presets(&self) -> Result<Vec<WithRef<Preset>>, anyhow::Error> {
+        let objects = self
+            .owned_objects(QueryFilter::Preset, SuiAddress::from_str(COMMANDER_OBJ)?)
+            .await?;
+
         Ok(objects
             .data
             .iter()
             .map(parse_bytes)
-            .collect::<Vec<Preset>>())
+            .collect::<Vec<WithRef<Preset>>>())
     }
 
     /// Get all owned `Recruit` objects.
-    pub async fn get_recruits(&self) -> Result<Vec<Recruit>, anyhow::Error> {
-        let player = SuiAddress::from_str(PLAYER_ADDRESS).unwrap();
-        let objects = self.owned_objects(QueryFilter::Recruit, player).await?;
+    pub async fn get_recruits(
+        &self,
+        address: SuiAddress,
+    ) -> Result<Vec<WithRef<Recruit>>, anyhow::Error> {
+        let objects = self.owned_objects(QueryFilter::Recruit, address).await?;
         Ok(objects
             .data
             .iter()
             .map(parse_bytes)
-            .collect::<Vec<Recruit>>())
+            .collect::<Vec<WithRef<Recruit>>>())
     }
 
     /// Get all owned `Replay` objects.
-    pub async fn get_replays(&self) -> Result<Vec<Replay>, anyhow::Error> {
-        let player = SuiAddress::from_str(PLAYER_ADDRESS).unwrap();
-        let objects = self.owned_objects(QueryFilter::Replay, player).await?;
+    pub async fn get_replays(
+        &self,
+        address: SuiAddress,
+    ) -> Result<Vec<WithRef<Replay>>, anyhow::Error> {
+        let objects = self.owned_objects(QueryFilter::Replay, address).await?;
         Ok(objects
             .data
             .iter()
             .map(parse_bytes)
-            .collect::<Vec<Replay>>())
+            .collect::<Vec<WithRef<Replay>>>())
     }
 
     /// Get all owned `Weapon` objects.
-    pub async fn get_weapons(&self) -> Result<Vec<Weapon>, anyhow::Error> {
-        let player = SuiAddress::from_str(PLAYER_ADDRESS).unwrap();
-        let objects = self.owned_objects(QueryFilter::Weapon, player).await?;
+    pub async fn get_weapons(
+        &self,
+        address: SuiAddress,
+    ) -> Result<Vec<WithRef<Weapon>>, anyhow::Error> {
+        let objects = self.owned_objects(QueryFilter::Weapon, address).await?;
         Ok(objects
             .data
             .iter()
             .map(parse_bytes)
-            .collect::<Vec<Weapon>>())
+            .collect::<Vec<WithRef<Weapon>>>())
     }
 
     /// Get all owned `Armor` objects.
-    pub async fn get_armors(&self) -> Result<Vec<Armor>, anyhow::Error> {
-        let player = SuiAddress::from_str(PLAYER_ADDRESS).unwrap();
-        let objects = self.owned_objects(QueryFilter::Armor, player).await?;
-        Ok(objects.data.iter().map(parse_bytes).collect::<Vec<Armor>>())
+    pub async fn get_armors(
+        &self,
+        address: SuiAddress,
+    ) -> Result<Vec<WithRef<Armor>>, anyhow::Error> {
+        let objects = self.owned_objects(QueryFilter::Armor, address).await?;
+        Ok(objects
+            .data
+            .iter()
+            .map(parse_bytes)
+            .collect::<Vec<WithRef<Armor>>>())
     }
 
     /// Get all owned objects with the given `QueryFilter`.
@@ -118,16 +119,27 @@ impl CommanderClient {
     }
 }
 
-fn parse_bytes<'a, T>(obj_data: &'a SuiObjectResponse) -> T
+fn parse_bytes<'a, T>(obj_data: &'a SuiObjectResponse) -> WithRef<T>
 where
     T: Deserialize<'a>,
 {
     let data = obj_data.data.as_ref().unwrap();
     if let Some(SuiRawData::MoveObject(object)) = &data.bcs {
-        bcs::from_bytes(object.bcs_bytes.as_ref()).unwrap()
+        WithRef {
+            object_ref: data.object_ref(),
+            data: bcs::from_bytes(object.bcs_bytes.as_ref()).unwrap(),
+        }
     } else {
         panic!("Unexpected failure in `parse_bytes`");
     }
+}
+
+// === Ref Wrapper ===
+
+#[derive(Debug, Clone)]
+pub struct WithRef<T> {
+    pub object_ref: ObjectRef,
+    pub data: T,
 }
 
 // === Query Filter ===

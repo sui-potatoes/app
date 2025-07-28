@@ -1,21 +1,23 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+use crate::input::Command;
 use crate::Message as TokioMessage;
+use crate::client::WithRef;
 use crate::draw::*;
 use crate::move_types::{Game, ID, Preset, Recruit, Replay};
 use macroquad::miniquad::window::set_window_size;
 use macroquad::prelude::*;
-use sui_types::base_types::SuiAddress;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::sync::mpsc::Sender;
+use sui_types::base_types::SuiAddress;
 
 pub struct App {
     pub screen: Screen,
-    pub replays: Vec<Replay>,
-    pub presets: Vec<Preset>,
-    pub recruits: Vec<Recruit>,
+    pub replays: Vec<WithRef<Replay>>,
+    pub presets: Vec<WithRef<Preset>>,
+    pub recruits: Vec<WithRef<Recruit>>,
     pub game: Option<Game>,
 
     /// Textures for the game.
@@ -28,7 +30,7 @@ pub struct App {
     /// Tiles that are currently highlighted.
     pub highlight: Vec<(u8, u8)>,
 
-    /// Address of the user.
+    /// Address of the user. If present, the user is expected to be logged in.
     pub address: Option<SuiAddress>,
 
     /// Sender for messages to the tokio runtime.
@@ -49,6 +51,16 @@ pub struct Menu<T: MenuItem> {
 pub enum Message {
     /// Prepare to open a login window.
     PrepareLogin,
+    /// Start a new game.
+    StartGame,
+    /// Logout the user.
+    Logout,
+    /// Fetch the list of presets.
+    FetchPresets,
+    /// Fetch the list of recruits.
+    FetchRecruits,
+    /// Fetch the list of replays.
+    FetchReplays,
 }
 
 pub enum Screen {
@@ -59,7 +71,11 @@ pub enum Screen {
     /// Show list of presets.
     Presets(Menu<PresetMenuItem>),
     /// Show in-game Preset map.
-    Preset(Preset),
+    Preset(WithRef<Preset>),
+    /// Show list of recruits.
+    Recruits(Menu<RecruitMenuItem>),
+    /// Show a single recruit.
+    Recruit(WithRef<Recruit>),
     /// Show list of replays.
     Replays(Menu<ReplayMenuItem>),
     /// Show settings menu.
@@ -77,23 +93,31 @@ pub enum MainMenuItem {
     Presets,
     Recruits,
     Settings,
+    Quit,
 }
 
 #[derive(Debug, Clone)]
 pub enum ReplayMenuItem {
-    Replay(Replay),
+    Replay(WithRef<Replay>),
+    Back,
+}
+
+#[derive(Debug, Clone)]
+pub enum RecruitMenuItem {
+    Recruit(WithRef<Recruit>),
     Back,
 }
 
 #[derive(Debug, Clone)]
 pub enum PresetMenuItem {
-    Preset(Preset),
+    Preset(WithRef<Preset>),
     Back,
 }
 
 #[derive(Debug, Clone)]
 pub enum SettingsMenuItem {
     WindowSize,
+    Logout,
     Back,
 }
 
@@ -122,8 +146,8 @@ impl App {
         }
     }
 
-    pub fn get_preset(&self, id: &ID) -> Option<&Preset> {
-        self.presets.iter().find(|p| p.id == *id)
+    pub fn get_preset(&self, id: &ID) -> Option<&WithRef<Preset>> {
+        self.presets.iter().find(|p| p.data.id == *id)
     }
 
     /// Sends a message to the tokio runtime.
@@ -133,113 +157,153 @@ impl App {
 
     pub fn update_from_message(&mut self, msg: TokioMessage) {
         match msg {
-            TokioMessage::Presets(presets) => self.presets = presets,
-            TokioMessage::Recruits(recruits) => self.recruits = recruits,
-            TokioMessage::Replays(replays) => self.replays = replays,
+            TokioMessage::Presets(presets) => {
+                self.presets = presets;
+                self.reload_screen();
+            }
+            TokioMessage::Recruits(recruits) => {
+                self.recruits = recruits;
+                self.reload_screen();
+            }
+            TokioMessage::Replays(replays) => {
+                self.replays = replays;
+                self.reload_screen();
+            }
             TokioMessage::Address(address) => {
+                println!("Received address: {}", address);
                 self.address = Some(address);
-                self.set_screen(Screen::MainMenu(Menu::main(self.address)));
+                self.reload_screen();
             }
             TokioMessage::Text(txt) => println!("Received text message: {}", txt),
         }
     }
 
     /// Triggered by `input::handle_input`, handles key presses for each screen.
-    pub fn handle_key_press(&mut self, key: KeyCode) {
+    pub fn handle_key_press(&mut self, key: Command) {
         match &mut self.screen {
             Screen::MainMenu(menu) => match key {
-                KeyCode::Up => menu.previous_item(),
-                KeyCode::Down => menu.next_item(),
-                KeyCode::Enter => match menu.select() {
+                Command::Up => menu.previous_item(),
+                Command::Down => menu.next_item(),
+                Command::Select => match menu.select() {
                     MainMenuItem::Address(_address) => {}
                     MainMenuItem::Login => {
-                        // Requests fetching `nonce` from zklogin, then wait for
-                        // the message to be received, and in the message handler
-                        // we will open the auth page.
+                        // Starts the login process.
                         self.send_message(Message::PrepareLogin);
                     }
                     MainMenuItem::StartGame => {
-                        println!("Starting game");
+                        self.send_message(Message::StartGame);
                     }
                     MainMenuItem::Replays => {
+                        self.send_message(Message::FetchReplays);
                         self.set_screen(Screen::Replays(Menu::replays(&self.replays)))
                     }
                     MainMenuItem::Presets => {
+                        self.send_message(Message::FetchPresets);
                         self.set_screen(Screen::Presets(Menu::presets(&self.presets)))
                     }
                     MainMenuItem::Recruits => {
-                        println!("Showing recruits");
+                        self.send_message(Message::FetchRecruits);
+                        self.set_screen(Screen::Recruits(Menu::recruits(&self.recruits)))
                     }
                     MainMenuItem::Settings => self.set_screen(Screen::Settings(Menu::settings())),
+                    MainMenuItem::Quit => std::process::exit(0),
                 },
                 _ => {}
             },
             Screen::Settings(menu) => match key {
-                KeyCode::Up => menu.previous_item(),
-                KeyCode::Down => menu.next_item(),
-                KeyCode::Escape => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
-                KeyCode::Enter => match menu.select() {
+                Command::Up => menu.previous_item(),
+                Command::Down => menu.next_item(),
+                Command::Menu => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                Command::Select => match menu.select() {
                     SettingsMenuItem::WindowSize => {
                         self.set_screen(Screen::WindowSettings(Menu::window_settings()))
                     }
-                    SettingsMenuItem::Back => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                    SettingsMenuItem::Logout => {
+                        self.send_message(Message::Logout);
+                        self.address = None;
+                        self.switch_to_main_screen();
+                    }
+                    SettingsMenuItem::Back => self.switch_to_main_screen(),
                 },
                 _ => {}
             },
+            Screen::Recruits(menu) => match key {
+                Command::Up => menu.previous_item(),
+                Command::Down => menu.next_item(),
+                Command::Menu => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                Command::Select => match menu.select() {
+                    RecruitMenuItem::Recruit(recruit) => {
+                        let recruit = recruit.clone();
+                        self.set_screen(Screen::Recruit(recruit));
+                    }
+                    RecruitMenuItem::Back => self.switch_to_main_screen(),
+                },
+                _ => {}
+            },
+            Screen::Recruit(_) => match key {
+                Command::Menu => {
+                    self.set_screen(Screen::Recruits(Menu::recruits(&self.recruits)))
+                }
+                _ => {}
+            },
             Screen::Replays(menu) => match key {
-                KeyCode::Up => menu.previous_item(),
-                KeyCode::Down => menu.next_item(),
-                KeyCode::Escape => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
-                KeyCode::Enter => match menu.select() {
-                    ReplayMenuItem::Replay(replay) => println!("Starting replay {}", replay.id),
-                    ReplayMenuItem::Back => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                Command::Up => menu.previous_item(),
+                Command::Down => menu.next_item(),
+                Command::Menu => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                Command::Select => match menu.select() {
+                    ReplayMenuItem::Replay(replay) => {
+                        println!("Starting replay {}", replay.data.id)
+                    }
+                    ReplayMenuItem::Back => self.switch_to_main_screen(),
                 },
                 _ => {}
             },
             Screen::Presets(menu) => match key {
-                KeyCode::Up => menu.previous_item(),
-                KeyCode::Down => menu.next_item(),
-                KeyCode::Escape => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
-                KeyCode::Enter => match menu.select() {
+                Command::Up => menu.previous_item(),
+                Command::Down => menu.next_item(),
+                Command::Menu => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                Command::Select => match menu.select() {
                     PresetMenuItem::Preset(preset) => self.screen = Screen::Preset(preset.clone()),
-                    PresetMenuItem::Back => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                    PresetMenuItem::Back => self.switch_to_main_screen(),
                 },
                 _ => {}
             },
             Screen::WindowSettings(menu) => match key {
-                KeyCode::Up => menu.previous_item(),
-                KeyCode::Down => menu.next_item(),
-                KeyCode::Escape => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
-                KeyCode::Enter => match menu.select() {
+                Command::Up => menu.previous_item(),
+                Command::Down => menu.next_item(),
+                Command::Menu => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                Command::Select => match menu.select() {
                     WindowSettingsMenuItem::SizeSmall => set_window_size(700, 700),
                     WindowSettingsMenuItem::SizeMedium => set_window_size(1000, 1000),
                     WindowSettingsMenuItem::SizeLarge => set_window_size(1200, 1200),
-                    WindowSettingsMenuItem::Back => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                    WindowSettingsMenuItem::Back => self.switch_to_main_screen(),
                 },
                 _ => {}
             },
             Screen::Preset(preset) => match key {
-                KeyCode::Escape => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
-                KeyCode::Up => {
-                    self.cursor.0 = (self.cursor.0 + preset.map.height() - 1) % preset.map.height();
+                Command::Menu => self.set_screen(Screen::MainMenu(Menu::main(self.address))),
+                Command::Up => {
+                    self.cursor.0 =
+                        (self.cursor.0 + preset.data.map.height() - 1) % preset.data.map.height();
                     self.highlight.drain(..);
                 }
-                KeyCode::Down => {
-                    self.cursor.0 = (self.cursor.0 + 1) % preset.map.height();
+                Command::Down => {
+                    self.cursor.0 = (self.cursor.0 + 1) % preset.data.map.height();
                     self.highlight.drain(..);
                 }
-                KeyCode::Left => {
-                    self.cursor.1 = (self.cursor.1 + preset.map.width() - 1) % preset.map.width();
+                Command::Left => {
+                    self.cursor.1 =
+                        (self.cursor.1 + preset.data.map.width() - 1) % preset.data.map.width();
                     self.highlight.drain(..);
                 }
-                KeyCode::Right => {
-                    self.cursor.1 = (self.cursor.1 + 1) % preset.map.width();
+                Command::Right => {
+                    self.cursor.1 = (self.cursor.1 + 1) % preset.data.map.width();
                     self.highlight.drain(..);
                 }
-                KeyCode::Space => {
-                    self.highlight = preset.map.walkable_tiles(self.cursor, 3);
+                Command::Select => {
+                    self.highlight = preset.data.map.walkable_tiles(self.cursor, 3);
                 }
-                _ => self.screen = Screen::MainMenu(Menu::main(self.address)),
+                // _ => self.switch_to_main_screen(),
             },
             Screen::Play(_game) => match key {
                 _ => {}
@@ -247,9 +311,30 @@ impl App {
         }
     }
 
+    fn switch_to_main_screen(&mut self) {
+        self.set_screen(Screen::MainMenu(Menu::main(self.address)));
+    }
+
     fn set_screen(&mut self, screen: Screen) {
         self.screen = screen;
         self.cursor = (0, 0);
+        self.highlight.drain(..);
+    }
+
+    fn reload_screen(&mut self) {
+        let screen = match &self.screen {
+            Screen::MainMenu(_) => Screen::MainMenu(Menu::main(self.address)),
+            Screen::Presets(_) => Screen::Presets(Menu::presets(&self.presets)),
+            Screen::Replays(_) => Screen::Replays(Menu::replays(&self.replays)),
+            Screen::Recruits(_) => Screen::Recruits(Menu::recruits(&self.recruits)),
+            Screen::Recruit(_)
+            | Screen::Preset(_)
+            | Screen::Play(_)
+            | Screen::Settings(_)
+            | Screen::WindowSettings(_) => return,
+        };
+
+        self.set_screen(screen);
     }
 }
 
@@ -260,23 +345,26 @@ impl MenuItem for ReplayMenuItem {}
 impl MenuItem for PresetMenuItem {}
 impl MenuItem for SettingsMenuItem {}
 impl MenuItem for WindowSettingsMenuItem {}
+impl MenuItem for RecruitMenuItem {}
 
 impl Menu<MainMenuItem> {
     pub fn main(address: Option<SuiAddress>) -> Self {
-        Self {
-            title: Some("Commander".to_string()),
-            items: vec![
+        let items = if let Some(_) = address {
+            vec![
                 MainMenuItem::StartGame,
-                if let Some(address) = address {
-                    MainMenuItem::Address(address)
-                } else {
-                    MainMenuItem::Login
-                },
                 MainMenuItem::Presets,
                 MainMenuItem::Replays,
                 MainMenuItem::Recruits,
                 MainMenuItem::Settings,
-            ],
+                MainMenuItem::Quit,
+            ]
+        } else {
+            vec![MainMenuItem::Login, MainMenuItem::Settings, MainMenuItem::Quit]
+        };
+
+        Self {
+            title: Some("Commander".to_string()),
+            items,
             selected_item: 0,
             window: None,
         }
@@ -284,7 +372,7 @@ impl Menu<MainMenuItem> {
 }
 
 impl Menu<ReplayMenuItem> {
-    pub fn replays(replays: &Vec<Replay>) -> Self {
+    pub fn replays(replays: &Vec<WithRef<Replay>>) -> Self {
         Self {
             title: Some("Replays".to_string()),
             items: vec![ReplayMenuItem::Back]
@@ -292,13 +380,13 @@ impl Menu<ReplayMenuItem> {
                 .chain(replays.iter().map(|r| ReplayMenuItem::Replay(r.clone())))
                 .collect(),
             selected_item: 0,
-            window: Some(10),
+            window: Some(20),
         }
     }
 }
 
 impl Menu<PresetMenuItem> {
-    pub fn presets(presets: &Vec<Preset>) -> Self {
+    pub fn presets(presets: &Vec<WithRef<Preset>>) -> Self {
         Self {
             title: Some("Presets".to_string()),
             items: vec![PresetMenuItem::Back]
@@ -306,7 +394,7 @@ impl Menu<PresetMenuItem> {
                 .chain(presets.iter().map(|p| PresetMenuItem::Preset(p.clone())))
                 .collect(),
             selected_item: 0,
-            window: Some(10),
+            window: Some(20),
         }
     }
 }
@@ -315,7 +403,11 @@ impl Menu<SettingsMenuItem> {
     pub fn settings() -> Self {
         Self {
             title: Some("Settings".to_string()),
-            items: vec![SettingsMenuItem::WindowSize, SettingsMenuItem::Back],
+            items: vec![
+                SettingsMenuItem::WindowSize,
+                SettingsMenuItem::Logout,
+                SettingsMenuItem::Back,
+            ],
             selected_item: 0,
             window: None,
         }
@@ -334,6 +426,20 @@ impl Menu<WindowSettingsMenuItem> {
             ],
             selected_item: 0,
             window: None,
+        }
+    }
+}
+
+impl Menu<RecruitMenuItem> {
+    pub fn recruits(recruits: &Vec<WithRef<Recruit>>) -> Self {
+        Self {
+            title: Some("Recruits".to_string()),
+            items: vec![RecruitMenuItem::Back]
+                .into_iter()
+                .chain(recruits.iter().map(|r| RecruitMenuItem::Recruit(r.clone())))
+                .collect(),
+            selected_item: 0,
+            window: Some(20),
         }
     }
 }
@@ -370,20 +476,28 @@ impl Draw for App {
                     (game.map.width(), game.map.height()),
                 );
             }
+            Screen::Recruit(_) => {}
+            Screen::Recruits(menu) => menu.draw(),
             Screen::Replays(menu) => menu.draw(),
             Screen::Presets(menu) => menu.draw(),
             Screen::Settings(menu) => menu.draw(),
             Screen::WindowSettings(menu) => menu.draw(),
             Screen::Preset(preset) => {
                 if let Some(texture) = self.textures.get("background") {
-                    draw_texture_background((preset.map.width(), preset.map.height()), texture);
+                    draw_texture_background(
+                        (preset.data.map.width(), preset.data.map.height()),
+                        texture,
+                    );
                 }
 
-                preset.map.draw();
-                draw_cursor(self.cursor, (preset.map.width(), preset.map.height()));
+                preset.data.map.draw();
+                draw_cursor(
+                    self.cursor,
+                    (preset.data.map.width(), preset.data.map.height()),
+                );
                 draw_highlight(
                     self.highlight.clone(),
-                    (preset.map.width(), preset.map.height()),
+                    (preset.data.map.width(), preset.data.map.height()),
                 );
             }
         }
@@ -448,12 +562,28 @@ impl Display for MainMenuItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             MainMenuItem::StartGame => write!(f, "Start Game"),
-            MainMenuItem::Address(address) => write!(f, "Address: {}", address),
+            MainMenuItem::Address(_address) => write!(f, "Logged in"),
             MainMenuItem::Login => write!(f, "Login (Google)"),
             MainMenuItem::Replays => write!(f, "Replays"),
             MainMenuItem::Presets => write!(f, "Presets"),
             MainMenuItem::Recruits => write!(f, "Recruits"),
             MainMenuItem::Settings => write!(f, "Settings"),
+            MainMenuItem::Quit => write!(f, "Quit"),
+        }
+    }
+}
+
+impl Display for RecruitMenuItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RecruitMenuItem::Recruit(recruit) => {
+                write!(
+                    f,
+                    "{} (Rank: {})",
+                    recruit.data.metadata.name, recruit.data.rank
+                )
+            }
+            RecruitMenuItem::Back => write!(f, "Back"),
         }
     }
 }
@@ -462,7 +592,12 @@ impl Display for ReplayMenuItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ReplayMenuItem::Replay(replay) => {
-                write!(f, "{} (Actions: {})", replay.id, replay.history.0.len())
+                write!(
+                    f,
+                    "{} (Actions: {})",
+                    replay.data.id,
+                    replay.data.history.0.len()
+                )
             }
             ReplayMenuItem::Back => write!(f, "Back"),
         }
@@ -472,7 +607,7 @@ impl Display for ReplayMenuItem {
 impl Display for PresetMenuItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PresetMenuItem::Preset(preset) => write!(f, "{}", preset.name),
+            PresetMenuItem::Preset(preset) => write!(f, "{}", preset.data.name),
             PresetMenuItem::Back => write!(f, "Back"),
         }
     }
@@ -482,6 +617,7 @@ impl Display for SettingsMenuItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SettingsMenuItem::WindowSize => write!(f, "Window Size"),
+            SettingsMenuItem::Logout => write!(f, "Logout"),
             SettingsMenuItem::Back => write!(f, "Back"),
         }
     }

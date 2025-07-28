@@ -3,35 +3,58 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use fastcrypto::traits::KeyPair;
+use fastcrypto::{
+    ed25519::{Ed25519KeyPair, Ed25519PublicKey},
+    traits::KeyPair,
+};
+use fastcrypto_zkp::bn254::zk_login::ZkLoginInputs;
+use gamepads::Gamepads;
 use macroquad::prelude::*;
-use fastcrypto::ed25519::Ed25519PublicKey;
-use sui_types::base_types::SuiAddress;
-use std::path::Path;
-use std::sync::mpsc::{Sender, channel};
+use quad_storage::STORAGE;
+use serde::{Deserialize, Serialize};
+use std::{
+    path::Path,
+    sync::mpsc::{Sender, channel},
+};
 use sui_sdk::SuiClient;
+use sui_types::base_types::SuiAddress;
 use tokio::runtime::Runtime;
 
 mod client;
+mod config;
 mod draw;
+mod errors;
 mod game;
 mod input;
 mod move_types;
+mod tx;
 mod zklogin;
 
-use crate::client::CommanderClient;
-use crate::draw::Draw;
-use crate::game::App;
-use crate::game::Message as AppMessage;
-use crate::move_types::{Preset, Recruit, Replay};
+use crate::{
+    client::{CommanderClient, WithRef},
+    draw::Draw,
+    game::{App, Message as AppMessage},
+    move_types::{Preset, Recruit, Replay},
+    tx::TxRunner,
+};
 
 /// Messages sent from the tokio runtime to the Application.
 pub enum Message {
-    Presets(Vec<Preset>),
-    Recruits(Vec<Recruit>),
-    Replays(Vec<Replay>),
+    Presets(Vec<WithRef<Preset>>),
+    Recruits(Vec<WithRef<Recruit>>),
+    Replays(Vec<WithRef<Replay>>),
     Address(SuiAddress),
     Text(String),
+}
+
+const SESSION_KEY: &str = "session";
+
+#[derive(Serialize, Deserialize)]
+pub struct Session {
+    pub address: SuiAddress,
+    pub keypair: Ed25519KeyPair,
+    pub zkp: ZkLoginInputs,
+    pub max_epoch: u64,
 }
 
 #[macroquad::main("Commander")]
@@ -39,44 +62,48 @@ async fn main() -> Result<(), anyhow::Error> {
     // Setup channel to receive data from the tokio task
     let (tx, rx) = channel::<Message>();
     let (tx_app, rx_app) = channel::<AppMessage>();
+    let mut tx_runner = None;
+    let mut address = None;
+    let prev_session = STORAGE.lock().unwrap().get(SESSION_KEY);
 
     // Spawn tokio runtime in a background thread
     std::thread::spawn(move || {
         let rt = Runtime::new().unwrap();
         rt.block_on(async move {
-            let client = CommanderClient::new().await.unwrap();
+            let client: CommanderClient = CommanderClient::new().await.unwrap();
             println!("Sui testnet version: {}", client.as_inner().api_version());
-
-            let recruits = client.get_recruits().await.unwrap();
-            let _ = tx.send(Message::Recruits(recruits));
-
-            let presets = client.get_presets().await.unwrap();
-            let _ = tx.send(Message::Presets(presets));
-
-            let replays = client.get_replays().await.unwrap();
-            let _ = tx.send(Message::Replays(replays));
 
             startup_action(&tx, client.as_inner())
                 .await
                 .unwrap_or_else(|e| eprintln!("Error: {}", e));
 
+            if let Some(prev_session) = prev_session {
+                if let Ok(mut session) = serde_json::from_str::<Session>(&prev_session) {
+                    let _ = tx.send(Message::Address(session.address));
+                    let zkp = session.zkp.init().unwrap();
+                    address.replace(session.address);
+                    tx_runner = Some(TxRunner::new(
+                        session.keypair,
+                        zkp,
+                        session.max_epoch,
+                        client.as_inner().clone(),
+                    ));
+                } else {
+                    STORAGE.lock().unwrap().remove(SESSION_KEY);
+                }
+            }
+
             loop {
                 if let Ok(msg) = rx_app.try_recv() {
                     match msg {
+                        AppMessage::Logout => {
+                            STORAGE.lock().unwrap().remove(SESSION_KEY);
+                            tx_runner = None;
+                        }
                         AppMessage::PrepareLogin => {
-                            // let skp =SuiKeyPair::Ed25519(Ed25519KeyPair::generate(&mut StdRng::from_seed([0; 32])));
-                            // let jwt_randomness = BigUint::from_bytes_be(&[0; 32]).to_string();
-                            // let mut eph_pk_bytes = vec![0x00];
-                            // eph_pk_bytes.extend(skp.public().as_ref());
-                            // let kp_bigint = BigUint::from_bytes_be(&eph_pk_bytes).to_string();
-                            // let nonce = get_nonce(&eph_pk_bytes, max_epoch, &jwt_randomness).unwrap();
-
-                            let keypair = fastcrypto::ed25519::Ed25519KeyPair::generate(
-                                &mut ::rand::thread_rng(),
-                            );
+                            let keypair = Ed25519KeyPair::generate(&mut ::rand::thread_rng());
                             let public_key = keypair.public();
-
-                            let address = login_action(&tx, public_key)
+                            let login_res = login_action(public_key)
                                 .await
                                 .map(|e| Some(e))
                                 .unwrap_or_else(|e| {
@@ -84,8 +111,60 @@ async fn main() -> Result<(), anyhow::Error> {
                                     None
                                 });
 
+                            if let Some((new_address, zkp, max_epoch)) = login_res {
+                                let _ = tx.send(Message::Address(new_address));
+                                tx_runner = Some(TxRunner::new(
+                                    keypair.copy(),
+                                    zkp.clone(),
+                                    max_epoch,
+                                    client.as_inner().clone(),
+                                ));
+                                address.replace(new_address);
+                                STORAGE.lock().unwrap().set(
+                                    SESSION_KEY,
+                                    &serde_json::to_string(&Session {
+                                        address: new_address,
+                                        keypair,
+                                        zkp,
+                                        max_epoch,
+                                    })
+                                    .unwrap(),
+                                );
+                            }
+                        }
+                        AppMessage::StartGame => {
+                            // measure time between start and end of tx
+                            let start = std::time::Instant::now();
+                            if let Some(tx_runner) = &mut tx_runner {
+                                tx_runner.test_tx().await.unwrap();
+                                let end = std::time::Instant::now();
+                                println!("Test tx executed in {:?}", end.duration_since(start));
+                            } else {
+                                println!("No tx runner");
+                            }
+                        }
+                        AppMessage::FetchPresets => {
+                            if let Some(_) = address {
+                                let presets = client.get_presets().await.unwrap();
+                                tx.send(Message::Presets(presets)).unwrap();
+                            } else {
+                                eprintln!("Not logged in");
+                            }
+                        }
+                        AppMessage::FetchRecruits => {
                             if let Some(address) = address {
-                                let _ = tx.send(Message::Address(address));
+                                let recruits = client.get_recruits(address).await.unwrap();
+                                tx.send(Message::Recruits(recruits)).unwrap();
+                            } else {
+                                eprintln!("Not logged in");
+                            }
+                        }
+                        AppMessage::FetchReplays => {
+                            if let Some(address) = address {
+                                let replays = client.get_replays(address).await.unwrap();
+                                tx.send(Message::Replays(replays)).unwrap();
+                            } else {
+                                eprintln!("Not logged in");
                             }
                         }
                     }
@@ -101,13 +180,20 @@ async fn main() -> Result<(), anyhow::Error> {
     let tile_texture = load_texture(path).await.unwrap();
 
     let mut app = App::new(tx_app);
+    let mut gamepads = Gamepads::new();
 
     app.textures.insert("background".to_string(), tile_texture);
 
+    // let gamepads = get_connected_gamepads();
+    // dbg!(&gamepads);
+
     // Main game loop
     loop {
+        gamepads.poll();
         clear_background(LIGHTGRAY);
         input::handle_input(&mut app);
+        input::handle_gamepad_input(&mut app, &mut gamepads);
+
         app.draw();
 
         if let Ok(msg) = rx.try_recv() {
@@ -120,51 +206,28 @@ async fn main() -> Result<(), anyhow::Error> {
 
 /// Handles the login process.
 async fn login_action(
-    tx: &Sender<Message>,
     public_key: &Ed25519PublicKey,
-) -> Result<SuiAddress, anyhow::Error> {
+) -> Result<(SuiAddress, ZkLoginInputs, u64), anyhow::Error> {
     // fetch nonce from zklogin and send it to the game
     let nonce = zklogin::get_nonce(public_key).await.unwrap();
-
-    println!("Nonce: {:?}", nonce);
+    let max_epoch = nonce.max_epoch;
 
     zklogin::open_auth_page(&nonce.nonce);
 
-    println!("Preparing login");
-
-    let jwt = if let Ok(Some(code)) = zklogin::start_auth_listener(&tx).await {
-        println!("Login code: {}", code);
-        if let Ok(jwt) = zklogin::get_jwt(code).await.map_err(|err| {
-            println!("Error getting JWT: {:?}", err);
-            err
-        }) {
-            jwt
-        } else {
-            return Err(anyhow::anyhow!("Error getting JWT"));
-        }
+    let jwt = if let Ok(Some(code)) = zklogin::start_auth_listener().await {
+        zklogin::get_jwt(code)
+            .await
+            .map_err(|e| anyhow::anyhow!("Error getting JWT: {}", e))?
     } else {
         return Err(anyhow::anyhow!("Error getting login code"));
     };
 
-    println!("JWT: {}", jwt);
-
-    let zkp = if let Ok(zkp) = zklogin::get_zkp(jwt, nonce, public_key)
+    let zkp = zklogin::get_zkp(jwt, nonce, public_key)
         .await
-        .map_err(|err| {
-            println!("Error getting ZKP: {:?}", err);
-            err
-        }) {
-        zkp
-    } else {
-        return Err(anyhow::anyhow!("Error getting ZKP"));
-    };
+        .map_err(|e| anyhow::anyhow!("Error getting ZKP: {}", e))?;
 
-    println!("ZKP: {:?}", zkp);
-
-    let address = SuiAddress::try_from_unpadded(&zkp).unwrap();
-    println!("Address: {}", address);
-
-    Ok(address)
+    let address = SuiAddress::try_from_unpadded(&zkp)?;
+    Ok((address, zkp, max_epoch))
 }
 
 async fn startup_action(tx: &Sender<Message>, client: &SuiClient) -> Result<(), anyhow::Error> {
