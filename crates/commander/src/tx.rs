@@ -14,7 +14,6 @@ use sui_json_rpc_types::{
     Coin, ObjectChange, SuiObjectDataOptions, SuiObjectResponse, SuiTransactionBlockEffectsAPI,
     SuiTransactionBlockResponse, SuiTransactionBlockResponseOptions,
 };
-
 use sui_sdk::SuiClient;
 use sui_types::{
     base_types::{ObjectID, ObjectRef, SequenceNumber, SuiAddress},
@@ -30,7 +29,7 @@ use sui_types::{
     zk_login_authenticator::ZkLoginAuthenticator,
 };
 
-const SUI_COIN_TYPE: &str = "0x2::sui::SUI";
+use crate::config::SUI_COIN_TYPE;
 
 pub struct TxRunner {
     keypair: Ed25519KeyPair,

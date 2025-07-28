@@ -3,19 +3,20 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+use std::{
+    path::Path,
+    sync::mpsc::{Sender, channel},
+};
+
 use fastcrypto::{
     ed25519::{Ed25519KeyPair, Ed25519PublicKey},
     traits::KeyPair,
 };
 use fastcrypto_zkp::bn254::zk_login::ZkLoginInputs;
 use gamepads::Gamepads;
-use macroquad::prelude::*;
+use macroquad::{miniquad::conf::Icon, prelude::*};
 use quad_storage::STORAGE;
 use serde::{Deserialize, Serialize};
-use std::{
-    path::Path,
-    sync::mpsc::{Sender, channel},
-};
 use sui_sdk::SuiClient;
 use sui_types::base_types::SuiAddress;
 use tokio::runtime::Runtime;
@@ -57,7 +58,20 @@ pub struct Session {
     pub max_epoch: u64,
 }
 
-#[macroquad::main("Commander")]
+/// Configure Macroquad on start.
+fn window_conf() -> macroquad::window::Conf {
+    Conf {
+        window_title: "Commander".to_owned(),
+        window_width: 1000,
+        window_height: 1000,
+        fullscreen: false,
+        window_resizable: true,
+        icon: Some(Icon::miniquad_logo()),
+        ..Default::default()
+    }
+}
+
+#[macroquad::main(window_conf)]
 async fn main() -> Result<(), anyhow::Error> {
     // Setup channel to receive data from the tokio task
     let (tx, rx) = channel::<Message>();
@@ -183,9 +197,6 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut gamepads = Gamepads::new();
 
     app.textures.insert("background".to_string(), tile_texture);
-
-    // let gamepads = get_connected_gamepads();
-    // dbg!(&gamepads);
 
     // Main game loop
     loop {

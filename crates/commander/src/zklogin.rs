@@ -1,6 +1,8 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+use std::{collections::HashMap, convert::Infallible, sync::Arc};
+
 use axum::{Router, extract::Query, response::Html, routing::get};
 use fastcrypto::{
     ed25519::Ed25519PublicKey,
@@ -8,24 +10,32 @@ use fastcrypto::{
 };
 use fastcrypto_zkp::bn254::zk_login::ZkLoginInputs;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::convert::Infallible;
-use std::sync::Arc;
 use thiserror::Error;
-use tokio::sync::Mutex;
-use tokio::sync::oneshot;
+use tokio::sync::{Mutex, oneshot};
 
 use crate::errors::Error;
 
+// === Compile-time constants ===
+
+const CLIENT_ID: &str = env!(
+    "GOOGLE_CLIENT_ID",
+    "`GOOGLE_CLIENT_ID` is required for compiling the application"
+);
+const CLIENT_SECRET: &str = env!(
+    "GOOGLE_CLIENT_SECRET",
+    "`GOOGLE_CLIENT_SECRET` is required for compiling the application"
+);
+const ENOKI_API_KEY: &str = env!(
+    "ENOKI_API_KEY",
+    "`ENOKI_API_KEY` is required for compiling the application"
+);
+
+// === Runtime constants ===
+
+const ENOKI_API_URL: &str = "https://api.enoki.mystenlabs.com/v1/zklogin";
 const REDIRECT_URI: &str = "http://localhost:5337/";
 const RESPONSE_TYPE: &str = "code";
 const SCOPE: &str = "openid";
-
-const CLIENT_ID: &str = env!("GOOGLE_CLIENT_ID");
-const CLIENT_SECRET: &str = env!("GOOGLE_CLIENT_SECRET");
-
-const ENOKI_API_URL: &str = "https://api.enoki.mystenlabs.com/v1/zklogin";
-const ENOKI_API_KEY: &str = env!("ENOKI_API_KEY");
 
 /// Opens the login page in the default browser. The nonce must be fetch preemptively and stored in the session.
 /// It is then used to generate the zkp.
@@ -172,8 +182,8 @@ pub async fn get_jwt(code: String) -> Result<String, Error> {
         .post("https://oauth2.googleapis.com/token")
         .form(&[
             ("code", &code),
-            ("client_id", &std::env::var("GOOGLE_CLIENT_ID").unwrap()),
-            ("client_secret", &std::env::var("GOOGLE_CLIENT_SECRET").unwrap()),
+            ("client_id", &CLIENT_ID.to_string()),
+            ("client_secret", &CLIENT_SECRET.to_string()),
             ("redirect_uri", &REDIRECT_URI.to_string()),
             ("grant_type", &"authorization_code".to_string()),
         ])

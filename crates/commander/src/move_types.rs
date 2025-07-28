@@ -5,10 +5,11 @@
 
 use std::fmt::Display;
 
-use crate::draw::Draw;
 use macroquad::prelude::*;
 use serde::{Deserialize, Serialize};
 use sui_types::base_types::SuiAddress;
+
+use crate::draw::Draw;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct ID(SuiAddress);

@@ -3,9 +3,10 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use crate::game::App;
-use macroquad::prelude::*;
 use gamepads::{Button, Gamepads};
+use macroquad::prelude::*;
+
+use crate::game::App;
 
 /// Keys that are tracked for input.
 const TRACKED_KEYS: [KeyCode; 8] = [
@@ -66,13 +67,12 @@ pub fn handle_gamepad_input(app: &mut App, gamepads: &mut Gamepads) {
                     b @ _ => {
                         println!("Unhandled button: {:?}", b);
                         continue;
-                    },
+                    }
                 });
 
                 println!("Just pressed button: {:?}", button);
                 // gamepads.rumble(gamepad.id(), 1000, 0, 1.0, 0.0);
             }
-
         }
         // println!("Left thumbstick: {:?}", gamepad.left_stick());
         // println!("Right thumbstick: {:?}", gamepad.right_stick());

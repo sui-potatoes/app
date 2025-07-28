@@ -3,8 +3,9 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use macroquad::prelude::*;
 use std::f32::consts::PI;
+
+use macroquad::prelude::*;
 
 pub trait Draw {
     fn draw(&self);

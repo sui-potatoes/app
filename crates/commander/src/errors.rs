@@ -1,8 +1,9 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use crate::zklogin::ZkLoginError;
 use thiserror::Error;
+
+use crate::zklogin::ZkLoginError;
 
 #[derive(Error, Debug)]
 pub enum Error {
