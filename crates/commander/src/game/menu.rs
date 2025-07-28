@@ -3,24 +3,31 @@
 
 use std::fmt::Display;
 
+use macroquad::prelude::*;
 use sui_types::base_types::SuiAddress;
 
 use crate::{
     client::WithRef,
+    draw::Draw,
     move_types::{Preset, Recruit, Replay},
 };
 
+const FONT_SIZE: f32 = 24.0;
+const TITLE_FONT_SIZE: f32 = 40.0;
+
 /// Draws the menu based on the items, tracks the currently selected item. Reacts
 /// on keyboard input to navigate the menu.
-pub struct Menu<T: MenuItem> {
+pub struct Menu<Item: MenuItem> {
     pub title: Option<String>,
-    pub items: Vec<T>,
+    /// The items in the menu.
+    pub items: Vec<Item>,
+    /// The index of the currently selected item.
     pub selected_item: usize,
     /// Size of the window (how many to show at once).
     pub window: Option<usize>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy)]
 pub enum MainMenuItem {
     StartGame,
     Login,
@@ -73,6 +80,8 @@ impl MenuItem for PresetMenuItem {}
 impl MenuItem for SettingsMenuItem {}
 impl MenuItem for WindowSettingsMenuItem {}
 impl MenuItem for RecruitMenuItem {}
+
+// === Menu impls ===
 
 impl Menu<MainMenuItem> {
     pub fn main(address: Option<SuiAddress>) -> Self {
@@ -186,6 +195,58 @@ impl<T: MenuItem> Menu<T> {
 
     pub fn select(&mut self) -> &T {
         &self.items[self.selected_item]
+    }
+}
+
+impl<T: MenuItem> Draw for Menu<T> {
+    fn draw(&self) {
+        let offset = if let Some(title) = &self.title {
+            draw_text(&title, 20.0, 40.0, TITLE_FONT_SIZE, WHITE);
+            TITLE_FONT_SIZE * 2.0
+        } else {
+            FONT_SIZE
+        };
+
+        // If window is not set, draw all items at all times.
+        if self.window.is_none() {
+            for (i, item) in self.items.iter().enumerate() {
+                let color = if i == self.selected_item {
+                    WHITE
+                } else {
+                    BLACK
+                };
+                draw_text(
+                    &item.to_string(),
+                    20.0,
+                    offset + (i as f32 * FONT_SIZE),
+                    FONT_SIZE,
+                    color,
+                );
+            }
+            return;
+        }
+
+        // If window is set, cursor shifts the window when moving up/down.
+        let window = self.window.unwrap();
+        let start = self.selected_item.saturating_sub(window / 2);
+        let end = start + window;
+        let mut j = 0;
+
+        for (i, item) in self.items.iter().enumerate().skip(start).take(end - start) {
+            let color = if i == self.selected_item {
+                WHITE
+            } else {
+                BLACK
+            };
+            draw_text(
+                &item.to_string(),
+                20.0,
+                offset + (j as f32 * FONT_SIZE),
+                FONT_SIZE,
+                color,
+            );
+            j += 1;
+        }
     }
 }
 

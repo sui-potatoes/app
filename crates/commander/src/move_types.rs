@@ -9,10 +9,10 @@ use macroquad::prelude::*;
 use serde::{Deserialize, Serialize};
 use sui_types::base_types::SuiAddress;
 
-use crate::draw::Draw;
+use crate::draw::{Draw, TEXTURES, Texture};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
-pub struct ID(SuiAddress);
+pub struct ID(pub SuiAddress);
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 /// A single in-game Tile.
@@ -30,7 +30,7 @@ pub enum TileType {
         right: u8,
         bottom: u8,
     },
-    Unwalkable,
+    Obstacle,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -41,23 +41,54 @@ pub struct Map {
     pub turn: u16,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub struct History(pub Vec<Record>);
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub enum Record {
+    /// Header: single action.
     Reload(Vec<u16>),
+    /// Header: single action.
     NextTurn(u16),
+    /// Header: single action.
     Move(Vec<u8>),
+    /// Header: action with effects.
     Attack { origin: Vec<u16>, target: Vec<u16> },
+    /// Header: single action.
     RecruitPlaced(u16, u16),
+    /// Effect: damage.
     Damage(u8),
+    /// Effect: miss.
     Miss,
+    /// Effect: explosion.
     Explosion,
+    /// Effect: critical hit.
     CriticalHit(u8),
+    /// Header: action with effects.
     Grenade(u16, u16, u16),
+    /// Effect: unit KIA.
     UnitKIA(ID),
+    /// Effect: unit dodged.
     Dodged,
+}
+
+impl Display for Record {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Record::Reload(at) => write!(f, "Reload: {:?}", at),
+            Record::NextTurn(turn) => write!(f, "Next Turn: {}", turn),
+            Record::Move(path) => write!(f, "Move: {:?}", path),
+            Record::Attack { origin, target } => write!(f, "Attack: {:?} -> {:?}", origin, target),
+            Record::RecruitPlaced(x, y) => write!(f, "Recruit Placed: ({}, {})", x, y),
+            Record::Damage(damage) => write!(f, "Damage: {}", damage),
+            Record::Miss => write!(f, "Miss"),
+            Record::Explosion => write!(f, "Explosion"),
+            Record::CriticalHit(damage) => write!(f, "Critical Hit: {}", damage),
+            Record::Grenade(x, y, damage) => write!(f, "Grenade: ({}, {}) -> {}", x, y, damage),
+            Record::UnitKIA(id) => write!(f, "Unit KIA: {}", id),
+            Record::Dodged => write!(f, "Dodged"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -66,6 +97,12 @@ pub struct Param(u16, u16);
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Stats(u128);
+
+impl Default for Stats {
+    fn default() -> Self {
+        Self(0x07_41_0A_00_00_00_00_00_00_00_00_00_00_00_00_00)
+    }
+}
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Unit {
@@ -76,6 +113,20 @@ pub struct Unit {
     pub grenade_used: bool,
     pub stats: Stats,
     pub last_turn: u16,
+}
+
+impl Default for Unit {
+    fn default() -> Self {
+        Self {
+            recruit: ID(SuiAddress::default()),
+            ap: Param(2, 0),
+            hp: Param(15, 0),
+            ammo: Param(5, 0),
+            grenade_used: false,
+            stats: Stats::default(),
+            last_turn: 0,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -170,6 +221,56 @@ pub enum Direction {
     Down,
     Left,
     Right,
+    None,
+}
+
+impl TryFrom<u8> for Direction {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            1 => Ok(Self::Up),
+            2 => Ok(Self::Right),
+            4 => Ok(Self::Down),
+            8 => Ok(Self::Left),
+            0 => Ok(Self::None),
+            _ => Err(()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Cursor {
+    pub position: (u8, u8),
+    pub history: Vec<(u8, u8)>,
+}
+
+impl Cursor {
+    pub fn new(position: (u8, u8)) -> Self {
+        Self {
+            position,
+            history: vec![position],
+        }
+    }
+
+    pub fn move_to(&mut self, direction: Direction) {
+        let new_position = match direction {
+            Direction::Up => (self.position.0 - 1, self.position.1),
+            Direction::Down => (self.position.0 + 1, self.position.1),
+            Direction::Left => (self.position.0, self.position.1 - 1),
+            Direction::Right => (self.position.0, self.position.1 + 1),
+            Direction::None => self.position,
+        };
+
+        self.position = new_position;
+        self.history.push(self.position);
+    }
+}
+
+impl Into<Vec<(u8, u8)>> for Cursor {
+    fn into(self) -> Vec<(u8, u8)> {
+        self.history
+    }
 }
 
 /// Stats are a bit field of 10 bytes, each byte is a stat value, encoded as a
@@ -278,10 +379,10 @@ impl Map {
                 for (x, y) in self.von_neumann(nx, ny) {
                     let to = &self.grid[x as usize][y as usize];
                     let from = &self.grid[nx as usize][ny as usize];
-                    let direction = self.coords_to_direction((nx, ny), (x, y));
+                    let direction = Direction::from_coords((nx, ny), (x, y));
 
                     if to.unit.is_some()
-                        || matches!(to.tile_type, TileType::Unwalkable)
+                        || matches!(to.tile_type, TileType::Obstacle)
                         || map[x as usize][y as usize] != 0
                     {
                         continue;
@@ -452,7 +553,7 @@ impl Draw for Map {
                             );
                         }
                     }
-                    TileType::Unwalkable => {
+                    TileType::Obstacle => {
                         draw_rectangle(
                             x as f32 * tile_width * scale_x,
                             y as f32 * tile_width * scale_y,
@@ -462,8 +563,33 @@ impl Draw for Map {
                         );
                     }
                 }
+
+                // Draw the unit if present.
+                if let Some(_unit) = tile.unit {
+                    if let Some(texture) = TEXTURES.lock().unwrap().get(&Texture::Unit) {
+                        draw_texture_ex(
+                            texture,
+                            x as f32 * tile_width * scale_x,
+                            y as f32 * tile_width * scale_y,
+                            WHITE,
+                            DrawTextureParams {
+                                dest_size: Some(Vec2::new(
+                                    tile_width * scale_x,
+                                    tile_width * scale_y,
+                                )),
+                                ..Default::default()
+                            },
+                        );
+                    }
+                }
             }
         }
+    }
+}
+
+impl From<SuiAddress> for ID {
+    fn from(address: SuiAddress) -> Self {
+        Self(address)
     }
 }
 
@@ -496,6 +622,52 @@ impl Display for ID {
         let end = addr[addr.len() - 4..].to_string();
 
         write!(f, "{}..{}", start, end)
+    }
+}
+
+impl Direction {
+    pub fn from_coords(from: (u8, u8), to: (u8, u8)) -> Self {
+        if from.0 < to.0 {
+            Self::Down
+        } else if from.0 > to.0 {
+            Self::Up
+        } else if from.1 < to.1 {
+            Self::Right
+        } else if from.1 > to.1 {
+            Self::Left
+        } else {
+            Self::None
+        }
+    }
+}
+
+impl Display for Direction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Direction::Up => "Up",
+                Direction::Down => "Down",
+                Direction::Left => "Left",
+                Direction::Right => "Right",
+                Direction::None => "None",
+            }
+        )
+    }
+}
+
+impl Display for TileType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                TileType::Empty => "Empty",
+                TileType::Cover { .. } => "Cover",
+                TileType::Obstacle => "Obstacle",
+            }
+        )
     }
 }
 

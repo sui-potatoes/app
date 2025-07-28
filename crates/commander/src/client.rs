@@ -6,7 +6,7 @@
 use std::str::FromStr;
 
 use move_core_types::language_storage::StructTag;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sui_json_rpc_types::{ObjectsPage, SuiObjectResponse, SuiRawData};
 use sui_sdk::{
     SuiClient, SuiClientBuilder,
@@ -139,7 +139,7 @@ where
 
 // === Ref Wrapper ===
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WithRef<T> {
     pub object_ref: ObjectRef,
     pub data: T,
