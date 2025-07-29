@@ -12,6 +12,8 @@ use crate::{
     move_types::{Preset, Recruit, Replay},
 };
 
+const SELECTED_COLOR: Color = WHITE;
+const TEXT_COLOR: Color = LIGHTGRAY;
 const FONT_SIZE: f32 = 24.0;
 const TITLE_FONT_SIZE: f32 = 40.0;
 
@@ -211,9 +213,9 @@ impl<T: MenuItem> Draw for Menu<T> {
         if self.window.is_none() {
             for (i, item) in self.items.iter().enumerate() {
                 let color = if i == self.selected_item {
-                    WHITE
+                    SELECTED_COLOR
                 } else {
-                    BLACK
+                    TEXT_COLOR
                 };
                 draw_text(
                     &item.to_string(),
@@ -234,9 +236,9 @@ impl<T: MenuItem> Draw for Menu<T> {
 
         for (i, item) in self.items.iter().enumerate().skip(start).take(end - start) {
             let color = if i == self.selected_item {
-                WHITE
+                SELECTED_COLOR
             } else {
-                BLACK
+                TEXT_COLOR
             };
             draw_text(
                 &item.to_string(),

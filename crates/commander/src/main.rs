@@ -104,11 +104,23 @@ async fn main() -> Result<(), anyhow::Error> {
     // Register global textures before the game loop starts.
     global_load_texture(Texture::Background, "assets/texture-sand.png").await;
     global_load_texture(Texture::Unit, "assets/unit-soldier.png").await;
+    global_load_texture(Texture::Main, "assets/main-screen.png").await;
 
     // Main game loop
     loop {
         gamepads.poll();
         clear_background(LIGHTGRAY);
+        draw_texture_ex(
+            TEXTURES.lock().unwrap().get(&Texture::Main).unwrap(),
+            0.0,
+            0.0,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(Vec2::new(screen_width(), screen_height())),
+                ..Default::default()
+            },
+        );
+
         input::handle_input(&mut app);
         input::handle_gamepad_input(&mut app, &mut gamepads);
 
