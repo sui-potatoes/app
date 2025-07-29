@@ -4,10 +4,10 @@
 use std::fmt::Display;
 
 use macroquad::prelude::*;
-use sui_types::base_types::SuiAddress;
+use sui_sdk_types::Address;
 
 use crate::{
-    client::WithRef,
+    WithRef,
     draw::Draw,
     move_types::{Preset, Recruit, Replay},
 };
@@ -31,7 +31,7 @@ pub struct Menu<Item: MenuItem> {
 pub enum MainMenuItem {
     StartGame,
     Login,
-    Address(SuiAddress),
+    Address(Address),
     Replays,
     Presets,
     Recruits,
@@ -84,7 +84,7 @@ impl MenuItem for RecruitMenuItem {}
 // === Menu impls ===
 
 impl Menu<MainMenuItem> {
-    pub fn main(address: Option<SuiAddress>) -> Self {
+    pub fn main(address: Option<Address>) -> Self {
         let items = if let Some(_) = address {
             vec![
                 MainMenuItem::StartGame,

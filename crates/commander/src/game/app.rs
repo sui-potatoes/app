@@ -7,12 +7,11 @@ use std::{
 };
 
 use macroquad::{miniquad::window::set_window_size, prelude::*};
-use sui_types::base_types::SuiAddress;
+use sui_sdk_types::Address;
 
 use super::{menu::*, player::*};
 use crate::{
-    Message as TokioMessage, State,
-    client::WithRef,
+    Message as TokioMessage, State, WithRef,
     draw::*,
     input::Command,
     move_types::{Game, ID, Preset, Recruit, Replay},

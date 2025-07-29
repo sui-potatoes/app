@@ -4,297 +4,212 @@
 //! This module contains the logic for executing game transactions. It caches
 //! used object refs to avoid unnecessary queries and speed up the execution.
 
-use std::{collections::HashMap, str::FromStr};
+// use std::{collections::HashMap, str::FromStr};
 
-use fastcrypto::ed25519::Ed25519KeyPair;
-use fastcrypto_zkp::bn254::zk_login::ZkLoginInputs;
-use move_core_types::language_storage::StructTag;
-use shared_crypto::intent::{Intent, IntentMessage};
-use sui_json_rpc_types::{
-    Coin, ObjectChange, SuiObjectDataOptions, SuiObjectResponse, SuiTransactionBlockEffectsAPI,
-    SuiTransactionBlockResponse, SuiTransactionBlockResponseOptions,
-};
-use sui_sdk::SuiClient;
-use sui_types::{
-    base_types::{ObjectID, ObjectRef, SequenceNumber, SuiAddress},
-    crypto::Signature,
-    programmable_transaction_builder::ProgrammableTransactionBuilder,
-    quorum_driver_types::ExecuteTransactionRequestType,
-    signature::GenericSignature,
-    transaction::{
-        Command, GasData, ObjectArg, ProgrammableMoveCall, ProgrammableTransaction, Transaction,
-        TransactionData, TransactionDataV1, TransactionExpiration, TransactionKind,
-    },
-    type_input::TypeInput,
-    zk_login_authenticator::ZkLoginAuthenticator,
-};
+// use fastcrypto::ed25519::Ed25519KeyPair;
+// use fastcrypto_zkp::bn254::zk_login::ZkLoginInputs;
 
-use crate::config::SUI_COIN_TYPE;
+// use crate::config::SUI_COIN_TYPE;
+
+use std::{collections::HashMap, ops::Deref, time::Instant};
+
+use serde::Deserialize;
+use sui_crypto::{SuiSigner, ed25519::Ed25519PrivateKey};
+use sui_rpc::{
+    Client,
+    field::FieldMask,
+    proto::sui::rpc::v2beta2::{ExecuteTransactionRequest, ListOwnedObjectsRequest},
+};
+use sui_sdk_types::{
+    Address, Identifier, ObjectId, ObjectOut, ObjectReference, Transaction, TransactionEffects,
+    TransactionEffectsV2, TypeTag, UserSignature, Version, ZkLoginAuthenticator, ZkLoginInputs,
+};
+use sui_transaction_builder::{Function, Serialized, TransactionBuilder, unresolved::Input};
+
+use crate::{WithRef, config::SUI_COIN_TYPE};
 
 pub struct TxRunner {
-    keypair: Ed25519KeyPair,
+    keypair: Ed25519PrivateKey,
     zkp: ZkLoginInputs,
-    client: SuiClient,
-    address: SuiAddress,
+    client: Client,
+    address: Address,
     max_epoch: u64,
 
+    coins: Option<Vec<WithRef<Coin>>>,
     rgp: Option<u64>,
-    coins: Option<Vec<Coin>>,
 
     /// Cache of shared object refs.
-    shared_refs: HashMap<ObjectID, SharedObjectRef>,
+    shared_refs: HashMap<ObjectId, SharedObjectRef>,
 }
 
+#[derive(Debug, Clone)]
 pub struct SharedObjectRef {
-    id: ObjectID,
-    initial_shared_version: SequenceNumber,
+    id: ObjectId,
+    initial_shared_version: Version,
     mutable: bool,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Coin {
+    id: ObjectId,
+    balance: u64,
+}
+
+impl From<WithRef<Coin>> for Input {
+    fn from(coin: WithRef<Coin>) -> Self {
+        Input::owned(
+            *coin.object_ref.object_id(),
+            coin.object_ref.version(),
+            *coin.object_ref.digest(),
+        )
+    }
 }
 
 impl TxRunner {
     pub fn new(
-        keypair: Ed25519KeyPair,
+        secret_key: Ed25519PrivateKey,
         zkp: ZkLoginInputs,
         max_epoch: u64,
-        client: SuiClient,
+        client: Client,
     ) -> Self {
+        let address: Address = zkp
+            .public_identifier()
+            .unwrap()
+            .derive_address()
+            .next()
+            .unwrap();
+
         Self {
-            address: SuiAddress::try_from_unpadded(&zkp).unwrap(),
-            keypair,
+            address,
+            keypair: secret_key,
             zkp,
             client,
             max_epoch,
-            rgp: None,
             coins: None,
+            rgp: None,
             shared_refs: HashMap::new(),
         }
     }
 
-    pub async fn test_tx(&mut self) -> Result<(), anyhow::Error> {
-        let mut ptb = ProgrammableTransactionBuilder::new();
-        let arg = ptb.pure(10u8)?;
-        let some_res = ptb.command(Command::MoveCall(
-            ProgrammableMoveCall {
-                package: ObjectID::from_hex_literal("0x1")?,
-                module: "option".to_string(),
-                function: "some".to_string(),
-                type_arguments: vec![TypeInput::U8],
-                arguments: vec![arg],
-            }
-            .into(),
-        ));
+    pub async fn test_tx(&mut self) -> Result<TransactionEffectsV2, anyhow::Error> {
+        let gas_coins = self.get_gas_coins().await?;
+        let mut ptb = TransactionBuilder::new();
+        let input = ptb.input(Serialized(&100u8));
 
-        ptb.command(Command::MoveCall(
-            ProgrammableMoveCall {
-                package: ObjectID::from_hex_literal("0x1")?,
-                module: "option".to_string(),
-                function: "destroy_some".to_string(),
-                type_arguments: vec![TypeInput::U8],
-                arguments: vec![some_res],
-            }
-            .into(),
-        ));
-
-        // 0.1 SUI
-        let _res = self.execute_tx(ptb.finish(), Some(100000000), None).await?;
-
-        Ok(())
-    }
-
-    pub async fn create_demo() {}
-
-    /// Execute a programmable transaction:
-    /// 1. Run devInspectTransactionBlock to get the gas cost
-    /// 2. Select coins to pay for the gas
-    /// 3. Sign & Execute the transaction
-    pub async fn execute_tx(
-        &mut self,
-        ptb: ProgrammableTransaction,
-        gas_budget: Option<u64>,
-        options: Option<SuiTransactionBlockResponseOptions>,
-    ) -> Result<SuiTransactionBlockResponse, anyhow::Error> {
-        let gas_price = if let Some(rgp) = self.rgp {
-            rgp
-        } else {
-            let rgp = self.client.read_api().get_reference_gas_price().await?;
-            self.rgp = Some(rgp);
-            rgp
-        };
-
-        let gas_budget = if let Some(gas_budget) = gas_budget {
-            gas_budget
-        } else {
-            // This currently exists only for gas. Can be removed potentially.
-            // Manual gas submission saves ~150ms of latency per tx.
-            let results = self
-                .client
-                .read_api()
-                .dev_inspect_transaction_block(
-                    self.address,
-                    TransactionKind::ProgrammableTransaction(ptb.clone()),
-                    None,
-                    None,
-                    None,
-                )
-                .await?;
-            let gas = results.effects.gas_cost_summary().gas_used();
-            gas * gas_price
-        };
-
-        let gas_coins = self.select_coins(gas_budget).await?;
-        let tx = TransactionKind::ProgrammableTransaction(ptb);
-        let tx_data = TransactionData::V1(TransactionDataV1 {
-            sender: self.address,
-            gas_data: GasData {
-                payment: gas_coins,
-                owner: self.address,
-                price: gas_price,
-                budget: gas_budget,
-            },
-            expiration: TransactionExpiration::None,
-            kind: tx,
-        });
-
-        // Sign with ephemeral key, then create a ZkLogin signature.
-        let signature = Signature::new_secure(
-            &IntentMessage::new(Intent::sui_transaction(), &tx_data),
-            &self.keypair,
+        ptb.move_call(
+            Function::new(
+                Address::from_hex("0x1")?,
+                Identifier::new("option")?,
+                Identifier::new("some")?,
+                vec![TypeTag::U8],
+            ),
+            vec![input],
         );
 
-        // Wrap the signature in a ZkLoginAuthenticator.
-        let signature = GenericSignature::from(ZkLoginAuthenticator::new(
-            self.zkp.clone(),
-            self.max_epoch,
-            signature,
-        ));
+        ptb.set_sender(self.address);
+        ptb.add_gas_objects(gas_coins.iter().map(|coin| Input::from(coin.clone())));
+        ptb.set_gas_budget(100000000);
+        ptb.set_gas_price(1000);
+        ptb.set_expiration(self.max_epoch);
 
-        // Whatever the options are, we require object changes and effects at all times.
-        let res = self
-            .client
-            .quorum_driver_api()
-            .execute_transaction_block(
-                // Note: use `from_data` if the signature is not `GenericSignature`.
-                Transaction::from_generic_sig_data(tx_data, vec![signature]),
-                options
-                    .unwrap_or_default()
-                    .with_object_changes()
-                    .with_effects(),
-                Some(ExecuteTransactionRequestType::WaitForEffectsCert),
-            )
-            .await?;
-
-        // Remove coins from the coin cache if they're marked as deleted in object changes.
-        // This way we maintain integrity of the Coin cache.
-        if let Some(object_changes) = &res.object_changes {
-            let sui_coin_type = StructTag::from_str(SUI_COIN_TYPE).unwrap();
-
-            for change in object_changes {
-                match change {
-                    ObjectChange::Deleted {
-                        object_type,
-                        object_id,
-                        ..
-                    } => {
-                        if object_type == &sui_coin_type {
-                            if let Some(coins) = &mut self.coins {
-                                coins.retain(|coin| coin.coin_object_id != *object_id);
-                            }
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
-
-        if let Some(effects) = &res.effects {
-            println!("Status: {:?}", effects.status());
-        }
-
-        Ok(res)
-    }
-
-    /// Select coins to pay for the gas. Caches the coins in the `TxRunner` instance.
-    pub async fn select_coins(&mut self, amount: u64) -> Result<Vec<ObjectRef>, anyhow::Error> {
-        let coins = if let Some(coins) = &self.coins {
-            coins
-        } else {
-            let page = self
-                .client
-                .coin_read_api()
-                .get_coins(self.address, None, None, Some(100))
-                .await?;
-            self.coins = Some(page.data.clone());
-            self.coins.as_ref().unwrap()
+        let tx: Transaction = ptb.finish()?;
+        let simple_signature = match self.keypair.sign_transaction(&tx) {
+            Ok(UserSignature::Simple(simple)) => simple,
+            Ok(_) => return Err(anyhow::anyhow!("Failed to sign transaction")),
+            Err(_) => return Err(anyhow::anyhow!("Failed to sign transaction")),
         };
 
-        // Pick coins until we have enough for amount.
-        let mut total_picked = 0u64;
-        let mut picked = vec![];
-        for coin in coins {
-            if total_picked >= amount {
-                break;
-            }
+        let zklogin_signature = UserSignature::ZkLogin(Box::new(ZkLoginAuthenticator {
+            inputs: self.zkp.clone(),
+            signature: simple_signature,
+            max_epoch: self.max_epoch,
+        }));
 
-            total_picked += coin.balance;
-            picked.push(coin.object_ref());
-        }
-
-        Ok(picked)
-    }
-
-    /// Get a shared object ref from the cache, or query it from the network and
-    /// cache it. Shared objects versions do not need to be tracked, easy to use.
-    pub async fn shared_object_arg(
-        &mut self,
-        object_id: ObjectID,
-    ) -> Result<ObjectArg, anyhow::Error> {
-        let object = self
+        let timer = Instant::now();
+        let tx_result = self
             .client
-            .read_api()
-            .get_object_with_options(object_id, SuiObjectDataOptions::new().with_owner())
+            .execution_client()
+            .execute_transaction(ExecuteTransactionRequest {
+                transaction: Some(tx.into()),
+                signatures: vec![zklogin_signature.into()],
+                read_mask: Some(FieldMask {
+                    paths: vec!["transaction.effects.bcs".to_string()],
+                }),
+                ..Default::default()
+            })
             .await?;
+        println!("Execution time: {:?}", timer.elapsed());
 
-        if let Some(error) = object.error {
-            return Err(anyhow::anyhow!("Object not found {}", error));
-        };
-
-        Ok(SharedObjectRef::try_from(object)?.into())
-    }
-}
-
-// === Impls ===
-
-impl TryFrom<SuiObjectResponse> for SharedObjectRef {
-    type Error = anyhow::Error;
-
-    fn try_from(object: SuiObjectResponse) -> Result<Self, Self::Error> {
-        if let Some(data) = object.data {
-            if let Some(owner) = data.owner {
-                Ok(SharedObjectRef {
-                    id: data.object_id,
-                    initial_shared_version: owner.start_version().unwrap(),
-                    // Currently hardcoded. Maybe there's a better way to do this.
-                    mutable: true,
-                })
-            } else {
+        let effects: TransactionEffects = match tx_result.get_ref().transaction.as_ref() {
+            Some(tx) => {
+                bcs::from_bytes(tx.effects.as_ref().unwrap().bcs.as_ref().unwrap().value()).unwrap()
+            }
+            None => {
                 return Err(anyhow::anyhow!(
-                    "Missing owner, use `with_owner` when querying"
+                    "Incorrect path specified, transaction missing"
                 ));
             }
-        } else {
-            return Err(anyhow::anyhow!(
-                "Missing data, use `with_data` when querying"
-            ));
+        };
+
+        let effects = match effects {
+            TransactionEffects::V2(effects) => effects.deref().clone(),
+            _ => {
+                return Err(anyhow::anyhow!(
+                    "Unsupported transaction effects version, expected V2"
+                ));
+            }
+        };
+
+        self.update_coins_from_effects(&effects);
+
+        Ok(effects)
+    }
+
+    async fn get_gas_coins(&mut self) -> Result<Vec<WithRef<Coin>>, anyhow::Error> {
+        match &self.coins {
+            Some(coins) => Ok(coins.clone()),
+            None => {
+                let coins = self
+                    .client
+                    .live_data_client()
+                    .list_owned_objects(ListOwnedObjectsRequest {
+                        owner: Some(self.address.to_string()),
+                        object_type: Some(SUI_COIN_TYPE.to_string()),
+                        read_mask: Some(FieldMask {
+                            paths: vec!["contents".to_string(), "digest".to_string()],
+                        }),
+                        ..Default::default()
+                    })
+                    .await?
+                    .get_ref()
+                    .objects
+                    .iter()
+                    .map(|obj| WithRef::from_rpc_object(obj).unwrap())
+                    .collect::<Vec<WithRef<Coin>>>();
+
+                self.coins = Some(coins.clone());
+                Ok(coins)
+            }
         }
     }
-}
 
-impl Into<ObjectArg> for SharedObjectRef {
-    fn into(self) -> ObjectArg {
-        ObjectArg::SharedObject {
-            id: self.id,
-            initial_shared_version: self.initial_shared_version,
-            mutable: self.mutable,
+    fn update_coins_from_effects(&mut self, effects: &TransactionEffectsV2) {
+        if let Some(coins) = &mut self.coins {
+            for obj in &effects.changed_objects {
+                coins
+                    .iter_mut()
+                    .find(|coin| coin.object_ref.object_id() == &obj.object_id)
+                    .map(|coin| {
+                        let digest = match &obj.output_state {
+                            ObjectOut::NotExist => return,
+                            ObjectOut::ObjectWrite { digest, .. } => *digest,
+                            ObjectOut::PackageWrite { digest, .. } => *digest,
+                        };
+
+                        coin.object_ref =
+                            ObjectReference::new(obj.object_id, effects.lamport_version, digest)
+                    });
+            }
         }
     }
 }

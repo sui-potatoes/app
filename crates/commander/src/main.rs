@@ -5,25 +5,29 @@
 
 use std::{
     path::Path,
+    str::FromStr,
     sync::{
         Arc, Mutex,
         mpsc::{Receiver, Sender, channel},
     },
 };
 
-use fastcrypto::{
-    ed25519::{Ed25519KeyPair, Ed25519PublicKey},
-    traits::KeyPair,
-};
-use fastcrypto_zkp::bn254::zk_login::ZkLoginInputs;
 use gamepads::Gamepads;
 use macroquad::{miniquad::conf::Icon, prelude::*};
 use quad_storage::STORAGE;
 use serde::{Deserialize, Serialize};
-use sui_types::base_types::SuiAddress;
+
+use sui_crypto::ed25519::Ed25519PrivateKey;
+use sui_rpc::{
+    Client,
+    field::FieldMask,
+    proto::sui::rpc::v2beta2::{ListOwnedObjectsRequest, Object},
+};
+use sui_sdk_types::{
+    Address, Ed25519PublicKey, ObjectDigest, ObjectId, ObjectReference, Version, ZkLoginInputs,
+};
 use tokio::runtime::Runtime;
 
-mod client;
 mod config;
 mod draw;
 mod errors;
@@ -34,7 +38,7 @@ mod tx;
 mod zklogin;
 
 use crate::{
-    client::{CommanderClient, WithRef},
+    config::{COMMANDER_OBJ, PRESET_STRUCT_TAG, RECRUIT_STRUCT_TAG, REPLAY_STRUCT_TAG},
     draw::{Draw, TEXTURES, Texture},
     game::{App, Message as AppMessage},
     move_types::{Preset, Recruit, Replay},
@@ -51,8 +55,8 @@ const SESSION_KEY: &str = "session";
 
 #[derive(Serialize, Deserialize)]
 pub struct Session {
-    pub address: SuiAddress,
-    pub keypair: Ed25519KeyPair,
+    pub address: Address,
+    pub keypair: String,
     pub zkp: ZkLoginInputs,
     pub max_epoch: u64,
 }
@@ -62,7 +66,7 @@ pub struct Session {
 /// Passed into the `App` during initialization and filled in + updated in event
 /// handlers.
 pub struct State {
-    pub address: Option<SuiAddress>,
+    pub address: Option<Address>,
     pub presets: Vec<WithRef<Preset>>,
     pub recruits: Vec<WithRef<Recruit>>,
     pub replays: Vec<WithRef<Replay>>,
@@ -118,26 +122,30 @@ async fn main() -> Result<(), anyhow::Error> {
     }
 }
 
+const GRPC_URL: &str =
+    "https://fullnode.testnet.sui.io/sui.rpc.v2beta2.LiveDataService/SimulateTransaction";
+
 fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<Mutex<State>>) {
+    let default_provider = rustls::crypto::aws_lc_rs::default_provider();
+    rustls::crypto::CryptoProvider::install_default(default_provider).unwrap();
+
     let rt = Runtime::new().unwrap();
-    let mut tx_runner = None;
     let prev_session = STORAGE.lock().unwrap().get(SESSION_KEY);
 
     rt.block_on(async move {
-        let client: CommanderClient = CommanderClient::new().await.unwrap();
-        println!("Sui testnet version: {}", client.as_inner().api_version());
+        let mut client = Client::new(GRPC_URL).unwrap();
+        let mut tx_runner: Option<TxRunner> = None;
 
         if let Some(prev_session) = prev_session {
-            if let Ok(mut session) = serde_json::from_str::<Session>(&prev_session) {
-                let zkp = session.zkp.init().unwrap();
+            if let Ok(session) = serde_json::from_str::<Session>(&prev_session) {
                 state.lock().unwrap().address = Some(session.address);
-                tx.send(Message::StateUpdated).unwrap();
                 tx_runner = Some(TxRunner::new(
-                    session.keypair,
-                    zkp,
+                    Ed25519PrivateKey::from_pem(&session.keypair).unwrap(),
+                    session.zkp,
                     session.max_epoch,
-                    client.as_inner().clone(),
+                    client.clone(),
                 ));
+                tx.send(Message::StateUpdated).unwrap();
             } else {
                 // Clean up session storage if data cannot be deserialized (very
                 // likely due to data format changes).
@@ -150,12 +158,13 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
                 match msg {
                     AppMessage::Logout => {
                         STORAGE.lock().unwrap().remove(SESSION_KEY);
-                        tx_runner = None;
+                        state.lock().unwrap().address = None;
+                        tx.send(Message::StateUpdated).unwrap();
                     }
                     AppMessage::PrepareLogin => {
-                        let keypair = Ed25519KeyPair::generate(&mut ::rand::thread_rng());
-                        let public_key = keypair.public();
-                        let login_res = login_action(public_key)
+                        let keypair = Ed25519PrivateKey::generate(&mut ::rand::thread_rng());
+                        let public_key = keypair.public_key();
+                        let login_res = login_action(&public_key)
                             .await
                             .map(|e| Some(e))
                             .unwrap_or_else(|e| {
@@ -165,19 +174,13 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
 
                         if let Some((new_address, zkp, max_epoch)) = login_res {
                             state.lock().unwrap().address = Some(new_address);
-                            tx_runner = Some(TxRunner::new(
-                                keypair.copy(),
-                                zkp.clone(),
-                                max_epoch,
-                                client.as_inner().clone(),
-                            ));
-                            state.lock().unwrap().address = Some(new_address);
                             tx.send(Message::StateUpdated).unwrap();
+
                             STORAGE.lock().unwrap().set(
                                 SESSION_KEY,
                                 &serde_json::to_string(&Session {
                                     address: new_address,
-                                    keypair,
+                                    keypair: keypair.to_pem().unwrap(),
                                     zkp,
                                     max_epoch,
                                 })
@@ -186,54 +189,84 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
                         }
                     }
                     AppMessage::StartGame => {
-                        // measure time between start and end of tx
-                        match &mut tx_runner {
-                            Some(tx_runner) => {
-                                let start = std::time::Instant::now();
-                                tx_runner.test_tx().await.unwrap();
-                                let end = std::time::Instant::now();
-                                println!("Test tx executed in {:?}", end.duration_since(start));
-                            }
-                            None => println!("No tx runner"),
+                        if let Some(tx_runner) = tx_runner.as_mut() {
+                            let _effects = match tx_runner.test_tx().await {
+                                Ok(effects) => effects,
+                                Err(err) => {
+                                    eprintln!("Error: {}", err);
+                                    continue;
+                                }
+                            };
                         }
                     }
-                    AppMessage::FetchPresets => match client.get_presets().await {
-                        Ok(presets) => {
-                            state.lock().unwrap().presets = presets;
-                            tx.send(Message::StateUpdated).unwrap();
-                        }
-                        Err(e) => eprintln!("Error fetching presets. Something went wrong: {}", e),
-                    },
+                    AppMessage::FetchPresets => {
+                        let mut state = state.lock().unwrap();
+                        state.presets = client
+                            .live_data_client()
+                            .list_owned_objects(ListOwnedObjectsRequest {
+                                owner: Some(COMMANDER_OBJ.to_string()),
+                                object_type: Some(PRESET_STRUCT_TAG.to_string()),
+                                read_mask: Some(FieldMask {
+                                    paths: vec!["contents".to_string(), "digest".to_string()],
+                                }),
+                                ..Default::default()
+                            })
+                            .await
+                            .unwrap()
+                            .get_ref()
+                            .objects
+                            .iter()
+                            .map(|obj| WithRef::from_rpc_object(obj).unwrap())
+                            .collect::<Vec<WithRef<Preset>>>();
+
+                        tx.send(Message::StateUpdated).unwrap();
+                    }
                     AppMessage::FetchRecruits => {
                         let mut state = state.lock().unwrap();
 
-                        if let Some(address) = state.address {
-                            match client.get_recruits(address).await {
-                                Ok(recruits) => {
-                                    state.recruits = recruits;
-                                    tx.send(Message::StateUpdated).unwrap();
-                                }
-                                Err(e) => eprintln!(
-                                    "Error fetching recruits. Something went wrong: {}",
-                                    e
-                                ),
-                            }
-                        }
+                        state.recruits = client
+                            .live_data_client()
+                            .list_owned_objects(ListOwnedObjectsRequest {
+                                owner: state.address.map(|a| a.to_string()),
+                                object_type: Some(RECRUIT_STRUCT_TAG.to_string()),
+                                page_size: Some(100),
+                                read_mask: Some(FieldMask {
+                                    paths: vec!["contents".to_string(), "digest".to_string()],
+                                }),
+                                ..Default::default()
+                            })
+                            .await
+                            .unwrap()
+                            .get_ref()
+                            .objects
+                            .iter()
+                            .map(|obj| WithRef::from_rpc_object(obj).unwrap())
+                            .collect::<Vec<WithRef<Recruit>>>();
+
+                        tx.send(Message::StateUpdated).unwrap();
                     }
                     AppMessage::FetchReplays => {
                         let mut state = state.lock().unwrap();
+                        state.replays = client
+                            .live_data_client()
+                            .list_owned_objects(ListOwnedObjectsRequest {
+                                owner: state.address.map(|a| a.to_string()),
+                                object_type: Some(REPLAY_STRUCT_TAG.to_string()),
+                                page_size: Some(100),
+                                read_mask: Some(FieldMask {
+                                    paths: vec!["contents".to_string(), "digest".to_string()],
+                                }),
+                                ..Default::default()
+                            })
+                            .await
+                            .unwrap()
+                            .get_ref()
+                            .objects
+                            .iter()
+                            .map(|obj| WithRef::from_rpc_object(obj).unwrap())
+                            .collect::<Vec<WithRef<Replay>>>();
 
-                        if let Some(address) = state.address {
-                            match client.get_replays(address).await {
-                                Ok(replays) => {
-                                    state.replays = replays;
-                                    tx.send(Message::StateUpdated).unwrap();
-                                }
-                                Err(e) => {
-                                    eprintln!("Error fetching replays. Something went wrong: {}", e)
-                                }
-                            }
-                        }
+                        tx.send(Message::StateUpdated).unwrap();
                     }
                 }
             }
@@ -244,26 +277,22 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
 /// Handles the login process.
 async fn login_action(
     public_key: &Ed25519PublicKey,
-) -> Result<(SuiAddress, ZkLoginInputs, u64), anyhow::Error> {
+) -> Result<(Address, ZkLoginInputs, u64), anyhow::Error> {
     // fetch nonce from zklogin and send it to the game
     let nonce = zklogin::get_nonce(public_key).await.unwrap();
     let max_epoch = nonce.max_epoch;
 
     zklogin::open_auth_page(&nonce.nonce);
 
-    let jwt = if let Ok(Some(code)) = zklogin::start_auth_listener().await {
-        zklogin::get_jwt(code)
-            .await
-            .map_err(|e| anyhow::anyhow!("Error getting JWT: {}", e))?
-    } else {
-        return Err(anyhow::anyhow!("Error getting login code"));
+    let jwt = match zklogin::start_auth_listener().await {
+        Ok(Some(code)) => zklogin::get_jwt(code).await.unwrap(),
+        Ok(None) => return Err(anyhow::anyhow!("Error getting login code")),
+        Err(e) => return Err(anyhow::anyhow!("Error getting login code: {}", e)),
     };
 
-    let zkp = zklogin::get_zkp(jwt, nonce, public_key)
-        .await
-        .map_err(|e| anyhow::anyhow!("Error getting ZKP: {}", e))?;
+    let zkp = zklogin::get_zkp(jwt, nonce, public_key).await?;
+    let address = zklogin::zkp_to_address(&zkp)?;
 
-    let address = SuiAddress::try_from_unpadded(&zkp)?;
     Ok((address, zkp, max_epoch))
 }
 
@@ -277,7 +306,34 @@ async fn global_load_texture(name: Texture, path: &str) {
     TEXTURES.lock().unwrap().insert(name, tile_texture);
 }
 
-// === Impls ===
+// === Utils ===
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WithRef<T> {
+    pub object_ref: ObjectReference,
+    pub data: T,
+}
+
+impl<'de, T> WithRef<T> {
+    pub fn from_rpc_object(obj: &'de Object) -> Result<Self, anyhow::Error>
+    where
+        T: Deserialize<'de>,
+    {
+        Ok(WithRef {
+            data: bcs::from_bytes(
+                obj.contents
+                    .as_ref()
+                    .ok_or(anyhow::anyhow!("No contents"))?
+                    .value(),
+            )?,
+            object_ref: ObjectReference::new(
+                ObjectId::from_str(&obj.object_id()).unwrap(),
+                Version::from(obj.version()),
+                ObjectDigest::from_base58(&obj.digest()).unwrap(),
+            ),
+        })
+    }
+}
 
 impl Default for State {
     fn default() -> Self {

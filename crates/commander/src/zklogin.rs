@@ -4,14 +4,13 @@
 use std::{collections::HashMap, convert::Infallible, sync::Arc};
 
 use axum::{Router, extract::Query, response::Html, routing::get};
-use fastcrypto::{
-    ed25519::Ed25519PublicKey,
-    encoding::{Base64, Encoding},
-};
-use fastcrypto_zkp::bn254::zk_login::ZkLoginInputs;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::sync::{Mutex, oneshot};
+
+use sui_sdk_types::{
+    Address, Bn254FieldElement, Ed25519PublicKey, ZkLoginClaim, ZkLoginInputs, ZkLoginProof,
+};
 
 use crate::errors::Error;
 
@@ -202,6 +201,42 @@ pub async fn get_jwt(code: String) -> Result<String, Error> {
     Ok(data.id_token)
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZkpClaimResponse {
+    pub value: String,
+    pub index_mod_4: u8,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZkpResponse {
+    pub proof_points: ZkLoginProof,
+    pub iss_base64_details: ZkpClaimResponse,
+    pub header_base64: String,
+    pub address_seed: Bn254FieldElement,
+}
+
+impl Into<ZkLoginInputs> for ZkpResponse {
+    fn into(self) -> ZkLoginInputs {
+        ZkLoginInputs {
+            proof_points: self.proof_points,
+            iss_base64_details: self.iss_base64_details.into(),
+            header_base64: self.header_base64,
+            address_seed: self.address_seed,
+        }
+    }
+}
+
+impl Into<ZkLoginClaim> for ZkpClaimResponse {
+    fn into(self) -> ZkLoginClaim {
+        ZkLoginClaim {
+            value: self.value,
+            index_mod_4: self.index_mod_4,
+        }
+    }
+}
+
 /// Make a request to the Enoki API to get the ZKP data.
 pub async fn get_zkp(
     jwt: String,
@@ -244,21 +279,25 @@ pub async fn get_zkp(
         .await
         .map_err(|_| ZkLoginError::FailedToParseResponse.into())?;
 
-    let mut data: DataWrapper<ZkLoginInputs> =
-        serde_json::from_str(&body).map_err(|_| ZkLoginError::FailedToParseResponse.into())?;
+    let data: DataWrapper<ZkpResponse> = serde_json::from_str(&body).map_err(|err| {
+        println!("Error: {:?}", err);
+        ZkLoginError::FailedToParseResponse.into()
+    })?;
 
-    // This .init() call is critical for parsing the ISS
-    Ok(data
-        .data
-        .init()
-        .map_err(|_| ZkLoginError::FailedZkpInit.into())?)
+    Ok(data.data.into())
 }
 
 /// Pad the public key with a 0x00 byte to make it 32 bytes long and encode it in base64.
 pub fn ephemeral_public_key(public_key: &Ed25519PublicKey) -> String {
+    use base64::{Engine as _, engine::general_purpose};
     let mut eph_pk_bytes = vec![0x00];
-    eph_pk_bytes.extend(public_key.as_ref());
-    Base64::encode(eph_pk_bytes)
+    eph_pk_bytes.extend(public_key.as_bytes());
+    general_purpose::STANDARD.encode(eph_pk_bytes)
+}
+
+/// Convert the ZKP to an address.
+pub fn zkp_to_address(zkp: &ZkLoginInputs) -> Result<Address, anyhow::Error> {
+    Ok(zkp.public_identifier()?.derive_address().next().unwrap())
 }
 
 // === Into impls ===

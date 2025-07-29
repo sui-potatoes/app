@@ -7,12 +7,12 @@ use std::fmt::Display;
 
 use macroquad::prelude::*;
 use serde::{Deserialize, Serialize};
-use sui_types::base_types::SuiAddress;
+use sui_sdk_types::Address;
 
 use crate::draw::{Draw, TEXTURES, Texture};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
-pub struct ID(pub SuiAddress);
+pub struct ID(pub Address);
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 /// A single in-game Tile.
@@ -118,7 +118,7 @@ pub struct Unit {
 impl Default for Unit {
     fn default() -> Self {
         Self {
-            recruit: ID(SuiAddress::default()),
+            recruit: ID(Address::ZERO),
             ap: Param(2, 0),
             hp: Param(15, 0),
             ammo: Param(5, 0),
@@ -177,7 +177,7 @@ pub struct Recruit {
     pub stats: Stats,
     pub weapon: Option<Weapon>,
     pub armor: Option<Armor>,
-    pub leader: SuiAddress,
+    pub leader: Address,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -186,7 +186,7 @@ pub struct Preset {
     pub map: Map,
     pub name: String,
     pub positions: Vec<Vec<u8>>,
-    pub author: SuiAddress,
+    pub author: Address,
     pub popularity: u64,
 }
 
@@ -194,10 +194,10 @@ pub struct Preset {
 pub struct Game {
     pub id: ID,
     pub map: Map,
-    pub players: Vec<SuiAddress>,
+    pub players: Vec<Address>,
     pub positions: Vec<Vec<u8>>,
     pub history: History,
-    pub recruits: (SuiAddress, u64),
+    pub recruits: (Address, u64),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -587,8 +587,8 @@ impl Draw for Map {
     }
 }
 
-impl From<SuiAddress> for ID {
-    fn from(address: SuiAddress) -> Self {
+impl From<Address> for ID {
+    fn from(address: Address) -> Self {
         Self(address)
     }
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-pub const SUI_COIN_TYPE: &str = "0x2::sui::SUI";
+pub const SUI_COIN_TYPE: &str = "0x2::coin::Coin<0x2::sui::SUI>";
 
 pub const COMMANDER_OBJ: &'static str =
     "0x133420084e1dc366bb9a39d77c4c6a64e9caa553b0a16f704b3f9e7058f98cb7";

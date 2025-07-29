@@ -4,7 +4,6 @@
 use std::{collections::VecDeque, convert::TryFrom};
 
 use macroquad::color::*;
-use sui_types::base_types::SuiAddress;
 
 use crate::{
     draw::{Draw, Highlight, draw_highlight},
