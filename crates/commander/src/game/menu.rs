@@ -8,7 +8,7 @@ use sui_sdk_types::Address;
 
 use crate::{
     WithRef,
-    draw::Draw,
+    draw::{Draw, FONTS},
     move_types::{Preset, Recruit, Replay},
 };
 
@@ -203,7 +203,17 @@ impl<T: MenuItem> Menu<T> {
 impl<T: MenuItem> Draw for Menu<T> {
     fn draw(&self) {
         let offset = if let Some(title) = &self.title {
-            draw_text(&title, 20.0, 40.0, TITLE_FONT_SIZE, WHITE);
+            draw_text_ex(
+                &title,
+                20.0,
+                40.0,
+                TextParams {
+                    font: Some(FONTS.lock().unwrap().get("doto").unwrap()),
+                    font_size: TITLE_FONT_SIZE as u16,
+                    color: WHITE,
+                    ..Default::default()
+                },
+            );
             TITLE_FONT_SIZE * 2.0
         } else {
             FONT_SIZE
@@ -217,12 +227,16 @@ impl<T: MenuItem> Draw for Menu<T> {
                 } else {
                     TEXT_COLOR
                 };
-                draw_text(
+                draw_text_ex(
                     &item.to_string(),
                     20.0,
                     offset + (i as f32 * FONT_SIZE),
-                    FONT_SIZE,
-                    color,
+                    TextParams {
+                        font: Some(FONTS.lock().unwrap().get("doto").unwrap()),
+                        font_size: FONT_SIZE as u16,
+                        color,
+                        ..Default::default()
+                    },
                 );
             }
             return;
@@ -240,12 +254,17 @@ impl<T: MenuItem> Draw for Menu<T> {
             } else {
                 TEXT_COLOR
             };
-            draw_text(
+            draw_text_ex(
                 &item.to_string(),
                 20.0,
                 offset + (j as f32 * FONT_SIZE),
-                FONT_SIZE,
-                color,
+                TextParams {
+                    font: Some(FONTS.lock().unwrap().get("doto").unwrap()),
+                    font_size: FONT_SIZE as u16,
+                    color,
+
+                    ..Default::default()
+                },
             );
             j += 1;
         }

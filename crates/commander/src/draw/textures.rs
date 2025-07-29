@@ -25,3 +25,7 @@ lazy_static! {
     /// ```
     pub static ref TEXTURES: Mutex<HashMap<Texture, Texture2D>> = Mutex::new(Default::default());
 }
+
+lazy_static! {
+    pub static ref FONTS: Mutex<HashMap<String, Font>> = Mutex::new(Default::default());
+}

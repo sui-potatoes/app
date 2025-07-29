@@ -39,7 +39,7 @@ mod zklogin;
 
 use crate::{
     config::{COMMANDER_OBJ, PRESET_STRUCT_TAG, RECRUIT_STRUCT_TAG, REPLAY_STRUCT_TAG},
-    draw::{Draw, TEXTURES, Texture},
+    draw::{Draw, FONTS, TEXTURES, Texture},
     game::{App, Message as AppMessage},
     move_types::{Preset, Recruit, Replay},
     tx::TxRunner,
@@ -105,6 +105,9 @@ async fn main() -> Result<(), anyhow::Error> {
     global_load_texture(Texture::Background, "assets/texture-sand.png").await;
     global_load_texture(Texture::Unit, "assets/unit-soldier.png").await;
     global_load_texture(Texture::Main, "assets/main-screen.png").await;
+
+    // Register global fonts before the game loop starts.
+    global_load_font("doto", "assets/fonts/jersey20.ttf").await;
 
     // Main game loop
     loop {
@@ -316,6 +319,15 @@ async fn global_load_texture(name: Texture, path: &str) {
     let tile_texture = load_texture(path).await.unwrap();
 
     TEXTURES.lock().unwrap().insert(name, tile_texture);
+}
+
+async fn global_load_font(name: &str, path: &str) {
+    let root = env!("CARGO_MANIFEST_DIR");
+    let path = Path::new(root).join(path);
+    let path = path.to_str().unwrap();
+    let font = load_ttf_font(path).await.unwrap();
+
+    FONTS.lock().unwrap().insert(name.to_string(), font);
 }
 
 // === Utils ===
