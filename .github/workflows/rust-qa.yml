@@ -3,6 +3,11 @@ name: Potatoes Rust QA
 on:
     pull_request:
 
+env:
+    GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+    GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+    ENOKI_API_KEY: ${{ secrets.ENOKI_PUBLIC_KEY }}
+
 jobs:
     test-rust-packages:
         name: Build and Test Rust Packages
