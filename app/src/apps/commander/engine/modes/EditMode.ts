@@ -115,7 +115,7 @@ export class EditMode extends Mode {
                     tool: mode.tool,
                     location: [x, y],
                 });
-                return this.grid.markSpawn(x, y);
+                return this.grid._markSpawn(x, y);
             }
 
             if (mode.tool === "Remove Spawn") {
