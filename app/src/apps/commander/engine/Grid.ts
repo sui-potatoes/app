@@ -323,7 +323,7 @@ export class Grid {
         });
         positions.forEach(([x, y]) => {
             this.spawnPositions.push(new THREE.Vector2(x, y));
-            if (!this._markSpawn(x, y)) throw new Error("Invalid spawn position")
+            if (!this._markSpawn(x, y)) throw new Error("Invalid spawn position");
         });
     }
 
@@ -333,5 +333,7 @@ export class Grid {
     protected _setCell(_x: number, _y: number, _tile: Tile) {}
 
     /** Edit mode marker, add a mesh to the cell to indicate a spawn point. */
-    protected _markSpawn(_x: number, _y: number): boolean { return true }
+    protected _markSpawn(_x: number, _y: number): boolean {
+        return true;
+    }
 }

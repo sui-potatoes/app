@@ -181,7 +181,6 @@ export class Grid3D extends Grid {
 
     // === Edit Mode ===
 
-
     removeSpawn(x: number, y: number) {
         this.spawnPositions = this.spawnPositions.filter((pos) => pos.x !== x || pos.y !== y);
         this.objects.remove(this.meshes[`${x}-${y}`]);
