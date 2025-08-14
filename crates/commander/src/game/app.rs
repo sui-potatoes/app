@@ -58,7 +58,7 @@ pub enum Screen {
     /// Show list of recruits.
     Recruits(Menu<RecruitMenuItem>),
     /// Show a single recruit.
-    Recruit(WithRef<Recruit>),
+    Recruit(RecruitScreen),
     /// Show list of replays.
     Replays(Menu<ReplayMenuItem>),
     /// Play a replay.
@@ -67,6 +67,12 @@ pub enum Screen {
     Settings(Menu<SettingsMenuItem>),
     /// Show window settings menu.
     WindowSettings(Menu<WindowSettingsMenuItem>),
+}
+
+#[derive(Debug, Clone)]
+pub struct RecruitScreen {
+    pub menu: Menu<RecruitSubMenuItem>,
+    pub recruit: WithRef<Recruit>,
 }
 
 impl App {
@@ -128,7 +134,7 @@ impl App {
             Screen::MainMenu(menu) => match key {
                 Command::Up => menu.previous_item(),
                 Command::Down => menu.next_item(),
-                Command::Select => match menu.select() {
+                Command::Select => match menu.selected_item() {
                     MainMenuItem::Address(_address) => {}
                     MainMenuItem::Login => {
                         // Starts the login process.
@@ -158,7 +164,7 @@ impl App {
                 Command::Up => menu.previous_item(),
                 Command::Down => menu.next_item(),
                 Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Select => match menu.select() {
+                Command::Select => match menu.selected_item() {
                     SettingsMenuItem::WindowSize => {
                         self.screen = Screen::WindowSettings(Menu::window_settings())
                     }
@@ -177,10 +183,12 @@ impl App {
                 Command::Up => menu.previous_item(),
                 Command::Down => menu.next_item(),
                 Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Select => match menu.select() {
+                Command::Select => match menu.selected_item() {
                     RecruitMenuItem::Recruit(recruit) => {
-                        let recruit = recruit.clone();
-                        self.screen = Screen::Recruit(recruit);
+                        self.screen = Screen::Recruit(RecruitScreen {
+                            menu: Menu::recruit_sub(&recruit),
+                            recruit: recruit.clone(),
+                        });
                     }
                     RecruitMenuItem::Back => {
                         self.screen = Screen::MainMenu(Menu::main(state.address))
@@ -188,15 +196,25 @@ impl App {
                 },
                 _ => {}
             },
-            Screen::Recruit(_) => match key {
+            Screen::Recruit(screen) => match key {
                 Command::Menu => self.screen = Screen::Recruits(Menu::recruits(&state.recruits)),
+                Command::Up => screen.previous_item(),
+                Command::Down => screen.next_item(),
+                Command::Select => match screen.selected_item() {
+                    RecruitSubMenuItem::Stats => {}
+                    RecruitSubMenuItem::Weapon => {}
+                    RecruitSubMenuItem::Armor => {}
+                    RecruitSubMenuItem::Back => {
+                        self.screen = Screen::Recruits(Menu::recruits(&state.recruits))
+                    }
+                },
                 _ => {}
             },
             Screen::Replays(menu) => match key {
                 Command::Up => menu.previous_item(),
                 Command::Down => menu.next_item(),
                 Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Select => match menu.select() {
+                Command::Select => match menu.selected_item() {
                     ReplayMenuItem::Replay(replay) => {
                         self.screen = Screen::Replay(Player::new(replay.data.clone()));
                         self.send_message(Message::FetchPresets);
@@ -225,7 +243,7 @@ impl App {
                 Command::Up => menu.previous_item(),
                 Command::Down => menu.next_item(),
                 Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Select => match menu.select() {
+                Command::Select => match menu.selected_item() {
                     PresetMenuItem::Preset(preset) => self.screen = Screen::Preset(preset.clone()),
                     PresetMenuItem::Back => {
                         self.screen = Screen::MainMenu(Menu::main(state.address))
@@ -237,7 +255,7 @@ impl App {
                 Command::Up => menu.previous_item(),
                 Command::Down => menu.next_item(),
                 Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Select => match menu.select() {
+                Command::Select => match menu.selected_item() {
                     WindowSettingsMenuItem::SizeSmall => set_window_size(700, 700),
                     WindowSettingsMenuItem::SizeMedium => set_window_size(1000, 1000),
                     WindowSettingsMenuItem::SizeLarge => set_window_size(1200, 1200),
@@ -348,7 +366,7 @@ impl Draw for App {
                     draw_text("No preset found for replay", 10.0, 10.0, 20.0, BLACK);
                 }
             }
-            Screen::Recruit(_) => {}
+            Screen::Recruit(screen) => screen.draw(),
             Screen::Recruits(menu) => menu.draw(),
             Screen::Replays(menu) => menu.draw(),
             Screen::Presets(menu) => menu.draw(),
@@ -375,5 +393,52 @@ impl Draw for App {
                 }
             }
         }
+    }
+}
+
+impl Draw for RecruitScreen {
+    fn draw(&self) {
+        self.menu.draw();
+
+        if matches!(self.menu.selected_item(), RecruitSubMenuItem::Stats) {
+            self.draw_stats();
+        }
+    }
+}
+
+impl Selectable for RecruitScreen {
+    type Item = RecruitSubMenuItem;
+
+    fn next_item(&mut self) {
+        self.menu.next_item();
+    }
+
+    fn previous_item(&mut self) {
+        self.menu.previous_item();
+    }
+
+    fn selected_item(&self) -> &RecruitSubMenuItem {
+        self.menu.selected_item()
+    }
+}
+
+impl RecruitScreen {
+    /// Draws:
+    /// - rank (string)
+    /// - aim (max 100)
+    /// - health (max 20)
+    /// - mobility (max 10)
+    /// - armor (max 3)
+    /// - dodge (max 100)
+    pub fn draw_stats(&self) {
+        let stats = self.recruit.data.stats.clone();
+
+        draw_text(
+            &format!("Health: {}", stats.health()),
+            40.0,
+            60.0,
+            20.0,
+            WHITE,
+        );
     }
 }

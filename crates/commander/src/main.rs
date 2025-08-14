@@ -104,7 +104,7 @@ async fn main() -> Result<(), anyhow::Error> {
     // Register global textures before the game loop starts.
     global_load_texture(Texture::Background, "assets/texture-sand.png").await;
     global_load_texture(Texture::Unit, "assets/unit-soldier.png").await;
-    global_load_texture(Texture::Main, "assets/main-screen.png").await;
+    global_load_texture(Texture::Main, "assets/main-screen-variation.png").await;
 
     // Register global fonts before the game loop starts.
     global_load_font("doto", "assets/fonts/jersey20.ttf").await;
@@ -140,7 +140,7 @@ async fn main() -> Result<(), anyhow::Error> {
 const GRPC_URL: &str =
     "https://fullnode.testnet.sui.io/sui.rpc.v2beta2.LiveDataService/SimulateTransaction";
 
-fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<Mutex<State>>) {
+fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: Arc<Mutex<State>>) {
     let default_provider = rustls::crypto::aws_lc_rs::default_provider();
     rustls::crypto::CryptoProvider::install_default(default_provider).unwrap();
 
@@ -153,13 +153,14 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
 
         if let Some(prev_session) = prev_session {
             if let Ok(session) = serde_json::from_str::<Session>(&prev_session) {
-                state.lock().unwrap().address = Some(session.address);
+                state_arc.lock().unwrap().address = Some(session.address);
                 tx_runner = Some(TxRunner::new(
                     Ed25519PrivateKey::from_pem(&session.keypair).unwrap(),
                     session.zkp,
                     session.max_epoch,
                     client.clone(),
                 ));
+
                 tx.send(Message::StateUpdated).unwrap();
             } else {
                 // Clean up session storage if data cannot be deserialized (very
@@ -173,7 +174,7 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
                 match msg {
                     AppMessage::Logout => {
                         STORAGE.lock().unwrap().remove(SESSION_KEY);
-                        state.lock().unwrap().address = None;
+                        state_arc.lock().unwrap().address = None;
                         tx.send(Message::StateUpdated).unwrap();
                     }
                     AppMessage::PrepareLogin => {
@@ -188,7 +189,7 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
                             });
 
                         if let Some((new_address, zkp, max_epoch)) = login_res {
-                            state.lock().unwrap().address = Some(new_address);
+                            state_arc.lock().unwrap().address = Some(new_address);
                             tx.send(Message::StateUpdated).unwrap();
 
                             STORAGE.lock().unwrap().set(
@@ -215,7 +216,18 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
                         }
                     }
                     AppMessage::FetchPresets => {
-                        let mut state = state.lock().unwrap();
+                        #[cfg(feature = "cache")]
+                        if let Some(state) = STORAGE.lock().unwrap().get("presets") {
+                            println!("fetching presets from cache");
+                            let presets: Vec<WithRef<Preset>> =
+                                serde_json::from_str(state.as_ref()).unwrap();
+                            state_arc.lock().unwrap().presets = presets;
+                            tx.send(Message::StateUpdated).unwrap();
+                            continue;
+                        }
+
+                        let mut state = state_arc.lock().unwrap();
+
                         state.presets = client
                             .live_data_client()
                             .list_owned_objects(ListOwnedObjectsRequest {
@@ -234,10 +246,25 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
                             .map(|obj| WithRef::from_rpc_object(obj).unwrap())
                             .collect::<Vec<WithRef<Preset>>>();
 
+                        STORAGE
+                            .lock()
+                            .unwrap()
+                            .set("presets", &serde_json::to_string(&state.presets).unwrap());
+
                         tx.send(Message::StateUpdated).unwrap();
                     }
                     AppMessage::FetchRecruits => {
-                        let mut state = state.lock().unwrap();
+                        #[cfg(feature = "cache")]
+                        if let Some(state) = STORAGE.lock().unwrap().get("recruits") {
+                            println!("fetching recruits from cache");
+                            let recruits: Vec<WithRef<Recruit>> =
+                                serde_json::from_str(state.as_ref()).unwrap();
+                            state_arc.lock().unwrap().recruits = recruits;
+                            tx.send(Message::StateUpdated).unwrap();
+                            continue;
+                        }
+
+                        let mut state = state_arc.lock().unwrap();
 
                         state.recruits = client
                             .live_data_client()
@@ -258,10 +285,26 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
                             .map(|obj| WithRef::from_rpc_object(obj).unwrap())
                             .collect::<Vec<WithRef<Recruit>>>();
 
+                        STORAGE
+                            .lock()
+                            .unwrap()
+                            .set("recruits", &serde_json::to_string(&state.recruits).unwrap());
+
                         tx.send(Message::StateUpdated).unwrap();
                     }
                     AppMessage::FetchReplays => {
-                        let mut state = state.lock().unwrap();
+                        #[cfg(feature = "cache")]
+                        if let Some(state) = STORAGE.lock().unwrap().get("replays") {
+                            println!("fetching replays from cache");
+                            let replays: Vec<WithRef<Replay>> =
+                                serde_json::from_str(state.as_ref()).unwrap();
+                            state_arc.lock().unwrap().replays = replays;
+                            tx.send(Message::StateUpdated).unwrap();
+                            continue;
+                        }
+
+                        let mut state = state_arc.lock().unwrap();
+
                         state.replays = client
                             .live_data_client()
                             .list_owned_objects(ListOwnedObjectsRequest {
@@ -280,6 +323,11 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state: Arc<M
                             .iter()
                             .map(|obj| WithRef::from_rpc_object(obj).unwrap())
                             .collect::<Vec<WithRef<Replay>>>();
+
+                        STORAGE
+                            .lock()
+                            .unwrap()
+                            .set("replays", &serde_json::to_string(&state.replays).unwrap());
 
                         tx.send(Message::StateUpdated).unwrap();
                     }

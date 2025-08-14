@@ -10,13 +10,16 @@ use crate::{
     WithRef,
     draw::{Draw, FONTS},
     move_types::{Preset, Recruit, Replay},
+    config::{
+        MENU_FONT_SIZE as FONT_SIZE,
+        MENU_FONT_COLOR as TEXT_COLOR,
+    },
 };
 
 const SELECTED_COLOR: Color = WHITE;
-const TEXT_COLOR: Color = LIGHTGRAY;
-const FONT_SIZE: f32 = 24.0;
 const TITLE_FONT_SIZE: f32 = 40.0;
 
+#[derive(Debug, Clone)]
 /// Draws the menu based on the items, tracks the currently selected item. Reacts
 /// on keyboard input to navigate the menu.
 pub struct Menu<Item: MenuItem> {
@@ -74,6 +77,22 @@ pub enum WindowSettingsMenuItem {
     Back,
 }
 
+#[derive(Debug, Clone)]
+pub enum RecruitSubMenuItem {
+    Stats,
+    Weapon,
+    Armor,
+    Back,
+}
+
+pub trait Selectable {
+    type Item;
+
+    fn next_item(&mut self);
+    fn previous_item(&mut self);
+    fn selected_item(&self) -> &Self::Item;
+}
+
 pub trait MenuItem: Display {}
 
 impl MenuItem for MainMenuItem {}
@@ -82,6 +101,7 @@ impl MenuItem for PresetMenuItem {}
 impl MenuItem for SettingsMenuItem {}
 impl MenuItem for WindowSettingsMenuItem {}
 impl MenuItem for RecruitMenuItem {}
+impl MenuItem for RecruitSubMenuItem {}
 
 // === Menu impls ===
 
@@ -147,7 +167,7 @@ impl Menu<SettingsMenuItem> {
             title: Some("Settings".to_string()),
             items: vec![
                 SettingsMenuItem::WindowSize,
-                SettingsMenuItem::Logout,
+                // SettingsMenuItem::Logout,
                 SettingsMenuItem::Back,
             ],
             selected_item: 0,
@@ -186,16 +206,34 @@ impl Menu<RecruitMenuItem> {
     }
 }
 
-impl<T: MenuItem> Menu<T> {
-    pub fn next_item(&mut self) {
+impl Menu<RecruitSubMenuItem> {
+    pub fn recruit_sub(recruit: &WithRef<Recruit>) -> Self {
+        Self {
+            title: Some(format!("{}", recruit.data.metadata.name)),
+            items: vec![
+                RecruitSubMenuItem::Stats,
+                RecruitSubMenuItem::Weapon,
+                RecruitSubMenuItem::Armor,
+                RecruitSubMenuItem::Back,
+            ],
+            selected_item: 0,
+            window: None,
+        }
+    }
+}
+
+impl<T: MenuItem> Selectable for Menu<T> {
+    type Item = T;
+
+    fn next_item(&mut self) {
         self.selected_item = (self.selected_item + 1) % self.items.len();
     }
 
-    pub fn previous_item(&mut self) {
+    fn previous_item(&mut self) {
         self.selected_item = (self.selected_item + self.items.len() - 1) % self.items.len();
     }
 
-    pub fn select(&mut self) -> &T {
+    fn selected_item(&self) -> &T {
         &self.items[self.selected_item]
     }
 }
@@ -345,6 +383,17 @@ impl Display for WindowSettingsMenuItem {
             WindowSettingsMenuItem::SizeMedium => write!(f, "Medium (1000x1000)"),
             WindowSettingsMenuItem::SizeLarge => write!(f, "Large (1200x1200)"),
             WindowSettingsMenuItem::Back => write!(f, "Back"),
+        }
+    }
+}
+
+impl Display for RecruitSubMenuItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RecruitSubMenuItem::Stats => write!(f, "Stats"),
+            RecruitSubMenuItem::Weapon => write!(f, "Weapon"),
+            RecruitSubMenuItem::Armor => write!(f, "Armor"),
+            RecruitSubMenuItem::Back => write!(f, "Back"),
         }
     }
 }
