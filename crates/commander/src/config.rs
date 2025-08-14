@@ -1,7 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use macroquad::color::{Color, BLACK};
+use macroquad::color::{BLACK, Color};
 
 pub const SUI_COIN_TYPE: &str = "0x2::coin::Coin<0x2::sui::SUI>";
 
@@ -21,6 +21,11 @@ pub const ARMOR_STRUCT_TAG: &'static str =
     "0x6e6770b3554b6bf4997aee770b29e1395aa640979afc84504058f05721ee54a7::armor::Armor";
 pub const PRESET_STRUCT_TAG: &'static str =
     "0x6e6770b3554b6bf4997aee770b29e1395aa640979afc84504058f05721ee54a7::commander::Preset";
+
+// === Draw Configuration ===
+
+pub const TILE_WIDTH: f32 = 20.0;
+pub const TILE_HEIGHT: f32 = 20.0;
 
 // === Font Configuration ===
 

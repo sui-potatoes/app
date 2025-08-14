@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: MIT
 
 use std::{
-    path::Path,
     str::FromStr,
     sync::{
         Arc, Mutex,
@@ -33,16 +32,16 @@ mod draw;
 mod errors;
 mod game;
 mod input;
-mod move_types;
 mod tx;
+mod types;
 mod zklogin;
 
 use crate::{
     config::{COMMANDER_OBJ, PRESET_STRUCT_TAG, RECRUIT_STRUCT_TAG, REPLAY_STRUCT_TAG},
-    draw::{Draw, FONTS, TEXTURES, Texture},
+    draw::{ASSETS, AssetStore, Draw, Texture},
     game::{App, Message as AppMessage},
-    move_types::{Preset, Recruit, Replay},
     tx::TxRunner,
+    types::{Preset, Recruit, Replay},
 };
 
 /// Messages sent from the tokio runtime to the Application.
@@ -102,19 +101,23 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut gamepads = Gamepads::new();
 
     // Register global textures before the game loop starts.
-    global_load_texture(Texture::Background, "assets/texture-sand.png").await;
-    global_load_texture(Texture::Unit, "assets/unit-soldier.png").await;
-    global_load_texture(Texture::Main, "assets/main-screen-variation.png").await;
+    let mut asset_store = AssetStore::new();
+    asset_store.load_all().await;
 
-    // Register global fonts before the game loop starts.
-    global_load_font("doto", "assets/fonts/jersey20.ttf").await;
+    println!("Setting ASSETS...");
+    ASSETS.set(Arc::new(asset_store)).unwrap();
+    println!("ASSETS set.");
 
     // Main game loop
     loop {
         gamepads.poll();
         clear_background(LIGHTGRAY);
+
+        let assets = ASSETS.get().unwrap().clone();
+        let texture = assets.texture(Texture::Main).unwrap();
+
         draw_texture_ex(
-            TEXTURES.lock().unwrap().get(&Texture::Main).unwrap(),
+            texture,
             0.0,
             0.0,
             WHITE,
@@ -357,25 +360,6 @@ async fn login_action(
     let address = zklogin::zkp_to_address(&zkp)?;
 
     Ok((address, zkp, max_epoch))
-}
-
-async fn global_load_texture(name: Texture, path: &str) {
-    // Load the texture from the assets folder in the root of the crate.
-    let root = env!("CARGO_MANIFEST_DIR");
-    let path = Path::new(root).join(path);
-    let path = path.to_str().unwrap();
-    let tile_texture = load_texture(path).await.unwrap();
-
-    TEXTURES.lock().unwrap().insert(name, tile_texture);
-}
-
-async fn global_load_font(name: &str, path: &str) {
-    let root = env!("CARGO_MANIFEST_DIR");
-    let path = Path::new(root).join(path);
-    let path = path.to_str().unwrap();
-    let font = load_ttf_font(path).await.unwrap();
-
-    FONTS.lock().unwrap().insert(name.to_string(), font);
 }
 
 // === Utils ===

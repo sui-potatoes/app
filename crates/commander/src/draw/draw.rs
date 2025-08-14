@@ -13,18 +13,20 @@ const TILE_SIZE: f32 = 20.0;
 pub struct Highlight(pub Vec<(u8, u8)>, pub Color);
 
 pub trait Draw {
+    /// Draw the object globally.
     fn draw(&self);
+}
+
+/// Draw the object at the given position (in cell coordinates).
+/// Requires the dimensions of the map where the object is being drawn.
+pub trait DrawAt {
+    fn draw_at(&self, position: (u8, u8), dimensions: (u8, u8));
 }
 
 /// Draw a cursor at the given tile.
 /// The cursor is a rectangle with a thickness of 4.0.
 pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8)) {
-    let (screen_width, screen_height) = (screen_width(), screen_height());
-    let (width, height) = (dimensions.0 as f32, dimensions.1 as f32);
-    let (scale_x, scale_y) = (
-        screen_width / (width * TILE_SIZE),
-        screen_height / (height * TILE_SIZE),
-    );
+    let (scale_x, scale_y) = get_scale(dimensions);
 
     draw_rectangle_lines(
         position.1 as f32 * TILE_SIZE * scale_x,
@@ -38,13 +40,7 @@ pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8)) {
 
 /// Draw a highlight on the given tiles.
 pub fn draw_highlight(highlight: &Highlight, dimensions: (u8, u8)) {
-    let (screen_width, screen_height) = (screen_width(), screen_height());
-    let (width, height) = (dimensions.0 as f32, dimensions.1 as f32);
-    let (scale_x, scale_y) = (
-        screen_width / (width * TILE_SIZE),
-        screen_height / (height * TILE_SIZE),
-    );
-
+    let (scale_x, scale_y) = get_scale(dimensions);
     for (x, y) in &highlight.0 {
         draw_rectangle(
             *y as f32 * TILE_SIZE * scale_x,
@@ -59,12 +55,8 @@ pub fn draw_highlight(highlight: &Highlight, dimensions: (u8, u8)) {
 /// Get the size of the map and for each tile draw the texture. Apply the scale
 /// similarly to the Map drawing.
 pub fn draw_texture_background(dimensions: (u8, u8), texture: &Texture2D) {
-    let (screen_width, screen_height) = (screen_width(), screen_height());
+    let (scale_x, scale_y) = get_scale(dimensions);
     let (width, height) = (dimensions.0 as f32, dimensions.1 as f32);
-    let (scale_x, scale_y) = (
-        screen_width / (width * TILE_SIZE),
-        screen_height / (height * TILE_SIZE),
-    );
 
     for y in 0..height as i32 {
         for x in 0..width as i32 {
@@ -82,4 +74,13 @@ pub fn draw_texture_background(dimensions: (u8, u8), texture: &Texture2D) {
             );
         }
     }
+}
+
+pub fn get_scale(dimensions: (u8, u8)) -> (f32, f32) {
+    let (screen_width, screen_height) = (screen_width(), screen_height());
+    let (width, height) = (dimensions.0 as f32, dimensions.1 as f32);
+    (
+        screen_width / (width * TILE_SIZE),
+        screen_height / (height * TILE_SIZE),
+    )
 }

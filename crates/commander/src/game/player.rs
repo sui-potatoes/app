@@ -7,7 +7,7 @@ use macroquad::color::*;
 
 use crate::{
     draw::{Draw, Highlight, draw_highlight},
-    move_types::{Cursor, Direction, History, ID, Map, Preset, Record, Replay, Unit},
+    types::{Cursor, Direction, History, ID, Map, Preset, Record, Replay, Unit},
 };
 
 /// A Player for `Replay`s. Allows playing the replay step by step.

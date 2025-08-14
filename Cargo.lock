@@ -369,6 +369,7 @@ dependencies = [
  "gamepads",
  "lazy_static",
  "macroquad",
+ "once_cell",
  "open",
  "quad-storage",
  "rand",

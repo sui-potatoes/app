@@ -8,12 +8,9 @@ use sui_sdk_types::Address;
 
 use crate::{
     WithRef,
-    draw::{Draw, FONTS},
-    move_types::{Preset, Recruit, Replay},
-    config::{
-        MENU_FONT_SIZE as FONT_SIZE,
-        MENU_FONT_COLOR as TEXT_COLOR,
-    },
+    config::{MENU_FONT_COLOR as TEXT_COLOR, MENU_FONT_SIZE as FONT_SIZE},
+    draw::{ASSETS, Draw},
+    types::{Preset, Recruit, Replay},
 };
 
 const SELECTED_COLOR: Color = WHITE;
@@ -246,7 +243,7 @@ impl<T: MenuItem> Draw for Menu<T> {
                 20.0,
                 40.0,
                 TextParams {
-                    font: Some(FONTS.lock().unwrap().get("doto").unwrap()),
+                    font: Some(ASSETS.get().unwrap().font("doto").unwrap()),
                     font_size: TITLE_FONT_SIZE as u16,
                     color: WHITE,
                     ..Default::default()
@@ -270,7 +267,7 @@ impl<T: MenuItem> Draw for Menu<T> {
                     20.0,
                     offset + (i as f32 * FONT_SIZE),
                     TextParams {
-                        font: Some(FONTS.lock().unwrap().get("doto").unwrap()),
+                        font: Some(ASSETS.get().unwrap().font("doto").unwrap()),
                         font_size: FONT_SIZE as u16,
                         color,
                         ..Default::default()
@@ -297,7 +294,7 @@ impl<T: MenuItem> Draw for Menu<T> {
                 20.0,
                 offset + (j as f32 * FONT_SIZE),
                 TextParams {
-                    font: Some(FONTS.lock().unwrap().get("doto").unwrap()),
+                    font: Some(ASSETS.get().unwrap().font("doto").unwrap()),
                     font_size: FONT_SIZE as u16,
                     color,
 

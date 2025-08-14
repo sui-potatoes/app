@@ -14,7 +14,7 @@ use crate::{
     Message as TokioMessage, State, WithRef,
     draw::*,
     input::Command,
-    move_types::{Game, ID, Preset, Recruit, Replay},
+    types::{Game, ID, Preset, Recruit, Replay},
 };
 
 pub struct App {
@@ -336,7 +336,7 @@ impl Draw for App {
         match &self.screen {
             Screen::MainMenu(menu) => menu.draw(),
             Screen::Play(game) => {
-                if let Some(texture) = TEXTURES.lock().unwrap().get(&Texture::Background) {
+                if let Some(texture) = ASSETS.get().unwrap().texture(Texture::Background) {
                     draw_texture_background((game.map.width(), game.map.height()), texture);
                 }
 
@@ -348,7 +348,7 @@ impl Draw for App {
             }
             Screen::Replay(replay) => {
                 if let Some(preset) = self.get_preset(&replay.preset_id) {
-                    if let Some(texture) = TEXTURES.lock().unwrap().get(&Texture::Background) {
+                    if let Some(texture) = ASSETS.get().unwrap().texture(Texture::Background) {
                         draw_texture_background(
                             (preset.data.map.width(), preset.data.map.height()),
                             texture,
@@ -373,7 +373,7 @@ impl Draw for App {
             Screen::Settings(menu) => menu.draw(),
             Screen::WindowSettings(menu) => menu.draw(),
             Screen::Preset(preset) => {
-                if let Some(texture) = TEXTURES.lock().unwrap().get(&Texture::Background) {
+                if let Some(texture) = ASSETS.get().unwrap().texture(Texture::Background) {
                     draw_texture_background(
                         (preset.data.map.width(), preset.data.map.height()),
                         texture,
