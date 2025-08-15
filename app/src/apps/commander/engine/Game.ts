@@ -4,7 +4,6 @@
 import * as THREE from "three";
 import { Controls } from "./Controls";
 import { Unit } from "./Unit";
-import { Grid } from "./Grid";
 import { Mode } from "./modes/Mode";
 import { NoneMode } from "./modes/NoneMode";
 import { GameMap } from "../hooks/useGame";
@@ -16,18 +15,7 @@ import { ShootMode } from "./modes/ShootMode";
 import { Camera } from "./Camera";
 import { ReloadMode } from "./modes/ReloadMode";
 import { pathToCoordinates } from "../types/cursor";
-
-export type Tile =
-    | { type: "Empty"; unit: number | null }
-    | { type: "Unwalkable"; unit: number | null }
-    | {
-          type: "Cover";
-          up: number;
-          down: number;
-          left: number;
-          right: number;
-          unit: number | null;
-      };
+import { Grid3D } from "./Grid3D";
 
 /**
  * The base class for the Game scene and related objects. Contains the game logic,
@@ -44,7 +32,7 @@ export class Game extends THREE.Object3D {
     /** The Plane used for intersections */
     public readonly plane: THREE.Mesh;
     /** The Grid object */
-    public readonly grid: Grid;
+    public readonly grid: Grid3D;
     /** Current turn */
     public turn: number;
     /**
@@ -135,8 +123,8 @@ export class Game extends THREE.Object3D {
         this.turn = 0;
         this.plane = this.initPlane(size);
         this.add(this.plane);
-        this.grid = new Grid(size);
-        this.add(this.grid);
+        this.grid = new Grid3D(size);
+        this.add(this.grid.objects);
         this.switchMode(new NoneMode());
     }
 
