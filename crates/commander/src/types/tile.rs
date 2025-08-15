@@ -5,7 +5,7 @@ use std::fmt::Display;
 
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
-    draw::{ASSETS, DrawAt, Sprite, Texture, get_scale},
+    draw::{self, ASSETS, DrawAt, DrawCommand, Sprite, Texture, get_scale},
 };
 
 use super::Unit;
@@ -48,16 +48,19 @@ impl DrawAt for Tile {
                     .and_then(|unit| Some(unit.draw_at(position, dimensions)));
             }
             TileType::Obstacle => {
-                draw_texture_ex(
-                    ASSETS.get().unwrap().texture(Texture::Obstacle).unwrap(),
+                draw::request_draw(DrawCommand::Texture {
+                    texture: ASSETS
+                        .with(|assets| assets.get().unwrap().texture(Texture::Obstacle).unwrap())
+                        .clone(),
                     x,
                     y,
-                    WHITE,
-                    DrawTextureParams {
+                    color: WHITE,
+                    params: DrawTextureParams {
                         dest_size: Some(Vec2::new(TILE_WIDTH * scale_x, TILE_HEIGHT * scale_y)),
                         ..Default::default()
                     },
-                );
+                    z_index: 10,
+                });
             }
             TileType::Cover {
                 left,
@@ -65,18 +68,20 @@ impl DrawAt for Tile {
                 top,
                 bottom,
             } => {
-                let sprite = ASSETS.get().unwrap().sprite_sheet(Sprite::Wall).unwrap();
+                let sprite = ASSETS
+                    .with(|assets| assets.get().unwrap().sprite_sheet(Sprite::Wall).unwrap())
+                    .clone();
 
                 if *left > 0 {
-                    sprite.draw_frame(x, y, 0, dimensions);
+                    sprite.draw_frame_with_index(x, y, 0, dimensions, 0);
                 }
 
                 if *top > 0 {
-                    sprite.draw_frame(x, y, 1, dimensions);
+                    sprite.draw_frame_with_index(x, y, 1, dimensions, 0);
                 }
 
                 if *right > 0 {
-                    sprite.draw_frame(x, y, 2, dimensions);
+                    sprite.draw_frame_with_index(x, y, 2, dimensions, 0);
                 }
 
                 // Draw the unit if present before the bottom cover.
@@ -85,7 +90,7 @@ impl DrawAt for Tile {
                     .and_then(|unit| Some(unit.draw_at(position, dimensions)));
 
                 if *bottom > 0 {
-                    sprite.draw_frame(x, y, 3, dimensions);
+                    sprite.draw_frame_with_index(x, y, 3, dimensions, 10);
                 }
             }
         };

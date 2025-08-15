@@ -243,7 +243,7 @@ impl<T: MenuItem> Draw for Menu<T> {
                 20.0,
                 40.0,
                 TextParams {
-                    font: Some(ASSETS.get().unwrap().font("doto").unwrap()),
+                    font: Some(&ASSETS.with(|assets| assets.get().unwrap().font("doto").unwrap())),
                     font_size: TITLE_FONT_SIZE as u16,
                     color: WHITE,
                     ..Default::default()
@@ -267,7 +267,9 @@ impl<T: MenuItem> Draw for Menu<T> {
                     20.0,
                     offset + (i as f32 * FONT_SIZE),
                     TextParams {
-                        font: Some(ASSETS.get().unwrap().font("doto").unwrap()),
+                        font: Some(
+                            &ASSETS.with(|assets| assets.get().unwrap().font("doto").unwrap()),
+                        ),
                         font_size: FONT_SIZE as u16,
                         color,
                         ..Default::default()
@@ -294,7 +296,7 @@ impl<T: MenuItem> Draw for Menu<T> {
                 20.0,
                 offset + (j as f32 * FONT_SIZE),
                 TextParams {
-                    font: Some(ASSETS.get().unwrap().font("doto").unwrap()),
+                    font: Some(&ASSETS.with(|assets| assets.get().unwrap().font("doto").unwrap())),
                     font_size: FONT_SIZE as u16,
                     color,
 

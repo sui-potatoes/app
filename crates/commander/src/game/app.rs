@@ -8,7 +8,6 @@ use std::{
 
 use macroquad::{miniquad::window::set_window_size, prelude::*};
 use sui_sdk_types::Address;
-use typed_arena::Arena;
 
 use super::{menu::*, player::*};
 use crate::{
@@ -18,8 +17,8 @@ use crate::{
     types::{Game, ID, Preset, Recruit, Replay},
 };
 
-pub struct App<'a> {
-    pub screen: Screen<'a>,
+pub struct App {
+    pub screen: Screen,
     pub state: Arc<Mutex<State>>,
     pub game: Option<Game>,
     /// Cursor position on the Map.
@@ -47,7 +46,7 @@ pub enum Message {
     FetchReplays,
 }
 
-pub enum Screen<'a> {
+pub enum Screen {
     /// Show main menu.
     MainMenu(Menu<MainMenuItem>),
     /// Show an active game.
@@ -63,7 +62,7 @@ pub enum Screen<'a> {
     /// Show list of replays.
     Replays(Menu<ReplayMenuItem>),
     /// Play a replay.
-    Replay(Player<'a>),
+    Replay(Player),
     /// Show settings menu.
     Settings(Menu<SettingsMenuItem>),
     /// Show window settings menu.
@@ -76,7 +75,7 @@ pub struct RecruitScreen {
     pub recruit: WithRef<Recruit>,
 }
 
-impl<'a> App<'a> {
+impl App {
     pub fn new(tx: Sender<Message>, state: Arc<Mutex<State>>) -> Self {
         Self {
             screen: Screen::MainMenu(Menu::main(None)),
@@ -310,7 +309,7 @@ impl<'a> App<'a> {
         }
     }
 
-    fn set_screen(&mut self, screen: Screen<'a>) {
+    fn set_screen(&mut self, screen: Screen) {
         self.screen = screen;
         self.cursor = (0, 0);
         self.highlight = None;
@@ -339,12 +338,14 @@ impl<'a> App<'a> {
 
 /// === Draw impls ===
 
-impl<'a> Draw for App<'a> {
+impl Draw for App {
     fn draw(&self) {
         match &self.screen {
             Screen::MainMenu(menu) => menu.draw(),
             Screen::Play(game) => {
-                if let Some(texture) = ASSETS.get().unwrap().texture(Texture::Background) {
+                if let Some(texture) =
+                    ASSETS.with(|assets| assets.get().unwrap().texture(Texture::Background))
+                {
                     draw_texture_background((game.map.width(), game.map.height()), texture);
                 }
 
@@ -356,7 +357,9 @@ impl<'a> Draw for App<'a> {
             }
             Screen::Replay(replay) => {
                 if let Some(preset) = self.get_preset(&replay.preset_id) {
-                    if let Some(texture) = ASSETS.get().unwrap().texture(Texture::Background) {
+                    if let Some(texture) =
+                        ASSETS.with(|assets| assets.get().unwrap().texture(Texture::Background))
+                    {
                         draw_texture_background(
                             (preset.data.map.width(), preset.data.map.height()),
                             texture,
@@ -381,7 +384,9 @@ impl<'a> Draw for App<'a> {
             Screen::Settings(menu) => menu.draw(),
             Screen::WindowSettings(menu) => menu.draw(),
             Screen::Preset(preset) => {
-                if let Some(texture) = ASSETS.get().unwrap().texture(Texture::Background) {
+                if let Some(texture) =
+                    ASSETS.with(|assets| assets.get().unwrap().texture(Texture::Background))
+                {
                     draw_texture_background(
                         (preset.data.map.width(), preset.data.map.height()),
                         texture,

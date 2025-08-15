@@ -18,7 +18,7 @@ use crate::{
 };
 
 /// A Player for `Replay`s. Allows playing the replay step by step.
-pub struct Player<'a> {
+pub struct Player {
     /// The Game Map.
     pub map: Option<Map>,
     /// The Replay to play.
@@ -32,7 +32,7 @@ pub struct Player<'a> {
     /// Highlight the tiles that are affected by the action.
     pub highlight: Option<Highlight>,
     /// Stores units that are currently on the Map and their animations.
-    pub objects: HashMap<ID, GameObject<'a>>,
+    pub objects: HashMap<ID, GameObject>,
     /// Just a value that allows distinguishing between units.
     pub id_counter: u8,
 }
@@ -68,8 +68,8 @@ pub struct PathSegment {
 
 /// Converts a `PathSegment` into an `Animation` that moves the unit along the
 /// segment.
-impl<'a> Into<Animation<'a>> for PathSegment {
-    fn into(self) -> Animation<'a> {
+impl Into<Animation> for PathSegment {
+    fn into(self) -> Animation {
         let sprite = match self.direction {
             Direction::Up => Sprite::SoldierRunUp,
             Direction::Down => Sprite::SoldierRunDown,
@@ -81,7 +81,9 @@ impl<'a> Into<Animation<'a>> for PathSegment {
         Animation {
             duration: Some(self.length as f64 / 2.0),
             type_: AnimationType::MoveSprite {
-                sprite: RefCell::new(ASSETS.get().unwrap().sprite_sheet(sprite).unwrap()),
+                sprite: ASSETS
+                    .with(|assets| assets.get().unwrap().sprite_sheet(sprite).unwrap())
+                    .clone(),
                 start_position: self.start_position,
                 end_position: self.end_position,
                 frame: 0,
@@ -111,7 +113,7 @@ pub enum ProcessedRecord {
     },
 }
 
-impl<'a> Player<'a> {
+impl Player {
     pub fn new(mut replay: Replay) -> Self {
         Self {
             map: None,
@@ -204,7 +206,7 @@ impl<'a> Player<'a> {
                         .map(|segment| segment.into())
                         .collect::<Vec<_>>();
 
-                    let mut start_animation: Animation<'a> = animations.remove(0);
+                    let mut start_animation: Animation = animations.remove(0);
 
                     for animation in animations {
                         start_animation.chain(animation);
@@ -345,7 +347,7 @@ impl<'a> Player<'a> {
     }
 }
 
-impl<'a> Draw for Player<'a> {
+impl Draw for Player {
     fn draw(&self) {
         if let Some(map) = &self.map {
             map.draw();
@@ -507,16 +509,18 @@ fn path_to_world_points(mut path: Vec<u8>, dimensions: (u8, u8)) -> Vec<PathSegm
     segments
 }
 
-fn static_unit_animation<'a>() -> Animation<'a> {
+fn static_unit_animation() -> Animation {
     Animation {
         type_: AnimationType::StaticSprite {
-            sprite: RefCell::new(
-                ASSETS
-                    .get()
-                    .unwrap()
-                    .sprite_sheet(Sprite::SoldierIdle)
-                    .unwrap(),
-            ),
+            sprite: ASSETS
+                .with(|assets| {
+                    assets
+                        .get()
+                        .unwrap()
+                        .sprite_sheet(Sprite::SoldierIdle)
+                        .unwrap()
+                })
+                .clone(),
             frame: 0,
             fps: Some(0.2),
         },

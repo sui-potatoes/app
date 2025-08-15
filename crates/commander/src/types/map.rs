@@ -4,7 +4,7 @@
 use super::{Direction, ID, Tile, TileType};
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
-    draw::{Draw, DrawAt, get_scale},
+    draw::{self, Draw, DrawAt, DrawCommand, get_scale},
 };
 
 use macroquad::prelude::*;
@@ -157,14 +157,15 @@ impl Draw for Map {
         let (scale_x, scale_y) = get_scale((self.width(), self.height()));
         for (y, row) in self.grid.iter().enumerate() {
             for (x, tile) in row.iter().enumerate() {
-                draw_rectangle_lines(
-                    x as f32 * TILE_WIDTH * scale_x,
-                    y as f32 * TILE_WIDTH * scale_y,
-                    TILE_WIDTH * scale_x,
-                    TILE_HEIGHT * scale_y,
-                    1.0,
-                    DARKGRAY,
-                );
+                draw::request_draw(DrawCommand::RectangleLines {
+                    x: x as f32 * TILE_WIDTH * scale_x,
+                    y: y as f32 * TILE_WIDTH * scale_y,
+                    width: TILE_WIDTH * scale_x,
+                    height: TILE_HEIGHT * scale_y,
+                    thickness: 1.0,
+                    color: DARKGRAY,
+                    z_index: 0,
+                });
 
                 tile.draw_at((x as u8, y as u8), (self.width(), self.height()));
             }

@@ -104,18 +104,20 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut asset_store = AssetStore::new();
     asset_store.load_all().await;
 
-    ASSETS.set(Arc::new(asset_store)).unwrap();
+    ASSETS
+        .with(|assets| assets.set(Arc::new(asset_store)))
+        .unwrap();
 
     // Main game loop.
     loop {
         gamepads.poll();
         clear_background(LIGHTGRAY);
 
-        let assets = ASSETS.get().unwrap().clone();
+        let assets = ASSETS.with(|assets| assets.get().unwrap().clone());
         let texture = assets.texture(Texture::Main).unwrap();
 
         draw_texture_ex(
-            texture,
+            &texture,
             0.0,
             0.0,
             WHITE,
@@ -133,6 +135,9 @@ async fn main() -> Result<(), anyhow::Error> {
         if let Ok(msg) = rx.try_recv() {
             app.update_from_message(msg);
         }
+
+        // Flush the draw registry (draws everything) before the next frame.
+        draw::flush_draw_registry();
 
         next_frame().await;
     }

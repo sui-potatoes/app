@@ -3,51 +3,51 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use std::cell::RefCell;
+use std::{cell::RefCell, rc::Rc};
 
 use macroquad::prelude::*;
 
-use crate::draw::{Draw, SpriteSheet};
+use crate::draw::{self, Draw, DrawCommand, SpriteSheet};
 
 /// An in-game object which has a position and an animation. If the object is
 /// static, then the animation is also static (or `idle` in some cases).
-pub struct GameObject<'a> {
+pub struct GameObject {
     /// Game dimensions, so sprite can be scaled.
     pub dimensions: (u8, u8),
     /// The position of the object.
     pub position: Vec2,
     /// The animation of the object (including static representation).
-    pub animation: Animation<'a>,
+    pub animation: Animation,
 }
 
 /// Animation of the object.
-pub struct Animation<'a> {
+pub struct Animation {
     /// Optional duration of the animation in milliseconds.
     /// When not set, the animation will run indefinitely.
     pub duration: Option<f64>,
     /// Time when animation started.
     pub start_time: f64,
     /// The type of animation.
-    pub type_: AnimationType<'a>,
+    pub type_: AnimationType,
     /// Callback to trigger on end of animation.
     pub on_end: Option<Box<dyn Fn(&mut GameObject)>>,
     // Animation to set in `GameObject` after reaching the end of the current
     // animation.
     // TODO: implement this
-    pub chain: Option<Box<Animation<'a>>>,
+    pub chain: Option<Box<Animation>>,
 }
 
-pub enum AnimationType<'a> {
+pub enum AnimationType {
     Hidden,
-    Static(RefCell<&'a Texture2D>),
+    Static(Rc<Texture2D>),
     /// Static sprite with a single frame.
     StaticSprite {
         frame: usize,
         fps: Option<f64>,
-        sprite: RefCell<&'a SpriteSheet>,
+        sprite: Rc<SpriteSheet>,
     },
     Move {
-        texture: RefCell<&'a Texture2D>,
+        texture: Rc<Texture2D>,
         /// This field may be considered duplicate to the `position` field
         /// of the `GameObject`, yet let's keep it for now. Maybe Animation
         /// system has applications beyond `GameObject`.`
@@ -58,7 +58,7 @@ pub enum AnimationType<'a> {
     /// in a `SpriteSheet`. Uses `SpriteSheet`'s built-in drawing method to
     /// function.
     MoveSprite {
-        sprite: RefCell<&'a SpriteSheet>,
+        sprite: Rc<SpriteSheet>,
         start_position: Vec2,
         end_position: Vec2,
         frame: usize,
@@ -67,8 +67,8 @@ pub enum AnimationType<'a> {
     },
 }
 
-impl<'a> GameObject<'a> {
-    pub fn new(position: Vec2, dimensions: (u8, u8), animation: Animation<'a>) -> Self {
+impl GameObject {
+    pub fn new(position: Vec2, dimensions: (u8, u8), animation: Animation) -> Self {
         Self {
             dimensions,
             position,
@@ -77,7 +77,7 @@ impl<'a> GameObject<'a> {
     }
 
     /// Chain an animation to the very last animation in the chain.
-    pub fn chain(&mut self, animation: Animation<'a>) {
+    pub fn chain(&mut self, animation: Animation) {
         self.animation.chain(animation);
     }
 
@@ -161,7 +161,7 @@ impl<'a> GameObject<'a> {
             let frames_passed = (time - self.animation.start_time) / *fps;
 
             self.position = position;
-            *frame = frames_passed as usize % sprite.borrow().frames;
+            *frame = frames_passed as usize % sprite.frames;
         }
 
         // If animation is static sprite, update the frame of the sprite
@@ -169,7 +169,7 @@ impl<'a> GameObject<'a> {
             if let Some(fps) = fps {
                 let time = get_time();
                 let frames_passed = (time - self.animation.start_time) / *fps;
-                *frame = frames_passed as usize % sprite.borrow().frames;
+                *frame = frames_passed as usize % sprite.frames;
             }
         }
 
@@ -178,7 +178,7 @@ impl<'a> GameObject<'a> {
     }
 }
 
-impl<'a> Animation<'a> {
+impl Animation {
     /// Returns the final position of the animation.
     pub fn end_position(&self) -> Option<Vec2> {
         match &self.type_ {
@@ -188,7 +188,7 @@ impl<'a> Animation<'a> {
         }
     }
 
-    pub fn chain(&mut self, animation: Animation<'a>) {
+    pub fn chain(&mut self, animation: Animation) {
         let mut nested_anim_ref = &mut self.chain;
 
         loop {
@@ -204,47 +204,51 @@ impl<'a> Animation<'a> {
     }
 }
 
-impl<'a> Draw for GameObject<'a> {
+impl Draw for GameObject {
     fn draw(&self) {
         match &self.animation.type_ {
             AnimationType::Static(texture) => {
-                draw_texture_ex(
-                    &texture.borrow(),
-                    self.position.x,
-                    self.position.y,
-                    WHITE,
-                    DrawTextureParams::default(),
-                );
+                draw::request_draw(DrawCommand::Texture {
+                    texture: texture.clone(),
+                    x: self.position.x,
+                    y: self.position.y,
+                    color: WHITE,
+                    params: DrawTextureParams::default(),
+                    z_index: 5,
+                });
             }
             AnimationType::Move { texture, .. } => {
-                draw_texture_ex(
-                    &texture.borrow(),
-                    self.position.x,
-                    self.position.y,
-                    WHITE,
-                    DrawTextureParams::default(),
-                );
+                draw::request_draw(DrawCommand::Texture {
+                    texture: texture.clone(),
+                    x: self.position.x,
+                    y: self.position.y,
+                    color: WHITE,
+                    params: DrawTextureParams::default(),
+                    z_index: 5,
+                });
             }
             AnimationType::StaticSprite { frame, sprite, .. } => {
-                sprite.borrow().draw_frame(
+                sprite.draw_frame_with_index(
                     self.position.x,
                     self.position.y,
                     *frame,
                     self.dimensions,
+                    5,
                 );
             }
-            AnimationType::MoveSprite { sprite, frame, .. } => sprite.borrow().draw_frame(
+            AnimationType::MoveSprite { sprite, frame, .. } => sprite.draw_frame_with_index(
                 self.position.x,
                 self.position.y,
                 *frame,
                 self.dimensions,
+                5,
             ),
             AnimationType::Hidden => {}
         }
     }
 }
 
-impl<'a> Default for Animation<'a> {
+impl Default for Animation {
     fn default() -> Self {
         Self {
             duration: None,
