@@ -17,6 +17,68 @@ thread_local! {
     pub static ASSETS: OnceCell<Arc<AssetStore>> = OnceCell::new();
 }
 
+/// Macro to insert a sprite sheet into the asset store.
+///
+/// Use:
+/// ```rust
+/// load_and_register_sprite!(self.sprites, "soldier.png", 6, 32.0 * 4.0, [
+///     (Sprite::SoldierRunDown, 0),
+///     (Sprite::SoldierRunRight, 1),
+///     (Sprite::SoldierRunLeft, 2),
+///     (Sprite::SoldierRunUp, 3),
+///     (Sprite::SoldierIdle, 4),
+/// ]);
+/// ```
+macro_rules! load_and_register_sprite {
+    (
+        $map:expr,                // the sprite HashMap
+        $file:literal,            // texture filename under `assets/`
+        $frames:expr,             // frame count
+        $frame_size:expr,         // frame width
+        [ $( ($variant:expr, $row:expr) ),+ $(,)? ] // enum + row list
+    ) => {{
+        let texture = load_texture(
+            Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join(concat!("assets/", $file))
+                .to_str()
+                .unwrap()
+        ).await.unwrap();
+
+        $(
+            $map.insert(
+                $variant,
+                Rc::new(SpriteSheet::new(
+                    texture.clone(),
+                    $frames,
+                    $frame_size,
+                    $row,
+                    0.0,
+                )),
+            );
+        )+
+    }};
+}
+
+/// Macro to load a texture and register it in the asset store.
+macro_rules! load_and_register_texture {
+    (
+        $map:expr,
+        $key:expr,
+        $file:literal
+    ) => {{
+        let texture = load_texture(
+            Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join(concat!("assets/", $file))
+                .to_str()
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+        $map.insert($key, Rc::new(texture));
+    }};
+}
+
 #[derive(Debug, Clone)]
 pub struct AssetStore {
     pub textures: HashMap<Texture, Rc<Texture2D>>,
@@ -39,6 +101,7 @@ pub enum Sprite {
     SoldierRunRight,
     SoldierRunLeft,
     SoldierRunUp,
+    Shadow,
     Wall,
 }
 
@@ -122,63 +185,12 @@ impl AssetStore {
     }
 
     pub async fn load_all(&mut self) {
-        let root = env!("CARGO_MANIFEST_DIR");
+        // === Textures ===
 
-        self.textures.insert(
-            Texture::Background,
-            Rc::new(
-                load_texture(
-                    Path::new(root)
-                        .join("assets/texture-snow.png")
-                        .to_str()
-                        .unwrap(),
-                )
-                .await
-                .unwrap(),
-            ),
-        );
-
-        self.textures.insert(
-            Texture::Unit,
-            Rc::new(
-                load_texture(
-                    Path::new(root)
-                        .join("assets/unit-soldier.png")
-                        .to_str()
-                        .unwrap(),
-                )
-                .await
-                .unwrap(),
-            ),
-        );
-
-        self.textures.insert(
-            Texture::Obstacle,
-            Rc::new(
-                load_texture(
-                    Path::new(root)
-                        .join("assets/obstacle-boulder.png")
-                        .to_str()
-                        .unwrap(),
-                )
-                .await
-                .unwrap(),
-            ),
-        );
-
-        self.textures.insert(
-            Texture::Main,
-            Rc::new(
-                load_texture(
-                    Path::new(root)
-                        .join("assets/main-screen-variation.png")
-                        .to_str()
-                        .unwrap(),
-                )
-                .await
-                .unwrap(),
-            ),
-        );
+        load_and_register_texture!(self.textures, Texture::Unit, "unit-soldier.png");
+        load_and_register_texture!(self.textures, Texture::Background, "texture-snow.png");
+        load_and_register_texture!(self.textures, Texture::Obstacle, "obstacle-boulder.png");
+        load_and_register_texture!(self.textures, Texture::Main, "main-screen-variation.png");
 
         // === Fonts ===
 
@@ -186,7 +198,7 @@ impl AssetStore {
             "doto".into(),
             Rc::new(
                 load_ttf_font(
-                    Path::new(root)
+                    Path::new(env!("CARGO_MANIFEST_DIR"))
                         .join("assets/fonts/jersey20.ttf")
                         .to_str()
                         .unwrap(),
@@ -198,82 +210,34 @@ impl AssetStore {
 
         // === Sprites ===
 
-        self.sprites.insert(
-            Sprite::Wall,
-            Rc::new(SpriteSheet::new(
-                load_texture(
-                    Path::new(root)
-                        .join("assets/wall-sprite.png")
-                        .to_str()
-                        .unwrap(),
-                )
-                .await
-                .unwrap(),
-                4,
-                32.0 * 4.0,
-                0,
-                0.0,
-            )),
+        load_and_register_sprite!(
+            self.sprites,
+            "wall-sprite.png",
+            4,
+            32.0 * 4.0,
+            [(Sprite::Wall, 0)]
         );
 
-        let soldier_sprite =
-            load_texture(Path::new(root).join("assets/soldier.png").to_str().unwrap())
-                .await
-                .unwrap();
-
-        self.sprites.insert(
-            Sprite::SoldierRunDown,
-            Rc::new(SpriteSheet::new(
-                soldier_sprite.clone(),
-                6,
-                32.0 * 4.0,
-                0,
-                0.0,
-            )),
+        load_and_register_sprite!(
+            self.sprites,
+            "soldier.png",
+            6,
+            32.0 * 4.0,
+            [
+                (Sprite::SoldierRunDown, 0),
+                (Sprite::SoldierRunRight, 1),
+                (Sprite::SoldierRunLeft, 2),
+                (Sprite::SoldierRunUp, 3),
+                (Sprite::SoldierIdle, 4),
+            ]
         );
 
-        self.sprites.insert(
-            Sprite::SoldierRunRight,
-            Rc::new(SpriteSheet::new(
-                soldier_sprite.clone(),
-                6,
-                32.0 * 4.0,
-                1,
-                0.0,
-            )),
-        );
-
-        self.sprites.insert(
-            Sprite::SoldierRunLeft,
-            Rc::new(SpriteSheet::new(
-                soldier_sprite.clone(),
-                6,
-                32.0 * 4.0,
-                2,
-                0.0,
-            )),
-        );
-
-        self.sprites.insert(
-            Sprite::SoldierRunUp,
-            Rc::new(SpriteSheet::new(
-                soldier_sprite.clone(),
-                6,
-                32.0 * 4.0,
-                3,
-                0.0,
-            )),
-        );
-
-        self.sprites.insert(
-            Sprite::SoldierIdle,
-            Rc::new(SpriteSheet::new(
-                soldier_sprite.clone(),
-                6,
-                32.0 * 4.0,
-                4,
-                0.0,
-            )),
+        load_and_register_sprite!(
+            self.sprites,
+            "shadow.png",
+            1,
+            32.0 * 4.0,
+            [(Sprite::Shadow, 0)]
         );
     }
 
