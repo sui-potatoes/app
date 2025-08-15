@@ -9,7 +9,7 @@ use sui_sdk_types::Address;
 use crate::{
     WithRef,
     config::{MENU_FONT_COLOR as TEXT_COLOR, MENU_FONT_SIZE as FONT_SIZE},
-    draw::{ASSETS, Draw},
+    draw::{self, ASSETS, Draw, DrawCommand},
     types::{Preset, Recruit, Replay},
 };
 
@@ -237,18 +237,12 @@ impl<T: MenuItem> Selectable for Menu<T> {
 
 impl<T: MenuItem> Draw for Menu<T> {
     fn draw(&self) {
+        draw::draw_main_menu_background();
+
         let offset = if let Some(title) = &self.title {
-            draw_text_ex(
-                &title,
-                20.0,
-                40.0,
-                TextParams {
-                    font: Some(&ASSETS.with(|assets| assets.get().unwrap().font("doto").unwrap())),
-                    font_size: TITLE_FONT_SIZE as u16,
-                    color: WHITE,
-                    ..Default::default()
-                },
-            );
+            DrawCommand::text(title.clone(), 20.0, 40.0, TITLE_FONT_SIZE as u16, WHITE, 1)
+                .schedule();
+
             TITLE_FONT_SIZE * 2.0
         } else {
             FONT_SIZE
@@ -262,19 +256,16 @@ impl<T: MenuItem> Draw for Menu<T> {
                 } else {
                     TEXT_COLOR
                 };
-                draw_text_ex(
-                    &item.to_string(),
+
+                DrawCommand::text(
+                    item.to_string(),
                     20.0,
                     offset + (i as f32 * FONT_SIZE),
-                    TextParams {
-                        font: Some(
-                            &ASSETS.with(|assets| assets.get().unwrap().font("doto").unwrap()),
-                        ),
-                        font_size: FONT_SIZE as u16,
-                        color,
-                        ..Default::default()
-                    },
-                );
+                    FONT_SIZE as u16,
+                    color,
+                    1,
+                )
+                .schedule();
             }
             return;
         }
@@ -291,18 +282,30 @@ impl<T: MenuItem> Draw for Menu<T> {
             } else {
                 TEXT_COLOR
             };
-            draw_text_ex(
-                &item.to_string(),
+
+            DrawCommand::text(
+                item.to_string(),
                 20.0,
                 offset + (j as f32 * FONT_SIZE),
-                TextParams {
-                    font: Some(&ASSETS.with(|assets| assets.get().unwrap().font("doto").unwrap())),
-                    font_size: FONT_SIZE as u16,
-                    color,
+                FONT_SIZE as u16,
+                color,
+                1,
+            )
+            .schedule();
 
-                    ..Default::default()
-                },
-            );
+            // draw::request_draw(DrawCommand::Text {
+            //     text: item.to_string(),
+            //     x: 20.0,
+            //     y: offset + (j as f32 * FONT_SIZE),
+            //     font: Some(font.clone()),
+            //     font_size: FONT_SIZE as u16,
+            //     font_scale: 1.0,
+            //     font_scale_aspect: 1.0,
+            //     rotation: 0.0,
+            //     color,
+            //     z_index: 1,
+            // });
+
             j += 1;
         }
     }

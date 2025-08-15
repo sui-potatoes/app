@@ -38,7 +38,7 @@ mod zklogin;
 
 use crate::{
     config::{COMMANDER_OBJ, PRESET_STRUCT_TAG, RECRUIT_STRUCT_TAG, REPLAY_STRUCT_TAG},
-    draw::{ASSETS, AssetStore, Texture},
+    draw::{ASSETS, AssetStore},
     game::{App, Message as AppMessage},
     tx::TxRunner,
     types::{Preset, Recruit, Replay},
@@ -112,20 +112,6 @@ async fn main() -> Result<(), anyhow::Error> {
     loop {
         gamepads.poll();
         clear_background(LIGHTGRAY);
-
-        let assets = ASSETS.with(|assets| assets.get().unwrap().clone());
-        let texture = assets.texture(Texture::Main).unwrap();
-
-        draw_texture_ex(
-            &texture,
-            0.0,
-            0.0,
-            WHITE,
-            DrawTextureParams {
-                dest_size: Some(Vec2::new(screen_width(), screen_height())),
-                ..Default::default()
-            },
-        );
 
         input::handle_input(&mut app);
         input::handle_gamepad_input(&mut app, &mut gamepads);

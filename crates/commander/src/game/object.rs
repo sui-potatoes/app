@@ -18,6 +18,8 @@ pub struct GameObject {
     pub position: Vec2,
     /// The animation of the object (including static representation).
     pub animation: Animation,
+    /// Optional shadow sprite.
+    pub shadow: Option<Rc<SpriteSheet>>,
 }
 
 /// Animation of the object.
@@ -68,11 +70,17 @@ pub enum AnimationType {
 }
 
 impl GameObject {
-    pub fn new(position: Vec2, dimensions: (u8, u8), animation: Animation) -> Self {
+    pub fn new(
+        position: Vec2,
+        dimensions: (u8, u8),
+        animation: Animation,
+        shadow: Option<Rc<SpriteSheet>>,
+    ) -> Self {
         Self {
             dimensions,
             position,
             animation,
+            shadow,
         }
     }
 
@@ -206,6 +214,10 @@ impl Animation {
 
 impl Draw for GameObject {
     fn draw(&self) {
+        if let Some(shadow) = &self.shadow {
+            shadow.draw_frame_with_index(self.position.x, self.position.y, 0, self.dimensions, 1);
+        }
+
         match &self.animation.type_ {
             AnimationType::Static(texture) => {
                 draw::request_draw(DrawCommand::Texture {

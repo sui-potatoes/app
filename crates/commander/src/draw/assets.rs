@@ -35,6 +35,7 @@ macro_rules! load_and_register_sprite {
         $file:literal,            // texture filename under `assets/`
         $frames:expr,             // frame count
         $frame_size:expr,         // frame width
+        $y_offset:expr,           // y offset
         [ $( ($variant:expr, $row:expr) ),+ $(,)? ] // enum + row list
     ) => {{
         let texture = load_texture(
@@ -52,7 +53,7 @@ macro_rules! load_and_register_sprite {
                     $frames,
                     $frame_size,
                     $row,
-                    0.0,
+                    $y_offset,
                 )),
             );
         )+
@@ -134,7 +135,7 @@ impl SpriteSheet {
     }
 
     pub fn draw_frame(&self, x: f32, y: f32, frame: usize, dimensions: (u8, u8)) {
-        self.draw_frame_with_index(x, y, frame, dimensions, 0);
+        self.draw_frame_with_index(x, y, frame, dimensions, 1);
     }
 
     pub fn draw_frame_with_index(
@@ -215,6 +216,7 @@ impl AssetStore {
             "wall-sprite.png",
             4,
             32.0 * 4.0,
+            0.0,
             [(Sprite::Wall, 0)]
         );
 
@@ -223,6 +225,7 @@ impl AssetStore {
             "soldier.png",
             6,
             32.0 * 4.0,
+            0.2,
             [
                 (Sprite::SoldierRunDown, 0),
                 (Sprite::SoldierRunRight, 1),
@@ -237,6 +240,7 @@ impl AssetStore {
             "shadow.png",
             1,
             32.0 * 4.0,
+            0.2,
             [(Sprite::Shadow, 0)]
         );
     }

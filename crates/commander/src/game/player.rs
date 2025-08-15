@@ -5,6 +5,7 @@ use std::{
     cell::RefCell,
     collections::{HashMap, VecDeque},
     convert::TryFrom,
+    fmt::Display,
 };
 
 use macroquad::prelude::*;
@@ -12,8 +13,8 @@ use sui_sdk_types::Address;
 
 use super::{Animation, AnimationType, GameObject};
 use crate::{
-    config::{TILE_HEIGHT, TILE_WIDTH},
-    draw::{ASSETS, Draw, Highlight, Sprite, Texture, draw_highlight, grid_to_world},
+    config::{MENU_FONT_SIZE as FONT_SIZE, TILE_HEIGHT, TILE_WIDTH},
+    draw::{ASSETS, Draw, DrawCommand, Highlight, Sprite, Texture, draw_highlight, grid_to_world},
     types::{Cursor, Direction, History, ID, Map, Preset, Record, Replay, Unit},
 };
 
@@ -54,6 +55,13 @@ const COLOR_MOVE: Color = Color {
 const COLOR_ATTACK: Color = Color {
     r: 200.0,
     g: 0.0,
+    b: 0.0,
+    a: 0.2,
+};
+
+const COLOR_RELOAD: Color = Color {
+    r: 0.0,
+    g: 200.0,
     b: 0.0,
     a: 0.2,
 };
@@ -172,6 +180,13 @@ impl Player {
                         position,
                         self.map.as_ref().unwrap().dimensions(),
                         static_unit_animation(),
+                        Some(
+                            ASSETS
+                                .with(|assets| {
+                                    assets.get().unwrap().sprite_sheet(Sprite::Shadow).unwrap()
+                                })
+                                .clone(),
+                        ),
                     ),
                 );
                 self.id_counter += 1;
@@ -248,6 +263,9 @@ impl Player {
 
                     self.kia_units.push(unit);
                 }
+            }
+            ProcessedRecord::Reload(pos) => {
+                self.highlight = Some(Highlight(vec![*pos], COLOR_RELOAD));
             }
             c @ _ => {
                 println!("Skipping action: {:?}", c);
@@ -336,6 +354,9 @@ impl Player {
                     );
                 }
             }
+            ProcessedRecord::Reload(pos) => {
+                self.highlight = Some(Highlight(vec![*pos], COLOR_RELOAD));
+            }
             _ => {
                 println!("Skipping action: {:?}", action);
             }
@@ -355,6 +376,35 @@ impl Draw for Player {
             if let Some(highlight) = &self.highlight {
                 draw_highlight(highlight, (map.width(), map.height()));
             }
+
+            // Draw the turn number, the action number in the very bottom.
+            DrawCommand::text(
+                format!("Turn: {}", map.turn,),
+                20.0,
+                FONT_SIZE,
+                FONT_SIZE as u16,
+                BLACK,
+                100,
+            )
+            .schedule();
+
+            DrawCommand::text(
+                format!(
+                    "Action: {} ({}/{})",
+                    self.processed_records
+                        .back()
+                        .unwrap_or(&ProcessedRecord::NextTurn(0))
+                        .to_string(),
+                    self.processed_records.len(),
+                    self.records.len() + self.processed_records.len()
+                ),
+                20.0,
+                FONT_SIZE * 2.0,
+                FONT_SIZE as u16,
+                BLACK,
+                100,
+            )
+            .schedule();
         }
     }
 }
@@ -457,6 +507,19 @@ impl Record {
             Some(cursor.into())
         } else {
             None
+        }
+    }
+}
+
+impl Display for ProcessedRecord {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ProcessedRecord::NextTurn(_) => write!(f, "Next Turn"),
+            ProcessedRecord::Reload(_) => write!(f, "Reload"),
+            ProcessedRecord::Move(..) => write!(f, "Move"),
+            ProcessedRecord::RecruitPlaced(..) => write!(f, "Place Unit"),
+            ProcessedRecord::Attack { .. } => write!(f, "Attack"),
+            ProcessedRecord::Grenade { .. } => write!(f, "Grenade"),
         }
     }
 }
