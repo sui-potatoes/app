@@ -38,7 +38,7 @@ mod zklogin;
 
 use crate::{
     config::{COMMANDER_OBJ, PRESET_STRUCT_TAG, RECRUIT_STRUCT_TAG, REPLAY_STRUCT_TAG},
-    draw::{ASSETS, AssetStore, Draw, Texture},
+    draw::{ASSETS, AssetStore, Texture},
     game::{App, Message as AppMessage},
     tx::TxRunner,
     types::{Preset, Recruit, Replay},
@@ -104,11 +104,9 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut asset_store = AssetStore::new();
     asset_store.load_all().await;
 
-    println!("Setting ASSETS...");
     ASSETS.set(Arc::new(asset_store)).unwrap();
-    println!("ASSETS set.");
 
-    // Main game loop
+    // Main game loop.
     loop {
         gamepads.poll();
         clear_background(LIGHTGRAY);
@@ -130,7 +128,7 @@ async fn main() -> Result<(), anyhow::Error> {
         input::handle_input(&mut app);
         input::handle_gamepad_input(&mut app, &mut gamepads);
 
-        app.draw();
+        app.tick();
 
         if let Ok(msg) = rx.try_recv() {
             app.update_from_message(msg);

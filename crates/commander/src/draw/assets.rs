@@ -30,7 +30,11 @@ pub enum Texture {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum Sprite {
-    UnitSoldier,
+    SoldierIdle,
+    SoldierRunDown,
+    SoldierRunRight,
+    SoldierRunLeft,
+    SoldierRunUp,
     Wall,
 }
 
@@ -40,14 +44,25 @@ pub struct SpriteSheet {
     pub texture: Texture2D,
     pub frames: usize,
     pub frame_size: f32,
+    /// The row being loaded (for multi-row sprite sheets).
+    pub row: usize,
+    pub y_offset: f32,
 }
 
 impl SpriteSheet {
-    pub fn new(texture: Texture2D, frames: usize, frame_size: f32) -> Self {
+    pub fn new(
+        texture: Texture2D,
+        frames: usize,
+        frame_size: f32,
+        row: usize,
+        y_offset: f32,
+    ) -> Self {
         Self {
             texture,
             frames,
             frame_size,
+            row,
+            y_offset,
         }
     }
 
@@ -60,16 +75,17 @@ impl SpriteSheet {
         );
 
         let (scale_x, scale_y) = super::get_scale(dimensions);
+        let y_offset = -self.y_offset * TILE_HEIGHT as f32 * scale_y;
 
         draw_texture_ex(
             &self.texture,
             x,
-            y,
+            y + y_offset,
             WHITE,
             DrawTextureParams {
                 source: Some(Rect {
                     x: self.frame_size * frame as f32,
-                    y: 0.0,
+                    y: self.frame_size * self.row as f32,
                     w: self.frame_size,
                     h: self.frame_size,
                 }),
@@ -157,22 +173,6 @@ impl AssetStore {
         // === Sprites ===
 
         self.sprites.insert(
-            Sprite::UnitSoldier,
-            SpriteSheet::new(
-                load_texture(
-                    Path::new(root)
-                        .join("assets/soldier-sprite.png")
-                        .to_str()
-                        .unwrap(),
-                )
-                .await
-                .unwrap(),
-                8,
-                32.0 * 4.0,
-            ),
-        );
-
-        self.sprites.insert(
             Sprite::Wall,
             SpriteSheet::new(
                 load_texture(
@@ -185,7 +185,39 @@ impl AssetStore {
                 .unwrap(),
                 4,
                 32.0 * 4.0,
+                0,
+                0.0,
             ),
+        );
+
+        let soldier_sprite =
+            load_texture(Path::new(root).join("assets/soldier.png").to_str().unwrap())
+                .await
+                .unwrap();
+
+        self.sprites.insert(
+            Sprite::SoldierRunDown,
+            SpriteSheet::new(soldier_sprite.clone(), 6, 32.0 * 4.0, 0, 0.0),
+        );
+
+        self.sprites.insert(
+            Sprite::SoldierRunRight,
+            SpriteSheet::new(soldier_sprite.clone(), 6, 32.0 * 4.0, 1, 0.0),
+        );
+
+        self.sprites.insert(
+            Sprite::SoldierRunLeft,
+            SpriteSheet::new(soldier_sprite.clone(), 6, 32.0 * 4.0, 2, 0.0),
+        );
+
+        self.sprites.insert(
+            Sprite::SoldierRunUp,
+            SpriteSheet::new(soldier_sprite.clone(), 6, 32.0 * 4.0, 3, 0.0),
+        );
+
+        self.sprites.insert(
+            Sprite::SoldierIdle,
+            SpriteSheet::new(soldier_sprite.clone(), 6, 32.0 * 4.0, 4, 0.0),
         );
     }
 

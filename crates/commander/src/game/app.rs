@@ -8,6 +8,7 @@ use std::{
 
 use macroquad::{miniquad::window::set_window_size, prelude::*};
 use sui_sdk_types::Address;
+use typed_arena::Arena;
 
 use super::{menu::*, player::*};
 use crate::{
@@ -17,8 +18,8 @@ use crate::{
     types::{Game, ID, Preset, Recruit, Replay},
 };
 
-pub struct App {
-    pub screen: Screen,
+pub struct App<'a> {
+    pub screen: Screen<'a>,
     pub state: Arc<Mutex<State>>,
     pub game: Option<Game>,
     /// Cursor position on the Map.
@@ -46,7 +47,7 @@ pub enum Message {
     FetchReplays,
 }
 
-pub enum Screen {
+pub enum Screen<'a> {
     /// Show main menu.
     MainMenu(Menu<MainMenuItem>),
     /// Show an active game.
@@ -62,7 +63,7 @@ pub enum Screen {
     /// Show list of replays.
     Replays(Menu<ReplayMenuItem>),
     /// Play a replay.
-    Replay(Player),
+    Replay(Player<'a>),
     /// Show settings menu.
     Settings(Menu<SettingsMenuItem>),
     /// Show window settings menu.
@@ -75,7 +76,7 @@ pub struct RecruitScreen {
     pub recruit: WithRef<Recruit>,
 }
 
-impl App {
+impl<'a> App<'a> {
     pub fn new(tx: Sender<Message>, state: Arc<Mutex<State>>) -> Self {
         Self {
             screen: Screen::MainMenu(Menu::main(None)),
@@ -302,7 +303,14 @@ impl App {
         }
     }
 
-    fn set_screen(&mut self, screen: Screen) {
+    pub fn tick(&mut self) {
+        self.draw();
+        if let Screen::Replay(player) = &mut self.screen {
+            player.tick();
+        }
+    }
+
+    fn set_screen(&mut self, screen: Screen<'a>) {
         self.screen = screen;
         self.cursor = (0, 0);
         self.highlight = None;
@@ -331,7 +339,7 @@ impl App {
 
 /// === Draw impls ===
 
-impl Draw for App {
+impl<'a> Draw for App<'a> {
     fn draw(&self) {
         match &self.screen {
             Screen::MainMenu(menu) => menu.draw(),
@@ -380,7 +388,6 @@ impl Draw for App {
                     );
                 }
 
-                preset.data.map.draw();
                 draw_cursor(
                     self.cursor,
                     (preset.data.map.width(), preset.data.map.height()),
@@ -391,6 +398,8 @@ impl Draw for App {
                         (preset.data.map.width(), preset.data.map.height()),
                     );
                 }
+
+                preset.data.map.draw();
             }
         }
     }

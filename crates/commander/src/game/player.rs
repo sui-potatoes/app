@@ -1,17 +1,24 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use std::{collections::VecDeque, convert::TryFrom};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, VecDeque},
+    convert::TryFrom,
+};
 
-use macroquad::color::*;
+use macroquad::prelude::*;
+use sui_sdk_types::Address;
 
+use super::{Animation, AnimationType, GameObject};
 use crate::{
-    draw::{Draw, Highlight, draw_highlight},
+    config::{TILE_HEIGHT, TILE_WIDTH},
+    draw::{ASSETS, Draw, Highlight, Sprite, Texture, draw_highlight, grid_to_world},
     types::{Cursor, Direction, History, ID, Map, Preset, Record, Replay, Unit},
 };
 
 /// A Player for `Replay`s. Allows playing the replay step by step.
-pub struct Player {
+pub struct Player<'a> {
     /// The Game Map.
     pub map: Option<Map>,
     /// The Replay to play.
@@ -24,6 +31,10 @@ pub struct Player {
     pub kia_units: Vec<Unit>,
     /// Highlight the tiles that are affected by the action.
     pub highlight: Option<Highlight>,
+    /// Stores units that are currently on the Map and their animations.
+    pub objects: HashMap<ID, GameObject<'a>>,
+    /// Just a value that allows distinguishing between units.
+    pub id_counter: u8,
 }
 
 const COLOR_PLACE: Color = Color {
@@ -48,10 +59,45 @@ const COLOR_ATTACK: Color = Color {
 };
 
 #[derive(Debug)]
+pub struct PathSegment {
+    direction: Direction,
+    start_position: Vec2,
+    end_position: Vec2,
+    length: usize,
+}
+
+/// Converts a `PathSegment` into an `Animation` that moves the unit along the
+/// segment.
+impl<'a> Into<Animation<'a>> for PathSegment {
+    fn into(self) -> Animation<'a> {
+        let sprite = match self.direction {
+            Direction::Up => Sprite::SoldierRunUp,
+            Direction::Down => Sprite::SoldierRunDown,
+            Direction::Left => Sprite::SoldierRunLeft,
+            Direction::Right => Sprite::SoldierRunRight,
+            _ => Sprite::SoldierIdle,
+        };
+
+        Animation {
+            duration: Some(self.length as f64 / 2.0),
+            type_: AnimationType::MoveSprite {
+                sprite: RefCell::new(ASSETS.get().unwrap().sprite_sheet(sprite).unwrap()),
+                start_position: self.start_position,
+                end_position: self.end_position,
+                frame: 0,
+                fps: 0.1,
+            },
+            ..Default::default()
+        }
+    }
+}
+
+#[derive(Debug)]
 pub enum ProcessedRecord {
     Reload((u8, u8)),
     NextTurn(u16),
-    Move(Vec<(u8, u8)>),
+    /// Stores the grid coordinates and the original directional path.
+    Move(Vec<(u8, u8)>, Vec<u8>),
     Attack {
         origin: (u8, u8),
         target: (u8, u8),
@@ -65,7 +111,7 @@ pub enum ProcessedRecord {
     },
 }
 
-impl Player {
+impl<'a> Player<'a> {
     pub fn new(mut replay: Replay) -> Self {
         Self {
             map: None,
@@ -74,6 +120,23 @@ impl Player {
             processed_records: VecDeque::new(),
             kia_units: Vec::new(),
             highlight: None,
+            objects: HashMap::new(),
+            id_counter: 0,
+        }
+    }
+
+    pub fn tick(&mut self) {
+        for (_id, object) in self.objects.iter_mut() {
+            object.tick(get_time());
+        }
+
+        self.draw();
+    }
+
+    pub fn stop_all_animations(&mut self) {
+        for (_id, object) in self.objects.iter_mut() {
+            object.skip_all_animations();
+            object.animation = static_unit_animation();
         }
     }
 
@@ -82,6 +145,8 @@ impl Player {
     }
 
     pub fn next_action(&mut self) -> Result<(), anyhow::Error> {
+        self.stop_all_animations();
+
         let action: ProcessedRecord = self
             .records
             .pop_front()
@@ -93,15 +158,27 @@ impl Player {
                 self.highlight = Some(Highlight(vec![(*x, *y)], COLOR_PLACE));
 
                 let tile = &mut self.map.as_mut().unwrap().grid[*x as usize][*y as usize];
-                tile.unit = Some(Unit::default());
+                let mut unit = Unit::default();
+                unit.recruit = ID(Address::from_bytes([self.id_counter; 32]).unwrap());
+                tile.unit = Some(unit);
 
-                println!("Placed unit at ({}, {})", x, y);
+                let position = grid_to_world((*x, *y), self.map.as_ref().unwrap().dimensions());
+
+                self.objects.insert(
+                    unit.recruit,
+                    GameObject::new(
+                        position,
+                        self.map.as_ref().unwrap().dimensions(),
+                        static_unit_animation(),
+                    ),
+                );
+                self.id_counter += 1;
             }
             ProcessedRecord::NextTurn(turn) => {
                 self.highlight = None;
                 self.map.as_mut().unwrap().turn = *turn;
             }
-            ProcessedRecord::Move(coords) => {
+            ProcessedRecord::Move(coords, path) => {
                 self.highlight = Some(Highlight(coords.clone(), COLOR_MOVE));
 
                 let start = coords
@@ -115,6 +192,30 @@ impl Player {
                     .unit
                     .take()
                     .ok_or(anyhow::anyhow!("Failed to get unit"))?;
+
+                if let Some(obj) = self.objects.get_mut(&unit.recruit) {
+                    // obj.position = grid_to_world(*end, self.map.as_ref().unwrap().dimensions());
+                    let direction_points =
+                        path_to_world_points(path.clone(), self.map.as_ref().unwrap().dimensions());
+
+                    let last_direction = direction_points.last().unwrap().direction;
+                    let mut animations = direction_points
+                        .into_iter()
+                        .map(|segment| segment.into())
+                        .collect::<Vec<_>>();
+
+                    let mut start_animation: Animation<'a> = animations.remove(0);
+
+                    for animation in animations {
+                        start_animation.chain(animation);
+                    }
+
+                    println!("Last direction: {:?}", last_direction);
+                    start_animation.chain(static_unit_animation());
+
+                    println!("Start move animation",);
+                    obj.animation = start_animation;
+                }
 
                 let end_tile = &mut self.map.as_mut().unwrap().grid[end.0 as usize][end.1 as usize];
                 end_tile.unit = Some(unit);
@@ -176,6 +277,7 @@ impl Player {
                     .ok_or(anyhow::anyhow!("Failed to get map"))?
                     .grid[*x as usize][*y as usize];
 
+                self.objects.remove(&tile.unit.as_ref().unwrap().recruit);
                 tile.unit = None;
             }
             ProcessedRecord::NextTurn(turn) => {
@@ -185,9 +287,10 @@ impl Player {
                     .ok_or(anyhow::anyhow!("Failed to get map"))?
                     .turn = turn - 1;
             }
-            ProcessedRecord::Move(coords) => {
+            ProcessedRecord::Move(coords, _) => {
                 self.highlight = Some(Highlight(coords.clone(), COLOR_MOVE));
 
+                let dimensions = self.map.as_ref().unwrap().dimensions();
                 let start = coords
                     .first()
                     .ok_or(anyhow::anyhow!("Failed to get start"))?;
@@ -202,6 +305,12 @@ impl Player {
                     .unit
                     .take()
                     .ok_or(anyhow::anyhow!("Failed to get unit"))?;
+
+                if let Some(obj) = self.objects.get_mut(&unit.recruit) {
+                    obj.position = grid_to_world(*start, dimensions);
+                    obj.animation = static_unit_animation();
+                }
+
                 let start_tile = &mut map_mut.grid[start.0 as usize][start.1 as usize];
                 start_tile.unit = Some(unit);
             }
@@ -236,7 +345,7 @@ impl Player {
     }
 }
 
-impl Draw for Player {
+impl<'a> Draw for Player<'a> {
     fn draw(&self) {
         if let Some(map) = &self.map {
             map.draw();
@@ -286,7 +395,9 @@ impl History {
             res.push(match header {
                 Record::Reload(pos) => ProcessedRecord::Reload((pos[0] as u8, pos[1] as u8)),
                 Record::NextTurn(turn) => ProcessedRecord::NextTurn(turn),
-                r @ Record::Move(_) => ProcessedRecord::Move(r.move_to_coords().unwrap()),
+                r @ Record::Move(_) => {
+                    ProcessedRecord::Move(r.move_to_coords().unwrap(), r.move_path().unwrap())
+                }
                 Record::RecruitPlaced(x, y) => ProcessedRecord::RecruitPlaced(x as u8, y as u8),
                 Record::Attack { origin, target } => ProcessedRecord::Attack {
                     origin: (origin[0] as u8, origin[1] as u8),
@@ -318,6 +429,14 @@ impl Record {
         }
     }
 
+    pub fn move_path(&self) -> Option<Vec<u8>> {
+        if let Record::Move(path) = self {
+            Some(path.clone())
+        } else {
+            None
+        }
+    }
+
     pub fn move_to_coords(&self) -> Option<Vec<(u8, u8)>> {
         if let Record::Move(path) = self {
             // Start position is the first two elements of the path.
@@ -337,6 +456,71 @@ impl Record {
         } else {
             None
         }
+    }
+}
+
+/// Splits the path into sections where only one coordinate changes.
+fn path_to_world_points(mut path: Vec<u8>, dimensions: (u8, u8)) -> Vec<PathSegment> {
+    let start = (path.remove(0), path.remove(0));
+    let start_position = grid_to_world(start, dimensions);
+    let mut segments: Vec<PathSegment> = Vec::new();
+
+    // TODO: check if path can be empty.
+    if path.len() == 0 {
+        return vec![PathSegment {
+            direction: Direction::None,
+            start_position: grid_to_world(start, dimensions),
+            end_position: grid_to_world(start, dimensions),
+            length: 0,
+        }];
+    }
+
+    let mut cursor = Cursor::new(start);
+    let mut curr_direction = Direction::None;
+
+    for dir in path {
+        let direction = Direction::try_from(dir).unwrap();
+        if direction != curr_direction {
+            segments.push(PathSegment {
+                direction: curr_direction,
+                start_position: segments
+                    .last()
+                    .map(|e| e.end_position)
+                    .unwrap_or(start_position),
+                end_position: grid_to_world(cursor.position, dimensions),
+                length: cursor.history.len(),
+            });
+            curr_direction = direction;
+            cursor.reset(cursor.position);
+        }
+        cursor.move_to(direction);
+    }
+
+    // Push the last direction.
+    segments.push(PathSegment {
+        direction: curr_direction,
+        start_position: segments.last().unwrap().end_position,
+        end_position: grid_to_world(cursor.position, dimensions),
+        length: cursor.history.len(),
+    });
+
+    segments
+}
+
+fn static_unit_animation<'a>() -> Animation<'a> {
+    Animation {
+        type_: AnimationType::StaticSprite {
+            sprite: RefCell::new(
+                ASSETS
+                    .get()
+                    .unwrap()
+                    .sprite_sheet(Sprite::SoldierIdle)
+                    .unwrap(),
+            ),
+            frame: 0,
+            fps: Some(0.2),
+        },
+        ..Default::default()
     }
 }
 

@@ -84,3 +84,11 @@ pub fn get_scale(dimensions: (u8, u8)) -> (f32, f32) {
         screen_height / (height * TILE_SIZE),
     )
 }
+
+pub fn grid_to_world(p: (u8, u8), dimensions: (u8, u8)) -> Vec2 {
+    let (scale_x, scale_y) = get_scale(dimensions);
+    Vec2::new(
+        p.1 as f32 * TILE_SIZE * scale_x,
+        p.0 as f32 * TILE_SIZE * scale_y,
+    )
+}

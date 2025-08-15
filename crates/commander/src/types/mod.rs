@@ -161,7 +161,7 @@ pub struct Replay {
     pub history: History,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum Direction {
     Up,
     Down,
@@ -197,6 +197,12 @@ impl Cursor {
             position,
             history: vec![position],
         }
+    }
+
+    pub fn reset(&mut self, position: (u8, u8)) {
+        self.position = position;
+        self.history.clear();
+        self.history.push(position);
     }
 
     pub fn move_to(&mut self, direction: Direction) {

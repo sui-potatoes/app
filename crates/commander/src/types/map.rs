@@ -19,6 +19,10 @@ pub struct Map {
 }
 
 impl Map {
+    pub fn dimensions(&self) -> (u8, u8) {
+        (self.cols(), self.rows())
+    }
+
     pub fn rows(&self) -> u8 {
         self.grid.len() as u8
     }
