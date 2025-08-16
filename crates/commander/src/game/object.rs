@@ -20,6 +20,8 @@ pub struct GameObject {
     pub animation: Animation,
     /// Optional shadow sprite.
     pub shadow: Option<Rc<SpriteSheet>>,
+    /// Optional status sprite.
+    pub status: Option<Animation>,
 }
 
 /// Animation of the object.
@@ -67,6 +69,13 @@ pub enum AnimationType {
         /// Frames per second.
         fps: f64,
     },
+    /// Status animation. Used to display text on the object for a short time.
+    /// Preferably uses `duration` field to set the duration of the animation.
+    Status {
+        text: String,
+        font_size: u16,
+        color: Color,
+    },
 }
 
 impl GameObject {
@@ -81,12 +90,18 @@ impl GameObject {
             position,
             animation,
             shadow,
+            status: None,
         }
     }
 
     /// Chain an animation to the very last animation in the chain.
     pub fn chain(&mut self, animation: Animation) {
         self.animation.chain(animation);
+    }
+
+    /// Set a status animation.
+    pub fn status_animation(&mut self, animation: Animation) {
+        self.status = Some(animation);
     }
 
     pub fn skip_all_animations(&mut self) {
@@ -104,6 +119,24 @@ impl GameObject {
     }
 
     pub fn tick(&mut self, time: f64) {
+        if let Some(status) = &mut self.status {
+            if let Some(duration) = status.duration {
+                if time - status.start_time > duration {
+                    let chain = status.chain.take().map(|c| {
+                        let mut next_anim = *c;
+                        next_anim.start_time = get_time();
+                        next_anim
+                    });
+
+                    if let Some(on_end) = status.on_end.take() {
+                        on_end(self);
+                    }
+
+                    self.status = chain;
+                }
+            }
+        }
+
         let animation = &self.animation;
 
         // Check if the time has come for the animation to end.
@@ -187,6 +220,20 @@ impl GameObject {
 }
 
 impl Animation {
+    pub fn status(text: String, font_size: u16, color: Color, duration: Option<f64>) -> Self {
+        Self {
+            duration,
+            start_time: get_time(),
+            type_: AnimationType::Status {
+                text,
+                font_size,
+                color,
+            },
+            on_end: None,
+            chain: None,
+        }
+    }
+
     /// Returns the final position of the animation.
     pub fn end_position(&self) -> Option<Vec2> {
         match &self.type_ {
@@ -216,6 +263,27 @@ impl Draw for GameObject {
     fn draw(&self) {
         if let Some(shadow) = &self.shadow {
             shadow.draw_frame_with_index(self.position.x, self.position.y, 0, self.dimensions, 1);
+        }
+
+        if let Some(status) = &self.status {
+            match &status.type_ {
+                AnimationType::Status {
+                    text,
+                    font_size,
+                    color,
+                } => {
+                    DrawCommand::text(
+                        text.clone(),
+                        self.position.x,
+                        self.position.y,
+                        *font_size,
+                        *color,
+                        100,
+                    )
+                    .schedule();
+                }
+                _ => {}
+            }
         }
 
         match &self.animation.type_ {
@@ -255,6 +323,23 @@ impl Draw for GameObject {
                 self.dimensions,
                 5,
             ),
+            AnimationType::Status {
+                text,
+                font_size,
+                color,
+            } => {
+                println!("Drawing status animation");
+
+                DrawCommand::text(
+                    text.clone(),
+                    self.position.x,
+                    self.position.y,
+                    *font_size,
+                    *color,
+                    100,
+                )
+                .schedule();
+            }
             AnimationType::Hidden => {}
         }
     }

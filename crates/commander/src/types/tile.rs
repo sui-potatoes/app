@@ -69,7 +69,13 @@ impl DrawAt for Tile {
                 bottom,
             } => {
                 let sprite = ASSETS
-                    .with(|assets| assets.get().unwrap().sprite_sheet(Sprite::Wall).unwrap())
+                    .with(|assets| {
+                        assets
+                            .get()
+                            .unwrap()
+                            .sprite_sheet(Sprite::WallSnow)
+                            .unwrap()
+                    })
                     .clone();
 
                 if *left > 0 {

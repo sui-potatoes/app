@@ -9,7 +9,7 @@ use macroquad::prelude::*;
 use crate::game::App;
 
 /// Keys that are tracked for input.
-const TRACKED_KEYS: [KeyCode; 8] = [
+const TRACKED_KEYS: [KeyCode; 9] = [
     KeyCode::Up,
     KeyCode::Down,
     KeyCode::Left,
@@ -18,6 +18,7 @@ const TRACKED_KEYS: [KeyCode; 8] = [
     KeyCode::Space,
     KeyCode::Enter,
     KeyCode::Space,
+    KeyCode::Tab,
 ];
 
 pub enum Command {
@@ -33,6 +34,8 @@ pub enum Command {
     Menu,
     /// Select / Start (both menu and in-game).
     Select,
+    /// Tool key - triangle / Y on controller, tab on keyboard.
+    Tool,
 }
 
 pub fn handle_input(app: &mut App) {
@@ -46,7 +49,11 @@ pub fn handle_input(app: &mut App) {
                 KeyCode::Escape => Command::Menu,
                 KeyCode::Space => Command::Select,
                 KeyCode::Enter => Command::Select,
-                _ => continue,
+                KeyCode::Tab => Command::Tool,
+                _ => {
+                    println!("Unhandled key: {:?}", key);
+                    continue;
+                }
             });
         }
     }
@@ -64,6 +71,7 @@ pub fn handle_gamepad_input(app: &mut App, gamepads: &mut Gamepads) {
                     Button::DPadRight => Command::Right,
                     Button::RightCenterCluster => Command::Menu,
                     Button::ActionDown => Command::Select,
+                    Button::ActionUp => Command::Tool,
                     b @ _ => {
                         println!("Unhandled button: {:?}", b);
                         continue;

@@ -215,7 +215,6 @@ impl Player {
                     let direction_points =
                         path_to_world_points(path.clone(), self.map.as_ref().unwrap().dimensions());
 
-                    let last_direction = direction_points.last().unwrap().direction;
                     let mut animations = direction_points
                         .into_iter()
                         .map(|segment| segment.into())
@@ -227,10 +226,7 @@ impl Player {
                         start_animation.chain(animation);
                     }
 
-                    println!("Last direction: {:?}", last_direction);
                     start_animation.chain(static_unit_animation());
-
-                    println!("Start move animation",);
                     obj.animation = start_animation;
                 }
 
@@ -249,14 +245,25 @@ impl Player {
             } => {
                 self.highlight = Some(Highlight(vec![*target], COLOR_ATTACK));
 
+                let tile =
+                    &mut self.map.as_mut().unwrap().grid[target.0 as usize][target.1 as usize];
+
+                let target_unit = tile.unit.as_ref().unwrap();
+                let target_obj = self.objects.get_mut(&target_unit.recruit).unwrap();
+
+                effects
+                    .iter()
+                    .map(|e| Animation::status(e.to_string(), 25, RED, Some(1.0)))
+                    .reduce(|mut acc, e| {
+                        acc.chain(e);
+                        acc
+                    })
+                    .map(|e| target_obj.status_animation(e));
+
                 if let Some(Record::UnitKIA(_)) =
                     effects.iter().find(|e| matches!(e, Record::UnitKIA(_)))
                 {
-                    let unit = self
-                        .map
-                        .as_mut()
-                        .ok_or(anyhow::anyhow!("Failed to get map"))?
-                        .grid[target.0 as usize][target.1 as usize]
+                    let unit = tile
                         .unit
                         .take()
                         .ok_or(anyhow::anyhow!("Failed to get unit"))?;
@@ -341,12 +348,12 @@ impl Player {
             } => {
                 self.highlight = Some(Highlight(vec![*target], COLOR_ATTACK));
 
+                let tile =
+                    &mut self.map.as_mut().unwrap().grid[target.0 as usize][target.1 as usize];
+
                 if let Some(Record::UnitKIA(_)) =
                     effects.iter().find(|e| matches!(e, Record::UnitKIA(_)))
                 {
-                    let tile =
-                        &mut self.map.as_mut().unwrap().grid[target.0 as usize][target.1 as usize];
-
                     tile.unit.replace(
                         self.kia_units
                             .pop()
@@ -377,11 +384,13 @@ impl Draw for Player {
                 draw_highlight(highlight, (map.width(), map.height()));
             }
 
+            let bottom = screen_height();
+
             // Draw the turn number, the action number in the very bottom.
             DrawCommand::text(
                 format!("Turn: {}", map.turn,),
                 20.0,
-                FONT_SIZE,
+                bottom - 30.0,
                 FONT_SIZE as u16,
                 BLACK,
                 100,
@@ -399,7 +408,17 @@ impl Draw for Player {
                     self.records.len() + self.processed_records.len()
                 ),
                 20.0,
-                FONT_SIZE * 2.0,
+                bottom - 10.0,
+                FONT_SIZE as u16,
+                BLACK,
+                100,
+            )
+            .schedule();
+
+            DrawCommand::text(
+                format!("Arrow keys to control the Replay; Menu or Esc to exit"),
+                screen_width() - 505.0,
+                bottom - 10.0,
                 FONT_SIZE as u16,
                 BLACK,
                 100,

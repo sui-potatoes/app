@@ -19,6 +19,26 @@ pub struct Map {
 }
 
 impl Map {
+    /// Create a new `Map` with given dimensions. Only used in `Editor` mode,
+    /// actual Game and Replay maps are deserialized from grpc object query
+    /// responses.
+    pub fn new(id: ID, width: u8, height: u8) -> Self {
+        Self {
+            id,
+            grid: vec![
+                vec![
+                    Tile {
+                        unit: None,
+                        tile_type: TileType::Empty
+                    };
+                    width as usize
+                ];
+                height as usize
+            ],
+            turn: 0,
+        }
+    }
+
     pub fn dimensions(&self) -> (u8, u8) {
         (self.cols(), self.rows())
     }

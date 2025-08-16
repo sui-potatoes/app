@@ -199,6 +199,14 @@ impl Cursor {
         }
     }
 
+    pub fn x(&self) -> u8 {
+        self.position.0
+    }
+
+    pub fn y(&self) -> u8 {
+        self.position.1
+    }
+
     pub fn reset(&mut self, position: (u8, u8)) {
         self.position = position;
         self.history.clear();
@@ -294,5 +302,11 @@ impl Display for Direction {
                 Direction::None => "None",
             }
         )
+    }
+}
+
+impl Default for ID {
+    fn default() -> Self {
+        Self(Address::ZERO)
     }
 }

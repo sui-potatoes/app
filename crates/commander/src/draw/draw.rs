@@ -7,6 +7,8 @@ use std::{cell::RefCell, f32::consts::PI, rc::Rc};
 
 use macroquad::prelude::*;
 
+use crate::draw::Texture;
+
 /// Default size of a tile in pixels, will be scaled to the window size.
 const TILE_SIZE: f32 = 20.0;
 
@@ -118,9 +120,12 @@ pub fn draw_highlight(highlight: &Highlight, dimensions: (u8, u8)) {
 
 /// Get the size of the map and for each tile draw the texture. Apply the scale
 /// similarly to the Map drawing.
-pub fn draw_texture_background(dimensions: (u8, u8), texture: Rc<Texture2D>) {
+pub fn draw_texture_background(dimensions: (u8, u8), texture: Texture) {
     let (scale_x, scale_y) = get_scale(dimensions);
     let (width, height) = (dimensions.0 as f32, dimensions.1 as f32);
+    let texture = super::ASSETS
+        .with(|assets| assets.get().unwrap().texture(texture).unwrap())
+        .clone();
 
     for y in 0..height as i32 {
         for x in 0..width as i32 {

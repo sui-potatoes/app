@@ -104,6 +104,7 @@ pub enum Sprite {
     SoldierRunUp,
     Shadow,
     Wall,
+    WallSnow,
 }
 
 #[derive(Debug, Clone)]
@@ -218,6 +219,15 @@ impl AssetStore {
             32.0 * 4.0,
             0.0,
             [(Sprite::Wall, 0)]
+        );
+
+        load_and_register_sprite!(
+            self.sprites,
+            "wall-snow-sprite.png",
+            4,
+            32.0 * 4.0,
+            0.0,
+            [(Sprite::WallSnow, 1)]
         );
 
         load_and_register_sprite!(

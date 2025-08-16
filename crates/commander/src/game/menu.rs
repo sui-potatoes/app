@@ -37,6 +37,7 @@ pub enum MainMenuItem {
     Replays,
     Presets,
     Recruits,
+    Editor,
     Settings,
     Quit,
 }
@@ -110,6 +111,7 @@ impl Menu<MainMenuItem> {
                 MainMenuItem::Presets,
                 MainMenuItem::Replays,
                 MainMenuItem::Recruits,
+                MainMenuItem::Editor,
                 MainMenuItem::Settings,
                 MainMenuItem::Quit,
             ]
@@ -164,7 +166,7 @@ impl Menu<SettingsMenuItem> {
             title: Some("Settings".to_string()),
             items: vec![
                 SettingsMenuItem::WindowSize,
-                // SettingsMenuItem::Logout,
+                SettingsMenuItem::Logout,
                 SettingsMenuItem::Back,
             ],
             selected_item: 0,
@@ -289,22 +291,9 @@ impl<T: MenuItem> Draw for Menu<T> {
                 offset + (j as f32 * FONT_SIZE),
                 FONT_SIZE as u16,
                 color,
-                1,
+                100,
             )
             .schedule();
-
-            // draw::request_draw(DrawCommand::Text {
-            //     text: item.to_string(),
-            //     x: 20.0,
-            //     y: offset + (j as f32 * FONT_SIZE),
-            //     font: Some(font.clone()),
-            //     font_size: FONT_SIZE as u16,
-            //     font_scale: 1.0,
-            //     font_scale_aspect: 1.0,
-            //     rotation: 0.0,
-            //     color,
-            //     z_index: 1,
-            // });
 
             j += 1;
         }
@@ -322,6 +311,7 @@ impl Display for MainMenuItem {
             MainMenuItem::Replays => write!(f, "Replays"),
             MainMenuItem::Presets => write!(f, "Presets"),
             MainMenuItem::Recruits => write!(f, "Recruits"),
+            MainMenuItem::Editor => write!(f, "Editor"),
             MainMenuItem::Settings => write!(f, "Settings"),
             MainMenuItem::Quit => write!(f, "Quit"),
         }

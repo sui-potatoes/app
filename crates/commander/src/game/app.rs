@@ -13,6 +13,7 @@ use super::{menu::*, player::*};
 use crate::{
     Message as TokioMessage, State, WithRef,
     draw::*,
+    game::Editor,
     input::Command,
     types::{Game, ID, Preset, Recruit, Replay},
 };
@@ -47,6 +48,8 @@ pub enum Message {
 }
 
 pub enum Screen {
+    /// Show the editor.
+    Editor(Editor),
     /// Show main menu.
     MainMenu(Menu<MainMenuItem>),
     /// Show an active game.
@@ -131,6 +134,13 @@ impl App {
     pub fn handle_key_press(&mut self, key: Command) {
         let state = self.state.lock().unwrap();
         match &mut self.screen {
+            Screen::Editor(editor) => {
+                if matches!(key, Command::Menu) {
+                    self.screen = Screen::MainMenu(Menu::main(state.address));
+                } else {
+                    editor.handle_key_press(key)
+                }
+            }
             Screen::MainMenu(menu) => match key {
                 Command::Up => menu.previous_item(),
                 Command::Down => menu.next_item(),
@@ -154,6 +164,9 @@ impl App {
                     MainMenuItem::Recruits => {
                         self.send_message(Message::FetchRecruits);
                         self.screen = Screen::Recruits(Menu::recruits(&state.recruits))
+                    }
+                    MainMenuItem::Editor => {
+                        self.screen = Screen::Editor(Editor::new(10, 10));
                     }
                     MainMenuItem::Settings => self.screen = Screen::Settings(Menu::settings()),
                     MainMenuItem::Quit => std::process::exit(0),
@@ -295,6 +308,7 @@ impl App {
                         },
                     ));
                 }
+                Command::Tool => {}
             },
             Screen::Play(_game) => match key {
                 _ => {}
@@ -327,6 +341,7 @@ impl App {
             | Screen::Preset(_)
             | Screen::Play(_)
             | Screen::Settings(_)
+            | Screen::Editor(_)
             | Screen::WindowSettings(_) => return,
         };
 
@@ -341,13 +356,10 @@ impl App {
 impl Draw for App {
     fn draw(&self) {
         match &self.screen {
+            Screen::Editor(editor) => editor.draw(),
             Screen::MainMenu(menu) => menu.draw(),
             Screen::Play(game) => {
-                if let Some(texture) =
-                    ASSETS.with(|assets| assets.get().unwrap().texture(Texture::Background))
-                {
-                    draw_texture_background((game.map.width(), game.map.height()), texture);
-                }
+                draw_texture_background((game.map.width(), game.map.height()), Texture::Background);
 
                 game.map.draw();
                 draw_cursor(self.cursor, (game.map.width(), game.map.height()));
@@ -357,14 +369,10 @@ impl Draw for App {
             }
             Screen::Replay(replay) => {
                 if let Some(preset) = self.get_preset(&replay.preset_id) {
-                    if let Some(texture) =
-                        ASSETS.with(|assets| assets.get().unwrap().texture(Texture::Background))
-                    {
-                        draw_texture_background(
-                            (preset.data.map.width(), preset.data.map.height()),
-                            texture,
-                        );
-                    }
+                    draw_texture_background(
+                        (preset.data.map.width(), preset.data.map.height()),
+                        Texture::Background,
+                    );
 
                     replay.draw();
                     if let Some(highlight) = &self.highlight {
@@ -384,14 +392,10 @@ impl Draw for App {
             Screen::Settings(menu) => menu.draw(),
             Screen::WindowSettings(menu) => menu.draw(),
             Screen::Preset(preset) => {
-                if let Some(texture) =
-                    ASSETS.with(|assets| assets.get().unwrap().texture(Texture::Background))
-                {
-                    draw_texture_background(
-                        (preset.data.map.width(), preset.data.map.height()),
-                        texture,
-                    );
-                }
+                draw_texture_background(
+                    (preset.data.map.width(), preset.data.map.height()),
+                    Texture::Background,
+                );
 
                 draw_cursor(
                     self.cursor,
