@@ -35,7 +35,6 @@ pub enum MainMenuItem {
     Login,
     Address(Address),
     Replays,
-    Presets,
     Recruits,
     Editor,
     Settings,
@@ -51,12 +50,6 @@ pub enum ReplayMenuItem {
 #[derive(Debug, Clone)]
 pub enum RecruitMenuItem {
     Recruit(WithRef<Recruit>),
-    Back,
-}
-
-#[derive(Debug, Clone)]
-pub enum PresetMenuItem {
-    Preset(WithRef<Preset>),
     Back,
 }
 
@@ -95,7 +88,6 @@ pub trait MenuItem: Display {}
 
 impl MenuItem for MainMenuItem {}
 impl MenuItem for ReplayMenuItem {}
-impl MenuItem for PresetMenuItem {}
 impl MenuItem for SettingsMenuItem {}
 impl MenuItem for WindowSettingsMenuItem {}
 impl MenuItem for RecruitMenuItem {}
@@ -108,7 +100,6 @@ impl Menu<MainMenuItem> {
         let items = if let Some(_) = address {
             vec![
                 MainMenuItem::StartGame,
-                MainMenuItem::Presets,
                 MainMenuItem::Replays,
                 MainMenuItem::Recruits,
                 MainMenuItem::Editor,
@@ -139,20 +130,6 @@ impl Menu<ReplayMenuItem> {
             items: vec![ReplayMenuItem::Back]
                 .into_iter()
                 .chain(replays.iter().map(|r| ReplayMenuItem::Replay(r.clone())))
-                .collect(),
-            selected_item: 0,
-            window: Some(20),
-        }
-    }
-}
-
-impl Menu<PresetMenuItem> {
-    pub fn presets(presets: &Vec<WithRef<Preset>>) -> Self {
-        Self {
-            title: Some("Presets".to_string()),
-            items: vec![PresetMenuItem::Back]
-                .into_iter()
-                .chain(presets.iter().map(|p| PresetMenuItem::Preset(p.clone())))
                 .collect(),
             selected_item: 0,
             window: Some(20),
@@ -309,7 +286,6 @@ impl Display for MainMenuItem {
             MainMenuItem::Address(_address) => write!(f, "Logged in"),
             MainMenuItem::Login => write!(f, "Login (Google)"),
             MainMenuItem::Replays => write!(f, "Replays"),
-            MainMenuItem::Presets => write!(f, "Presets"),
             MainMenuItem::Recruits => write!(f, "Recruits"),
             MainMenuItem::Editor => write!(f, "Editor"),
             MainMenuItem::Settings => write!(f, "Settings"),
@@ -345,15 +321,6 @@ impl Display for ReplayMenuItem {
                 )
             }
             ReplayMenuItem::Back => write!(f, "Back"),
-        }
-    }
-}
-
-impl Display for PresetMenuItem {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            PresetMenuItem::Preset(preset) => write!(f, "{}", preset.data.name),
-            PresetMenuItem::Back => write!(f, "Back"),
         }
     }
 }

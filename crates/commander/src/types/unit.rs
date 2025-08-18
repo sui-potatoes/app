@@ -40,26 +40,3 @@ impl Display for Unit {
         write!(f, "Unit: {}", self.recruit)
     }
 }
-
-impl DrawAt for Unit {
-    fn draw_at(&self, _position: (u8, u8), _dimensions: (u8, u8)) {
-        return;
-        // let (scale_x, scale_y) = get_scale(dimensions);
-        // let (x, y) = (
-        //     position.0 as f32 * TILE_WIDTH * scale_x,
-        //     position.1 as f32 * TILE_HEIGHT * scale_y,
-        // );
-        // if let Some(sprite) = ASSETS.get().unwrap().sprite_sheet(Sprite::UnitSoldier) {
-        //     let frame = (get_time() * 10.0 % sprite.frames as f64) as usize;
-        //     sprite.draw_frame(x, y, frame, dimensions);
-        // } else {
-        //     draw_rectangle_ex(
-        //         x,
-        //         y,
-        //         TILE_WIDTH * scale_x,
-        //         TILE_HEIGHT * scale_y,
-        //         DrawRectangleParams::default(),
-        //     );
-        // }
-    }
-}

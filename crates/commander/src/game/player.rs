@@ -6,6 +6,7 @@ use std::{
     collections::{HashMap, VecDeque},
     convert::TryFrom,
     fmt::Display,
+    rc::Rc,
 };
 
 use macroquad::prelude::*;
@@ -15,13 +16,13 @@ use super::{Animation, AnimationType, GameObject};
 use crate::{
     config::{MENU_FONT_SIZE as FONT_SIZE, TILE_HEIGHT, TILE_WIDTH},
     draw::{ASSETS, Draw, DrawCommand, Highlight, Sprite, Texture, draw_highlight, grid_to_world},
-    types::{Cursor, Direction, History, ID, Map, Preset, Record, Replay, Unit},
+    types::{Cursor, Direction, GameMap, History, ID, Map, Preset, Record, Replay, Unit},
 };
 
 /// A Player for `Replay`s. Allows playing the replay step by step.
 pub struct Player {
     /// The Game Map.
-    pub map: Option<Map>,
+    pub map: Option<GameMap>,
     /// The Replay to play.
     pub preset_id: ID,
     /// Stores unprocessed actions.
@@ -29,7 +30,7 @@ pub struct Player {
     /// Stores processed actions.
     pub processed_records: VecDeque<ProcessedRecord>,
     /// Stores units that have been KIA to restore them on prev_action.
-    pub kia_units: Vec<Unit>,
+    pub kia_units: Vec<Rc<RefCell<Unit>>>,
     /// Highlight the tiles that are affected by the action.
     pub highlight: Option<Highlight>,
     /// Stores units that are currently on the Map and their animations.
@@ -151,7 +152,7 @@ impl Player {
     }
 
     pub fn add_preset(&mut self, preset: Preset) {
-        self.map = Some(preset.map.clone());
+        self.map = Some(preset.map.clone().into());
     }
 
     pub fn next_action(&mut self) -> Result<(), anyhow::Error> {
@@ -170,7 +171,7 @@ impl Player {
                 let tile = &mut self.map.as_mut().unwrap().grid[*x as usize][*y as usize];
                 let mut unit = Unit::default();
                 unit.recruit = ID(Address::from_bytes([self.id_counter; 32]).unwrap());
-                tile.unit = Some(unit);
+                tile.unit = Some(Rc::new(RefCell::new(unit)));
 
                 let position = grid_to_world((*x, *y), self.map.as_ref().unwrap().dimensions());
 
@@ -210,7 +211,7 @@ impl Player {
                     .take()
                     .ok_or(anyhow::anyhow!("Failed to get unit"))?;
 
-                if let Some(obj) = self.objects.get_mut(&unit.recruit) {
+                if let Some(obj) = self.objects.get_mut(&unit.borrow().recruit) {
                     // obj.position = grid_to_world(*end, self.map.as_ref().unwrap().dimensions());
                     let direction_points =
                         path_to_world_points(path.clone(), self.map.as_ref().unwrap().dimensions());
@@ -249,7 +250,7 @@ impl Player {
                     &mut self.map.as_mut().unwrap().grid[target.0 as usize][target.1 as usize];
 
                 let target_unit = tile.unit.as_ref().unwrap();
-                let target_obj = self.objects.get_mut(&target_unit.recruit).unwrap();
+                let target_obj = self.objects.get_mut(&target_unit.borrow().recruit).unwrap();
 
                 effects
                     .iter()
@@ -304,7 +305,8 @@ impl Player {
                     .ok_or(anyhow::anyhow!("Failed to get map"))?
                     .grid[*x as usize][*y as usize];
 
-                self.objects.remove(&tile.unit.as_ref().unwrap().recruit);
+                self.objects
+                    .remove(&tile.unit.as_ref().unwrap().borrow().recruit);
                 tile.unit = None;
             }
             ProcessedRecord::NextTurn(turn) => {
@@ -333,7 +335,7 @@ impl Player {
                     .take()
                     .ok_or(anyhow::anyhow!("Failed to get unit"))?;
 
-                if let Some(obj) = self.objects.get_mut(&unit.recruit) {
+                if let Some(obj) = self.objects.get_mut(&unit.borrow().recruit) {
                     obj.position = grid_to_world(*start, dimensions);
                     obj.animation = static_unit_animation();
                 }
@@ -381,7 +383,7 @@ impl Draw for Player {
             map.draw();
 
             if let Some(highlight) = &self.highlight {
-                draw_highlight(highlight, (map.width(), map.height()));
+                draw_highlight(highlight, map.dimensions());
             }
 
             let bottom = screen_height();

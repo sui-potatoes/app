@@ -8,13 +8,13 @@ use macroquad::prelude::*;
 use crate::{
     draw::{ASSETS, Draw, DrawCommand, Texture, draw},
     input::Command,
-    types::{Cursor, Direction, ID, Map, TileType},
+    types::{Cursor, Direction, GameMap, TileType},
 };
 
 const TOOL_COUNT: usize = 5;
 
 pub struct Editor {
-    grid: Map,
+    grid: GameMap,
     tool: Tool,
     mode: Mode,
     cursor: EditorCursor,
@@ -47,7 +47,7 @@ enum Tool {
 impl Editor {
     pub fn new(width: u8, height: u8) -> Self {
         Self {
-            grid: Map::new(ID::default(), width, height),
+            grid: GameMap::new(width, height),
             tool: Tool::Obstacle,
             cursor: EditorCursor::new((0, 0), (width, height)),
             mode: Mode::Editor,

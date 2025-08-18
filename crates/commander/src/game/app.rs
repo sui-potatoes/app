@@ -54,10 +54,6 @@ pub enum Screen {
     MainMenu(Menu<MainMenuItem>),
     /// Show an active game.
     Play(Game),
-    /// Show list of presets.
-    Presets(Menu<PresetMenuItem>),
-    /// Show in-game Preset map.
-    Preset(WithRef<Preset>),
     /// Show list of recruits.
     Recruits(Menu<RecruitMenuItem>),
     /// Show a single recruit.
@@ -157,10 +153,6 @@ impl App {
                         self.send_message(Message::FetchReplays);
                         self.screen = Screen::Replays(Menu::replays(&state.replays))
                     }
-                    MainMenuItem::Presets => {
-                        self.send_message(Message::FetchPresets);
-                        self.screen = Screen::Presets(Menu::presets(&state.presets))
-                    }
                     MainMenuItem::Recruits => {
                         self.send_message(Message::FetchRecruits);
                         self.screen = Screen::Recruits(Menu::recruits(&state.recruits))
@@ -252,18 +244,6 @@ impl App {
                 }
                 _ => {}
             },
-            Screen::Presets(menu) => match key {
-                Command::Up => menu.previous_item(),
-                Command::Down => menu.next_item(),
-                Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Select => match menu.selected_item() {
-                    PresetMenuItem::Preset(preset) => self.screen = Screen::Preset(preset.clone()),
-                    PresetMenuItem::Back => {
-                        self.screen = Screen::MainMenu(Menu::main(state.address))
-                    }
-                },
-                _ => {}
-            },
             Screen::WindowSettings(menu) => match key {
                 Command::Up => menu.previous_item(),
                 Command::Down => menu.next_item(),
@@ -277,38 +257,6 @@ impl App {
                     }
                 },
                 _ => {}
-            },
-            Screen::Preset(preset) => match key {
-                Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Up => {
-                    self.cursor.0 =
-                        (self.cursor.0 + preset.data.map.height() - 1) % preset.data.map.height();
-                    self.highlight = None;
-                }
-                Command::Down => {
-                    self.cursor.0 = (self.cursor.0 + 1) % preset.data.map.height();
-                    self.highlight = None;
-                }
-                Command::Left => {
-                    self.cursor.1 =
-                        (self.cursor.1 + preset.data.map.width() - 1) % preset.data.map.width();
-                    self.highlight = None;
-                }
-                Command::Right => {
-                    self.cursor.1 = (self.cursor.1 + 1) % preset.data.map.width();
-                    self.highlight = None;
-                }
-                Command::Select => {
-                    self.highlight = Some(Highlight(
-                        preset.data.map.walkable_tiles(self.cursor, 3),
-                        Color {
-                            b: 200.0,
-                            a: 0.2,
-                            ..Default::default()
-                        },
-                    ));
-                }
-                Command::Tool => {}
             },
             Screen::Play(_game) => match key {
                 _ => {}
@@ -333,12 +281,10 @@ impl App {
         let state = self.state.lock().unwrap();
         let screen = match &self.screen {
             Screen::MainMenu(_) => Screen::MainMenu(Menu::main(state.address)),
-            Screen::Presets(_) => Screen::Presets(Menu::presets(&state.presets)),
             Screen::Replays(_) => Screen::Replays(Menu::replays(&state.replays)),
             Screen::Recruits(_) => Screen::Recruits(Menu::recruits(&state.recruits)),
             Screen::Recruit(_)
             | Screen::Replay(_)
-            | Screen::Preset(_)
             | Screen::Play(_)
             | Screen::Settings(_)
             | Screen::Editor(_)
@@ -358,28 +304,17 @@ impl Draw for App {
         match &self.screen {
             Screen::Editor(editor) => editor.draw(),
             Screen::MainMenu(menu) => menu.draw(),
-            Screen::Play(game) => {
-                draw_texture_background((game.map.width(), game.map.height()), Texture::Background);
-
-                game.map.draw();
-                draw_cursor(self.cursor, (game.map.width(), game.map.height()));
-                if let Some(highlight) = &self.highlight {
-                    draw_highlight(highlight, (game.map.width(), game.map.height()));
-                }
-            }
+            Screen::Play(_game) => unimplemented!("Play screen not implemented"),
             Screen::Replay(replay) => {
                 if let Some(preset) = self.get_preset(&replay.preset_id) {
                     draw_texture_background(
-                        (preset.data.map.width(), preset.data.map.height()),
+                        (preset.data.map.cols(), preset.data.map.rows()),
                         Texture::Background,
                     );
 
                     replay.draw();
                     if let Some(highlight) = &self.highlight {
-                        draw_highlight(
-                            highlight,
-                            (preset.data.map.width(), preset.data.map.height()),
-                        );
+                        draw_highlight(highlight, (preset.data.map.cols(), preset.data.map.rows()));
                     }
                 } else {
                     draw_text("No preset found for replay", 10.0, 10.0, 20.0, BLACK);
@@ -388,28 +323,8 @@ impl Draw for App {
             Screen::Recruit(screen) => screen.draw(),
             Screen::Recruits(menu) => menu.draw(),
             Screen::Replays(menu) => menu.draw(),
-            Screen::Presets(menu) => menu.draw(),
             Screen::Settings(menu) => menu.draw(),
             Screen::WindowSettings(menu) => menu.draw(),
-            Screen::Preset(preset) => {
-                draw_texture_background(
-                    (preset.data.map.width(), preset.data.map.height()),
-                    Texture::Background,
-                );
-
-                draw_cursor(
-                    self.cursor,
-                    (preset.data.map.width(), preset.data.map.height()),
-                );
-                if let Some(highlight) = &self.highlight {
-                    draw_highlight(
-                        highlight,
-                        (preset.data.map.width(), preset.data.map.height()),
-                    );
-                }
-
-                preset.data.map.draw();
-            }
         }
     }
 }

@@ -2,14 +2,14 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+mod game_map;
 mod map;
 mod stats;
-mod tile;
 mod unit;
 
+pub use game_map::*;
 pub use map::*;
 pub use stats::*;
-pub use tile::*;
 pub use unit::*;
 
 use std::fmt::Display;
