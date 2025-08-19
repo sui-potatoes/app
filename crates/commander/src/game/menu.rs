@@ -9,7 +9,7 @@ use sui_sdk_types::Address;
 use crate::{
     WithRef,
     config::{MENU_FONT_COLOR as TEXT_COLOR, MENU_FONT_SIZE as FONT_SIZE},
-    draw::{self, ASSETS, Draw, DrawCommand},
+    draw::{self, ASSETS, Draw, DrawCommand, ZIndex},
     types::{Preset, Recruit, Replay},
 };
 
@@ -35,7 +35,6 @@ pub enum MainMenuItem {
     Login,
     Address(Address),
     Replays,
-    Recruits,
     Editor,
     Settings,
     Quit,
@@ -44,12 +43,6 @@ pub enum MainMenuItem {
 #[derive(Debug, Clone)]
 pub enum ReplayMenuItem {
     Replay(WithRef<Replay>),
-    Back,
-}
-
-#[derive(Debug, Clone)]
-pub enum RecruitMenuItem {
-    Recruit(WithRef<Recruit>),
     Back,
 }
 
@@ -90,7 +83,6 @@ impl MenuItem for MainMenuItem {}
 impl MenuItem for ReplayMenuItem {}
 impl MenuItem for SettingsMenuItem {}
 impl MenuItem for WindowSettingsMenuItem {}
-impl MenuItem for RecruitMenuItem {}
 impl MenuItem for RecruitSubMenuItem {}
 
 // === Menu impls ===
@@ -101,7 +93,6 @@ impl Menu<MainMenuItem> {
             vec![
                 MainMenuItem::StartGame,
                 MainMenuItem::Replays,
-                MainMenuItem::Recruits,
                 MainMenuItem::Editor,
                 MainMenuItem::Settings,
                 MainMenuItem::Quit,
@@ -168,20 +159,6 @@ impl Menu<WindowSettingsMenuItem> {
     }
 }
 
-impl Menu<RecruitMenuItem> {
-    pub fn recruits(recruits: &Vec<WithRef<Recruit>>) -> Self {
-        Self {
-            title: Some("Recruits".to_string()),
-            items: vec![RecruitMenuItem::Back]
-                .into_iter()
-                .chain(recruits.iter().map(|r| RecruitMenuItem::Recruit(r.clone())))
-                .collect(),
-            selected_item: 0,
-            window: Some(20),
-        }
-    }
-}
-
 impl Menu<RecruitSubMenuItem> {
     pub fn recruit_sub(recruit: &WithRef<Recruit>) -> Self {
         Self {
@@ -219,7 +196,11 @@ impl<T: MenuItem> Draw for Menu<T> {
         draw::draw_main_menu_background();
 
         let offset = if let Some(title) = &self.title {
-            DrawCommand::text(title.clone(), 20.0, 40.0, TITLE_FONT_SIZE as u16, WHITE, 1)
+            DrawCommand::text(title.clone())
+                .position(20.0, 40.0)
+                .font_size(TITLE_FONT_SIZE as u16)
+                .color(WHITE)
+                .z_index(ZIndex::MenuText)
                 .schedule();
 
             TITLE_FONT_SIZE * 2.0
@@ -236,15 +217,12 @@ impl<T: MenuItem> Draw for Menu<T> {
                     TEXT_COLOR
                 };
 
-                DrawCommand::text(
-                    item.to_string(),
-                    20.0,
-                    offset + (i as f32 * FONT_SIZE),
-                    FONT_SIZE as u16,
-                    color,
-                    1,
-                )
-                .schedule();
+                DrawCommand::text(item.to_string())
+                    .position(20.0, offset + (i as f32 * FONT_SIZE))
+                    .font_size(FONT_SIZE as u16)
+                    .color(color)
+                    .z_index(ZIndex::MenuText)
+                    .schedule();
             }
             return;
         }
@@ -262,15 +240,12 @@ impl<T: MenuItem> Draw for Menu<T> {
                 TEXT_COLOR
             };
 
-            DrawCommand::text(
-                item.to_string(),
-                20.0,
-                offset + (j as f32 * FONT_SIZE),
-                FONT_SIZE as u16,
-                color,
-                100,
-            )
-            .schedule();
+            DrawCommand::text(item.to_string())
+                .position(20.0, offset + (j as f32 * FONT_SIZE))
+                .font_size(FONT_SIZE as u16)
+                .color(color)
+                .z_index(ZIndex::MenuText)
+                .schedule();
 
             j += 1;
         }
@@ -286,25 +261,9 @@ impl Display for MainMenuItem {
             MainMenuItem::Address(_address) => write!(f, "Logged in"),
             MainMenuItem::Login => write!(f, "Login (Google)"),
             MainMenuItem::Replays => write!(f, "Replays"),
-            MainMenuItem::Recruits => write!(f, "Recruits"),
             MainMenuItem::Editor => write!(f, "Editor"),
             MainMenuItem::Settings => write!(f, "Settings"),
             MainMenuItem::Quit => write!(f, "Quit"),
-        }
-    }
-}
-
-impl Display for RecruitMenuItem {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            RecruitMenuItem::Recruit(recruit) => {
-                write!(
-                    f,
-                    "{} (Rank: {})",
-                    recruit.data.metadata.name, recruit.data.rank
-                )
-            }
-            RecruitMenuItem::Back => write!(f, "Back"),
         }
     }
 }

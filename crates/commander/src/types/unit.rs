@@ -4,7 +4,6 @@
 use std::fmt::Display;
 
 use super::{ID, Param, Stats};
-use crate::draw::DrawAt;
 
 use macroquad::prelude::*;
 use serde::{Deserialize, Serialize};

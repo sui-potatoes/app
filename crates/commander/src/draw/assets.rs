@@ -9,7 +9,10 @@ use macroquad::prelude::*;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
-use crate::config::{TILE_HEIGHT, TILE_WIDTH};
+use crate::{
+    config::{TILE_HEIGHT, TILE_WIDTH},
+    draw::ZIndex,
+};
 
 use super::DrawCommand;
 
@@ -136,7 +139,7 @@ impl SpriteSheet {
     }
 
     pub fn draw_frame(&self, x: f32, y: f32, frame: usize, dimensions: (u8, u8)) {
-        self.draw_frame_with_index(x, y, frame, dimensions, 1);
+        self.draw_frame_with_index(x, y, frame, dimensions, ZIndex::Unit);
     }
 
     pub fn draw_frame_with_index(
@@ -145,7 +148,7 @@ impl SpriteSheet {
         y: f32,
         frame: usize,
         dimensions: (u8, u8),
-        z_index: u8,
+        z_index: ZIndex,
     ) {
         assert!(
             frame < self.frames,

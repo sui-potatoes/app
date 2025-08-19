@@ -7,7 +7,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use macroquad::prelude::*;
 
-use crate::draw::{self, Draw, DrawCommand, SpriteSheet};
+use crate::draw::{self, Draw, DrawCommand, SpriteSheet, ZIndex};
 
 /// An in-game object which has a position and an animation. If the object is
 /// static, then the animation is also static (or `idle` in some cases).
@@ -262,7 +262,13 @@ impl Animation {
 impl Draw for GameObject {
     fn draw(&self) {
         if let Some(shadow) = &self.shadow {
-            shadow.draw_frame_with_index(self.position.x, self.position.y, 0, self.dimensions, 1);
+            shadow.draw_frame_with_index(
+                self.position.x,
+                self.position.y,
+                0,
+                self.dimensions,
+                ZIndex::UnitShadow,
+            );
         }
 
         if let Some(status) = &self.status {
@@ -272,15 +278,12 @@ impl Draw for GameObject {
                     font_size,
                     color,
                 } => {
-                    DrawCommand::text(
-                        text.clone(),
-                        self.position.x,
-                        self.position.y,
-                        *font_size,
-                        *color,
-                        100,
-                    )
-                    .schedule();
+                    DrawCommand::text(text.clone())
+                        .position(self.position.x, self.position.y)
+                        .font_size(*font_size)
+                        .color(*color)
+                        .z_index(ZIndex::UnitStatus)
+                        .schedule();
                 }
                 _ => {}
             }
@@ -294,7 +297,7 @@ impl Draw for GameObject {
                     y: self.position.y,
                     color: WHITE,
                     params: DrawTextureParams::default(),
-                    z_index: 5,
+                    z_index: ZIndex::Unit,
                 });
             }
             AnimationType::Move { texture, .. } => {
@@ -304,7 +307,7 @@ impl Draw for GameObject {
                     y: self.position.y,
                     color: WHITE,
                     params: DrawTextureParams::default(),
-                    z_index: 5,
+                    z_index: ZIndex::Unit,
                 });
             }
             AnimationType::StaticSprite { frame, sprite, .. } => {
@@ -313,7 +316,7 @@ impl Draw for GameObject {
                     self.position.y,
                     *frame,
                     self.dimensions,
-                    5,
+                    ZIndex::Unit,
                 );
             }
             AnimationType::MoveSprite { sprite, frame, .. } => sprite.draw_frame_with_index(
@@ -321,7 +324,7 @@ impl Draw for GameObject {
                 self.position.y,
                 *frame,
                 self.dimensions,
-                5,
+                ZIndex::Unit,
             ),
             AnimationType::Status {
                 text,
@@ -330,15 +333,12 @@ impl Draw for GameObject {
             } => {
                 println!("Drawing status animation");
 
-                DrawCommand::text(
-                    text.clone(),
-                    self.position.x,
-                    self.position.y,
-                    *font_size,
-                    *color,
-                    100,
-                )
-                .schedule();
+                DrawCommand::text(text.clone())
+                    .position(self.position.x, self.position.y)
+                    .font_size(*font_size)
+                    .color(*color)
+                    .z_index(ZIndex::UnitStatus)
+                    .schedule();
             }
             AnimationType::Hidden => {}
         }

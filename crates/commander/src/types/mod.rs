@@ -233,8 +233,6 @@ impl Into<Vec<(u8, u8)>> for Cursor {
     }
 }
 
-// === Draw impls ===
-
 impl From<Address> for ID {
     fn from(address: Address) -> Self {
         Self(address)

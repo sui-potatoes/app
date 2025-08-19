@@ -7,7 +7,7 @@ use macroquad::prelude::*;
 
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
-    draw::{self, ASSETS, Draw, DrawAt, DrawCommand, Sprite, Texture, get_scale},
+    draw::{self, ASSETS, Draw, DrawAt, DrawCommand, Sprite, Texture, ZIndex, get_scale},
     types::{Direction, Map, TileType, Unit},
 };
 
@@ -210,7 +210,7 @@ impl Draw for GameMap {
                     height: TILE_HEIGHT * scale_y,
                     thickness: 1.0,
                     color: DARKGRAY,
-                    z_index: 0,
+                    z_index: ZIndex::Grid,
                 });
 
                 tile.draw_at((x as u8, y as u8), self.dimensions());
@@ -228,12 +228,7 @@ impl DrawAt for GameTile {
         );
 
         match &self.tile_type {
-            TileType::Empty => {
-                // Draw the unit if present.
-                // self.unit
-                //     .as_ref()
-                //     .and_then(|unit| Some(unit.draw_at(position, dimensions)));
-            }
+            TileType::Empty => {}
             TileType::Obstacle => {
                 draw::request_draw(DrawCommand::Texture {
                     texture: ASSETS
@@ -246,7 +241,7 @@ impl DrawAt for GameTile {
                         dest_size: Some(Vec2::new(TILE_WIDTH * scale_x, TILE_HEIGHT * scale_y)),
                         ..Default::default()
                     },
-                    z_index: 10,
+                    z_index: ZIndex::Obstacle,
                 });
             }
             TileType::Cover {
@@ -266,24 +261,19 @@ impl DrawAt for GameTile {
                     .clone();
 
                 if *left > 0 {
-                    sprite.draw_frame_with_index(x, y, 0, dimensions, 0);
+                    sprite.draw_frame_with_index(x, y, 0, dimensions, ZIndex::TopCover);
                 }
 
                 if *top > 0 {
-                    sprite.draw_frame_with_index(x, y, 1, dimensions, 0);
+                    sprite.draw_frame_with_index(x, y, 1, dimensions, ZIndex::TopCover);
                 }
 
                 if *right > 0 {
-                    sprite.draw_frame_with_index(x, y, 2, dimensions, 0);
+                    sprite.draw_frame_with_index(x, y, 2, dimensions, ZIndex::TopCover);
                 }
 
-                // Draw the unit if present before the bottom cover.
-                // self.unit
-                //     .as_ref()
-                //     .and_then(|unit| Some(unit.draw_at(position, dimensions)));
-
                 if *bottom > 0 {
-                    sprite.draw_frame_with_index(x, y, 3, dimensions, 10);
+                    sprite.draw_frame_with_index(x, y, 3, dimensions, ZIndex::BottomCover);
                 }
             }
         };

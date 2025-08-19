@@ -15,7 +15,10 @@ use sui_sdk_types::Address;
 use super::{Animation, AnimationType, GameObject};
 use crate::{
     config::{MENU_FONT_SIZE as FONT_SIZE, TILE_HEIGHT, TILE_WIDTH},
-    draw::{ASSETS, Draw, DrawCommand, Highlight, Sprite, Texture, draw_highlight, grid_to_world},
+    draw::{
+        ASSETS, Align, Draw, DrawCommand, Highlight, Sprite, Texture, ZIndex, draw_highlight,
+        grid_to_world,
+    },
     types::{Cursor, Direction, GameMap, History, ID, Map, Preset, Record, Replay, Unit},
 };
 
@@ -389,43 +392,35 @@ impl Draw for Player {
             let bottom = screen_height();
 
             // Draw the turn number, the action number in the very bottom.
-            DrawCommand::text(
-                format!("Turn: {}", map.turn,),
-                20.0,
-                bottom - 30.0,
-                FONT_SIZE as u16,
-                BLACK,
-                100,
-            )
+            DrawCommand::text(format!("Turn: {}", map.turn))
+                .position(20.0, bottom - 30.0)
+                .font_size(FONT_SIZE as u16)
+                .color(BLACK)
+                .z_index(ZIndex::ModalText)
+                .schedule();
+
+            DrawCommand::text(format!(
+                "Action: {} ({}/{})",
+                self.processed_records
+                    .back()
+                    .unwrap_or(&ProcessedRecord::NextTurn(0))
+                    .to_string(),
+                self.processed_records.len(),
+                self.records.len() + self.processed_records.len()
+            ))
+            .position(20.0, bottom - 10.0)
+            .font_size(FONT_SIZE as u16)
+            .color(BLACK)
+            .z_index(ZIndex::ModalText)
             .schedule();
 
-            DrawCommand::text(
-                format!(
-                    "Action: {} ({}/{})",
-                    self.processed_records
-                        .back()
-                        .unwrap_or(&ProcessedRecord::NextTurn(0))
-                        .to_string(),
-                    self.processed_records.len(),
-                    self.records.len() + self.processed_records.len()
-                ),
-                20.0,
-                bottom - 10.0,
-                FONT_SIZE as u16,
-                BLACK,
-                100,
-            )
-            .schedule();
-
-            DrawCommand::text(
-                format!("Arrow keys to control the Replay; Menu or Esc to exit"),
-                screen_width() - 505.0,
-                bottom - 10.0,
-                FONT_SIZE as u16,
-                BLACK,
-                100,
-            )
-            .schedule();
+            DrawCommand::text("Arrow keys to control the Replay; Menu or Esc to exit".to_string())
+                .position(screen_width() / 2.0, bottom - 10.0)
+                .align(Align::Center)
+                .font_size(FONT_SIZE as u16)
+                .color(BLACK)
+                .z_index(ZIndex::ModalText)
+                .schedule();
         }
     }
 }

@@ -25,7 +25,7 @@ pub enum DrawCommand {
         y: f32,
         color: Color,
         params: DrawTextureParams,
-        z_index: u8,
+        z_index: ZIndex,
     },
     RectangleLines {
         x: f32,
@@ -34,7 +34,7 @@ pub enum DrawCommand {
         height: f32,
         thickness: f32,
         color: Color,
-        z_index: u8,
+        z_index: ZIndex,
     },
     Rectangle {
         x: f32,
@@ -42,20 +42,45 @@ pub enum DrawCommand {
         width: f32,
         height: f32,
         color: Color,
-        z_index: u8,
+        z_index: ZIndex,
     },
     Text {
         text: String,
         x: f32,
         y: f32,
-        font: Option<Rc<Font>>,
+        align: Align,
+        font: Rc<Font>,
         font_size: u16,
         font_scale: f32,
         font_scale_aspect: f32,
         rotation: f32,
         color: Color,
-        z_index: u8,
+        z_index: ZIndex,
     },
+}
+
+#[repr(u8)]
+#[derive(Clone, Copy, PartialEq, PartialOrd, Ord, Eq)]
+pub enum ZIndex {
+    Background = 0,
+    Grid = 1,
+    TopCover = 2,
+    Highlight = 3,
+    Cursor = 4,
+    UnitShadow = 10,
+    Unit = 11,
+    UnitStatus = 19,
+    Obstacle = 20,
+    BottomCover = 21,
+    ModalBackground = 30,
+    ModalText = 32,
+    MenuText = 41,
+}
+
+pub enum Align {
+    Left,
+    Center,
+    Right,
 }
 
 pub struct Highlight(pub Vec<(u8, u8)>, pub Color);
@@ -83,7 +108,7 @@ pub fn draw_main_menu_background() {
             dest_size: Some(Vec2::new(screen_width(), screen_height())),
             ..Default::default()
         },
-        z_index: 0,
+        z_index: ZIndex::Background,
     });
 }
 
@@ -99,7 +124,7 @@ pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8)) {
         height: TILE_SIZE * scale_y,
         thickness: 4.0,
         color: RED,
-        z_index: 1,
+        z_index: ZIndex::Cursor,
     });
 }
 
@@ -113,7 +138,7 @@ pub fn draw_highlight(highlight: &Highlight, dimensions: (u8, u8)) {
             width: TILE_SIZE * scale_x,
             height: TILE_SIZE * scale_y,
             color: highlight.1,
-            z_index: 1,
+            z_index: ZIndex::Highlight,
         });
     }
 }
@@ -140,7 +165,7 @@ pub fn draw_texture_background(dimensions: (u8, u8), texture: Texture) {
                     rotation: if x % 2 == 0 { 0.0 } else { PI },
                     ..Default::default()
                 },
-                z_index: 0,
+                z_index: ZIndex::Background,
             });
         }
     }
@@ -183,7 +208,7 @@ pub fn flush_draw_registry() {
 }
 
 impl DrawCommand {
-    pub fn z_index(&self) -> u8 {
+    pub fn z_index(&self) -> ZIndex {
         match self {
             DrawCommand::Texture { z_index, .. } => *z_index,
             DrawCommand::RectangleLines { z_index, .. } => *z_index,
@@ -192,23 +217,8 @@ impl DrawCommand {
         }
     }
 
-    pub fn text(text: String, x: f32, y: f32, font_size: u16, color: Color, z_index: u8) -> Self {
-        DrawCommand::Text {
-            text,
-            x,
-            y,
-            color,
-            z_index,
-            font: Some(
-                super::ASSETS
-                    .with(|assets| assets.get().unwrap().font("doto").unwrap())
-                    .clone(),
-            ),
-            font_size,
-            font_scale: 1.0,
-            font_scale_aspect: 1.0,
-            rotation: 0.0,
-        }
+    pub fn text(text: String) -> DrawTextBuilder {
+        DrawTextBuilder::new(text)
     }
 
     pub fn schedule(self) {
@@ -258,14 +268,21 @@ impl DrawCommand {
                 font_scale_aspect,
                 rotation,
                 color,
-                ..
+                align,
+                z_index: _,
             } => {
+                let x = match align {
+                    Align::Left => x,
+                    Align::Center => x - measure_text(&text, Some(&font), font_size, font_scale).width / 2.0,
+                    Align::Right => x - measure_text(&text, Some(&font), font_size, font_scale).width,
+                };
+
                 draw_text_ex(
                     &text,
                     x,
                     y,
                     TextParams {
-                        font: font.as_ref().map(|f| f.as_ref()),
+                        font: Some(&font),
                         font_size,
                         font_scale,
                         font_scale_aspect,
@@ -275,5 +292,117 @@ impl DrawCommand {
                 );
             }
         }
+    }
+}
+
+pub struct DrawTextBuilder {
+    text: String,
+    x: Option<f32>,
+    y: Option<f32>,
+    align: Option<Align>,
+    font: Option<Rc<Font>>,
+    font_size: Option<u16>,
+    font_scale: Option<f32>,
+    font_scale_aspect: Option<f32>,
+    rotation: Option<f32>,
+    color: Option<Color>,
+    z_index: Option<ZIndex>,
+}
+
+impl DrawTextBuilder {
+    pub fn new(text: String) -> Self {
+        Self {
+            text,
+            x: None,
+            y: None,
+            align: None,
+            font: None,
+            font_size: None,
+            font_scale: None,
+            font_scale_aspect: None,
+            rotation: None,
+            color: None,
+            z_index: None,
+        }
+    }
+
+    pub fn align(mut self, align: Align) -> Self {
+        self.align = Some(align);
+        self
+    }
+
+    pub fn position(mut self, x: f32, y: f32) -> Self {
+        self.x = Some(x);
+        self.y = Some(y);
+        self
+    }
+
+    pub fn x(mut self, x: f32) -> Self {
+        self.x = Some(x);
+        self
+    }
+
+    pub fn y(mut self, y: f32) -> Self {
+        self.y = Some(y);
+        self
+    }
+
+    pub fn font(mut self, font: Rc<Font>) -> Self {
+        self.font = Some(font);
+        self
+    }
+
+    pub fn font_size(mut self, font_size: u16) -> Self {
+        self.font_size = Some(font_size);
+        self
+    }
+
+    pub fn font_scale(mut self, font_scale: f32) -> Self {
+        self.font_scale = Some(font_scale);
+        self
+    }
+
+    pub fn font_scale_aspect(mut self, font_scale_aspect: f32) -> Self {
+        self.font_scale_aspect = Some(font_scale_aspect);
+        self
+    }
+
+    pub fn rotation(mut self, rotation: f32) -> Self {
+        self.rotation = Some(rotation);
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = Some(color);
+        self
+    }
+
+    pub fn z_index(mut self, z_index: ZIndex) -> Self {
+        self.z_index = Some(z_index);
+        self
+    }
+
+    pub fn build(self) -> DrawCommand {
+        DrawCommand::Text {
+            text: self.text,
+            x: self.x.unwrap_or(0.0),
+            y: self.y.unwrap_or(0.0),
+            align: self.align.unwrap_or(Align::Left),
+            font: self.font.unwrap_or(
+                super::ASSETS
+                    .with(|assets| assets.get().unwrap().font("doto").unwrap())
+                    .clone(),
+            ),
+            font_size: self.font_size.unwrap_or(16),
+            font_scale: self.font_scale.unwrap_or(1.0),
+            font_scale_aspect: self.font_scale_aspect.unwrap_or(1.0),
+            rotation: self.rotation.unwrap_or(0.0),
+            color: self.color.unwrap_or(WHITE),
+            z_index: self.z_index.unwrap_or(ZIndex::MenuText),
+        }
+    }
+
+    pub fn schedule(self) {
+        self.build().schedule();
     }
 }

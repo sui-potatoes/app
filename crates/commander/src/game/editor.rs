@@ -6,7 +6,7 @@ use std::fmt::Display;
 use macroquad::prelude::*;
 
 use crate::{
-    draw::{ASSETS, Draw, DrawCommand, Texture, draw},
+    draw::{ASSETS, Draw, DrawCommand, Texture, ZIndex, draw},
     input::Command,
     types::{Cursor, Direction, GameMap, TileType},
 };
@@ -144,15 +144,12 @@ impl Draw for Editor {
         self.grid.draw();
         self.cursor.draw();
 
-        DrawCommand::text(
-            format!("Tool: {}", self.tool),
-            10.0,
-            screen_height() - 20.0,
-            20,
-            BLACK,
-            1,
-        )
-        .schedule();
+        DrawCommand::text(format!("Tool: {}", self.tool))
+            .position(10.0, screen_height() - 20.0)
+            .font_size(20)
+            .color(BLACK)
+            .z_index(ZIndex::ModalText)
+            .schedule();
 
         if let Mode::ToolSelect(index, secondary_index) = self.mode {
             draw::request_draw(DrawCommand::Rectangle {
@@ -161,7 +158,7 @@ impl Draw for Editor {
                 width: screen_width(),
                 height: screen_height(),
                 color: BLACK.with_alpha(0.5),
-                z_index: 20,
+                z_index: ZIndex::ModalBackground,
             });
 
             let font = ASSETS.with(|store| store.get().unwrap().font("doto").unwrap());
@@ -189,7 +186,12 @@ impl Draw for Editor {
                 let x = (width - dims.width) / 2.0;
                 let y = (height + dims.height) / 2.0 + (i as f32 * 40.0) - 40.0;
 
-                DrawCommand::text(text, x, y, font_size, color, 20).schedule();
+                DrawCommand::text(text)
+                    .position(x, y)
+                    .font_size(font_size)
+                    .color(color)
+                    .z_index(ZIndex::ModalText)
+                    .schedule();
             }
         }
     }
