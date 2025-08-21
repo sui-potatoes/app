@@ -1,6 +1,5 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-module commander::commander_tests;
-
-
+pub mod fetch;
+pub mod tx;
