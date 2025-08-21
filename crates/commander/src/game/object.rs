@@ -285,30 +285,33 @@ impl Draw for GameObject {
                         .z_index(ZIndex::UnitStatus)
                         .schedule();
                 }
+                AnimationType::StaticSprite { frame, sprite, .. } => {
+                    sprite.draw_frame_with_index(
+                        self.position.x,
+                        self.position.y,
+                        *frame,
+                        self.dimensions,
+                        ZIndex::Unit,
+                    );
+                }
                 _ => {}
             }
         }
 
         match &self.animation.type_ {
             AnimationType::Static(texture) => {
-                draw::request_draw(DrawCommand::Texture {
-                    texture: texture.clone(),
-                    x: self.position.x,
-                    y: self.position.y,
-                    color: WHITE,
-                    params: DrawTextureParams::default(),
-                    z_index: ZIndex::Unit,
-                });
+                DrawCommand::texture(texture.clone())
+                    .position(self.position.x, self.position.y)
+                    .color(WHITE)
+                    .z_index(ZIndex::Unit)
+                    .schedule();
             }
             AnimationType::Move { texture, .. } => {
-                draw::request_draw(DrawCommand::Texture {
-                    texture: texture.clone(),
-                    x: self.position.x,
-                    y: self.position.y,
-                    color: WHITE,
-                    params: DrawTextureParams::default(),
-                    z_index: ZIndex::Unit,
-                });
+                DrawCommand::texture(texture.clone())
+                    .position(self.position.x, self.position.y)
+                    .color(WHITE)
+                    .z_index(ZIndex::Unit)
+                    .schedule();
             }
             AnimationType::StaticSprite { frame, sprite, .. } => {
                 sprite.draw_frame_with_index(

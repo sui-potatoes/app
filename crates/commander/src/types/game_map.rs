@@ -7,7 +7,7 @@ use macroquad::prelude::*;
 
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
-    draw::{self, ASSETS, Draw, DrawAt, DrawCommand, Sprite, Texture, ZIndex, get_scale},
+    draw::{ASSETS, Draw, DrawAt, DrawCommand, Sprite, Texture, ZIndex, get_scale},
     types::{Direction, Map, TileType, Unit},
 };
 
@@ -58,6 +58,25 @@ impl GameMap {
 
     pub fn cols(&self) -> u8 {
         self.grid[0].len() as u8
+    }
+
+    pub fn targets(&self, origin: (u8, u8), range: u8) -> Vec<(u8, u8)> {
+        let mut targets = Vec::new();
+        for (x, row) in self.grid.iter().enumerate() {
+            for (y, tile) in row.iter().enumerate() {
+                let distance = self.manhattan_distance((x as u8, y as u8), origin);
+                if distance <= range && tile.unit.is_some() {
+                    targets.push((x as u8, y as u8));
+                }
+            }
+        }
+        targets
+    }
+
+    pub fn manhattan_distance(&self, origin: (u8, u8), target: (u8, u8)) -> u8 {
+        let (x0, y0) = origin;
+        let (x1, y1) = target;
+        x0.abs_diff(x1) + y0.abs_diff(y1)
     }
 
     pub fn walkable_tiles(&self, start: (u8, u8), limit: u8) -> Vec<(u8, u8)> {
@@ -203,15 +222,16 @@ impl Draw for GameMap {
         let (scale_x, scale_y) = get_scale(self.dimensions());
         for (y, row) in self.grid.iter().enumerate() {
             for (x, tile) in row.iter().enumerate() {
-                draw::request_draw(DrawCommand::RectangleLines {
-                    x: x as f32 * TILE_WIDTH * scale_x,
-                    y: y as f32 * TILE_HEIGHT * scale_y,
-                    width: TILE_WIDTH * scale_x,
-                    height: TILE_HEIGHT * scale_y,
-                    thickness: 1.0,
-                    color: DARKGRAY,
-                    z_index: ZIndex::Grid,
-                });
+                DrawCommand::rectangle_lines(
+                    x as f32 * TILE_WIDTH * scale_x,
+                    y as f32 * TILE_HEIGHT * scale_y,
+                    TILE_WIDTH * scale_x,
+                    TILE_HEIGHT * scale_y,
+                )
+                .color(DARKGRAY)
+                .thickness(1.0)
+                .z_index(ZIndex::Grid)
+                .schedule();
 
                 tile.draw_at((x as u8, y as u8), self.dimensions());
             }
@@ -230,19 +250,16 @@ impl DrawAt for GameTile {
         match &self.tile_type {
             TileType::Empty => {}
             TileType::Obstacle => {
-                draw::request_draw(DrawCommand::Texture {
-                    texture: ASSETS
-                        .with(|assets| assets.get().unwrap().texture(Texture::Obstacle).unwrap())
-                        .clone(),
-                    x,
-                    y,
-                    color: WHITE,
-                    params: DrawTextureParams {
-                        dest_size: Some(Vec2::new(TILE_WIDTH * scale_x, TILE_HEIGHT * scale_y)),
-                        ..Default::default()
-                    },
-                    z_index: ZIndex::Obstacle,
-                });
+                let texture = ASSETS
+                    .with(|assets| assets.get().unwrap().texture(Texture::Obstacle).unwrap())
+                    .clone();
+
+                DrawCommand::texture(texture)
+                    .position(x, y)
+                    .color(WHITE)
+                    .dest_size(Vec2::new(TILE_WIDTH * scale_x, TILE_HEIGHT * scale_y))
+                    .z_index(ZIndex::Obstacle)
+                    .schedule();
             }
             TileType::Cover {
                 left,

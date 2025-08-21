@@ -7,6 +7,7 @@ mod app;
 mod editor;
 mod menu;
 mod object;
+mod play;
 mod player;
 
 pub use app::*;

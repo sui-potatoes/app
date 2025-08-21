@@ -7,7 +7,7 @@ use macroquad::prelude::*;
 
 use crate::{
     draw::{ASSETS, Draw, DrawCommand, Texture, ZIndex, draw},
-    input::Command,
+    input::InputCommand,
     types::{Cursor, Direction, GameMap, TileType},
 };
 
@@ -54,16 +54,16 @@ impl Editor {
         }
     }
 
-    pub fn handle_key_press(&mut self, key: Command) {
+    pub fn handle_key_press(&mut self, key: InputCommand) -> bool {
         match self.mode {
             Mode::Editor => {
                 match key {
-                    Command::Up => self.cursor.move_to(Direction::Up),
-                    Command::Down => self.cursor.move_to(Direction::Down),
-                    Command::Left => self.cursor.move_to(Direction::Left),
-                    Command::Right => self.cursor.move_to(Direction::Right),
-                    Command::Tool => self.mode = Mode::ToolSelect(self.tool.clone().into(), 0),
-                    Command::Select => {
+                    InputCommand::Up => self.cursor.move_to(Direction::Up),
+                    InputCommand::Down => self.cursor.move_to(Direction::Down),
+                    InputCommand::Left => self.cursor.move_to(Direction::Left),
+                    InputCommand::Right => self.cursor.move_to(Direction::Right),
+                    InputCommand::Tool => self.mode = Mode::ToolSelect(self.tool.clone().into(), 0),
+                    InputCommand::Select => {
                         let (x, y) = self.cursor.position;
                         let tile = &mut self.grid.grid[x as usize][y as usize];
                         match self.tool {
@@ -101,20 +101,24 @@ impl Editor {
                         }
                     }
                     // This is handled by the main menu, cannot be used in the Editor.
-                    Command::Menu => {}
+                    InputCommand::Menu => return true,
                 }
             }
             Mode::ToolSelect(index, secondary_index) => match key {
-                Command::Up => {
+                InputCommand::Up => {
                     self.mode = Mode::ToolSelect((index + 4) % TOOL_COUNT, secondary_index)
                 }
-                Command::Down => {
+                InputCommand::Down => {
                     self.mode = Mode::ToolSelect((index + 1) % TOOL_COUNT, secondary_index)
                 }
-                Command::Left => self.mode = Mode::ToolSelect(index, (secondary_index + 3) % 4),
-                Command::Right => self.mode = Mode::ToolSelect(index, (secondary_index + 1) % 4),
-                Command::Tool => self.mode = Mode::Editor,
-                Command::Select => {
+                InputCommand::Left => {
+                    self.mode = Mode::ToolSelect(index, (secondary_index + 3) % 4)
+                }
+                InputCommand::Right => {
+                    self.mode = Mode::ToolSelect(index, (secondary_index + 1) % 4)
+                }
+                InputCommand::Tool => self.mode = Mode::Editor,
+                InputCommand::Select => {
                     self.mode = Mode::Editor;
                     self.tool = match index {
                         0 => Tool::Wall(match secondary_index {
@@ -134,6 +138,8 @@ impl Editor {
                 _ => {}
             },
         }
+
+        false
     }
 }
 
@@ -152,14 +158,10 @@ impl Draw for Editor {
             .schedule();
 
         if let Mode::ToolSelect(index, secondary_index) = self.mode {
-            draw::request_draw(DrawCommand::Rectangle {
-                x: 0.0,
-                y: 0.0,
-                width: screen_width(),
-                height: screen_height(),
-                color: BLACK.with_alpha(0.5),
-                z_index: ZIndex::ModalBackground,
-            });
+            DrawCommand::rectangle(0.0, 0.0, screen_width(), screen_height())
+                .color(BLACK.with_alpha(0.5))
+                .z_index(ZIndex::ModalBackground)
+                .schedule();
 
             let font = ASSETS.with(|store| store.get().unwrap().font("doto").unwrap());
 

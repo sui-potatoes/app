@@ -36,5 +36,6 @@ codegen-units = 1
 panic = "abort"
 
 [features]
-default = ["cache"]
+# default = ["cache"]
+default = []
 cache = []

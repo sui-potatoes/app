@@ -151,7 +151,7 @@ impl SpriteSheet {
         z_index: ZIndex,
     ) {
         assert!(
-            frame < self.frames,
+            frame <= self.frames,
             "Frame out of bounds: {} < {}",
             frame,
             self.frames
@@ -160,23 +160,18 @@ impl SpriteSheet {
         let (scale_x, scale_y) = super::get_scale(dimensions);
         let y_offset = -self.y_offset * TILE_HEIGHT as f32 * scale_y;
 
-        super::request_draw(DrawCommand::Texture {
-            texture: self.texture.clone(),
-            x,
-            y: y + y_offset,
-            color: WHITE,
-            params: DrawTextureParams {
-                source: Some(Rect {
-                    x: self.frame_size * frame as f32,
-                    y: self.frame_size * self.row as f32,
-                    w: self.frame_size,
-                    h: self.frame_size,
-                }),
-                dest_size: Some(Vec2::new(TILE_WIDTH * scale_x, TILE_HEIGHT * scale_y)),
-                ..Default::default()
-            },
-            z_index,
-        });
+        DrawCommand::texture(self.texture.clone())
+            .position(x, y + y_offset)
+            .color(WHITE)
+            .dest_size(Vec2::new(TILE_WIDTH * scale_x, TILE_HEIGHT * scale_y))
+            .source(Rect {
+                x: self.frame_size * frame as f32,
+                y: self.frame_size * self.row as f32,
+                w: self.frame_size,
+                h: self.frame_size,
+            })
+            .z_index(z_index)
+            .schedule();
     }
 }
 
@@ -251,7 +246,7 @@ impl AssetStore {
         load_and_register_sprite!(
             self.sprites,
             "shadow.png",
-            1,
+            2,
             32.0 * 4.0,
             0.2,
             [(Sprite::Shadow, 0)]

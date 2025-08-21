@@ -13,8 +13,8 @@ use super::{menu::*, player::*};
 use crate::{
     Message as TokioMessage, State, WithRef,
     draw::*,
-    game::Editor,
-    input::Command,
+    game::{Editor, play::Play},
+    input::InputCommand,
     types::{Game, ID, Preset, Recruit, Replay},
 };
 
@@ -53,7 +53,7 @@ pub enum Screen {
     /// Show main menu.
     MainMenu(Menu<MainMenuItem>),
     /// Show an active game.
-    Play(Game),
+    Play(Play),
     /// Show list of replays.
     Replays(Menu<ReplayMenuItem>),
     /// Play a replay.
@@ -68,6 +68,17 @@ pub enum Screen {
 pub struct RecruitScreen {
     pub menu: Menu<RecruitSubMenuItem>,
     pub recruit: WithRef<Recruit>,
+}
+
+/// Trait for separate screens that can be used in the App.
+pub trait AppComponent {
+    /// Handles a key press. Returns true if the screen should be closed, false
+    /// otherwise. Eg, on `InputCommand::Menu` or `InputCommand::Select`, an
+    /// app component may request to close the screen.
+    fn handle_key_press(&mut self, key: InputCommand) -> bool;
+
+    /// Updates the component on each frame.
+    fn tick(&mut self);
 }
 
 impl App {
@@ -119,24 +130,43 @@ impl App {
         match msg {
             TokioMessage::Text(txt) => println!("Received text message: {}", txt),
             TokioMessage::StateUpdated => self.reload_screen(),
+            TokioMessage::GameStarted => {
+                self.screen = Screen::Play(Play::from(
+                    self.state
+                        .lock()
+                        .as_ref()
+                        .unwrap()
+                        .active_game
+                        .clone()
+                        .unwrap(),
+                ));
+            }
         }
     }
 
     /// Triggered by `input::handle_input`, handles key presses for each screen.
-    pub fn handle_key_press(&mut self, key: Command) {
+    pub fn handle_key_press(&mut self, key: InputCommand) {
         let state = self.state.lock().unwrap();
         match &mut self.screen {
             Screen::Editor(editor) => {
-                if matches!(key, Command::Menu) {
+                if editor.handle_key_press(key) {
                     self.screen = Screen::MainMenu(Menu::main(state.address));
-                } else {
-                    editor.handle_key_press(key)
+                }
+            }
+            Screen::Play(play) => {
+                if play.handle_key_press(key) {
+                    self.screen = Screen::MainMenu(Menu::main(state.address));
+                }
+            }
+            Screen::Replay(player) => {
+                if player.handle_key_press(key) {
+                    self.screen = Screen::MainMenu(Menu::main(state.address));
                 }
             }
             Screen::MainMenu(menu) => match key {
-                Command::Up => menu.previous_item(),
-                Command::Down => menu.next_item(),
-                Command::Select => match menu.selected_item() {
+                InputCommand::Up => menu.previous_item(),
+                InputCommand::Down => menu.next_item(),
+                InputCommand::Select => match menu.selected_item() {
                     MainMenuItem::Address(_address) => {}
                     MainMenuItem::Login => {
                         // Starts the login process.
@@ -158,16 +188,15 @@ impl App {
                 _ => {}
             },
             Screen::Settings(menu) => match key {
-                Command::Up => menu.previous_item(),
-                Command::Down => menu.next_item(),
-                Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Select => match menu.selected_item() {
+                InputCommand::Up => menu.previous_item(),
+                InputCommand::Down => menu.next_item(),
+                InputCommand::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
+                InputCommand::Select => match menu.selected_item() {
                     SettingsMenuItem::WindowSize => {
                         self.screen = Screen::WindowSettings(Menu::window_settings())
                     }
                     SettingsMenuItem::Logout => {
                         self.send_message(Message::Logout);
-                        // state.address = None;
                         self.screen = Screen::MainMenu(Menu::main(state.address));
                     }
                     SettingsMenuItem::Back => {
@@ -177,10 +206,10 @@ impl App {
                 _ => {}
             },
             Screen::Replays(menu) => match key {
-                Command::Up => menu.previous_item(),
-                Command::Down => menu.next_item(),
-                Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Select => match menu.selected_item() {
+                InputCommand::Up => menu.previous_item(),
+                InputCommand::Down => menu.next_item(),
+                InputCommand::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
+                InputCommand::Select => match menu.selected_item() {
                     ReplayMenuItem::Replay(replay) => {
                         self.screen = Screen::Replay(Player::new(replay.data.clone()));
                         self.send_message(Message::FetchPresets);
@@ -191,25 +220,11 @@ impl App {
                 },
                 _ => {}
             },
-            Screen::Replay(player) => match key {
-                Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Right => {
-                    if let Err(e) = player.next_action() {
-                        eprintln!("Error: {}", e);
-                    }
-                }
-                Command::Left => {
-                    if let Err(e) = player.prev_action() {
-                        eprintln!("Error: {}", e);
-                    }
-                }
-                _ => {}
-            },
             Screen::WindowSettings(menu) => match key {
-                Command::Up => menu.previous_item(),
-                Command::Down => menu.next_item(),
-                Command::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                Command::Select => match menu.selected_item() {
+                InputCommand::Up => menu.previous_item(),
+                InputCommand::Down => menu.next_item(),
+                InputCommand::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
+                InputCommand::Select => match menu.selected_item() {
                     WindowSettingsMenuItem::SizeSmall => set_window_size(700, 700),
                     WindowSettingsMenuItem::SizeMedium => set_window_size(1000, 1000),
                     WindowSettingsMenuItem::SizeLarge => set_window_size(1200, 1200),
@@ -219,16 +234,14 @@ impl App {
                 },
                 _ => {}
             },
-            Screen::Play(_game) => match key {
-                _ => {}
-            },
         }
     }
 
     pub fn tick(&mut self) {
-        self.draw();
-        if let Screen::Replay(player) = &mut self.screen {
-            player.tick();
+        match &mut self.screen {
+            Screen::Replay(player) => player.tick(),
+            Screen::Play(play) => play.tick(),
+            _ => self.draw(),
         }
     }
 
@@ -263,25 +276,11 @@ impl Draw for App {
         match &self.screen {
             Screen::Editor(editor) => editor.draw(),
             Screen::MainMenu(menu) => menu.draw(),
-            Screen::Play(_game) => unimplemented!("Play screen not implemented"),
-            Screen::Replay(replay) => {
-                if let Some(preset) = self.get_preset(&replay.preset_id) {
-                    draw_texture_background(
-                        (preset.data.map.cols(), preset.data.map.rows()),
-                        Texture::Background,
-                    );
-
-                    replay.draw();
-                    if let Some(highlight) = &self.highlight {
-                        draw_highlight(highlight, (preset.data.map.cols(), preset.data.map.rows()));
-                    }
-                } else {
-                    draw_text("No preset found for replay", 10.0, 10.0, 20.0, BLACK);
-                }
-            }
             Screen::Replays(menu) => menu.draw(),
             Screen::Settings(menu) => menu.draw(),
             Screen::WindowSettings(menu) => menu.draw(),
+            Screen::Play(_play) => unreachable!("Play manages its own draw"),
+            Screen::Replay(_player) => unreachable!("Player manages its own draw"),
         }
     }
 }

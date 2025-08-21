@@ -9,6 +9,7 @@ use std::{
         Arc, Mutex,
         mpsc::{Receiver, Sender, channel},
     },
+    time::Duration,
 };
 
 use gamepads::Gamepads;
@@ -17,11 +18,7 @@ use quad_storage::STORAGE;
 use serde::{Deserialize, Serialize};
 
 use sui_crypto::ed25519::Ed25519PrivateKey;
-use sui_rpc::{
-    Client,
-    field::FieldMask,
-    proto::sui::rpc::v2beta2::{ListOwnedObjectsRequest, Object},
-};
+use sui_rpc::{Client, proto::sui::rpc::v2beta2::Object};
 use sui_sdk_types::{
     Address, Ed25519PublicKey, ObjectDigest, ObjectId, ObjectReference, Version, ZkLoginInputs,
 };
@@ -32,22 +29,22 @@ mod draw;
 mod errors;
 mod game;
 mod input;
-mod tx;
+mod sui;
 mod types;
 mod zklogin;
 
 use crate::{
-    config::{COMMANDER_OBJ, PRESET_STRUCT_TAG, RECRUIT_STRUCT_TAG, REPLAY_STRUCT_TAG},
     draw::{ASSETS, AssetStore},
     game::{App, Message as AppMessage},
-    tx::TxRunner,
-    types::{Preset, Recruit, Replay},
+    sui::{fetch::GameClient, tx::TxExecutor},
+    types::{Game, Preset, Recruit, Replay},
 };
 
 /// Messages sent from the tokio runtime to the Application.
 pub enum Message {
     Text(String),
     StateUpdated,
+    GameStarted,
 }
 
 const SESSION_KEY: &str = "session";
@@ -69,6 +66,7 @@ pub struct State {
     pub presets: Vec<WithRef<Preset>>,
     pub recruits: Vec<WithRef<Recruit>>,
     pub replays: Vec<WithRef<Replay>>,
+    pub active_game: Option<Game>,
 }
 
 /// Configure Macroquad on start.
@@ -140,17 +138,18 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
     let prev_session = STORAGE.lock().unwrap().get(SESSION_KEY);
 
     rt.block_on(async move {
-        let mut client = Client::new(GRPC_URL).unwrap();
-        let mut tx_runner: Option<TxRunner> = None;
+        let client = Client::new(GRPC_URL).unwrap();
+        let mut game_client = GameClient::new(client.clone());
+        let mut tx_runner: Option<TxExecutor> = None;
 
         if let Some(prev_session) = prev_session {
             if let Ok(session) = serde_json::from_str::<Session>(&prev_session) {
                 state_arc.lock().unwrap().address = Some(session.address);
-                tx_runner = Some(TxRunner::new(
+                tx_runner = Some(TxExecutor::new(
                     Ed25519PrivateKey::from_pem(&session.keypair).unwrap(),
                     session.zkp,
                     session.max_epoch,
-                    client.clone(),
+                    client,
                 ));
 
                 tx.send(Message::StateUpdated).unwrap();
@@ -197,14 +196,48 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                         }
                     }
                     AppMessage::StartGame => {
+                        // Fetch presets if they are not already fetched.
+                        let mut state = state_arc.lock().unwrap();
+                        if state.presets.is_empty() {
+                            state.presets = game_client.list_presets().await;
+                        }
+
+                        if let Some(game) = STORAGE.lock().unwrap().get("active_game") {
+                            let game = serde_json::from_str::<Game>(game.as_ref()).unwrap();
+                            state.active_game = Some(game);
+                            println!("Game already started");
+                            tx.send(Message::GameStarted).unwrap();
+                            continue;
+                        }
+
+                        if state.active_game.is_some() {
+                            continue;
+                        }
+
                         if let Some(tx_runner) = tx_runner.as_mut() {
-                            let _effects = match tx_runner.test_tx().await {
-                                Ok(effects) => effects,
+                            match tx_runner.start_game(state.presets[0].clone()).await {
+                                Ok(game_id) => {
+                                    println!("https://suiscan.xyz/testnet/object/{}", game_id);
+                                    std::thread::sleep(Duration::from_secs(5));
+
+                                    let game = game_client
+                                        .get_game(game_id)
+                                        .await
+                                        .unwrap_or_else(|e| panic!("Error: {}", e));
+
+                                    state.active_game = Some(game);
+                                    STORAGE.lock().unwrap().set(
+                                        "active_game",
+                                        &serde_json::to_string(&state.active_game).unwrap(),
+                                    );
+
+                                    tx.send(Message::StateUpdated).unwrap();
+                                }
                                 Err(err) => {
                                     eprintln!("Error: {}", err);
                                     continue;
                                 }
-                            };
+                            }
                         }
                     }
                     AppMessage::FetchPresets => {
@@ -220,23 +253,7 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
 
                         let mut state = state_arc.lock().unwrap();
 
-                        state.presets = client
-                            .live_data_client()
-                            .list_owned_objects(ListOwnedObjectsRequest {
-                                owner: Some(COMMANDER_OBJ.to_string()),
-                                object_type: Some(PRESET_STRUCT_TAG.to_string()),
-                                read_mask: Some(FieldMask {
-                                    paths: vec!["contents".to_string(), "digest".to_string()],
-                                }),
-                                ..Default::default()
-                            })
-                            .await
-                            .unwrap()
-                            .get_ref()
-                            .objects
-                            .iter()
-                            .map(|obj| WithRef::from_rpc_object(obj).unwrap())
-                            .collect::<Vec<WithRef<Preset>>>();
+                        state.presets = game_client.list_presets().await;
 
                         STORAGE
                             .lock()
@@ -258,31 +275,17 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
 
                         let mut state = state_arc.lock().unwrap();
 
-                        state.recruits = client
-                            .live_data_client()
-                            .list_owned_objects(ListOwnedObjectsRequest {
-                                owner: state.address.map(|a| a.to_string()),
-                                object_type: Some(RECRUIT_STRUCT_TAG.to_string()),
-                                page_size: Some(100),
-                                read_mask: Some(FieldMask {
-                                    paths: vec!["contents".to_string(), "digest".to_string()],
-                                }),
-                                ..Default::default()
-                            })
-                            .await
-                            .unwrap()
-                            .get_ref()
-                            .objects
-                            .iter()
-                            .map(|obj| WithRef::from_rpc_object(obj).unwrap())
-                            .collect::<Vec<WithRef<Recruit>>>();
+                        if let Some(address) = state.address {
+                            state.recruits = game_client.list_recruits(address).await;
+                            STORAGE
+                                .lock()
+                                .unwrap()
+                                .set("recruits", &serde_json::to_string(&state.recruits).unwrap());
 
-                        STORAGE
-                            .lock()
-                            .unwrap()
-                            .set("recruits", &serde_json::to_string(&state.recruits).unwrap());
-
-                        tx.send(Message::StateUpdated).unwrap();
+                            tx.send(Message::StateUpdated).unwrap();
+                        } else {
+                            panic!("No address found");
+                        }
                     }
                     AppMessage::FetchReplays => {
                         #[cfg(feature = "cache")]
@@ -297,31 +300,18 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
 
                         let mut state = state_arc.lock().unwrap();
 
-                        state.replays = client
-                            .live_data_client()
-                            .list_owned_objects(ListOwnedObjectsRequest {
-                                owner: state.address.map(|a| a.to_string()),
-                                object_type: Some(REPLAY_STRUCT_TAG.to_string()),
-                                page_size: Some(100),
-                                read_mask: Some(FieldMask {
-                                    paths: vec!["contents".to_string(), "digest".to_string()],
-                                }),
-                                ..Default::default()
-                            })
-                            .await
-                            .unwrap()
-                            .get_ref()
-                            .objects
-                            .iter()
-                            .map(|obj| WithRef::from_rpc_object(obj).unwrap())
-                            .collect::<Vec<WithRef<Replay>>>();
+                        if let Some(address) = state.address {
+                            state.replays = game_client.list_replays(address).await;
 
-                        STORAGE
-                            .lock()
-                            .unwrap()
-                            .set("replays", &serde_json::to_string(&state.replays).unwrap());
+                            STORAGE
+                                .lock()
+                                .unwrap()
+                                .set("replays", &serde_json::to_string(&state.replays).unwrap());
 
-                        tx.send(Message::StateUpdated).unwrap();
+                            tx.send(Message::StateUpdated).unwrap();
+                        } else {
+                            panic!("No address found");
+                        }
                     }
                 }
             }
@@ -387,6 +377,7 @@ impl Default for State {
             presets: vec![],
             recruits: vec![],
             replays: vec![],
+            active_game: None,
         }
     }
 }

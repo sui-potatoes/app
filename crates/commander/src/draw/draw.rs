@@ -24,7 +24,12 @@ pub enum DrawCommand {
         x: f32,
         y: f32,
         color: Color,
-        params: DrawTextureParams,
+        dest_size: Option<Vec2>,
+        source: Option<Rect>,
+        rotation: f32,
+        flip_x: bool,
+        flip_y: bool,
+        pivot: Option<Vec2>,
         z_index: ZIndex,
     },
     RectangleLines {
@@ -97,33 +102,31 @@ pub trait DrawAt {
 }
 
 pub fn draw_main_menu_background() {
-    request_draw(DrawCommand::Texture {
-        texture: super::ASSETS
-            .with(|assets| assets.get().unwrap().texture(super::Texture::Main).unwrap())
-            .clone(),
-        x: 0.0,
-        y: 0.0,
-        color: WHITE,
-        params: DrawTextureParams {
-            dest_size: Some(Vec2::new(screen_width(), screen_height())),
-            ..Default::default()
-        },
-        z_index: ZIndex::Background,
-    });
+    let texture = super::ASSETS
+        .with(|assets| assets.get().unwrap().texture(super::Texture::Main).unwrap())
+        .clone();
+
+    DrawCommand::texture(texture)
+        .position(0.0, 0.0)
+        .color(WHITE)
+        .dest_size(Vec2::new(screen_width(), screen_height()))
+        .z_index(ZIndex::Background)
+        .schedule();
 }
 
 /// Draw a cursor at the given tile.
 /// The cursor is a rectangle with a thickness of 4.0.
 pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8)) {
     let (scale_x, scale_y) = get_scale(dimensions);
+    let thickness = 6.0;
 
     request_draw(DrawCommand::RectangleLines {
-        x: position.1 as f32 * TILE_SIZE * scale_x,
-        y: position.0 as f32 * TILE_SIZE * scale_y,
-        width: TILE_SIZE * scale_x,
-        height: TILE_SIZE * scale_y,
-        thickness: 4.0,
-        color: RED,
+        x: position.1 as f32 * TILE_SIZE * scale_x + thickness / 2.0,
+        y: position.0 as f32 * TILE_SIZE * scale_y + thickness / 2.0,
+        width: TILE_SIZE * scale_x - thickness,
+        height: TILE_SIZE * scale_y - thickness,
+        thickness,
+        color: BLUE,
         z_index: ZIndex::Cursor,
     });
 }
@@ -154,19 +157,16 @@ pub fn draw_texture_background(dimensions: (u8, u8), texture: Texture) {
 
     for y in 0..height as i32 {
         for x in 0..width as i32 {
-            request_draw(DrawCommand::Texture {
-                texture: texture.clone(),
-                x: x as f32 * TILE_SIZE * scale_x,
-                y: y as f32 * TILE_SIZE * scale_y,
-                color: WHITE,
-                params: DrawTextureParams {
-                    dest_size: Some(Vec2::new(TILE_SIZE * scale_x, TILE_SIZE * scale_y)),
-                    // draw 180º counter-clockwise
-                    rotation: if x % 2 == 0 { 0.0 } else { PI },
-                    ..Default::default()
-                },
-                z_index: ZIndex::Background,
-            });
+            DrawCommand::texture(texture.clone())
+                .position(
+                    x as f32 * TILE_SIZE * scale_x,
+                    y as f32 * TILE_SIZE * scale_y,
+                )
+                .color(WHITE)
+                .dest_size(Vec2::new(TILE_SIZE * scale_x, TILE_SIZE * scale_y))
+                .rotation(if x % 2 == 0 { 0.0 } else { PI })
+                .z_index(ZIndex::Background)
+                .schedule();
         }
     }
 }
@@ -192,7 +192,7 @@ pub fn grid_to_world(p: (u8, u8), dimensions: (u8, u8)) -> Vec2 {
 /// frame. The commands are sorted by their z-index and then drawn in order.
 ///
 /// See `flush_draw_registry` for the actual drawing.
-pub fn request_draw(cmd: DrawCommand) {
+fn request_draw(cmd: DrawCommand) {
     DRAW_REGISTRY.with(move |registry| {
         registry.borrow_mut().push(cmd);
     });
@@ -221,6 +221,22 @@ impl DrawCommand {
         DrawTextBuilder::new(text)
     }
 
+    pub fn rectangle(x: f32, y: f32, width: f32, height: f32) -> DrawRectangleBuilder {
+        DrawRectangleBuilder::new()
+            .position(x, y)
+            .dimensions(width, height)
+    }
+
+    pub fn rectangle_lines(x: f32, y: f32, width: f32, height: f32) -> DrawRectangleLinesBuilder {
+        DrawRectangleLinesBuilder::new()
+            .position(x, y)
+            .dimensions(width, height)
+    }
+
+    pub fn texture(texture: Rc<Texture2D>) -> DrawTextureBuilder {
+        DrawTextureBuilder::new(texture)
+    }
+
     pub fn schedule(self) {
         request_draw(self);
     }
@@ -232,10 +248,28 @@ impl DrawCommand {
                 x,
                 y,
                 color,
-                params,
-                ..
+                dest_size,
+                source,
+                rotation,
+                flip_x,
+                flip_y,
+                pivot,
+                z_index: _,
             } => {
-                draw_texture_ex(&texture, x, y, color, params.clone());
+                draw_texture_ex(
+                    &texture,
+                    x,
+                    y,
+                    color,
+                    DrawTextureParams {
+                        dest_size,
+                        source,
+                        rotation,
+                        flip_x,
+                        flip_y,
+                        pivot,
+                    },
+                );
             }
             DrawCommand::RectangleLines {
                 x,
@@ -273,8 +307,12 @@ impl DrawCommand {
             } => {
                 let x = match align {
                     Align::Left => x,
-                    Align::Center => x - measure_text(&text, Some(&font), font_size, font_scale).width / 2.0,
-                    Align::Right => x - measure_text(&text, Some(&font), font_size, font_scale).width,
+                    Align::Center => {
+                        x - measure_text(&text, Some(&font), font_size, font_scale).width / 2.0
+                    }
+                    Align::Right => {
+                        x - measure_text(&text, Some(&font), font_size, font_scale).width
+                    }
                 };
 
                 draw_text_ex(
@@ -292,6 +330,252 @@ impl DrawCommand {
                 );
             }
         }
+    }
+}
+
+// === Builders ===
+
+pub struct DrawTextureBuilder {
+    texture: Rc<Texture2D>,
+    x: Option<f32>,
+    y: Option<f32>,
+    color: Option<Color>,
+    dest_size: Option<Vec2>,
+    source: Option<Rect>,
+    rotation: Option<f32>,
+    flip_x: Option<bool>,
+    flip_y: Option<bool>,
+    pivot: Option<Vec2>,
+    z_index: Option<ZIndex>,
+}
+
+impl DrawTextureBuilder {
+    pub fn new(texture: Rc<Texture2D>) -> Self {
+        Self {
+            texture,
+            x: None,
+            y: None,
+            color: None,
+            dest_size: None,
+            source: None,
+            rotation: None,
+            flip_x: None,
+            flip_y: None,
+            pivot: None,
+            z_index: None,
+        }
+    }
+
+    pub fn position(mut self, x: f32, y: f32) -> Self {
+        self.x = Some(x);
+        self.y = Some(y);
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = Some(color);
+        self
+    }
+
+    pub fn dest_size(mut self, dest_size: Vec2) -> Self {
+        self.dest_size = Some(dest_size);
+        self
+    }
+
+    pub fn source(mut self, source: Rect) -> Self {
+        self.source = Some(source);
+        self
+    }
+
+    pub fn rotation(mut self, rotation: f32) -> Self {
+        self.rotation = Some(rotation);
+        self
+    }
+
+    pub fn flip_x(mut self, flip_x: bool) -> Self {
+        self.flip_x = Some(flip_x);
+        self
+    }
+
+    pub fn flip_y(mut self, flip_y: bool) -> Self {
+        self.flip_y = Some(flip_y);
+        self
+    }
+
+    pub fn pivot(mut self, pivot: Vec2) -> Self {
+        self.pivot = Some(pivot);
+        self
+    }
+
+    pub fn z_index(mut self, z_index: ZIndex) -> Self {
+        self.z_index = Some(z_index);
+        self
+    }
+
+    pub fn build(self) -> DrawCommand {
+        DrawCommand::Texture {
+            texture: self.texture,
+            x: self.x.unwrap_or(0.0),
+            y: self.y.unwrap_or(0.0),
+            color: self.color.unwrap_or(WHITE),
+            dest_size: self.dest_size,
+            source: self.source,
+            rotation: self.rotation.unwrap_or(0.0),
+            flip_x: self.flip_x.unwrap_or(false),
+            flip_y: self.flip_y.unwrap_or(false),
+            pivot: self.pivot,
+            z_index: self.z_index.unwrap_or(ZIndex::MenuText),
+        }
+    }
+
+    pub fn schedule(self) {
+        self.build().schedule();
+    }
+}
+
+pub struct DrawRectangleLinesBuilder {
+    x: Option<f32>,
+    y: Option<f32>,
+    width: Option<f32>,
+    height: Option<f32>,
+    thickness: Option<f32>,
+    color: Option<Color>,
+    z_index: Option<ZIndex>,
+}
+
+impl DrawRectangleLinesBuilder {
+    pub fn new() -> Self {
+        Self {
+            x: None,
+            y: None,
+            width: None,
+            height: None,
+            thickness: None,
+            color: None,
+            z_index: None,
+        }
+    }
+
+    pub fn position(mut self, x: f32, y: f32) -> Self {
+        self.x = Some(x);
+        self.y = Some(y);
+        self
+    }
+
+    pub fn dimensions(mut self, width: f32, height: f32) -> Self {
+        self.width = Some(width);
+        self.height = Some(height);
+        self
+    }
+
+    pub fn thickness(mut self, thickness: f32) -> Self {
+        self.thickness = Some(thickness);
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = Some(color);
+        self
+    }
+
+    pub fn z_index(mut self, z_index: ZIndex) -> Self {
+        self.z_index = Some(z_index);
+        self
+    }
+
+    pub fn build(self) -> DrawCommand {
+        DrawCommand::RectangleLines {
+            x: self.x.unwrap_or(0.0),
+            y: self.y.unwrap_or(0.0),
+            width: self.width.unwrap_or(0.0),
+            height: self.height.unwrap_or(0.0),
+            thickness: self.thickness.unwrap_or(1.0),
+            color: self.color.unwrap_or(WHITE),
+            z_index: self.z_index.unwrap_or(ZIndex::MenuText),
+        }
+    }
+
+    pub fn schedule(self) {
+        self.build().schedule();
+    }
+}
+
+pub struct DrawRectangleBuilder {
+    x: Option<f32>,
+    y: Option<f32>,
+    width: Option<f32>,
+    height: Option<f32>,
+    color: Option<Color>,
+    z_index: Option<ZIndex>,
+}
+
+impl DrawRectangleBuilder {
+    pub fn new() -> Self {
+        Self {
+            x: None,
+            y: None,
+            width: None,
+            height: None,
+            color: None,
+            z_index: None,
+        }
+    }
+
+    pub fn position(mut self, x: f32, y: f32) -> Self {
+        self.x = Some(x);
+        self.y = Some(y);
+        self
+    }
+
+    pub fn dimensions(mut self, width: f32, height: f32) -> Self {
+        self.width = Some(width);
+        self.height = Some(height);
+        self
+    }
+
+    pub fn width(mut self, width: f32) -> Self {
+        self.width = Some(width);
+        self
+    }
+
+    pub fn height(mut self, height: f32) -> Self {
+        self.height = Some(height);
+        self
+    }
+
+    pub fn x(mut self, x: f32) -> Self {
+        self.x = Some(x);
+        self
+    }
+
+    pub fn y(mut self, y: f32) -> Self {
+        self.y = Some(y);
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = Some(color);
+        self
+    }
+
+    pub fn z_index(mut self, z_index: ZIndex) -> Self {
+        self.z_index = Some(z_index);
+        self
+    }
+
+    pub fn build(self) -> DrawCommand {
+        DrawCommand::Rectangle {
+            x: self.x.unwrap_or(0.0),
+            y: self.y.unwrap_or(0.0),
+            width: self.width.unwrap_or(0.0),
+            height: self.height.unwrap_or(0.0),
+            color: self.color.unwrap_or(WHITE),
+            z_index: self.z_index.unwrap_or(ZIndex::MenuText),
+        }
+    }
+
+    pub fn schedule(self) {
+        self.build().schedule();
     }
 }
 

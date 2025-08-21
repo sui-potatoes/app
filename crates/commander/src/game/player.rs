@@ -16,9 +16,11 @@ use super::{Animation, AnimationType, GameObject};
 use crate::{
     config::{MENU_FONT_SIZE as FONT_SIZE, TILE_HEIGHT, TILE_WIDTH},
     draw::{
-        ASSETS, Align, Draw, DrawCommand, Highlight, Sprite, Texture, ZIndex, draw_highlight,
+        self, ASSETS, Align, Draw, DrawCommand, Highlight, Sprite, Texture, ZIndex, draw_highlight,
         grid_to_world,
     },
+    game::AppComponent,
+    input::InputCommand,
     types::{Cursor, Direction, GameMap, History, ID, Map, Preset, Record, Replay, Unit},
 };
 
@@ -125,6 +127,30 @@ pub enum ProcessedRecord {
     },
 }
 
+impl AppComponent for Player {
+    fn handle_key_press(&mut self, key: InputCommand) -> bool {
+        match key {
+            InputCommand::Menu => return true,
+            InputCommand::Right => self
+                .next_action()
+                .unwrap_or_else(|e| eprintln!("Error: {}", e)),
+            InputCommand::Left => self
+                .prev_action()
+                .unwrap_or_else(|e| eprintln!("Error: {}", e)),
+            _ => {}
+        }
+        false
+    }
+
+    fn tick(&mut self) {
+        for (_id, object) in self.objects.iter_mut() {
+            object.tick(get_time());
+        }
+
+        self.draw();
+    }
+}
+
 impl Player {
     pub fn new(mut replay: Replay) -> Self {
         Self {
@@ -137,14 +163,6 @@ impl Player {
             objects: HashMap::new(),
             id_counter: 0,
         }
-    }
-
-    pub fn tick(&mut self) {
-        for (_id, object) in self.objects.iter_mut() {
-            object.tick(get_time());
-        }
-
-        self.draw();
     }
 
     pub fn stop_all_animations(&mut self) {
@@ -383,6 +401,8 @@ impl Player {
 impl Draw for Player {
     fn draw(&self) {
         if let Some(map) = &self.map {
+            draw::draw_texture_background(map.dimensions(), Texture::Background);
+
             map.draw();
 
             if let Some(highlight) = &self.highlight {
