@@ -9,7 +9,7 @@ use macroquad::prelude::*;
 use crate::game::App;
 
 /// Keys that are tracked for input.
-const TRACKED_KEYS: [KeyCode; 10] = [
+const TRACKED_KEYS: [KeyCode; 9] = [
     KeyCode::Up,
     KeyCode::Down,
     KeyCode::Left,
@@ -17,7 +17,6 @@ const TRACKED_KEYS: [KeyCode; 10] = [
     KeyCode::Escape,
     KeyCode::Space,
     KeyCode::Enter,
-    KeyCode::Space,
     KeyCode::Tab,
     KeyCode::Backspace,
 ];

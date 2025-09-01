@@ -68,6 +68,9 @@ pub enum DrawCommand {
         font_scale: f32,
         font_scale_aspect: f32,
         rotation: f32,
+        background: Option<Color>,
+        padding: Vec2,
+        line_height: Option<f32>,
         color: Color,
         z_index: ZIndex,
     },
@@ -350,31 +353,60 @@ impl DrawCommand {
                 rotation,
                 color,
                 align,
+                background,
+                line_height,
+                padding,
                 z_index: _,
             } => {
-                let x = match align {
-                    Align::Left => x,
-                    Align::Center => {
-                        x - measure_text(&text, Some(&font), font_size, font_scale).width / 2.0
-                    }
-                    Align::Right => {
-                        x - measure_text(&text, Some(&font), font_size, font_scale).width
-                    }
-                };
+                let max_width = text
+                    .lines()
+                    .map(|line| measure_text(line, Some(&font), font_size, font_scale).width as i32)
+                    .max()
+                    .unwrap_or(0) as f32; // eh, conversion...
 
-                draw_text_ex(
-                    &text,
-                    x,
-                    y,
-                    TextParams {
-                        font: Some(&font),
-                        font_size,
-                        font_scale,
-                        font_scale_aspect,
-                        rotation,
-                        color,
-                    },
-                );
+                let line_height = line_height.unwrap_or(font_size as f32) * font_scale;
+                let lines = text.lines().collect::<Vec<&str>>();
+
+                if let Some(background) = background {
+                    let x = match align {
+                        Align::Left => x - padding.x,
+                        Align::Center => x - padding.x - max_width / 2.0,
+                        Align::Right => x - padding.x - max_width,
+                    };
+
+                    draw_rectangle(
+                        x,
+                        y - padding.y,
+                        max_width + padding.x * 2.0,
+                        line_height * lines.len() as f32 + padding.y * 2.0,
+                        background,
+                    );
+                }
+
+                text.lines().enumerate().for_each(|(i, line)| {
+                    let measure = measure_text(line, Some(&font), font_size, font_scale);
+                    let width = measure.width;
+                    let y = y + i as f32 * line_height + (padding.y / 2.0);
+                    let x = match align {
+                        Align::Left => x + padding.x,
+                        Align::Center => x - width / 2.0,
+                        Align::Right => x - (padding.x / 2.0) - width,
+                    };
+
+                    draw_text_ex(
+                        line,
+                        x,
+                        y,
+                        TextParams {
+                            font: Some(&font),
+                            font_size,
+                            font_scale,
+                            font_scale_aspect,
+                            rotation,
+                            color,
+                        },
+                    );
+                });
             }
         }
     }
@@ -703,6 +735,9 @@ pub struct DrawTextBuilder {
     font_scale: Option<f32>,
     font_scale_aspect: Option<f32>,
     rotation: Option<f32>,
+    background: Option<Color>,
+    padding: Option<Vec2>,
+    line_height: Option<f32>,
     color: Option<Color>,
     z_index: Option<ZIndex>,
 }
@@ -719,6 +754,9 @@ impl DrawTextBuilder {
             font_scale: None,
             font_scale_aspect: None,
             rotation: None,
+            background: None,
+            line_height: None,
+            padding: None,
             color: None,
             z_index: None,
         }
@@ -780,6 +818,21 @@ impl DrawTextBuilder {
         self
     }
 
+    pub fn background(mut self, background: Color) -> Self {
+        self.background = Some(background);
+        self
+    }
+
+    pub fn padding(mut self, padding: Vec2) -> Self {
+        self.padding = Some(padding);
+        self
+    }
+
+    pub fn line_height(mut self, line_height: f32) -> Self {
+        self.line_height = Some(line_height);
+        self
+    }
+
     pub fn build(self) -> DrawCommand {
         DrawCommand::Text {
             text: self.text,
@@ -796,6 +849,9 @@ impl DrawTextBuilder {
             font_scale_aspect: self.font_scale_aspect.unwrap_or(1.0),
             rotation: self.rotation.unwrap_or(0.0),
             color: self.color.unwrap_or(WHITE),
+            background: self.background,
+            line_height: self.line_height,
+            padding: self.padding.unwrap_or(Vec2::new(0.0, 0.0)),
             z_index: self.z_index.unwrap_or(ZIndex::MenuText),
         }
     }

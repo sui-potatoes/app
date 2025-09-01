@@ -50,6 +50,8 @@ pub enum Message {
 pub enum Screen {
     /// Show the message to interact with opened browser window.
     Login,
+    /// Show the message while the game is being created.
+    CreatingGame,
     /// Show the editor.
     Editor(Editor),
     /// Show main menu.
@@ -135,6 +137,7 @@ impl App {
             TokioMessage::LoginStarted => self.screen = Screen::Login,
             TokioMessage::LoginFinished => self.reload_screen(),
             TokioMessage::GameStarted => {
+                println!("Game started");
                 self.screen = Screen::Play(Play::from(
                     self.state
                         .lock()
@@ -152,6 +155,8 @@ impl App {
     pub fn handle_key_press(&mut self, key: InputCommand) {
         let state = self.state.lock().unwrap();
         match &mut self.screen {
+            // Currently no action on the CreatingGame screen.
+            Screen::CreatingGame => {}
             // Currently no action on the Login screen.
             Screen::Login => {}
             Screen::Editor(editor) => {
@@ -180,6 +185,7 @@ impl App {
                     }
                     MainMenuItem::StartGame => {
                         self.send_message(Message::StartGame);
+                        self.screen = Screen::CreatingGame;
                     }
                     MainMenuItem::Replays => {
                         self.send_message(Message::FetchReplays);
@@ -260,6 +266,7 @@ impl App {
     fn reload_screen(&mut self) {
         let state = self.state.lock().unwrap();
         let screen = match &self.screen {
+            Screen::CreatingGame => return,
             Screen::MainMenu(_) | Screen::Login => Screen::MainMenu(Menu::main(state.address)),
             Screen::Replays(_) => Screen::Replays(Menu::replays(&state.replays)),
             Screen::Replay(_)
@@ -285,12 +292,30 @@ impl Draw for App {
             Screen::Replays(menu) => menu.draw(),
             Screen::Settings(menu) => menu.draw(),
             Screen::WindowSettings(menu) => menu.draw(),
-            Screen::Login => {
-                DrawCommand::text("Proceed to authorization in the browser window.".to_string())
+            Screen::CreatingGame => {
+                draw::draw_main_menu_background();
+                DrawCommand::text("Creating game...".to_string())
                     .position(screen_width() / 2.0, screen_height() / 2.0)
                     .align(Align::Center)
+                    .background(BLACK.with_alpha(0.8))
+                    .padding(Vec2::new(30.0, 30.0))
+                    .line_height(30.0)
                     .font_size(24)
                     .schedule();
+            }
+            Screen::Login => {
+                draw::draw_main_menu_background();
+                DrawCommand::text(
+                    "Proceed to authorization in the browser window.\nPress Enter to abort.\nAborting will return you to the main menu."
+                        .to_string(),
+                )
+                .position(screen_width() / 2.0, screen_height() / 2.0)
+                .align(Align::Center)
+                .background(BLACK.with_alpha(0.8))
+                .padding(Vec2::new(30.0, 30.0))
+                .line_height(30.0)
+                .font_size(24)
+                .schedule();
             }
             Screen::Play(_play) => unreachable!("Play manages its own draw"),
             Screen::Replay(_player) => unreachable!("Player manages its own draw"),

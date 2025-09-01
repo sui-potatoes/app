@@ -1,14 +1,14 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, fmt::Display, rc::Rc};
 
 use macroquad::prelude::*;
 use sui_sdk_types::Address;
 
 use crate::{
     draw::{
-        self, ASSETS, Draw, Highlight, Sprite, SpriteSheet, Texture,
+        self, ASSETS, Align, Draw, Highlight, Sprite, SpriteSheet, Texture,
         direction_path_to_path_segments, grid_path_to_direction_path, grid_to_world,
     },
     game::{Animation, AnimationType, AppComponent, GameObject},
@@ -27,8 +27,10 @@ pub struct Play {
     selected_unit: Option<Rc<RefCell<Unit>>>,
 }
 
+#[derive(Debug)]
 enum Mode {
     Walk,
+    Shoot,
 }
 
 struct PlayCursor {
@@ -51,19 +53,7 @@ impl AppComponent for Play {
             InputCommand::Select => {
                 let pos = self.cursor.position;
 
-                if self.selected_unit.is_some() && matches!(self.mode, Mode::Walk) {
-                    let unit_pos = self
-                        .game
-                        .unit_position(&self.selected_unit.as_ref().unwrap().borrow())
-                        .unwrap();
-
-                    if let Some(path) = self.game.trace_path(unit_pos, self.cursor.position) {
-                        if path.len() > 1 {
-                            self.move_selected_unit(path);
-                            self.deselect_unit();
-                        }
-                    }
-                } else {
+                if self.selected_unit.is_none() {
                     self.select_unit(pos);
                     self.mode = Mode::Walk;
 
@@ -72,9 +62,58 @@ impl AppComponent for Play {
                         let tiles = self.game.walkable_tiles(pos, distance.mobility() as u8);
                         self.highlight = Some(Highlight(tiles, BLUE.with_alpha(0.2)));
                     }
+                } else {
+                    match self.mode {
+                        Mode::Walk => {
+                            let unit_pos = self
+                                .game
+                                .unit_position(&self.selected_unit.as_ref().unwrap().borrow())
+                                .unwrap();
+
+                            if let Some(path) = self.game.trace_path(unit_pos, self.cursor.position)
+                            {
+                                if path.len() > 1 {
+                                    self.move_selected_unit(path);
+                                    self.deselect_unit();
+                                }
+                            }
+                        }
+                        Mode::Shoot => {}
+                    }
                 }
             }
-            InputCommand::Tool => {}
+            InputCommand::Tool => match self.mode {
+                Mode::Walk => {
+                    self.highlight = None;
+                    self.mode = Mode::Shoot;
+
+                    if let Some(unit) = &self.selected_unit {
+                        let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
+                        let targets = self
+                            .game
+                            .targets(unit_pos, unit.borrow().stats.range() as u8)
+                            .into_iter()
+                            .filter(|target| target != &unit_pos)
+                            .collect::<Vec<_>>();
+
+                        self.highlight = Some(Highlight(targets, RED.with_alpha(0.2)));
+                    }
+                }
+                Mode::Shoot => {
+                    self.highlight = None;
+                    self.mode = Mode::Walk;
+
+                    if let Some(unit) = &self.selected_unit {
+                        let distance = unit.borrow().stats;
+                        let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
+                        let tiles = self
+                            .game
+                            .walkable_tiles(unit_pos, distance.mobility() as u8);
+
+                        self.highlight = Some(Highlight(tiles, BLUE.with_alpha(0.2)));
+                    }
+                }
+            },
         }
 
         false
@@ -253,6 +292,18 @@ impl Draw for Play {
         self.game.draw();
         self.cursor.draw();
 
+        draw::DrawCommand::text(format!(
+            "Mode: {}\nUnit: {}",
+            self.mode,
+            self.selected_unit.is_some()
+        ))
+        .position(screen_width() / 2.0, screen_height() - 40.0 - 20.0)
+        .background(BLACK.with_alpha(0.5))
+        .align(Align::Center)
+        .font_size(20)
+        .padding(Vec2::new(40.0, 20.0))
+        .schedule();
+
         if let Some(highlight) = &self.highlight {
             draw::draw_highlight(highlight, self.game.dimensions());
         }
@@ -267,6 +318,15 @@ impl Draw for Play {
                     }
                 }
             }
+        }
+    }
+}
+
+impl Display for Mode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Mode::Walk => write!(f, "Walk "),
+            Mode::Shoot => write!(f, "Shoot"),
         }
     }
 }

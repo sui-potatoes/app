@@ -3,6 +3,9 @@
 .vscode
 .DS_Store
 
+# Commander
+*.data
+
 # Added by cargo
 
 /target
