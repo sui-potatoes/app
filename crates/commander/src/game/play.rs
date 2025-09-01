@@ -8,8 +8,7 @@ use sui_sdk_types::Address;
 
 use crate::{
     draw::{
-        self, ASSETS, Align, Draw, Highlight, Sprite, SpriteSheet, Texture,
-        direction_path_to_path_segments, grid_path_to_direction_path, grid_to_world,
+        self, ASSETS, Align, Draw, GridPath, Highlight, Sprite, SpriteSheet, Texture, grid_to_world,
     },
     game::{Animation, AnimationType, AppComponent, GameObject},
     input::InputCommand,
@@ -185,11 +184,9 @@ impl Play {
             };
 
             let obj = self.objects.get_mut(&unit.borrow().recruit).unwrap();
-            let direction_path = grid_path_to_direction_path(grid_path);
-            let path_segments =
-                direction_path_to_path_segments(direction_path, self.game.dimensions());
-
-            let mut animations = path_segments
+            let path = GridPath::new(grid_path);
+            let mut animations = path
+                .to_path_segments(self.game.dimensions())
                 .into_iter()
                 .map(|segment| segment.into())
                 .collect::<Vec<_>>();

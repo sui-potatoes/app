@@ -16,8 +16,8 @@ use super::{Animation, AnimationType, GameObject};
 use crate::{
     config::{MENU_FONT_SIZE as FONT_SIZE, TILE_HEIGHT, TILE_WIDTH},
     draw::{
-        self, ASSETS, Align, Draw, DrawCommand, Highlight, Sprite, Texture, ZIndex,
-        direction_path_to_path_segments, draw_highlight, grid_to_world,
+        self, ASSETS, Align, Draw, DrawCommand, GridPath, Highlight, Sprite, Texture, ZIndex,
+        draw_highlight, grid_to_world,
     },
     game::AppComponent,
     input::InputCommand,
@@ -197,13 +197,9 @@ impl Player {
                     .ok_or(anyhow::anyhow!("Failed to get unit"))?;
 
                 if let Some(obj) = self.objects.get_mut(&unit.borrow().recruit) {
-                    // obj.position = grid_to_world(*end, self.map.as_ref().unwrap().dimensions());
-                    let direction_points = direction_path_to_path_segments(
-                        path.clone(),
-                        self.map.as_ref().unwrap().dimensions(),
-                    );
-
-                    let mut animations = direction_points
+                    let path = GridPath::from_direction_path(path.clone());
+                    let mut animations = path
+                        .to_path_segments(self.map.as_ref().unwrap().dimensions())
                         .into_iter()
                         .map(|segment| segment.into())
                         .collect::<Vec<_>>();

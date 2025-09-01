@@ -199,7 +199,9 @@ impl TryFrom<u8> for Direction {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Cursor {
+    /// Current position of the cursor.
     pub position: (u8, u8),
+    /// List of positions visited by the cursor, including the starting position.
     pub history: Vec<(u8, u8)>,
 }
 
@@ -209,6 +211,10 @@ impl Cursor {
             position,
             history: vec![position],
         }
+    }
+
+    pub fn position(&self) -> (u8, u8) {
+        self.position
     }
 
     pub fn x(&self) -> u8 {
