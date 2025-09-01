@@ -170,6 +170,18 @@ pub enum Direction {
     None,
 }
 
+impl Into<u8> for Direction {
+    fn into(self) -> u8 {
+        match self {
+            Direction::Up => 1,
+            Direction::Down => 4,
+            Direction::Left => 8,
+            Direction::Right => 2,
+            Direction::None => 0,
+        }
+    }
+}
+
 impl TryFrom<u8> for Direction {
     type Error = ();
 

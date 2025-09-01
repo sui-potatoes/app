@@ -60,6 +60,20 @@ impl GameMap {
         self.grid[0].len() as u8
     }
 
+    pub fn unit_position(&self, unit: &Unit) -> Option<(u8, u8)> {
+        self.grid.iter().enumerate().find_map(|(x, row)| {
+            row.iter().enumerate().find_map(|(y, tile)| {
+                if let Some(tile_unit) = &tile.unit {
+                    if tile_unit.borrow().recruit == unit.recruit {
+                        return Some((x as u8, y as u8));
+                    }
+                }
+
+                None
+            })
+        })
+    }
+
     pub fn targets(&self, origin: (u8, u8), range: u8) -> Vec<(u8, u8)> {
         let mut targets = Vec::new();
         for (x, row) in self.grid.iter().enumerate() {
@@ -77,6 +91,144 @@ impl GameMap {
         let (x0, y0) = origin;
         let (x1, y1) = target;
         x0.abs_diff(x1) + y0.abs_diff(y1)
+    }
+
+    /// Use a Dijkstra algorithm to trace a path from `start` to `target` with a
+    /// given `limit`. Use already computed `walkable_tiles` to speed up the
+    /// algorithm.
+    pub fn trace_path(&self, start: (u8, u8), target: (u8, u8)) -> Option<Vec<(u8, u8)>> {
+        let mut map = vec![vec![0; self.cols() as usize]; self.rows() as usize];
+        let mut queue = vec![start];
+        let mut num = 1;
+
+        if start == target {
+            return Some(vec![]);
+        }
+
+        map[start.0 as usize][start.1 as usize] = num;
+
+        'path: while !queue.is_empty() {
+            let temp_queue = queue.drain(..).collect::<Vec<(u8, u8)>>();
+            num += 1;
+
+            for (nx, ny) in temp_queue {
+                for (x, y) in self.von_neumann(nx, ny) {
+                    let to = &self.grid[x as usize][y as usize];
+                    let from = &self.grid[nx as usize][ny as usize];
+                    let direction = Direction::from_coords((nx, ny), (x, y));
+
+                    // if the tile is already visited, skip
+                    // if the tile is an obstacle, skip
+                    // if the tile is a unit, skip
+                    if to.unit.is_some()
+                        || matches!(to.tile_type, TileType::Obstacle)
+                        || map[x as usize][y as usize] != 0
+                    {
+                        continue;
+                    }
+
+                    if let TileType::Cover {
+                        left,
+                        top,
+                        right,
+                        bottom,
+                    } = to.tile_type
+                    {
+                        match direction {
+                            Direction::Up if bottom > 0 => continue,
+                            Direction::Down if top > 0 => continue,
+                            Direction::Left if right > 0 => continue,
+                            Direction::Right if left > 0 => continue,
+                            _ => {}
+                        }
+                    }
+
+                    if let TileType::Cover {
+                        left,
+                        top,
+                        right,
+                        bottom,
+                    } = from.tile_type
+                    {
+                        match direction {
+                            Direction::Up if top > 0 => continue,
+                            Direction::Down if bottom > 0 => continue,
+                            Direction::Left if left > 0 => continue,
+                            Direction::Right if right > 0 => continue,
+                            _ => {}
+                        }
+                    }
+
+                    if x == target.0 && y == target.1 {
+                        map[x as usize][y as usize] = num;
+                        break 'path;
+                    }
+
+                    map[x as usize][y as usize] = num;
+                    queue.push((x, y));
+                }
+            }
+        }
+
+        if map[target.0 as usize][target.1 as usize] == 0 {
+            return None;
+        }
+
+        let (mut nx, mut ny) = target;
+        let mut path = vec![target];
+        let mut num2 = map[target.0 as usize][target.1 as usize];
+
+        while num2 > 1 {
+            for (x, y) in self.von_neumann(nx, ny) {
+                if map[x as usize][y as usize] == num2 - 1 {
+                    let direction = Direction::from_coords((nx, ny), (x, y));
+                    let from = &self.grid[nx as usize][ny as usize];
+                    let to = &self.grid[x as usize][y as usize];
+
+                    if let TileType::Cover {
+                        left,
+                        top,
+                        right,
+                        bottom,
+                    } = from.tile_type
+                    {
+                        match direction {
+                            Direction::Up if top > 0 => continue,
+                            Direction::Down if bottom > 0 => continue,
+                            Direction::Left if left > 0 => continue,
+                            Direction::Right if right > 0 => continue,
+                            _ => {}
+                        }
+                    }
+
+                    if let TileType::Cover {
+                        left,
+                        top,
+                        right,
+                        bottom,
+                    } = to.tile_type
+                    {
+                        match direction {
+                            Direction::Up if bottom > 0 => continue,
+                            Direction::Down if top > 0 => continue,
+                            Direction::Left if right > 0 => continue,
+                            Direction::Right if left > 0 => continue,
+                            _ => {}
+                        }
+                    }
+
+                    nx = x;
+                    ny = y;
+
+                    path.push((x, y));
+                    num2 -= 1;
+                    break;
+                }
+            }
+        }
+
+        path.reverse();
+        Some(path)
     }
 
     pub fn walkable_tiles(&self, start: (u8, u8), limit: u8) -> Vec<(u8, u8)> {
@@ -171,12 +323,13 @@ impl GameMap {
 
     fn von_neumann(&self, x: u8, y: u8) -> Vec<(u8, u8)> {
         let mut points = Vec::new();
+        let (rows, cols) = self.dimensions();
 
-        if x < self.rows() - 1 {
+        if x < rows - 1 {
             points.push((x + 1, y));
         }
 
-        if y < self.cols() - 1 {
+        if y < cols - 1 {
             points.push((x, y + 1));
         }
 

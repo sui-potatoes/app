@@ -3,3 +3,4 @@
 
 pub mod fetch;
 pub mod tx;
+pub mod zklogin;

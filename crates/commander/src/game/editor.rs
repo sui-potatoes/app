@@ -63,6 +63,13 @@ impl Editor {
                     InputCommand::Left => self.cursor.move_to(Direction::Left),
                     InputCommand::Right => self.cursor.move_to(Direction::Right),
                     InputCommand::Tool => self.mode = Mode::ToolSelect(self.tool.clone().into(), 0),
+                    InputCommand::Back => {
+                        // Erase the tile on `O` press
+                        let (x, y) = self.cursor.position;
+                        let tile = &mut self.grid.grid[x as usize][y as usize];
+                        tile.tile_type = TileType::Empty;
+                        return true;
+                    }
                     InputCommand::Select => {
                         let (x, y) = self.cursor.position;
                         let tile = &mut self.grid.grid[x as usize][y as usize];

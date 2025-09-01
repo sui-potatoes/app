@@ -77,22 +77,30 @@ impl Stats {
     }
 }
 
-/// The difference with Move implementation in `bit_field` is that in Rust the
-/// `u128` is little endian, so a symmetric function in Move looks differently.
 fn read_u8_at_offset_be(value: u128, offset: u8) -> i8 {
-    (value >> (8 * (15 - offset)) & 0xFF) as i8
+    (value >> 8 * offset & 0xFF) as i8
+}
+
+fn pack_u8(values: Vec<u8>) -> u128 {
+    values.iter().enumerate().fold(0, |acc, (index, &value)| {
+        acc | (value as u128) << (8 * index)
+    })
 }
 
 impl Default for Stats {
     fn default() -> Self {
-        Self(0x07_41_0A_00_00_00_00_00_00_00_00_00_00_00_00_00)
+        Self(pack_u8(vec![
+            7, 65, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ]))
     }
 }
 
 #[test]
 fn test_stats() {
     // 7, 65, 10, 0, 0
-    let stats = Stats(0x07_41_0A_00_00_00_00_00_00_00_00_00_00_00_00_00);
+    let stats = Stats(pack_u8(vec![
+        7, 65, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ]));
 
     assert_eq!(stats.mobility(), 7);
     assert_eq!(stats.aim(), 65);
@@ -111,7 +119,9 @@ fn test_stats() {
     assert_eq!(stats.range(), 0);
     assert_eq!(stats.ammo(), 0);
 
-    let weapon_stats = Stats(0x00_00_00_00_00_00_04_02_00_00_01_01_00_04_03_00);
+    let weapon_stats = Stats(pack_u8(vec![
+        0, 0, 0, 0, 0, 0, 4, 2, 0, 0, 1, 1, 0, 4, 3, 0,
+    ]));
 
     assert_eq!(weapon_stats.mobility(), 0);
     assert_eq!(weapon_stats.aim(), 0);
@@ -129,4 +139,20 @@ fn test_stats() {
     assert_eq!(weapon_stats.env_damage(), 0);
     assert_eq!(weapon_stats.range(), 4);
     assert_eq!(weapon_stats.ammo(), 3);
+}
+
+#[test]
+fn test_in_game_stats() {
+    let stats = Stats(15658020524713025353488063875662087);
+    let value = 15658020524713025353488063875662087u128;
+    for i in 0..15 {
+        dbg!(i, value >> 8 * i & 0xFF);
+    }
+
+    assert_eq!(stats.mobility(), 7);
+    assert_eq!(stats.aim(), 65);
+    assert_eq!(stats.health(), 10);
+    assert_eq!(stats.armor(), 0);
+    assert_eq!(stats.dodge(), 0);
+    assert_eq!(stats.defense(), 0);
 }

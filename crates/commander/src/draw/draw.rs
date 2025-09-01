@@ -49,6 +49,15 @@ pub enum DrawCommand {
         color: Color,
         z_index: ZIndex,
     },
+    Line {
+        x1: f32,
+        y1: f32,
+        x2: f32,
+        y2: f32,
+        color: Color,
+        thickness: f32,
+        z_index: ZIndex,
+    },
     Text {
         text: String,
         x: f32,
@@ -146,6 +155,28 @@ pub fn draw_highlight(highlight: &Highlight, dimensions: (u8, u8)) {
     }
 }
 
+/// Draw a line through the given tiles, line starts at the center of each tile
+/// and goes to the center of the next tile.
+pub fn draw_path(path: &[(u8, u8)], dimensions: (u8, u8)) {
+    let (scale_x, scale_y) = get_scale(dimensions);
+    let thickness = 3.0;
+
+    for w in path.windows(2) {
+        let (x1, y1) = w[0];
+        let (x2, y2) = w[1];
+
+        request_draw(DrawCommand::Line {
+            x1: (y1 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
+            y1: (x1 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
+            x2: (y2 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
+            y2: (x2 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
+            color: BLUE,
+            thickness,
+            z_index: ZIndex::Highlight,
+        });
+    }
+}
+
 /// Get the size of the map and for each tile draw the texture. Apply the scale
 /// similarly to the Map drawing.
 pub fn draw_texture_background(dimensions: (u8, u8), texture: Texture) {
@@ -213,6 +244,7 @@ impl DrawCommand {
             DrawCommand::Texture { z_index, .. } => *z_index,
             DrawCommand::RectangleLines { z_index, .. } => *z_index,
             DrawCommand::Rectangle { z_index, .. } => *z_index,
+            DrawCommand::Line { z_index, .. } => *z_index,
             DrawCommand::Text { z_index, .. } => *z_index,
         }
     }
@@ -235,6 +267,10 @@ impl DrawCommand {
 
     pub fn texture(texture: Rc<Texture2D>) -> DrawTextureBuilder {
         DrawTextureBuilder::new(texture)
+    }
+
+    pub fn line(x1: f32, y1: f32, x2: f32, y2: f32) -> DrawLineBuilder {
+        DrawLineBuilder::new().start(x1, y1).end(x2, y2)
     }
 
     pub fn schedule(self) {
@@ -291,6 +327,17 @@ impl DrawCommand {
                 ..
             } => {
                 draw_rectangle(x, y, width, height, color);
+            }
+            DrawCommand::Line {
+                x1,
+                y1,
+                x2,
+                y2,
+                color,
+                thickness,
+                z_index: _,
+            } => {
+                draw_line(x1, y1, x2, y2, thickness, color);
             }
             DrawCommand::Text {
                 text,
@@ -570,6 +617,73 @@ impl DrawRectangleBuilder {
             width: self.width.unwrap_or(0.0),
             height: self.height.unwrap_or(0.0),
             color: self.color.unwrap_or(WHITE),
+            z_index: self.z_index.unwrap_or(ZIndex::MenuText),
+        }
+    }
+
+    pub fn schedule(self) {
+        self.build().schedule();
+    }
+}
+
+pub struct DrawLineBuilder {
+    x1: Option<f32>,
+    y1: Option<f32>,
+    x2: Option<f32>,
+    y2: Option<f32>,
+    color: Option<Color>,
+    thickness: Option<f32>,
+    z_index: Option<ZIndex>,
+}
+
+impl DrawLineBuilder {
+    pub fn new() -> Self {
+        Self {
+            x1: None,
+            y1: None,
+            x2: None,
+            y2: None,
+            color: None,
+            thickness: None,
+            z_index: None,
+        }
+    }
+
+    pub fn start(mut self, x: f32, y: f32) -> Self {
+        self.x1 = Some(x);
+        self.y1 = Some(y);
+        self
+    }
+
+    pub fn end(mut self, x: f32, y: f32) -> Self {
+        self.x2 = Some(x);
+        self.y2 = Some(y);
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = Some(color);
+        self
+    }
+
+    pub fn thickness(mut self, thickness: f32) -> Self {
+        self.thickness = Some(thickness);
+        self
+    }
+
+    pub fn z_index(mut self, z_index: ZIndex) -> Self {
+        self.z_index = Some(z_index);
+        self
+    }
+
+    pub fn build(self) -> DrawCommand {
+        DrawCommand::Line {
+            x1: self.x1.unwrap_or(0.0),
+            y1: self.y1.unwrap_or(0.0),
+            x2: self.x2.unwrap_or(0.0),
+            y2: self.y2.unwrap_or(0.0),
+            color: self.color.unwrap_or(WHITE),
+            thickness: self.thickness.unwrap_or(1.0),
             z_index: self.z_index.unwrap_or(ZIndex::MenuText),
         }
     }

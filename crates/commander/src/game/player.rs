@@ -16,8 +16,8 @@ use super::{Animation, AnimationType, GameObject};
 use crate::{
     config::{MENU_FONT_SIZE as FONT_SIZE, TILE_HEIGHT, TILE_WIDTH},
     draw::{
-        self, ASSETS, Align, Draw, DrawCommand, Highlight, Sprite, Texture, ZIndex, draw_highlight,
-        grid_to_world,
+        self, ASSETS, Align, Draw, DrawCommand, Highlight, Sprite, Texture, ZIndex,
+        direction_path_to_path_segments, draw_highlight, grid_to_world,
     },
     game::AppComponent,
     input::InputCommand,
@@ -71,42 +71,6 @@ const COLOR_RELOAD: Color = Color {
     b: 0.0,
     a: 0.2,
 };
-
-#[derive(Debug)]
-pub struct PathSegment {
-    direction: Direction,
-    start_position: Vec2,
-    end_position: Vec2,
-    length: usize,
-}
-
-/// Converts a `PathSegment` into an `Animation` that moves the unit along the
-/// segment.
-impl Into<Animation> for PathSegment {
-    fn into(self) -> Animation {
-        let sprite = match self.direction {
-            Direction::Up => Sprite::SoldierRunUp,
-            Direction::Down => Sprite::SoldierRunDown,
-            Direction::Left => Sprite::SoldierRunLeft,
-            Direction::Right => Sprite::SoldierRunRight,
-            _ => Sprite::SoldierIdle,
-        };
-
-        Animation {
-            duration: Some(self.length as f64 / 2.0),
-            type_: AnimationType::MoveSprite {
-                sprite: ASSETS
-                    .with(|assets| assets.get().unwrap().sprite_sheet(sprite).unwrap())
-                    .clone(),
-                start_position: self.start_position,
-                end_position: self.end_position,
-                frame: 0,
-                fps: 0.1,
-            },
-            ..Default::default()
-        }
-    }
-}
 
 #[derive(Debug)]
 pub enum ProcessedRecord {
@@ -234,8 +198,10 @@ impl Player {
 
                 if let Some(obj) = self.objects.get_mut(&unit.borrow().recruit) {
                     // obj.position = grid_to_world(*end, self.map.as_ref().unwrap().dimensions());
-                    let direction_points =
-                        path_to_world_points(path.clone(), self.map.as_ref().unwrap().dimensions());
+                    let direction_points = direction_path_to_path_segments(
+                        path.clone(),
+                        self.map.as_ref().unwrap().dimensions(),
+                    );
 
                     let mut animations = direction_points
                         .into_iter()
@@ -558,54 +524,6 @@ impl Display for ProcessedRecord {
             ProcessedRecord::Grenade { .. } => write!(f, "Grenade"),
         }
     }
-}
-
-/// Splits the path into sections where only one coordinate changes.
-fn path_to_world_points(mut path: Vec<u8>, dimensions: (u8, u8)) -> Vec<PathSegment> {
-    let start = (path.remove(0), path.remove(0));
-    let start_position = grid_to_world(start, dimensions);
-    let mut segments: Vec<PathSegment> = Vec::new();
-
-    // TODO: check if path can be empty.
-    if path.len() == 0 {
-        return vec![PathSegment {
-            direction: Direction::None,
-            start_position: grid_to_world(start, dimensions),
-            end_position: grid_to_world(start, dimensions),
-            length: 0,
-        }];
-    }
-
-    let mut cursor = Cursor::new(start);
-    let mut curr_direction = Direction::None;
-
-    for dir in path {
-        let direction = Direction::try_from(dir).unwrap();
-        if direction != curr_direction {
-            segments.push(PathSegment {
-                direction: curr_direction,
-                start_position: segments
-                    .last()
-                    .map(|e| e.end_position)
-                    .unwrap_or(start_position),
-                end_position: grid_to_world(cursor.position, dimensions),
-                length: cursor.history.len(),
-            });
-            curr_direction = direction;
-            cursor.reset(cursor.position);
-        }
-        cursor.move_to(direction);
-    }
-
-    // Push the last direction.
-    segments.push(PathSegment {
-        direction: curr_direction,
-        start_position: segments.last().unwrap().end_position,
-        end_position: grid_to_world(cursor.position, dimensions),
-        length: cursor.history.len(),
-    });
-
-    segments
 }
 
 fn static_unit_animation() -> Animation {

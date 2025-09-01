@@ -31,7 +31,6 @@ mod game;
 mod input;
 mod sui;
 mod types;
-mod zklogin;
 
 use crate::{
     draw::{ASSETS, AssetStore},
@@ -45,6 +44,8 @@ pub enum Message {
     Text(String),
     StateUpdated,
     GameStarted,
+    LoginStarted,
+    LoginFinished,
 }
 
 const SESSION_KEY: &str = "session";
@@ -120,7 +121,7 @@ async fn main() -> Result<(), anyhow::Error> {
             app.update_from_message(msg);
         }
 
-        // Flush the draw registry (draws everything) before the next frame.
+        // Flush the draw registry (complete draw requests) before the next frame.
         draw::flush_draw_registry();
 
         next_frame().await;
@@ -171,6 +172,9 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                     AppMessage::PrepareLogin => {
                         let keypair = Ed25519PrivateKey::generate(&mut ::rand::thread_rng());
                         let public_key = keypair.public_key();
+
+                        tx.send(Message::LoginStarted).unwrap();
+
                         let login_res = login_action(&public_key)
                             .await
                             .map(|e| Some(e))
@@ -194,6 +198,8 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                                 .unwrap(),
                             );
                         }
+
+                        tx.send(Message::LoginFinished).unwrap();
                     }
                     AppMessage::StartGame => {
                         // Fetch presets if they are not already fetched.
@@ -319,24 +325,23 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
     });
 }
 
-/// Handles the login process.
+/// Handles the login process using zklogin.
 async fn login_action(
     public_key: &Ed25519PublicKey,
 ) -> Result<(Address, ZkLoginInputs, u64), anyhow::Error> {
-    // fetch nonce from zklogin and send it to the game
-    let nonce = zklogin::get_nonce(public_key).await.unwrap();
+    let nonce = sui::zklogin::get_nonce(public_key).await.unwrap();
     let max_epoch = nonce.max_epoch;
 
-    zklogin::open_auth_page(&nonce.nonce);
+    sui::zklogin::open_auth_page(&nonce.nonce);
 
-    let jwt = match zklogin::start_auth_listener().await {
-        Ok(Some(code)) => zklogin::get_jwt(code).await.unwrap(),
+    let jwt = match sui::zklogin::start_auth_listener().await {
+        Ok(Some(code)) => sui::zklogin::get_jwt(code).await.unwrap(),
         Ok(None) => return Err(anyhow::anyhow!("Error getting login code")),
         Err(e) => return Err(anyhow::anyhow!("Error getting login code: {}", e)),
     };
 
-    let zkp = zklogin::get_zkp(jwt, nonce, public_key).await?;
-    let address = zklogin::zkp_to_address(&zkp)?;
+    let zkp = sui::zklogin::get_zkp(jwt, nonce, public_key).await?;
+    let address = sui::zklogin::zkp_to_address(&zkp)?;
 
     Ok((address, zkp, max_epoch))
 }

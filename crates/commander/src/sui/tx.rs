@@ -4,13 +4,6 @@
 //! This module contains the logic for executing game transactions. It caches
 //! used object refs to avoid unnecessary queries and speed up the execution.
 
-// use std::{collections::HashMap, str::FromStr};
-
-// use fastcrypto::ed25519::Ed25519KeyPair;
-// use fastcrypto_zkp::bn254::zk_login::ZkLoginInputs;
-
-// use crate::config::SUI_COIN_TYPE;
-
 use std::{collections::HashMap, ops::Deref, str::FromStr, time::Instant};
 
 use serde::Deserialize;

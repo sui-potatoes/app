@@ -163,13 +163,13 @@ pub async fn start_auth_listener() -> Result<Option<String>, Error> {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct JwtResponse {
-    pub access_token: String,
-    pub expires_in: u32,
-    pub id_token: String,
-    // pub refresh_token: String,
-    pub scope: String,
-    pub token_type: String,
+struct JwtResponse {
+    access_token: String,
+    expires_in: u32,
+    id_token: String,
+    // refresh_token: String,
+    scope: String,
+    token_type: String,
 }
 
 /// Make a request to Google to get the JWT token based on the authorization code.
@@ -203,38 +203,18 @@ pub async fn get_jwt(code: String) -> Result<String, Error> {
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ZkpClaimResponse {
-    pub value: String,
-    pub index_mod_4: u8,
+struct ZkpClaimResponse {
+    value: String,
+    index_mod_4: u8,
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ZkpResponse {
-    pub proof_points: ZkLoginProof,
-    pub iss_base64_details: ZkpClaimResponse,
-    pub header_base64: String,
-    pub address_seed: Bn254FieldElement,
-}
-
-impl Into<ZkLoginInputs> for ZkpResponse {
-    fn into(self) -> ZkLoginInputs {
-        ZkLoginInputs {
-            proof_points: self.proof_points,
-            iss_base64_details: self.iss_base64_details.into(),
-            header_base64: self.header_base64,
-            address_seed: self.address_seed,
-        }
-    }
-}
-
-impl Into<ZkLoginClaim> for ZkpClaimResponse {
-    fn into(self) -> ZkLoginClaim {
-        ZkLoginClaim {
-            value: self.value,
-            index_mod_4: self.index_mod_4,
-        }
-    }
+struct ZkpResponse {
+    proof_points: ZkLoginProof,
+    iss_base64_details: ZkpClaimResponse,
+    header_base64: String,
+    address_seed: Bn254FieldElement,
 }
 
 /// Make a request to the Enoki API to get the ZKP data.
@@ -305,5 +285,25 @@ pub fn zkp_to_address(zkp: &ZkLoginInputs) -> Result<Address, anyhow::Error> {
 impl Into<Error> for ZkLoginError {
     fn into(self) -> Error {
         Error::ZkLoginError(self)
+    }
+}
+
+impl Into<ZkLoginInputs> for ZkpResponse {
+    fn into(self) -> ZkLoginInputs {
+        ZkLoginInputs {
+            proof_points: self.proof_points,
+            iss_base64_details: self.iss_base64_details.into(),
+            header_base64: self.header_base64,
+            address_seed: self.address_seed,
+        }
+    }
+}
+
+impl Into<ZkLoginClaim> for ZkpClaimResponse {
+    fn into(self) -> ZkLoginClaim {
+        ZkLoginClaim {
+            value: self.value,
+            index_mod_4: self.index_mod_4,
+        }
     }
 }

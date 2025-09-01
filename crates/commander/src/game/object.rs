@@ -220,6 +220,16 @@ impl GameObject {
 }
 
 impl Animation {
+    pub fn none() -> Self {
+        Self {
+            duration: None,
+            start_time: 0.0,
+            type_: AnimationType::Hidden,
+            on_end: None,
+            chain: None,
+        }
+    }
+
     pub fn status(text: String, font_size: u16, color: Color, duration: Option<f64>) -> Self {
         Self {
             duration,

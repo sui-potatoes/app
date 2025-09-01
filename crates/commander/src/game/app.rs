@@ -48,6 +48,8 @@ pub enum Message {
 }
 
 pub enum Screen {
+    /// Show the message to interact with opened browser window.
+    Login,
     /// Show the editor.
     Editor(Editor),
     /// Show main menu.
@@ -130,6 +132,8 @@ impl App {
         match msg {
             TokioMessage::Text(txt) => println!("Received text message: {}", txt),
             TokioMessage::StateUpdated => self.reload_screen(),
+            TokioMessage::LoginStarted => self.screen = Screen::Login,
+            TokioMessage::LoginFinished => self.reload_screen(),
             TokioMessage::GameStarted => {
                 self.screen = Screen::Play(Play::from(
                     self.state
@@ -148,6 +152,8 @@ impl App {
     pub fn handle_key_press(&mut self, key: InputCommand) {
         let state = self.state.lock().unwrap();
         match &mut self.screen {
+            // Currently no action on the Login screen.
+            Screen::Login => {}
             Screen::Editor(editor) => {
                 if editor.handle_key_press(key) {
                     self.screen = Screen::MainMenu(Menu::main(state.address));
@@ -254,7 +260,7 @@ impl App {
     fn reload_screen(&mut self) {
         let state = self.state.lock().unwrap();
         let screen = match &self.screen {
-            Screen::MainMenu(_) => Screen::MainMenu(Menu::main(state.address)),
+            Screen::MainMenu(_) | Screen::Login => Screen::MainMenu(Menu::main(state.address)),
             Screen::Replays(_) => Screen::Replays(Menu::replays(&state.replays)),
             Screen::Replay(_)
             | Screen::Play(_)
@@ -279,6 +285,13 @@ impl Draw for App {
             Screen::Replays(menu) => menu.draw(),
             Screen::Settings(menu) => menu.draw(),
             Screen::WindowSettings(menu) => menu.draw(),
+            Screen::Login => {
+                DrawCommand::text("Proceed to authorization in the browser window.".to_string())
+                    .position(screen_width() / 2.0, screen_height() / 2.0)
+                    .align(Align::Center)
+                    .font_size(24)
+                    .schedule();
+            }
             Screen::Play(_play) => unreachable!("Play manages its own draw"),
             Screen::Replay(_player) => unreachable!("Player manages its own draw"),
         }

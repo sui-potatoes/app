@@ -3,7 +3,7 @@
 
 use thiserror::Error;
 
-use crate::zklogin::ZkLoginError;
+use crate::sui::zklogin::ZkLoginError;
 
 #[derive(Error, Debug)]
 pub enum Error {
