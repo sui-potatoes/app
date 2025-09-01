@@ -265,3 +265,29 @@ impl AssetStore {
         self.sprites.get(&key).cloned()
     }
 }
+
+pub trait Asset {
+    type AssetType;
+
+    fn load(&self) -> Option<Rc<Self::AssetType>>;
+}
+
+impl Asset for Texture {
+    type AssetType = Texture2D;
+
+    fn load(&self) -> Option<Rc<Self::AssetType>> {
+        ASSETS.with(|assets| assets.get().unwrap().texture(self.clone()))
+    }
+}
+
+impl Asset for Sprite {
+    type AssetType = SpriteSheet;
+
+    fn load(&self) -> Option<Rc<Self::AssetType>> {
+        ASSETS.with(|assets| assets.get().unwrap().sprite_sheet(self.clone()))
+    }
+}
+
+pub fn font(key: &str) -> Option<Rc<Font>> {
+    ASSETS.with(|assets| assets.get().unwrap().font(key))
+}

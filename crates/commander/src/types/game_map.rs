@@ -7,7 +7,7 @@ use macroquad::prelude::*;
 
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
-    draw::{ASSETS, Draw, DrawAt, DrawCommand, Sprite, Texture, ZIndex, get_scale},
+    draw::{Asset, Draw, DrawAt, DrawCommand, Sprite, Texture, ZIndex, get_scale},
     types::{Direction, Map, TileType, Unit},
 };
 
@@ -403,9 +403,7 @@ impl DrawAt for GameTile {
         match &self.tile_type {
             TileType::Empty => {}
             TileType::Obstacle => {
-                let texture = ASSETS
-                    .with(|assets| assets.get().unwrap().texture(Texture::Obstacle).unwrap())
-                    .clone();
+                let texture = Texture::Obstacle.load().unwrap();
 
                 DrawCommand::texture(texture)
                     .position(x, y)
@@ -420,15 +418,7 @@ impl DrawAt for GameTile {
                 top,
                 bottom,
             } => {
-                let sprite = ASSETS
-                    .with(|assets| {
-                        assets
-                            .get()
-                            .unwrap()
-                            .sprite_sheet(Sprite::WallSnow)
-                            .unwrap()
-                    })
-                    .clone();
+                let sprite = Sprite::WallSnow.load().unwrap();
 
                 if *left > 0 {
                     sprite.draw_frame_with_index(x, y, 0, dimensions, ZIndex::TopCover);

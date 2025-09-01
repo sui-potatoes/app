@@ -6,7 +6,7 @@ use std::fmt::Display;
 use macroquad::prelude::*;
 
 use crate::{
-    draw::{ASSETS, Draw, DrawCommand, Texture, ZIndex, draw},
+    draw::{Draw, DrawCommand, Texture, ZIndex, draw, font},
     input::InputCommand,
     types::{Cursor, Direction, GameMap, TileType},
 };
@@ -170,7 +170,7 @@ impl Draw for Editor {
                 .z_index(ZIndex::ModalBackground)
                 .schedule();
 
-            let font = ASSETS.with(|store| store.get().unwrap().font("doto").unwrap());
+            let font = font("doto").unwrap();
 
             for i in 0..TOOL_COUNT {
                 let color = if i == index { WHITE } else { BLACK };

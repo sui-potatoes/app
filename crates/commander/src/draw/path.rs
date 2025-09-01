@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 use crate::{
-    draw::{ASSETS, Sprite, grid_to_world},
+    draw::{Asset, Sprite, grid_to_world},
     game::{Animation, AnimationType},
     types::{Cursor, Direction, Record},
 };
@@ -153,9 +153,7 @@ impl Into<Animation> for PathSegment {
         Animation {
             duration: Some(self.length as f64 / 2.0),
             type_: AnimationType::MoveSprite {
-                sprite: ASSETS
-                    .with(|assets| assets.get().unwrap().sprite_sheet(sprite).unwrap())
-                    .clone(),
+                sprite: sprite.load().unwrap(),
                 start_position: self.start_position,
                 end_position: self.end_position,
                 frame: 0,

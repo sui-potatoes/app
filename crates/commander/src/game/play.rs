@@ -8,7 +8,7 @@ use sui_sdk_types::Address;
 
 use crate::{
     draw::{
-        self, ASSETS, Align, Draw, GridPath, Highlight, Sprite, SpriteSheet, Texture, grid_to_world,
+        self, Align, Asset, Draw, GridPath, Highlight, Sprite, SpriteSheet, Texture, grid_to_world,
     },
     game::{Animation, AnimationType, AppComponent, GameObject},
     input::InputCommand,
@@ -232,7 +232,7 @@ impl From<Game> for Play {
                             position,
                             game.dimensions(),
                             static_unit_animation(),
-                            Some(shadow()),
+                            Some(Sprite::Shadow.load().unwrap()),
                         ),
                     );
                 }
@@ -328,24 +328,10 @@ impl Display for Mode {
     }
 }
 
-fn shadow() -> Rc<SpriteSheet> {
-    ASSETS
-        .with(|assets| assets.get().unwrap().sprite_sheet(Sprite::Shadow).unwrap())
-        .clone()
-}
-
 fn static_unit_animation() -> Animation {
     Animation {
         type_: AnimationType::StaticSprite {
-            sprite: ASSETS
-                .with(|assets| {
-                    assets
-                        .get()
-                        .unwrap()
-                        .sprite_sheet(Sprite::SoldierIdle)
-                        .unwrap()
-                })
-                .clone(),
+            sprite: Sprite::SoldierIdle.load().unwrap(),
             frame: 0,
             fps: Some(0.2),
         },

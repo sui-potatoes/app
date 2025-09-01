@@ -7,7 +7,7 @@ use std::{cell::RefCell, f32::consts::PI, rc::Rc};
 
 use macroquad::prelude::*;
 
-use crate::draw::Texture;
+use crate::draw::{Asset, Texture};
 
 /// Default size of a tile in pixels, will be scaled to the window size.
 const TILE_SIZE: f32 = 20.0;
@@ -114,9 +114,7 @@ pub trait DrawAt {
 }
 
 pub fn draw_main_menu_background() {
-    let texture = super::ASSETS
-        .with(|assets| assets.get().unwrap().texture(super::Texture::Main).unwrap())
-        .clone();
+    let texture = Texture::Main.load().unwrap();
 
     DrawCommand::texture(texture)
         .position(0.0, 0.0)
@@ -185,9 +183,7 @@ pub fn draw_path(path: &[(u8, u8)], dimensions: (u8, u8)) {
 pub fn draw_texture_background(dimensions: (u8, u8), texture: Texture) {
     let (scale_x, scale_y) = get_scale(dimensions);
     let (width, height) = (dimensions.0 as f32, dimensions.1 as f32);
-    let texture = super::ASSETS
-        .with(|assets| assets.get().unwrap().texture(texture).unwrap())
-        .clone();
+    let texture = texture.load().unwrap();
 
     for y in 0..height as i32 {
         for x in 0..width as i32 {
@@ -839,11 +835,7 @@ impl DrawTextBuilder {
             x: self.x.unwrap_or(0.0),
             y: self.y.unwrap_or(0.0),
             align: self.align.unwrap_or(Align::Left),
-            font: self.font.unwrap_or(
-                super::ASSETS
-                    .with(|assets| assets.get().unwrap().font("doto").unwrap())
-                    .clone(),
-            ),
+            font: self.font.unwrap_or(super::font("doto").unwrap()),
             font_size: self.font_size.unwrap_or(16),
             font_scale: self.font_scale.unwrap_or(1.0),
             font_scale_aspect: self.font_scale_aspect.unwrap_or(1.0),

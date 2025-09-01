@@ -9,7 +9,7 @@ use sui_sdk_types::Address;
 use crate::{
     WithRef,
     config::{MENU_FONT_COLOR as TEXT_COLOR, MENU_FONT_SIZE as FONT_SIZE},
-    draw::{self, ASSETS, Draw, DrawCommand, ZIndex},
+    draw::{self, Draw, DrawCommand, ZIndex},
     types::{Preset, Recruit, Replay},
 };
 

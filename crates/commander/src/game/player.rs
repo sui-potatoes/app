@@ -16,7 +16,7 @@ use super::{Animation, AnimationType, GameObject};
 use crate::{
     config::{MENU_FONT_SIZE as FONT_SIZE, TILE_HEIGHT, TILE_WIDTH},
     draw::{
-        self, ASSETS, Align, Draw, DrawCommand, GridPath, Highlight, Sprite, Texture, ZIndex,
+        self, Align, Asset, Draw, DrawCommand, GridPath, Highlight, Sprite, Texture, ZIndex,
         draw_highlight, grid_to_world,
     },
     game::AppComponent,
@@ -166,13 +166,7 @@ impl Player {
                         position,
                         self.map.as_ref().unwrap().dimensions(),
                         static_unit_animation(),
-                        Some(
-                            ASSETS
-                                .with(|assets| {
-                                    assets.get().unwrap().sprite_sheet(Sprite::Shadow).unwrap()
-                                })
-                                .clone(),
-                        ),
+                        Some(Sprite::Shadow.load().unwrap()),
                     ),
                 );
                 self.id_counter += 1;
@@ -525,15 +519,7 @@ impl Display for ProcessedRecord {
 fn static_unit_animation() -> Animation {
     Animation {
         type_: AnimationType::StaticSprite {
-            sprite: ASSETS
-                .with(|assets| {
-                    assets
-                        .get()
-                        .unwrap()
-                        .sprite_sheet(Sprite::SoldierIdle)
-                        .unwrap()
-                })
-                .clone(),
+            sprite: Sprite::SoldierIdle.load().unwrap(),
             frame: 0,
             fps: Some(0.2),
         },
