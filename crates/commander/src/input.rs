@@ -34,6 +34,8 @@ pub enum InputCommand {
     Menu,
     /// Select / Start (both menu and in-game).
     Select,
+    /// Action key - B / square on controller, F on keyboard.
+    Action,
     /// Tool key - triangle / Y on controller, tab on keyboard.
     Tool,
     /// Back key - backspace on keyboard, ActionRight on controller.
@@ -49,7 +51,7 @@ pub fn handle_input(app: &mut App) {
                 KeyCode::Left => InputCommand::Left,
                 KeyCode::Right => InputCommand::Right,
                 KeyCode::Escape => InputCommand::Menu,
-                KeyCode::Space => InputCommand::Select,
+                KeyCode::Space => InputCommand::Action,
                 KeyCode::Enter => InputCommand::Select,
                 KeyCode::Tab => InputCommand::Tool,
                 KeyCode::Backspace => InputCommand::Back,
@@ -75,6 +77,7 @@ pub fn handle_gamepad_input(app: &mut App, gamepads: &mut Gamepads) {
                     Button::RightCenterCluster => InputCommand::Menu,
                     Button::ActionDown => InputCommand::Select,
                     Button::ActionUp => InputCommand::Tool,
+                    Button::ActionLeft => InputCommand::Action,
                     Button::ActionRight => InputCommand::Back,
                     b @ _ => {
                         println!("Unhandled button: {:?}", b);

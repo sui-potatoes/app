@@ -4,33 +4,57 @@
 use std::fmt::Display;
 
 use macroquad::prelude::*;
+use quad_storage::STORAGE;
+use sui_sdk_types::Address;
 
 use crate::{
-    draw::{Draw, DrawCommand, Texture, ZIndex, draw, font},
+    config::{TILE_HEIGHT, TILE_WIDTH},
+    draw::{
+        Align, Asset, Draw, DrawCommand, Sprite, Texture, ZIndex, draw, font, get_scale,
+        grid_to_world,
+    },
+    game::Selectable,
     input::InputCommand,
-    types::{Cursor, Direction, GameMap, TileType},
+    types::{Cursor, Direction, GameMap, ID, Map, Preset, TileType},
 };
 
-const TOOL_COUNT: usize = 5;
+const EDITOR_GRID_KEY: &str = "editor_state";
 
+#[derive(Clone)]
 pub struct Editor {
     grid: GameMap,
     tool: Tool,
     mode: Mode,
     cursor: EditorCursor,
+    spawns: Vec<(u8, u8)>,
 }
 
+#[derive(Clone)]
 struct EditorCursor {
     position: (u8, u8),
     dimensions: (u8, u8),
 }
 
+#[derive(Clone)]
 /// The mode the editor is in, changed with the Tool key.
 enum Mode {
     /// The default mode, where the editor is used to edit the map.
     Editor,
-    /// ToolSelect(index) is the index of the tool that is selected.
-    ToolSelect(usize, usize),
+    /// The menu mode, where the user can save the preset, exit or reset the map.
+    Menu(EditorMenu),
+}
+
+#[derive(Clone)]
+struct EditorMenu {
+    items: Vec<EditorMenuItem>,
+    selected_item: usize,
+}
+
+#[derive(Clone)]
+enum EditorMenuItem {
+    UploadPreset,
+    Reset,
+    Exit,
 }
 
 #[derive(Clone)]
@@ -39,114 +63,129 @@ enum Mode {
 enum Tool {
     Wall(Direction),
     Obstacle,
-    SpawnRed,
-    SpawnBlue,
-    Clear,
+    Spawn,
+}
+
+pub enum EditorMessage {
+    Play(Preset),
+    Exit,
+    None,
 }
 
 impl Editor {
     pub fn new(width: u8, height: u8) -> Self {
-        Self {
-            grid: GameMap::new(width, height),
-            tool: Tool::Obstacle,
-            cursor: EditorCursor::new((0, 0), (width, height)),
-            mode: Mode::Editor,
+        if let Some(grid) = STORAGE.lock().unwrap().get(EDITOR_GRID_KEY) {
+            Self::from(serde_json::from_str::<Preset>(&grid).unwrap())
+        } else {
+            Self {
+                grid: GameMap::new(width, height),
+                tool: Tool::Obstacle,
+                cursor: EditorCursor::new((0, 0), (width, height)),
+                mode: Mode::Editor,
+                spawns: vec![],
+            }
         }
     }
 
-    pub fn handle_key_press(&mut self, key: InputCommand) -> bool {
-        match self.mode {
-            Mode::Editor => {
-                match key {
-                    InputCommand::Up => self.cursor.move_to(Direction::Up),
-                    InputCommand::Down => self.cursor.move_to(Direction::Down),
-                    InputCommand::Left => self.cursor.move_to(Direction::Left),
-                    InputCommand::Right => self.cursor.move_to(Direction::Right),
-                    InputCommand::Tool => self.mode = Mode::ToolSelect(self.tool.clone().into(), 0),
-                    InputCommand::Back => {
-                        // Erase the tile on `O` press
-                        let (x, y) = self.cursor.position;
-                        let tile = &mut self.grid.grid[x as usize][y as usize];
-                        tile.tile_type = TileType::Empty;
-                        return true;
+    pub fn handle_key_press(&mut self, key: InputCommand) -> EditorMessage {
+        match &mut self.mode {
+            Mode::Editor => match key {
+                InputCommand::Up => self.cursor.move_to(Direction::Up),
+                InputCommand::Down => self.cursor.move_to(Direction::Down),
+                InputCommand::Left => self.cursor.move_to(Direction::Left),
+                InputCommand::Right => self.cursor.move_to(Direction::Right),
+                InputCommand::Tool => match self.tool {
+                    Tool::Obstacle => self.tool = Tool::Wall(Direction::Up),
+                    Tool::Wall(_) => self.tool = Tool::Spawn,
+                    Tool::Spawn => self.tool = Tool::Obstacle,
+                },
+                InputCommand::Action => {
+                    if let Tool::Wall(direction) = &mut self.tool {
+                        direction.rotate();
                     }
-                    InputCommand::Select => {
-                        let (x, y) = self.cursor.position;
-                        let tile = &mut self.grid.grid[x as usize][y as usize];
-                        match self.tool {
-                            Tool::Wall(direction) => {
-                                let (mut left, mut top, mut right, mut bottom) =
-                                    match tile.tile_type {
-                                        TileType::Cover {
-                                            left,
-                                            top,
-                                            right,
-                                            bottom,
-                                        } => (left, top, right, bottom),
-                                        _ => (0, 0, 0, 0),
-                                    };
-
-                                match direction {
-                                    Direction::Up => top = 1,
-                                    Direction::Down => bottom = 1,
-                                    Direction::Left => left = 1,
-                                    Direction::Right => right = 1,
-                                    Direction::None => {}
-                                }
-
-                                tile.tile_type = TileType::Cover {
+                }
+                InputCommand::Back => {
+                    // Erase the tile on `O` press
+                    let (x, y) = self.cursor.position;
+                    let tile = &mut self.grid.grid[x as usize][y as usize];
+                    tile.tile_type = TileType::Empty;
+                    return EditorMessage::None;
+                }
+                InputCommand::Select => {
+                    let (x, y) = self.cursor.position;
+                    let tile = &mut self.grid.grid[x as usize][y as usize];
+                    match self.tool {
+                        Tool::Wall(direction) => {
+                            let (mut left, mut top, mut right, mut bottom) = match tile.tile_type {
+                                TileType::Cover {
                                     left,
                                     top,
                                     right,
                                     bottom,
-                                };
+                                } => (left, top, right, bottom),
+                                _ => (0, 0, 0, 0),
+                            };
+
+                            match direction {
+                                Direction::Up => top = 1,
+                                Direction::Down => bottom = 1,
+                                Direction::Left => left = 1,
+                                Direction::Right => right = 1,
+                                Direction::None => {}
                             }
-                            Tool::Obstacle => tile.tile_type = TileType::Obstacle,
-                            Tool::Clear => tile.tile_type = TileType::Empty,
-                            Tool::SpawnRed => {}
-                            Tool::SpawnBlue => {}
+
+                            tile.tile_type = TileType::Cover {
+                                left,
+                                top,
+                                right,
+                                bottom,
+                            };
+                        }
+                        Tool::Obstacle => {
+                            self.spawns.retain(|&spawn| spawn != (x, y));
+                            tile.tile_type = TileType::Obstacle;
+                        }
+                        Tool::Spawn => {
+                            let (x, y) = self.cursor.position;
+                            if self.spawns.contains(&(x, y)) {
+                                self.spawns.retain(|&spawn| spawn != (x, y));
+                            } else {
+                                self.spawns.push((x, y));
+                            }
                         }
                     }
-                    // This is handled by the main menu, cannot be used in the Editor.
-                    InputCommand::Menu => return true,
                 }
-            }
-            Mode::ToolSelect(index, secondary_index) => match key {
-                InputCommand::Up => {
-                    self.mode = Mode::ToolSelect((index + 4) % TOOL_COUNT, secondary_index)
-                }
-                InputCommand::Down => {
-                    self.mode = Mode::ToolSelect((index + 1) % TOOL_COUNT, secondary_index)
-                }
-                InputCommand::Left => {
-                    self.mode = Mode::ToolSelect(index, (secondary_index + 3) % 4)
-                }
-                InputCommand::Right => {
-                    self.mode = Mode::ToolSelect(index, (secondary_index + 1) % 4)
-                }
-                InputCommand::Tool => self.mode = Mode::Editor,
-                InputCommand::Select => {
-                    self.mode = Mode::Editor;
-                    self.tool = match index {
-                        0 => Tool::Wall(match secondary_index {
-                            0 => Direction::Up,
-                            1 => Direction::Down,
-                            2 => Direction::Left,
-                            3 => Direction::Right,
-                            _ => unreachable!(),
-                        }),
-                        1 => Tool::Obstacle,
-                        2 => Tool::SpawnRed,
-                        3 => Tool::SpawnBlue,
-                        4 => Tool::Clear,
-                        _ => unreachable!(),
-                    };
-                }
-                _ => {}
+                // This is handled by the main menu, cannot be used in the Editor.
+                InputCommand::Menu => self.mode = Mode::Menu(EditorMenu::new()),
+            },
+            Mode::Menu(menu) => match key {
+                InputCommand::Menu => self.mode = Mode::Editor,
+                InputCommand::Up => menu.previous_item(),
+                InputCommand::Down => menu.next_item(),
+                InputCommand::Select => match menu.selected_item() {
+                    EditorMenuItem::UploadPreset => {
+                        return EditorMessage::Play(Preset::from(self.clone().into()));
+                    }
+                    EditorMenuItem::Reset => {
+                        let (width, height) = self.grid.dimensions();
+                        self.grid = GameMap::new(width, height);
+                        self.mode = Mode::Editor;
+                    }
+                    // EditorMenuItem::Play => {}
+                    // Exit the editor.
+                    EditorMenuItem::Exit => {
+                        STORAGE.lock().unwrap().set(
+                            EDITOR_GRID_KEY,
+                            &serde_json::to_string(&Preset::from(self.clone().into())).unwrap(),
+                        );
+                        return EditorMessage::Exit;
+                    }
+                },
+                key @ _ => menu.handle_key_press(key),
             },
         }
 
-        false
+        EditorMessage::None
     }
 }
 
@@ -164,44 +203,138 @@ impl Draw for Editor {
             .z_index(ZIndex::ModalText)
             .schedule();
 
-        if let Mode::ToolSelect(index, secondary_index) = self.mode {
-            DrawCommand::rectangle(0.0, 0.0, screen_width(), screen_height())
-                .color(BLACK.with_alpha(0.5))
-                .z_index(ZIndex::ModalBackground)
-                .schedule();
+        for grid_point in self.spawns.clone() {
+            let pos = grid_to_world(grid_point, self.grid.dimensions());
+            let sprite = Sprite::Shadow.load().unwrap();
+            sprite.draw_frame_with_index(
+                pos.x,
+                pos.y,
+                0,
+                WHITE,
+                self.grid.dimensions(),
+                ZIndex::UnitShadow,
+            );
+        }
 
-            let font = font("doto").unwrap();
+        match &self.mode {
+            Mode::Menu(menu) => menu.draw(),
+            // Draw semi-transparent tool at position of the cursor.
+            Mode::Editor => match self.tool {
+                Tool::Obstacle => {
+                    let (x, y) = self.cursor.absolute_position();
+                    let texture = Texture::Obstacle.load().unwrap();
+                    DrawCommand::texture(texture)
+                        .position(x, y)
+                        .dest_size(self.cursor.size())
+                        .color(WHITE.with_alpha(0.5))
+                        .schedule();
+                }
+                Tool::Wall(direction) => {
+                    let (x, y) = self.cursor.absolute_position();
+                    let sprite = Sprite::WallSnow.load().unwrap();
+                    let frame = match direction {
+                        Direction::Left => 0,
+                        Direction::Up => 1,
+                        Direction::Right => 2,
+                        Direction::Down => 3,
+                        Direction::None => 0,
+                    };
 
-            for i in 0..TOOL_COUNT {
-                let color = if i == index { WHITE } else { BLACK };
-                let font_size = 24;
-                let text = format!("{}", {
-                    let mut tool = Tool::from(i);
-                    if let Tool::Wall(direction) = &mut tool {
-                        *direction = match secondary_index {
-                            0 => Direction::Up,
-                            1 => Direction::Down,
-                            2 => Direction::Left,
-                            3 => Direction::Right,
-                            _ => unreachable!(),
-                        };
-                    }
+                    sprite.draw_frame_with_index(
+                        x,
+                        y,
+                        frame,
+                        WHITE.with_alpha(0.5),
+                        self.cursor.dimensions,
+                        ZIndex::TopCover,
+                    );
+                }
+                Tool::Spawn => {
+                    let (x, y) = self.cursor.absolute_position();
+                    let sprite = Sprite::Shadow.load().unwrap();
 
-                    tool
-                });
-                let (width, height) = (screen_width(), screen_height());
-                let dims = measure_text(&text, Some(&font), font_size, 1.0);
+                    sprite.draw_frame_with_index(
+                        x,
+                        y,
+                        0,
+                        WHITE.with_alpha(0.5),
+                        self.cursor.dimensions,
+                        ZIndex::UnitShadow,
+                    )
+                }
+            },
+        }
+    }
+}
 
-                let x = (width - dims.width) / 2.0;
-                let y = (height + dims.height) / 2.0 + (i as f32 * 40.0) - 40.0;
+impl EditorMenu {
+    fn new() -> Self {
+        Self {
+            items: vec![
+                EditorMenuItem::UploadPreset,
+                EditorMenuItem::Reset,
+                EditorMenuItem::Exit,
+            ],
+            selected_item: 0,
+        }
+    }
 
-                DrawCommand::text(text)
-                    .position(x, y)
-                    .font_size(font_size)
-                    .color(color)
-                    .z_index(ZIndex::ModalText)
-                    .schedule();
+    fn handle_key_press(&mut self, key: InputCommand) {
+        match key {
+            InputCommand::Up => {
+                self.selected_item = (self.selected_item + self.items.len() - 1) % self.items.len()
             }
+            InputCommand::Down => self.selected_item = (self.selected_item + 1) % self.items.len(),
+            _ => {}
+        }
+    }
+}
+
+impl Selectable for EditorMenu {
+    type Item = EditorMenuItem;
+
+    fn next_item(&mut self) {
+        self.selected_item = (self.selected_item + 1) % self.items.len();
+    }
+
+    fn previous_item(&mut self) {
+        self.selected_item = (self.selected_item + self.items.len() - 1) % self.items.len();
+    }
+
+    fn selected_item(&self) -> &EditorMenuItem {
+        &self.items[self.selected_item]
+    }
+}
+
+impl Draw for EditorMenu {
+    fn draw(&self) {
+        let width = screen_width();
+        let height = screen_height();
+        let line_height = 44.0;
+
+        DrawCommand::text("Editor Menu".to_string())
+            .position(width / 2.0, height / 4.0 + 64.0)
+            .font_size(32)
+            .color(WHITE)
+            .align(Align::Center)
+            .z_index(ZIndex::ModalText)
+            .schedule();
+
+        DrawCommand::rectangle(width / 4.0, height / 4.0, width / 2.0, height / 2.0)
+            .color(BLACK.with_alpha(0.8))
+            .z_index(ZIndex::ModalBackground)
+            .schedule();
+
+        for (i, item) in self.items.iter().enumerate() {
+            let color = if i == self.selected_item { WHITE } else { GRAY };
+
+            DrawCommand::text(item.to_string())
+                .position(width / 2.0, height / 4.0 + 200.0 + (i as f32 * line_height))
+                .font_size(32)
+                .color(color)
+                .align(Align::Center)
+                .z_index(ZIndex::MenuText)
+                .schedule();
         }
     }
 }
@@ -212,6 +345,19 @@ impl EditorCursor {
             position,
             dimensions,
         }
+    }
+
+    pub fn absolute_position(&self) -> (f32, f32) {
+        let (scale_x, scale_y) = get_scale(self.dimensions);
+        (
+            self.position.1 as f32 * TILE_WIDTH * scale_x,
+            self.position.0 as f32 * TILE_HEIGHT * scale_y,
+        )
+    }
+
+    pub fn size(&self) -> Vec2 {
+        let (scale_x, scale_y) = get_scale(self.dimensions);
+        Vec2::new(TILE_WIDTH * scale_x, TILE_HEIGHT * scale_y)
     }
 
     /// Move the cursor to the given direction. Instead of overflowing, it
@@ -231,6 +377,38 @@ impl EditorCursor {
     }
 }
 
+impl From<Preset> for Editor {
+    fn from(preset: Preset) -> Self {
+        let Preset { map, positions, .. } = preset;
+        let grid = GameMap::from(map);
+        let dimensions = grid.dimensions();
+        Self {
+            grid,
+            tool: Tool::Obstacle,
+            cursor: EditorCursor::new((0, 0), dimensions),
+            mode: Mode::Editor,
+            spawns: positions
+                .iter()
+                .map(|position| (position[0], position[1]))
+                .collect(),
+        }
+    }
+}
+
+impl Into<Preset> for Editor {
+    fn into(self) -> Preset {
+        let Editor { grid, spawns, .. } = self;
+        Preset {
+            map: grid.into(),
+            positions: spawns.iter().map(|(x, y)| vec![*x, *y]).collect(),
+            id: ID::default(),
+            name: "".to_string(),
+            author: Address::ZERO,
+            popularity: 0,
+        }
+    }
+}
+
 impl Draw for EditorCursor {
     fn draw(&self) {
         draw::draw_cursor(self.position, self.dimensions);
@@ -242,34 +420,17 @@ impl Display for Tool {
         match self {
             Tool::Wall(direction) => write!(f, "Wall ({})", direction),
             Tool::Obstacle => write!(f, "Obstacle"),
-            Tool::SpawnRed => write!(f, "Spawn Red"),
-            Tool::SpawnBlue => write!(f, "Spawn Blue"),
-            Tool::Clear => write!(f, "Erase"),
+            Tool::Spawn => write!(f, "Spawn"),
         }
     }
 }
 
-impl From<usize> for Tool {
-    fn from(index: usize) -> Self {
-        match index {
-            0 => Tool::Wall(Direction::Up),
-            1 => Tool::Obstacle,
-            2 => Tool::SpawnRed,
-            3 => Tool::SpawnBlue,
-            4 => Tool::Clear,
-            _ => unreachable!(),
-        }
-    }
-}
-
-impl Into<usize> for Tool {
-    fn into(self) -> usize {
+impl Display for EditorMenuItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Tool::Wall(_) => 0,
-            Tool::Obstacle => 1,
-            Tool::SpawnRed => 2,
-            Tool::SpawnBlue => 3,
-            Tool::Clear => 4,
+            EditorMenuItem::UploadPreset => write!(f, "Upload Preset"),
+            EditorMenuItem::Reset => write!(f, "Reset"),
+            EditorMenuItem::Exit => write!(f, "Save and Exit"),
         }
     }
 }

@@ -12,7 +12,7 @@ use crate::{
     },
     game::{Animation, AnimationType, AppComponent, GameObject},
     input::InputCommand,
-    types::{Direction, Game, GameMap, ID, Unit},
+    types::{Direction, Game, GameMap, History, ID, Preset, Target, Unit},
 };
 
 pub struct Play {
@@ -24,6 +24,7 @@ pub struct Play {
     highlight: Option<Highlight>,
     objects: HashMap<ID, GameObject>,
     selected_unit: Option<Rc<RefCell<Unit>>>,
+    is_test_game: bool,
 }
 
 #[derive(Debug)]
@@ -40,6 +41,7 @@ struct PlayCursor {
 impl AppComponent for Play {
     fn handle_key_press(&mut self, key: InputCommand) -> bool {
         match key {
+            InputCommand::Action => {} // no action yet
             InputCommand::Menu => return true,
             InputCommand::Up => self.cursor.move_to(Direction::Up),
             InputCommand::Down => self.cursor.move_to(Direction::Down),
@@ -81,27 +83,9 @@ impl AppComponent for Play {
                     }
                 }
             }
-            InputCommand::Tool => match self.mode {
+            InputCommand::Tool => match self.mode.next() {
                 Mode::Walk => {
                     self.highlight = None;
-                    self.mode = Mode::Shoot;
-
-                    if let Some(unit) = &self.selected_unit {
-                        let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
-                        let targets = self
-                            .game
-                            .targets(unit_pos, unit.borrow().stats.range() as u8)
-                            .into_iter()
-                            .filter(|target| target != &unit_pos)
-                            .collect::<Vec<_>>();
-
-                        self.highlight = Some(Highlight(targets, RED.with_alpha(0.2)));
-                    }
-                }
-                Mode::Shoot => {
-                    self.highlight = None;
-                    self.mode = Mode::Walk;
-
                     if let Some(unit) = &self.selected_unit {
                         let distance = unit.borrow().stats;
                         let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
@@ -109,7 +93,35 @@ impl AppComponent for Play {
                             .game
                             .walkable_tiles(unit_pos, distance.mobility() as u8);
 
+                        self.game.targets(unit_pos).iter().for_each(|t| {
+                            self.objects.get_mut(&t.target_id).map(|o| o.status = None);
+                        });
                         self.highlight = Some(Highlight(tiles, BLUE.with_alpha(0.2)));
+                    }
+                }
+                Mode::Shoot => {
+                    self.highlight = None;
+                    if let Some(unit) = &self.selected_unit {
+                        let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
+                        let targets = self.game.targets(unit_pos);
+
+                        targets.iter().for_each(|t| {
+                            if let Some(chance) = t.chance {
+                                if let Some(object) = self.objects.get_mut(&t.target_id) {
+                                    object.status_animation(Animation::status(
+                                        format!("Hit chance: {}", chance),
+                                        24,
+                                        RED,
+                                        None,
+                                    ));
+                                }
+                            }
+                        });
+
+                        self.highlight = Some(Highlight(
+                            targets.into_iter().map(|t| t.position).collect::<Vec<_>>(),
+                            RED.with_alpha(0.2),
+                        ));
                     }
                 }
             },
@@ -137,7 +149,7 @@ impl Play {
         }
     }
 
-    fn select_unit(&mut self, pos: (u8, u8)) {
+    fn select_unit(&mut self, pos: (u8, u8)) -> Option<Rc<RefCell<Unit>>> {
         self.deselect_unit();
 
         let tile = &self.game.grid[pos.0 as usize][pos.1 as usize];
@@ -155,6 +167,10 @@ impl Play {
                 duration: None,
                 ..Default::default()
             });
+
+            Some(unit.clone())
+        } else {
+            None
         }
     }
 
@@ -248,6 +264,34 @@ impl From<Game> for Play {
             players,
             game,
             selected_unit: None,
+            is_test_game: false,
+        }
+    }
+}
+
+impl From<Preset> for Game {
+    fn from(value: Preset) -> Self {
+        let Preset {
+            id,
+            mut map,
+            positions,
+            ..
+        } = value;
+
+        for (i, pos) in positions.iter().enumerate() {
+            map.grid[pos[0] as usize][pos[1] as usize].unit = Some(Unit {
+                recruit: ID(Address::from_hex(format!("0x{}", i)).unwrap()),
+                ..Default::default()
+            });
+        }
+
+        Game {
+            id,
+            map: map.into(),
+            players: vec![],
+            positions: positions.clone(),
+            history: History(vec![]),
+            recruits: (Address::ZERO, 0),
         }
     }
 }
@@ -316,6 +360,22 @@ impl Draw for Play {
                 }
             }
         }
+    }
+}
+
+impl Mode {
+    pub fn next(&mut self) -> &Self {
+        match self {
+            Mode::Walk => *self = Mode::Shoot,
+            Mode::Shoot => *self = Mode::Walk,
+        };
+        self
+    }
+}
+
+impl Default for Mode {
+    fn default() -> Self {
+        Mode::Walk
     }
 }
 

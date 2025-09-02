@@ -8,9 +8,10 @@ use macroquad::prelude::*;
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
     draw::{Asset, Draw, DrawAt, DrawCommand, Sprite, Texture, ZIndex, get_scale},
-    types::{Direction, Map, TileType, Unit},
+    types::{Direction, ID, Map, Tile, TileType, Unit},
 };
 
+#[derive(Clone)]
 /// Game Map is a transformed instance of the `Map` type defined in Move.
 pub struct GameMap {
     pub grid: Vec<Vec<GameTile>>,
@@ -25,6 +26,15 @@ pub struct GameMap {
 pub struct GameTile {
     pub unit: Option<Rc<RefCell<Unit>>>,
     pub tile_type: TileType,
+}
+
+#[derive(Debug, Clone)]
+/// A single target which can be attacked by a unit.
+pub struct Target {
+    pub position: (u8, u8),
+    pub range: u8,
+    pub chance: Option<u8>,
+    pub target_id: ID,
 }
 
 impl GameMap {
@@ -74,17 +84,35 @@ impl GameMap {
         })
     }
 
-    pub fn targets(&self, origin: (u8, u8), range: u8) -> Vec<(u8, u8)> {
+    pub fn targets(&self, origin: (u8, u8)) -> Vec<Target> {
         let mut targets = Vec::new();
+        let unit = &self.grid[origin.0 as usize][origin.1 as usize].unit;
+
         for (x, row) in self.grid.iter().enumerate() {
             for (y, tile) in row.iter().enumerate() {
-                let distance = self.manhattan_distance((x as u8, y as u8), origin);
-                if distance <= range && tile.unit.is_some() {
-                    targets.push((x as u8, y as u8));
+                let range = self.manhattan_distance((x as u8, y as u8), origin);
+                // let range = self.cherbyshev_distance((x as u8, y as u8), origin);
+                if origin == (x as u8, y as u8) {
+                    continue;
+                }
+
+                if let Some(target) = &tile.unit {
+                    targets.push(Target {
+                        position: (x as u8, y as u8),
+                        range,
+                        chance: unit.clone().map(|unit| chance(&unit.borrow(), range)),
+                        target_id: target.borrow().recruit,
+                    });
                 }
             }
         }
         targets
+    }
+
+    pub fn cherbyshev_distance(&self, origin: (u8, u8), target: (u8, u8)) -> u8 {
+        let (x0, y0) = origin;
+        let (x1, y1) = target;
+        x0.abs_diff(x1).max(y0.abs_diff(y1))
     }
 
     pub fn manhattan_distance(&self, origin: (u8, u8), target: (u8, u8)) -> u8 {
@@ -370,6 +398,26 @@ impl From<Map> for GameMap {
     }
 }
 
+impl Into<Map> for GameMap {
+    fn into(self) -> Map {
+        let id = ID::default();
+        let GameMap { grid, turn, .. } = self;
+        let grid = grid
+            .into_iter()
+            .map(|row| {
+                row.into_iter()
+                    .map(|tile| Tile {
+                        unit: tile.unit.map(|unit| unit.borrow().clone()),
+                        tile_type: tile.tile_type,
+                    })
+                    .collect()
+            })
+            .collect();
+
+        Map { id, grid, turn }
+    }
+}
+
 impl Draw for GameMap {
     fn draw(&self) {
         let (scale_x, scale_y) = get_scale(self.dimensions());
@@ -421,22 +469,40 @@ impl DrawAt for GameTile {
                 let sprite = Sprite::WallSnow.load().unwrap();
 
                 if *left > 0 {
-                    sprite.draw_frame_with_index(x, y, 0, dimensions, ZIndex::TopCover);
+                    sprite.draw_frame_with_index(x, y, 0, WHITE, dimensions, ZIndex::TopCover);
                 }
 
                 if *top > 0 {
-                    sprite.draw_frame_with_index(x, y, 1, dimensions, ZIndex::TopCover);
+                    sprite.draw_frame_with_index(x, y, 1, WHITE, dimensions, ZIndex::TopCover);
                 }
 
                 if *right > 0 {
-                    sprite.draw_frame_with_index(x, y, 2, dimensions, ZIndex::TopCover);
+                    sprite.draw_frame_with_index(x, y, 2, WHITE, dimensions, ZIndex::TopCover);
                 }
 
                 if *bottom > 0 {
-                    sprite.draw_frame_with_index(x, y, 3, dimensions, ZIndex::BottomCover);
+                    sprite.draw_frame_with_index(x, y, 3, WHITE, dimensions, ZIndex::BottomCover);
                 }
             }
         };
+    }
+}
+
+const CLOSE_DISTANCE_MODIFIER: u8 = 5;
+const DISTANCE_MODIFIER: u8 = 10;
+// const MAX_DISTANCE_OFFSET: u8 = 3;
+
+fn chance(unit: &Unit, range: u8) -> u8 {
+    let aim = unit.stats.aim() as u8;
+    let eff_range = unit.stats.range() as u8;
+
+    if range == eff_range {
+        return aim;
+    } else if range < eff_range {
+        return aim + (eff_range - range) * CLOSE_DISTANCE_MODIFIER;
+    } else {
+        let diff = (range - eff_range) * DISTANCE_MODIFIER;
+        return aim - aim.min(diff);
     }
 }
 

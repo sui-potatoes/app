@@ -19,7 +19,7 @@ const TITLE_FONT_SIZE: f32 = 40.0;
 #[derive(Debug, Clone)]
 /// Draws the menu based on the items, tracks the currently selected item. Reacts
 /// on keyboard input to navigate the menu.
-pub struct Menu<Item: MenuItem> {
+pub struct Menu<Item> {
     pub title: Option<String>,
     /// The items in the menu.
     pub items: Vec<Item>,
@@ -76,14 +76,6 @@ pub trait Selectable {
     fn previous_item(&mut self);
     fn selected_item(&self) -> &Self::Item;
 }
-
-pub trait MenuItem: Display {}
-
-impl MenuItem for MainMenuItem {}
-impl MenuItem for ReplayMenuItem {}
-impl MenuItem for SettingsMenuItem {}
-impl MenuItem for WindowSettingsMenuItem {}
-impl MenuItem for RecruitSubMenuItem {}
 
 // === Menu impls ===
 
@@ -175,7 +167,7 @@ impl Menu<RecruitSubMenuItem> {
     }
 }
 
-impl<T: MenuItem> Selectable for Menu<T> {
+impl<T> Selectable for Menu<T> {
     type Item = T;
 
     fn next_item(&mut self) {
@@ -191,10 +183,8 @@ impl<T: MenuItem> Selectable for Menu<T> {
     }
 }
 
-impl<T: MenuItem> Draw for Menu<T> {
+impl<T: Display> Draw for Menu<T> {
     fn draw(&self) {
-        draw::draw_main_menu_background();
-
         let offset = if let Some(title) = &self.title {
             DrawCommand::text(title.clone())
                 .position(20.0, 40.0)

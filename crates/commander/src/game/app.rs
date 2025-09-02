@@ -13,7 +13,7 @@ use super::{menu::*, player::*};
 use crate::{
     Message as TokioMessage, State, WithRef,
     draw::*,
-    game::{Editor, play::Play},
+    game::{Editor, EditorMessage, play::Play},
     input::InputCommand,
     types::{Game, ID, Preset, Recruit, Replay},
 };
@@ -98,7 +98,7 @@ impl App {
     }
 
     /// Returns a preset by its ID.
-    pub fn get_preset(&self, id: &ID) -> Option<WithRef<Preset>> {
+    fn get_preset(&self, id: &ID) -> Option<WithRef<Preset>> {
         self.state
             .lock()
             .unwrap()
@@ -109,7 +109,7 @@ impl App {
     }
 
     /// Sends a message to the tokio runtime.
-    pub fn send_message(&self, msg: Message) {
+    fn send_message(&self, msg: Message) {
         self.tx.send(msg).unwrap();
     }
 
@@ -159,11 +159,15 @@ impl App {
             Screen::CreatingGame => {}
             // Currently no action on the Login screen.
             Screen::Login => {}
-            Screen::Editor(editor) => {
-                if editor.handle_key_press(key) {
+            Screen::Editor(editor) => match editor.handle_key_press(key) {
+                EditorMessage::Exit => {
                     self.screen = Screen::MainMenu(Menu::main(state.address));
                 }
-            }
+                EditorMessage::Play(preset) => {
+                    self.screen = Screen::Play(Play::from(Game::from(preset)));
+                }
+                EditorMessage::None => {}
+            },
             Screen::Play(play) => {
                 if play.handle_key_press(key) {
                     self.screen = Screen::MainMenu(Menu::main(state.address));
@@ -288,10 +292,22 @@ impl Draw for App {
     fn draw(&self) {
         match &self.screen {
             Screen::Editor(editor) => editor.draw(),
-            Screen::MainMenu(menu) => menu.draw(),
-            Screen::Replays(menu) => menu.draw(),
-            Screen::Settings(menu) => menu.draw(),
-            Screen::WindowSettings(menu) => menu.draw(),
+            Screen::MainMenu(menu) => {
+                draw::draw_main_menu_background();
+                menu.draw()
+            }
+            Screen::Replays(menu) => {
+                draw::draw_main_menu_background();
+                menu.draw()
+            }
+            Screen::Settings(menu) => {
+                draw::draw_main_menu_background();
+                menu.draw()
+            }
+            Screen::WindowSettings(menu) => {
+                draw::draw_main_menu_background();
+                menu.draw()
+            }
             Screen::CreatingGame => {
                 draw::draw_main_menu_background();
                 DrawCommand::text("Creating game...".to_string())

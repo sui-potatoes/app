@@ -1,7 +1,17 @@
 #![allow(dead_code)]
-
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
+
+//! # Draw
+//!
+//! Draw commands are stored in a thread-local registry and executed on each
+//! frame. The commands are sorted by their z-index and then drawn in order.
+//!
+//! Each command has a matching builder that allows setting the properties of
+//! the command and then building it. Once built, the command can be scheduled
+//! to be executed on the next frame.
+//!
+//! See `flush_draw_registry` for the actual drawing.
 
 use std::{cell::RefCell, f32::consts::PI, rc::Rc};
 
@@ -18,6 +28,7 @@ thread_local! {
     pub static DRAW_REGISTRY: RefCell<Vec<DrawCommand>> = RefCell::new(Vec::new());
 }
 
+/// Draw command that can be scheduled to be executed on the next frame.
 pub enum DrawCommand {
     Texture {
         texture: Rc<Texture2D>,
@@ -92,6 +103,7 @@ pub enum ZIndex {
     ModalBackground = 30,
     ModalText = 32,
     MenuText = 41,
+    Max = 255,
 }
 
 pub enum Align {
@@ -130,29 +142,33 @@ pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8)) {
     let (scale_x, scale_y) = get_scale(dimensions);
     let thickness = 6.0;
 
-    request_draw(DrawCommand::RectangleLines {
-        x: position.1 as f32 * TILE_SIZE * scale_x + thickness / 2.0,
-        y: position.0 as f32 * TILE_SIZE * scale_y + thickness / 2.0,
-        width: TILE_SIZE * scale_x - thickness,
-        height: TILE_SIZE * scale_y - thickness,
-        thickness,
-        color: BLUE,
-        z_index: ZIndex::Cursor,
-    });
+    let x = position.1 as f32 * TILE_SIZE * scale_x + thickness / 2.0;
+    let y = position.0 as f32 * TILE_SIZE * scale_y + thickness / 2.0;
+    let width = TILE_SIZE * scale_x - thickness;
+    let height = TILE_SIZE * scale_y - thickness;
+
+    DrawRectangleLinesBuilder::new()
+        .position(x, y)
+        .dimensions(width, height)
+        .thickness(thickness)
+        .color(BLUE)
+        .z_index(ZIndex::Cursor)
+        .schedule();
 }
 
 /// Draw a highlight on the given tiles.
 pub fn draw_highlight(highlight: &Highlight, dimensions: (u8, u8)) {
     let (scale_x, scale_y) = get_scale(dimensions);
-    for (x, y) in &highlight.0 {
-        request_draw(DrawCommand::Rectangle {
-            x: *y as f32 * TILE_SIZE * scale_x,
-            y: *x as f32 * TILE_SIZE * scale_y,
-            width: TILE_SIZE * scale_x,
-            height: TILE_SIZE * scale_y,
-            color: highlight.1,
-            z_index: ZIndex::Highlight,
-        });
+    for (hx, hy) in &highlight.0 {
+        let x = *hy as f32 * TILE_SIZE * scale_x;
+        let y = *hx as f32 * TILE_SIZE * scale_y;
+
+        DrawRectangleBuilder::new()
+            .position(x, y)
+            .dimensions(TILE_SIZE * scale_x, TILE_SIZE * scale_y)
+            .color(highlight.1)
+            .z_index(ZIndex::Highlight)
+            .schedule();
     }
 }
 
@@ -166,15 +182,19 @@ pub fn draw_path(path: &[(u8, u8)], dimensions: (u8, u8)) {
         let (x1, y1) = w[0];
         let (x2, y2) = w[1];
 
-        request_draw(DrawCommand::Line {
-            x1: (y1 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
-            y1: (x1 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
-            x2: (y2 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
-            y2: (x2 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
-            color: BLUE,
-            thickness,
-            z_index: ZIndex::Highlight,
-        });
+        DrawLineBuilder::new()
+            .start(
+                (y1 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
+                (x1 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
+            )
+            .end(
+                (y2 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
+                (x2 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
+            )
+            .color(BLUE)
+            .thickness(thickness)
+            .z_index(ZIndex::Highlight)
+            .schedule();
     }
 }
 
@@ -384,7 +404,7 @@ impl DrawCommand {
                     let width = measure.width;
                     let y = y + i as f32 * line_height + (padding.y / 2.0);
                     let x = match align {
-                        Align::Left => x + padding.x,
+                        Align::Left => x,
                         Align::Center => x - width / 2.0,
                         Align::Right => x - (padding.x / 2.0) - width,
                     };

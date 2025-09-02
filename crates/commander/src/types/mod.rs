@@ -170,6 +170,18 @@ pub enum Direction {
     None,
 }
 
+impl Direction {
+    pub fn rotate(&mut self) {
+        *self = match self {
+            Direction::Up => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+            Direction::None => Direction::Up, // goes to Up and never happens again
+        };
+    }
+}
+
 impl Into<u8> for Direction {
     fn into(self) -> u8 {
         match self {

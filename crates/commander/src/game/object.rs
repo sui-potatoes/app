@@ -276,6 +276,7 @@ impl Draw for GameObject {
                 self.position.x,
                 self.position.y,
                 0,
+                WHITE,
                 self.dimensions,
                 ZIndex::UnitShadow,
             );
@@ -300,6 +301,7 @@ impl Draw for GameObject {
                         self.position.x,
                         self.position.y,
                         *frame,
+                        WHITE,
                         self.dimensions,
                         ZIndex::Unit,
                     );
@@ -328,6 +330,7 @@ impl Draw for GameObject {
                     self.position.x,
                     self.position.y,
                     *frame,
+                    WHITE,
                     self.dimensions,
                     ZIndex::Unit,
                 );
@@ -336,6 +339,7 @@ impl Draw for GameObject {
                 self.position.x,
                 self.position.y,
                 *frame,
+                WHITE,
                 self.dimensions,
                 ZIndex::Unit,
             ),

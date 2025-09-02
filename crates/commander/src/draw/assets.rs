@@ -139,7 +139,7 @@ impl SpriteSheet {
     }
 
     pub fn draw_frame(&self, x: f32, y: f32, frame: usize, dimensions: (u8, u8)) {
-        self.draw_frame_with_index(x, y, frame, dimensions, ZIndex::Unit);
+        self.draw_frame_with_index(x, y, frame, WHITE, dimensions, ZIndex::Unit);
     }
 
     pub fn draw_frame_with_index(
@@ -147,6 +147,7 @@ impl SpriteSheet {
         x: f32,
         y: f32,
         frame: usize,
+        color: Color,
         dimensions: (u8, u8),
         z_index: ZIndex,
     ) {
@@ -162,7 +163,7 @@ impl SpriteSheet {
 
         DrawCommand::texture(self.texture.clone())
             .position(x, y + y_offset)
-            .color(WHITE)
+            .color(color)
             .dest_size(Vec2::new(TILE_WIDTH * scale_x, TILE_HEIGHT * scale_y))
             .source(Rect {
                 x: self.frame_size * frame as f32,
