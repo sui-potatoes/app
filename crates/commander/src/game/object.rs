@@ -3,7 +3,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use macroquad::prelude::*;
 
@@ -21,7 +21,7 @@ pub struct GameObject {
     /// Optional shadow sprite.
     pub shadow: Option<Rc<SpriteSheet>>,
     /// Optional status sprite.
-    pub status: Option<Animation>,
+    pub statuses: HashMap<String, Animation>,
 }
 
 /// Animation of the object.
@@ -76,6 +76,12 @@ pub enum AnimationType {
         font_size: u16,
         color: Color,
     },
+    /// Action Point animation. Shows the number of AP the object has.
+    AP {
+        ap: u16,
+        max_ap: u16,
+        color: Color,
+    },
 }
 
 impl GameObject {
@@ -90,7 +96,7 @@ impl GameObject {
             position,
             animation,
             shadow,
-            status: None,
+            statuses: HashMap::new(),
         }
     }
 
@@ -99,9 +105,15 @@ impl GameObject {
         self.animation.chain(animation);
     }
 
-    /// Set a status animation.
-    pub fn status_animation(&mut self, animation: Animation) {
-        self.status = Some(animation);
+    /// Set (or replaces) status animation with a given key.
+    pub fn add_status_animation(&mut self, key: &str, animation: Animation) {
+        let _ = self.statuses.remove(&key.to_string());
+        self.statuses.insert(key.to_string(), animation);
+    }
+
+    /// Remove status animation with a given key.
+    pub fn remove_status_animation(&mut self, key: &str) {
+        let _ = self.statuses.remove(&key.to_string());
     }
 
     pub fn skip_all_animations(&mut self) {
@@ -119,22 +131,30 @@ impl GameObject {
     }
 
     pub fn tick(&mut self, time: f64) {
-        if let Some(status) = &mut self.status {
+        let mut statuses_to_remove = vec![];
+        for (key, status) in self.statuses.iter_mut() {
             if let Some(duration) = status.duration {
                 if time - status.start_time > duration {
-                    let chain = status.chain.take().map(|c| {
+                    if let Some(chain) = status.chain.take().map(|c| {
                         let mut next_anim = *c;
                         next_anim.start_time = get_time();
                         next_anim
-                    });
-
-                    if let Some(on_end) = status.on_end.take() {
-                        on_end(self);
+                    }) {
+                        *status = chain;
+                    } else {
+                        statuses_to_remove.push(key.clone());
                     }
 
-                    self.status = chain;
+                    // if let Some(on_end) = status.on_end.take() {
+                    //     on_end(self);
+                    // }
                 }
             }
+        }
+
+        // Remove statuses that have ended.
+        for key in statuses_to_remove {
+            self.statuses.remove(&key);
         }
 
         let animation = &self.animation;
@@ -244,6 +264,16 @@ impl Animation {
         }
     }
 
+    pub fn ap(ap: u16, max_ap: u16, color: Color, duration: Option<f64>) -> Self {
+        Self {
+            duration,
+            start_time: get_time(),
+            type_: AnimationType::AP { ap, max_ap, color },
+            on_end: None,
+            chain: None,
+        }
+    }
+
     /// Returns the final position of the animation.
     pub fn end_position(&self) -> Option<Vec2> {
         match &self.type_ {
@@ -282,7 +312,7 @@ impl Draw for GameObject {
             );
         }
 
-        if let Some(status) = &self.status {
+        for (_, status) in self.statuses.iter() {
             match &status.type_ {
                 AnimationType::Status {
                     text,
@@ -292,6 +322,14 @@ impl Draw for GameObject {
                     DrawCommand::text(text.clone())
                         .position(self.position.x, self.position.y)
                         .font_size(*font_size)
+                        .color(*color)
+                        .z_index(ZIndex::UnitStatus)
+                        .schedule();
+                }
+                AnimationType::AP { ap, max_ap, color } => {
+                    DrawCommand::text(format!("AP: {} / {}", ap, max_ap))
+                        .position(self.position.x, self.position.y)
+                        .font_size(20)
                         .color(*color)
                         .z_index(ZIndex::UnitStatus)
                         .schedule();
@@ -343,6 +381,8 @@ impl Draw for GameObject {
                 self.dimensions,
                 ZIndex::Unit,
             ),
+            // AP is only drawn as status.
+            AnimationType::AP { .. } => {}
             AnimationType::Status {
                 text,
                 font_size,

@@ -428,7 +428,7 @@ impl Display for Tool {
 impl Display for EditorMenuItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            EditorMenuItem::UploadPreset => write!(f, "Upload Preset"),
+            EditorMenuItem::UploadPreset => write!(f, "Play Test Preset"),
             EditorMenuItem::Reset => write!(f, "Reset"),
             EditorMenuItem::Exit => write!(f, "Save and Exit"),
         }

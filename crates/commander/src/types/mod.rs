@@ -75,6 +75,20 @@ impl Display for Record {
 /// Stores value and max value of a parameter.
 pub struct Param(u16, u16);
 
+impl Param {
+    pub fn value(&self) -> u16 {
+        self.0
+    }
+
+    pub fn max_value(&self) -> u16 {
+        self.1
+    }
+
+    pub fn decrease(&mut self, amount: u16) {
+        self.0 = self.0.saturating_sub(amount);
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Armor {
     pub id: ID,

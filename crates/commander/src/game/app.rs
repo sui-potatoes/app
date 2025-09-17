@@ -13,7 +13,10 @@ use super::{menu::*, player::*};
 use crate::{
     Message as TokioMessage, State, WithRef,
     draw::*,
-    game::{Editor, EditorMessage, play::Play},
+    game::{
+        Editor, EditorMessage,
+        play::{Play, PlayMessage},
+    },
     input::InputCommand,
     types::{Game, ID, Preset, Recruit, Replay},
 };
@@ -76,10 +79,12 @@ pub struct RecruitScreen {
 
 /// Trait for separate screens that can be used in the App.
 pub trait AppComponent {
+    type Message;
+
     /// Handles a key press. Returns true if the screen should be closed, false
     /// otherwise. Eg, on `InputCommand::Menu` or `InputCommand::Select`, an
     /// app component may request to close the screen.
-    fn handle_key_press(&mut self, key: InputCommand) -> bool;
+    fn handle_key_press(&mut self, key: InputCommand) -> Self::Message;
 
     /// Updates the component on each frame.
     fn tick(&mut self);
@@ -164,20 +169,25 @@ impl App {
                     self.screen = Screen::MainMenu(Menu::main(state.address));
                 }
                 EditorMessage::Play(preset) => {
-                    self.screen = Screen::Play(Play::from(Game::from(preset)));
+                    let mut play = Play::from(Game::from(preset.clone()));
+                    play.test_preset = Some(preset.clone());
+                    self.screen = Screen::Play(play);
                 }
                 EditorMessage::None => {}
             },
-            Screen::Play(play) => {
-                if play.handle_key_press(key) {
+            Screen::Play(play) => match play.handle_key_press(key) {
+                PlayMessage::Exit => match play.test_preset.take() {
+                    Some(preset) => self.screen = Screen::Editor(Editor::from(preset)),
+                    None => self.screen = Screen::MainMenu(Menu::main(state.address))
+                },
+                PlayMessage::None => {}
+            },
+            Screen::Replay(player) => match player.handle_key_press(key) {
+                PlayerMessage::Exit => {
                     self.screen = Screen::MainMenu(Menu::main(state.address));
                 }
-            }
-            Screen::Replay(player) => {
-                if player.handle_key_press(key) {
-                    self.screen = Screen::MainMenu(Menu::main(state.address));
-                }
-            }
+                PlayerMessage::None => {}
+            },
             Screen::MainMenu(menu) => match key {
                 InputCommand::Up => menu.previous_item(),
                 InputCommand::Down => menu.next_item(),

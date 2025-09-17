@@ -91,10 +91,17 @@ pub enum ProcessedRecord {
     },
 }
 
+pub enum PlayerMessage {
+    None,
+    Exit,
+}
+
 impl AppComponent for Player {
-    fn handle_key_press(&mut self, key: InputCommand) -> bool {
+    type Message = PlayerMessage;
+
+    fn handle_key_press(&mut self, key: InputCommand) -> PlayerMessage {
         match key {
-            InputCommand::Menu => return true,
+            InputCommand::Menu => return PlayerMessage::Exit,
             InputCommand::Right => self
                 .next_action()
                 .unwrap_or_else(|e| eprintln!("Error: {}", e)),
@@ -103,7 +110,7 @@ impl AppComponent for Player {
                 .unwrap_or_else(|e| eprintln!("Error: {}", e)),
             _ => {}
         }
-        false
+        PlayerMessage::None
     }
 
     fn tick(&mut self) {
@@ -236,7 +243,7 @@ impl Player {
                         acc.chain(e);
                         acc
                     })
-                    .map(|e| target_obj.status_animation(e));
+                    .map(|e| target_obj.add_status_animation("status", e));
 
                 if let Some(Record::UnitKIA(_)) =
                     effects.iter().find(|e| matches!(e, Record::UnitKIA(_)))
