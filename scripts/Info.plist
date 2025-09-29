@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
+<plist version="1.0">
+<dict>
+  <!-- Application name -->
+  <key>CFBundleName</key>
+  <string>Commander</string>
+
+  <!-- Executable name inside Contents/MacOS/ -->
+  <key>CFBundleExecutable</key>
+  <string>Commander</string>
+
+  <!-- Unique bundle identifier (reverse domain style) -->
+  <key>CFBundleIdentifier</key>
+  <string>com.potatoes.commander</string>
+
+  <!-- Application version -->
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+
+  <!-- Build number -->
+  <key>CFBundleVersion</key>
+  <string>1</string>
+
+  <!-- Application category -->
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.games</string>
+
+  <!-- Minimum macOS version -->
+  <key>LSMinimumSystemVersion</key>
+  <string>10.13</string>
+
+  <!-- Bundle type -->
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+
+  <!-- Application icon (place YourGame.icns in Contents/Resources/) -->
+  <key>CFBundleIconFile</key>
+  <string>Commander</string>
+
+  <!-- High-resolution support -->
+  <key>NSHighResolutionCapable</key>
+  <true/>
+</dict>
+</plist>

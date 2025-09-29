@@ -74,8 +74,8 @@ pub struct State {
 fn window_conf() -> macroquad::window::Conf {
     Conf {
         window_title: "Commander".to_owned(),
-        window_width: 1000,
-        window_height: 1000,
+        window_width: 800,
+        window_height: 800,
         fullscreen: false,
         window_resizable: true,
         icon: Some(Icon::miniquad_logo()),

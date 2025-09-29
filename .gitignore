@@ -6,6 +6,5 @@
 # Commander
 *.data
 
-# Added by cargo
-
+/build
 /target

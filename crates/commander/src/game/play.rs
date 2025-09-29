@@ -35,7 +35,7 @@ pub enum Mode {
 }
 
 #[derive(Clone)]
-struct PlayMenu {
+pub struct PlayMenu {
     items: Vec<PlayMenuItem>,
     selected_item: usize,
 }

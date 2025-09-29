@@ -97,11 +97,11 @@ pub enum ZIndex {
     Cursor = 4,
     UnitShadow = 10,
     Unit = 11,
-    UnitStatus = 19,
     Obstacle = 20,
     BottomCover = 21,
     ModalBackground = 30,
     ModalText = 32,
+    UnitStatus = 40,
     MenuText = 41,
     Max = 255,
 }
