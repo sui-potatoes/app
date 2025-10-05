@@ -7,7 +7,10 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use macroquad::prelude::*;
 
-use crate::draw::{self, Draw, DrawCommand, SpriteSheet, ZIndex};
+use crate::{
+    config::{TILE_HEIGHT, TILE_WIDTH},
+    draw::{self, Draw, DrawCommand, SpriteSheet, ZIndex},
+};
 
 /// An in-game object which has a position and an animation. If the object is
 /// static, then the animation is also static (or `idle` in some cases).
@@ -326,13 +329,31 @@ impl Draw for GameObject {
                         .z_index(ZIndex::UnitStatus)
                         .schedule();
                 }
-                AnimationType::AP { ap, max_ap, color } => {
-                    DrawCommand::text(format!("AP: {} / {}", ap, max_ap))
-                        .position(self.position.x, self.position.y)
-                        .font_size(20)
+                // Draw AP bars in the top left of the object. Stacked vertically.
+                AnimationType::AP {
+                    ap,
+                    max_ap: _,
+                    color,
+                } => {
+                    let (scale_x, _scale_y) = draw::get_scale(self.dimensions);
+                    let padding = 2.0;
+                    let ap_bar_height = 4.0;
+                    let ap_bar_width = scale_x * 3.0;
+
+                    let ap_bar_y = self.position.y + padding / 2.0;
+                    let ap_bar_x = self.position.x + padding / 2.0;
+
+                    for i in 0..*ap {
+                        DrawCommand::rectangle(
+                            ap_bar_x + padding,
+                            ap_bar_y + (i as f32 * ap_bar_height) + (i as f32) * padding,
+                            ap_bar_width,
+                            ap_bar_height,
+                        )
                         .color(*color)
                         .z_index(ZIndex::UnitStatus)
                         .schedule();
+                    }
                 }
                 AnimationType::StaticSprite { frame, sprite, .. } => {
                     sprite.draw_frame_with_index(

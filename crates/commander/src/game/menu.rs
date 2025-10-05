@@ -10,6 +10,7 @@ use crate::{
     WithRef,
     config::{MENU_FONT_COLOR as TEXT_COLOR, MENU_FONT_SIZE as FONT_SIZE},
     draw::{self, Draw, DrawCommand, ZIndex},
+    sound::Effect,
     types::{Preset, Recruit, Replay},
 };
 
@@ -171,10 +172,12 @@ impl<T> Selectable for Menu<T> {
     type Item = T;
 
     fn next_item(&mut self) {
+        Effect::Too.play();
         self.selected_item = (self.selected_item + 1) % self.items.len();
     }
 
     fn previous_item(&mut self) {
+        Effect::Too.play();
         self.selected_item = (self.selected_item + self.items.len() - 1) % self.items.len();
     }
 

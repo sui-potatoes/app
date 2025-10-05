@@ -58,6 +58,10 @@ impl GameMap {
         }
     }
 
+    pub fn next_turn(&mut self) {
+        self.turn += 1;
+    }
+
     pub fn dimensions(&self) -> (u8, u8) {
         (self.cols(), self.rows())
     }

@@ -44,6 +44,7 @@ pub struct PlayMenu {
 pub enum PlayMenuItem {
     NextTurn,
     QuitGame,
+    BackToEditor,
     Exit,
 }
 
@@ -51,6 +52,7 @@ pub enum PlayMessage {
     None,
     /// Perform a Move action.
     Move(GridPath),
+    BackToEditor,
     NextTurn,
     QuitGame,
     Exit,
@@ -72,6 +74,7 @@ impl AppComponent for Play {
 
     fn handle_key_press(&mut self, key: InputCommand) -> PlayMessage {
         match &mut self.mode {
+            // Menu handling.
             Mode::Menu(menu) => match key {
                 InputCommand::Menu => self.mode = Mode::Play,
                 InputCommand::Up => menu.previous_item(),
@@ -80,17 +83,26 @@ impl AppComponent for Play {
                     return match menu.selected_item() {
                         PlayMenuItem::NextTurn => {
                             self.mode = Mode::Play;
+                            self.game.next_turn();
                             PlayMessage::NextTurn
                         }
+                        PlayMenuItem::BackToEditor => PlayMessage::BackToEditor,
                         PlayMenuItem::QuitGame => PlayMessage::QuitGame,
                         PlayMenuItem::Exit => PlayMessage::Exit,
                     };
                 }
                 _ => {}
             },
+            // Play handling.
             Mode::Play => match key {
                 InputCommand::Action => {} // no action yet
-                InputCommand::Menu => self.mode = Mode::Menu(PlayMenu::new()),
+                InputCommand::Menu => {
+                    if let Some(_preset) = &self.test_preset {
+                        self.mode = Mode::Menu(PlayMenu::new_test_preset())
+                    } else {
+                        self.mode = Mode::Menu(PlayMenu::new())
+                    }
+                }
                 InputCommand::Up => self.cursor.move_to(Direction::Up),
                 InputCommand::Down => self.cursor.move_to(Direction::Down),
                 InputCommand::Left => self.cursor.move_to(Direction::Left),
@@ -188,7 +200,25 @@ impl AppComponent for Play {
     }
 
     fn tick(&mut self) {
-        for (_id, object) in self.objects.iter_mut() {
+        let units = self.units();
+        let turn = self.game.turn;
+
+        for (id, object) in self.objects.iter_mut() {
+            if let Some(unit) = units.iter().find(|u| u.borrow().recruit == *id) {
+                let ap = if unit.borrow().last_turn < turn {
+                    unit.borrow().ap.max_value()
+                } else {
+                    unit.borrow().ap.value()
+                };
+
+                let max_ap = unit.borrow().ap.max_value();
+                let color = BLUE;
+                let duration = None;
+
+                object.remove_status_animation("ap");
+                object.add_status_animation("ap", Animation::ap(ap, max_ap, color, duration));
+            }
+
             object.tick(get_time());
         }
 
@@ -201,6 +231,18 @@ impl AppComponent for Play {
 }
 
 impl Play {
+    fn units(&self) -> Vec<Rc<RefCell<Unit>>> {
+        let mut units = Vec::new();
+        for (_i, row) in self.game.grid.iter().enumerate() {
+            for (_j, tile) in row.iter().enumerate() {
+                if let Some(unit) = &tile.unit {
+                    units.push(unit.clone());
+                }
+            }
+        }
+        units
+    }
+
     fn deselect_unit(&mut self) {
         if let Some(unit) = &self.selected_unit {
             let object = self.objects.get_mut(&unit.borrow().recruit).unwrap();
@@ -481,6 +523,17 @@ impl PlayMenu {
             selected_item: 0,
         }
     }
+
+    pub fn new_test_preset() -> Self {
+        Self {
+            items: vec![
+                PlayMenuItem::NextTurn,
+                PlayMenuItem::BackToEditor,
+                PlayMenuItem::Exit,
+            ],
+            selected_item: 0,
+        }
+    }
 }
 
 impl Selectable for PlayMenu {
@@ -529,6 +582,7 @@ impl Display for PlayMenuItem {
         match self {
             PlayMenuItem::NextTurn => write!(f, "Next Turn"),
             PlayMenuItem::QuitGame => write!(f, "Quit Game"),
+            PlayMenuItem::BackToEditor => write!(f, "Back to Editor"),
             PlayMenuItem::Exit => write!(f, "Back to Main Menu"),
         }
     }

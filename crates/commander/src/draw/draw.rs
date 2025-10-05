@@ -17,7 +17,7 @@ use std::{cell::RefCell, f32::consts::PI, rc::Rc};
 
 use macroquad::prelude::*;
 
-use crate::draw::{Asset, Texture};
+use crate::draw::{Asset, Sprite, Texture};
 
 /// Default size of a tile in pixels, will be scaled to the window size.
 const TILE_SIZE: f32 = 20.0;
@@ -126,14 +126,10 @@ pub trait DrawAt {
 }
 
 pub fn draw_main_menu_background() {
-    let texture = Texture::Main.load().unwrap();
+    let frame = (get_time() * 10.0) as usize % 12;
+    let sprite = Sprite::MainAnim.load().unwrap();
 
-    DrawCommand::texture(texture)
-        .position(0.0, 0.0)
-        .color(WHITE)
-        .dest_size(Vec2::new(screen_width(), screen_height()))
-        .z_index(ZIndex::Background)
-        .schedule();
+    sprite.draw_frame(0.0, 0.0, frame, (1, 1));
 }
 
 /// Draw a cursor at the given tile.

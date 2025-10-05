@@ -28,12 +28,14 @@ mod draw;
 mod errors;
 mod game;
 mod input;
+mod sound;
 mod sui;
 mod types;
 
 use crate::{
     draw::{ASSETS, AssetStore},
     game::{App, Message as AppMessage, PlayMessage},
+    sound::{Background, SOUNDS, SoundStore},
     sui::{fetch::GameClient, tx::TxExecutor},
     types::{Game, Preset, Recruit, Replay},
 };
@@ -106,6 +108,16 @@ async fn main() -> Result<(), anyhow::Error> {
     ASSETS
         .with(|assets| assets.set(Arc::new(asset_store)))
         .unwrap();
+
+    let mut sound_store = SoundStore::new();
+    sound_store.load_all().await;
+
+    SOUNDS
+        .with(|sounds| sounds.set(Arc::new(sound_store)))
+        .unwrap();
+
+    // By default we play the main background sound.
+    Background::Main.play();
 
     // Main game loop.
     loop {

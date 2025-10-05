@@ -22,6 +22,14 @@ thread_local! {
 
 /// Macro to insert a sprite sheet into the asset store.
 ///
+/// Params in order:
+/// - the sprite HashMap
+/// - texture filename under `assets/`
+/// - frame count
+/// - frame width
+/// - y offset
+/// - enum + row list
+///
 /// Use:
 /// ```rust
 /// load_and_register_sprite!(self.sprites, "soldier.png", 6, 32.0 * 4.0, [
@@ -108,6 +116,7 @@ pub enum Sprite {
     Shadow,
     Wall,
     WallSnow,
+    MainAnim,
 }
 
 #[derive(Debug, Clone)]
@@ -251,6 +260,15 @@ impl AssetStore {
             32.0 * 4.0,
             0.2,
             [(Sprite::Shadow, 0)]
+        );
+
+        load_and_register_sprite!(
+            self.sprites,
+            "main-anim.png",
+            12,
+            166.0 * 4.0,
+            0.0,
+            [(Sprite::MainAnim, 0)]
         );
     }
 

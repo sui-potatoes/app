@@ -18,6 +18,7 @@ use crate::{
         play::{Play, PlayMessage},
     },
     input::InputCommand,
+    sound::Effect,
     types::{Game, ID, Preset, Recruit, Replay},
 };
 
@@ -180,10 +181,7 @@ impl App {
                 EditorMessage::None => {}
             },
             Screen::Play(play) => match play.handle_key_press(key) {
-                PlayMessage::Exit => match play.test_preset.take() {
-                    Some(preset) => self.screen = Screen::Editor(Editor::from(preset)),
-                    None => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                },
+                PlayMessage::Exit => self.screen = Screen::MainMenu(Menu::main(state.address)),
                 PlayMessage::NextTurn if play.test_preset.is_none() => {
                     self.send_message(Message::Play(PlayMessage::NextTurn));
                 }
@@ -193,6 +191,9 @@ impl App {
                 }
                 m @ PlayMessage::Move(_) if play.test_preset.is_none() => {
                     self.send_message(Message::Play(m));
+                }
+                PlayMessage::BackToEditor if play.test_preset.is_some() => {
+                    self.screen = Screen::Editor(Editor::from(play.test_preset.take().unwrap()));
                 }
                 _ => {}
             },
@@ -205,73 +206,89 @@ impl App {
             Screen::MainMenu(menu) => match key {
                 InputCommand::Up => menu.previous_item(),
                 InputCommand::Down => menu.next_item(),
-                InputCommand::Select => match menu.selected_item() {
-                    MainMenuItem::Address(_address) => {}
-                    MainMenuItem::Login => {
-                        // Starts the login process.
-                        self.send_message(Message::PrepareLogin);
+                InputCommand::Select => {
+                    Effect::Tada.play();
+
+                    match menu.selected_item() {
+                        MainMenuItem::Address(_address) => {}
+                        MainMenuItem::Login => {
+                            // Starts the login process.
+                            self.send_message(Message::PrepareLogin);
+                        }
+                        MainMenuItem::StartGame => {
+                            self.send_message(Message::StartGame);
+                            self.screen = Screen::CreatingGame;
+                        }
+                        MainMenuItem::Replays => {
+                            self.send_message(Message::FetchReplays);
+                            self.screen = Screen::Replays(Menu::replays(&state.replays))
+                        }
+                        MainMenuItem::Editor => {
+                            self.screen = Screen::Editor(Editor::new(10, 10));
+                        }
+                        MainMenuItem::Settings => self.screen = Screen::Settings(Menu::settings()),
+                        MainMenuItem::Quit => std::process::exit(0),
                     }
-                    MainMenuItem::StartGame => {
-                        self.send_message(Message::StartGame);
-                        self.screen = Screen::CreatingGame;
-                    }
-                    MainMenuItem::Replays => {
-                        self.send_message(Message::FetchReplays);
-                        self.screen = Screen::Replays(Menu::replays(&state.replays))
-                    }
-                    MainMenuItem::Editor => {
-                        self.screen = Screen::Editor(Editor::new(10, 10));
-                    }
-                    MainMenuItem::Settings => self.screen = Screen::Settings(Menu::settings()),
-                    MainMenuItem::Quit => std::process::exit(0),
-                },
+                }
                 _ => {}
             },
             Screen::Settings(menu) => match key {
                 InputCommand::Up => menu.previous_item(),
                 InputCommand::Down => menu.next_item(),
                 InputCommand::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                InputCommand::Select => match menu.selected_item() {
-                    SettingsMenuItem::WindowSize => {
-                        self.screen = Screen::WindowSettings(Menu::window_settings())
+                InputCommand::Select => {
+                    Effect::Tada.play();
+                    match menu.selected_item() {
+                        SettingsMenuItem::WindowSize => {
+                            self.screen = Screen::WindowSettings(Menu::window_settings())
+                        }
+                        SettingsMenuItem::Logout => {
+                            self.send_message(Message::Logout);
+                            self.screen = Screen::MainMenu(Menu::main(state.address));
+                        }
+                        SettingsMenuItem::Back => {
+                            Effect::Data.play();
+                            self.screen = Screen::MainMenu(Menu::main(state.address))
+                        }
                     }
-                    SettingsMenuItem::Logout => {
-                        self.send_message(Message::Logout);
-                        self.screen = Screen::MainMenu(Menu::main(state.address));
-                    }
-                    SettingsMenuItem::Back => {
-                        self.screen = Screen::MainMenu(Menu::main(state.address))
-                    }
-                },
+                }
                 _ => {}
             },
             Screen::Replays(menu) => match key {
                 InputCommand::Up => menu.previous_item(),
                 InputCommand::Down => menu.next_item(),
                 InputCommand::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                InputCommand::Select => match menu.selected_item() {
-                    ReplayMenuItem::Replay(replay) => {
-                        self.screen = Screen::Replay(Player::new(replay.data.clone()));
-                        self.send_message(Message::FetchPresets);
+                InputCommand::Select => {
+                    Effect::Tada.play();
+                    match menu.selected_item() {
+                        ReplayMenuItem::Replay(replay) => {
+                            self.screen = Screen::Replay(Player::new(replay.data.clone()));
+                            self.send_message(Message::FetchPresets);
+                        }
+                        ReplayMenuItem::Back => {
+                            Effect::Data.play();
+                            self.screen = Screen::MainMenu(Menu::main(state.address))
+                        }
                     }
-                    ReplayMenuItem::Back => {
-                        self.screen = Screen::MainMenu(Menu::main(state.address))
-                    }
-                },
+                }
                 _ => {}
             },
             Screen::WindowSettings(menu) => match key {
                 InputCommand::Up => menu.previous_item(),
                 InputCommand::Down => menu.next_item(),
                 InputCommand::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                InputCommand::Select => match menu.selected_item() {
-                    WindowSettingsMenuItem::SizeSmall => set_window_size(700, 700),
-                    WindowSettingsMenuItem::SizeMedium => set_window_size(1000, 1000),
-                    WindowSettingsMenuItem::SizeLarge => set_window_size(1200, 1200),
-                    WindowSettingsMenuItem::Back => {
-                        self.screen = Screen::MainMenu(Menu::main(state.address))
+                InputCommand::Select => {
+                    Effect::Tada.play();
+                    match menu.selected_item() {
+                        WindowSettingsMenuItem::SizeSmall => set_window_size(700, 700),
+                        WindowSettingsMenuItem::SizeMedium => set_window_size(1000, 1000),
+                        WindowSettingsMenuItem::SizeLarge => set_window_size(1200, 1200),
+                        WindowSettingsMenuItem::Back => {
+                            Effect::Data.play();
+                            self.screen = Screen::MainMenu(Menu::main(state.address))
+                        }
                     }
-                },
+                }
                 _ => {}
             },
         }
