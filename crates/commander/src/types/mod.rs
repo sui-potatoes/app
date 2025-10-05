@@ -16,7 +16,7 @@ use std::fmt::Display;
 
 use macroquad::prelude::*;
 use serde::{Deserialize, Serialize};
-use sui_sdk_types::Address;
+use sui_sdk_types::{Address, ObjectId};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct ID(pub Address);
@@ -350,5 +350,11 @@ impl Display for Direction {
 impl Default for ID {
     fn default() -> Self {
         Self(Address::ZERO)
+    }
+}
+
+impl Into<ObjectId> for ID {
+    fn into(self) -> ObjectId {
+        ObjectId::from(self.0)
     }
 }

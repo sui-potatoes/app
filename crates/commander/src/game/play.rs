@@ -11,7 +11,7 @@ use crate::{
         self, Align, Asset, Draw, DrawCommand, GridPath, Highlight, Sprite, SpriteSheet, Texture,
         ZIndex, grid_to_world,
     },
-    game::{Animation, AnimationType, AppComponent, GameObject},
+    game::{Animation, AnimationType, AppComponent, GameObject, Selectable},
     input::InputCommand,
     types::{Direction, Game, GameMap, History, ID, Preset, Target, Unit},
 };
@@ -41,12 +41,18 @@ pub struct PlayMenu {
 }
 
 #[derive(Clone)]
-enum PlayMenuItem {
+pub enum PlayMenuItem {
+    NextTurn,
+    QuitGame,
     Exit,
 }
 
 pub enum PlayMessage {
     None,
+    /// Perform a Move action.
+    Move(GridPath),
+    NextTurn,
+    QuitGame,
     Exit,
 }
 
@@ -65,95 +71,116 @@ impl AppComponent for Play {
     type Message = PlayMessage;
 
     fn handle_key_press(&mut self, key: InputCommand) -> PlayMessage {
-        match key {
-            InputCommand::Action => {} // no action yet
-            InputCommand::Menu => return PlayMessage::Exit,
-            InputCommand::Up => self.cursor.move_to(Direction::Up),
-            InputCommand::Down => self.cursor.move_to(Direction::Down),
-            InputCommand::Left => self.cursor.move_to(Direction::Left),
-            InputCommand::Right => self.cursor.move_to(Direction::Right),
-            InputCommand::Back => {
-                self.deselect_unit();
-                self.action_mode = ActionMode::Walk;
-            }
-            InputCommand::Select => {
-                let pos = self.cursor.position;
-
-                if self.selected_unit.is_none() {
-                    self.select_unit(pos);
-                    self.action_mode = ActionMode::Walk;
-
-                    if let Some(unit) = &self.selected_unit {
-                        let distance = unit.borrow().stats;
-                        let tiles = self.game.walkable_tiles(pos, distance.mobility() as u8);
-                        self.highlight = Some(Highlight(tiles, BLUE.with_alpha(0.2)));
-                    }
-                } else {
-                    match self.action_mode {
-                        ActionMode::Walk => {
-                            let unit_pos = self
-                                .game
-                                .unit_position(&self.selected_unit.as_ref().unwrap().borrow())
-                                .unwrap();
-
-                            if let Some(path) = self.game.trace_path(unit_pos, self.cursor.position)
-                            {
-                                if path.len() > 1 {
-                                    self.move_selected_unit(path);
-                                    self.deselect_unit();
-                                }
-                            }
+        match &mut self.mode {
+            Mode::Menu(menu) => match key {
+                InputCommand::Menu => self.mode = Mode::Play,
+                InputCommand::Up => menu.previous_item(),
+                InputCommand::Down => menu.next_item(),
+                InputCommand::Select => {
+                    return match menu.selected_item() {
+                        PlayMenuItem::NextTurn => {
+                            self.mode = Mode::Play;
+                            PlayMessage::NextTurn
                         }
-                        ActionMode::Shoot => {}
-                    }
+                        PlayMenuItem::QuitGame => PlayMessage::QuitGame,
+                        PlayMenuItem::Exit => PlayMessage::Exit,
+                    };
                 }
-            }
-            InputCommand::Tool => match self.action_mode.next() {
-                ActionMode::Walk => {
-                    self.highlight = None;
-                    if let Some(unit) = &self.selected_unit {
-                        let distance = unit.borrow().stats;
-                        let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
-                        let tiles = self
-                            .game
-                            .walkable_tiles(unit_pos, distance.mobility() as u8);
-
-                        self.game.targets(unit_pos).iter().for_each(|t| {
-                            self.objects
-                                .get_mut(&t.target_id)
-                                .map(|o| o.remove_status_animation("hit_chance"));
-                        });
-                        self.highlight = Some(Highlight(tiles, BLUE.with_alpha(0.2)));
-                    }
+                _ => {}
+            },
+            Mode::Play => match key {
+                InputCommand::Action => {} // no action yet
+                InputCommand::Menu => self.mode = Mode::Menu(PlayMenu::new()),
+                InputCommand::Up => self.cursor.move_to(Direction::Up),
+                InputCommand::Down => self.cursor.move_to(Direction::Down),
+                InputCommand::Left => self.cursor.move_to(Direction::Left),
+                InputCommand::Right => self.cursor.move_to(Direction::Right),
+                InputCommand::Back => {
+                    self.deselect_unit();
+                    self.action_mode = ActionMode::Walk;
                 }
-                ActionMode::Shoot => {
-                    self.highlight = None;
-                    if let Some(unit) = &self.selected_unit {
-                        let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
-                        let targets = self.game.targets(unit_pos);
+                InputCommand::Select => {
+                    let pos = self.cursor.position;
 
-                        targets.iter().for_each(|t| {
-                            if let Some(chance) = t.chance {
-                                if let Some(object) = self.objects.get_mut(&t.target_id) {
-                                    object.add_status_animation(
-                                        "hit_chance",
-                                        Animation::status(
-                                            format!("Hit chance: {}", chance),
-                                            24,
-                                            RED,
-                                            None,
-                                        ),
-                                    );
+                    if self.selected_unit.is_none() {
+                        self.select_unit(pos);
+                        self.action_mode = ActionMode::Walk;
+
+                        if let Some(unit) = &self.selected_unit {
+                            let distance = unit.borrow().stats;
+                            let tiles = self.game.walkable_tiles(pos, distance.mobility() as u8);
+                            self.highlight = Some(Highlight(tiles, BLUE.with_alpha(0.2)));
+                        }
+                    } else {
+                        match self.action_mode {
+                            ActionMode::Walk => {
+                                let unit_pos = self
+                                    .game
+                                    .unit_position(&self.selected_unit.as_ref().unwrap().borrow())
+                                    .unwrap();
+
+                                if let Some(path) =
+                                    self.game.trace_path(unit_pos, self.cursor.position)
+                                {
+                                    if path.len() > 1 {
+                                        let path = GridPath::new(path);
+                                        self.move_selected_unit(path.clone());
+                                        self.deselect_unit();
+                                        return PlayMessage::Move(path);
+                                    }
                                 }
                             }
-                        });
-
-                        self.highlight = Some(Highlight(
-                            targets.into_iter().map(|t| t.position).collect::<Vec<_>>(),
-                            RED.with_alpha(0.2),
-                        ));
+                            ActionMode::Shoot => {}
+                        }
                     }
                 }
+                InputCommand::Tool => match self.action_mode.next() {
+                    ActionMode::Walk => {
+                        self.highlight = None;
+                        if let Some(unit) = &self.selected_unit {
+                            let distance = unit.borrow().stats;
+                            let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
+                            let tiles = self
+                                .game
+                                .walkable_tiles(unit_pos, distance.mobility() as u8);
+
+                            self.game.targets(unit_pos).iter().for_each(|t| {
+                                self.objects
+                                    .get_mut(&t.target_id)
+                                    .map(|o| o.remove_status_animation("hit_chance"));
+                            });
+                            self.highlight = Some(Highlight(tiles, BLUE.with_alpha(0.2)));
+                        }
+                    }
+                    ActionMode::Shoot => {
+                        self.highlight = None;
+                        if let Some(unit) = &self.selected_unit {
+                            let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
+                            let targets = self.game.targets(unit_pos);
+
+                            targets.iter().for_each(|t| {
+                                if let Some(chance) = t.chance {
+                                    if let Some(object) = self.objects.get_mut(&t.target_id) {
+                                        object.add_status_animation(
+                                            "hit_chance",
+                                            Animation::status(
+                                                format!("Hit chance: {}", chance),
+                                                24,
+                                                RED,
+                                                None,
+                                            ),
+                                        );
+                                    }
+                                }
+                            });
+
+                            self.highlight = Some(Highlight(
+                                targets.into_iter().map(|t| t.position).collect::<Vec<_>>(),
+                                RED.with_alpha(0.2),
+                            ));
+                        }
+                    }
+                },
             },
         }
 
@@ -163,6 +190,10 @@ impl AppComponent for Play {
     fn tick(&mut self) {
         for (_id, object) in self.objects.iter_mut() {
             object.tick(get_time());
+        }
+
+        if let Mode::Menu(menu) = &mut self.mode {
+            menu.draw();
         }
 
         self.draw();
@@ -207,7 +238,7 @@ impl Play {
         }
     }
 
-    fn move_selected_unit(&mut self, grid_path: Vec<(u8, u8)>) {
+    fn move_selected_unit(&mut self, grid_path: GridPath) {
         if grid_path.is_empty() {
             return;
         }
@@ -216,7 +247,7 @@ impl Play {
             assert!(
                 self.game
                     .unit_position(&unit.borrow())
-                    .is_some_and(|pos| pos == grid_path[0])
+                    .is_some_and(|pos| pos == grid_path.0[0])
             );
 
             if unit.borrow().ap.value() == 0 {
@@ -227,8 +258,8 @@ impl Play {
 
             // Move the unit on the Map.
             {
-                let first = *grid_path.first().unwrap();
-                let last = *grid_path.last().unwrap();
+                let first = *grid_path.0.first().unwrap();
+                let last = *grid_path.0.last().unwrap();
                 let unit_rc = self.game.grid[first.0 as usize][first.1 as usize]
                     .unit
                     .take()
@@ -239,8 +270,7 @@ impl Play {
             };
 
             let obj = self.objects.get_mut(&unit.borrow().recruit).unwrap();
-            let path = GridPath::new(grid_path);
-            let mut animations = path
+            let mut animations = grid_path
                 .to_path_segments(self.game.dimensions())
                 .into_iter()
                 .map(|segment| segment.into())
@@ -440,6 +470,35 @@ impl Draw for PlayMenu {
     }
 }
 
+impl PlayMenu {
+    pub fn new() -> Self {
+        Self {
+            items: vec![
+                PlayMenuItem::NextTurn,
+                PlayMenuItem::QuitGame,
+                PlayMenuItem::Exit,
+            ],
+            selected_item: 0,
+        }
+    }
+}
+
+impl Selectable for PlayMenu {
+    type Item = PlayMenuItem;
+
+    fn next_item(&mut self) {
+        self.selected_item = (self.selected_item + 1) % self.items.len();
+    }
+
+    fn previous_item(&mut self) {
+        self.selected_item = (self.selected_item + self.items.len() - 1) % self.items.len();
+    }
+
+    fn selected_item(&self) -> &PlayMenuItem {
+        &self.items[self.selected_item]
+    }
+}
+
 impl ActionMode {
     pub fn next(&mut self) -> &Self {
         match self {
@@ -468,7 +527,9 @@ impl Display for ActionMode {
 impl Display for PlayMenuItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PlayMenuItem::Exit => write!(f, "Exit"),
+            PlayMenuItem::NextTurn => write!(f, "Next Turn"),
+            PlayMenuItem::QuitGame => write!(f, "Quit Game"),
+            PlayMenuItem::Exit => write!(f, "Back to Main Menu"),
         }
     }
 }

@@ -48,6 +48,8 @@ pub enum Message {
     FetchRecruits,
     /// Fetch the list of replays.
     FetchReplays,
+    /// Send a PlayMessage to the tokio runtime.
+    Play(PlayMessage),
 }
 
 pub enum Screen {
@@ -141,8 +143,10 @@ impl App {
             TokioMessage::StateUpdated => self.reload_screen(),
             TokioMessage::LoginStarted => self.screen = Screen::Login,
             TokioMessage::LoginFinished => self.reload_screen(),
+            TokioMessage::GameDestroyed => {
+                self.screen = Screen::MainMenu(Menu::main(self.state.lock().unwrap().address));
+            }
             TokioMessage::GameStarted => {
-                println!("Game started");
                 self.screen = Screen::Play(Play::from(
                     self.state
                         .lock()
@@ -178,9 +182,19 @@ impl App {
             Screen::Play(play) => match play.handle_key_press(key) {
                 PlayMessage::Exit => match play.test_preset.take() {
                     Some(preset) => self.screen = Screen::Editor(Editor::from(preset)),
-                    None => self.screen = Screen::MainMenu(Menu::main(state.address))
+                    None => self.screen = Screen::MainMenu(Menu::main(state.address)),
                 },
-                PlayMessage::None => {}
+                PlayMessage::NextTurn if play.test_preset.is_none() => {
+                    self.send_message(Message::Play(PlayMessage::NextTurn));
+                }
+                PlayMessage::QuitGame if play.test_preset.is_none() => {
+                    self.send_message(Message::Play(PlayMessage::QuitGame));
+                    self.screen = Screen::MainMenu(Menu::main(state.address))
+                }
+                m @ PlayMessage::Move(_) if play.test_preset.is_none() => {
+                    self.send_message(Message::Play(m));
+                }
+                _ => {}
             },
             Screen::Replay(player) => match player.handle_key_press(key) {
                 PlayerMessage::Exit => {

@@ -9,8 +9,9 @@ use crate::{
 
 use macroquad::prelude::Vec2;
 
+#[derive(Debug, Clone)]
 /// Representation of a `Path` on the grid.
-pub struct GridPath(Vec<(u8, u8)>);
+pub struct GridPath(pub Vec<(u8, u8)>);
 
 impl GridPath {
     /// Create a new `GridPath` from a list of coordinates. Performs validation
@@ -31,6 +32,10 @@ impl GridPath {
         });
 
         Self(path)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 
     /// Direction path is a representation of a Path as a start coordinate (

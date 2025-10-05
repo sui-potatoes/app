@@ -25,6 +25,7 @@ use sui_transaction_builder::{Function, Serialized, TransactionBuilder, unresolv
 use crate::{
     WithRef,
     config::{COMMANDER_OBJ, COMMANDER_PKG, SUI_COIN_TYPE},
+    draw::GridPath,
     types::Preset,
 };
 
@@ -214,6 +215,104 @@ impl TxExecutor {
             .object_id;
 
         Ok(game_id)
+    }
+
+    pub async fn move_unit(
+        &mut self,
+        game_id: ObjectId,
+        path: GridPath,
+    ) -> Result<TransactionEffectsV2, anyhow::Error> {
+        let rgp = self.rgp.unwrap_or(1000);
+        let gas_coins = self.get_gas_coins().await?;
+        let mut ptb = TransactionBuilder::new();
+
+        let game = self.get_shared_object_ref(game_id, true).await?;
+        let game_arg = ptb.input(game);
+        let path_arg = ptb.input(Serialized(&path.to_direction_path()));
+
+        ptb.move_call(
+            Function::new(
+                Address::from_hex(COMMANDER_PKG)?,
+                Identifier::new("commander")?,
+                Identifier::new("move_unit")?,
+                vec![],
+            ),
+            vec![game_arg, path_arg],
+        );
+
+        ptb.set_gas_price(rgp);
+        ptb.set_gas_budget(100_000_000);
+        ptb.set_sender(self.address);
+        ptb.add_gas_objects(gas_coins.iter().map(|coin| Input::from(coin.clone())));
+        ptb.set_expiration(self.max_epoch);
+
+        Ok(self.execute_tx(ptb.finish()?).await?)
+    }
+
+    pub async fn next_turn(
+        &mut self,
+        game_id: ObjectId,
+    ) -> Result<TransactionEffectsV2, anyhow::Error> {
+        let rgp = self.rgp.unwrap_or(1000);
+        let gas_coins = self.get_gas_coins().await?;
+        let mut ptb = TransactionBuilder::new();
+
+        let game = self.get_shared_object_ref(game_id, true).await?;
+        let game_arg = ptb.input(game);
+
+        ptb.move_call(
+            Function::new(
+                Address::from_hex(COMMANDER_PKG)?,
+                Identifier::new("commander")?,
+                Identifier::new("next_turn")?,
+                vec![],
+            ),
+            vec![game_arg],
+        );
+
+        ptb.set_gas_price(rgp);
+        ptb.set_gas_budget(100_000_000);
+        ptb.set_sender(self.address);
+        ptb.add_gas_objects(gas_coins.iter().map(|coin| Input::from(coin.clone())));
+        ptb.set_expiration(self.max_epoch);
+
+        Ok(self.execute_tx(ptb.finish()?).await?)
+    }
+
+    pub async fn quit_game(
+        &mut self,
+        game_id: ObjectId,
+    ) -> Result<TransactionEffectsV2, anyhow::Error> {
+        let rgp = self.rgp.unwrap_or(1000);
+        let gas_coins = self.get_gas_coins().await?;
+        let mut ptb = TransactionBuilder::new();
+
+        let registry = self
+            .get_shared_object_ref(ObjectId::from_str(COMMANDER_OBJ)?, true)
+            .await?;
+
+        let registry_arg = ptb.input(registry);
+        let game = self.get_shared_object_ref(game_id, true).await?;
+        let game_arg = ptb.input(game);
+        let save_replay_arg = ptb.input(Serialized(&true));
+
+        ptb.move_call(
+            Function::new(
+                Address::from_hex(COMMANDER_PKG)?,
+                Identifier::new("commander")?,
+                Identifier::new("destroy_game")?,
+                vec![],
+            ),
+            vec![registry_arg, game_arg, save_replay_arg],
+        );
+
+        ptb.set_gas_price(rgp);
+        ptb.set_gas_budget(100_000_000);
+        ptb.set_sender(self.address);
+        ptb.add_gas_objects(gas_coins.iter().map(|coin| Input::from(coin.clone())));
+        ptb.set_expiration(self.max_epoch);
+
+        Ok(self.execute_tx(ptb.finish()?).await?)
     }
 
     async fn get_gas_coins(&mut self) -> Result<Vec<WithRef<Coin>>, anyhow::Error> {

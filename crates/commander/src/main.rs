@@ -9,7 +9,6 @@ use std::{
         Arc, Mutex,
         mpsc::{Receiver, Sender, channel},
     },
-    time::Duration,
 };
 
 use gamepads::Gamepads;
@@ -34,7 +33,7 @@ mod types;
 
 use crate::{
     draw::{ASSETS, AssetStore},
-    game::{App, Message as AppMessage},
+    game::{App, Message as AppMessage, PlayMessage},
     sui::{fetch::GameClient, tx::TxExecutor},
     types::{Game, Preset, Recruit, Replay},
 };
@@ -46,6 +45,7 @@ pub enum Message {
     GameStarted,
     LoginStarted,
     LoginFinished,
+    GameDestroyed,
 }
 
 const SESSION_KEY: &str = "session";
@@ -208,12 +208,23 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                             state.presets = game_client.list_presets().await;
                         }
 
-                        if let Some(game) = STORAGE.lock().unwrap().get("active_game") {
-                            let game = serde_json::from_str::<Game>(game.as_ref()).unwrap();
-                            state.active_game = Some(game);
-                            println!("Game already started");
-                            tx.send(Message::GameStarted).unwrap();
-                            continue;
+                        // avoid state lock by moving the active game to a local variable
+                        let active_game = STORAGE.lock().unwrap().get("active_game").clone();
+                        if let Some(game) = active_game {
+                            let stored_game = serde_json::from_str::<Game>(game.as_ref()).unwrap();
+                            let game = game_client.get_game(stored_game.id.into()).await.ok();
+
+                            state.active_game = game;
+
+                            if let Some(_game) = &state.active_game {
+                                println!("Game already started");
+                                tx.send(Message::GameStarted).unwrap();
+                                continue;
+                            } else {
+                                println!("Previous game not found");
+                                STORAGE.lock().unwrap().remove("active_game");
+                                println!("Previous game removed");
+                            }
                         }
 
                         if state.active_game.is_some() {
@@ -221,21 +232,22 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                         }
 
                         if let Some(tx_runner) = tx_runner.as_mut() {
+                            println!("Starting new game");
                             match tx_runner.start_game(state.presets[0].clone()).await {
                                 Ok(game_id) => {
                                     println!("https://suiscan.xyz/testnet/object/{}", game_id);
-                                    std::thread::sleep(Duration::from_secs(5));
+                                    let game = game_client.get_game(game_id).await.ok();
 
-                                    let game = game_client
-                                        .get_game(game_id)
-                                        .await
-                                        .unwrap_or_else(|e| panic!("Error: {}", e));
+                                    state.active_game = game;
 
-                                    state.active_game = Some(game);
-                                    STORAGE.lock().unwrap().set(
-                                        "active_game",
-                                        &serde_json::to_string(&state.active_game).unwrap(),
-                                    );
+                                    if let Some(game) = &state.active_game {
+                                        println!("Game started");
+                                        tx.send(Message::GameStarted).unwrap();
+                                        STORAGE.lock().unwrap().set(
+                                            "active_game",
+                                            &serde_json::to_string(game).unwrap(),
+                                        );
+                                    }
 
                                     tx.send(Message::StateUpdated).unwrap();
                                 }
@@ -246,6 +258,55 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                             }
                         }
                     }
+                    AppMessage::Play(message) => match message {
+                        PlayMessage::Move(path) => {
+                            println!("Moving unit: {:?}", path);
+                            let state = state_arc.lock().unwrap();
+                            let result = tx_runner
+                                .as_mut()
+                                .unwrap()
+                                .move_unit(state.active_game.as_ref().unwrap().id.into(), path)
+                                .await
+                                .unwrap();
+
+                            println!("Result: {:?}", result.status);
+                        }
+                        PlayMessage::NextTurn => {
+                            let state = state_arc.lock().unwrap();
+                            let result = tx_runner
+                                .as_mut()
+                                .unwrap()
+                                .next_turn(state.active_game.as_ref().unwrap().id.into())
+                                .await
+                                .unwrap();
+
+                            println!("Result: {:?}", result.status);
+                        }
+                        PlayMessage::QuitGame => {
+                            let game_id = state_arc
+                                .lock()
+                                .unwrap()
+                                .active_game
+                                .as_ref()
+                                .unwrap()
+                                .id
+                                .into();
+
+                            let result = tx_runner
+                                .as_mut()
+                                .unwrap()
+                                .quit_game(game_id)
+                                .await
+                                .unwrap();
+
+                            println!("Result: {:?}", result.status);
+
+                            state_arc.lock().unwrap().active_game = None;
+                            STORAGE.lock().unwrap().remove("active_game");
+                            tx.send(Message::GameDestroyed).unwrap();
+                        }
+                        _ => {}
+                    },
                     AppMessage::FetchPresets => {
                         #[cfg(feature = "cache")]
                         if let Some(state) = STORAGE.lock().unwrap().get("presets") {
