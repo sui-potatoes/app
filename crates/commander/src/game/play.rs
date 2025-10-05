@@ -52,6 +52,7 @@ pub enum PlayMessage {
     None,
     /// Perform a Move action.
     Move(GridPath),
+    Attack(Vec2, Vec2),
     BackToEditor,
     NextTurn,
     QuitGame,

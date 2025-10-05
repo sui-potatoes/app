@@ -6,6 +6,7 @@
 
 use std::{collections::HashMap, ops::Deref, str::FromStr, time::Instant};
 
+use macroquad::math::Vec2;
 use serde::Deserialize;
 use sui_crypto::{SuiSigner, ed25519::Ed25519PrivateKey};
 use sui_rpc::{
@@ -237,6 +238,48 @@ impl TxExecutor {
                 vec![],
             ),
             vec![game_arg, path_arg],
+        );
+
+        ptb.set_gas_price(rgp);
+        ptb.set_gas_budget(100_000_000);
+        ptb.set_sender(self.address);
+        ptb.add_gas_objects(gas_coins.iter().map(|coin| Input::from(coin.clone())));
+        ptb.set_expiration(self.max_epoch);
+
+        Ok(self.execute_tx(ptb.finish()?).await?)
+    }
+
+    pub async fn perform_attack(
+        &mut self,
+        game_id: ObjectId,
+        p0: Vec2,
+        p1: Vec2,
+    ) -> Result<TransactionEffectsV2, anyhow::Error> {
+        let rgp = self.rgp.unwrap_or(1000);
+        let gas_coins = self.get_gas_coins().await?;
+        let mut ptb = TransactionBuilder::new();
+
+        let game = self.get_shared_object_ref(game_id, true).await?;
+        let rng = self
+            .get_shared_object_ref(ObjectId::from_str("0x8")?, false)
+            .await?;
+
+        let x0 = ptb.input(Serialized(&(p0.x as u16)));
+        let y0 = ptb.input(Serialized(&(p0.y as u16)));
+        let x1 = ptb.input(Serialized(&(p1.x as u16)));
+        let y1 = ptb.input(Serialized(&(p1.y as u16)));
+
+        let game_arg = ptb.input(game);
+        let rng_arg = ptb.input(rng);
+
+        ptb.move_call(
+            Function::new(
+                Address::from_hex(COMMANDER_PKG)?,
+                Identifier::new("commander")?,
+                Identifier::new("perform_attack")?,
+                vec![],
+            ),
+            vec![game_arg, rng_arg, x0, y0, x1, y1],
         );
 
         ptb.set_gas_price(rgp);
