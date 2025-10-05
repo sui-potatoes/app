@@ -24,9 +24,9 @@ impl Default for Unit {
     fn default() -> Self {
         Self {
             recruit: ID(Address::ZERO),
-            ap: Param(2, 0),
-            hp: Param(15, 0),
-            ammo: Param(5, 0),
+            ap: Param(2, 2),
+            hp: Param(8, 8),
+            ammo: Param(4, 4),
             grenade_used: false,
             stats: Stats::default(),
             last_turn: 0,

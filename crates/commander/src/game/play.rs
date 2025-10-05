@@ -388,7 +388,6 @@ impl From<Preset> for Game {
         for (i, pos) in positions.iter().enumerate() {
             map.grid[pos[0] as usize][pos[1] as usize].unit = Some(Unit {
                 recruit: ID(Address::from_hex(format!("0x{}", i)).unwrap()),
-                ap: Param::new(2, 2),
                 ..Default::default()
             });
         }
