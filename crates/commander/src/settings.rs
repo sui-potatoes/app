@@ -54,10 +54,7 @@ impl Settings {
         }
 
         // update main menu volume
-        Background::Main.stop();
-        Background::Main.play();
-
-        // effects volume is updated on each effect play automatically
+        Background::Main.set_volume(self.main_menu_volume);
     }
 }
 

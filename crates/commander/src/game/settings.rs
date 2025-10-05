@@ -5,10 +5,11 @@ use std::fmt::Display;
 
 use super::menu::*;
 use crate::{
-    draw::Draw,
+    draw::{Draw, draw},
     game::AppComponent,
     input::InputCommand,
     settings::{Settings, WindowSize},
+    sound::Effect,
 };
 
 #[derive(Debug, Clone)]
@@ -66,6 +67,7 @@ impl AppComponent for SettingsScreen {
     }
 
     fn tick(&mut self) {
+        draw::draw_main_menu_background();
         self.menu.draw();
     }
 }
@@ -97,6 +99,9 @@ impl Menu<SettingsScreenItem> {
             SettingsScreenItem::EffectsVolume => {
                 settings.effects_volume += 0.1;
                 settings.effects_volume = settings.effects_volume.clamp(0.0, 1.0);
+                settings.save();
+
+                Effect::Too.play();
             }
             SettingsScreenItem::MainMenuVolume => {
                 settings.main_menu_volume += 0.1;
@@ -120,6 +125,9 @@ impl Menu<SettingsScreenItem> {
             SettingsScreenItem::EffectsVolume => {
                 settings.effects_volume -= 0.1;
                 settings.effects_volume = settings.effects_volume.clamp(0.0, 1.0);
+                settings.save();
+
+                Effect::Too.play();
             }
             SettingsScreenItem::MainMenuVolume => {
                 settings.main_menu_volume -= 0.1;
@@ -147,6 +155,16 @@ impl Display for SettingsScreenItem {
             SettingsScreenItem::Faucet => write!(f, "Open Faucet"),
             SettingsScreenItem::Logout => write!(f, "Logout"),
             SettingsScreenItem::Back => write!(f, "Back"),
+        }
+    }
+}
+
+impl Into<i32> for WindowSize {
+    fn into(self) -> i32 {
+        match self {
+            WindowSize::Small => 750,
+            WindowSize::Medium => 1000,
+            WindowSize::Large => 1250,
         }
     }
 }

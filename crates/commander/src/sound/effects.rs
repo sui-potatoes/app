@@ -3,7 +3,9 @@
 
 use std::{collections::HashMap, path::Path, rc::Rc, sync::Arc};
 
-use macroquad::audio::{PlaySoundParams, Sound, load_sound, play_sound, stop_sound};
+use macroquad::audio::{
+    PlaySoundParams, Sound, load_sound, play_sound, set_sound_volume, stop_sound,
+};
 use macroquad::prelude::*;
 
 use once_cell::sync::OnceCell;
@@ -95,6 +97,11 @@ impl Background {
                 volume: Settings::load().main_menu_volume,
             },
         );
+    }
+
+    pub fn set_volume(&self, volume: f32) {
+        let sound = self.load().unwrap();
+        set_sound_volume(sound.as_ref(), volume);
     }
 
     pub fn stop(&self) {

@@ -36,6 +36,7 @@ mod types;
 use crate::{
     draw::{ASSETS, AssetStore},
     game::{App, Message as AppMessage, PlayMessage},
+    settings::Settings,
     sound::{Background, SOUNDS, SoundStore},
     sui::{fetch::GameClient, tx::TxExecutor},
     types::{Game, Preset, Recruit, Replay},
@@ -75,10 +76,12 @@ pub struct State {
 
 /// Configure Macroquad on start.
 fn window_conf() -> macroquad::window::Conf {
+    let settings = Settings::load();
+
     Conf {
         window_title: "Commander".to_owned(),
-        window_width: 800,
-        window_height: 800,
+        window_width: settings.window_size.clone().into(),
+        window_height: settings.window_size.clone().into(),
         fullscreen: false,
         window_resizable: true,
         icon: Some(Icon::miniquad_logo()),
