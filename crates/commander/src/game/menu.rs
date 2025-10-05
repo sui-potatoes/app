@@ -48,21 +48,6 @@ pub enum ReplayMenuItem {
 }
 
 #[derive(Debug, Clone)]
-pub enum SettingsMenuItem {
-    WindowSize,
-    Logout,
-    Back,
-}
-
-#[derive(Debug, Clone)]
-pub enum WindowSettingsMenuItem {
-    SizeSmall,
-    SizeMedium,
-    SizeLarge,
-    Back,
-}
-
-#[derive(Debug, Clone)]
 pub enum RecruitSubMenuItem {
     Stats,
     Weapon,
@@ -117,37 +102,6 @@ impl Menu<ReplayMenuItem> {
                 .collect(),
             selected_item: 0,
             window: Some(20),
-        }
-    }
-}
-
-impl Menu<SettingsMenuItem> {
-    pub fn settings() -> Self {
-        Self {
-            title: Some("Settings".to_string()),
-            items: vec![
-                SettingsMenuItem::WindowSize,
-                SettingsMenuItem::Logout,
-                SettingsMenuItem::Back,
-            ],
-            selected_item: 0,
-            window: None,
-        }
-    }
-}
-
-impl Menu<WindowSettingsMenuItem> {
-    pub fn window_settings() -> Self {
-        Self {
-            title: Some("Window Settings".to_string()),
-            items: vec![
-                WindowSettingsMenuItem::SizeSmall,
-                WindowSettingsMenuItem::SizeMedium,
-                WindowSettingsMenuItem::SizeLarge,
-                WindowSettingsMenuItem::Back,
-            ],
-            selected_item: 0,
-            window: None,
         }
     }
 }
@@ -273,27 +227,6 @@ impl Display for ReplayMenuItem {
                 )
             }
             ReplayMenuItem::Back => write!(f, "Back"),
-        }
-    }
-}
-
-impl Display for SettingsMenuItem {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SettingsMenuItem::WindowSize => write!(f, "Window Size"),
-            SettingsMenuItem::Logout => write!(f, "Logout"),
-            SettingsMenuItem::Back => write!(f, "Back"),
-        }
-    }
-}
-
-impl Display for WindowSettingsMenuItem {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            WindowSettingsMenuItem::SizeSmall => write!(f, "Small (700x700)"),
-            WindowSettingsMenuItem::SizeMedium => write!(f, "Medium (1000x1000)"),
-            WindowSettingsMenuItem::SizeLarge => write!(f, "Large (1200x1200)"),
-            WindowSettingsMenuItem::Back => write!(f, "Back"),
         }
     }
 }

@@ -85,6 +85,12 @@ pub enum AnimationType {
         max_ap: u16,
         color: Color,
     },
+    /// HP animation. Shows the number of HP the object has.
+    HP {
+        hp: u16,
+        max_hp: u16,
+        color: Color,
+    },
 }
 
 impl GameObject {
@@ -277,6 +283,16 @@ impl Animation {
         }
     }
 
+    pub fn hp(hp: u16, max_hp: u16, color: Color, duration: Option<f64>) -> Self {
+        Self {
+            duration,
+            start_time: get_time(),
+            type_: AnimationType::HP { hp, max_hp, color },
+            on_end: None,
+            chain: None,
+        }
+    }
+
     /// Returns the final position of the animation.
     pub fn end_position(&self) -> Option<Vec2> {
         match &self.type_ {
@@ -355,6 +371,25 @@ impl Draw for GameObject {
                         .schedule();
                     }
                 }
+                // Draw HP squares in the bottom of the object, stacked horizontally.
+                AnimationType::HP { hp, max_hp, color } => {
+                    let (scale_x, scale_y) = draw::get_scale(self.dimensions);
+                    let padding = 2.0;
+                    let width = (scale_x * TILE_WIDTH - padding) / (*max_hp as f32);
+                    let height = 4.0;
+
+                    for i in 0..*hp {
+                        DrawCommand::rectangle(
+                            self.position.x + padding + (i as f32 * width),
+                            self.position.y + (TILE_HEIGHT * scale_y) - height - padding,
+                            width - padding,
+                            height,
+                        )
+                        .color(*color)
+                        .z_index(ZIndex::UnitStatus)
+                        .schedule();
+                    }
+                }
                 AnimationType::StaticSprite { frame, sprite, .. } => {
                     sprite.draw_frame_with_index(
                         self.position.x,
@@ -404,6 +439,8 @@ impl Draw for GameObject {
             ),
             // AP is only drawn as status.
             AnimationType::AP { .. } => {}
+            // HP is only drawn as status.
+            AnimationType::HP { .. } => {}
             AnimationType::Status {
                 text,
                 font_size,

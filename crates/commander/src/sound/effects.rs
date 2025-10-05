@@ -10,6 +10,7 @@ use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 
 use crate::draw::Asset;
+use crate::settings::Settings;
 
 thread_local! {
     pub static SOUNDS: OnceCell<Arc<SoundStore>> = OnceCell::new();
@@ -77,7 +78,7 @@ impl Effect {
         play_sound(
             sound.as_ref(),
             PlaySoundParams {
-                volume: 1.0,
+                volume: Settings::load().effects_volume,
                 looped: false,
             },
         );
@@ -91,7 +92,7 @@ impl Background {
             sound.as_ref(),
             PlaySoundParams {
                 looped: true,
-                volume: 0.7,
+                volume: Settings::load().main_menu_volume,
             },
         );
     }

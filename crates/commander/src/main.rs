@@ -28,6 +28,7 @@ mod draw;
 mod errors;
 mod game;
 mod input;
+mod settings;
 mod sound;
 mod sui;
 mod types;

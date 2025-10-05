@@ -205,13 +205,19 @@ impl AppComponent for Play {
 
         for (id, object) in self.objects.iter_mut() {
             if let Some(unit) = units.iter().find(|u| u.borrow().recruit == *id) {
-                let ap = unit.borrow().ap.value();
-                let max_ap = unit.borrow().ap.max_value();
-                let color = BLUE;
-                let duration = None;
+                let unit = unit.borrow();
 
                 object.remove_status_animation("ap");
-                object.add_status_animation("ap", Animation::ap(ap, max_ap, color, duration));
+                object.add_status_animation(
+                    "ap",
+                    Animation::ap(unit.ap.value(), unit.ap.max_value(), BLUE, None),
+                );
+
+                object.remove_status_animation("hp");
+                object.add_status_animation(
+                    "hp",
+                    Animation::hp(unit.hp.value(), unit.hp.max_value(), RED, None),
+                );
             }
 
             object.tick(get_time());

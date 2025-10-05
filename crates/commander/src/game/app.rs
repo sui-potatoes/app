@@ -14,7 +14,7 @@ use crate::{
     Message as TokioMessage, State, WithRef,
     draw::*,
     game::{
-        Editor, EditorMessage,
+        Editor, EditorMessage, SettingsScreen, SettingsScreenMessage,
         play::{Play, PlayMessage},
     },
     input::InputCommand,
@@ -69,9 +69,7 @@ pub enum Screen {
     /// Play a replay.
     Replay(Player),
     /// Show settings menu.
-    Settings(Menu<SettingsMenuItem>),
-    /// Show window settings menu.
-    WindowSettings(Menu<WindowSettingsMenuItem>),
+    Settings(SettingsScreen),
 }
 
 #[derive(Debug, Clone)]
@@ -226,33 +224,29 @@ impl App {
                         MainMenuItem::Editor => {
                             self.screen = Screen::Editor(Editor::new(10, 10));
                         }
-                        MainMenuItem::Settings => self.screen = Screen::Settings(Menu::settings()),
+                        MainMenuItem::Settings => {
+                            self.screen = Screen::Settings(SettingsScreen::new())
+                        }
                         MainMenuItem::Quit => std::process::exit(0),
                     }
                 }
                 _ => {}
             },
-            Screen::Settings(menu) => match key {
-                InputCommand::Up => menu.previous_item(),
-                InputCommand::Down => menu.next_item(),
-                InputCommand::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                InputCommand::Select => {
-                    Effect::Tada.play();
-                    match menu.selected_item() {
-                        SettingsMenuItem::WindowSize => {
-                            self.screen = Screen::WindowSettings(Menu::window_settings())
-                        }
-                        SettingsMenuItem::Logout => {
-                            self.send_message(Message::Logout);
-                            self.screen = Screen::MainMenu(Menu::main(state.address));
-                        }
-                        SettingsMenuItem::Back => {
-                            Effect::Data.play();
-                            self.screen = Screen::MainMenu(Menu::main(state.address))
-                        }
+            Screen::Settings(menu) => match menu.handle_key_press(key) {
+                SettingsScreenMessage::Exit => {
+                    self.screen = Screen::MainMenu(Menu::main(state.address));
+                }
+                SettingsScreenMessage::Faucet => {
+                    if let Some(address) = state.address {
+                        println!("Opening faucet for address: {}", address);
+                        open::that(format!("https://faucet.sui.io/?address={}", address)).unwrap();
                     }
                 }
-                _ => {}
+                SettingsScreenMessage::Logout => {
+                    self.send_message(Message::Logout);
+                    self.screen = Screen::MainMenu(Menu::main(state.address));
+                }
+                SettingsScreenMessage::None => {}
             },
             Screen::Replays(menu) => match key {
                 InputCommand::Up => menu.previous_item(),
@@ -273,29 +267,12 @@ impl App {
                 }
                 _ => {}
             },
-            Screen::WindowSettings(menu) => match key {
-                InputCommand::Up => menu.previous_item(),
-                InputCommand::Down => menu.next_item(),
-                InputCommand::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
-                InputCommand::Select => {
-                    Effect::Tada.play();
-                    match menu.selected_item() {
-                        WindowSettingsMenuItem::SizeSmall => set_window_size(700, 700),
-                        WindowSettingsMenuItem::SizeMedium => set_window_size(1000, 1000),
-                        WindowSettingsMenuItem::SizeLarge => set_window_size(1200, 1200),
-                        WindowSettingsMenuItem::Back => {
-                            Effect::Data.play();
-                            self.screen = Screen::MainMenu(Menu::main(state.address))
-                        }
-                    }
-                }
-                _ => {}
-            },
         }
     }
 
     pub fn tick(&mut self) {
         match &mut self.screen {
+            Screen::Settings(settings) => settings.tick(),
             Screen::Replay(player) => player.tick(),
             Screen::Play(play) => play.tick(),
             _ => self.draw(),
@@ -314,11 +291,7 @@ impl App {
             Screen::CreatingGame => return,
             Screen::MainMenu(_) | Screen::Login => Screen::MainMenu(Menu::main(state.address)),
             Screen::Replays(_) => Screen::Replays(Menu::replays(&state.replays)),
-            Screen::Replay(_)
-            | Screen::Play(_)
-            | Screen::Settings(_)
-            | Screen::Editor(_)
-            | Screen::WindowSettings(_) => return,
+            Screen::Replay(_) | Screen::Play(_) | Screen::Settings(_) | Screen::Editor(_) => return,
         };
 
         self.screen = screen;
@@ -338,14 +311,6 @@ impl Draw for App {
                 menu.draw()
             }
             Screen::Replays(menu) => {
-                draw::draw_main_menu_background();
-                menu.draw()
-            }
-            Screen::Settings(menu) => {
-                draw::draw_main_menu_background();
-                menu.draw()
-            }
-            Screen::WindowSettings(menu) => {
                 draw::draw_main_menu_background();
                 menu.draw()
             }
@@ -376,6 +341,7 @@ impl Draw for App {
             }
             Screen::Play(_play) => unreachable!("Play manages its own draw"),
             Screen::Replay(_player) => unreachable!("Player manages its own draw"),
+            Screen::Settings(_settings) => unreachable!("Settings manages its own draw"),
         }
     }
 }
