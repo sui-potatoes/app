@@ -4,11 +4,13 @@
 
 mod game_map;
 mod map;
+mod path;
 mod stats;
 mod unit;
 
 pub use game_map::*;
 pub use map::*;
+pub use path::*;
 pub use stats::*;
 pub use unit::*;
 
@@ -76,6 +78,10 @@ impl Display for Record {
 pub struct Param(u16, u16);
 
 impl Param {
+    pub fn new(value: u16, max_value: u16) -> Self {
+        Self(value, max_value)
+    }
+
     pub fn value(&self) -> u16 {
         self.0
     }
@@ -86,6 +92,10 @@ impl Param {
 
     pub fn decrease(&mut self, amount: u16) {
         self.0 = self.0.saturating_sub(amount);
+    }
+
+    pub fn reset(&mut self) {
+        self.0 = self.1;
     }
 }
 

@@ -58,8 +58,21 @@ impl GameMap {
         }
     }
 
-    pub fn next_turn(&mut self) {
+    pub fn next_turn(&mut self, update_units: bool) {
         self.turn += 1;
+
+        if update_units {
+            for row in self.grid.iter_mut() {
+                for tile in row.iter_mut() {
+                    if let Some(unit) = &tile.unit {
+                        unit.borrow_mut().ap.reset();
+                        unit.borrow_mut().last_turn = self.turn;
+
+                        println!("Reset AP for unit: {:?}", unit.borrow().ap);
+                    }
+                }
+            }
+        }
     }
 
     pub fn dimensions(&self) -> (u8, u8) {

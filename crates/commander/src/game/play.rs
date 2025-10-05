@@ -8,12 +8,12 @@ use sui_sdk_types::Address;
 
 use crate::{
     draw::{
-        self, Align, Asset, Draw, DrawCommand, GridPath, Highlight, Sprite, SpriteSheet, Texture,
-        ZIndex, grid_to_world,
+        self, Align, Asset, Draw, DrawCommand, Highlight, Sprite, SpriteSheet, Texture, ZIndex,
+        grid_to_world,
     },
     game::{Animation, AnimationType, AppComponent, GameObject, Selectable},
     input::InputCommand,
-    types::{Direction, Game, GameMap, History, ID, Preset, Target, Unit},
+    types::{Direction, Game, GameMap, GridPath, History, ID, Param, Preset, Target, Unit},
 };
 
 pub struct Play {
@@ -83,7 +83,7 @@ impl AppComponent for Play {
                     return match menu.selected_item() {
                         PlayMenuItem::NextTurn => {
                             self.mode = Mode::Play;
-                            self.game.next_turn();
+                            self.game.next_turn(self.test_preset.is_some());
                             PlayMessage::NextTurn
                         }
                         PlayMenuItem::BackToEditor => PlayMessage::BackToEditor,
@@ -201,16 +201,11 @@ impl AppComponent for Play {
 
     fn tick(&mut self) {
         let units = self.units();
-        let turn = self.game.turn;
+        // let turn = self.game.turn;
 
         for (id, object) in self.objects.iter_mut() {
             if let Some(unit) = units.iter().find(|u| u.borrow().recruit == *id) {
-                let ap = if unit.borrow().last_turn < turn {
-                    unit.borrow().ap.max_value()
-                } else {
-                    unit.borrow().ap.value()
-                };
-
+                let ap = unit.borrow().ap.value();
                 let max_ap = unit.borrow().ap.max_value();
                 let color = BLUE;
                 let duration = None;
@@ -393,6 +388,7 @@ impl From<Preset> for Game {
         for (i, pos) in positions.iter().enumerate() {
             map.grid[pos[0] as usize][pos[1] as usize].unit = Some(Unit {
                 recruit: ID(Address::from_hex(format!("0x{}", i)).unwrap()),
+                ap: Param::new(2, 2),
                 ..Default::default()
             });
         }

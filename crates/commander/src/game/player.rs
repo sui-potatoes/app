@@ -16,12 +16,12 @@ use super::{Animation, AnimationType, GameObject};
 use crate::{
     config::{MENU_FONT_SIZE as FONT_SIZE, TILE_HEIGHT, TILE_WIDTH},
     draw::{
-        self, Align, Asset, Draw, DrawCommand, GridPath, Highlight, Sprite, Texture, ZIndex,
-        draw_highlight, grid_to_world,
+        self, Align, Asset, Draw, DrawCommand, Highlight, Sprite, Texture, ZIndex, draw_highlight,
+        grid_to_world,
     },
     game::AppComponent,
     input::InputCommand,
-    types::{Cursor, Direction, GameMap, History, ID, Map, Preset, Record, Replay, Unit},
+    types::{Cursor, Direction, GameMap, GridPath, History, ID, Map, Preset, Record, Replay, Unit},
 };
 
 /// A Player for `Replay`s. Allows playing the replay step by step.

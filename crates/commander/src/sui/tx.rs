@@ -25,8 +25,7 @@ use sui_transaction_builder::{Function, Serialized, TransactionBuilder, unresolv
 use crate::{
     WithRef,
     config::{COMMANDER_OBJ, COMMANDER_PKG, SUI_COIN_TYPE},
-    draw::GridPath,
-    types::Preset,
+    types::{GridPath, Preset},
 };
 
 pub struct TxExecutor {
