@@ -22,6 +22,9 @@ use crate::draw::{Asset, Sprite, Texture};
 /// Default size of a tile in pixels, will be scaled to the window size.
 const TILE_SIZE: f32 = 20.0;
 
+/// Padding around the playable map.
+pub const MAP_PADDING: f32 = 20.0;
+
 // Safe to use in the main thread, forces the use of a single thread. Hence,
 // allows using RefCell which doesn't implement Sync for 'static lifetime.
 thread_local! {
@@ -90,11 +93,12 @@ pub enum DrawCommand {
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq, PartialOrd, Ord, Eq)]
 pub enum ZIndex {
-    Background = 0,
-    Grid = 1,
-    TopCover = 2,
-    Highlight = 3,
-    Cursor = 4,
+    BlackBackground = 0,
+    Background = 1,
+    Grid = 2,
+    TopCover = 3,
+    Highlight = 4,
+    Cursor = 5,
     UnitShadow = 10,
     Unit = 11,
     Obstacle = 20,
@@ -144,7 +148,7 @@ pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8), color: Color) {
     let height = TILE_SIZE * scale_y - thickness;
 
     DrawRectangleLinesBuilder::new()
-        .position(x, y)
+        .position(x + MAP_PADDING, y + MAP_PADDING)
         .dimensions(width, height)
         .thickness(thickness)
         .color(color)
@@ -156,8 +160,8 @@ pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8), color: Color) {
 pub fn draw_highlight(highlight: &Highlight, dimensions: (u8, u8)) {
     let (scale_x, scale_y) = get_scale(dimensions);
     for (hx, hy) in &highlight.0 {
-        let x = *hy as f32 * TILE_SIZE * scale_x;
-        let y = *hx as f32 * TILE_SIZE * scale_y;
+        let x = *hy as f32 * TILE_SIZE * scale_x + MAP_PADDING;
+        let y = *hx as f32 * TILE_SIZE * scale_y + MAP_PADDING;
 
         DrawRectangleBuilder::new()
             .position(x, y)
@@ -180,12 +184,12 @@ pub fn draw_path(path: &[(u8, u8)], dimensions: (u8, u8)) {
 
         DrawLineBuilder::new()
             .start(
-                (y1 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
-                (x1 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
+                (y1 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0 + MAP_PADDING,
+                (x1 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0 + MAP_PADDING,
             )
             .end(
-                (y2 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
-                (x2 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
+                (y2 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0 + MAP_PADDING,
+                (x2 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0 + MAP_PADDING,
             )
             .color(BLUE)
             .thickness(thickness)
@@ -205,8 +209,8 @@ pub fn draw_texture_background(dimensions: (u8, u8), texture: Texture) {
         for x in 0..width as i32 {
             DrawCommand::texture(texture.clone())
                 .position(
-                    x as f32 * TILE_SIZE * scale_x,
-                    y as f32 * TILE_SIZE * scale_y,
+                    x as f32 * TILE_SIZE * scale_x + MAP_PADDING,
+                    y as f32 * TILE_SIZE * scale_y + MAP_PADDING,
                 )
                 .color(WHITE)
                 .dest_size(Vec2::new(TILE_SIZE * scale_x, TILE_SIZE * scale_y))
@@ -221,16 +225,16 @@ pub fn get_scale(dimensions: (u8, u8)) -> (f32, f32) {
     let (screen_width, screen_height) = (screen_width(), screen_height());
     let (width, height) = (dimensions.0 as f32, dimensions.1 as f32);
     (
-        screen_width / (width * TILE_SIZE),
-        screen_height / (height * TILE_SIZE),
+        (screen_width - MAP_PADDING * 2.0) / (width * TILE_SIZE),
+        (screen_height - MAP_PADDING * 2.0) / (height * TILE_SIZE),
     )
 }
 
 pub fn grid_to_world(p: (u8, u8), dimensions: (u8, u8)) -> Vec2 {
     let (scale_x, scale_y) = get_scale(dimensions);
     Vec2::new(
-        p.1 as f32 * TILE_SIZE * scale_x,
-        p.0 as f32 * TILE_SIZE * scale_y,
+        p.1 as f32 * TILE_SIZE * scale_x + MAP_PADDING,
+        p.0 as f32 * TILE_SIZE * scale_y + MAP_PADDING,
     )
 }
 
