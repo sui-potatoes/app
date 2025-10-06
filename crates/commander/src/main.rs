@@ -39,7 +39,7 @@ use crate::{
     settings::Settings,
     sound::{Background, SOUNDS, SoundStore},
     sui::{fetch::GameClient, tx::TxExecutor},
-    types::{Game, Preset, Recruit, Replay},
+    types::{Game, History, Preset, Recruit, Replay},
 };
 
 /// Messages sent from the tokio runtime to the Application.
@@ -50,6 +50,7 @@ pub enum Message {
     LoginStarted,
     LoginFinished,
     GameDestroyed,
+    PlayEffects(History),
 }
 
 const SESSION_KEY: &str = "session";
@@ -281,6 +282,7 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                                 Ok(game_id) => {
                                     println!("https://suiscan.xyz/testnet/object/{}", game_id);
                                     let game = game_client.get_game(game_id).await.ok();
+                                    println!("Fetched game {}", game_id);
 
                                     state.active_game = game;
 
@@ -293,7 +295,7 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                                         );
                                     }
 
-                                    tx.send(Message::StateUpdated).unwrap();
+                                    // tx.send(Message::StateUpdated).unwrap();
                                 }
                                 Err(err) => {
                                     eprintln!("Error: {}", err);
@@ -305,26 +307,70 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                     AppMessage::Play(message) => match message {
                         PlayMessage::Move(path) => {
                             println!("Moving unit: {:?}", path);
-                            let state = state_arc.lock().unwrap();
-                            let result = tx_runner
+                            let game_id =
+                                state_arc.lock().unwrap().active_game.as_ref().unwrap().id;
+                            let (effects, events) = tx_runner
                                 .as_mut()
                                 .unwrap()
-                                .move_unit(state.active_game.as_ref().unwrap().id.into(), path)
+                                .move_unit(game_id.into(), path)
                                 .await
                                 .unwrap();
 
-                            println!("Result: {:?}", result.status);
+                            println!("Result: {:?}", effects.status);
+
+                            if let Some(events) = events {
+                                events.0.iter().for_each(|event| {
+                                    // we know all events in this transaction are from Commander
+                                    tx.send(Message::PlayEffects(
+                                        bcs::from_bytes(event.contents.as_ref()).unwrap(),
+                                    ))
+                                    .unwrap();
+                                });
+                            }
+                        }
+                        PlayMessage::Attack(p0, p1) => {
+                            println!("Attacking: {:?}, {:?}", p0, p1);
+                            let game_id =
+                                state_arc.lock().unwrap().active_game.as_ref().unwrap().id;
+                            let (effects, events) = tx_runner
+                                .as_mut()
+                                .unwrap()
+                                .perform_attack(game_id.into(), p0, p1)
+                                .await
+                                .unwrap();
+
+                            println!("Result: {:?}", effects.status);
+
+                            if let Some(events) = events {
+                                events.0.iter().for_each(|event| {
+                                    // we know all events in this transaction are from Commander
+                                    tx.send(Message::PlayEffects(
+                                        bcs::from_bytes(event.contents.as_ref()).unwrap(),
+                                    ))
+                                    .unwrap();
+                                });
+                            }
                         }
                         PlayMessage::NextTurn => {
                             let state = state_arc.lock().unwrap();
-                            let result = tx_runner
+                            let (effects, events) = tx_runner
                                 .as_mut()
                                 .unwrap()
                                 .next_turn(state.active_game.as_ref().unwrap().id.into())
                                 .await
                                 .unwrap();
 
-                            println!("Result: {:?}", result.status);
+                            println!("Result: {:?}", effects.status);
+
+                            if let Some(events) = events {
+                                events.0.iter().for_each(|event| {
+                                    // we know all events in this transaction are from Commander
+                                    tx.send(Message::PlayEffects(
+                                        bcs::from_bytes(event.contents.as_ref()).unwrap(),
+                                    ))
+                                    .unwrap();
+                                });
+                            }
                         }
                         PlayMessage::QuitGame => {
                             let game_id = state_arc
@@ -336,14 +382,14 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                                 .id
                                 .into();
 
-                            let result = tx_runner
+                            let (effects, _events) = tx_runner
                                 .as_mut()
                                 .unwrap()
                                 .quit_game(game_id)
                                 .await
                                 .unwrap();
 
-                            println!("Result: {:?}", result.status);
+                            println!("Result: {:?}", effects.status);
 
                             state_arc.lock().unwrap().active_game = None;
                             STORAGE.lock().unwrap().remove("active_game");

@@ -4,6 +4,7 @@
 use std::fmt::Display;
 
 use macroquad::prelude::*;
+use quad_storage::STORAGE;
 use sui_sdk_types::Address;
 
 use crate::{
@@ -203,8 +204,17 @@ impl<T: Display> Draw for Menu<T> {
 
 impl Display for MainMenuItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // check if there's a game stored in the storage
+        let has_active_game = STORAGE.lock().unwrap().get("active_game").is_some();
+
         match self {
-            MainMenuItem::StartGame => write!(f, "Start Game"),
+            MainMenuItem::StartGame => {
+                if has_active_game {
+                    write!(f, "Resume Game")
+                } else {
+                    write!(f, "Start Game")
+                }
+            }
             MainMenuItem::Address(_address) => write!(f, "Logged in"),
             MainMenuItem::Login => write!(f, "Login (Google)"),
             MainMenuItem::Replays => write!(f, "Replays"),

@@ -103,10 +103,10 @@ pub enum ZIndex {
     Unit = 11,
     Obstacle = 20,
     BottomCover = 21,
-    ModalBackground = 30,
-    ModalText = 32,
     UnitStatus = 40,
     MenuText = 41,
+    ModalBackground = 50,
+    ModalText = 51,
     Max = 255,
 }
 
@@ -184,12 +184,12 @@ pub fn draw_path(path: &[(u8, u8)], dimensions: (u8, u8)) {
 
         DrawLineBuilder::new()
             .start(
-                (y1 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
-                (x1 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
+                (y1 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0 + MAP_PADDING,
+                (x1 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0 + MAP_PADDING,
             )
             .end(
-                (y2 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
-                (x2 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
+                (y2 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0 + MAP_PADDING,
+                (x2 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0 + MAP_PADDING,
             )
             .color(BLUE)
             .thickness(thickness)

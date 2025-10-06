@@ -90,6 +90,10 @@ impl Param {
         self.1
     }
 
+    pub fn deplete(&mut self) {
+        self.0 = 0;
+    }
+
     pub fn decrease(&mut self, amount: u16) {
         self.0 = self.0.saturating_sub(amount);
     }

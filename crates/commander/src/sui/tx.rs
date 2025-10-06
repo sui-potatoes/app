@@ -6,7 +6,6 @@
 
 use std::{collections::HashMap, ops::Deref, str::FromStr, time::Instant};
 
-use macroquad::math::Vec2;
 use serde::Deserialize;
 use sui_crypto::{SuiSigner, ed25519::Ed25519PrivateKey};
 use sui_rpc::{
@@ -18,8 +17,8 @@ use sui_rpc::{
 };
 use sui_sdk_types::{
     Address, IdOperation, Identifier, ObjectDigest, ObjectId, ObjectOut, ObjectReference, Owner,
-    Transaction, TransactionEffects, TransactionEffectsV2, TypeTag, UserSignature, Version,
-    ZkLoginAuthenticator, ZkLoginInputs,
+    Transaction, TransactionEffects, TransactionEffectsV2, TransactionEvents, UserSignature,
+    Version, ZkLoginAuthenticator, ZkLoginInputs,
 };
 use sui_transaction_builder::{Function, Serialized, TransactionBuilder, unresolved::Input};
 
@@ -96,31 +95,6 @@ impl TxExecutor {
         }
     }
 
-    pub async fn test_tx(&mut self) -> Result<TransactionEffectsV2, anyhow::Error> {
-        let gas_coins = self.get_gas_coins().await?;
-        let mut ptb = TransactionBuilder::new();
-        let input = ptb.input(Serialized(&100u8));
-
-        ptb.move_call(
-            Function::new(
-                Address::from_hex("0x1")?,
-                Identifier::new("option")?,
-                Identifier::new("some")?,
-                vec![TypeTag::U8],
-            ),
-            vec![input],
-        );
-
-        ptb.set_sender(self.address);
-        ptb.add_gas_objects(gas_coins.iter().map(|coin| Input::from(coin.clone())));
-        ptb.set_gas_budget(100000000);
-        ptb.set_gas_price(1000);
-        ptb.set_expiration(self.max_epoch);
-
-        let tx: Transaction = ptb.finish()?;
-        Ok(self.execute_tx(tx).await?)
-    }
-
     pub async fn start_game(&mut self, preset: WithRef<Preset>) -> Result<ObjectId, anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
         let gas_coins = self.get_gas_coins().await?;
@@ -192,10 +166,7 @@ impl TxExecutor {
         ptb.add_gas_objects(gas_coins.iter().map(|coin| Input::from(coin.clone())));
         ptb.set_expiration(self.max_epoch);
 
-        let effects = self.execute_tx(ptb.finish()?).await?;
-
-        // dbg!(&effects.changed_objects);
-        // dbg!(&effects.status);
+        let (effects, _events) = self.execute_tx(ptb.finish()?).await?;
 
         // The only new shared object in this transaction is the game object.
         // Hence, the search for it is straightforward.
@@ -221,7 +192,7 @@ impl TxExecutor {
         &mut self,
         game_id: ObjectId,
         path: GridPath,
-    ) -> Result<TransactionEffectsV2, anyhow::Error> {
+    ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
         let gas_coins = self.get_gas_coins().await?;
         let mut ptb = TransactionBuilder::new();
@@ -252,9 +223,9 @@ impl TxExecutor {
     pub async fn perform_attack(
         &mut self,
         game_id: ObjectId,
-        p0: Vec2,
-        p1: Vec2,
-    ) -> Result<TransactionEffectsV2, anyhow::Error> {
+        p0: (u8, u8),
+        p1: (u8, u8),
+    ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
         let gas_coins = self.get_gas_coins().await?;
         let mut ptb = TransactionBuilder::new();
@@ -264,10 +235,10 @@ impl TxExecutor {
             .get_shared_object_ref(ObjectId::from_str("0x8")?, false)
             .await?;
 
-        let x0 = ptb.input(Serialized(&(p0.x as u16)));
-        let y0 = ptb.input(Serialized(&(p0.y as u16)));
-        let x1 = ptb.input(Serialized(&(p1.x as u16)));
-        let y1 = ptb.input(Serialized(&(p1.y as u16)));
+        let x0 = ptb.input(Serialized(&(p0.0 as u16)));
+        let y0 = ptb.input(Serialized(&(p0.1 as u16)));
+        let x1 = ptb.input(Serialized(&(p1.0 as u16)));
+        let y1 = ptb.input(Serialized(&(p1.1 as u16)));
 
         let game_arg = ptb.input(game);
         let rng_arg = ptb.input(rng);
@@ -294,7 +265,7 @@ impl TxExecutor {
     pub async fn next_turn(
         &mut self,
         game_id: ObjectId,
-    ) -> Result<TransactionEffectsV2, anyhow::Error> {
+    ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
         let gas_coins = self.get_gas_coins().await?;
         let mut ptb = TransactionBuilder::new();
@@ -324,7 +295,7 @@ impl TxExecutor {
     pub async fn quit_game(
         &mut self,
         game_id: ObjectId,
-    ) -> Result<TransactionEffectsV2, anyhow::Error> {
+    ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
         let gas_coins = self.get_gas_coins().await?;
         let mut ptb = TransactionBuilder::new();
@@ -420,7 +391,7 @@ impl TxExecutor {
                         .unwrap()
                         .version
                         .unwrap(),
-                    mutable: true,
+                    mutable,
                 };
 
                 self.shared_refs.insert(id, shared_ref.clone());
@@ -463,7 +434,10 @@ impl TxExecutor {
             .await?)
     }
 
-    async fn execute_tx(&mut self, tx: Transaction) -> Result<TransactionEffectsV2, anyhow::Error> {
+    async fn execute_tx(
+        &mut self,
+        tx: Transaction,
+    ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
         let simple_signature = match self.keypair.sign_transaction(&tx) {
             Ok(UserSignature::Simple(simple)) => simple,
             Ok(_) => return Err(anyhow::anyhow!("Failed to sign transaction")),
@@ -486,6 +460,7 @@ impl TxExecutor {
                 read_mask: Some(FieldMask {
                     paths: vec![
                         "transaction.effects.bcs".to_string(),
+                        "transaction.events".to_string(),
                         "finality".to_string(),
                     ],
                 }),
@@ -495,16 +470,21 @@ impl TxExecutor {
 
         println!("Execution time: {:?}", timer.elapsed());
 
-        let effects: TransactionEffects = match tx_result.get_ref().transaction.as_ref() {
-            Some(tx) => {
-                bcs::from_bytes(tx.effects.as_ref().unwrap().bcs.as_ref().unwrap().value()).unwrap()
-            }
-            None => {
-                return Err(anyhow::anyhow!(
-                    "Incorrect path specified, transaction missing"
-                ));
-            }
-        };
+        let (effects, events): (TransactionEffects, Option<TransactionEvents>) =
+            match tx_result.get_ref().transaction.as_ref() {
+                Some(tx) => (
+                    bcs::from_bytes(tx.effects.as_ref().unwrap().bcs.as_ref().unwrap().value())
+                        .unwrap(),
+                    tx.events.as_ref().map(|events| {
+                        bcs::from_bytes(events.bcs.as_ref().unwrap().value()).unwrap()
+                    }),
+                ),
+                None => {
+                    return Err(anyhow::anyhow!(
+                        "Incorrect path specified, transaction missing"
+                    ));
+                }
+            };
 
         let effects = match effects {
             TransactionEffects::V2(effects) => effects.deref().clone(),
@@ -517,7 +497,7 @@ impl TxExecutor {
 
         self.process_effects(&effects);
 
-        Ok(effects)
+        Ok((effects, events))
     }
 
     fn process_effects(&mut self, effects: &TransactionEffectsV2) {

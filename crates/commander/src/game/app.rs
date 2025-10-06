@@ -145,6 +145,10 @@ impl App {
             TokioMessage::GameDestroyed => {
                 self.screen = Screen::MainMenu(Menu::main(self.state.lock().unwrap().address));
             }
+            TokioMessage::PlayEffects(effects) => match &mut self.screen {
+                Screen::Play(play) => play.apply_effects(effects),
+                _ => {}
+            },
             TokioMessage::GameStarted => {
                 self.screen = Screen::Play(Play::from(
                     self.state
@@ -187,7 +191,9 @@ impl App {
                     self.send_message(Message::Play(PlayMessage::QuitGame));
                     self.screen = Screen::MainMenu(Menu::main(state.address))
                 }
-                m @ PlayMessage::Move(_) if play.test_preset.is_none() => {
+                m @ (PlayMessage::Move(_) | PlayMessage::Attack(_, _))
+                    if play.test_preset.is_none() =>
+                {
                     self.send_message(Message::Play(m));
                 }
                 PlayMessage::BackToEditor if play.test_preset.is_some() => {

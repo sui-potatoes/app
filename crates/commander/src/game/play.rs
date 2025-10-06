@@ -11,10 +11,10 @@ use crate::{
         self, Align, Asset, Draw, DrawCommand, Highlight, Sprite, SpriteSheet, Texture, ZIndex,
         grid_to_world,
     },
-    game::{Animation, AnimationType, AppComponent, GameObject, Selectable},
+    game::{Animation, AnimationType, AppComponent, GameObject, ProcessedRecord, Selectable},
     input::InputCommand,
     sound::{self, Effect},
-    types::{Direction, Game, GameMap, GridPath, History, ID, Param, Preset, Target, Unit},
+    types::{Direction, Game, GameMap, GridPath, History, ID, Param, Preset, Record, Target, Unit},
 };
 
 pub struct Play {
@@ -54,7 +54,7 @@ pub enum PlayMessage {
     None,
     /// Perform a Move action.
     Move(GridPath),
-    Attack(Vec2, Vec2),
+    Attack((u8, u8), (u8, u8)),
     BackToEditor,
     NextTurn,
     QuitGame,
@@ -137,6 +137,7 @@ impl AppComponent for Play {
                 },
                 InputCommand::Back => {
                     self.deselect_unit();
+                    self.remove_target_animations();
                     self.action_mode = ActionMode::Walk;
                 }
                 InputCommand::Select => {
@@ -155,10 +156,8 @@ impl AppComponent for Play {
                     } else {
                         match self.action_mode {
                             ActionMode::Walk => {
-                                let unit_pos = self
-                                    .game
-                                    .unit_position(&self.selected_unit.as_ref().unwrap().borrow())
-                                    .unwrap();
+                                let unit = *self.selected_unit.clone().unwrap().borrow();
+                                let unit_pos = self.game.unit_position(&unit).unwrap();
 
                                 if let Some(path) =
                                     self.game.trace_path(unit_pos, self.cursor.position)
@@ -175,12 +174,38 @@ impl AppComponent for Play {
                                     }
                                 }
                             }
-                            ActionMode::Shoot => {}
+                            ActionMode::Shoot => {
+                                let unit = *self.selected_unit.clone().unwrap().borrow();
+                                let unit_pos = self.game.unit_position(&unit).unwrap();
+                                let targets = self.game.targets(unit_pos);
+
+                                self.remove_target_animations();
+
+                                if let Some(target) =
+                                    targets.iter().find(|t| t.position == self.cursor.position)
+                                {
+                                    if unit.ap.value() == 0 {
+                                        println!("No AP left");
+                                        return PlayMessage::None;
+                                    }
+
+                                    self.selected_unit
+                                        .as_ref()
+                                        .unwrap()
+                                        .borrow_mut()
+                                        .ap
+                                        .deplete();
+
+                                    sound::Effect::VoiceAttack.play();
+                                    return PlayMessage::Attack(unit_pos, target.position);
+                                }
+                            }
                         }
                     }
                 }
                 InputCommand::Tool => match self.action_mode.next() {
                     ActionMode::Walk => {
+                        self.remove_target_animations();
                         self.highlight = None;
                         if let Some(unit) = &self.selected_unit {
                             let distance = unit.borrow().stats;
@@ -198,6 +223,7 @@ impl AppComponent for Play {
                         }
                     }
                     ActionMode::Shoot => {
+                        self.remove_target_animations();
                         self.highlight = None;
                         if let Some(unit) = &self.selected_unit {
                             let unit_pos = self.game.unit_position(&unit.borrow()).unwrap();
@@ -209,7 +235,7 @@ impl AppComponent for Play {
                                         object.add_status_animation(
                                             "hit_chance",
                                             Animation::status(
-                                                format!("Hit chance: {}", chance),
+                                                format!("Chance: {}%", chance),
                                                 24,
                                                 RED,
                                                 None,
@@ -234,11 +260,16 @@ impl AppComponent for Play {
 
     fn tick(&mut self) {
         let units = self.units();
-        // let turn = self.game.turn;
+        let turn = self.game.turn;
 
         for (id, object) in self.objects.iter_mut() {
             if let Some(unit) = units.iter().find(|u| u.borrow().recruit == *id) {
-                let unit = unit.borrow();
+                let mut unit = unit.borrow_mut();
+
+                if unit.last_turn != turn {
+                    unit.last_turn = turn;
+                    unit.ap.reset();
+                }
 
                 object.remove_status_animation("ap");
                 object.add_status_animation(
@@ -265,6 +296,101 @@ impl AppComponent for Play {
 }
 
 impl Play {
+    /// Triggered externally from the `App` to apply effects to the game after a
+    /// transaction is executed. Can also be used to mock the external execution
+    /// in test environments like play testing new maps.
+    pub fn apply_effects(&mut self, mut effects: History) {
+        effects
+            .take_records_with_effects()
+            .iter()
+            .for_each(|record| match record {
+                ProcessedRecord::Attack {
+                    origin: _,
+                    target,
+                    effects,
+                } => {
+                    if let Some(target_unit) = self.unit_at(*target) {
+                        effects.into_iter().for_each(|effect| match effect {
+                            Record::Damage(damage) => {
+                                target_unit.borrow_mut().hp.decrease(*damage as u16);
+                                self.objects
+                                    .get_mut(&target_unit.borrow().recruit)
+                                    .unwrap()
+                                    .add_status_animation(
+                                        "damage",
+                                        Animation::status(
+                                            format!("Damage! {}", damage),
+                                            24,
+                                            RED,
+                                            Some(2.0),
+                                        ),
+                                    );
+                            }
+                            Record::Miss => {
+                                self.objects
+                                    .get_mut(&target_unit.borrow().recruit)
+                                    .unwrap()
+                                    .add_status_animation(
+                                        "miss",
+                                        Animation::status("Miss".to_string(), 24, RED, Some(2.0)),
+                                    );
+                            }
+                            Record::Dodged => {
+                                self.objects
+                                    .get_mut(&target_unit.borrow().recruit)
+                                    .unwrap()
+                                    .add_status_animation(
+                                        "dodged",
+                                        Animation::status("Dodged".to_string(), 24, RED, Some(2.0)),
+                                    );
+                            }
+                            Record::CriticalHit(damage) => {
+                                self.objects
+                                    .get_mut(&target_unit.borrow().recruit)
+                                    .unwrap()
+                                    .add_status_animation(
+                                        "critical_hit",
+                                        Animation::status(
+                                            format!("Critical! {}", damage),
+                                            24,
+                                            RED,
+                                            Some(2.0),
+                                        ),
+                                    );
+                            }
+                            Record::UnitKIA(id) => {
+                                self.objects
+                                    .get_mut(&target_unit.borrow().recruit)
+                                    .unwrap()
+                                    .animation = Animation::none();
+
+                                let unit = self
+                                    .units()
+                                    .iter()
+                                    .find(|u| u.borrow().recruit == *id)
+                                    .unwrap()
+                                    .clone();
+
+                                let position = self.game.unit_position(&unit.borrow()).unwrap();
+
+                                // Remove the unit from the grid.
+                                self.game.grid[position.0 as usize][position.1 as usize]
+                                    .unit
+                                    .take()
+                                    .unwrap();
+                            }
+                            _ => {}
+                        })
+                    }
+                }
+                _ => println!("Unsupported effect: {:?}", record),
+            });
+    }
+
+    fn unit_at(&self, pos: (u8, u8)) -> Option<Rc<RefCell<Unit>>> {
+        self.game.grid[pos.0 as usize][pos.1 as usize].unit.clone()
+    }
+
     fn units(&self) -> Vec<Rc<RefCell<Unit>>> {
         let mut units = Vec::new();
         for (_i, row) in self.game.grid.iter().enumerate() {
@@ -284,6 +410,12 @@ impl Play {
             self.selected_unit = None;
             self.highlight = None;
         }
+    }
+
+    fn remove_target_animations(&mut self) {
+        self.objects
+            .iter_mut()
+            .for_each(|(_, o)| o.remove_status_animation("hit_chance"));
     }
 
     fn select_unit(&mut self, pos: (u8, u8)) -> Option<Rc<RefCell<Unit>>> {
@@ -555,7 +687,7 @@ impl Draw for PlayMenu {
                 .font_size(32)
                 .color(color)
                 .align(Align::Center)
-                .z_index(ZIndex::MenuText)
+                .z_index(ZIndex::ModalText)
                 .schedule();
         }
     }

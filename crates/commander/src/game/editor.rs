@@ -343,7 +343,7 @@ impl Draw for EditorMenu {
                 .font_size(32)
                 .color(color)
                 .align(Align::Center)
-                .z_index(ZIndex::MenuText)
+                .z_index(ZIndex::ModalText)
                 .schedule();
         }
     }
