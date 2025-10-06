@@ -98,6 +98,10 @@ impl Param {
         self.0 = self.0.saturating_sub(amount);
     }
 
+    pub fn is_full(&self) -> bool {
+        self.0 == self.1
+    }
+
     pub fn reset(&mut self) {
         self.0 = self.1;
     }

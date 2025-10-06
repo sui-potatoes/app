@@ -220,6 +220,39 @@ impl TxExecutor {
         Ok(self.execute_tx(ptb.finish()?).await?)
     }
 
+    pub async fn perform_reload(
+        &mut self,
+        game_id: ObjectId,
+        p0: (u8, u8),
+    ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
+        let rgp = self.rgp.unwrap_or(1000);
+        let gas_coins = self.get_gas_coins().await?;
+        let mut ptb = TransactionBuilder::new();
+
+        let game = self.get_shared_object_ref(game_id, true).await?;
+        let game_arg = ptb.input(game);
+        let x0 = ptb.input(Serialized(&(p0.0 as u16)));
+        let y0 = ptb.input(Serialized(&(p0.1 as u16)));
+
+        ptb.move_call(
+            Function::new(
+                Address::from_hex(COMMANDER_PKG)?,
+                Identifier::new("commander")?,
+                Identifier::new("perform_reload")?,
+                vec![],
+            ),
+            vec![game_arg, x0, y0],
+        );
+
+        ptb.set_gas_price(rgp);
+        ptb.set_gas_budget(100_000_000);
+        ptb.set_sender(self.address);
+        ptb.add_gas_objects(gas_coins.iter().map(|coin| Input::from(coin.clone())));
+        ptb.set_expiration(self.max_epoch);
+
+        Ok(self.execute_tx(ptb.finish()?).await?)
+    }
+
     pub async fn perform_attack(
         &mut self,
         game_id: ObjectId,

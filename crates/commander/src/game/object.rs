@@ -10,6 +10,7 @@ use macroquad::prelude::*;
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
     draw::{self, Draw, DrawCommand, SpriteSheet, ZIndex},
+    types::Param,
 };
 
 /// An in-game object which has a position and an animation. If the object is
@@ -81,14 +82,17 @@ pub enum AnimationType {
     },
     /// Action Point animation. Shows the number of AP the object has.
     AP {
-        ap: u16,
-        max_ap: u16,
+        param: Param,
         color: Color,
     },
     /// HP animation. Shows the number of HP the object has.
     HP {
-        hp: u16,
-        max_hp: u16,
+        param: Param,
+        color: Color,
+    },
+    /// Ammo animation. Shows the number of ammo the object has.
+    Ammo {
+        param: Param,
         color: Color,
     },
 }
@@ -269,21 +273,31 @@ impl Animation {
         }
     }
 
-    pub fn ap(ap: u16, max_ap: u16, color: Color, duration: Option<f64>) -> Self {
+    pub fn ap(param: Param, color: Color, duration: Option<f64>) -> Self {
         Self {
             duration,
             start_time: get_time(),
-            type_: AnimationType::AP { ap, max_ap, color },
+            type_: AnimationType::AP { param, color },
             on_end: None,
             chain: None,
         }
     }
 
-    pub fn hp(hp: u16, max_hp: u16, color: Color, duration: Option<f64>) -> Self {
+    pub fn hp(param: Param, color: Color, duration: Option<f64>) -> Self {
         Self {
             duration,
             start_time: get_time(),
-            type_: AnimationType::HP { hp, max_hp, color },
+            type_: AnimationType::HP { param, color },
+            on_end: None,
+            chain: None,
+        }
+    }
+
+    pub fn ammo(param: Param, color: Color, duration: Option<f64>) -> Self {
+        Self {
+            duration,
+            start_time: get_time(),
+            type_: AnimationType::Ammo { param, color },
             on_end: None,
             chain: None,
         }
@@ -344,25 +358,21 @@ impl Draw for GameObject {
                         .schedule();
                 }
                 // Draw AP bars in the top left of the object. Stacked vertically.
-                AnimationType::AP {
-                    ap,
-                    max_ap: _,
-                    color,
-                } => {
-                    let (scale_x, _scale_y) = draw::get_scale(self.dimensions);
+                AnimationType::AP { param, color } => {
+                    let (_scale_x, _scale_y) = draw::get_scale(self.dimensions);
                     let padding = 2.0;
-                    let ap_bar_height = 4.0;
-                    let ap_bar_width = scale_x * 3.0;
+                    let height = 4.0;
+                    let width = 10.0;
 
                     let ap_bar_y = self.position.y + padding / 2.0;
                     let ap_bar_x = self.position.x + padding / 2.0;
 
-                    for i in 0..*ap {
+                    for i in 0..param.value() {
                         DrawCommand::rectangle(
                             ap_bar_x + padding,
-                            ap_bar_y + (i as f32 * ap_bar_height) + (i as f32) * padding,
-                            ap_bar_width,
-                            ap_bar_height,
+                            ap_bar_y + (i as f32 * height) + (i as f32) * padding,
+                            width,
+                            height,
                         )
                         .color(*color)
                         .z_index(ZIndex::UnitStatus)
@@ -370,16 +380,35 @@ impl Draw for GameObject {
                     }
                 }
                 // Draw HP squares in the bottom of the object, stacked horizontally.
-                AnimationType::HP { hp, max_hp, color } => {
+                AnimationType::HP { param, color } => {
                     let (scale_x, scale_y) = draw::get_scale(self.dimensions);
                     let padding = 2.0;
-                    let width = (scale_x * TILE_WIDTH - padding) / (*max_hp as f32);
+                    let width = (scale_x * TILE_WIDTH - padding) / (param.max_value() as f32);
                     let height = 4.0;
 
-                    for i in 0..*hp {
+                    for i in 0..param.value() {
                         DrawCommand::rectangle(
                             self.position.x + padding + (i as f32 * width),
                             self.position.y + (TILE_HEIGHT * scale_y) - height - padding,
+                            width - padding,
+                            height,
+                        )
+                        .color(*color)
+                        .z_index(ZIndex::UnitStatus)
+                        .schedule();
+                    }
+                }
+                // Draw ammo squares on the top right of the object.
+                AnimationType::Ammo { param, color } => {
+                    let (scale_x, _scale_y) = draw::get_scale(self.dimensions);
+                    let padding = 2.0;
+                    let width = 10.0;
+                    let height = 4.0;
+
+                    for i in 0..param.value() {
+                        DrawCommand::rectangle(
+                            self.position.x + (TILE_WIDTH * scale_x) - width - padding,
+                            self.position.y + padding + (i as f32 * (height + padding)),
                             width - padding,
                             height,
                         )
@@ -445,6 +474,8 @@ impl Draw for GameObject {
             AnimationType::AP { .. } => {}
             // HP is only drawn as status.
             AnimationType::HP { .. } => {}
+            // Ammo is only drawn as status.
+            AnimationType::Ammo { .. } => {}
             AnimationType::Status {
                 text,
                 font_size,

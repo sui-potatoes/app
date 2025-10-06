@@ -351,6 +351,29 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
                                 });
                             }
                         }
+                        PlayMessage::Reload(p) => {
+                            println!("Reloading: {:?}", p);
+                            let game_id =
+                                state_arc.lock().unwrap().active_game.as_ref().unwrap().id;
+                            let (effects, events) = tx_runner
+                                .as_mut()
+                                .unwrap()
+                                .perform_reload(game_id.into(), p)
+                                .await
+                                .unwrap();
+
+                            println!("Result: {:?}", effects.status);
+
+                            if let Some(events) = events {
+                                events.0.iter().for_each(|event| {
+                                    // we know all events in this transaction are from Commander
+                                    tx.send(Message::PlayEffects(
+                                        bcs::from_bytes(event.contents.as_ref()).unwrap(),
+                                    ))
+                                    .unwrap();
+                                });
+                            }
+                        }
                         PlayMessage::NextTurn => {
                             let state = state_arc.lock().unwrap();
                             let (effects, events) = tx_runner

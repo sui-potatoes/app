@@ -191,7 +191,7 @@ impl App {
                     self.send_message(Message::Play(PlayMessage::QuitGame));
                     self.screen = Screen::MainMenu(Menu::main(state.address))
                 }
-                m @ (PlayMessage::Move(_) | PlayMessage::Attack(_, _))
+                m @ (PlayMessage::Move(_) | PlayMessage::Attack(_, _) | PlayMessage::Reload(_))
                     if play.test_preset.is_none() =>
                 {
                     self.send_message(Message::Play(m));

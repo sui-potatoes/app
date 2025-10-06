@@ -55,6 +55,7 @@ pub enum PlayMessage {
     /// Perform a Move action.
     Move(GridPath),
     Attack((u8, u8), (u8, u8)),
+    Reload((u8, u8)),
     BackToEditor,
     NextTurn,
     QuitGame,
@@ -65,6 +66,7 @@ pub enum PlayMessage {
 enum ActionMode {
     Walk,
     Shoot,
+    Reload,
 }
 
 struct PlayCursor {
@@ -110,6 +112,12 @@ impl AppComponent for Play {
                 | InputCommand::Down
                 | InputCommand::Left
                 | InputCommand::Right) => match self.action_mode {
+                    // do nothing on reload, keep the cursor on the selected unit
+                    ActionMode::Reload => {
+                        let unit = *self.selected_unit.clone().unwrap().borrow();
+                        let unit_pos = self.game.unit_position(&unit).unwrap();
+                        self.cursor.set_to(unit_pos);
+                    }
                     ActionMode::Walk => self.cursor.move_to(i.clone().into()),
                     ActionMode::Shoot => {
                         let unit = *self.selected_unit.clone().unwrap().borrow();
@@ -155,6 +163,23 @@ impl AppComponent for Play {
                         }
                     } else {
                         match self.action_mode {
+                            ActionMode::Reload => {
+                                let unit = *self.selected_unit.clone().unwrap().borrow();
+                                let unit_pos = self.game.unit_position(&unit).unwrap();
+                                self.cursor.set_to(unit_pos);
+
+                                if unit.ap.value() == 0 {
+                                    println!("No AP left");
+                                    return PlayMessage::None;
+                                }
+
+                                let mut unit = self.selected_unit.as_ref().unwrap().borrow_mut();
+                                unit.ap.decrease(1);
+                                unit.ammo.reset();
+
+                                self.action_mode.next();
+                                return PlayMessage::Reload(unit_pos);
+                            }
                             ActionMode::Walk => {
                                 let unit = *self.selected_unit.clone().unwrap().borrow();
                                 let unit_pos = self.game.unit_position(&unit).unwrap();
@@ -184,17 +209,19 @@ impl AppComponent for Play {
                                 if let Some(target) =
                                     targets.iter().find(|t| t.position == self.cursor.position)
                                 {
-                                    if unit.ap.value() == 0 {
-                                        println!("No AP left");
+                                    if unit.ap.value() == 0 || unit.ammo.value() == 0 {
+                                        println!(
+                                            "No AP ({}) or ammo ({}) left",
+                                            unit.ap.value(),
+                                            unit.ammo.value()
+                                        );
                                         return PlayMessage::None;
                                     }
 
-                                    self.selected_unit
-                                        .as_ref()
-                                        .unwrap()
-                                        .borrow_mut()
-                                        .ap
-                                        .deplete();
+                                    let mut unit =
+                                        self.selected_unit.as_ref().unwrap().borrow_mut();
+                                    unit.ap.deplete();
+                                    unit.ammo.decrease(1);
 
                                     sound::Effect::VoiceAttack.play();
                                     return PlayMessage::Attack(unit_pos, target.position);
@@ -204,6 +231,23 @@ impl AppComponent for Play {
                     }
                 }
                 InputCommand::Tool => match self.action_mode.next() {
+                    ActionMode::Reload => {
+                        self.remove_target_animations();
+                        self.highlight = None;
+
+                        if let Some(unit) = &self.selected_unit.clone() {
+                            let unit = unit.borrow();
+                            let unit_pos = self.game.unit_position(&unit).unwrap();
+
+                            if unit.ammo.is_full() {
+                                println!("Ammo is full");
+                                self.handle_key_press(InputCommand::Tool);
+                                return PlayMessage::None;
+                            }
+
+                            self.cursor.set_to(unit_pos);
+                        }
+                    }
                     ActionMode::Walk => {
                         self.remove_target_animations();
                         self.highlight = None;
@@ -271,17 +315,9 @@ impl AppComponent for Play {
                     unit.ap.reset();
                 }
 
-                object.remove_status_animation("ap");
-                object.add_status_animation(
-                    "ap",
-                    Animation::ap(unit.ap.value(), unit.ap.max_value(), BLUE, None),
-                );
-
-                object.remove_status_animation("hp");
-                object.add_status_animation(
-                    "hp",
-                    Animation::hp(unit.hp.value(), unit.hp.max_value(), RED, None),
-                );
+                object.add_status_animation("ap", Animation::ap(unit.ap, BLUE, None));
+                object.add_status_animation("hp", Animation::hp(unit.hp, RED, None));
+                object.add_status_animation("ammo", Animation::ammo(unit.ammo, BLACK, None));
             }
 
             object.tick(get_time());
@@ -624,6 +660,7 @@ impl Draw for Play {
         match self.action_mode {
             ActionMode::Walk => self.cursor.draw_with_color(BLUE),
             ActionMode::Shoot => self.cursor.draw_with_color(RED),
+            ActionMode::Reload => self.cursor.draw_with_color(GREEN),
         };
 
         draw::DrawCommand::text(format!(
@@ -737,7 +774,8 @@ impl ActionMode {
     pub fn next(&mut self) -> &Self {
         match self {
             ActionMode::Walk => *self = ActionMode::Shoot,
-            ActionMode::Shoot => *self = ActionMode::Walk,
+            ActionMode::Shoot => *self = ActionMode::Reload,
+            ActionMode::Reload => *self = ActionMode::Walk,
         };
         self
     }
@@ -754,6 +792,7 @@ impl Display for ActionMode {
         match self {
             ActionMode::Walk => write!(f, "Walk"),
             ActionMode::Shoot => write!(f, "Shoot"),
+            ActionMode::Reload => write!(f, "Reload"),
         }
     }
 }
