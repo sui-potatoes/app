@@ -7,7 +7,7 @@ use macroquad::prelude::*;
 
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
-    draw::{Asset, Draw, DrawAt, DrawCommand, MAP_PADDING, Sprite, Texture, ZIndex, get_scale},
+    draw::{Asset, Draw, DrawAt, DrawCommand, Sprite, Texture, ZIndex, get_scale},
     types::{Direction, ID, Map, Tile, TileType, Unit},
 };
 
@@ -436,18 +436,12 @@ impl Into<Map> for GameMap {
 
 impl Draw for GameMap {
     fn draw(&self) {
-        // draw black background
-        DrawCommand::rectangle(0.0, 0.0, screen_width(), screen_height())
-            .color(BLACK)
-            .z_index(ZIndex::BlackBackground)
-            .schedule();
-
         let (scale_x, scale_y) = get_scale(self.dimensions());
         for (y, row) in self.grid.iter().enumerate() {
             for (x, tile) in row.iter().enumerate() {
                 DrawCommand::rectangle_lines(
-                    x as f32 * TILE_WIDTH * scale_x + MAP_PADDING,
-                    y as f32 * TILE_HEIGHT * scale_y + MAP_PADDING,
+                    x as f32 * TILE_WIDTH * scale_x,
+                    y as f32 * TILE_HEIGHT * scale_y,
                     TILE_WIDTH * scale_x,
                     TILE_HEIGHT * scale_y,
                 )
@@ -476,7 +470,7 @@ impl DrawAt for GameTile {
                 let texture = Texture::Obstacle.load().unwrap();
 
                 DrawCommand::texture(texture)
-                    .position(x + MAP_PADDING, y + MAP_PADDING)
+                    .position(x, y)
                     .color(WHITE)
                     .dest_size(Vec2::new(TILE_WIDTH * scale_x, TILE_HEIGHT * scale_y))
                     .z_index(ZIndex::Obstacle)
@@ -489,22 +483,30 @@ impl DrawAt for GameTile {
                 bottom,
             } => {
                 let sprite = Sprite::WallSnow.load().unwrap();
-                let (x, y) = (x + MAP_PADDING, y + MAP_PADDING);
+                let (x, y) = (x, y);
 
                 if *left > 0 {
-                    sprite.draw_frame_with_index(x, y, 0, WHITE, dimensions, ZIndex::TopCover);
+                    sprite
+                        .draw_frame_with_index(x, y, 0, WHITE, dimensions, ZIndex::TopCover)
+                        .schedule();
                 }
 
                 if *top > 0 {
-                    sprite.draw_frame_with_index(x, y, 1, WHITE, dimensions, ZIndex::TopCover);
+                    sprite
+                        .draw_frame_with_index(x, y, 1, WHITE, dimensions, ZIndex::TopCover)
+                        .schedule();
                 }
 
                 if *right > 0 {
-                    sprite.draw_frame_with_index(x, y, 2, WHITE, dimensions, ZIndex::TopCover);
+                    sprite
+                        .draw_frame_with_index(x, y, 2, WHITE, dimensions, ZIndex::TopCover)
+                        .schedule();
                 }
 
                 if *bottom > 0 {
-                    sprite.draw_frame_with_index(x, y, 3, WHITE, dimensions, ZIndex::BottomCover);
+                    sprite
+                        .draw_frame_with_index(x, y, 3, WHITE, dimensions, ZIndex::BottomCover)
+                        .schedule();
                 }
             }
         };

@@ -10,8 +10,8 @@ use sui_sdk_types::Address;
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
     draw::{
-        Align, Asset, Draw, DrawCommand, MAP_PADDING, Sprite, Texture, ZIndex, draw, font,
-        get_scale, grid_to_world,
+        Align, Asset, Draw, DrawCommand, Sprite, Texture, ZIndex, draw, font, get_scale,
+        grid_to_world,
     },
     game::Selectable,
     input::InputCommand,
@@ -206,14 +206,16 @@ impl Draw for Editor {
         for grid_point in self.spawns.clone() {
             let pos = grid_to_world(grid_point, self.grid.dimensions());
             let sprite = Sprite::Shadow.load().unwrap();
-            sprite.draw_frame_with_index(
-                pos.x,
-                pos.y,
-                0,
-                WHITE,
-                self.grid.dimensions(),
-                ZIndex::UnitShadow,
-            );
+            sprite
+                .draw_frame_with_index(
+                    pos.x,
+                    pos.y,
+                    0,
+                    WHITE,
+                    self.grid.dimensions(),
+                    ZIndex::UnitShadow,
+                )
+                .schedule();
         }
 
         match &self.mode {
@@ -221,16 +223,16 @@ impl Draw for Editor {
             // Draw semi-transparent tool at position of the cursor.
             Mode::Editor => match self.tool {
                 Tool::Obstacle => {
-                    let (x, y) = self.cursor.absolute_position();
+                    let pos = self.cursor.absolute_position();
                     let texture = Texture::Obstacle.load().unwrap();
                     DrawCommand::texture(texture)
-                        .position(x, y)
+                        .position(pos.x, pos.y)
                         .dest_size(self.cursor.size())
                         .color(WHITE.with_alpha(0.5))
                         .schedule();
                 }
                 Tool::Wall(direction) => {
-                    let (x, y) = self.cursor.absolute_position();
+                    let pos = self.cursor.absolute_position();
                     let sprite = Sprite::WallSnow.load().unwrap();
                     let frame = match direction {
                         Direction::Left => 0,
@@ -240,27 +242,31 @@ impl Draw for Editor {
                         Direction::None => 0,
                     };
 
-                    sprite.draw_frame_with_index(
-                        x,
-                        y,
-                        frame,
-                        WHITE.with_alpha(0.5),
-                        self.cursor.dimensions,
-                        ZIndex::TopCover,
-                    );
+                    sprite
+                        .draw_frame_with_index(
+                            pos.x,
+                            pos.y,
+                            frame,
+                            WHITE.with_alpha(0.5),
+                            self.cursor.dimensions,
+                            ZIndex::TopCover,
+                        )
+                        .schedule();
                 }
                 Tool::Spawn => {
-                    let (x, y) = self.cursor.absolute_position();
+                    let pos = self.cursor.absolute_position();
                     let sprite = Sprite::Shadow.load().unwrap();
 
-                    sprite.draw_frame_with_index(
-                        x,
-                        y,
-                        0,
-                        WHITE.with_alpha(0.5),
-                        self.cursor.dimensions,
-                        ZIndex::UnitShadow,
-                    )
+                    sprite
+                        .draw_frame_with_index(
+                            pos.x,
+                            pos.y,
+                            0,
+                            WHITE.with_alpha(0.5),
+                            self.cursor.dimensions,
+                            ZIndex::UnitShadow,
+                        )
+                        .schedule();
                 }
             },
         }
@@ -329,10 +335,7 @@ impl Draw for EditorMenu {
             let color = if i == self.selected_item { WHITE } else { GRAY };
 
             DrawCommand::text(item.to_string())
-                .position(
-                    width / 2.0 + MAP_PADDING,
-                    height / 4.0 + 200.0 + (i as f32 * line_height) + MAP_PADDING,
-                )
+                .position(width / 2.0, height / 4.0 + 200.0 + (i as f32 * line_height))
                 .font_size(32)
                 .color(color)
                 .align(Align::Center)
@@ -350,12 +353,8 @@ impl EditorCursor {
         }
     }
 
-    pub fn absolute_position(&self) -> (f32, f32) {
-        let (scale_x, scale_y) = get_scale(self.dimensions);
-        (
-            self.position.1 as f32 * TILE_WIDTH * scale_x + MAP_PADDING,
-            self.position.0 as f32 * TILE_HEIGHT * scale_y + MAP_PADDING,
-        )
+    pub fn absolute_position(&self) -> Vec2 {
+        grid_to_world(self.position, self.dimensions)
     }
 
     pub fn size(&self) -> Vec2 {

@@ -83,7 +83,7 @@ fn window_conf() -> macroquad::window::Conf {
         window_width: settings.window_size.clone().into(),
         window_height: settings.window_size.clone().into(),
         fullscreen: false,
-        window_resizable: true,
+        window_resizable: false,
         icon: Some(Icon::miniquad_logo()),
         ..Default::default()
     }
@@ -126,7 +126,8 @@ async fn main() -> Result<(), anyhow::Error> {
     // Main game loop.
     loop {
         gamepads.poll();
-        clear_background(LIGHTGRAY);
+
+        clear_background(Color::from_rgba(182, 209, 204, 0));
 
         input::handle_input(&mut app);
         input::handle_gamepad_input(&mut app, &mut gamepads);

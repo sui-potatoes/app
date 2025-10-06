@@ -133,7 +133,7 @@ pub fn draw_main_menu_background() {
     let frame = (get_time() * 10.0) as usize % 12;
     let sprite = Sprite::MainAnim.load().unwrap();
 
-    sprite.draw_frame(0.0, 0.0, frame, (1, 1));
+    sprite.draw_frame(0.0, 0.0, frame, (1, 1)).schedule();
 }
 
 /// Draw a cursor at the given tile.
@@ -148,7 +148,7 @@ pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8), color: Color) {
     let height = TILE_SIZE * scale_y - thickness;
 
     DrawRectangleLinesBuilder::new()
-        .position(x + MAP_PADDING, y + MAP_PADDING)
+        .position(x, y)
         .dimensions(width, height)
         .thickness(thickness)
         .color(color)
@@ -160,8 +160,8 @@ pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8), color: Color) {
 pub fn draw_highlight(highlight: &Highlight, dimensions: (u8, u8)) {
     let (scale_x, scale_y) = get_scale(dimensions);
     for (hx, hy) in &highlight.0 {
-        let x = *hy as f32 * TILE_SIZE * scale_x + MAP_PADDING;
-        let y = *hx as f32 * TILE_SIZE * scale_y + MAP_PADDING;
+        let x = *hy as f32 * TILE_SIZE * scale_x;
+        let y = *hx as f32 * TILE_SIZE * scale_y;
 
         DrawRectangleBuilder::new()
             .position(x, y)
@@ -184,12 +184,12 @@ pub fn draw_path(path: &[(u8, u8)], dimensions: (u8, u8)) {
 
         DrawLineBuilder::new()
             .start(
-                (y1 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0 + MAP_PADDING,
-                (x1 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0 + MAP_PADDING,
+                (y1 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
+                (x1 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
             )
             .end(
-                (y2 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0 + MAP_PADDING,
-                (x2 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0 + MAP_PADDING,
+                (y2 as f32 + 0.5) * TILE_SIZE * scale_y - thickness / 2.0,
+                (x2 as f32 + 0.5) * TILE_SIZE * scale_x + thickness / 2.0,
             )
             .color(BLUE)
             .thickness(thickness)
@@ -209,8 +209,8 @@ pub fn draw_texture_background(dimensions: (u8, u8), texture: Texture) {
         for x in 0..width as i32 {
             DrawCommand::texture(texture.clone())
                 .position(
-                    x as f32 * TILE_SIZE * scale_x + MAP_PADDING,
-                    y as f32 * TILE_SIZE * scale_y + MAP_PADDING,
+                    x as f32 * TILE_SIZE * scale_x,
+                    y as f32 * TILE_SIZE * scale_y,
                 )
                 .color(WHITE)
                 .dest_size(Vec2::new(TILE_SIZE * scale_x, TILE_SIZE * scale_y))
@@ -233,8 +233,8 @@ pub fn get_scale(dimensions: (u8, u8)) -> (f32, f32) {
 pub fn grid_to_world(p: (u8, u8), dimensions: (u8, u8)) -> Vec2 {
     let (scale_x, scale_y) = get_scale(dimensions);
     Vec2::new(
-        p.1 as f32 * TILE_SIZE * scale_x + MAP_PADDING,
-        p.0 as f32 * TILE_SIZE * scale_y + MAP_PADDING,
+        p.1 as f32 * TILE_SIZE * scale_x,
+        p.0 as f32 * TILE_SIZE * scale_y,
     )
 }
 
@@ -442,6 +442,7 @@ pub struct DrawTextureBuilder {
     flip_y: Option<bool>,
     pivot: Option<Vec2>,
     z_index: Option<ZIndex>,
+    ignore_padding: Option<bool>,
 }
 
 impl DrawTextureBuilder {
@@ -458,6 +459,7 @@ impl DrawTextureBuilder {
             flip_y: None,
             pivot: None,
             z_index: None,
+            ignore_padding: None,
         }
     }
 
@@ -507,11 +509,22 @@ impl DrawTextureBuilder {
         self
     }
 
+    pub fn ignore_padding(mut self) -> Self {
+        self.ignore_padding = Some(true);
+        self
+    }
+
     pub fn build(self) -> DrawCommand {
+        let padding = if self.ignore_padding.unwrap_or(false) {
+            0.0
+        } else {
+            MAP_PADDING
+        };
+
         DrawCommand::Texture {
             texture: self.texture,
-            x: self.x.unwrap_or(0.0),
-            y: self.y.unwrap_or(0.0),
+            x: self.x.unwrap_or(0.0) + padding,
+            y: self.y.unwrap_or(0.0) + padding,
             color: self.color.unwrap_or(WHITE),
             dest_size: self.dest_size,
             source: self.source,
@@ -536,6 +549,7 @@ pub struct DrawRectangleLinesBuilder {
     thickness: Option<f32>,
     color: Option<Color>,
     z_index: Option<ZIndex>,
+    ignore_padding: Option<bool>,
 }
 
 impl DrawRectangleLinesBuilder {
@@ -548,6 +562,7 @@ impl DrawRectangleLinesBuilder {
             thickness: None,
             color: None,
             z_index: None,
+            ignore_padding: None,
         }
     }
 
@@ -578,10 +593,21 @@ impl DrawRectangleLinesBuilder {
         self
     }
 
+    pub fn ignore_padding(mut self) -> Self {
+        self.ignore_padding = Some(true);
+        self
+    }
+
     pub fn build(self) -> DrawCommand {
+        let padding = if self.ignore_padding.unwrap_or(false) {
+            0.0
+        } else {
+            MAP_PADDING
+        };
+
         DrawCommand::RectangleLines {
-            x: self.x.unwrap_or(0.0),
-            y: self.y.unwrap_or(0.0),
+            x: self.x.unwrap_or(0.0) + padding,
+            y: self.y.unwrap_or(0.0) + padding,
             width: self.width.unwrap_or(0.0),
             height: self.height.unwrap_or(0.0),
             thickness: self.thickness.unwrap_or(1.0),
@@ -602,6 +628,7 @@ pub struct DrawRectangleBuilder {
     height: Option<f32>,
     color: Option<Color>,
     z_index: Option<ZIndex>,
+    ignore_padding: Option<bool>,
 }
 
 impl DrawRectangleBuilder {
@@ -613,6 +640,7 @@ impl DrawRectangleBuilder {
             height: None,
             color: None,
             z_index: None,
+            ignore_padding: None,
         }
     }
 
@@ -658,10 +686,21 @@ impl DrawRectangleBuilder {
         self
     }
 
+    pub fn ignore_padding(mut self) -> Self {
+        self.ignore_padding = Some(true);
+        self
+    }
+
     pub fn build(self) -> DrawCommand {
+        let padding = if self.ignore_padding.unwrap_or(false) {
+            0.0
+        } else {
+            MAP_PADDING
+        };
+
         DrawCommand::Rectangle {
-            x: self.x.unwrap_or(0.0),
-            y: self.y.unwrap_or(0.0),
+            x: self.x.unwrap_or(0.0) + padding,
+            y: self.y.unwrap_or(0.0) + padding,
             width: self.width.unwrap_or(0.0),
             height: self.height.unwrap_or(0.0),
             color: self.color.unwrap_or(WHITE),
@@ -682,6 +721,7 @@ pub struct DrawLineBuilder {
     color: Option<Color>,
     thickness: Option<f32>,
     z_index: Option<ZIndex>,
+    ignore_padding: Option<bool>,
 }
 
 impl DrawLineBuilder {
@@ -694,6 +734,7 @@ impl DrawLineBuilder {
             color: None,
             thickness: None,
             z_index: None,
+            ignore_padding: None,
         }
     }
 
@@ -725,11 +766,17 @@ impl DrawLineBuilder {
     }
 
     pub fn build(self) -> DrawCommand {
+        let padding = if self.ignore_padding.unwrap_or(false) {
+            0.0
+        } else {
+            MAP_PADDING
+        };
+
         DrawCommand::Line {
-            x1: self.x1.unwrap_or(0.0),
-            y1: self.y1.unwrap_or(0.0),
-            x2: self.x2.unwrap_or(0.0),
-            y2: self.y2.unwrap_or(0.0),
+            x1: self.x1.unwrap_or(0.0) + padding,
+            y1: self.y1.unwrap_or(0.0) + padding,
+            x2: self.x2.unwrap_or(0.0) + padding,
+            y2: self.y2.unwrap_or(0.0) + padding,
             color: self.color.unwrap_or(WHITE),
             thickness: self.thickness.unwrap_or(1.0),
             z_index: self.z_index.unwrap_or(ZIndex::MenuText),
@@ -756,6 +803,7 @@ pub struct DrawTextBuilder {
     line_height: Option<f32>,
     color: Option<Color>,
     z_index: Option<ZIndex>,
+    ignore_padding: Option<bool>,
 }
 
 impl DrawTextBuilder {
@@ -775,6 +823,7 @@ impl DrawTextBuilder {
             padding: None,
             color: None,
             z_index: None,
+            ignore_padding: None,
         }
     }
 
@@ -834,6 +883,11 @@ impl DrawTextBuilder {
         self
     }
 
+    pub fn ignore_padding(mut self) -> Self {
+        self.ignore_padding = Some(true);
+        self
+    }
+
     pub fn background(mut self, background: Color) -> Self {
         self.background = Some(background);
         self
@@ -850,10 +904,16 @@ impl DrawTextBuilder {
     }
 
     pub fn build(self) -> DrawCommand {
+        let padding = if self.ignore_padding.unwrap_or(false) {
+            0.0
+        } else {
+            MAP_PADDING
+        };
+
         DrawCommand::Text {
             text: self.text,
-            x: self.x.unwrap_or(0.0),
-            y: self.y.unwrap_or(0.0),
+            x: self.x.unwrap_or(0.0) + padding,
+            y: self.y.unwrap_or(0.0) + padding,
             align: self.align.unwrap_or(Align::Left),
             font: self.font.unwrap_or(super::font("doto").unwrap()),
             font_size: self.font_size.unwrap_or(16),

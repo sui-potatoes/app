@@ -153,10 +153,6 @@ impl GameObject {
                     } else {
                         statuses_to_remove.push(key.clone());
                     }
-
-                    // if let Some(on_end) = status.on_end.take() {
-                    //     on_end(self);
-                    // }
                 }
             }
         }
@@ -321,14 +317,16 @@ impl Animation {
 impl Draw for GameObject {
     fn draw(&self) {
         if let Some(shadow) = &self.shadow {
-            shadow.draw_frame_with_index(
-                self.position.x,
-                self.position.y,
-                0,
-                WHITE,
-                self.dimensions,
-                ZIndex::UnitShadow,
-            );
+            shadow
+                .draw_frame_with_index(
+                    self.position.x,
+                    self.position.y,
+                    0,
+                    WHITE,
+                    self.dimensions,
+                    ZIndex::UnitShadow,
+                )
+                .schedule();
         }
 
         for (_, status) in self.statuses.iter() {
@@ -391,14 +389,16 @@ impl Draw for GameObject {
                     }
                 }
                 AnimationType::StaticSprite { frame, sprite, .. } => {
-                    sprite.draw_frame_with_index(
-                        self.position.x,
-                        self.position.y,
-                        *frame,
-                        WHITE,
-                        self.dimensions,
-                        ZIndex::Unit,
-                    );
+                    sprite
+                        .draw_frame_with_index(
+                            self.position.x,
+                            self.position.y,
+                            *frame,
+                            WHITE,
+                            self.dimensions,
+                            ZIndex::Unit,
+                        )
+                        .schedule();
                 }
                 _ => {}
             }
@@ -420,23 +420,27 @@ impl Draw for GameObject {
                     .schedule();
             }
             AnimationType::StaticSprite { frame, sprite, .. } => {
-                sprite.draw_frame_with_index(
+                sprite
+                    .draw_frame_with_index(
+                        self.position.x,
+                        self.position.y,
+                        *frame,
+                        WHITE,
+                        self.dimensions,
+                        ZIndex::Unit,
+                    )
+                    .schedule();
+            }
+            AnimationType::MoveSprite { sprite, frame, .. } => sprite
+                .draw_frame_with_index(
                     self.position.x,
                     self.position.y,
                     *frame,
                     WHITE,
                     self.dimensions,
                     ZIndex::Unit,
-                );
-            }
-            AnimationType::MoveSprite { sprite, frame, .. } => sprite.draw_frame_with_index(
-                self.position.x,
-                self.position.y,
-                *frame,
-                WHITE,
-                self.dimensions,
-                ZIndex::Unit,
-            ),
+                )
+                .schedule(),
             // AP is only drawn as status.
             AnimationType::AP { .. } => {}
             // HP is only drawn as status.

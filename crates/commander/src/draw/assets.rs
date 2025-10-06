@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
-    draw::ZIndex,
+    draw::{DrawTextureBuilder, ZIndex},
 };
 
 use super::DrawCommand;
@@ -147,8 +147,14 @@ impl SpriteSheet {
         }
     }
 
-    pub fn draw_frame(&self, x: f32, y: f32, frame: usize, dimensions: (u8, u8)) {
-        self.draw_frame_with_index(x, y, frame, WHITE, dimensions, ZIndex::Unit);
+    pub fn draw_frame(
+        &self,
+        x: f32,
+        y: f32,
+        frame: usize,
+        dimensions: (u8, u8),
+    ) -> DrawTextureBuilder {
+        self.draw_frame_with_index(x, y, frame, WHITE, dimensions, ZIndex::Unit)
     }
 
     pub fn draw_frame_with_index(
@@ -159,7 +165,7 @@ impl SpriteSheet {
         color: Color,
         dimensions: (u8, u8),
         z_index: ZIndex,
-    ) {
+    ) -> DrawTextureBuilder {
         assert!(
             frame <= self.frames,
             "Frame out of bounds: {} < {}",
@@ -181,7 +187,6 @@ impl SpriteSheet {
                 h: self.frame_size,
             })
             .z_index(z_index)
-            .schedule();
     }
 }
 
