@@ -194,6 +194,7 @@ pub fn draw_path(path: &[(u8, u8)], dimensions: (u8, u8)) {
             .color(BLUE)
             .thickness(thickness)
             .z_index(ZIndex::Highlight)
+            .ignore_padding()
             .schedule();
     }
 }
@@ -762,6 +763,11 @@ impl DrawLineBuilder {
 
     pub fn z_index(mut self, z_index: ZIndex) -> Self {
         self.z_index = Some(z_index);
+        self
+    }
+
+    pub fn ignore_padding(mut self) -> Self {
+        self.ignore_padding = Some(true);
         self
     }
 

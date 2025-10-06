@@ -13,6 +13,7 @@ use crate::{
     },
     game::{Animation, AnimationType, AppComponent, GameObject, Selectable},
     input::InputCommand,
+    sound::{self, Effect},
     types::{Direction, Game, GameMap, GridPath, History, ID, Param, Preset, Target, Unit},
 };
 
@@ -143,6 +144,7 @@ impl AppComponent for Play {
 
                     if self.selected_unit.is_none() {
                         self.select_unit(pos);
+                        sound::random_effect(&[Effect::VoiceYes, Effect::VoiceCommander]);
                         self.action_mode = ActionMode::Walk;
 
                         if let Some(unit) = &self.selected_unit {
@@ -165,6 +167,10 @@ impl AppComponent for Play {
                                         let path = GridPath::new(path);
                                         self.move_selected_unit(path.clone());
                                         self.deselect_unit();
+                                        sound::random_effect(&[
+                                            Effect::VoiceWillDo,
+                                            Effect::VoiceMovingToTheTarget,
+                                        ]);
                                         return PlayMessage::Move(path);
                                     }
                                 }

@@ -18,6 +18,26 @@ thread_local! {
     pub static SOUNDS: OnceCell<Arc<SoundStore>> = OnceCell::new();
 }
 
+macro_rules! load_and_register_effect {
+    (
+        $map:expr,
+        $key:expr,
+        $file:literal
+    ) => {
+        let sound = load_sound(
+            Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("assets/sounds")
+                .join($file)
+                .to_str()
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+        $map.insert($key, Rc::new(sound));
+    };
+}
+
 #[derive(Debug, Clone)]
 pub struct SoundStore {
     pub effects: HashMap<Effect, Rc<Sound>>,
@@ -29,6 +49,11 @@ pub enum Effect {
     Too,
     Tada,
     Data,
+    VoiceAttack,
+    VoiceCommander,
+    VoiceMovingToTheTarget,
+    VoiceWillDo,
+    VoiceYes,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -45,13 +70,18 @@ impl SoundStore {
     }
 
     pub async fn load_all(&mut self) {
-        let da_ta = load_sound(sound_path("da-ta.wav").as_str()).await.unwrap();
-        let ta_da = load_sound(sound_path("ta-da.wav").as_str()).await.unwrap();
-        let too = load_sound(sound_path("too.wav").as_str()).await.unwrap();
-
-        self.effects.insert(Effect::Data, Rc::new(da_ta));
-        self.effects.insert(Effect::Tada, Rc::new(ta_da));
-        self.effects.insert(Effect::Too, Rc::new(too));
+        load_and_register_effect!(self.effects, Effect::Data, "da-ta.wav");
+        load_and_register_effect!(self.effects, Effect::Tada, "ta-da.wav");
+        load_and_register_effect!(self.effects, Effect::Too, "too.wav");
+        load_and_register_effect!(self.effects, Effect::VoiceAttack, "voice/attack.wav");
+        load_and_register_effect!(self.effects, Effect::VoiceCommander, "voice/commander.wav");
+        load_and_register_effect!(
+            self.effects,
+            Effect::VoiceMovingToTheTarget,
+            "voice/moving-to-the-target.wav"
+        );
+        load_and_register_effect!(self.effects, Effect::VoiceWillDo, "voice/will-do.wav");
+        load_and_register_effect!(self.effects, Effect::VoiceYes, "voice/yes.wav");
 
         let main = load_sound(sound_path("main.wav").as_str()).await.unwrap();
         self.background.insert(Background::Main, Rc::new(main));
@@ -80,7 +110,7 @@ impl Effect {
         play_sound(
             sound.as_ref(),
             PlaySoundParams {
-                volume: Settings::load().effects_volume,
+                volume: Settings::load().effects_volume as f32 / 100.0,
                 looped: false,
             },
         );
@@ -94,7 +124,7 @@ impl Background {
             sound.as_ref(),
             PlaySoundParams {
                 looped: true,
-                volume: Settings::load().main_menu_volume,
+                volume: Settings::load().main_menu_volume as f32 / 100.0,
             },
         );
     }
@@ -117,4 +147,10 @@ fn sound_path(path: &str) -> String {
         .to_str()
         .unwrap()
         .to_string()
+}
+
+pub fn random_effect(effects: &[Effect]) {
+    let index = rand::gen_range(0, effects.len());
+    let effect = effects[index];
+    effect.play();
 }

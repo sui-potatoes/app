@@ -23,6 +23,7 @@ pub enum SettingsScreenItem {
     MainMenuVolume,
     EffectsVolume,
     WindowSize,
+    Balance,
     Faucet,
     Logout,
     Back,
@@ -81,6 +82,7 @@ impl Menu<SettingsScreenItem> {
                 SettingsScreenItem::EffectsVolume,
                 SettingsScreenItem::MainMenuVolume,
                 SettingsScreenItem::Faucet,
+                SettingsScreenItem::Balance,
                 SettingsScreenItem::Logout,
                 SettingsScreenItem::Back,
             ],
@@ -97,16 +99,17 @@ impl Menu<SettingsScreenItem> {
                 WindowSize::Large => settings.window_size = WindowSize::Small,
             },
             SettingsScreenItem::EffectsVolume => {
-                settings.effects_volume += 0.1;
-                settings.effects_volume = settings.effects_volume.clamp(0.0, 1.0);
+                settings.effects_volume += 10;
+                settings.effects_volume = settings.effects_volume.clamp(0, 100);
                 settings.save();
 
                 Effect::Too.play();
             }
             SettingsScreenItem::MainMenuVolume => {
-                settings.main_menu_volume += 0.1;
-                settings.main_menu_volume = settings.main_menu_volume.clamp(0.0, 1.0);
+                settings.main_menu_volume += 10;
+                settings.main_menu_volume = settings.main_menu_volume.clamp(0, 100);
             }
+            SettingsScreenItem::Balance => {}
             SettingsScreenItem::Faucet => {}
             SettingsScreenItem::Logout => {}
             SettingsScreenItem::Back => {}
@@ -123,16 +126,15 @@ impl Menu<SettingsScreenItem> {
                 WindowSize::Large => settings.window_size = WindowSize::Medium,
             },
             SettingsScreenItem::EffectsVolume => {
-                settings.effects_volume -= 0.1;
-                settings.effects_volume = settings.effects_volume.clamp(0.0, 1.0);
+                settings.effects_volume = settings.effects_volume.saturating_sub(10);
                 settings.save();
 
                 Effect::Too.play();
             }
             SettingsScreenItem::MainMenuVolume => {
-                settings.main_menu_volume -= 0.1;
-                settings.main_menu_volume = settings.main_menu_volume.clamp(0.0, 1.0);
+                settings.main_menu_volume = settings.main_menu_volume.saturating_sub(10);
             }
+            SettingsScreenItem::Balance => {}
             SettingsScreenItem::Faucet => {}
             SettingsScreenItem::Logout => {}
             SettingsScreenItem::Back => {}
@@ -148,23 +150,20 @@ impl Menu<SettingsScreenItem> {
 
 impl Display for SettingsScreenItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let settings = Settings::load();
+
         match self {
-            SettingsScreenItem::WindowSize => write!(f, "Window Size"),
-            SettingsScreenItem::EffectsVolume => write!(f, "Effects Volume"),
-            SettingsScreenItem::MainMenuVolume => write!(f, "Main Menu Volume"),
+            SettingsScreenItem::WindowSize => write!(f, "Window Size: {}", settings.window_size),
+            SettingsScreenItem::EffectsVolume => {
+                write!(f, "Effects Volume {}%", settings.effects_volume)
+            }
+            SettingsScreenItem::MainMenuVolume => {
+                write!(f, "Main Menu Volume {}%", settings.main_menu_volume)
+            }
             SettingsScreenItem::Faucet => write!(f, "Open Faucet"),
+            SettingsScreenItem::Balance => write!(f, "Balance"),
             SettingsScreenItem::Logout => write!(f, "Logout"),
             SettingsScreenItem::Back => write!(f, "Back"),
-        }
-    }
-}
-
-impl Into<i32> for WindowSize {
-    fn into(self) -> i32 {
-        match self {
-            WindowSize::Small => 750,
-            WindowSize::Medium => 1000,
-            WindowSize::Large => 1250,
         }
     }
 }
