@@ -6,7 +6,7 @@
 use gamepads::{Button, Gamepads};
 use macroquad::prelude::*;
 
-use crate::game::App;
+use crate::{game::App, types::Direction};
 
 /// Keys that are tracked for input.
 const TRACKED_KEYS: [KeyCode; 9] = [
@@ -21,6 +21,7 @@ const TRACKED_KEYS: [KeyCode; 9] = [
     KeyCode::Backspace,
 ];
 
+#[derive(Clone)]
 pub enum InputCommand {
     /// Directional key Up (both menu and in-game).
     Up,
@@ -91,5 +92,17 @@ pub fn handle_gamepad_input(app: &mut App, gamepads: &mut Gamepads) {
         }
         // println!("Left thumbstick: {:?}", gamepad.left_stick());
         // println!("Right thumbstick: {:?}", gamepad.right_stick());
+    }
+}
+
+impl Into<Direction> for InputCommand {
+    fn into(self) -> Direction {
+        match self {
+            InputCommand::Up => Direction::Up,
+            InputCommand::Down => Direction::Down,
+            InputCommand::Left => Direction::Left,
+            InputCommand::Right => Direction::Right,
+            _ => Direction::None,
+        }
     }
 }

@@ -108,7 +108,6 @@ impl GameMap {
         for (x, row) in self.grid.iter().enumerate() {
             for (y, tile) in row.iter().enumerate() {
                 let range = self.manhattan_distance((x as u8, y as u8), origin);
-                // let range = self.cherbyshev_distance((x as u8, y as u8), origin);
                 if origin == (x as u8, y as u8) {
                     continue;
                 }

@@ -27,6 +27,7 @@ pub struct Play {
     objects: HashMap<ID, GameObject>,
     selected_unit: Option<Rc<RefCell<Unit>>>,
     pub test_preset: Option<Preset>,
+    pub secondary_index: usize,
 }
 
 pub enum Mode {
@@ -104,10 +105,35 @@ impl AppComponent for Play {
                         self.mode = Mode::Menu(PlayMenu::new())
                     }
                 }
-                InputCommand::Up => self.cursor.move_to(Direction::Up),
-                InputCommand::Down => self.cursor.move_to(Direction::Down),
-                InputCommand::Left => self.cursor.move_to(Direction::Left),
-                InputCommand::Right => self.cursor.move_to(Direction::Right),
+                i @ (InputCommand::Up
+                | InputCommand::Down
+                | InputCommand::Left
+                | InputCommand::Right) => match self.action_mode {
+                    ActionMode::Walk => self.cursor.move_to(i.clone().into()),
+                    ActionMode::Shoot => {
+                        let unit = *self.selected_unit.clone().unwrap().borrow();
+                        let unit_pos = self.game.unit_position(&unit).unwrap();
+                        let targets = self.game.targets(unit_pos);
+
+                        self.secondary_index += 1;
+
+                        let target_idx = self.secondary_index % targets.len();
+                        let target = targets[target_idx].clone();
+                        self.cursor.set_to(target.position);
+
+                        if self.selected_unit.is_some() {
+                            let unit_pos = self
+                                .game
+                                .unit_position(&self.selected_unit.as_ref().unwrap().borrow())
+                                .unwrap();
+
+                            if target.position == unit_pos {
+                                println!("Target is the same as the unit position");
+                                println!("Unit position: {:?}", unit_pos);
+                            }
+                        }
+                    }
+                },
                 InputCommand::Back => {
                     self.deselect_unit();
                     self.action_mode = ActionMode::Walk;
@@ -379,6 +405,7 @@ impl From<Game> for Play {
             game,
             selected_unit: None,
             test_preset: None,
+            secondary_index: 0,
         }
     }
 }
@@ -416,6 +443,10 @@ impl PlayCursor {
             position,
             dimensions,
         }
+    }
+
+    pub fn set_to(&mut self, position: (u8, u8)) {
+        self.position = position;
     }
 
     /// Move the cursor to the given direction. Instead of overflowing, it
