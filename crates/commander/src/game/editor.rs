@@ -10,8 +10,8 @@ use sui_sdk_types::Address;
 use crate::{
     config::{TILE_HEIGHT, TILE_WIDTH},
     draw::{
-        Align, Asset, Draw, DrawCommand, Sprite, Texture, ZIndex, draw, font, get_scale,
-        grid_to_world,
+        Align, Asset, Draw, DrawCommand, MAP_PADDING, Sprite, Texture, ZIndex, draw, font,
+        get_scale, grid_to_world,
     },
     game::Selectable,
     input::InputCommand,
@@ -329,7 +329,10 @@ impl Draw for EditorMenu {
             let color = if i == self.selected_item { WHITE } else { GRAY };
 
             DrawCommand::text(item.to_string())
-                .position(width / 2.0, height / 4.0 + 200.0 + (i as f32 * line_height))
+                .position(
+                    width / 2.0 + MAP_PADDING,
+                    height / 4.0 + 200.0 + (i as f32 * line_height) + MAP_PADDING,
+                )
                 .font_size(32)
                 .color(color)
                 .align(Align::Center)
@@ -350,8 +353,8 @@ impl EditorCursor {
     pub fn absolute_position(&self) -> (f32, f32) {
         let (scale_x, scale_y) = get_scale(self.dimensions);
         (
-            self.position.1 as f32 * TILE_WIDTH * scale_x,
-            self.position.0 as f32 * TILE_HEIGHT * scale_y,
+            self.position.1 as f32 * TILE_WIDTH * scale_x + MAP_PADDING,
+            self.position.0 as f32 * TILE_HEIGHT * scale_y + MAP_PADDING,
         )
     }
 
