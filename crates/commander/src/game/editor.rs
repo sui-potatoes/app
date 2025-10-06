@@ -164,6 +164,10 @@ impl Editor {
                 InputCommand::Down => menu.next_item(),
                 InputCommand::Select => match menu.selected_item() {
                     EditorMenuItem::UploadPreset => {
+                        STORAGE.lock().unwrap().set(
+                            EDITOR_GRID_KEY,
+                            &serde_json::to_string(&Preset::from(self.clone().into())).unwrap(),
+                        );
                         return EditorMessage::Play(Preset::from(self.clone().into()));
                     }
                     EditorMenuItem::Reset => {

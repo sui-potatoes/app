@@ -74,8 +74,35 @@ pub struct State {
     pub active_game: Option<Game>,
 }
 
+// TODO: configure to work only for desktop builds. We needn't do it on mobile or wasm builds.
+fn init_storage_dir() {
+    use dirs;
+    use std::env;
+    use std::fs;
+
+    // Detect platform-appropriate data dir
+    let mut dir = dirs::data_dir().unwrap_or_else(|| env::current_dir().unwrap());
+    dir.push(env!("CARGO_PKG_NAME")); // uses your crate name as folder
+
+    // Ensure it exists
+    fs::create_dir_all(&dir).unwrap_or_else(|e| {
+        eprintln!("Could not create storage directory {:?}: {}", dir, e);
+    });
+
+    // Change current working directory to it,
+    // so Macroquad's save/load functions use it implicitly
+    env::set_current_dir(&dir).unwrap_or_else(|e| {
+        eprintln!("Could not set current dir to {:?}: {}", dir, e);
+    });
+
+    println!("Storage directory set to: {:?}", dir);
+}
+
 /// Configure Macroquad on start.
 fn window_conf() -> macroquad::window::Conf {
+    // Magic initialization of the storage directory.
+    init_storage_dir();
+
     let settings = Settings::load();
 
     Conf {
