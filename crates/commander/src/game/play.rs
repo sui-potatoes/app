@@ -468,7 +468,13 @@ impl PlayCursor {
 
 impl Draw for PlayCursor {
     fn draw(&self) {
-        draw::draw_cursor(self.position, self.dimensions);
+        draw::draw_cursor(self.position, self.dimensions, BLUE);
+    }
+}
+
+impl PlayCursor {
+    pub fn draw_with_color(&self, color: Color) {
+        draw::draw_cursor(self.position, self.dimensions, color);
     }
 }
 
@@ -476,7 +482,11 @@ impl Draw for Play {
     fn draw(&self) {
         draw::draw_texture_background(self.game.dimensions(), Texture::Background);
         self.game.draw();
-        self.cursor.draw();
+
+        match self.action_mode {
+            ActionMode::Walk => self.cursor.draw_with_color(BLUE),
+            ActionMode::Shoot => self.cursor.draw_with_color(RED),
+        };
 
         draw::DrawCommand::text(format!(
             "Mode: {}\nUnit: {}",

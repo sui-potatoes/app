@@ -411,7 +411,7 @@ impl Into<Preset> for Editor {
 
 impl Draw for EditorCursor {
     fn draw(&self) {
-        draw::draw_cursor(self.position, self.dimensions);
+        draw::draw_cursor(self.position, self.dimensions, BLUE);
     }
 }
 

@@ -134,7 +134,7 @@ pub fn draw_main_menu_background() {
 
 /// Draw a cursor at the given tile.
 /// The cursor is a rectangle with a thickness of 4.0.
-pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8)) {
+pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8), color: Color) {
     let (scale_x, scale_y) = get_scale(dimensions);
     let thickness = 6.0;
 
@@ -147,7 +147,7 @@ pub fn draw_cursor(position: (u8, u8), dimensions: (u8, u8)) {
         .position(x, y)
         .dimensions(width, height)
         .thickness(thickness)
-        .color(BLUE)
+        .color(color)
         .z_index(ZIndex::Cursor)
         .schedule();
 }
