@@ -126,6 +126,10 @@ impl AppComponent for Play {
 
                         self.secondary_index += 1;
 
+                        if targets.is_empty() {
+                            return PlayMessage::None;
+                        }
+
                         let target_idx = self.secondary_index % targets.len();
                         let target = targets[target_idx].clone();
                         self.cursor.set_to(target.position);
@@ -349,9 +353,11 @@ impl Play {
                         effects.into_iter().for_each(|effect| match effect {
                             Record::Damage(damage) => {
                                 target_unit.borrow_mut().hp.decrease(*damage as u16);
-                                self.objects
-                                    .get_mut(&target_unit.borrow().recruit)
-                                    .unwrap()
+                                let object =
+                                    self.objects.get_mut(&target_unit.borrow().recruit).unwrap();
+
+                                object
+                                    .set_color(RED, 1.0) // blink red
                                     .add_status_animation(
                                         "damage",
                                         Animation::status(
@@ -470,6 +476,7 @@ impl Play {
                         frame: 2,
                         fps: None,
                         sprite: shadow,
+                        color: WHITE,
                     },
                     duration: None,
                     ..Default::default()
@@ -814,6 +821,7 @@ fn static_unit_animation() -> Animation {
             sprite: Sprite::SoldierIdle.load().unwrap(),
             frame: 0,
             fps: Some(0.2),
+            color: WHITE,
         },
         ..Default::default()
     }

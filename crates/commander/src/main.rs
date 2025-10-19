@@ -190,18 +190,23 @@ fn tokio_runtime(tx: Sender<Message>, rx_app: Receiver<AppMessage>, state_arc: A
 
         if let Some(prev_session) = prev_session {
             if let Ok(session) = serde_json::from_str::<Session>(&prev_session) {
-                state_arc.lock().unwrap().address = Some(session.address);
-                tx_runner = Some(TxExecutor::new(
-                    Ed25519PrivateKey::from_pem(&session.keypair).unwrap(),
-                    session.zkp,
-                    session.max_epoch,
-                    client,
-                ));
+                // If the session is expired, remove it and show login screen.
+                if session.max_epoch < game_client.get_epoch().await.unwrap() {
+                    STORAGE.lock().unwrap().remove(SESSION_KEY);
+                } else {
+                    state_arc.lock().unwrap().address = Some(session.address);
+                    tx_runner = Some(TxExecutor::new(
+                        Ed25519PrivateKey::from_pem(&session.keypair).unwrap(),
+                        session.zkp,
+                        session.max_epoch,
+                        client,
+                    ));
 
-                tx.send(Message::StateUpdated).unwrap();
+                    tx.send(Message::StateUpdated).unwrap();
+                }
             } else {
-                // Clean up session storage if data cannot be deserialized (very
-                // likely due to data format changes).
+                // Clean up session storage if data cannot be deserialized.
+                // Very likely due to data format changes.
                 STORAGE.lock().unwrap().remove(SESSION_KEY);
             }
         }

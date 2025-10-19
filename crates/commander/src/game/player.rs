@@ -529,6 +529,7 @@ fn static_unit_animation() -> Animation {
             sprite: Sprite::SoldierIdle.load().unwrap(),
             frame: 0,
             fps: Some(0.2),
+            color: WHITE,
         },
         ..Default::default()
     }

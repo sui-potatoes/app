@@ -7,7 +7,7 @@ use crate::{
     types::{Cursor, Direction, Record},
 };
 
-use macroquad::prelude::Vec2;
+use macroquad::{color::WHITE, prelude::Vec2};
 
 #[derive(Debug, Clone)]
 /// Representation of a `Path` on the grid.
@@ -163,6 +163,7 @@ impl Into<Animation> for PathSegment {
                 end_position: self.end_position,
                 frame: 0,
                 fps: 0.1,
+                color: WHITE,
             },
             ..Default::default()
         }

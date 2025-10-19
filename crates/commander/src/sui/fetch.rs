@@ -4,7 +4,7 @@
 use sui_rpc::{
     Client,
     field::FieldMask,
-    proto::sui::rpc::v2beta2::{GetObjectRequest, ListOwnedObjectsRequest},
+    proto::sui::rpc::v2beta2::{GetEpochRequest, GetObjectRequest, ListOwnedObjectsRequest},
 };
 use sui_sdk_types::{Address, ObjectId};
 
@@ -21,6 +21,21 @@ pub struct GameClient {
 impl GameClient {
     pub fn new(client: Client) -> Self {
         Self { client }
+    }
+
+    pub async fn get_epoch(&mut self) -> Result<u64, anyhow::Error> {
+        let epoch = self
+            .client
+            .ledger_client()
+            .get_epoch(GetEpochRequest {
+                ..Default::default()
+            })
+            .await?
+            .into_inner()
+            .epoch
+            .ok_or(anyhow::anyhow!("Epoch not found"))?;
+
+        Ok(epoch.epoch())
     }
 
     pub async fn get_game(&mut self, game_id: ObjectId) -> Result<Game, anyhow::Error> {

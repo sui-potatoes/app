@@ -3,7 +3,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc, sync::Arc};
 
 use macroquad::prelude::*;
 
@@ -13,6 +13,7 @@ use crate::{
     types::Param,
 };
 
+#[derive(Clone)]
 /// An in-game object which has a position and an animation. If the object is
 /// static, then the animation is also static (or `idle` in some cases).
 pub struct GameObject {
@@ -28,6 +29,7 @@ pub struct GameObject {
     pub statuses: HashMap<String, Animation>,
 }
 
+#[derive(Clone)]
 /// Animation of the object.
 pub struct Animation {
     /// Optional duration of the animation in milliseconds.
@@ -38,13 +40,14 @@ pub struct Animation {
     /// The type of animation.
     pub type_: AnimationType,
     /// Callback to trigger on end of animation.
-    pub on_end: Option<Box<dyn Fn(&mut GameObject)>>,
+    pub on_end: Option<Arc<dyn Fn(&mut GameObject)>>,
     // Animation to set in `GameObject` after reaching the end of the current
     // animation.
     // TODO: implement this
     pub chain: Option<Box<Animation>>,
 }
 
+#[derive(Clone)]
 pub enum AnimationType {
     Hidden,
     Static(Rc<Texture2D>),
@@ -53,6 +56,7 @@ pub enum AnimationType {
         frame: usize,
         fps: Option<f64>,
         sprite: Rc<SpriteSheet>,
+        color: Color,
     },
     Move {
         texture: Rc<Texture2D>,
@@ -72,6 +76,7 @@ pub enum AnimationType {
         frame: usize,
         /// Frames per second.
         fps: f64,
+        color: Color,
     },
     /// Status animation. Used to display text on the object for a short time.
     /// Preferably uses `duration` field to set the duration of the animation.
@@ -116,6 +121,24 @@ impl GameObject {
     /// Chain an animation to the very last animation in the chain.
     pub fn chain(&mut self, animation: Animation) {
         self.animation.chain(animation);
+    }
+
+    /// Set the color of the main animation for a given duration.
+    /// Can be used to temporarily change the color of the animation, eg if
+    /// unit
+    pub fn set_color(&mut self, new_color: Color, duration: f64) -> &mut Self {
+        let current_animation = self.animation.clone();
+
+        match &mut self.animation.type_ {
+            AnimationType::StaticSprite { color, .. } => *color = new_color,
+            AnimationType::MoveSprite { color, .. } => *color = new_color,
+            _ => {}
+        }
+
+        self.animation.duration = Some(duration);
+        self.animation.start_time = get_time();
+        self.animation.chain(current_animation);
+        self
     }
 
     /// Set (or replaces) status animation with a given key.
@@ -223,6 +246,7 @@ impl GameObject {
             end_position,
             frame,
             fps,
+            color: _,
         } = &mut self.animation.type_
         {
             let time = get_time();
@@ -235,7 +259,13 @@ impl GameObject {
         }
 
         // If animation is static sprite, update the frame of the sprite
-        if let AnimationType::StaticSprite { frame, fps, sprite } = &mut self.animation.type_ {
+        if let AnimationType::StaticSprite {
+            frame,
+            fps,
+            sprite,
+            color: _,
+        } = &mut self.animation.type_
+        {
             if let Some(fps) = fps {
                 let time = get_time();
                 let frames_passed = (time - self.animation.start_time) / *fps;
@@ -417,7 +447,12 @@ impl Draw for GameObject {
                         .schedule();
                     }
                 }
-                AnimationType::StaticSprite { frame, sprite, .. } => {
+                AnimationType::StaticSprite {
+                    frame,
+                    sprite,
+                    color,
+                    ..
+                } => {
                     sprite
                         .draw_frame_with_index(
                             self.position.x,
@@ -427,6 +462,7 @@ impl Draw for GameObject {
                             self.dimensions,
                             ZIndex::Unit,
                         )
+                        .color(*color)
                         .schedule();
                 }
                 _ => {}
@@ -448,7 +484,12 @@ impl Draw for GameObject {
                     .z_index(ZIndex::Unit)
                     .schedule();
             }
-            AnimationType::StaticSprite { frame, sprite, .. } => {
+            AnimationType::StaticSprite {
+                frame,
+                sprite,
+                color,
+                ..
+            } => {
                 sprite
                     .draw_frame_with_index(
                         self.position.x,
@@ -458,9 +499,15 @@ impl Draw for GameObject {
                         self.dimensions,
                         ZIndex::Unit,
                     )
+                    .color(*color)
                     .schedule();
             }
-            AnimationType::MoveSprite { sprite, frame, .. } => sprite
+            AnimationType::MoveSprite {
+                sprite,
+                frame,
+                color,
+                ..
+            } => sprite
                 .draw_frame_with_index(
                     self.position.x,
                     self.position.y,
@@ -469,6 +516,7 @@ impl Draw for GameObject {
                     self.dimensions,
                     ZIndex::Unit,
                 )
+                .color(*color)
                 .schedule(),
             // AP is only drawn as status.
             AnimationType::AP { .. } => {}
