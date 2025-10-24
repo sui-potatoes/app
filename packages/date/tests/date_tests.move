@@ -45,6 +45,49 @@ fun iso_date_time() {
 }
 
 #[test]
+fun getters() {
+    // Thu, 01 Jan 1970 00:00:00 GMT
+    let date = date::new(0);
+
+    assert_eq!(date.year(), 1970);
+    assert_eq!(date.month(), 0);
+    assert_eq!(date.day(), 1);
+    assert_eq!(date.hour(), 0);
+    assert_eq!(date.minute(), 0);
+    assert_eq!(date.second(), 0);
+    assert_eq!(date.ordinal(), 1);
+    assert_eq!(date.iso_week(), 1);
+    assert_eq!(date.timestamp_ms(), 0);
+
+    // Fri, 31 Dec 1970 00:00:00 GMT
+    let timestamp_ms = 31536000000 - 86400000;
+    let date = date::new(timestamp_ms);
+
+    assert_eq!(date.year(), 1970);
+    assert_eq!(date.month(), 11);
+    assert_eq!(date.day(), 31);
+    assert_eq!(date.hour(), 0);
+    assert_eq!(date.minute(), 0);
+    assert_eq!(date.second(), 0);
+    assert_eq!(date.ordinal(), 365);
+    assert_eq!(date.iso_week(), 53);
+    assert_eq!(date.timestamp_ms(), timestamp_ms);
+
+    // Thu, 22 May 2025 08:10:03 GMT
+    let date = date::new(1747901403000);
+
+    assert_eq!(date.year(), 2025);
+    assert_eq!(date.month(), 4);
+    assert_eq!(date.day(), 22);
+    assert_eq!(date.hour(), 8);
+    assert_eq!(date.minute(), 10);
+    assert_eq!(date.second(), 3);
+    assert_eq!(date.ordinal(), 142);
+    assert_eq!(date.iso_week(), 21);
+    assert_eq!(date.timestamp_ms(), 1747901403000);
+}
+
+#[test]
 fun format_year() {
     // Thu, 01 Jan 1970 00:00:00 GMT
     assert_format!(0, b"yy", b"70");

@@ -69,7 +69,7 @@ const DAYS_FULL: vector<vector<u8>> = vector[
 ];
 
 /// The number of days in each month.
-const DAYS_IN_MONTH: vector<u64> = vector[31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const DAYS_IN_MONTH: vector<u16> = vector[31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 // prettier-ignore
 /// The months of the year.
@@ -178,10 +178,10 @@ public fun new(timestamp_ms: u64): Date {
     let days_in_month = DAYS_IN_MONTH;
 
     loop {
-        let days_in_month = if (is_leap_year!(year) && month == 1) {
+        let days_in_month = if (month == 1 && is_leap_year!(year)) {
             29
         } else {
-            days_in_month[month]
+            days_in_month[month] as u64
         };
 
         if (days < days_in_month) break
@@ -275,7 +275,7 @@ public fun from_utc_string(utc: String): Date {
 
     // Add days for each month.
     month.do!(|m| {
-        days = days + days_in_month[m as u64];
+        days = days + (days_in_month[m as u64] as u64);
         // Add leap year day in February if applicable
         if (m == 1 && is_leap_year!(year)) days = days + 1;
     });
@@ -305,22 +305,47 @@ public fun from_utc_string(utc: String): Date {
 }
 
 /// Get the second of a `Date`.
+/// Returns the second as a number in 0..59 range.
 public fun second(date: &Date): u8 { date.second }
 
 /// Get the minute of a `Date`.
+/// Returns the minute as a number in 0..59 range.
 public fun minute(date: &Date): u8 { date.minute }
 
 /// Get the hour of a `Date`.
+/// Returns the hour as a number in 0..23 range.
 public fun hour(date: &Date): u8 { date.hour }
 
 /// Get the day of a `Date`.
+/// Returns the day as a number in 1..31 range.
 public fun day(date: &Date): u8 { date.day }
 
 /// Get the month of a `Date`.
+/// Returns the month as a number in 0..11 range.
 public fun month(date: &Date): u8 { date.month }
 
 /// Get the year of a `Date`.
+/// Returns the year as a number in 1970.. range.
 public fun year(date: &Date): u16 { date.year }
+
+/// Get the ordinal of a `Date`.
+/// Returns the ordinal as a number in 1..366 range.
+public fun ordinal(date: &Date): u16 {
+    let days_in_month = DAYS_IN_MONTH;
+    let mut ordinal = date.day as u16;
+    date.month.do!(|m| {
+        ordinal = ordinal + days_in_month[m as u64];
+    });
+    ordinal
+}
+
+/// Get the ISO week of a `Date`.
+/// Returns the ISO week as a number in 1..53 range.
+public fun iso_week(date: &Date): u8 {
+    let ordinal = date.ordinal();
+    let week = ordinal / 7 + 1;
+    week as u8
+}
 
 /// Get the timestamp in milliseconds of a `Date`.
 public fun timestamp_ms(date: &Date): u64 { date.timestamp_ms }
