@@ -4,35 +4,39 @@
 /// Implementation of the Date type and related functions in Move.
 ///
 /// Supports:
+///
 /// - ISO 8601
 /// - RFC 7231 (HTTP-date format)
 /// - Date / Time formatting
 ///
 /// Does not support:
+///
 /// - IANA Timezone names
 /// - Timezone Offsets (ISO 8601)
 ///
 /// Formatting:
-/// - `yyyy` or `YYYY` - The year number in four digits. For example, in this format, 2005 would be represented as 2005.
-/// - `yy` or `YY` - The last two digits of the year number. For example, in this format, 2005 would be represented as 05.
-/// - `MMMM` - The name of the month spelled in full. This format is supported only for output time. Note: This format is only supported for the output format.
-/// - `MMM` - The name of the month in three letters. For example, August would be represented as Aug.
-/// - `MM` - Month in two digits. If the month number is a single-digit number, it's displayed with a leading zero.
-/// - `M` - Month as a number from 1 to 12. If the month number is a single-digit number, it's displayed without a leading zero.
-/// - `dddd` or `DDDD` - The full name of the day of the week. For example, Saturday is displayed in full. Note: This format is only supported for the output format.
-/// - `ddd` or `DDD` - The abbreviated name of the day of the week in three letters. For example, Saturday is abbreviated as “Sat”.
-/// - `dd` or `DD` - Day in two digits. If the day number is a single-digit number, it's displayed with a leading zero.
-/// - `d` or `D` - Day as a number from 1 to 31. If the day number is a single-digit number, it's displayed without a leading zero.
-/// - `HH` - Hour in two digits using the 24-hour clock. For example, in this format, 1 pm would be represented as 13. If the hour number is a single-digit number, it's displayed with a leading zero.
-/// - `H` - Hour as a number from 0 to 23 when using the 24-hour clock. For example, in this format, 1 pm would be represented as 13. If the hour number is a single-digit number, it's displayed without a leading zero.
-/// - `hh` - Hour in two digits using the 12-hour clock. For example, in this format, 1 pm would be represented as 01. If the hour number is a single-digit number, it's displayed with a leading zero.
-/// - `h` - Hour as a number from 1 to 12 when using the 12-hour clock. If the hour number is a single-digit number, it's displayed without a leading zero.
-/// - `mm` - Minutes in two digits. If the minute number is a single-digit number, it's displayed with a leading zero.
-/// - `m` - Minutes as a number from 0 to 59. If the minute number is a single-digit number, it's displayed without a leading zero.
-/// - `ss` - Seconds in two digits. If the second number is a single-digit number, it's displayed with a leading zero.
-/// - `s` - Seconds as a number from 0 to 59. If the second number is a single-digit number, it's displayed without a leading zero.
-/// - `SSS` - Milliseconds in three digits. If the millisecond number is a single-digit number, it's displayed with a leading zero.
-/// - `tt` - A.M. or P.M. as two letters: AM or PM.
+/// | Pattern(s)       | Description                                                | Example(s)                   |
+/// |------------------|------------------------------------------------------------|------------------------------|
+/// | `yyyy` or `YYYY` | Year number in four digits.                                | 2005 → 2005                  |
+/// | `yy` or `YY`     | Last two digits of the year number.                        | 2005 → 05                    |
+/// | `MMMM`           | Month name spelled in full (output only).                  | August → August              |
+/// | `MMM`            | Month name, three letters.                                 | August → Aug                 |
+/// | `MM`             | Month, two digits with leading zero if needed.             | 8 → 08, 12 → 12              |
+/// | `M`              | Month as number from 1 to 12, no leading zero.             | 8 → 8, 12 → 12               |
+/// | `dddd` or `DDDD` | Full name of the day of week (output only).                | Saturday → Saturday          |
+/// | `ddd` or `DDD`   | Day of week, three-letter abbreviation.                    | Saturday → Sat               |
+/// | `dd` or `DD`     | Day, two digits with leading zero if needed.               | 5 → 05, 10 → 10              |
+/// | `d` or `D`       | Day as number from 1 to 31, no leading zero.               | 5 → 5, 10 → 10               |
+/// | `HH`             | Hour in two digits, 24-hour clock, leading zero if needed. | 1pm → 13, 8am → 08           |
+/// | `H`              | Hour as number (0–23), 24-hour clock, no leading zero.     | 1pm → 13, 8am → 8            |
+/// | `hh`             | Hour in two digits, 12-hour clock, leading zero if needed. | 1pm → 01, 8am → 08           |
+/// | `h`              | Hour as number (1–12), 12-hour clock, no leading zero.     | 1pm → 1, 8am → 8             |
+/// | `mm`             | Minutes in two digits, leading zero if needed.             | 7 → 07, 35 → 35              |
+/// | `m`              | Minutes as number (0–59), no leading zero.                 | 7 → 7, 35 → 35               |
+/// | `ss`             | Seconds in two digits, leading zero if needed.             | 9 → 09, 28 → 28              |
+/// | `s`              | Seconds as number (0–59), no leading zero.                 | 9 → 9, 28 → 28               |
+/// | `SSS`            | Milliseconds in three digits, leading zero(s) if needed.   | 5 → 005, 83 → 083, 415 → 415 |
+/// | `tt`             | A.M. or P.M. as two letters: AM or PM.                     | 1pm → PM, 8am → AM           |
 ///
 /// Resources:
 /// - ISO 8601: https://en.wikipedia.org/wiki/ISO_8601
