@@ -115,14 +115,14 @@ impl AppComponent for Play {
                 | InputCommand::Left
                 | InputCommand::Right) => match self.action_mode {
                     // do nothing on reload, keep the cursor on the selected unit
-                    ActionMode::Reload => {
-                        let unit = *self.selected_unit.clone().unwrap().borrow();
+                    ActionMode::Reload if self.selected_unit.is_some() => {
+                        let unit = *self.selected_unit.clone().unwrap().borrow(); // TODO: handle unwrap
                         let unit_pos = self.game.unit_position(&unit).unwrap();
                         self.cursor.set_to(unit_pos);
                     }
                     ActionMode::Walk => self.cursor.move_to(i.clone().into()),
-                    ActionMode::Shoot => {
-                        let unit = *self.selected_unit.clone().unwrap().borrow();
+                    ActionMode::Shoot if self.selected_unit.is_some() => {
+                        let unit = *self.selected_unit.clone().unwrap().borrow(); // TODO: handle unwrap
                         let unit_pos = self.game.unit_position(&unit).unwrap();
                         let targets = self.game.targets(unit_pos);
 
@@ -148,6 +148,7 @@ impl AppComponent for Play {
                             }
                         }
                     }
+                    _ => println!("Trying to move in an invalid mode: {:?}", self.action_mode),
                 },
                 InputCommand::Back => {
                     self.deselect_unit();
@@ -351,81 +352,84 @@ impl Play {
                     target,
                     effects,
                 } => {
-                    if let Some(target_unit) = self.unit_at(*target) {
-                        effects.into_iter().for_each(|effect| match effect {
-                            Record::Damage(damage) => {
-                                target_unit.borrow_mut().hp.decrease(*damage as u16);
-                                let object =
-                                    self.objects.get_mut(&target_unit.borrow().recruit).unwrap();
+                    let target_unit = match self.unit_at(*target) {
+                        Some(unit) => unit,
+                        None => return,
+                    };
 
-                                object
-                                    .set_color(RED, 1.0) // blink red
-                                    .add_status_animation(
-                                        "damage",
-                                        Animation::status(
-                                            format!("Damage! {}", damage),
-                                            24,
-                                            RED,
-                                            Some(2.0),
-                                        ),
-                                    );
-                            }
-                            Record::Miss => {
-                                self.objects
-                                    .get_mut(&target_unit.borrow().recruit)
-                                    .unwrap()
-                                    .add_status_animation(
-                                        "miss",
-                                        Animation::status("Miss".to_string(), 24, RED, Some(2.0)),
-                                    );
-                            }
-                            Record::Dodged => {
-                                self.objects
-                                    .get_mut(&target_unit.borrow().recruit)
-                                    .unwrap()
-                                    .add_status_animation(
-                                        "dodged",
-                                        Animation::status("Dodged".to_string(), 24, RED, Some(2.0)),
-                                    );
-                            }
-                            Record::CriticalHit(damage) => {
-                                self.objects
-                                    .get_mut(&target_unit.borrow().recruit)
-                                    .unwrap()
-                                    .add_status_animation(
-                                        "critical_hit",
-                                        Animation::status(
-                                            format!("Critical! {}", damage),
-                                            24,
-                                            RED,
-                                            Some(2.0),
-                                        ),
-                                    );
-                            }
-                            Record::UnitKIA(id) => {
-                                self.objects
-                                    .get_mut(&target_unit.borrow().recruit)
-                                    .unwrap()
-                                    .animation = Animation::none();
+                    effects.into_iter().for_each(|effect| match effect {
+                        Record::Damage(damage) => {
+                            target_unit.borrow_mut().hp.decrease(*damage as u16);
+                            let object =
+                                self.objects.get_mut(&target_unit.borrow().recruit).unwrap();
 
-                                let unit = self
-                                    .units()
-                                    .iter()
-                                    .find(|u| u.borrow().recruit == *id)
-                                    .unwrap()
-                                    .clone();
+                            object
+                                .set_color(RED, 1.0) // blink red
+                                .add_status_animation(
+                                    "damage",
+                                    Animation::status(
+                                        format!("Damage! {}", damage),
+                                        24,
+                                        RED,
+                                        Some(2.0),
+                                    ),
+                                );
+                        }
+                        Record::Miss => {
+                            self.objects
+                                .get_mut(&target_unit.borrow().recruit)
+                                .unwrap()
+                                .add_status_animation(
+                                    "miss",
+                                    Animation::status("Miss".to_string(), 24, RED, Some(2.0)),
+                                );
+                        }
+                        Record::Dodged => {
+                            self.objects
+                                .get_mut(&target_unit.borrow().recruit)
+                                .unwrap()
+                                .add_status_animation(
+                                    "dodged",
+                                    Animation::status("Dodged".to_string(), 24, RED, Some(2.0)),
+                                );
+                        }
+                        Record::CriticalHit(damage) => {
+                            self.objects
+                                .get_mut(&target_unit.borrow().recruit)
+                                .unwrap()
+                                .add_status_animation(
+                                    "critical_hit",
+                                    Animation::status(
+                                        format!("Critical! {}", damage),
+                                        24,
+                                        RED,
+                                        Some(2.0),
+                                    ),
+                                );
+                        }
+                        Record::UnitKIA(id) => {
+                            self.objects
+                                .get_mut(&target_unit.borrow().recruit)
+                                .unwrap()
+                                .animation = Animation::none();
 
-                                let position = self.game.unit_position(&unit.borrow()).unwrap();
+                            let unit = self
+                                .units()
+                                .iter()
+                                .find(|u| u.borrow().recruit == *id)
+                                .unwrap()
+                                .clone();
 
-                                // Remove the unit from the grid.
-                                self.game.grid[position.0 as usize][position.1 as usize]
-                                    .unit
-                                    .take()
-                                    .unwrap();
-                            }
-                            _ => {}
-                        })
-                    }
+                            let position = self.game.unit_position(&unit.borrow()).unwrap();
+
+                            // Remove the unit from the grid.
+                            self.game.grid[position.0 as usize][position.1 as usize]
+                                .unit
+                                .take()
+                                .unwrap();
+                        }
+                        _ => println!("Unsupported attack effect: {:?}", effect),
+                    })
                 }
                 _ => println!("Unsupported effect: {:?}", record),
             });
@@ -508,7 +512,7 @@ impl Play {
         self.deselect_unit();
 
         let tile = &self.game.grid[pos.0 as usize][pos.1 as usize];
-        if let Some(unit) = &tile.unit {
+        tile.unit.as_ref().map(|unit| {
             self.selected_unit = Some(unit.clone());
             let object = self.objects.get_mut(&unit.borrow().recruit).unwrap();
             let shadow = object.shadow.as_ref().unwrap().clone();
@@ -527,10 +531,8 @@ impl Play {
                 },
             );
 
-            Some(unit.clone())
-        } else {
-            None
-        }
+            unit.clone()
+        })
     }
 
     fn move_selected_unit(&mut self, grid_path: GridPath) {
@@ -552,18 +554,17 @@ impl Play {
             unit.borrow_mut().ap.decrease(1);
 
             // Move the unit on the Map.
-            {
-                let first = *grid_path.0.first().unwrap();
-                let last = *grid_path.0.last().unwrap();
-                let unit_rc = self.game.grid[first.0 as usize][first.1 as usize]
-                    .unit
-                    .take()
-                    .unwrap();
-                self.game.grid[last.0 as usize][last.1 as usize]
-                    .unit
-                    .replace(unit_rc);
-            };
+            let first = *grid_path.0.first().unwrap();
+            let last = *grid_path.0.last().unwrap();
+            let unit_rc = self.game.grid[first.0 as usize][first.1 as usize]
+                .unit
+                .take()
+                .unwrap();
+            self.game.grid[last.0 as usize][last.1 as usize]
+                .unit
+                .replace(unit_rc);
 
+            // Animate unit's movement.
             let obj = self.objects.get_mut(&unit.borrow().recruit).unwrap();
             let mut animations = grid_path
                 .to_path_segments(self.game.dimensions())
