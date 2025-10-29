@@ -21,7 +21,7 @@
 module grid::grid;
 
 use grid::point::Point;
-use std::{macros::{num_diff, num_max}, string::String};
+use std::{macros::{num_diff, num_max, num_sqrt}, string::String};
 use sui::bcs::BCS;
 
 /// Vector length is incorrect during initialization.
@@ -189,6 +189,28 @@ public macro fun manhattan_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T
 /// See https://en.wikipedia.org/wiki/Chebyshev_distance for more information.
 public macro fun chebyshev_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
     num_max!(num_diff!($x0, $x1), num_diff!($y0, $y1))
+}
+
+/// Get the Euclidean distance between two points. Euclidean distance is the
+/// square root of the sum of the squared differences of the x and y coordinates.
+///
+/// Note: use with caution on `u8` and `u16` types, as the macro does not upscale
+/// intermediate values automatically. Perform upscaling manually before using the
+/// macro if necessary.
+///
+/// Example:
+/// ```rust
+/// let distance = grid::euclidean_distance!(0, 0, 1, 2);
+///
+/// assert_eq!(distance, 2);
+/// ```
+///
+/// See https://en.wikipedia.org/wiki/Euclidean_distance for more information.
+public macro fun euclidean_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
+    let xd = num_diff!($x0, $x1);
+    let yd = num_diff!($y0, $y1);
+
+    num_sqrt!(xd * xd + yd * yd)
 }
 
 // === Macros: Grid ===
