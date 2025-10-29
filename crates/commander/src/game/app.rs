@@ -191,10 +191,15 @@ impl App {
                     self.send_message(Message::Play(PlayMessage::QuitGame));
                     self.screen = Screen::MainMenu(Menu::main(state.address))
                 }
-                m @ (PlayMessage::Move(_) | PlayMessage::Attack(_, _) | PlayMessage::Reload(_))
-                    if play.test_preset.is_none() =>
-                {
-                    self.send_message(Message::Play(m));
+                m @ (PlayMessage::Move(_) | PlayMessage::Attack(_, _) | PlayMessage::Reload(_)) => {
+                    if play.test_preset.is_none() {
+                        self.send_message(Message::Play(m));
+                    } else {
+                        // In test mode, we can reply with a random history
+                        // instead of invoking the network.
+                        let history = play.message_to_random_history(m);
+                        play.apply_effects(history);
+                    }
                 }
                 PlayMessage::BackToEditor if play.test_preset.is_some() => {
                     self.screen = Screen::Editor(Editor::from(play.test_preset.take().unwrap()));

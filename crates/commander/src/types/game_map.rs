@@ -125,16 +125,12 @@ impl GameMap {
         targets
     }
 
-    pub fn cherbyshev_distance(&self, origin: (u8, u8), target: (u8, u8)) -> u8 {
-        let (x0, y0) = origin;
-        let (x1, y1) = target;
-        x0.abs_diff(x1).max(y0.abs_diff(y1))
+    pub fn chebyshev_distance(&self, origin: (u8, u8), target: (u8, u8)) -> u8 {
+        chebyshev_distance(origin, target)
     }
 
     pub fn manhattan_distance(&self, origin: (u8, u8), target: (u8, u8)) -> u8 {
-        let (x0, y0) = origin;
-        let (x1, y1) = target;
-        x0.abs_diff(x1) + y0.abs_diff(y1)
+        manhattan_distance(origin, target)
     }
 
     /// Use a Dijkstra algorithm to trace a path from `start` to `target` with a
@@ -511,6 +507,18 @@ impl DrawAt for GameTile {
             }
         };
     }
+}
+
+pub fn chebyshev_distance(origin: (u8, u8), target: (u8, u8)) -> u8 {
+    let (x0, y0) = origin;
+    let (x1, y1) = target;
+    x0.abs_diff(x1).max(y0.abs_diff(y1))
+}
+
+pub fn manhattan_distance(origin: (u8, u8), target: (u8, u8)) -> u8 {
+    let (x0, y0) = origin;
+    let (x1, y1) = target;
+    x0.abs_diff(x1) + y0.abs_diff(y1)
 }
 
 const CLOSE_DISTANCE_MODIFIER: u8 = 5;

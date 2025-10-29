@@ -14,7 +14,9 @@ use crate::{
     game::{Animation, AnimationType, AppComponent, GameObject, ProcessedRecord, Selectable},
     input::InputCommand,
     sound::{self, Effect},
-    types::{Direction, Game, GameMap, GridPath, History, ID, Param, Preset, Record, Target, Unit},
+    types::{
+        self, Direction, Game, GameMap, GridPath, History, ID, Param, Preset, Record, Target, Unit,
+    },
 };
 
 pub struct Play {
@@ -427,6 +429,48 @@ impl Play {
                 }
                 _ => println!("Unsupported effect: {:?}", record),
             });
+    }
+
+    /// Converts a `PlayMessage` into a `History` with random effects.
+    pub fn message_to_random_history(&self, message: PlayMessage) -> History {
+        if self.test_preset.is_none() {
+            panic!("Cannot convert message to random history in non-test mode!");
+        }
+
+        match message {
+            PlayMessage::Attack((x0, y0), (x1, y1)) => {
+                let range = types::chebyshev_distance((x0, y0), (x1, y1));
+                let is_hit = rand::gen_range(0, 10) > range;
+                let damage = rand::gen_range(0, 5);
+                let is_kia = self
+                    .unit_at((x1, y1))
+                    .is_some_and(|unit| unit.borrow().hp.value() <= damage);
+
+                let mut history = vec![
+                    Record::Attack {
+                        origin: vec![x0 as u16, y0 as u16],
+                        target: vec![x1 as u16, y1 as u16],
+                    },
+                    match (is_hit, damage) {
+                        (true, damage) if damage > 0 => Record::Damage(damage as u8),
+                        (true, 0) => Record::Dodged,
+                        (false, _) => Record::Miss,
+                        _ => unreachable!("Invalid damage or hit chance"),
+                    },
+                ];
+
+                if is_kia {
+                    history.push(Record::UnitKIA(
+                        self.selected_unit.as_ref().unwrap().borrow().recruit,
+                    ));
+                }
+
+                History(history)
+            }
+            PlayMessage::Move(path) => History(vec![Record::Move(path.to_direction_path())]),
+            PlayMessage::Reload((x, y)) => History(vec![Record::Reload(vec![x as u16, y as u16])]),
+            _ => History(vec![]),
+        }
     }
 
     fn unit_at(&self, pos: (u8, u8)) -> Option<Rc<RefCell<Unit>>> {
