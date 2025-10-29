@@ -1,0 +1,358 @@
+// Copyright (c) Sui Potatoes
+// SPDX-License-Identifier: MIT
+
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex, mpsc::Sender},
+};
+
+use macroquad::{miniquad::window::set_window_size, prelude::*};
+use sui_sdk_types::Address;
+
+use super::{menu::*, player::*};
+use crate::{
+    Message as TokioMessage, State, WithRef,
+    draw::*,
+    game::{
+        Editor, EditorMessage, SettingsScreen, SettingsScreenMessage,
+        play::{Play, PlayMessage},
+    },
+    input::InputCommand,
+    sound::Effect,
+    types::{Game, ID, Preset, Recruit, Replay},
+};
+
+pub struct App {
+    pub screen: Screen,
+    pub state: Arc<Mutex<State>>,
+    pub game: Option<Game>,
+    /// Cursor position on the Map.
+    /// Only relevant in certain screens, like the Preset screen.
+    pub cursor: (u8, u8),
+    /// Tiles that are currently highlighted.
+    pub highlight: Option<Highlight>,
+    /// Sender for messages to the tokio runtime.
+    pub tx: Sender<Message>,
+}
+
+/// Messages sent from Application to the tokio runtime.
+pub enum Message {
+    /// Prepare to open a login window.
+    PrepareLogin,
+    /// Start a new game.
+    StartGame,
+    /// Logout the user.
+    Logout,
+    /// Fetch the list of presets.
+    FetchPresets,
+    /// Fetch the list of recruits.
+    FetchRecruits,
+    /// Fetch the list of replays.
+    FetchReplays,
+    /// Send a PlayMessage to the tokio runtime.
+    Play(PlayMessage),
+}
+
+pub enum Screen {
+    /// Show the message to interact with opened browser window.
+    Login,
+    /// Show the message while the game is being created.
+    CreatingGame,
+    /// Show the editor.
+    Editor(Editor),
+    /// Show main menu.
+    MainMenu(Menu<MainMenuItem>),
+    /// Show an active game.
+    Play(Play),
+    /// Show list of replays.
+    Replays(Menu<ReplayMenuItem>),
+    /// Play a replay.
+    Replay(Player),
+    /// Show settings menu.
+    Settings(SettingsScreen),
+}
+
+#[derive(Debug, Clone)]
+pub struct RecruitScreen {
+    pub menu: Menu<RecruitSubMenuItem>,
+    pub recruit: WithRef<Recruit>,
+}
+
+/// Trait for separate screens that can be used in the App.
+pub trait AppComponent {
+    type Message;
+
+    /// Handles a key press. Returns true if the screen should be closed, false
+    /// otherwise. Eg, on `InputCommand::Menu` or `InputCommand::Select`, an
+    /// app component may request to close the screen.
+    fn handle_key_press(&mut self, key: InputCommand) -> Self::Message;
+
+    /// Updates the component on each frame.
+    fn tick(&mut self);
+}
+
+impl App {
+    pub fn new(tx: Sender<Message>, state: Arc<Mutex<State>>) -> Self {
+        Self {
+            screen: Screen::MainMenu(Menu::main(None)),
+            game: None,
+            state,
+            highlight: None,
+            cursor: (0, 0),
+            tx,
+        }
+    }
+
+    /// Returns a preset by its ID.
+    fn get_preset(&self, id: &ID) -> Option<WithRef<Preset>> {
+        self.state
+            .lock()
+            .unwrap()
+            .presets
+            .iter()
+            .find(|p| p.data.id == *id)
+            .cloned()
+    }
+
+    /// Sends a message to the tokio runtime.
+    fn send_message(&self, msg: Message) {
+        self.tx.send(msg).unwrap();
+    }
+
+    /// Updates the app from a message received from the tokio runtime.
+    /// Triggered in the main loop, cannot be blocking.
+    pub fn update_from_message(&mut self, msg: TokioMessage) {
+        // If we're currently in Replay, fill in the Preset.
+        if let Screen::Replay(player) = &mut self.screen {
+            let preset_id = player.preset_id;
+            if let Some(preset) = self
+                .state
+                .lock()
+                .unwrap()
+                .presets
+                .iter()
+                .find(|p| p.data.id == preset_id)
+            {
+                player.add_preset(preset.data.clone());
+            }
+        }
+
+        match msg {
+            TokioMessage::Text(txt) => println!("Received text message: {}", txt),
+            TokioMessage::StateUpdated => self.reload_screen(),
+            TokioMessage::LoginStarted => self.screen = Screen::Login,
+            TokioMessage::LoginFinished => self.reload_screen(),
+            TokioMessage::GameDestroyed => {
+                self.screen = Screen::MainMenu(Menu::main(self.state.lock().unwrap().address));
+            }
+            TokioMessage::PlayEffects(effects) => match &mut self.screen {
+                Screen::Play(play) => play.apply_effects(effects),
+                _ => {}
+            },
+            TokioMessage::GameStarted => {
+                self.screen = Screen::Play(Play::from(
+                    self.state
+                        .lock()
+                        .as_ref()
+                        .unwrap()
+                        .active_game
+                        .clone()
+                        .unwrap(),
+                ));
+            }
+        }
+    }
+
+    /// Triggered by `input::handle_input`, handles key presses for each screen.
+    pub fn handle_key_press(&mut self, key: InputCommand) {
+        let state = self.state.lock().unwrap();
+        match &mut self.screen {
+            // Currently no action on the CreatingGame screen.
+            Screen::CreatingGame => {}
+            // Currently no action on the Login screen.
+            Screen::Login => {}
+            Screen::Editor(editor) => match editor.handle_key_press(key) {
+                EditorMessage::Exit => {
+                    self.screen = Screen::MainMenu(Menu::main(state.address));
+                }
+                EditorMessage::Play(preset) => {
+                    let mut play = Play::from(Game::from(preset.clone()));
+                    play.test_preset = Some(preset.clone());
+                    self.screen = Screen::Play(play);
+                }
+                EditorMessage::None => {}
+            },
+            Screen::Play(play) => match play.handle_key_press(key) {
+                PlayMessage::Exit => self.screen = Screen::MainMenu(Menu::main(state.address)),
+                PlayMessage::NextTurn if play.test_preset.is_none() => {
+                    self.send_message(Message::Play(PlayMessage::NextTurn));
+                }
+                PlayMessage::QuitGame if play.test_preset.is_none() => {
+                    self.send_message(Message::Play(PlayMessage::QuitGame));
+                    self.screen = Screen::MainMenu(Menu::main(state.address))
+                }
+                m @ (PlayMessage::Move(_) | PlayMessage::Attack(_, _) | PlayMessage::Reload(_)) => {
+                    if play.test_preset.is_none() {
+                        self.send_message(Message::Play(m));
+                    } else {
+                        // In test mode, we can reply with a random history
+                        // instead of invoking the network.
+                        let history = play.message_to_random_history(m);
+                        play.apply_effects(history);
+                    }
+                }
+                PlayMessage::BackToEditor if play.test_preset.is_some() => {
+                    self.screen = Screen::Editor(Editor::from(play.test_preset.take().unwrap()));
+                }
+                _ => {}
+            },
+            Screen::Replay(player) => match player.handle_key_press(key) {
+                PlayerMessage::Exit => {
+                    self.screen = Screen::MainMenu(Menu::main(state.address));
+                }
+                PlayerMessage::None => {}
+            },
+            Screen::MainMenu(menu) => match key {
+                InputCommand::Up => menu.previous_item(),
+                InputCommand::Down => menu.next_item(),
+                InputCommand::Select => {
+                    Effect::Tada.play();
+
+                    match menu.selected_item() {
+                        MainMenuItem::Address(_address) => {}
+                        MainMenuItem::Login => {
+                            // Starts the login process.
+                            self.send_message(Message::PrepareLogin);
+                        }
+                        MainMenuItem::StartGame => {
+                            self.send_message(Message::StartGame);
+                            self.screen = Screen::CreatingGame;
+                        }
+                        MainMenuItem::Replays => {
+                            self.send_message(Message::FetchReplays);
+                            self.screen = Screen::Replays(Menu::replays(&state.replays))
+                        }
+                        MainMenuItem::Editor => {
+                            self.screen = Screen::Editor(Editor::new(10, 10));
+                        }
+                        MainMenuItem::Settings => {
+                            self.screen = Screen::Settings(SettingsScreen::new())
+                        }
+                        MainMenuItem::Quit => std::process::exit(0),
+                    }
+                }
+                _ => {}
+            },
+            Screen::Settings(menu) => match menu.handle_key_press(key) {
+                SettingsScreenMessage::Exit => {
+                    self.screen = Screen::MainMenu(Menu::main(state.address));
+                }
+                SettingsScreenMessage::Faucet => {
+                    if let Some(address) = state.address {
+                        println!("Opening faucet for address: {}", address);
+                        open::that(format!("https://faucet.sui.io/?address={}", address)).unwrap();
+                    }
+                }
+                SettingsScreenMessage::Logout => {
+                    self.send_message(Message::Logout);
+                    self.screen = Screen::MainMenu(Menu::main(state.address));
+                }
+                SettingsScreenMessage::None => {}
+            },
+            Screen::Replays(menu) => match key {
+                InputCommand::Up => menu.previous_item(),
+                InputCommand::Down => menu.next_item(),
+                InputCommand::Menu => self.screen = Screen::MainMenu(Menu::main(state.address)),
+                InputCommand::Select => {
+                    Effect::Tada.play();
+                    match menu.selected_item() {
+                        ReplayMenuItem::Replay(replay) => {
+                            self.screen = Screen::Replay(Player::new(replay.data.clone()));
+                            self.send_message(Message::FetchPresets);
+                        }
+                        ReplayMenuItem::Back => {
+                            Effect::Data.play();
+                            self.screen = Screen::MainMenu(Menu::main(state.address))
+                        }
+                    }
+                }
+                _ => {}
+            },
+        }
+    }
+
+    pub fn tick(&mut self) {
+        match &mut self.screen {
+            Screen::Settings(settings) => settings.tick(),
+            Screen::Replay(player) => player.tick(),
+            Screen::Play(play) => play.tick(),
+            _ => self.draw(),
+        }
+    }
+
+    fn set_screen(&mut self, screen: Screen) {
+        self.screen = screen;
+        self.cursor = (0, 0);
+        self.highlight = None;
+    }
+
+    fn reload_screen(&mut self) {
+        let state = self.state.lock().unwrap();
+        let screen = match &self.screen {
+            Screen::CreatingGame => return,
+            Screen::MainMenu(_) | Screen::Login => Screen::MainMenu(Menu::main(state.address)),
+            Screen::Replays(_) => Screen::Replays(Menu::replays(&state.replays)),
+            Screen::Replay(_) | Screen::Play(_) | Screen::Settings(_) | Screen::Editor(_) => return,
+        };
+
+        self.screen = screen;
+        self.cursor = (0, 0);
+        self.highlight = None;
+    }
+}
+
+/// === Draw impls ===
+
+impl Draw for App {
+    fn draw(&self) {
+        match &self.screen {
+            Screen::Editor(editor) => editor.draw(),
+            Screen::MainMenu(menu) => {
+                draw::draw_main_menu_background();
+                menu.draw()
+            }
+            Screen::Replays(menu) => {
+                draw::draw_main_menu_background();
+                menu.draw()
+            }
+            Screen::CreatingGame => {
+                draw::draw_main_menu_background();
+                DrawCommand::text("Creating game...".to_string())
+                    .position(screen_width() / 2.0, screen_height() / 2.0)
+                    .align(Align::Center)
+                    .background(BLACK.with_alpha(0.8))
+                    .padding(Vec2::new(30.0, 30.0))
+                    .line_height(30.0)
+                    .font_size(24)
+                    .schedule();
+            }
+            Screen::Login => {
+                draw::draw_main_menu_background();
+                DrawCommand::text(
+                    "Proceed to authorization in the browser window.\nPress Enter to abort.\nAborting will return you to the main menu."
+                        .to_string(),
+                )
+                .position(screen_width() / 2.0, screen_height() / 2.0)
+                .align(Align::Center)
+                .background(BLACK.with_alpha(0.8))
+                .padding(Vec2::new(30.0, 30.0))
+                .line_height(30.0)
+                .font_size(24)
+                .schedule();
+            }
+            Screen::Play(_play) => unreachable!("Play manages its own draw"),
+            Screen::Replay(_player) => unreachable!("Player manages its own draw"),
+            Screen::Settings(_settings) => unreachable!("Settings manages its own draw"),
+        }
+    }
+}

@@ -15,7 +15,7 @@ import { GameApp } from "./play/Game";
 import { useGameTransactions } from "../hooks/useGameTransactions";
 import { useNetworkVariable } from "../../../networkConfig";
 import { DryRunTransactionBlockResponse, SuiObjectRef } from "@mysten/sui/client";
-import { parseVMError, vmAbortCodeToMessage } from "../types/abort_codes";
+import { parseVMError, vmAbortCodeToMessage } from "../types/abort-codes";
 import { pathToCoordinates } from "../types/cursor";
 import { Preset, useMaps } from "../hooks/useMaps";
 import { formatAddress, normalizeSuiAddress } from "@mysten/sui/utils";

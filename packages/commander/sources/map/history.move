@@ -106,14 +106,14 @@ public fun inner(r: &History): &vector<Record> { &r.0 }
 
 /// List all `Record::UnitKIA` records.
 public fun list_kia(r: &vector<Record>): vector<ID> {
-    let mut kias = vector[];
+    let mut units_kia = vector[];
     r.do_ref!(
         |e| match (e) {
-            Record::UnitKIA(id) => kias.push_back(*id),
+            Record::UnitKIA(id) => units_kia.push_back(*id),
             _ => (),
         },
     );
-    kias
+    units_kia
 }
 
 // === Compatibility / Conversion ===

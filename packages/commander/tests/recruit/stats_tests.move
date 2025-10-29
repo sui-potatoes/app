@@ -15,6 +15,19 @@ use std::unit_test::assert_eq;
 const SIGN_VALUE: u8 = 0x80;
 
 #[test]
+fun test_in_game_stats() {
+    let stats = stats::new_unchecked(15658020524713025353488063875662087);
+
+    assert_eq!(stats.mobility(), 7);
+    assert_eq!(stats.aim(), 65);
+    assert_eq!(stats.health(), 10);
+    assert_eq!(stats.armor(), 0);
+    assert_eq!(stats.dodge(), 0);
+    assert_eq!(stats.defense(), 0);
+    
+}
+
+#[test]
 fun test_stats() {
     let stats = stats::new(
         7, // mobility
