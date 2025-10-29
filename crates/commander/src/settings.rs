@@ -1,8 +1,8 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-// ! Defines all application settings. Settings are stored in the local config
-// ! file, and loaded on application startup.
+//! Defines all application settings. Settings are stored in the local config
+//! file, and loaded on application startup.
 
 use std::fmt::Display;
 
@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::sound::Background;
 
+/// Global storage key for settings.
 const SETTINGS_KEY: &str = "settings";
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
