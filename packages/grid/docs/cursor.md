@@ -179,7 +179,7 @@ Get both coordinates of the cursor.
 
 Construct a <code>Point</code> from a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code>.
 
-```rust
+```move
 use grid::cursor;
 use grid::point;
 
@@ -209,7 +209,7 @@ assert!(cursor.to_point() == point::new(1, 2));
 ## Function `to_vector`
 
 Convert a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> to a vector of two values.
-```rust
+```move
 use grid::cursor;
 
 let cursor = cursor::new(1, 2);
@@ -239,7 +239,7 @@ assert!(cursor.to_vector() == vector[1, 2]); // (x, y)
 
 Construct a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> from a <code>Point</code>. Alias: <code>Point.to_cursor</code>.
 
-```rust
+```move
 use grid::cursor;
 use grid::point;
 
@@ -301,7 +301,7 @@ Reset the <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> to a 
 Move <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> in a given direction. Aborts if the <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> is out of bounds.
 Stores the direction in the history.
 
-```rust
+```move
 use grid::cursor;
 use grid::direction;
 
@@ -348,7 +348,7 @@ cursor.move_to(direction::right!() | direction::down!());
 
 Move the <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> back to the previous position. Aborts if there is no history.
 
-```rust
+```move
 use grid::cursor;
 use grid::direction;
 
@@ -467,7 +467,7 @@ struct that is being deserialized from BCS.
 
 Print a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> as a string.
 
-```rust
+```move
 use grid::cursor;
 
 let cursor = cursor::new(1, 2);

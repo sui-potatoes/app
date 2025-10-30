@@ -28,7 +28,7 @@ as a combination of two orthogonal directions. For example, <code><a href="./dir
 - <code>b00001001</code> - up | left - 9
 
 Directions can be combined using bitwise OR or checked using bitwise AND.
-```
+```move
 use grid::direction;
 
 
@@ -552,7 +552,7 @@ Get the inverse direction of a given direction.
 Get the direction from point <code>(x0, y0)</code> to point <code>(x1, y1)</code>.
 For convenience, takes any integer type, but <code>Grid</code> uses <code>u16</code>.
 
-```rust
+```move
 use grid::direction;
 
 

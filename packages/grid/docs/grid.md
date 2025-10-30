@@ -38,6 +38,7 @@ the left or to the right of another point
 -  [Function `borrow_point_mut`](#grid_grid_borrow_point_mut)
 -  [Macro function `manhattan_distance`](#grid_grid_manhattan_distance)
 -  [Macro function `chebyshev_distance`](#grid_grid_chebyshev_distance)
+-  [Macro function `euclidean_distance`](#grid_grid_euclidean_distance)
 -  [Macro function `tabulate`](#grid_grid_tabulate)
 -  [Macro function `destroy`](#grid_grid_destroy)
 -  [Macro function `do`](#grid_grid_do)
@@ -467,7 +468,7 @@ Get a Manhattan distance between two points. Manhattan distance is the
 sum of the absolute differences of the x and y coordinates.
 
 Example:
-```rust
+```move
 let distance = grid::manhattan_distance!(0, 0, 1, 2);
 
 assert!(distance == 3);
@@ -502,7 +503,7 @@ Get a Chebyshev distance between two points. Chebyshev distance is the
 maximum of the absolute differences of the x and y coordinates.
 
 Example:
-```rust
+```move
 let distance = grid::chebyshev_distance!(0, 0, 1, 2);
 
 assert!(distance == 2);
@@ -529,6 +530,47 @@ See https://en.wikipedia.org/wiki/Chebyshev_distance for more information.
 
 </details>
 
+<a name="grid_grid_euclidean_distance"></a>
+
+## Macro function `euclidean_distance`
+
+Get the Euclidean distance between two points. Euclidean distance is the
+square root of the sum of the squared differences of the x and y coordinates.
+
+Note: use with caution on <code>u8</code> and <code>u16</code> types, as the macro does not upscale
+intermediate values automatically. Perform upscaling manually before using the
+macro if necessary.
+
+Example:
+```move
+let distance = grid::euclidean_distance!(0, 0, 1, 2);
+
+assert_eq!(distance, 2);
+```
+
+See https://en.wikipedia.org/wiki/Euclidean_distance for more information.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_euclidean_distance">euclidean_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_euclidean_distance">euclidean_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
+    <b>let</b> xd = num_diff!($x0, $x1);
+    <b>let</b> yd = num_diff!($y0, $y1);
+    (xd * xd + yd * yd).sqrt()
+}
+</code></pre>
+
+
+
+</details>
+
 <a name="grid_grid_tabulate"></a>
 
 ## Macro function `tabulate`
@@ -537,7 +579,7 @@ Create a grid of the specified size by applying the function <code>f</code> to e
 The function receives the x and y coordinates of the cell.
 
 Example:
-```rust
+```move
 public enum Tile {
 Empty,
 // ...
@@ -577,7 +619,7 @@ Goes in reverse order (bottom to top, right to left). Cheaper than <code><a href
 doesn't need to reverse the elements.
 
 Example:
-```rust
+```move
 grid.destroy!(|tile| tile.destroy());
 ```
 
@@ -689,7 +731,7 @@ Traverse the grid, calling the function <code>f</code> for each cell. The functi
 receives the reference to the cell, the x and y coordinates of the cell.
 
 Example:
-```rust
+```move
 grid.traverse!(|cell, (x, y)| {
 // do something with the cell and the coordinates
 });
@@ -807,7 +849,7 @@ See https://en.wikipedia.org/wiki/Von_Neumann_neighborhood for more information.
 Count the number of Von Neumann neighbors of a point that satisfy the predicate $f.
 
 Example:
-```rust
+```move
 let count = grid.von_neumann_count!(0, 2, 1, |el| *el == 1);
 
 assert!(count == 1);
@@ -858,7 +900,7 @@ See <code>Point</code> for more information on the Moore neighborhood.
 See https://en.wikipedia.org/wiki/Moore_neighborhood for more information.
 
 Example:
-```rust
+```move
 let neighbors = grid.moore!(0, 2, 1);
 neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
 ```
@@ -893,7 +935,7 @@ neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
 Count the number of Moore neighbors of a point that pass the predicate $f.
 
 Example:
-```rust
+```move
 let count = grid.moore_count!(0, 2, 1, |el| *el == 1);
 std::debug::print(&count); // result varies based on the Grid
 ```
@@ -941,7 +983,7 @@ to be used with the <code><a href="./grid.md#grid_grid_von_neumann">von_neumann<
 However, it is possible to pass in a custom callback with exotic
 configurations, eg. only return diagonal neighbors.
 
-```rust
+```move
 // finds a group of cells with value 1 in von Neumann neighborhood
 grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
 
@@ -1004,7 +1046,7 @@ Use Wave Algorithm to find the shortest path between two points. The function
 check if the cell is passable - it takes two arguments: the current point
 and the next point.
 
-```rust
+```move
 // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
 grid.trace!(
 point::new(0, 0),
@@ -1069,7 +1111,7 @@ Transition to the last tile must match the predicate <code>f</code>.
             <b>if</b> (<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point">borrow_point</a>(&to) == 0) {
                 *<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>(&to) = num;
                 queue.push_back(to);
-            }
+            };
         }));
     };
     // If we never reached the destination within the limit, <b>return</b> none.
@@ -1083,6 +1125,7 @@ Transition to the last tile must match the predicate <code>f</code>.
         num = num - 1;
         $n(&last_point).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|p| {
             <b>if</b> (p == p0) <b>break</b> 'reconstruct;
+            <b>if</b> (!p.is_within_bounds(<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>)) <b>return</b>;
             <b>if</b> (<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point">borrow_point</a>(&p) == num) {
                 path.push_back(p);
                 last_point = p;
@@ -1105,7 +1148,7 @@ Transition to the last tile must match the predicate <code>f</code>.
 
 Print the grid to a string. Only works if <code>$T</code> has a <code>.<a href="./grid.md#grid_grid_to_string">to_string</a>()</code> method.
 
-```rust
+```move
 let grid = from_vector(vector[
 vector[1, 2, 3],
 vector[4, 5, 6],

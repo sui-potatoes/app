@@ -142,7 +142,7 @@ public macro fun inverse($direction: u8): u8 {
 /// Get the direction from point `(x0, y0)` to point `(x1, y1)`.
 /// For convenience, takes any integer type, but `Grid` uses `u16`.
 ///
-/// ```rust
+/// ```move
 /// use grid::direction;
 ///
 /// #[test]

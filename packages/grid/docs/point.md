@@ -19,6 +19,7 @@ a point in 2D space.
 -  [Function `is_within_bounds`](#grid_point_is_within_bounds)
 -  [Function `manhattan_distance`](#grid_point_manhattan_distance)
 -  [Function `chebyshev_distance`](#grid_point_chebyshev_distance)
+-  [Function `euclidean_distance`](#grid_point_euclidean_distance)
 -  [Function `von_neumann`](#grid_point_von_neumann)
 -  [Function `moore`](#grid_point_moore)
 -  [Function `le`](#grid_point_le)
@@ -271,7 +272,7 @@ Get the Manhattan distance between two points. Manhattan distance is the
 sum of the absolute differences of the x and y coordinates.
 
 Example:
-```rust
+```move
 let (p1, p2) = (new(1, 0), new(4, 3));
 let range = p1.range(&p2);
 
@@ -305,7 +306,7 @@ Get the Chebyshev distance between two points. Chebyshev distance is the
 maximum of the absolute differences of the x and y coordinates.
 
 Example:
-```rust
+```move
 let (p1, p2) = (new(1, 0), new(4, 3));
 let range = p1.range(&p2);
 
@@ -324,6 +325,42 @@ assert!(range == 3);
 
 <pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_chebyshev_distance">chebyshev_distance</a>(p1: &<a href="./point.md#grid_point_Point">Point</a>, p2: &<a href="./point.md#grid_point_Point">Point</a>): u16 {
     num_max!(num_diff!(p1.0, p2.0), num_diff!(p1.1, p2.1))
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_point_euclidean_distance"></a>
+
+## Function `euclidean_distance`
+
+Get the Euclidean distance between two points. Euclidean distance is the
+square root of the sum of the squared differences of the x and y coordinates.
+
+Example:
+```move
+let (p1, p2) = (new(1, 0), new(4, 3));
+let distance = p1.euclidean_distance(&p2);
+
+assert!(distance == 5);
+```
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_euclidean_distance">euclidean_distance</a>(p1: &<a href="./point.md#grid_point_Point">grid::point::Point</a>, p2: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): u16
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_euclidean_distance">euclidean_distance</a>(p1: &<a href="./point.md#grid_point_Point">Point</a>, p2: &<a href="./point.md#grid_point_Point">Point</a>): u16 {
+    <b>let</b> xd = num_diff!(p1.0, p2.0);
+    <b>let</b> yd = num_diff!(p1.1, p2.1);
+    (xd * xd + yd * yd).sqrt()
 }
 </code></pre>
 
@@ -368,22 +405,37 @@ Note: does not include the point itself!
 <pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_von_neumann">von_neumann</a>(p: &<a href="./point.md#grid_point_Point">Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">Point</a>&gt; {
     <b>if</b> (size == 0) <b>return</b> vector[];
     <b>let</b> <b>mut</b> neighbors = vector[];
-    <b>let</b> <a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>) = *p;
-    size.do!(|i| {
-        <b>let</b> i = i + 1;
-        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a>));
-        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a> + i));
-        <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a>));
-        <b>if</b> (<a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a> - i));
-        // add diagonals <b>if</b> i &gt; 1
-        <b>if</b> (i &gt; 1) {
-            <b>let</b> i = i - 1;
-            neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a> + i));
-            <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a> + i));
-            <b>if</b> (<a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a> - i));
-            <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i && <a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a> - i));
-        }
-    });
+    <b>let</b> <a href="./point.md#grid_point_Point">Point</a>(xc, yc) = *p;
+    <b>if</b> (size == 1) {
+        <b>if</b> (xc &gt; 0) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc - 1, yc));
+        <b>if</b> (yc &gt; 0) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc, yc - 1));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc + 1, yc));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc, yc + 1));
+        <b>return</b> neighbors
+    };
+    <b>if</b> (size == 2) {
+        <b>if</b> (xc &gt; 1) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc - 2, yc));
+        <b>if</b> (yc &gt; 1) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc, yc - 2));
+        <b>if</b> (xc &gt; 0) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc - 1, yc));
+        <b>if</b> (yc &gt; 0) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc, yc - 1));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc + 1, yc));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc, yc + 1));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc + 2, yc));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc, yc + 2));
+        // do diagonals
+        <b>if</b> (xc &gt; 0 && yc &gt; 0) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc - 1, yc - 1));
+        <b>if</b> (xc &gt; 0) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc - 1, yc + 1));
+        <b>if</b> (yc &gt; 0) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc + 1, yc - 1));
+        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(xc + 1, yc + 1));
+        <b>return</b> neighbors
+    };
+    <b>let</b> (x0, y0) = (xc - size.min(xc), yc - size.min(yc));
+    <b>let</b> (x1, y1) = (xc + size, yc + size);
+    x0.range_do_eq!(x1, |<a href="./point.md#grid_point_x">x</a>| y0.range_do_eq!(y1, |<a href="./point.md#grid_point_y">y</a>| {
+        <b>if</b> (<a href="./point.md#grid_point_x">x</a> == xc && <a href="./point.md#grid_point_y">y</a> == yc) <b>return</b>;
+        <b>let</b> distance = num_diff!(<a href="./point.md#grid_point_x">x</a>, xc) + num_diff!(<a href="./point.md#grid_point_y">y</a>, yc);
+        <b>if</b> (distance &lt;= size) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>));
+    }));
     neighbors
 }
 </code></pre>
@@ -428,22 +480,12 @@ Note: does not include the point itself!
 <pre><code><b>public</b> <b>fun</b> <a href="./point.md#grid_point_moore">moore</a>(p: &<a href="./point.md#grid_point_Point">Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">Point</a>&gt; {
     <b>if</b> (size == 0) <b>return</b> vector[];
     <b>let</b> <b>mut</b> neighbors = vector[];
-    <b>let</b> <a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>) = *p;
-    size.do!(|i| {
-        <b>let</b> i = i + 1;
-        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a>));
-        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a> + i));
-        <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a>));
-        <b>if</b> (<a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a> - i));
-        // top left
-        <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i && <a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a> - i));
-        // top right
-        <b>if</b> (<a href="./point.md#grid_point_x">x</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> - i, <a href="./point.md#grid_point_y">y</a> + i));
-        // bottom left
-        <b>if</b> (<a href="./point.md#grid_point_y">y</a> &gt;= i) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a> - i));
-        // bottom right
-        neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a> + i, <a href="./point.md#grid_point_y">y</a> + i));
-    });
+    <b>let</b> <a href="./point.md#grid_point_Point">Point</a>(xc, yc) = *p;
+    <b>let</b> (x0, y0) = (xc - size.min(xc), yc - size.min(yc));
+    <b>let</b> (x1, y1) = (xc + size, yc + size);
+    x0.range_do_eq!(x1, |<a href="./point.md#grid_point_x">x</a>| y0.range_do_eq!(y1, |<a href="./point.md#grid_point_y">y</a>| {
+        <b>if</b> (<a href="./point.md#grid_point_x">x</a> != xc || <a href="./point.md#grid_point_y">y</a> != yc) neighbors.push_back(<a href="./point.md#grid_point_Point">Point</a>(<a href="./point.md#grid_point_x">x</a>, <a href="./point.md#grid_point_y">y</a>));
+    }));
     neighbors
 }
 </code></pre>
