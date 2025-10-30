@@ -48,7 +48,7 @@ public fun is_within_bounds(p: &Point, rows: u16, cols: u16): bool {
 /// sum of the absolute differences of the x and y coordinates.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// let (p1, p2) = (new(1, 0), new(4, 3));
 /// let range = p1.range(&p2);
 ///
@@ -62,7 +62,7 @@ public fun manhattan_distance(p1: &Point, p2: &Point): u16 {
 /// maximum of the absolute differences of the x and y coordinates.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// let (p1, p2) = (new(1, 0), new(4, 3));
 /// let range = p1.range(&p2);
 ///
@@ -76,7 +76,7 @@ public fun chebyshev_distance(p1: &Point, p2: &Point): u16 {
 /// square root of the sum of the squared differences of the x and y coordinates.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// let (p1, p2) = (new(1, 0), new(4, 3));
 /// let distance = p1.euclidean_distance(&p2);
 ///

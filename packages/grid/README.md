@@ -73,14 +73,14 @@ wrapping macro calls.
 | `map!`        | construct a new `Grid` by calling a function `f` on each element, consumes the value   |
 | `map_ref!`    | same as `map!` but does not consume the value, creates a new instance from a reference |
 | `traverse!`   | similar to `do_ref!` but the callback `f` receives coordinates of the Point as well    |
-| `rotate`      | rotate the grid 90º clockwise `times` times                                            |
+| `rotate`      | rotate the grid 90º clockwise `n` times                                                |
 
 #### Working with Points
 
 | method               | description                                                                                            |
 | -------------------- | ------------------------------------------------------------------------------------------------------ |
-| `moore`              | get all Moore neighbors of a `Point` in a distance `s`                                                 |
-| `von_neumann`        | get all Von Neumann neighbors of a `Point` in a distance `s`                                           |
+| `moore`              | get all Moore neighbors of a `Point` in a distance `s`, does not include the centre                    |
+| `von_neumann`        | get all Von Neumann neighbors of a `Point` in a distance `s`, does not include the centre              |
 | `moore_count!`       | count all Moore neighbors of a `Point` in a distance `s` that satisfy predicate `f`                    |
 | `von_neumann_count!` | count all Von Neumann neighbors of a `Point` in a distance `s` that satisfy predicate `f`              |
 | `find_group!`        | finds a group of points that match the predicate `f` in the neighborhood `$n`                          |
@@ -88,13 +88,14 @@ wrapping macro calls.
 
 #### Utilities
 
-| method                | description                                                                       |
-| --------------------- | --------------------------------------------------------------------------------- |
-| `debug!`              | print the `Grid` to `stdout`. _Only works if `T` implements `to_string()` method_ |
-| `to_string!`          | print `Grid` as a `String`. _Only works if `T` implements `to_string()` method_   |
-| `from_bcs!`           | peel the `Grid` from `BCS` instance, parse each element with function `f`         |
-| `manhattan_distance!` | get Manhattan distance between two pairs of coordinates                           |
-| `chebyshev_distance!` | get Chebyshev distance between two pairs of coordinates                           |
+| method                | description                                                                     |
+| --------------------- | ------------------------------------------------------------------------------- |
+| `debug!`              | print the `Grid` to `stdout`. Only works if `T` implements `to_string()` method |
+| `to_string!`          | print `Grid` as a `String`. Only works if `T` implements `to_string()` method   |
+| `from_bcs!`           | peel the `Grid` from `BCS` instance, parse each element with function `f`       |
+| `manhattan_distance!` | get Manhattan distance between two pairs of coordinates                         |
+| `chebyshev_distance!` | get Chebyshev distance between two pairs of coordinates                         |
+| `euclidean_distance!` | get Euclidean distance between two pairs of coordinates                         |
 
 ### Point
 

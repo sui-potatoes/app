@@ -26,7 +26,7 @@
 /// - `b00001001` - up | left - 9
 ///
 /// Directions can be combined using bitwise OR or checked using bitwise AND.
-/// ```
+/// ```move
 /// use grid::direction;
 ///
 /// #[test]

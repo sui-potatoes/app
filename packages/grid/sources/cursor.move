@@ -48,7 +48,7 @@ public fun to_values(c: &Cursor): (u16, u16) {
 
 /// Construct a `Point` from a `Cursor`.
 ///
-/// ```rust
+/// ```move
 /// use grid::cursor;
 /// use grid::point;
 ///
@@ -58,7 +58,7 @@ public fun to_values(c: &Cursor): (u16, u16) {
 public fun to_point(c: &Cursor): Point { point::new(c.0, c.1) }
 
 /// Convert a `Cursor` to a vector of two values.
-/// ```rust
+/// ```move
 /// use grid::cursor;
 ///
 /// let cursor = cursor::new(1, 2);
@@ -68,7 +68,7 @@ public fun to_vector(c: &Cursor): vector<u16> { vector[c.0, c.1] }
 
 /// Construct a `Cursor` from a `Point`. Alias: `Point.to_cursor`.
 ///
-/// ```rust
+/// ```move
 /// use grid::cursor;
 /// use grid::point;
 ///
@@ -90,7 +90,7 @@ public fun reset(c: &mut Cursor, x: u16, y: u16) {
 /// Move `Cursor` in a given direction. Aborts if the `Cursor` is out of bounds.
 /// Stores the direction in the history.
 ///
-/// ```rust
+/// ```move
 /// use grid::cursor;
 /// use grid::direction;
 ///
@@ -119,7 +119,7 @@ public fun move_to(c: &mut Cursor, direction: u8) {
 
 /// Move the `Cursor` back to the previous position. Aborts if there is no history.
 ///
-/// ```rust
+/// ```move
 /// use grid::cursor;
 /// use grid::direction;
 ///
@@ -160,7 +160,7 @@ public fun from_bcs(bcs: &mut BCS): Cursor {
 
 /// Print a `Cursor` as a string.
 ///
-/// ```rust
+/// ```move
 /// use grid::cursor;
 ///
 /// let cursor = cursor::new(1, 2);

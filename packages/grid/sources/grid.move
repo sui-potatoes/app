@@ -165,7 +165,7 @@ public fun borrow_point_mut<T>(g: &mut Grid<T>, p: &Point): &mut T {
 /// sum of the absolute differences of the x and y coordinates.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// let distance = grid::manhattan_distance!(0, 0, 1, 2);
 ///
 /// assert!(distance == 3);
@@ -180,7 +180,7 @@ public macro fun manhattan_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T
 /// maximum of the absolute differences of the x and y coordinates.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// let distance = grid::chebyshev_distance!(0, 0, 1, 2);
 ///
 /// assert!(distance == 2);
@@ -199,7 +199,7 @@ public macro fun chebyshev_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T
 /// macro if necessary.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// let distance = grid::euclidean_distance!(0, 0, 1, 2);
 ///
 /// assert_eq!(distance, 2);
@@ -219,7 +219,7 @@ public macro fun euclidean_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T
 /// The function receives the x and y coordinates of the cell.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// public enum Tile {
 ///   Empty,
 ///   // ...
@@ -239,7 +239,7 @@ public macro fun tabulate<$U: drop, $T>($rows: $U, $cols: $U, $f: |u16, u16| -> 
 /// doesn't need to reverse the elements.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// grid.destroy!(|tile| tile.destroy());
 /// ```
 public macro fun destroy<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
@@ -271,7 +271,7 @@ public macro fun do_mut<$T, $R: drop>($grid: &mut Grid<$T>, $f: |&mut $T| -> $R)
 /// receives the reference to the cell, the x and y coordinates of the cell.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// grid.traverse!(|cell, (x, y)| {
 ///     // do something with the cell and the coordinates
 /// });
@@ -309,7 +309,7 @@ public fun von_neumann<T>(g: &Grid<T>, p: Point, size: u16): vector<Point> {
 /// Count the number of Von Neumann neighbors of a point that satisfy the predicate $f.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// let count = grid.von_neumann_count!(0, 2, 1, |el| *el == 1);
 ///
 /// assert!(count == 1);
@@ -343,7 +343,7 @@ public macro fun von_neumann_count<$T>(
 /// See https://en.wikipedia.org/wiki/Moore_neighborhood for more information.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// let neighbors = grid.moore!(0, 2, 1);
 /// neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
 /// ```
@@ -358,7 +358,7 @@ public fun moore<T>(g: &Grid<T>, p: Point, size: u16): vector<Point> {
 /// Count the number of Moore neighbors of a point that pass the predicate $f.
 ///
 /// Example:
-/// ```rust
+/// ```move
 /// let count = grid.moore_count!(0, 2, 1, |el| *el == 1);
 /// std::debug::print(&count); // result varies based on the Grid
 /// ```
@@ -389,7 +389,7 @@ public macro fun moore_count<$T>($g: &Grid<$T>, $p: Point, $size: u16, $f: |&$T|
 /// However, it is possible to pass in a custom callback with exotic
 /// configurations, eg. only return diagonal neighbors.
 ///
-/// ```rust
+/// ```move
 /// // finds a group of cells with value 1 in von Neumann neighborhood
 /// grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
 ///
@@ -437,7 +437,7 @@ public macro fun find_group<$T>(
 /// check if the cell is passable - it takes two arguments: the current point
 /// and the next point.
 ///
-/// ```rust
+/// ```move
 /// // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
 /// grid.trace!(
 ///     point::new(0, 0),
@@ -533,7 +533,7 @@ public macro fun trace<$T>(
 
 /// Print the grid to a string. Only works if `$T` has a `.to_string()` method.
 ///
-/// ```rust
+/// ```move
 /// let grid = from_vector(vector[
 ///     vector[1, 2, 3],
 ///     vector[4, 5, 6],
