@@ -17,6 +17,9 @@ fun point() {
     assert_eq!(x, 1);
     assert_eq!(y, 2);
 
+    let v = p.to_vector();
+    assert_eq!(v, vector[1, 2]);
+
     let p2 = point::new(3, 4);
     assert_eq!(p.manhattan_distance(&p2), 4);
 
@@ -110,10 +113,10 @@ fun von_neumann() {
     assert!(n.contains(&point::new(1, 3))); // 2
     assert!(n.contains(&point::new(2, 0))); // 2
     assert!(n.contains(&point::new(2, 1))); // 2
-    assert!(n.contains(&point::new(2, 3))); // 2
+    assert!(n.contains(&point::new(2, 3))); // 1
     assert!(n.contains(&point::new(2, 4))); // 2
     assert!(n.contains(&point::new(3, 1))); // 2
-    assert!(n.contains(&point::new(3, 2))); // 2
+    assert!(n.contains(&point::new(3, 2))); // 1
     assert!(n.contains(&point::new(3, 3))); // 2
     assert!(n.contains(&point::new(4, 2))); // 2
     assert!(n.length() == 12);

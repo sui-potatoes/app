@@ -500,7 +500,7 @@ public macro fun trace<$T>(
             if (grid.borrow_point(&to) == 0) {
                 *grid.borrow_point_mut(&to) = num;
                 queue.push_back(to);
-            }
+            };
         }));
     };
 
@@ -517,6 +517,7 @@ public macro fun trace<$T>(
         num = num - 1;
         $n(&last_point).destroy!(|p| {
             if (p == p0) break 'reconstruct;
+            if (!p.is_within_bounds(rows, cols)) return;
             if (grid.borrow_point(&p) == num) {
                 path.push_back(p);
                 last_point = p;

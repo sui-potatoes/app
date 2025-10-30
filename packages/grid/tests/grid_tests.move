@@ -206,9 +206,9 @@ fun path_tracing() {
         6,
     );
 
-    assert!(path.is_some());
-    assert_eq!(path.borrow().length(), 5);
-    assert_eq!(path.borrow()[4], point::new(1, 4));
+    let path = path.destroy_or!(abort);
+    assert_eq!(path.length(), 5);
+    assert_eq!(path[4], point::new(1, 4));
 
     let grid = grid::from_vector(vector[
         vector[0, 1, 0, 0, 0],
@@ -229,10 +229,9 @@ fun path_tracing() {
         8,
     );
 
-    assert!(path.is_some());
-    assert_ref_eq!(
-        path.borrow(),
-        &vector[
+    assert_eq!(
+        path.destroy_or!(abort),
+        vector[
             point::new(1, 1), // down
             point::new(1, 2), // right
             point::new(2, 2), // down
