@@ -21,7 +21,7 @@
 module grid::grid;
 
 use grid::point::Point;
-use std::{macros::{num_diff, num_max, num_sqrt}, string::String};
+use std::{macros::{num_diff, num_max}, string::String};
 use sui::bcs::BCS;
 
 /// Vector length is incorrect during initialization.
@@ -210,7 +210,7 @@ public macro fun euclidean_distance<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T
     let xd = num_diff!($x0, $x1);
     let yd = num_diff!($y0, $y1);
 
-    num_sqrt!(xd * xd + yd * yd)
+    (xd * xd + yd * yd).sqrt()
 }
 
 // === Macros: Grid ===

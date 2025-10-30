@@ -32,13 +32,24 @@ fun point() {
 }
 
 #[test]
+fun distance() {
+    let p1 = point::new(1, 1);
+    let p2 = point::new(4, 5);
+
+    assert_eq!(p1.manhattan_distance(&p2), 7);
+    assert_eq!(p1.chebyshev_distance(&p2), 4);
+    assert_eq!(p1.euclidean_distance(&p2), 5);
+}
+
+#[test]
 fun moore() {
-    let neighbors = point::new(0, 0).moore(1);
-    // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
+    let neighbors = point::new(0, 0).moore(0);
+    assert_eq!(neighbors, vector[]);
+
+    let neighbors = point::new(0, 0).moore(1); // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
     assert_eq!(neighbors.length(), 3);
 
     let neighbors = point::new(1, 1).moore(1);
-    // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
     assert_eq!(neighbors.length(), 8);
 }
 
@@ -83,29 +94,29 @@ fun von_neumann() {
     // 0: | | |2| | |
     // 1: | |2|1|2| |
     // 2: |2|1|0|1|2|
-    // 3: | |3|1|2| |
+    // 3: | |2|1|2| |
     // 4: | | |2| | |
 
     let n = point::new(2, 2).von_neumann(2);
-    assert!(n.contains(&point::new(0, 2))); // 0
-    assert!(n.contains(&point::new(1, 1))); // 1
+    assert!(n.contains(&point::new(0, 2))); // 2
+    assert!(n.contains(&point::new(1, 1))); // 2
     assert!(n.contains(&point::new(1, 2))); // 1
-    assert!(n.contains(&point::new(1, 3))); // 1
+    assert!(n.contains(&point::new(1, 3))); // 2
     assert!(n.contains(&point::new(2, 0))); // 2
     assert!(n.contains(&point::new(2, 1))); // 2
     assert!(n.contains(&point::new(2, 3))); // 2
     assert!(n.contains(&point::new(2, 4))); // 2
-    assert!(n.contains(&point::new(3, 1))); // 3
-    assert!(n.contains(&point::new(3, 2))); // 3
-    assert!(n.contains(&point::new(3, 3))); // 3
-    assert!(n.contains(&point::new(4, 2))); // 4
+    assert!(n.contains(&point::new(3, 1))); // 2
+    assert!(n.contains(&point::new(3, 2))); // 2
+    assert!(n.contains(&point::new(3, 3))); // 2
+    assert!(n.contains(&point::new(4, 2))); // 2
     assert!(n.length() == 12);
 }
 
 #[test]
 fun from_bcs() {
     let p1 = point::new(10, 10);
-    let bytes = std::bcs::to_bytes(&p1);
+    let bytes = p1.to_bytes();
     let p2 = point::from_bytes(bytes);
 
     assert_eq!(p1, p2);

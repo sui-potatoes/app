@@ -72,6 +72,22 @@ public fun chebyshev_distance(p1: &Point, p2: &Point): u16 {
     num_max!(num_diff!(p1.0, p2.0), num_diff!(p1.1, p2.1))
 }
 
+/// Get the Euclidean distance between two points. Euclidean distance is the
+/// square root of the sum of the squared differences of the x and y coordinates.
+///
+/// Example:
+/// ```rust
+/// let (p1, p2) = (new(1, 0), new(4, 3));
+/// let distance = p1.euclidean_distance(&p2);
+///
+/// assert!(distance == 5);
+/// ```
+public fun euclidean_distance(p1: &Point, p2: &Point): u16 {
+    let xd = num_diff!(p1.0, p2.0);
+    let yd = num_diff!(p1.1, p2.1);
+    (xd * xd + yd * yd).sqrt()
+}
+
 /// Get all von Neumann neighbors of a point within a given range. Von Neumann
 /// neighborhood is a set of points that are adjacent to the given point. In 2D
 /// space, it's the point to the left, right, up, and down from the given point.
@@ -95,24 +111,43 @@ public fun von_neumann(p: &Point, size: u16): vector<Point> {
     if (size == 0) return vector[];
 
     let mut neighbors = vector[];
-    let Point(x, y) = *p;
+    let Point(xc, yc) = *p;
 
-    size.do!(|i| {
-        let i = i + 1;
-        neighbors.push_back(Point(x + i, y));
-        neighbors.push_back(Point(x, y + i));
-        if (x >= i) neighbors.push_back(Point(x - i, y));
-        if (y >= i) neighbors.push_back(Point(x, y - i));
+    if (size == 1) {
+        if (xc > 0) neighbors.push_back(Point(xc - 1, yc));
+        if (yc > 0) neighbors.push_back(Point(xc, yc - 1));
+        neighbors.push_back(Point(xc + 1, yc));
+        neighbors.push_back(Point(xc, yc + 1));
+        return neighbors
+    };
 
-        // add diagonals if i > 1
-        if (i > 1) {
-            let i = i - 1;
-            neighbors.push_back(Point(x + i, y + i));
-            if (x >= i) neighbors.push_back(Point(x - i, y + i));
-            if (y >= i) neighbors.push_back(Point(x + i, y - i));
-            if (x >= i && y >= i) neighbors.push_back(Point(x - i, y - i));
-        }
-    });
+    if (size == 2) {
+        if (xc > 1) neighbors.push_back(Point(xc - 2, yc));
+        if (yc > 1) neighbors.push_back(Point(xc, yc - 2));
+        if (xc > 0) neighbors.push_back(Point(xc - 1, yc));
+        if (yc > 0) neighbors.push_back(Point(xc, yc - 1));
+        neighbors.push_back(Point(xc + 1, yc));
+        neighbors.push_back(Point(xc, yc + 1));
+        neighbors.push_back(Point(xc + 2, yc));
+        neighbors.push_back(Point(xc, yc + 2));
+
+        // do diagonals
+        if (xc > 0 && yc > 0) neighbors.push_back(Point(xc - 1, yc - 1));
+        if (xc > 0) neighbors.push_back(Point(xc - 1, yc + 1));
+        if (yc > 0) neighbors.push_back(Point(xc + 1, yc - 1));
+        neighbors.push_back(Point(xc + 1, yc + 1));
+
+        return neighbors
+    };
+
+    let (x0, y0) = (xc - size.min(xc), yc - size.min(yc));
+    let (x1, y1) = (xc + size, yc + size);
+
+    x0.range_do_eq!(x1, |x| y0.range_do_eq!(y1, |y| {
+        if (x == xc && y == yc) return;
+        let distance = num_diff!(x, xc) + num_diff!(y, yc);
+        if (distance <= size) neighbors.push_back(Point(x, y));
+    }));
 
     neighbors
 }
