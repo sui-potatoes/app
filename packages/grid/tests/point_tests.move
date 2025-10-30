@@ -54,6 +54,9 @@ fun moore() {
 
     let neighbors = point::new(3, 3).moore(3);
     assert_eq!(neighbors.length(), 48); // 7x7 without the center
+
+    let neighbors = point::new(0, 0).moore(3);
+    assert_eq!(neighbors.length(), 15);
 }
 
 #[test]
@@ -114,6 +117,12 @@ fun von_neumann() {
     assert!(n.contains(&point::new(3, 3))); // 2
     assert!(n.contains(&point::new(4, 2))); // 2
     assert!(n.length() == 12);
+
+    let n = point::new(3, 3).von_neumann(3);
+    assert_eq!(n.length(), 24);
+
+    let n = point::new(0, 0).von_neumann(3);
+    assert_eq!(n.length(), 9);
 }
 
 #[test]
