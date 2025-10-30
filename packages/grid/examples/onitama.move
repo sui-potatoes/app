@@ -46,11 +46,11 @@ public enum MoveCard has store {
 }
 
 public fun new(mut cards: vector<u8>): Field {
-    let grid = grid::tabulate!(5, 5, |x, y| {
-        if (x == 0 && y != 2) Figure::BlueStudent
-        else if (x == 0 && y == 2) Figure::BlueMaster
-        else if (x == 4 && y != 2) Figure::RedStudent
-        else if (x == 4 && y == 2) Figure::RedMaster
+    let grid = grid::tabulate!(5, 5, |row, col| {
+        if (row == 0 && col != 2) Figure::BlueStudent
+        else if (row == 0 && col == 2) Figure::BlueMaster
+        else if (row == 4 && col != 2) Figure::RedStudent
+        else if (row == 4 && col == 2) Figure::RedMaster
         else Figure::None
     });
 
@@ -65,7 +65,7 @@ public fun new(mut cards: vector<u8>): Field {
     }
 }
 
-public fun play(field: &mut Field, card_idx: u8, x0: u16, y0: u16, x1: u16, y1: u16) {
+public fun play(field: &mut Field, card_idx: u8, row0: u16, col0: u16, row1: u16, col1: u16) {
     let is_red = field.turn;
 
     let swap_card = field.next_card.extract();
@@ -74,17 +74,17 @@ public fun play(field: &mut Field, card_idx: u8, x0: u16, y0: u16, x1: u16, y1: 
     stack.push_back(swap_card);
 
     let play_card = stack.swap_remove(card_idx as u64);
-    let mut cursor = cursor::new(x0, y0);
+    let mut cursor = cursor::new(row0, col0);
     let moves = play_card.moves(is_red);
     let is_valid = moves.any!(|moves| {
-        cursor.reset(x0, y0);
+        cursor.reset(row0, col0);
         'try: {
             moves.do_ref!(|direction| {
                 if (!cursor.can_move_to(*direction)) return 'try false
                 else cursor.move_to(*direction)
             });
-            let (x, y) = cursor.to_values();
-            x == x1 && y == y1
+            let (row, col) = cursor.to_values();
+            row == row1 && col == col1
         }
     });
 
@@ -92,7 +92,7 @@ public fun play(field: &mut Field, card_idx: u8, x0: u16, y0: u16, x1: u16, y1: 
 
     field.next_card.fill(play_card);
 
-    let figure = field.grid.swap(x0, y0, Figure::None);
+    let figure = field.grid.swap(row0, col0, Figure::None);
 
     match (&figure) {
         Figure::BlueMaster | Figure::BlueStudent => assert!(!is_red, EIllegalMove),
@@ -100,7 +100,7 @@ public fun play(field: &mut Field, card_idx: u8, x0: u16, y0: u16, x1: u16, y1: 
         _ => abort EIllegalMove,
     };
 
-    let target = field.grid.swap(x1, y1, figure);
+    let target = field.grid.swap(row1, col1, figure);
 
     match (target) {
         Figure::BlueMaster => assert!(is_red, EIllegalMove), // win

@@ -68,28 +68,28 @@ public enum Tile has drop, store {
 #[allow(lint(public_random))]
 public fun new(rng: RandomGenerator, ctx: &mut TxContext): Dungeon {
     let mut room = new_room(rng);
-    let (x, y) = (5, 3);
+    let (x, y) = (3, 5);
 
     // initial placement of the hero
-    *&mut room.grid[x, y] = Tile::Hero;
+    *&mut room.grid[y, x] = Tile::Hero;
 
     Dungeon {
         id: object::new(ctx),
-        hero: cursor::new(x, y),
+        hero: cursor::new(y, x),
         room,
     }
 }
 
 /// Move the hero in the given direction.
 public fun step(d: &mut Dungeon, direction: u8) {
-    let (x0, y0) = d.hero.to_values();
+    let (y0, x0) = d.hero.to_values();
     d.hero.move_to(direction);
-    let (x1, y1) = d.hero.to_values();
+    let (y1, x1) = d.hero.to_values();
 
-    let hero_tile = d.room.grid.swap(x0, y0, Tile::Empty);
+    let hero_tile = d.room.grid.swap(y0, x0, Tile::Empty);
     assert!(&hero_tile == &Tile::Hero); // sanity check
 
-    let replaced_tile = d.room.grid.swap(x1, y1, hero_tile);
+    let replaced_tile = d.room.grid.swap(y1, x1, hero_tile);
     assert!(replaced_tile == Tile::Empty);
 }
 
@@ -114,8 +114,9 @@ public fun to_string(t: &Tile): String {
 // === Internal ===
 
 fun new_room(mut rng: RandomGenerator): Room {
-    let mut grid = grid::tabulate!(SIZE, SIZE, |x, y| {
-        if (x == 0 || x == (SIZE - 1) || y == 0 || y == (SIZE - 1)) Tile::Wall else Tile::Empty
+    let mut grid = grid::tabulate!(SIZE, SIZE, |row, col| {
+        if (row == 0 || row == (SIZE - 1) || col == 0 || col == (SIZE - 1)) Tile::Wall
+        else Tile::Empty
     });
 
     // set up doors
@@ -158,15 +159,15 @@ public fun debug(d: &Dungeon) {
         b"Gold: 100".to_string(),
     ];
 
-    d.room.grid.traverse!(|e, (x, y)| {
-        if (y == 0) str.append_utf8(b"|");
+    d.room.grid.traverse!(|e, (row, col)| {
+        if (col == 0) str.append_utf8(b"|");
         str.append(e.to_string());
         str.append_utf8(b"|");
 
-        if (y == 6) {
-            if (x as u64 < extra_content.length()) {
+        if (col == 6) {
+            if (row as u64 < extra_content.length()) {
                 str.append_utf8(b" ");
-                str.append(extra_content[x as u64]);
+                str.append(extra_content[row as u64]);
                 str.append_utf8(b"\n");
             } else {
                 str.append_utf8(b"\n");

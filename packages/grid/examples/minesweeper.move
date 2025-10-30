@@ -7,7 +7,7 @@
 /// the turns and the values are completely random and defined on each step.
 module grid::minesweeper;
 
-use grid::{grid::{Self, Grid}, point::{Self, Point}};
+use grid::{cell::{Self, Cell}, grid::{Self, Grid}};
 use std::string::String;
 use sui::random::RandomGenerator;
 
@@ -38,9 +38,9 @@ public enum SolverTile has copy, drop {
 }
 
 public struct CheckedTile has copy, drop {
-    point: Point,
+    cell: Cell,
     score: u8,
-    solutions: vector<Point>,
+    solutions: vector<Cell>,
     is_solved: bool,
 }
 
@@ -83,7 +83,7 @@ fun new_solver_grid(ms: &Minesweeper): (Grid<SolverTile>, vector<CheckedTile>) {
             Tile::Revealed(0) => return SolverTile::Solved(0, true),
             Tile::Revealed(score) => {
                 let mut solutions = vector[];
-                ms.grid.neighbors(point::new(x, y)).destroy!(|p| {
+                ms.grid.neighbors(cell::new(x, y)).destroy!(|p| {
                     let (x, y) = p.to_values();
                     match (ms.grid[x, y]) {
                         Tile::Revealed(_) => (),
@@ -95,7 +95,7 @@ fun new_solver_grid(ms: &Minesweeper): (Grid<SolverTile>, vector<CheckedTile>) {
 
                 // TODO: insert at the right idx to avoid sorting
                 check_tiles.push_back(CheckedTile {
-                    point: point::new(x, y),
+                    cell: cell::new(x, y),
                     score,
                     solutions,
                     is_solved: solutions.length() == score as u64,
@@ -106,7 +106,7 @@ fun new_solver_grid(ms: &Minesweeper): (Grid<SolverTile>, vector<CheckedTile>) {
             _ => (),
         };
 
-        let neighbors = ms.grid.neighbors(point::new(x, y));
+        let neighbors = ms.grid.neighbors(cell::new(x, y));
 
         // Count number of neighbors for the (x0, y0) tile.
         // if (x == x0 && y == y0) num_neighbors = neighbors.length();
@@ -139,8 +139,8 @@ use fun print_tiles as vector.print_tiles;
 
 fun print_tiles(v: vector<CheckedTile>) {
     std::debug::print(
-        &v.map_ref!(|CheckedTile { solutions, point, score, .. }| {
-            let mut s = point.to_string();
+        &v.map_ref!(|CheckedTile { solutions, cell, score, .. }| {
+            let mut s = cell.to_string();
             s.append_utf8(b"[");
             s.append((*score).to_string());
             s.append_utf8(b"]: ");
@@ -183,9 +183,9 @@ public fun reveal(ms: &mut Minesweeper, x: u16, y: u16) {
     // let mut solutions = check_tiles[0].solutions;
     // 'solution: {
     //     solutions.do_ref!(|p| {
-    //         dbg!(b"Trying mine point: {}", vector[p.to_string()]);
+    //         dbg!(b"Trying mine cell: {}", vector[p.to_string()]);
     //         // try marking as mine.
-    //         *solver_grid.borrow_point_mut(p) = SolverTile::Mine;
+    //         *solver_grid.borrow_cell_mut(p) = SolverTile::Mine;
     //         // try solving.
     //         first_stage(&mut solver_grid, &mut check_tiles);
     //         // length.
@@ -214,7 +214,7 @@ fun first_stage(solver: &mut Grid<SolverTile>, check_tiles: &mut vector<CheckedT
         // 1. if the tile is solved, mark all mines
         // 2. if not solved, check if any of the solutions overlap with the mines
         // 3. decrease the searched score by the number of mines found in the solutions
-        check_tiles.do_mut!(|CheckedTile { solutions, score: score_ref, is_solved, point: _ }| {
+        check_tiles.do_mut!(|CheckedTile { solutions, score: score_ref, is_solved, cell: _ }| {
             let mut score = *score_ref as u64;
             let mut solutions_len = solutions.length();
 
@@ -222,13 +222,13 @@ fun first_stage(solver: &mut Grid<SolverTile>, check_tiles: &mut vector<CheckedT
             // tile as solved. Then, must place the mines on the grid.
             if (score == solutions_len && !*is_solved) {
                 *is_solved = true;
-                solutions.do_ref!(|p| *solver.borrow_point_mut(p) = SolverTile::Mine);
+                solutions.do_ref!(|p| *solver.borrow_cell_mut(p) = SolverTile::Mine);
                 changes = changes + 1;
                 return
             };
 
             // Map tiles
-            let mut solver_tiles = solutions.map_ref!(|p| *solver.borrow_point(p));
+            let mut solver_tiles = solutions.map_ref!(|p| *solver.borrow_cell(p));
 
             // If solutions contains fields marked as `NotMine`, filter them out
             // and compare the score to the leftover length.
@@ -249,7 +249,7 @@ fun first_stage(solver: &mut Grid<SolverTile>, check_tiles: &mut vector<CheckedT
             // Silly check: maybe we meet the (solutions_len == score) check.
             if (score == solutions_len) {
                 *is_solved = true;
-                solutions.do_ref!(|p| *solver.borrow_point_mut(p) = SolverTile::Mine);
+                solutions.do_ref!(|p| *solver.borrow_cell_mut(p) = SolverTile::Mine);
                 changes = changes + 1;
                 return
             };
@@ -272,7 +272,7 @@ fun first_stage(solver: &mut Grid<SolverTile>, check_tiles: &mut vector<CheckedT
             // We solved this already, mark the rest as not mines.
             if (score == 0) {
                 *is_solved = true;
-                solutions.do_ref!(|p| *solver.borrow_point_mut(p) = SolverTile::NotMine);
+                solutions.do_ref!(|p| *solver.borrow_cell_mut(p) = SolverTile::NotMine);
                 changes = changes + 1;
                 return
             };
@@ -280,7 +280,7 @@ fun first_stage(solver: &mut Grid<SolverTile>, check_tiles: &mut vector<CheckedT
             // If we're lucky, try solving this tile post filtering.
             if (score == solutions_len) {
                 *is_solved = true;
-                solutions.do_ref!(|p| *solver.borrow_point_mut(p) = SolverTile::Mine);
+                solutions.do_ref!(|p| *solver.borrow_cell_mut(p) = SolverTile::Mine);
                 changes = changes + 1;
                 return
             };
@@ -291,7 +291,7 @@ fun first_stage(solver: &mut Grid<SolverTile>, check_tiles: &mut vector<CheckedT
 }
 
 /// Second stage of optimizations: remove identical records (given, that all
-/// records follow the same Point order).
+/// records follow the same Cell order).
 fun remove_duplicates(_solver: &mut Grid<SolverTile>, check_tiles: &mut vector<CheckedTile>) {
     let (mut len, mut i) = (check_tiles.length(), 0);
     while (i < len) {
@@ -315,12 +315,12 @@ fun find_mismatch(solution: &Grid<SolverTile>, check_tiles: vector<CheckedTile>)
         let len = check_tiles.length();
         len.do!(|i| {
             let i = len - i - 1;
-            let CheckedTile { point, score, .. } = check_tiles[i];
-            let mines = solution.moore_count!(point, 1, |tile| tile == SolverTile::Mine);
+            let CheckedTile { cell, score, .. } = check_tiles[i];
+            let mines = solution.moore_count!(cell, 1, |tile| tile == SolverTile::Mine);
             if (mines as u8 != score) {
                 // dbg!(
-                //     b"not all mines found for point {}: {} != {}; at index {}",
-                //     vector[point.to_string(), mines.to_string(), score.to_string(), i.to_string()],
+                //     b"not all mines found for cell {}: {} != {}; at index {}",
+                //     vector[cell.to_string(), mines.to_string(), score.to_string(), i.to_string()],
                 // );
                 return 'search option::some(i)
             };
@@ -354,8 +354,8 @@ public fun solver_tile_to_string(t: &SolverTile): String {
 
 use fun neighbors as Grid.neighbors;
 
-fun neighbors<T>(grid: &Grid<T>, point: Point): vector<Point> {
-    grid.moore(point, 1)
+fun neighbors<T>(grid: &Grid<T>, cell: Cell): vector<Cell> {
+    grid.moore(cell, 1)
 }
 
 #[test_only]

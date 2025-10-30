@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 /// The `direction` module provides macros to check the relative positions of
-/// points on a grid as well as constants for the directions. Currently, the
+/// cells on a grid as well as constants for the directions. Currently, the
 /// main consumer of this module is `cursor`.
 ///
 /// Grid axes are defined as follows:
-/// - X-axis: vertical axis (top->down)
-/// - Y-axis: horizontal axis (left->right)
+/// - X-axis: horizontal axis (left->right)
+/// - Y-axis: vertical axis (top->down)
 ///
-/// Hence, the (0, 0) point is at the top-left corner of the grid.
+/// Hence, the (0, 0) cell is at the top-left corner of the grid.
 ///
 /// Direction is packed as a bit field in a single byte. Diagonals are represented
 /// as a combination of two orthogonal directions. For example, `up_right!()` is
@@ -44,49 +44,49 @@ use std::macros::{num_min, num_diff};
 
 // === Check Directions ===
 
-/// Check if a point is above another point (decrease in X).
-public macro fun is_up<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 > $x1 && $y0 == $y1
+/// Check if direction from `Cell0` to `Cell1` is up.
+public macro fun is_up<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 > $row1 && $col0 == $col1
 }
 
-/// Check if a point is below another point (increase in X).
-public macro fun is_down<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 < $x1 && $y0 == $y1
+/// Check if direction from `Cell0` to `Cell1` is down.
+public macro fun is_down<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 < $row1 && $col0 == $col1
 }
 
-/// Check if a point is to the left of another point (decrease in Y).
-public macro fun is_left<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 == $x1 && $y0 > $y1
+/// Check if direction from `Cell0` to `Cell1` is left.
+public macro fun is_left<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 == $row1 && $col0 > $col1
 }
 
-/// Check if a point is to the right of another point (increase in Y).
-public macro fun is_right<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 == $x1 && $y0 < $y1
+/// Check if direction from `Cell0` to `Cell1` is right.
+public macro fun is_right<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 == $row1 && $col0 < $col1
 }
 
-/// Check if a point is up-right of another point (decrease in X, increase in Y).
-public macro fun is_up_right<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 > $x1 && $y0 < $y1
+/// Check if direction from `Cell0` to `Cell1` is up-right.
+public macro fun is_up_right<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 > $row1 && $col0 < $col1
 }
 
-/// Check if a point is down-right of another point (increase in X, increase in Y).
-public macro fun is_down_right<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 < $x1 && $y0 < $y1
+/// Check if direction from `Cell0` to `Cell1` is down-right.
+public macro fun is_down_right<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 < $row1 && $col0 < $col1
 }
 
-/// Check if a point is down-left of another point (increase in X, decrease in Y).
-public macro fun is_down_left<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 < $x1 && $y0 > $y1
+/// Check if direction from `Cell0` to `Cell1` is down-left.
+public macro fun is_down_left<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 > $row1 && $col0 < $col1
 }
 
-/// Check if a point is up-left of another point (decrease in X, decrease in Y).
-public macro fun is_up_left<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 > $x1 && $y0 > $y1
+/// Check if direction from `Cell0` to `Cell1` is up-left.
+public macro fun is_up_left<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 > $row1 && $col0 > $col1
 }
 
-/// Check if a point is equal to another point.
-public macro fun is_equal<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 == $x1 && $y0 == $y1
+/// Check if position of `Cell0` to `Cell1` is the same.
+public macro fun is_equal<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 == $row1 && $col0 == $col1
 }
 
 // === Constants ===
@@ -122,7 +122,7 @@ public macro fun up_left(): u8 { up!() | left!() }
 /// Direction: none
 public macro fun none(): u8 { 0 }
 
-/// Get the inverse direction of a given direction.
+/// Get the inverse of a given direction.
 public macro fun inverse($direction: u8): u8 {
     match ($direction) {
         1 => down!(),
@@ -139,7 +139,7 @@ public macro fun inverse($direction: u8): u8 {
 
 // === Determine Direction ===
 
-/// Get the direction from point `(x0, y0)` to point `(x1, y1)`.
+/// Get the direction from cell `(x0, y0)` to cell `(x1, y1)`.
 /// For convenience, takes any integer type, but `Grid` uses `u16`.
 ///
 /// ```move
@@ -151,23 +151,23 @@ public macro fun inverse($direction: u8): u8 {
 ///     assert_eq!(dir, direction::right!());
 /// }
 /// ```
-public macro fun direction<$T: drop>($x0: $T, $y0: $T, $x1: $T, $y1: $T): u8 {
-    let diff_x = num_diff!($x0, $x1);
-    let diff_y = num_diff!($y0, $y1);
+public macro fun direction<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T): u8 {
+    let diff_x = num_diff!($row0, $row1);
+    let diff_y = num_diff!($col0, $col1);
 
     // same tile, one of the axis matches or one dominates
     if (diff_x == 0 && diff_y == 0) return none!();
 
-    let x_direction = if ($x0 < $x1) down!()
-    else if ($x0 > $x1) up!()
+    let horizontal_direction = if ($row0 < $row1) down!()
+    else if ($row0 > $row1) up!()
     else none!();
 
-    let y_direction = if ($y0 < $y1) right!()
-    else if ($y0 > $y1) left!()
+    let vertical_direction = if ($col0 < $col1) right!()
+    else if ($col0 > $col1) left!()
     else none!();
 
-    if (x_direction == none!() || diff_y > diff_x) return y_direction;
-    if (y_direction == none!() || diff_x > diff_y) return x_direction;
+    if (horizontal_direction == none!() || diff_y > diff_x) return vertical_direction;
+    if (vertical_direction == none!() || diff_x > diff_y) return horizontal_direction;
 
-    x_direction | y_direction // diagonals
+    horizontal_direction | vertical_direction // diagonals
 }

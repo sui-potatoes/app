@@ -4,7 +4,7 @@
 /// Implements Conway's game of life using grid.
 module grid::life;
 
-use grid::{grid::{Self, Grid}, point::{Self, Point}};
+use grid::{cell::{Self, Cell as GridCell}, grid::{Self, Grid}};
 use std::string::String;
 
 /// Rules:
@@ -17,7 +17,7 @@ public struct Life has key, store {
     /// Each cell is represented as a boolean value.
     grid: Grid<Cell>,
     /// Keep track of live cells to avoid traversing the grid.
-    live_cells: vector<Point>,
+    live_cells: vector<GridCell>,
 }
 
 /// Represents the game state. We use the wrapper type to implement `to_string`,
@@ -35,7 +35,7 @@ public fun new(width: u16, height: u16, ctx: &mut TxContext): Life {
 
 /// Place a live cell on the grid at (x, y).
 public fun place(l: &mut Life, x: u16, y: u16) {
-    l.live_cells.push_back(point::new(x, y));
+    l.live_cells.push_back(cell::new(x, y));
     let _ = l.grid.swap(x, y, Cell(true));
 }
 
@@ -63,7 +63,7 @@ public fun tick(l: &mut Life) {
     });
 
     to_check.destroy!(|p| {
-        let is_live = l.grid.borrow_point(&p).0;
+        let is_live = l.grid.borrow_cell(&p).0;
         let count = l.grid.moore_count!(p, 1, |v| v.0);
         if (is_live && (count < 2 || count > 3)) {
             // Mark as dead.
@@ -77,8 +77,8 @@ public fun tick(l: &mut Life) {
         }
     });
 
-    dead_cells.destroy!(|p| *&mut l.grid.borrow_point_mut(&p).0 = false);
-    live_cells.destroy!(|p| *&mut l.grid.borrow_point_mut(&p).0 = true);
+    dead_cells.destroy!(|p| *&mut l.grid.borrow_cell_mut(&p).0 = false);
+    live_cells.destroy!(|p| *&mut l.grid.borrow_cell_mut(&p).0 = true);
 
     l.live_cells = live_cells;
 }

@@ -69,9 +69,9 @@ public fun prove_victory(game: &mut TicTacToe, tiles: vector<vector<u8>>) {
 
     // skips the first tile
     tiles.do!(|tile| {
-        let (x, y) = cursor.to_values();
-        assert!(tile[0] as u16 == x && tile[1] as u16 == y, EInvalidDirection);
-        assert!(game.grid[x, y] == if (is_x) Tile::X else Tile::O, EInvalidVictory);
+        let (row, col) = cursor.to_values();
+        assert!(tile[0] as u16 == row && tile[1] as u16 == col, EInvalidDirection);
+        assert!(game.grid[row, col] == if (is_x) Tile::X else Tile::O, EInvalidVictory);
         if (tile != end) cursor.move_to(direction);
     });
 }

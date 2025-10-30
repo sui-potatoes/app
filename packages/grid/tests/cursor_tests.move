@@ -85,14 +85,14 @@ fun move_back_no_history_fail() {
 }
 
 #[test]
-fun to_from_point() {
+fun to_from_cell() {
     let cursor = cursor::new(10, 10);
-    let point = cursor.to_point();
-    let cursor = point.to_cursor();
+    let cell = cursor.to_cell();
+    let cursor = cell.to_cursor();
 
-    let (xc, yc) = cursor.to_values();
-    let (xp, yp) = point.to_values();
+    let (cursor_row, cursor_col) = cursor.to_values();
+    let (cell_row, cell_col) = cell.to_values();
 
-    assert_eq!(xc, xp);
-    assert_eq!(yc, yp);
+    assert_eq!(cursor_row, cell_row);
+    assert_eq!(cursor_col, cell_col);
 }

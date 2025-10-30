@@ -11,7 +11,7 @@
 module commander::map;
 
 use commander::{history::{Self, Record}, recruit::Recruit, unit::{Self, Unit}};
-use grid::{cursor, grid::{Self, Grid}, point};
+use grid::{cell, cursor, grid::{Self, Grid}};
 use std::{macros::{num_min, num_max}, string::String};
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
@@ -145,7 +145,7 @@ public fun perform_reload(map: &mut Map, x: u16, y: u16): Record {
     history::new_reload(x, y)
 }
 
-/// Move a unit along the path. The first point is the current position of the unit.
+/// Move a unit along the path. The first cell is the current position of the unit.
 public fun move_unit(map: &mut Map, path: vector<u8>): Record {
     assert!(path.length() > 2, EPathTooShort);
 
@@ -321,10 +321,10 @@ public fun perform_grenade(
 
     // update each tile: Cover -> Empty
     let mut history = vector[history::new_grenade(x1, y1, radius)];
-    let mut points = map.grid.von_neumann(point::new(x1, y1), radius);
+    let mut cells = map.grid.von_neumann(cell::new(x1, y1), radius);
 
-    points.push_back(point::new(x1, y1));
-    points.do!(|p| {
+    cells.push_back(cell::new(x1, y1));
+    cells.do!(|p| {
         let (x, y) = p.to_values();
         let tile = &mut map.grid[x, y];
 
@@ -407,7 +407,7 @@ public fun tile_to_string(tile: &Tile): String {
 /// Check if the given path is walkable. Can be an optimization for pathfinding,
 /// if the path is traced on the frontend.
 ///
-/// Returns `None` if the path is not walkable, otherwise returns the end point
+/// Returns `None` if the path is not walkable, otherwise returns the end cell
 /// of the path.
 public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
     use grid::direction::{up, down, left, right};

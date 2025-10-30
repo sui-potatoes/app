@@ -30,35 +30,35 @@ public struct Checkers has key, store {
 public fun new(ctx: &mut TxContext): Checkers {
     Checkers {
         id: object::new(ctx),
-        grid: grid::tabulate!(8, 8, |x, y| {
-            if ((x + y) % 2 == 1) Tile::Unavailable
-            else if (x < 3 && (x + y) % 2 == 0) Tile::Red
-            else if (x > 4 && (x + y) % 2 == 0) Tile::Blue
+        grid: grid::tabulate!(8, 8, |row, col| {
+            if ((row + col) % 2 == 1) Tile::Unavailable
+            else if (row < 3 && (row + col) % 2 == 0) Tile::Red
+            else if (row > 4 && (row + col) % 2 == 0) Tile::Blue
             else Tile::Empty
         }),
         turn: true,
     }
 }
 
-/// Play a move on the checkers board, x0 and y0 are the starting position, and
-/// x1 and y1 are the ending position. This implementation is incomplete, and
+/// Play a move on the checkers board, row0 and col0 are the starting position, and
+/// row1 and col1 are the ending position. This implementation is incomplete, and
 /// only supports moving a single tile or a jump over an opponent's piece.
-public fun play(game: &mut Checkers, x0: u8, y0: u8, x1: u8, y1: u8) {
+public fun play(game: &mut Checkers, row0: u8, col0: u8, row1: u8, col1: u8) {
     let is_red = game.turn;
-    let distance = grid::chebyshev_distance!(x0, y0, x1, y1);
+    let distance = grid::chebyshev_distance!(row0, col0, row1, col1);
 
     assert!(distance == 1 || distance == 2);
 
-    let piece = game.grid.swap(x0 as u16, y0 as u16, Tile::Empty);
+    let piece = game.grid.swap(row0 as u16, col0 as u16, Tile::Empty);
     assert!(piece == if (is_red) Tile::Red else Tile::Blue);
-    let target = game.grid.swap(x1 as u16, y1 as u16, piece);
+    let target = game.grid.swap(row1 as u16, col1 as u16, piece);
     assert!(target == Tile::Empty);
 
     if (distance == 4) {
         // if a move is a jump over a piece, it can only move to an empty tile, but
         // the piece in between must be a piece of the opposite color
-        let direction = direction::direction!(x0, y0, x1, y1);
-        let mut cursor = cursor::new(x0 as u16, y0 as u16);
+        let direction = direction::direction!(row0, col0, row1, col1);
+        let mut cursor = cursor::new(row0 as u16, col0 as u16);
         cursor.move_to(direction); // get to the piece in between
         let (xp, yp) = cursor.to_values();
         let piece = game.grid.swap(xp, yp, Tile::Empty);

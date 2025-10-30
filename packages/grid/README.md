@@ -7,7 +7,7 @@ type and a set of utilities and macros to work with it.
 -   [Usage](#usage)
     -   [Coordinates System](#coordinates-system)
     -   [Grid](#grid-1)
-    -   [Point](#point)
+    -   [Cell](#cell)
     -   [Direction](#direction)
     -   [Cursor](#cursor)
 -   [Examples](#examples)
@@ -37,14 +37,14 @@ Exported address of this package is:
 grid = "0x..."
 ```
 
-## Usage
+## Usagef
 
 > For example applications build with the `Grid`, [see examples](https://github.com/sui-potatoes/app/tree/main/packages/grid/examples)
 
 The package features 4 modules, each implementing a feature:
 
 -   `grid::grid` - defines the `Grid` type and its methods
--   `grid::point` - defines the `Point` type
+-   `grid::cell` - defines the `Cell` type
 -   `grid::direction` - implements direction bitmaps
 -   `grid::cursor` - defines the `Cursor` type and its methods
 
@@ -72,18 +72,18 @@ wrapping macro calls.
 | `do_mut!`     | apply function `f` to a mutable reference to an element                                |
 | `map!`        | construct a new `Grid` by calling a function `f` on each element, consumes the value   |
 | `map_ref!`    | same as `map!` but does not consume the value, creates a new instance from a reference |
-| `traverse!`   | similar to `do_ref!` but the callback `f` receives coordinates of the Point as well    |
+| `traverse!`   | similar to `do_ref!` but the callback `f` receives coordinates of the Cell as well     |
 | `rotate`      | rotate the grid 90º clockwise `n` times                                                |
 
-#### Working with Points
+#### Working with Cells
 
 | method               | description                                                                                            |
 | -------------------- | ------------------------------------------------------------------------------------------------------ |
-| `moore`              | get all Moore neighbors of a `Point` in a distance `s`, does not include the centre                    |
-| `von_neumann`        | get all Von Neumann neighbors of a `Point` in a distance `s`, does not include the centre              |
-| `moore_count!`       | count all Moore neighbors of a `Point` in a distance `s` that satisfy predicate `f`                    |
-| `von_neumann_count!` | count all Von Neumann neighbors of a `Point` in a distance `s` that satisfy predicate `f`              |
-| `find_group!`        | finds a group of points that match the predicate `f` in the neighborhood `$n`                          |
+| `moore`              | get all Moore neighbors of a `Cell` in a distance `s`, does not include the centre                     |
+| `von_neumann`        | get all Von Neumann neighbors of a `Cell` in a distance `s`, does not include the centre               |
+| `moore_count!`       | count all Moore neighbors of a `Cell` in a distance `s` that satisfy predicate `f`                     |
+| `von_neumann_count!` | count all Von Neumann neighbors of a `Cell` in a distance `s` that satisfy predicate `f`               |
+| `find_group!`        | finds a group of cells that match the predicate `f` in the neighborhood `$n`                           |
 | `trace!`             | traces path from `$p0` to `$p1` in the neighborhood `$n` with `f` marking if the tile can be walked on |
 
 #### Utilities
@@ -97,31 +97,34 @@ wrapping macro calls.
 | `chebyshev_distance!` | get Chebyshev distance between two pairs of coordinates                         |
 | `euclidean_distance!` | get Euclidean distance between two pairs of coordinates                         |
 
-### Point
+### Cell
 
-> For full reference, refer to the [documentation](https://github.com/sui-potatoes/app/tree/main/packages/grid/docs/point.md).
+> For full reference, refer to the [documentation](https://github.com/sui-potatoes/app/tree/main/packages/grid/docs/cell.md).
 
-Point represents a `Point` on a plane as `x` and `y` coordinates, where `x` is the row, and `y` is the column.
+Cell represents a `Cell` on of a `Grid` and stores the `row` and `column`.
 
 ```move
-use grid::point;
+use grid::cell;
 
 #[test]
-fun test_point() {
-    // create a `Point` at `(0, 1)`
-    let point = point::new(0, 1);
-    let (x, y) = point.into_values();
+fun test_cell() {
+    // create a `Cell` at `[0, 1]` with 0 as the row and 1 as a column
+    let cell = cell::new(0, 1);
+    let (row, col) = cell.into_values();
 
-    // get all Moore neighbors of the Point
-    // excludes the point
-    let moore_neighbors = point.moore(1);
+    // get all Moore neighbors of the Cell
+    // excludes the cell
+    let moore_neighbors = cell.moore(1);
 
-    // get all Von-Neumann neighbors of the Point
-    // excludes the point
-    let von_neumann_neighbors = point.von_neumann(1);
+    // get all Von-Neumann neighbors of the Cell
+    // excludes the cell
+    let von_neumann_neighbors = cell.von_neumann(1);
 
-    // prints as a pair: `(1, 2)`
-    let printed = point.to_string();
+    // prints as a pair: `[1, 2]`
+    let printed = cell.to_string();
+
+    // get logical / world coordinates of a `Cell`
+    let (x, y) = cell.to_world();
 }
 ```
 
@@ -156,7 +159,7 @@ fun test_direction() {
 > For full reference, refer to the [documentation](https://github.com/sui-potatoes/app/tree/main/packages/grid/docs/cursor.md).
 
 Cursor is a special type which can be moved using directions. It can come handy in certain scenarios by abstracting away
-coordinates. It is tightly coupled with `direction` module and supports conversion to and from `Point`.
+coordinates. It is tightly coupled with `direction` module and supports conversion to and from `Cell`.
 
 ```move
 use grid::cursor;
@@ -164,15 +167,17 @@ use grid::direction;
 
 #[test]
 fun test_cursor() {
+    use std::unit_test::assert_eq;
+
     let mut cursor = cursor::new(0, 0);
     cursor.move_to(direction::down!());
 
-    assert!(cursor.to_vector() == vector[1, 0]);
+    assert_eq!(cursor.to_vector(), vector[1, 0]);
 
     // additionally, it has "memory" and can go back
     cursor.move_back();
 
-    assert!(cursor.to_vector() == vector[0, 0]);
+    assert_eq!(cursor.to_vector(), vector[0, 0]);
 }
 ```
 

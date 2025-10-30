@@ -4,7 +4,7 @@
 /// Implements the actual game of Go.
 module go_game::go;
 
-use grid::{grid::{Self, Grid}, point::{Self, Point}};
+use grid::{cell::{Self, Cell}, grid::{Self, Grid}};
 use std::string::String;
 
 /// The move is invalid, the field is already occupied.
@@ -25,7 +25,7 @@ public struct Board has copy, drop, store {
     /// Captured stones.
     score: Score,
     /// Stores history of moves.
-    moves: vector<Point>,
+    moves: vector<Cell>,
     /// Stores last 2 states to implement the ko rule.
     prev_states: vector<Grid<Tile>>,
 }
@@ -38,7 +38,7 @@ public struct Score has copy, drop, store {
 
 /// A group of stones on the board. Tile marks the color of the group.
 /// Empty tile returns an empty group.
-public struct Group(Tile, vector<Point>) has copy, drop;
+public struct Group(Tile, vector<Cell>) has copy, drop;
 
 /// A tile on the board. Implements a `to_string` method to allow printing.
 public enum Tile has copy, drop, store {
@@ -65,16 +65,16 @@ public fun place(board: &mut Board, x: u16, y: u16) {
 
     assert!(board.grid.swap(x, y, stone) == Tile::Empty, EInvalidMove);
 
-    // Check for suicide move: count neighbors of the point, if all of them are
+    // Check for suicide move: count neighbors of the cell, if all of them are
     // opponent's stones, the move is suicide. However, if the surrounding group
     // is surrounded, the move is a capture.
     let (mut my_stones, mut enemy_stones) = (vector[], vector[]);
     let mut empty_num = 0;
 
-    // Get all neighbors of the point. Split them into my stones and enemy stones.
+    // Get all neighbors of the cell. Split them into my stones and enemy stones.
     // All my stones which are neighbors, actually form a group. The only tricky
     // part is checking the enemy stones and their groups.
-    point::new(x, y).von_neumann(1).destroy!(|p| {
+    cell::new(x, y).von_neumann(1).destroy!(|p| {
         let (x, y) = p.into_values();
         if (x >= board.size || y >= board.size) return;
         match (board.grid[x, y]) {
@@ -92,9 +92,9 @@ public fun place(board: &mut Board, x: u16, y: u16) {
     let mut enemy_groups = vector[];
     enemy_stones.destroy!(|p| {
         enemy_groups
-            // Check if the point is already in a group.
-            .find_index!(|Group(_, points)| points.contains(&p))
-            .destroy_or!({ enemy_groups.push_back(board.find_group(p.x(), p.y())); 0 });
+            // Check if the cell is already in a group.
+            .find_index!(|Group(_, cells)| cells.contains(&p))
+            .destroy_or!({ enemy_groups.push_back(board.find_group(p.row(), p.col())); 0 });
     });
 
     // Now we need to check if any of the enemy groups are surrounded.
@@ -102,13 +102,13 @@ public fun place(board: &mut Board, x: u16, y: u16) {
 
     // If any of the enemy groups are surrounded, we capture them.
     if (surrounded_groups.length() > 0) {
-        surrounded_groups.destroy!(|Group(_, points)| {
+        surrounded_groups.destroy!(|Group(_, cells)| {
             // Increase score by the number of stones in the group.
-            if (board.is_black) board.score.black = points.length() as u16 + board.score.black
-            else board.score.white = points.length() as u16 + board.score.white;
+            if (board.is_black) board.score.black = cells.length() as u16 + board.score.black
+            else board.score.white = cells.length() as u16 + board.score.white;
 
             // Remove the group from the board.
-            points.destroy!(|p| board.grid.swap(p.x(), p.y(), Tile::Empty));
+            cells.destroy!(|p| board.grid.swap(p.row(), p.col(), Tile::Empty));
         });
     } else if (empty_num == 0) {
         // If there are no empty neighbors, we need to check if the move is a
@@ -127,7 +127,7 @@ public fun place(board: &mut Board, x: u16, y: u16) {
 
     // Add the move and the current state to the history.
     board.prev_states.push_back(copy board.grid);
-    board.moves.push_back(point::new(x, y));
+    board.moves.push_back(cell::new(x, y));
     board.is_black = !board.is_black;
 }
 
@@ -144,7 +144,7 @@ public fun find_group(board: &Board, x: u16, y: u16): Group {
     // Find the group of stones of the same color.
     let mut group = board
         .grid // Go Game relies on the Von Neumann neighborhood.
-        .find_group!(point::new(x, y), |p| p.von_neumann(1), |tile| tile == &stone);
+        .find_group!(cell::new(x, y), |p| p.von_neumann(1), |tile| tile == &stone);
 
     // Sort the group to make them comparable.
     group.insertion_sort_by!(|a, b| a.le(b));
@@ -155,8 +155,8 @@ public fun find_group(board: &Board, x: u16, y: u16): Group {
 /// Checks if the group is surrounded.
 public fun is_group_surrounded(board: &Board, group: &Group): bool {
     'search: {
-        let Group(_, points) = group;
-        points.do_ref!(|p| {
+        let Group(_, cells) = group;
+        cells.do_ref!(|p| {
             // To make a call whether a group is surrounded, we need to check
             // for a single empty field neighboring the group. If there isn't
             // one, the group is surrounded. That is, assuming that the group
@@ -254,10 +254,10 @@ fun test_find_group() {
     assert_eq!(board.find_group(0, 0), Group(Tile::Empty, vector[]));
     assert_eq!(
         board.find_group(0, 1),
-        Group(Tile::Black, vector[point::new(0, 1), point::new(1, 1), point::new(2, 1)]),
+        Group(Tile::Black, vector[cell::new(0, 1), cell::new(1, 1), cell::new(2, 1)]),
     );
 
-    assert_eq!(board.find_group(2, 3), Group(Tile::White, vector[point::new(2, 3)]));
+    assert_eq!(board.find_group(2, 3), Group(Tile::White, vector[cell::new(2, 3)]));
 }
 
 #[test]
