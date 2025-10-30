@@ -10,8 +10,8 @@
 
 <pre><code><b>use</b> (codec=0x0)::base64;
 <b>use</b> (codec=0x0)::urlencode;
+<b>use</b> (grid=0x0)::cell;
 <b>use</b> (grid=0x0)::grid;
-<b>use</b> (grid=0x0)::point;
 <b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::animation;
 <b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::container;
 <b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::coordinate;

@@ -42,10 +42,10 @@ public fun new(size: u8, win_condition: u8, ctx: &mut TxContext): TicTacToe {
 }
 
 /// Play a move in the `TicTacToe` game.
-public fun play(game: &mut TicTacToe, x: u8, y: u8) {
+public fun play(game: &mut TicTacToe, row: u8, col: u8) {
     let swapped_tile = game
         .grid
-        .swap(x as u16, y as u16, if (game.current_player) Tile::X else Tile::O);
+        .swap(row as u16, col as u16, if (game.current_player) Tile::X else Tile::O);
 
     assert!(swapped_tile == Tile::Empty, EInvalidMove);
     game.current_player = !game.current_player;

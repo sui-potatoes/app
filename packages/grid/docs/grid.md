@@ -8,7 +8,7 @@ provides guarantees that the elements are stored in a rectangular shape.
 
 Additionally, the module provides functions to work with the grid, such as
 getting the cols and rows, borrowing elements, and finding the shortest
-path between two points using the Wave Algorithm.
+path between two cells using the Wave Algorithm.
 
 Structure, printing and directions:
 - the grid is a 2-dimensional vector of elements, with <code>x</code> coordinate being
@@ -18,8 +18,8 @@ and the column number
 in x going downwards and increase in y going to the right
 - the grid is printed vertically, with the top left corner being the first
 element and the bottom right corner being the last element
-- the grid provides macro functions to check if a point is above, below, to
-the left or to the right of another point
+- the grid provides macro functions to check if a cell is above, below, to
+the left or to the right of another cell
 
 
 -  [Struct `Grid`](#grid_grid_Grid)
@@ -34,8 +34,8 @@ the left or to the right of another point
 -  [Function `borrow_mut`](#grid_grid_borrow_mut)
 -  [Function `swap`](#grid_grid_swap)
 -  [Function `rotate`](#grid_grid_rotate)
--  [Function `borrow_point`](#grid_grid_borrow_point)
--  [Function `borrow_point_mut`](#grid_grid_borrow_point_mut)
+-  [Function `borrow_cell`](#grid_grid_borrow_cell)
+-  [Function `borrow_cell_mut`](#grid_grid_borrow_cell_mut)
 -  [Macro function `manhattan_distance`](#grid_grid_manhattan_distance)
 -  [Macro function `chebyshev_distance`](#grid_grid_chebyshev_distance)
 -  [Macro function `euclidean_distance`](#grid_grid_euclidean_distance)
@@ -57,7 +57,7 @@ the left or to the right of another point
 -  [Macro function `from_bcs`](#grid_grid_from_bcs)
 
 
-<pre><code><b>use</b> <a href="./point.md#grid_point">grid::point</a>;
+<pre><code><b>use</b> <a href="./cell.md#grid_cell">grid::cell</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
@@ -408,14 +408,14 @@ If <code>times</code> is greater than 3, it will be reduced to the equivalent ro
 
 </details>
 
-<a name="grid_grid_borrow_point"></a>
+<a name="grid_grid_borrow_cell"></a>
 
-## Function `borrow_point`
+## Function `borrow_cell`
 
-Get a reference to a cell in the <code><a href="./grid.md#grid_grid_Grid">Grid</a></code> at the given <code>Point</code>.
+Get a reference to a cell in the <code><a href="./grid.md#grid_grid_Grid">Grid</a></code> at the given <code>Cell</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_borrow_point">borrow_point</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): &T
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_borrow_cell">borrow_cell</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: &<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>): &T
 </code></pre>
 
 
@@ -424,7 +424,7 @@ Get a reference to a cell in the <code><a href="./grid.md#grid_grid_Grid">Grid</
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_borrow_point">borrow_point</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: &Point): &T {
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_borrow_cell">borrow_cell</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: &Cell): &T {
     <b>let</b> (x, y) = p.to_values();
     &g.<a href="./grid.md#grid_grid">grid</a>[x <b>as</b> u64][y <b>as</b> u64]
 }
@@ -434,14 +434,14 @@ Get a reference to a cell in the <code><a href="./grid.md#grid_grid_Grid">Grid</
 
 </details>
 
-<a name="grid_grid_borrow_point_mut"></a>
+<a name="grid_grid_borrow_cell_mut"></a>
 
-## Function `borrow_point_mut`
+## Function `borrow_cell_mut`
 
-Get a mutable reference to a cell in the <code><a href="./grid.md#grid_grid_Grid">Grid</a></code> at the given <code>Point</code>.
+Get a mutable reference to a cell in the <code><a href="./grid.md#grid_grid_Grid">Grid</a></code> at the given <code>Cell</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>&lt;T&gt;(g: &<b>mut</b> <a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): &<b>mut</b> T
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_borrow_cell_mut">borrow_cell_mut</a>&lt;T&gt;(g: &<b>mut</b> <a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: &<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>): &<b>mut</b> T
 </code></pre>
 
 
@@ -450,7 +450,7 @@ Get a mutable reference to a cell in the <code><a href="./grid.md#grid_grid_Grid
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>&lt;T&gt;(g: &<b>mut</b> <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: &Point): &<b>mut</b> T {
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_borrow_cell_mut">borrow_cell_mut</a>&lt;T&gt;(g: &<b>mut</b> <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: &Cell): &<b>mut</b> T {
     <b>let</b> (x, y) = p.to_values();
     &<b>mut</b> g.<a href="./grid.md#grid_grid">grid</a>[x <b>as</b> u64][y <b>as</b> u64]
 }
@@ -464,7 +464,7 @@ Get a mutable reference to a cell in the <code><a href="./grid.md#grid_grid_Grid
 
 ## Macro function `manhattan_distance`
 
-Get a Manhattan distance between two points. Manhattan distance is the
+Get a Manhattan distance between two cells. Manhattan distance is the
 sum of the absolute differences of the x and y coordinates.
 
 Example:
@@ -477,7 +477,7 @@ assert!(distance == 3);
 See https://en.wikipedia.org/wiki/Taxicab_geometry for more information.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_manhattan_distance">manhattan_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_manhattan_distance">manhattan_distance</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): $T
 </code></pre>
 
 
@@ -486,8 +486,8 @@ See https://en.wikipedia.org/wiki/Taxicab_geometry for more information.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_manhattan_distance">manhattan_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
-    num_diff!($x0, $x1) + num_diff!($y0, $y1)
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_manhattan_distance">manhattan_distance</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): $T {
+    num_diff!($row0, $row1) + num_diff!($col0, $col1)
 }
 </code></pre>
 
@@ -499,7 +499,7 @@ See https://en.wikipedia.org/wiki/Taxicab_geometry for more information.
 
 ## Macro function `chebyshev_distance`
 
-Get a Chebyshev distance between two points. Chebyshev distance is the
+Get a Chebyshev distance between two cells. Chebyshev distance is the
 maximum of the absolute differences of the x and y coordinates.
 
 Example:
@@ -512,7 +512,7 @@ assert!(distance == 2);
 See https://en.wikipedia.org/wiki/Chebyshev_distance for more information.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_chebyshev_distance">chebyshev_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_chebyshev_distance">chebyshev_distance</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): $T
 </code></pre>
 
 
@@ -521,8 +521,8 @@ See https://en.wikipedia.org/wiki/Chebyshev_distance for more information.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_chebyshev_distance">chebyshev_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
-    num_max!(num_diff!($x0, $x1), num_diff!($y0, $y1))
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_chebyshev_distance">chebyshev_distance</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): $T {
+    num_max!(num_diff!($row0, $row1), num_diff!($col0, $col1))
 }
 </code></pre>
 
@@ -534,7 +534,7 @@ See https://en.wikipedia.org/wiki/Chebyshev_distance for more information.
 
 ## Macro function `euclidean_distance`
 
-Get the Euclidean distance between two points. Euclidean distance is the
+Get the Euclidean distance between two cells. Euclidean distance is the
 square root of the sum of the squared differences of the x and y coordinates.
 
 Note: use with caution on <code>u8</code> and <code>u16</code> types, as the macro does not upscale
@@ -551,7 +551,7 @@ assert_eq!(distance, 2);
 See https://en.wikipedia.org/wiki/Euclidean_distance for more information.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_euclidean_distance">euclidean_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_euclidean_distance">euclidean_distance</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): $T
 </code></pre>
 
 
@@ -560,9 +560,9 @@ See https://en.wikipedia.org/wiki/Euclidean_distance for more information.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_euclidean_distance">euclidean_distance</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): $T {
-    <b>let</b> xd = num_diff!($x0, $x1);
-    <b>let</b> yd = num_diff!($y0, $y1);
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_euclidean_distance">euclidean_distance</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): $T {
+    <b>let</b> xd = num_diff!($row0, $row1);
+    <b>let</b> yd = num_diff!($col0, $col1);
     (xd * xd + yd * yd).sqrt()
 }
 </code></pre>
@@ -576,7 +576,7 @@ See https://en.wikipedia.org/wiki/Euclidean_distance for more information.
 ## Macro function `tabulate`
 
 Create a grid of the specified size by applying the function <code>f</code> to each cell.
-The function receives the x and y coordinates of the cell.
+The function receives the row and column coordinates of the cell.
 
 Example:
 ```move
@@ -634,7 +634,7 @@ grid.destroy!(|tile| tile.destroy());
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_destroy">destroy</a>&lt;$T, $R: drop&gt;($<a href="./grid.md#grid_grid">grid</a>: <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $f: |$T| -&gt; $R) {
-    <a href="./grid.md#grid_grid_into_vector">into_vector</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|row| row.<a href="./grid.md#grid_grid_destroy">destroy</a>!(|cell| $f(cell)));
+    <a href="./grid.md#grid_grid_into_vector">into_vector</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|row| row.<a href="./grid.md#grid_grid_destroy">destroy</a>!(|<a href="./cell.md#grid_cell">cell</a>| $f(<a href="./cell.md#grid_cell">cell</a>)));
 }
 </code></pre>
 
@@ -661,7 +661,7 @@ matter, use <code><a href="./grid.md#grid_grid_destroy">destroy</a></code> inste
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_do">do</a>&lt;$T, $R: drop&gt;($<a href="./grid.md#grid_grid">grid</a>: <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $f: |$T| -&gt; $R) {
-    <a href="./grid.md#grid_grid_into_vector">into_vector</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_do">do</a>!(|row| row.<a href="./grid.md#grid_grid_do">do</a>!(|cell| $f(cell)));
+    <a href="./grid.md#grid_grid_into_vector">into_vector</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_do">do</a>!(|row| row.<a href="./grid.md#grid_grid_do">do</a>!(|<a href="./cell.md#grid_cell">cell</a>| $f(<a href="./cell.md#grid_cell">cell</a>)));
 }
 </code></pre>
 
@@ -687,7 +687,7 @@ The function receives a reference to the cell.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_do_ref">do_ref</a>&lt;$T, $R: drop&gt;($<a href="./grid.md#grid_grid">grid</a>: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $f: |&$T| -&gt; $R) {
-    <a href="./grid.md#grid_grid_inner">inner</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_do_ref">do_ref</a>!(|row| row.<a href="./grid.md#grid_grid_do_ref">do_ref</a>!(|cell| $f(cell)));
+    <a href="./grid.md#grid_grid_inner">inner</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_do_ref">do_ref</a>!(|row| row.<a href="./grid.md#grid_grid_do_ref">do_ref</a>!(|<a href="./cell.md#grid_cell">cell</a>| $f(<a href="./cell.md#grid_cell">cell</a>)));
 }
 </code></pre>
 
@@ -728,7 +728,7 @@ a mutable reference to the cell.
 ## Macro function `traverse`
 
 Traverse the grid, calling the function <code>f</code> for each cell. The function
-receives the reference to the cell, the x and y coordinates of the cell.
+receives the reference to the cell, the row and column of the cell.
 
 Example:
 ```move
@@ -750,7 +750,7 @@ grid.traverse!(|cell, (x, y)| {
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_traverse">traverse</a>&lt;$T, $R: drop&gt;($g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $f: |&$T, (u16, u16)| -&gt; $R) {
     <b>let</b> g = $g;
     <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (g.<a href="./grid.md#grid_grid_rows">rows</a>(), g.<a href="./grid.md#grid_grid_cols">cols</a>());
-    <a href="./grid.md#grid_grid_rows">rows</a>.<a href="./grid.md#grid_grid_do">do</a>!(|x| <a href="./grid.md#grid_grid_cols">cols</a>.<a href="./grid.md#grid_grid_do">do</a>!(|y| $f(&g[x, y], (x, y))));
+    <a href="./grid.md#grid_grid_rows">rows</a>.<a href="./grid.md#grid_grid_do">do</a>!(|row| <a href="./grid.md#grid_grid_cols">cols</a>.<a href="./grid.md#grid_grid_do">do</a>!(|col| $f(&g[row, col], (row, col))));
 }
 </code></pre>
 
@@ -775,7 +775,7 @@ Map the grid to a new grid by applying the function <code>f</code> to each cell.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_map">map</a>&lt;$T, $U&gt;($<a href="./grid.md#grid_grid">grid</a>: <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $f: |$T| -&gt; $U): <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$U&gt; {
-    <a href="./grid.md#grid_grid_from_vector_unchecked">from_vector_unchecked</a>(<a href="./grid.md#grid_grid_into_vector">into_vector</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_map">map</a>!(|row| row.<a href="./grid.md#grid_grid_map">map</a>!(|cell| $f(cell))))
+    <a href="./grid.md#grid_grid_from_vector_unchecked">from_vector_unchecked</a>(<a href="./grid.md#grid_grid_into_vector">into_vector</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_map">map</a>!(|row| row.<a href="./grid.md#grid_grid_map">map</a>!(|<a href="./cell.md#grid_cell">cell</a>| $f(<a href="./cell.md#grid_cell">cell</a>))))
 }
 </code></pre>
 
@@ -801,7 +801,7 @@ Callback <code>f</code> takes the reference to the cell.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_map_ref">map_ref</a>&lt;$T, $U&gt;($<a href="./grid.md#grid_grid">grid</a>: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $f: |&$T| -&gt; $U): <a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$U&gt; {
-    <a href="./grid.md#grid_grid_from_vector_unchecked">from_vector_unchecked</a>(<a href="./grid.md#grid_grid_inner">inner</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_map_ref">map_ref</a>!(|row| row.<a href="./grid.md#grid_grid_map_ref">map_ref</a>!(|cell| $f(cell))))
+    <a href="./grid.md#grid_grid_from_vector_unchecked">from_vector_unchecked</a>(<a href="./grid.md#grid_grid_inner">inner</a>($<a href="./grid.md#grid_grid">grid</a>).<a href="./grid.md#grid_grid_map_ref">map_ref</a>!(|row| row.<a href="./grid.md#grid_grid_map_ref">map_ref</a>!(|<a href="./cell.md#grid_cell">cell</a>| $f(<a href="./cell.md#grid_cell">cell</a>))))
 }
 </code></pre>
 
@@ -813,14 +813,14 @@ Callback <code>f</code> takes the reference to the cell.
 
 ## Function `von_neumann`
 
-Get all von Neumann neighbors of a point, checking if the point is within
+Get all von Neumann neighbors of a cell, checking if the cell is within
 the bounds of the grid. The size parameter specifies the size of the neighborhood.
 
-See <code>Point</code> for more information on the von Neumann neighborhood.
+See <code>Cell</code> for more information on the von Neumann neighborhood.
 See https://en.wikipedia.org/wiki/Von_Neumann_neighborhood for more information.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann">von_neumann</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann">von_neumann</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: <a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>, size: u16): vector&lt;<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>&gt;
 </code></pre>
 
 
@@ -829,11 +829,11 @@ See https://en.wikipedia.org/wiki/Von_Neumann_neighborhood for more information.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann">von_neumann</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: Point, size: u16): vector&lt;Point&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann">von_neumann</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: Cell, size: u16): vector&lt;Cell&gt; {
     <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (g.<a href="./grid.md#grid_grid_rows">rows</a>(), g.<a href="./grid.md#grid_grid_cols">cols</a>());
-    p.<a href="./grid.md#grid_grid_von_neumann">von_neumann</a>(size).filter!(|<a href="./point.md#grid_point">point</a>| {
-        <b>let</b> (x, y) = <a href="./point.md#grid_point">point</a>.to_values();
-        x &lt; <a href="./grid.md#grid_grid_rows">rows</a> && y &lt; <a href="./grid.md#grid_grid_cols">cols</a>
+    p.<a href="./grid.md#grid_grid_von_neumann">von_neumann</a>(size).filter!(|<a href="./cell.md#grid_cell">cell</a>| {
+        <b>let</b> (row, col) = <a href="./cell.md#grid_cell">cell</a>.to_values();
+        row &lt; <a href="./grid.md#grid_grid_rows">rows</a> && col &lt; <a href="./grid.md#grid_grid_cols">cols</a>
     })
 }
 </code></pre>
@@ -846,7 +846,7 @@ See https://en.wikipedia.org/wiki/Von_Neumann_neighborhood for more information.
 
 ## Macro function `von_neumann_count`
 
-Count the number of Von Neumann neighbors of a point that satisfy the predicate $f.
+Count the number of Von Neumann neighbors of a cell that satisfy the predicate $f.
 
 Example:
 ```move
@@ -856,7 +856,7 @@ assert!(count == 1);
 ```
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann_count">von_neumann_count</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $size: u16, $f: |&$T| -&gt; bool): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann_count">von_neumann_count</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>, $size: u16, $f: |&$T| -&gt; bool): u8
 </code></pre>
 
 
@@ -865,20 +865,15 @@ assert!(count == 1);
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann_count">von_neumann_count</a>&lt;$T&gt;(
-    $g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;,
-    $p: Point,
-    $size: u16,
-    $f: |&$T| -&gt; bool,
-): u8 {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_von_neumann_count">von_neumann_count</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $p: Cell, $size: u16, $f: |&$T| -&gt; bool): u8 {
     <b>let</b> p = $p;
     <b>let</b> g = $g;
     <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (g.<a href="./grid.md#grid_grid_rows">rows</a>(), g.<a href="./grid.md#grid_grid_cols">cols</a>());
     <b>let</b> <b>mut</b> count = 0u8;
-    p.<a href="./grid.md#grid_grid_von_neumann">von_neumann</a>($size).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|<a href="./point.md#grid_point">point</a>| {
-        <b>let</b> (x1, y1) = <a href="./point.md#grid_point">point</a>.to_values();
-        <b>if</b> (x1 &gt;= <a href="./grid.md#grid_grid_rows">rows</a> || y1 &gt;= <a href="./grid.md#grid_grid_cols">cols</a>) <b>return</b>;
-        <b>if</b> (!$f(&g[x1, y1])) <b>return</b>;
+    p.<a href="./grid.md#grid_grid_von_neumann">von_neumann</a>($size).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|<a href="./cell.md#grid_cell">cell</a>| {
+        <b>let</b> (row1, col1) = <a href="./cell.md#grid_cell">cell</a>.to_values();
+        <b>if</b> (row1 &gt;= <a href="./grid.md#grid_grid_rows">rows</a> || col1 &gt;= <a href="./grid.md#grid_grid_cols">cols</a>) <b>return</b>;
+        <b>if</b> (!$f(&g[row1, col1])) <b>return</b>;
         count = count + 1;
     });
     count
@@ -893,10 +888,10 @@ assert!(count == 1);
 
 ## Function `moore`
 
-Get all Moore neighbors of a <code>Point</code>, checking if the point is within the
+Get all Moore neighbors of a <code>Cell</code>, checking if the cell is within the
 bounds of the grid. The size parameter specifies the size of the neighborhood.
 
-See <code>Point</code> for more information on the Moore neighborhood.
+See <code>Cell</code> for more information on the Moore neighborhood.
 See https://en.wikipedia.org/wiki/Moore_neighborhood for more information.
 
 Example:
@@ -906,7 +901,7 @@ neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_moore">moore</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, size: u16): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_moore">moore</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;T&gt;, p: <a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>, size: u16): vector&lt;<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>&gt;
 </code></pre>
 
 
@@ -915,11 +910,11 @@ neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_moore">moore</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: Point, size: u16): vector&lt;Point&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="./grid.md#grid_grid_moore">moore</a>&lt;T&gt;(g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;T&gt;, p: Cell, size: u16): vector&lt;Cell&gt; {
     <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (g.<a href="./grid.md#grid_grid_rows">rows</a>(), g.<a href="./grid.md#grid_grid_cols">cols</a>());
-    p.<a href="./grid.md#grid_grid_moore">moore</a>(size).filter!(|<a href="./point.md#grid_point">point</a>| {
-        <b>let</b> (x, y) = <a href="./point.md#grid_point">point</a>.to_values();
-        x &lt; <a href="./grid.md#grid_grid_rows">rows</a> && y &lt; <a href="./grid.md#grid_grid_cols">cols</a>
+    p.<a href="./grid.md#grid_grid_moore">moore</a>(size).filter!(|<a href="./cell.md#grid_cell">cell</a>| {
+        <b>let</b> (row, col) = <a href="./cell.md#grid_cell">cell</a>.to_values();
+        row &lt; <a href="./grid.md#grid_grid_rows">rows</a> && col &lt; <a href="./grid.md#grid_grid_cols">cols</a>
     })
 }
 </code></pre>
@@ -932,7 +927,7 @@ neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
 
 ## Macro function `moore_count`
 
-Count the number of Moore neighbors of a point that pass the predicate $f.
+Count the number of Moore neighbors of a cell that pass the predicate $f.
 
 Example:
 ```move
@@ -941,7 +936,7 @@ std::debug::print(&count); // result varies based on the Grid
 ```
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_moore_count">moore_count</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $size: u16, $f: |&$T| -&gt; bool): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_moore_count">moore_count</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>, $size: u16, $f: |&$T| -&gt; bool): u8
 </code></pre>
 
 
@@ -950,15 +945,15 @@ std::debug::print(&count); // result varies based on the Grid
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_moore_count">moore_count</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $p: Point, $size: u16, $f: |&$T| -&gt; bool): u8 {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_moore_count">moore_count</a>&lt;$T&gt;($g: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;, $p: Cell, $size: u16, $f: |&$T| -&gt; bool): u8 {
     <b>let</b> p = $p;
     <b>let</b> g = $g;
     <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (g.<a href="./grid.md#grid_grid_rows">rows</a>(), g.<a href="./grid.md#grid_grid_cols">cols</a>());
     <b>let</b> <b>mut</b> count = 0u8;
-    p.<a href="./grid.md#grid_grid_moore">moore</a>($size).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|<a href="./point.md#grid_point">point</a>| {
-        <b>let</b> (x1, y1) = <a href="./point.md#grid_point">point</a>.to_values();
-        <b>if</b> (x1 &gt;= <a href="./grid.md#grid_grid_rows">rows</a> || y1 &gt;= <a href="./grid.md#grid_grid_cols">cols</a>) <b>return</b>;
-        <b>if</b> (!$f(&g[x1, y1])) <b>return</b>;
+    p.<a href="./grid.md#grid_grid_moore">moore</a>($size).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|<a href="./cell.md#grid_cell">cell</a>| {
+        <b>let</b> (row1, col1) = <a href="./cell.md#grid_cell">cell</a>.to_values();
+        <b>if</b> (row1 &gt;= <a href="./grid.md#grid_grid_rows">rows</a> || col1 &gt;= <a href="./grid.md#grid_grid_cols">cols</a>) <b>return</b>;
+        <b>if</b> (!$f(&g[row1, col1])) <b>return</b>;
         count = count + 1;
     });
     count
@@ -974,11 +969,11 @@ std::debug::print(&count); // result varies based on the Grid
 ## Macro function `find_group`
 
 Finds a group of cells that satisfy the predicate <code>f</code> amongst the neighbors
-of the given point. The function <code>n</code> is used to get the neighbors of the
-current point. For Von Neumann neighborhood, use <code><a href="./grid.md#grid_grid_von_neumann">von_neumann</a></code> as the
+of the given cell. The function <code>n</code> is used to get the neighbors of the
+current cell. For Von Neumann neighborhood, use <code><a href="./grid.md#grid_grid_von_neumann">von_neumann</a></code> as the
 function. For Moore neighborhood, use <code><a href="./grid.md#grid_grid_moore">moore</a></code> as the function.
 
-Takes the <code>$n</code> function to get the neighbors of the current point. Expected
+Takes the <code>$n</code> function to get the neighbors of the current cell. Expected
 to be used with the <code><a href="./grid.md#grid_grid_von_neumann">von_neumann</a></code> and <code><a href="./grid.md#grid_grid_moore">moore</a></code> macros to get the neighbors.
 However, it is possible to pass in a custom callback with exotic
 configurations, eg. only return diagonal neighbors.
@@ -991,11 +986,11 @@ grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
 grid.find_group!(0, 2, |p| p.moore(1), |el| *el == 1);
 
 // custom neighborhood, only checks the neighbor to the right
-grid.find_group!(0, 2, |p| vector[point::new(p.x(), p.y() + 1)], |el| *el == 1);
+grid.find_group!(0, 2, |p| vector[cell::new(p.x(), p.y() + 1)], |el| *el == 1);
 ```
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_find_group">find_group</a>&lt;$T&gt;($<a href="./grid.md#grid_grid_map">map</a>: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $n: |&<a href="./point.md#grid_point_Point">grid::point::Point</a>| -&gt; vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;, $f: |&$T| -&gt; bool): vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_find_group">find_group</a>&lt;$T&gt;($<a href="./grid.md#grid_grid_map">map</a>: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p: <a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>, $n: |&<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>| -&gt; vector&lt;<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>&gt;, $f: |&$T| -&gt; bool): vector&lt;<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>&gt;
 </code></pre>
 
 
@@ -1006,24 +1001,24 @@ grid.find_group!(0, 2, |p| vector[point::new(p.x(), p.y() + 1)], |el| *el == 1);
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_find_group">find_group</a>&lt;$T&gt;(
     $<a href="./grid.md#grid_grid_map">map</a>: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;,
-    $p: Point,
-    $n: |&Point| -&gt; vector&lt;Point&gt;,
+    $p: Cell,
+    $n: |&Cell| -&gt; vector&lt;Cell&gt;,
     $f: |&$T| -&gt; bool,
-): vector&lt;Point&gt; {
+): vector&lt;Cell&gt; {
     <b>let</b> p = $p;
     <b>let</b> <a href="./grid.md#grid_grid_map">map</a> = $<a href="./grid.md#grid_grid_map">map</a>;
     <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (<a href="./grid.md#grid_grid_map">map</a>.<a href="./grid.md#grid_grid_rows">rows</a>(), <a href="./grid.md#grid_grid_map">map</a>.<a href="./grid.md#grid_grid_cols">cols</a>());
     <b>let</b> <b>mut</b> group = vector[];
     <b>let</b> <b>mut</b> visited = <a href="./grid.md#grid_grid_tabulate">tabulate</a>!(<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>, |_, _| <b>false</b>);
-    <b>if</b> (!$f(<a href="./grid.md#grid_grid_map">map</a>.<a href="./grid.md#grid_grid_borrow_point">borrow_point</a>(&p))) <b>return</b> group;
+    <b>if</b> (!$f(<a href="./grid.md#grid_grid_map">map</a>.<a href="./grid.md#grid_grid_borrow_cell">borrow_cell</a>(&p))) <b>return</b> group;
     group.push_back(p);
-    *visited.<a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>(&p) = <b>true</b>;
+    *visited.<a href="./grid.md#grid_grid_borrow_cell_mut">borrow_cell_mut</a>(&p) = <b>true</b>;
     <b>let</b> <b>mut</b> queue = vector[p];
     <b>while</b> (queue.length() != 0) {
         $n(&queue.pop_back()).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|p| {
-            <b>if</b> (!p.is_within_bounds(<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) || *visited.<a href="./grid.md#grid_grid_borrow_point">borrow_point</a>(&p)) <b>return</b>;
-            <b>if</b> ($f(<a href="./grid.md#grid_grid_map">map</a>.<a href="./grid.md#grid_grid_borrow_point">borrow_point</a>(&p))) {
-                *visited.<a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>(&p) = <b>true</b>;
+            <b>if</b> (!p.is_within_bounds(<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) || *visited.<a href="./grid.md#grid_grid_borrow_cell">borrow_cell</a>(&p)) <b>return</b>;
+            <b>if</b> ($f(<a href="./grid.md#grid_grid_map">map</a>.<a href="./grid.md#grid_grid_borrow_cell">borrow_cell</a>(&p))) {
+                *visited.<a href="./grid.md#grid_grid_borrow_cell_mut">borrow_cell_mut</a>(&p) = <b>true</b>;
                 group.push_back(p);
                 queue.push_back(p);
             }
@@ -1041,16 +1036,16 @@ grid.find_group!(0, 2, |p| vector[point::new(p.x(), p.y() + 1)], |el| *el == 1);
 
 ## Macro function `trace`
 
-Use Wave Algorithm to find the shortest path between two points. The function
-<code>n</code> returns the neighbors of the current point. The function <code>f</code> is used to
-check if the cell is passable - it takes two arguments: the current point
-and the next point.
+Use Wave Algorithm to find the shortest path between two cells. The function
+<code>n</code> returns the neighbors of the current cell. The function <code>f</code> is used to
+check if the cell is passable - it takes two arguments: the current cell
+and the next cell.
 
 ```move
 // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
 grid.trace!(
-point::new(0, 0),
-point::new(1, 4),
+cell::new(0, 0),
+cell::new(1, 4),
 |p| p.moore(1), // use moore neighborhood
 |(prev_x, prev_y), (next_x, next_y)| cell == 0,
 6,
@@ -1060,7 +1055,7 @@ point::new(1, 4),
 Transition to the last tile must match the predicate <code>f</code>.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_trace">trace</a>&lt;$T&gt;($<a href="./grid.md#grid_grid_map">map</a>: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p0: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $p1: <a href="./point.md#grid_point_Point">grid::point::Point</a>, $n: |&<a href="./point.md#grid_point_Point">grid::point::Point</a>| -&gt; vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;, $f: |(u16, u16), (u16, u16)| -&gt; bool, $limit: u16): <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;vector&lt;<a href="./point.md#grid_point_Point">grid::point::Point</a>&gt;&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_trace">trace</a>&lt;$T&gt;($<a href="./grid.md#grid_grid_map">map</a>: &<a href="./grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;$T&gt;, $p0: <a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>, $p1: <a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>, $n: |&<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>| -&gt; vector&lt;<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>&gt;, $f: |(u16, u16), (u16, u16)| -&gt; bool, $limit: u16): <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;vector&lt;<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>&gt;&gt;
 </code></pre>
 
 
@@ -1071,18 +1066,18 @@ Transition to the last tile must match the predicate <code>f</code>.
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./grid.md#grid_grid_trace">trace</a>&lt;$T&gt;(
     $<a href="./grid.md#grid_grid_map">map</a>: &<a href="./grid.md#grid_grid_Grid">Grid</a>&lt;$T&gt;,
-    $p0: Point,
-    $p1: Point,
-    $n: |&Point| -&gt; vector&lt;Point&gt;,
-    $f: |(u16, u16), (u16, u16)| -&gt; bool, // whether the cell is passable
+    $p0: Cell,
+    $p1: Cell,
+    $n: |&Cell| -&gt; vector&lt;Cell&gt;,
+    $f: |(u16, u16), (u16, u16)| -&gt; bool, // whether the <a href="./cell.md#grid_cell">cell</a> is passable
     $limit: u16,
-): Option&lt;vector&lt;Point&gt;&gt; {
+): Option&lt;vector&lt;Cell&gt;&gt; {
     <b>let</b> p0 = $p0;
     <b>let</b> p1 = $p1;
     <b>let</b> limit = $limit + 1; // we start from 1, not 0.
     <b>let</b> <a href="./grid.md#grid_grid_map">map</a> = $<a href="./grid.md#grid_grid_map">map</a>;
     <b>let</b> (<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) = (<a href="./grid.md#grid_grid_map">map</a>.<a href="./grid.md#grid_grid_rows">rows</a>(), <a href="./grid.md#grid_grid_map">map</a>.<a href="./grid.md#grid_grid_cols">cols</a>());
-    // If the points are out of bounds, <b>return</b> none.
+    // If the cells are out of bounds, <b>return</b> none.
     <b>if</b> (!p0.is_within_bounds(<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>) || !p1.is_within_bounds(<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>)) {
         <b>return</b> option::none()
     };
@@ -1090,26 +1085,26 @@ Transition to the last tile must match the predicate <code>f</code>.
     <b>let</b> <b>mut</b> num = 1;
     <b>let</b> <b>mut</b> queue = vector[p0];
     <b>let</b> <b>mut</b> <a href="./grid.md#grid_grid">grid</a> = <a href="./grid.md#grid_grid_tabulate">tabulate</a>!(<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>, |_, _| 0);
-    *<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>(&p0) = num;
+    *<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_cell_mut">borrow_cell_mut</a>(&p0) = num;
     <b>let</b> <b>mut</b> found = <b>false</b>;
     'search: <b>while</b> (num &lt; limit && !queue.is_empty()) {
         num = num + 1;
         // Flush the queue, marking all cells around the current number.
         queue.<a href="./grid.md#grid_grid_destroy">destroy</a>!(|from| $n(&from).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|to| {
-            <b>let</b> (x0, y0) = from.into_values();
-            <b>let</b> (x1, y1) = to.into_values();
-            <b>if</b> (x1 &gt;= <a href="./grid.md#grid_grid_rows">rows</a> || y1 &gt;= <a href="./grid.md#grid_grid_cols">cols</a>) <b>return</b>;
-            // If we can't pass through the cell, skip it.
-            <b>if</b> (!$f((x0, y0), (x1, y1))) <b>return</b>;
+            <b>let</b> (row0, col0) = from.into_values();
+            <b>let</b> (row1, col1) = to.into_values();
+            <b>if</b> (row1 &gt;= <a href="./grid.md#grid_grid_rows">rows</a> || col1 &gt;= <a href="./grid.md#grid_grid_cols">cols</a>) <b>return</b>;
+            // If we can't pass through the <a href="./cell.md#grid_cell">cell</a>, skip it.
+            <b>if</b> (!$f((row0, col0), (row1, col1))) <b>return</b>;
             // If we reached the destination, <b>break</b> the <b>loop</b>.
             <b>if</b> (to == p1) {
-                *<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>(&to) = num;
+                *<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_cell_mut">borrow_cell_mut</a>(&to) = num;
                 found = <b>true</b>;
                 <b>break</b> 'search
             };
-            // If the cell is empty, mark it with the current number.
-            <b>if</b> (<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point">borrow_point</a>(&to) == 0) {
-                *<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point_mut">borrow_point_mut</a>(&to) = num;
+            // If the <a href="./cell.md#grid_cell">cell</a> is empty, mark it with the current number.
+            <b>if</b> (<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_cell">borrow_cell</a>(&to) == 0) {
+                *<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_cell_mut">borrow_cell_mut</a>(&to) = num;
                 queue.push_back(to);
             };
         }));
@@ -1120,15 +1115,15 @@ Transition to the last tile must match the predicate <code>f</code>.
     };
     // Reconstruct the path by going from the destination to the source.
     <b>let</b> <b>mut</b> path = vector[p1];
-    <b>let</b> <b>mut</b> last_point = p1;
+    <b>let</b> <b>mut</b> last_cell = p1;
     'reconstruct: <b>while</b> (num &gt; 1) {
         num = num - 1;
-        $n(&last_point).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|p| {
-            <b>if</b> (p == p0) <b>break</b> 'reconstruct;
-            <b>if</b> (!p.is_within_bounds(<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>)) <b>return</b>;
-            <b>if</b> (<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_point">borrow_point</a>(&p) == num) {
-                path.push_back(p);
-                last_point = p;
+        $n(&last_cell).<a href="./grid.md#grid_grid_destroy">destroy</a>!(|<a href="./cell.md#grid_cell">cell</a>| {
+            <b>if</b> (<a href="./cell.md#grid_cell">cell</a> == p0) <b>break</b> 'reconstruct;
+            <b>if</b> (!<a href="./cell.md#grid_cell">cell</a>.is_within_bounds(<a href="./grid.md#grid_grid_rows">rows</a>, <a href="./grid.md#grid_grid_cols">cols</a>)) <b>return</b>;
+            <b>if</b> (<a href="./grid.md#grid_grid">grid</a>.<a href="./grid.md#grid_grid_borrow_cell">borrow_cell</a>(&<a href="./cell.md#grid_cell">cell</a>) == num) {
+                path.push_back(<a href="./cell.md#grid_cell">cell</a>);
+                last_cell = <a href="./cell.md#grid_cell">cell</a>;
                 <b>continue</b> 'reconstruct
             }
         });

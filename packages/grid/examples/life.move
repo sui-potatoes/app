@@ -33,10 +33,10 @@ public fun new(width: u16, height: u16, ctx: &mut TxContext): Life {
     }
 }
 
-/// Place a live cell on the grid at (x, y).
-public fun place(l: &mut Life, x: u16, y: u16) {
-    l.live_cells.push_back(cell::new(x, y));
-    let _ = l.grid.swap(x, y, Cell(true));
+/// Place a live cell on the grid at (row, col).
+public fun place(l: &mut Life, row: u16, col: u16) {
+    l.live_cells.push_back(cell::new(row, col));
+    let _ = l.grid.swap(row, col, Cell(true));
 }
 
 /// Perform a single tick of the game, calculate the next state.
@@ -53,9 +53,9 @@ public fun tick(l: &mut Life) {
     // rules, live cells die and dead cells become live only where life exists.
     l.live_cells.do!(|p| {
         p.moore(1).destroy!(|p| {
-            let (x, y) = p.into_values();
-            if (x >= height || y >= width) return;
-            let mut_ref = &mut visited[x, y];
+            let (row, col) = p.into_values();
+            if (row >= height || col >= width) return;
+            let mut_ref = &mut visited[row, col];
             if (*mut_ref) return;
             *mut_ref = true;
             to_check.push_back(p);

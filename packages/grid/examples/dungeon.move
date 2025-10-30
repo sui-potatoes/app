@@ -68,28 +68,28 @@ public enum Tile has drop, store {
 #[allow(lint(public_random))]
 public fun new(rng: RandomGenerator, ctx: &mut TxContext): Dungeon {
     let mut room = new_room(rng);
-    let (x, y) = (3, 5);
+    let (row, col) = (5, 3);
 
     // initial placement of the hero
-    *&mut room.grid[y, x] = Tile::Hero;
+    *&mut room.grid[row, col] = Tile::Hero;
 
     Dungeon {
         id: object::new(ctx),
-        hero: cursor::new(y, x),
+        hero: cursor::new(row, col),
         room,
     }
 }
 
 /// Move the hero in the given direction.
 public fun step(d: &mut Dungeon, direction: u8) {
-    let (y0, x0) = d.hero.to_values();
+    let (row0, col0) = d.hero.to_values();
     d.hero.move_to(direction);
-    let (y1, x1) = d.hero.to_values();
+    let (row1, col1) = d.hero.to_values();
 
-    let hero_tile = d.room.grid.swap(y0, x0, Tile::Empty);
+    let hero_tile = d.room.grid.swap(row0, col0, Tile::Empty);
     assert!(&hero_tile == &Tile::Hero); // sanity check
 
-    let replaced_tile = d.room.grid.swap(y1, x1, hero_tile);
+    let replaced_tile = d.room.grid.swap(row1, col1, hero_tile);
     assert!(replaced_tile == Tile::Empty);
 }
 
