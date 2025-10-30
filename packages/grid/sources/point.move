@@ -174,25 +174,14 @@ public fun moore(p: &Point, size: u16): vector<Point> {
     if (size == 0) return vector[];
 
     let mut neighbors = vector[];
-    let Point(x, y) = *p;
+    let Point(xc, yc) = *p;
 
-    size.do!(|i| {
-        let i = i + 1;
-        neighbors.push_back(Point(x + i, y));
-        neighbors.push_back(Point(x, y + i));
+    let (x0, y0) = (xc - size.min(xc), yc - size.min(yc));
+    let (x1, y1) = (xc + size, yc + size);
 
-        if (x >= i) neighbors.push_back(Point(x - i, y));
-        if (y >= i) neighbors.push_back(Point(x, y - i));
-
-        // top left
-        if (x >= i && y >= i) neighbors.push_back(Point(x - i, y - i));
-        // top right
-        if (x >= i) neighbors.push_back(Point(x - i, y + i));
-        // bottom left
-        if (y >= i) neighbors.push_back(Point(x + i, y - i));
-        // bottom right
-        neighbors.push_back(Point(x + i, y + i));
-    });
+    x0.range_do_eq!(x1, |x| y0.range_do_eq!(y1, |y| {
+        if (x != xc || y != yc) neighbors.push_back(Point(x, y));
+    }));
 
     neighbors
 }

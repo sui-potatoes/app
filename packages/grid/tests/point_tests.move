@@ -46,11 +46,14 @@ fun moore() {
     let neighbors = point::new(0, 0).moore(0);
     assert_eq!(neighbors, vector[]);
 
-    let neighbors = point::new(0, 0).moore(1); // neighbors.do_ref!(|p| std::debug::print(&p.to_string()));
+    let neighbors = point::new(0, 0).moore(1);
     assert_eq!(neighbors.length(), 3);
 
     let neighbors = point::new(1, 1).moore(1);
     assert_eq!(neighbors.length(), 8);
+
+    let neighbors = point::new(3, 3).moore(3);
+    assert_eq!(neighbors.length(), 48); // 7x7 without the center
 }
 
 #[test]
