@@ -2,11 +2,31 @@
 // SPDX-License-Identifier: MIT
 
 /// Checkers game implementation.
+///
+/// - Red are at the top; Blue are at the bottom.
+/// - Red can only go down before an upgrade; Blue - only up.
+/// - Until a piece upgraded, it can only move and consume forward.
+///
 /// See https://en.wikipedia.org/wiki/Checkers for more information.
 module grid::checkers;
 
-use grid::{cell, direction, grid::{Self, Grid}};
+use grid::{cell, direction::{Self, down, up}, grid::{Self, Grid}};
 use std::string::String;
+
+#[error(code = 0)]
+const ENoMoves: vector<u8> = b"To move a piece, pass at least two cells";
+#[error(code = 1)]
+const ENotYourTurn: vector<u8> = b"Trying to move a piece in a wrong turn";
+#[error(code = 2)]
+const ETargetCellNotEmpty: vector<u8> = b"Non-empty cell is in the path";
+#[error(code = 3)]
+const EIncorrectDistance: vector<u8> = b"A single move must be one or two cells away";
+#[error(code = 4)]
+const ENotDiagonalMove: vector<u8> = b"Only diagonal moves are allowed";
+#[error(code = 5)]
+const EIncorrectDirection: vector<u8> = b"Non-upgraded pieces can only go forward";
+#[error(code = 6)]
+const EOnlyConsumeEnemy: vector<u8> = b"Trying to jump over a friendly piece";
 
 /// The type of a tile on the checkers board. Black tiles are unavailable,
 /// white tiles are empty, red tiles are red checkers, and blue tiles are blue
@@ -14,8 +34,8 @@ use std::string::String;
 public enum Tile has store {
     Unavailable,
     Empty,
-    Red,
-    Blue,
+    Red(bool),
+    Blue(bool),
 }
 
 /// A single instance of a Checkers game.
@@ -32,8 +52,8 @@ public fun new(ctx: &mut TxContext): Checkers {
         id: object::new(ctx),
         grid: grid::tabulate!(8, 8, |row, col| {
             if ((row + col) % 2 == 1) Tile::Unavailable
-            else if (row < 3 && (row + col) % 2 == 0) Tile::Red
-            else if (row > 4 && (row + col) % 2 == 0) Tile::Blue
+            else if (row < 3 && (row + col) % 2 == 0) Tile::Red(false)
+            else if (row > 4 && (row + col) % 2 == 0) Tile::Blue(false)
             else Tile::Empty
         }),
         turn: true,
@@ -44,16 +64,16 @@ public fun new(ctx: &mut TxContext): Checkers {
 /// and row1 and col1 are the ending position. This implementation is incomplete,
 /// and only supports moving a single tile or a jump over an opponent's piece.
 public fun play(game: &mut Checkers, mut moves: vector<vector<u16>>) {
+    assert!(moves.length() > 2, ENoMoves);
+
     let is_red = game.turn;
     let mut c0 = cell::from_vector(moves.remove(0));
 
-    // There must be more than 1 move.
-    assert!(moves.length() > 0);
-
-    // Take the figure from the board.
-    // Make sure the right figure is taken based on the turn number.
-    let piece = game.grid.swap_cell(&c0, Tile::Empty);
-    assert!(if (is_red) piece.is_red() else piece.is_blue());
+    // Take the piece from the board.
+    // Make sure the right piece is taken based on the turn number.
+    let mut piece = game.grid.swap_cell(&c0, Tile::Empty);
+    let is_super = piece.can_go_backwards();
+    assert!(if (is_red) piece.is_red() else piece.is_blue(), ENotYourTurn);
 
     // Each move in checkers follows the same rules: repeat for each move.
     moves.do!(|c1| {
@@ -61,18 +81,21 @@ public fun play(game: &mut Checkers, mut moves: vector<vector<u16>>) {
         let direction = c0.direction_to(&c1);
         let linf_distance = c0.linf_distance(&c1);
 
-        assert!(game.grid.borrow_cell(&c1).is_empty());
-        assert!(direction::is_direction_diagonal!(direction));
-        assert!(linf_distance == 1 || linf_distance == 2);
+        assert!(game.grid.borrow_cell(&c1).is_empty(), ETargetCellNotEmpty);
+        assert!(linf_distance == 1 || linf_distance == 2, EIncorrectDistance);
+        assert!(direction::is_direction_diagonal!(direction), ENotDiagonalMove);
 
-        // If a move is a jump over a piece, it can only move to an empty tile, but
-        // the piece in between must be a piece of the opposite color.
+        // Perform forward movement checks.
+        // Red can only go down until it received an upgrade. Blue only up.
+        let is_forward = if (is_red) direction & down!() > 0 else direction & up!() > 0;
+        assert!(is_super || is_forward, EIncorrectDirection);
+
         if (linf_distance == 2) {
             let mut cursor = c0.to_cursor();
-            cursor.move_to(direction); // get to the piece in between
+            cursor.move_to(direction); // Get to the piece in between.
             let (xp, yp) = cursor.to_values();
             let piece = game.grid.swap(xp, yp, Tile::Empty);
-            assert!(if (is_red) piece.is_blue() else piece.is_red());
+            assert!(if (is_red) piece.is_blue() else piece.is_red(), EOnlyConsumeEnemy);
 
             // Remove the piece from the board.
             piece.destroy();
@@ -80,6 +103,13 @@ public fun play(game: &mut Checkers, mut moves: vector<vector<u16>>) {
 
         c0 = c1; // Final assignment for next (and final) move.
     });
+
+    // Upgrade the piece if it reached the opposite side.
+    match (&mut piece) {
+        Tile::Blue(is_super) if (c0.row() == 0) => *is_super = true,
+        Tile::Red(is_super) if (c0.row() == 7) => *is_super = true,
+        _ => {},
+    };
 
     // Place the piece at the last location. We already know it's empty.
     game.grid.swap_cell(&c0, piece).destroy();
@@ -101,15 +131,24 @@ public fun tile_to_string(tile: &Tile): String {
     match (tile) {
         Tile::Unavailable => b"=",
         Tile::Empty => b"_",
-        Tile::Red => b"R",
-        Tile::Blue => b"B",
+        Tile::Red(_) => b"R",
+        Tile::Blue(_) => b"B",
     }.to_string()
+}
+
+/// Check if the piece can move both ways.
+public fun can_go_backwards(tile: &Tile): bool {
+    match (tile) {
+        Tile::Red(v) => *v,
+        Tile::Blue(v) => *v,
+        _ => false,
+    }
 }
 
 /// Check if the Tile is Red.
 public fun is_red(tile: &Tile): bool {
     match (tile) {
-        Tile::Red => true,
+        Tile::Red(_) => true,
         _ => false,
     }
 }
@@ -117,7 +156,7 @@ public fun is_red(tile: &Tile): bool {
 /// Check if the Tile is Blue.
 public fun is_blue(tile: &Tile): bool {
     match (tile) {
-        Tile::Blue => true,
+        Tile::Blue(_) => true,
         _ => false,
     }
 }
@@ -135,8 +174,8 @@ public use fun destroy_tile as Tile.destroy;
 /// Destroy the Tile by matching on the value.
 public fun destroy_tile(tile: Tile) {
     match (tile) {
-        Tile::Red => {},
-        Tile::Blue => {},
+        Tile::Red(_) => {},
+        Tile::Blue(_) => {},
         Tile::Empty => {},
         Tile::Unavailable => {},
     }
@@ -155,8 +194,7 @@ fun test_checkers() {
     checkers.play(vector[vector[2, 2], vector[3, 3]]);
     checkers.play(vector[vector[6, 0], vector[5, 1]]);
     checkers.play(vector[vector[2, 4], vector[3, 5]]);
-    // double kill!
-    checkers.play(vector[vector[4, 2], vector[2, 4], vector[4, 6]]);
+    checkers.play(vector[vector[4, 2], vector[2, 4]]);
     checkers.play(vector[vector[3, 1], vector[4, 2]]);
     // single kill
     checkers.play(vector[vector[5, 3], vector[3, 1]]);
