@@ -14,7 +14,7 @@ use grid::{cell, direction::{Self, down, up}, grid::{Self, Grid}};
 use std::string::String;
 
 #[error(code = 0)]
-const ENoMoves: vector<u8> = b"To move a piece, pass at least two cells";
+const EInvalidPath: vector<u8> = b"To move a piece, pass at least two cells";
 #[error(code = 1)]
 const ENotYourTurn: vector<u8> = b"Trying to move a piece in a wrong turn";
 #[error(code = 2)]
@@ -64,7 +64,7 @@ public fun new(ctx: &mut TxContext): Checkers {
 /// and row1 and col1 are the ending position. This implementation is incomplete,
 /// and only supports moving a single tile or a jump over an opponent's piece.
 public fun play(game: &mut Checkers, mut moves: vector<vector<u16>>) {
-    assert!(moves.length() > 2, ENoMoves);
+    assert!(moves.length() > 1, EInvalidPath);
 
     let is_red = game.turn;
     let mut c0 = cell::from_vector(moves.remove(0));

@@ -33,7 +33,7 @@ public struct Cell(bool) has copy, drop, store;
 public fun new(width: u16, height: u16, ctx: &mut TxContext): Life {
     Life {
         id: object::new(ctx),
-        grid: grid::tabulate!(width, height, |_, _| Cell(false)),
+        grid: grid::tabulate!(height, width, |_, _| Cell(false)),
         live_cells: vector[],
     }
 }
@@ -48,8 +48,8 @@ public fun place(l: &mut Life, row: u16, col: u16) {
 public fun tick(l: &mut Life) {
     // Keep track of visited cells. Using `Grid` instead of `vec_set`-likes
     // significantly improves performance by avoiding `contains` loops.
-    let (width, height) = (l.grid.cols(), l.grid.rows());
-    let mut visited = grid::tabulate!(width, height, |_, _| false);
+    let (cols, rows) = (l.grid.cols(), l.grid.rows());
+    let mut visited = grid::tabulate!(rows, cols, |_, _| false);
     let mut live_cells = vector[];
     let mut dead_cells = vector[];
     let mut to_check = vector[];
@@ -59,7 +59,7 @@ public fun tick(l: &mut Life) {
     l.live_cells.do!(|p| {
         p.moore_neighbors(1).destroy!(|p| {
             let (row, col) = p.to_values();
-            if (row >= height || col >= width) return;
+            if (row >= rows || col >= cols) return;
             let mut_ref = &mut visited[row, col];
             if (*mut_ref) return;
             *mut_ref = true;

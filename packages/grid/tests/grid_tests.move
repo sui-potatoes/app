@@ -126,7 +126,7 @@ fun rotate() {
 
     // rotate large grid
     let size = 15u16;
-    let mut grid = grid::tabulate!(size, size, |x, y| x + y);
+    let mut grid = grid::tabulate!(size, size, |row, col| row + col);
     grid.rotate(5); // 5 is equivalent to 1
 
     // check the last column that it's 0 to 14
@@ -197,7 +197,7 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace!(
+    let path = grid::trace_path!(
         &grid,
         cell::new(0, 0),
         cell::new(1, 4),
@@ -218,13 +218,13 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace!(
+    let path = grid::trace_path!(
         &grid,
         cell::new(0, 1),
         cell::new(3, 0),
         |p| p.von_neumann_neighbors(1),
-        |(_, _), (x1, y1)| {
-            grid[x1, y1] == 0 || (x1 == 3 && y1 == 0)
+        |(_, _), (row1, col1)| {
+            grid[row1, col1] == 0 || (row1 == 3 && col1 == 0)
         },
         8,
     );
@@ -277,7 +277,7 @@ fun from_bcs() {
 
 #[test]
 fun from_bcs_with_custom_type() {
-    let grid = grid::tabulate!(3, 3, |x, y| cell::new(x, y));
+    let grid = grid::tabulate!(3, 3, |row, col| cell::new(row, col));
     let bytes = bcs::to_bytes(&grid);
     let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| cell::from_bcs(bcs));
 

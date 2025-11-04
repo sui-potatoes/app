@@ -9,11 +9,7 @@
 /// path between two cells using the Wave Algorithm.
 ///
 /// Structure, printing and directions:
-/// - the grid is a 2-dimensional vector of elements, with `x` coordinate being
-/// the outer vector and the row number, and `y` coordinate being the inner vector
-/// and the column number
-/// - x=0 is the top of the grid, y=0 is the left side of the grid, with increase
-/// in x going downwards and increase in y going to the right
+/// - the grid is a 2-dimensional vector of elements.
 /// - the grid is printed vertically, with the top left corner being the first
 /// element and the bottom right corner being the last element
 /// - the grid provides macro functions to check if a cell is above, below, to
@@ -26,10 +22,13 @@ use sui::bcs::BCS;
 
 /// Vector length is incorrect during initialization.
 const EIncorrectLength: u64 = 0;
+const EIndexOutOfBounds: u64 = 1;
 
 /// A generic 2D grid, each cell stores `T`.
 public struct Grid<T> has copy, drop, store {
     grid: vector<vector<T>>,
+    rows: u16,
+    cols: u16,
 }
 
 /// Create a new grid from a vector of vectors. The inner vectors represent
@@ -38,19 +37,24 @@ public struct Grid<T> has copy, drop, store {
 public fun from_vector<T>(grid: vector<vector<T>>): Grid<T> {
     assert!(grid.length() > 0, EIncorrectLength);
     let cols = grid[0].length();
+    let rows = grid.length() as u16;
     grid.do_ref!(|row| assert!(row.length() == cols, EIncorrectLength));
-    Grid { grid }
+    Grid { grid, rows, cols: cols as u16 }
 }
 
 /// Same as `from_vector` but doesn't check the lengths. May be used for optimal
 /// performance when the grid is known to be correct.
 public fun from_vector_unchecked<T>(grid: vector<vector<T>>): Grid<T> {
-    Grid { grid }
+    Grid {
+        rows: grid.length() as u16,
+        cols: grid[0].length() as u16,
+        grid,
+    }
 }
 
 /// Unpack the `Grid` into its underlying vector.
 public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
-    let Grid { grid } = grid;
+    let Grid { grid, .. } = grid;
     grid
 }
 
@@ -60,13 +64,13 @@ public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
 public use fun rows as Grid.height;
 
 /// Get the number of rows of the `Grid`.
-public fun rows<T>(g: &Grid<T>): u16 { g.grid.length() as u16 }
+public fun rows<T>(g: &Grid<T>): u16 { g.rows as u16 }
 
 /// Alias for the `cols` function.
 public use fun cols as Grid.width;
 
 /// Get the number of columns of the `Grid`.
-public fun cols<T>(g: &Grid<T>): u16 { g.grid[0].length() as u16 }
+public fun cols<T>(g: &Grid<T>): u16 { g.cols as u16 }
 
 /// Get a reference to the inner vector of the grid.
 public fun inner<T>(g: &Grid<T>): &vector<vector<T>> { &g.grid }
@@ -77,22 +81,27 @@ public fun inner<T>(g: &Grid<T>): &vector<vector<T>> { &g.grid }
 /// let value_ref = &grid[0, 0];
 /// let copied_value = grid[0, 0];
 /// ```
-public fun borrow<T>(g: &Grid<T>, x: u16, y: u16): &T { &g.grid[x as u64][y as u64] }
+public fun borrow<T>(g: &Grid<T>, row: u16, col: u16): &T {
+    assert!(row < g.rows && col < g.cols, EIndexOutOfBounds);
+    &g.grid[row as u64][col as u64]
+}
 
 #[syntax(index)]
 /// Borrow a mutable reference to a cell in the grid.
 /// ```move
 /// let value_mut = &mut grid[0, 0];
 /// ```
-public fun borrow_mut<T>(g: &mut Grid<T>, x: u16, y: u16): &mut T {
-    &mut g.grid[x as u64][y as u64]
+public fun borrow_mut<T>(g: &mut Grid<T>, row: u16, col: u16): &mut T {
+    assert!(row < g.rows && col < g.cols, EIndexOutOfBounds);
+    &mut g.grid[row as u64][col as u64]
 }
 
 /// Swap an element in the grid with another element, returning the old element.
 /// This is important for `T` types that don't have `drop`.
-public fun swap<T>(g: &mut Grid<T>, x: u16, y: u16, element: T): T {
-    g.grid[x as u64].push_back(element);
-    g.grid[x as u64].swap_remove(y as u64)
+public fun swap<T>(g: &mut Grid<T>, row: u16, col: u16, element: T): T {
+    assert!(row < g.rows && col < g.cols, EIndexOutOfBounds);
+    g.grid[row as u64].push_back(element);
+    g.grid[row as u64].swap_remove(col as u64)
 }
 
 /// Rotate the grid `times` * 90º degrees clockwise. Mutates the grid in place.
@@ -106,14 +115,14 @@ public fun rotate<T>(g: &mut Grid<T>, times: u8) {
     // first deal with times = 1, keep the grid value, only modify it
     // if we're only rotating 90º, we can perform swaps
     if (times == 1) {
-        let Grid { grid: source } = g;
+        let Grid { grid: source, rows, cols } = g;
+        let (rows, cols) = (*rows as u64, *cols as u64);
         let mut target = vector[];
-        let (rows, cols) = (source.length(), source[0].length());
         source.pop_back().do!(|el| target.push_back(vector[el]));
 
         (rows - 1).do!(|_| {
             let mut row = source.pop_back();
-            cols.do!(|i| target[cols - i - 1].push_back(row.pop_back()));
+            cols.do!(|i| target[(cols - i - 1)].push_back(row.pop_back()));
             row.destroy_empty();
         });
 
@@ -129,8 +138,8 @@ public fun rotate<T>(g: &mut Grid<T>, times: u8) {
 
     // 270º degrees rotation
     if (times == 3) {
-        let Grid { grid: source } = g;
-        let (rows, cols) = (source.length(), source[0].length());
+        let Grid { grid: source, rows, cols } = g;
+        let (rows, cols) = (*rows as u64, *cols as u64);
         let mut target = vector[];
         source.reverse();
         source.pop_back().do!(|el| target.push_back(vector[el]));
@@ -148,20 +157,23 @@ public fun rotate<T>(g: &mut Grid<T>, times: u8) {
 // === Accessors: Cell ===
 
 /// Get a reference to a cell in the `Grid` at the given `Cell`.
-public fun borrow_cell<T>(g: &Grid<T>, p: &Cell): &T {
-    let (x, y) = p.to_values();
-    &g.grid[x as u64][y as u64]
+public fun borrow_cell<T>(g: &Grid<T>, c: &Cell): &T {
+    let (row, col) = c.to_values();
+    assert!(row < g.rows && col < g.cols, EIndexOutOfBounds);
+    &g.grid[row as u64][col as u64]
 }
 
 /// Get a mutable reference to a cell in the `Grid` at the given `Cell`.
-public fun borrow_cell_mut<T>(g: &mut Grid<T>, p: &Cell): &mut T {
-    let (x, y) = p.to_values();
-    &mut g.grid[x as u64][y as u64]
+public fun borrow_cell_mut<T>(g: &mut Grid<T>, c: &Cell): &mut T {
+    let (row, col) = c.to_values();
+    assert!(row < g.rows && col < g.cols, EIndexOutOfBounds);
+    &mut g.grid[row as u64][col as u64]
 }
 
 /// Swap the value at the given `Cell`.
 public fun swap_cell<T>(g: &mut Grid<T>, c: &Cell, v: T): T {
     let (row, col) = c.to_values();
+    assert!(row < g.rows && col < g.cols, EIndexOutOfBounds);
     g.swap(row, col, v)
 }
 
@@ -249,27 +261,27 @@ public macro fun tabulate<$U: drop, $T>($rows: $U, $cols: $U, $f: |u16, u16| -> 
 /// ```move
 /// grid.destroy!(|tile| tile.destroy());
 /// ```
-public macro fun destroy<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
-    into_vector($grid).destroy!(|row| row.destroy!(|cell| $f(cell)));
+public macro fun destroy<$T, $R: drop>($g: Grid<$T>, $f: |$T| -> $R) {
+    into_vector($g).destroy!(|row| row.destroy!(|cell| $f(cell)));
 }
 
 /// Consume the `Grid` by calling the function `f` for each element. Preserves the
 /// order of elements (goes from top to bottom, left to right). If the order does not
 /// matter, use `destroy` instead.
-public macro fun do<$T, $R: drop>($grid: Grid<$T>, $f: |$T| -> $R) {
-    into_vector($grid).do!(|row| row.do!(|cell| $f(cell)));
+public macro fun do<$T, $R: drop>($g: Grid<$T>, $f: |$T| -> $R) {
+    into_vector($g).do!(|row| row.do!(|cell| $f(cell)));
 }
 
 /// Apply the function `f` for each element of the `Grid`.
 /// The function receives a reference to the cell.
-public macro fun do_ref<$T, $R: drop>($grid: &Grid<$T>, $f: |&$T| -> $R) {
-    inner($grid).do_ref!(|row| row.do_ref!(|cell| $f(cell)));
+public macro fun do_ref<$T, $R: drop>($g: &Grid<$T>, $f: |&$T| -> $R) {
+    inner($g).do_ref!(|row| row.do_ref!(|cell| $f(cell)));
 }
 
 /// Apply the function `f` for each element of the `Grid`. The function receives
 /// a mutable reference to the cell.
-public macro fun do_mut<$T, $R: drop>($grid: &mut Grid<$T>, $f: |&mut $T| -> $R) {
-    let grid = $grid;
+public macro fun do_mut<$T, $R: drop>($g: &mut Grid<$T>, $f: |&mut $T| -> $R) {
+    let grid = $g;
     let (rows, cols) = (grid.rows(), grid.cols());
     rows.do!(|row| cols.do!(|col| $f(&mut grid[row, col])));
 }
@@ -279,7 +291,7 @@ public macro fun do_mut<$T, $R: drop>($grid: &mut Grid<$T>, $f: |&mut $T| -> $R)
 ///
 /// Example:
 /// ```move
-/// grid.traverse!(|cell, (x, y)| {
+/// grid.traverse!(|cell, (row, col)| {
 ///     // do something with the cell and the coordinates
 /// });
 /// ```
@@ -290,14 +302,14 @@ public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, (u16, u16)| -> 
 }
 
 /// Map the grid to a new grid by applying the function `f` to each cell.
-public macro fun map<$T, $U>($grid: Grid<$T>, $f: |$T| -> $U): Grid<$U> {
-    from_vector_unchecked(into_vector($grid).map!(|row| row.map!(|cell| $f(cell))))
+public macro fun map<$T, $U>($g: Grid<$T>, $f: |$T| -> $U): Grid<$U> {
+    from_vector_unchecked(into_vector($g).map!(|row| row.map!(|cell| $f(cell))))
 }
 
 /// Map the grid to a new grid by applying the function `f` to each cell.
 /// Callback `f` takes the reference to the cell.
-public macro fun map_ref<$T, $U>($grid: &Grid<$T>, $f: |&$T| -> $U): Grid<$U> {
-    from_vector_unchecked(inner($grid).map_ref!(|row| row.map_ref!(|cell| $f(cell))))
+public macro fun map_ref<$T, $U>($g: &Grid<$T>, $f: |&$T| -> $U): Grid<$U> {
+    from_vector_unchecked(inner($g).map_ref!(|row| row.map_ref!(|cell| $f(cell))))
 }
 
 /// Get all von Neumann neighbors of a cell, checking if the cell is within
@@ -355,10 +367,9 @@ public macro fun von_neumann_neighbors_count<$T>(
 /// neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
 /// ```
 public fun moore_neighbors<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
-    let (rows, cols) = (g.rows(), g.cols());
     p.moore_neighbors(size).filter!(|cell| {
         let (row, col) = cell.to_values();
-        row < rows && col < cols
+        row < g.rows && col < g.cols
     })
 }
 
@@ -451,17 +462,17 @@ public macro fun find_group<$T>(
 ///
 /// ```move
 /// // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
-/// grid.trace!(
+/// grid.trace_path!(
 ///     cell::new(0, 0),
 ///     cell::new(1, 4),
 ///     |p| p.moore_neighbors(1), // use moore neighborhood
-///     |(prev_x, prev_y), (next_x, next_y)| cell == 0,
+///     |(prev_row, prev_col), (next_row, next_col)| cell == 0,
 ///     6,
 /// );
 /// ```
 ///
 /// Transition to the last tile must match the predicate `f`.
-public macro fun trace<$T>(
+public macro fun trace_path<$T>(
     $map: &Grid<$T>,
     $p0: Cell,
     $p1: Cell,
@@ -555,16 +566,16 @@ public macro fun trace<$T>(
 ///
 /// std::debug::print(&grid.to_string!())
 /// ```
-public macro fun to_string<$T>($grid: &Grid<$T>): String {
-    let grid = $grid;
+public macro fun to_string<$T>($g: &Grid<$T>): String {
+    let grid = $g;
     let mut result = b"".to_string();
     let (rows, cols) = (grid.rows(), grid.cols());
 
     // the layout is vertical, so we iterate over the rows first
-    rows.do!(|x| {
+    rows.do!(|row| {
         result.append_utf8(b"|");
-        cols.do!(|y| {
-            result.append(grid[x, y].to_string());
+        cols.do!(|col| {
+            result.append(grid[row, col].to_string());
             result.append_utf8(b"|");
         });
         result.append_utf8(b"\n");
@@ -583,8 +594,8 @@ public macro fun from_bcs<$T>($bcs: &mut BCS, $f: |&mut BCS| -> $T): Grid<$T> {
 
 #[test_only]
 /// Test-only function to print the grid to the console.
-public macro fun debug<$T>($grid: &Grid<$T>) {
+public macro fun debug<$T>($g: &Grid<$T>) {
     let mut str = b"\n".to_string();
-    str.append(to_string!($grid));
+    str.append(to_string!($g));
     std::debug::print(&str);
 }
