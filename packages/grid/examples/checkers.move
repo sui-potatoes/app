@@ -5,13 +5,13 @@
 /// See https://en.wikipedia.org/wiki/Checkers for more information.
 module grid::checkers;
 
-use grid::{cursor, direction, grid::{Self, Grid}};
+use grid::{cell, direction, grid::{Self, Grid}};
 use std::string::String;
 
 /// The type of a tile on the checkers board. Black tiles are unavailable,
 /// white tiles are empty, red tiles are red checkers, and blue tiles are blue
 /// checkers.
-public enum Tile has copy, drop, store {
+public enum Tile has store {
     Unavailable,
     Empty,
     Red,
@@ -40,37 +40,56 @@ public fun new(ctx: &mut TxContext): Checkers {
     }
 }
 
-/// Play a move on the checkers board, row0 and col0 are the starting position, and
-/// row1 and col1 are the ending position. This implementation is incomplete, and
-/// only supports moving a single tile or a jump over an opponent's piece.
-public fun play(game: &mut Checkers, row0: u8, col0: u8, row1: u8, col1: u8) {
+/// Play a move on the checkers board, row0 and col0 are the starting position,
+/// and row1 and col1 are the ending position. This implementation is incomplete,
+/// and only supports moving a single tile or a jump over an opponent's piece.
+public fun play(game: &mut Checkers, mut moves: vector<vector<u16>>) {
     let is_red = game.turn;
-    let distance = grid::chebyshev_distance!(row0, col0, row1, col1);
+    let mut c0 = cell::from_vector(moves.remove(0));
 
-    assert!(distance == 1 || distance == 2);
+    // There must be more than 1 move.
+    assert!(moves.length() > 0);
 
-    let piece = game.grid.swap(row0 as u16, col0 as u16, Tile::Empty);
-    assert!(piece == if (is_red) Tile::Red else Tile::Blue);
-    let target = game.grid.swap(row1 as u16, col1 as u16, piece);
-    assert!(target == Tile::Empty);
+    // Take the figure from the board.
+    // Make sure the right figure is taken based on the turn number.
+    let piece = game.grid.swap_cell(&c0, Tile::Empty);
+    assert!(if (is_red) piece.is_red() else piece.is_blue());
 
-    if (distance == 4) {
-        // if a move is a jump over a piece, it can only move to an empty tile, but
-        // the piece in between must be a piece of the opposite color
-        let direction = direction::direction!(row0, col0, row1, col1);
-        let mut cursor = cursor::new(row0 as u16, col0 as u16);
-        cursor.move_to(direction); // get to the piece in between
-        let (xp, yp) = cursor.to_values();
-        let piece = game.grid.swap(xp, yp, Tile::Empty);
-        assert!(piece == if (is_red) Tile::Blue else Tile::Red);
-    };
+    // Each move in checkers follows the same rules: repeat for each move.
+    moves.do!(|c1| {
+        let c1 = cell::from_vector(c1);
+        let direction = c0.direction_to(&c1);
+        let linf_distance = c0.linf_distance(&c1);
 
+        assert!(game.grid.borrow_cell(&c1).is_empty());
+        assert!(direction::is_direction_diagonal!(direction));
+        assert!(linf_distance == 1 || linf_distance == 2);
+
+        // If a move is a jump over a piece, it can only move to an empty tile, but
+        // the piece in between must be a piece of the opposite color.
+        if (linf_distance == 2) {
+            let mut cursor = c0.to_cursor();
+            cursor.move_to(direction); // get to the piece in between
+            let (xp, yp) = cursor.to_values();
+            let piece = game.grid.swap(xp, yp, Tile::Empty);
+            assert!(if (is_red) piece.is_blue() else piece.is_red());
+
+            // Remove the piece from the board.
+            piece.destroy();
+        };
+
+        c0 = c1; // Final assignment for next (and final) move.
+    });
+
+    // Place the piece at the last location. We already know it's empty.
+    game.grid.swap_cell(&c0, piece).destroy();
     game.turn = !game.turn;
 }
 
 /// Destroy a checkers game.
 public fun destroy(game: Checkers) {
-    let Checkers { id, .. } = game;
+    let Checkers { id, grid, .. } = game;
+    grid.destroy!(|tile| tile.destroy());
     id.delete();
 }
 
@@ -87,6 +106,42 @@ public fun tile_to_string(tile: &Tile): String {
     }.to_string()
 }
 
+/// Check if the Tile is Red.
+public fun is_red(tile: &Tile): bool {
+    match (tile) {
+        Tile::Red => true,
+        _ => false,
+    }
+}
+
+/// Check if the Tile is Blue.
+public fun is_blue(tile: &Tile): bool {
+    match (tile) {
+        Tile::Blue => true,
+        _ => false,
+    }
+}
+
+/// Check if the Tile is Empty.
+public fun is_empty(tile: &Tile): bool {
+    match (tile) {
+        Tile::Empty => true,
+        _ => false,
+    }
+}
+
+public use fun destroy_tile as Tile.destroy;
+
+/// Destroy the Tile by matching on the value.
+public fun destroy_tile(tile: Tile) {
+    match (tile) {
+        Tile::Red => {},
+        Tile::Blue => {},
+        Tile::Empty => {},
+        Tile::Unavailable => {},
+    }
+}
+
 #[test_only]
 public fun debug(game: &Checkers) { game.grid.debug!() }
 
@@ -95,11 +150,18 @@ fun test_checkers() {
     let ctx = &mut tx_context::dummy();
     let mut checkers = new(ctx);
 
-    checkers.play(2, 0, 3, 1);
-    checkers.play(5, 1, 4, 2);
-    checkers.play(2, 2, 3, 3);
-    checkers.play(4, 2, 2, 0); // take red piece by jumping over it
+    checkers.play(vector[vector[2, 0], vector[3, 1]]); // red
+    checkers.play(vector[vector[5, 1], vector[4, 2]]);
+    checkers.play(vector[vector[2, 2], vector[3, 3]]);
+    checkers.play(vector[vector[6, 0], vector[5, 1]]);
+    checkers.play(vector[vector[2, 4], vector[3, 5]]);
+    // double kill!
+    checkers.play(vector[vector[4, 2], vector[2, 4], vector[4, 6]]);
+    checkers.play(vector[vector[3, 1], vector[4, 2]]);
+    // single kill
+    checkers.play(vector[vector[5, 3], vector[3, 1]]);
 
+    // Uncomment this call to see the board state.
     // checkers.debug();
 
     checkers.destroy();

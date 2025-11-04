@@ -321,7 +321,7 @@ public fun perform_grenade(
 
     // update each tile: Cover -> Empty
     let mut history = vector[history::new_grenade(x1, y1, radius)];
-    let mut cells = map.grid.von_neumann(cell::new(x1, y1), radius);
+    let mut cells = map.grid.von_neumann_neighbors(cell::new(x1, y1), radius);
 
     cells.push_back(cell::new(x1, y1));
     cells.do!(|p| {

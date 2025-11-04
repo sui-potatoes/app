@@ -159,9 +159,15 @@ public fun borrow_cell_mut<T>(g: &mut Grid<T>, p: &Cell): &mut T {
     &mut g.grid[x as u64][y as u64]
 }
 
+/// Swap the value at the given `Cell`.
+public fun swap_cell<T>(g: &mut Grid<T>, c: &Cell, v: T): T {
+    let (row, col) = c.to_values();
+    g.swap(row, col, v)
+}
+
 // === Macros: Utility ===
 
-/// Get a Manhattan distance between two cells. Manhattan distance is the
+/// Get an L1 / Manhattan distance between two cells. Manhattan distance is the
 /// sum of the absolute differences of the x and y coordinates.
 ///
 /// Example:
@@ -176,8 +182,9 @@ public macro fun manhattan_distance<$T: drop>($row0: $T, $col0: $T, $row1: $T, $
     num_diff!($row0, $row1) + num_diff!($col0, $col1)
 }
 
-/// Get a Chebyshev distance between two cells. Chebyshev distance is the
-/// maximum of the absolute differences of the x and y coordinates.
+/// Get an L-Infinity / Chebyshev distance between two cells. Also known as "King"
+/// distance.
+/// The distance is the maximum of dx and dy.
 ///
 /// Example:
 /// ```move
@@ -298,9 +305,9 @@ public macro fun map_ref<$T, $U>($grid: &Grid<$T>, $f: |&$T| -> $U): Grid<$U> {
 ///
 /// See `Cell` for more information on the von Neumann neighborhood.
 /// See https://en.wikipedia.org/wiki/Von_Neumann_neighborhood for more information.
-public fun von_neumann<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
+public fun von_neumann_neighbors<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
     let (rows, cols) = (g.rows(), g.cols());
-    p.von_neumann(size).filter!(|cell| {
+    p.von_neumann_neighbors(size).filter!(|cell| {
         let (row, col) = cell.to_values();
         row < rows && col < cols
     })
@@ -314,13 +321,18 @@ public fun von_neumann<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
 ///
 /// assert!(count == 1);
 /// ```
-public macro fun von_neumann_count<$T>($g: &Grid<$T>, $p: Cell, $size: u16, $f: |&$T| -> bool): u8 {
+public macro fun von_neumann_neighbors_count<$T>(
+    $g: &Grid<$T>,
+    $p: Cell,
+    $size: u16,
+    $f: |&$T| -> bool,
+): u8 {
     let p = $p;
     let g = $g;
     let (rows, cols) = (g.rows(), g.cols());
     let mut count = 0u8;
 
-    p.von_neumann($size).destroy!(|cell| {
+    p.von_neumann_neighbors($size).destroy!(|cell| {
         let (row1, col1) = cell.to_values();
         if (row1 >= rows || col1 >= cols) return;
         if (!$f(&g[row1, col1])) return;
@@ -339,12 +351,12 @@ public macro fun von_neumann_count<$T>($g: &Grid<$T>, $p: Cell, $size: u16, $f: 
 ///
 /// Example:
 /// ```move
-/// let neighbors = grid.moore!(0, 2, 1);
+/// let neighbors = grid.moore_neighbors(0, 2, 1);
 /// neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
 /// ```
-public fun moore<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
+public fun moore_neighbors<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
     let (rows, cols) = (g.rows(), g.cols());
-    p.moore(size).filter!(|cell| {
+    p.moore_neighbors(size).filter!(|cell| {
         let (row, col) = cell.to_values();
         row < rows && col < cols
     })
@@ -354,16 +366,21 @@ public fun moore<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
 ///
 /// Example:
 /// ```move
-/// let count = grid.moore_count!(0, 2, 1, |el| *el == 1);
+/// let count = grid.moore_neighbors_count!(0, 2, 1, |el| *el == 1);
 /// std::debug::print(&count); // result varies based on the Grid
 /// ```
-public macro fun moore_count<$T>($g: &Grid<$T>, $p: Cell, $size: u16, $f: |&$T| -> bool): u8 {
+public macro fun moore_neighbors_count<$T>(
+    $g: &Grid<$T>,
+    $p: Cell,
+    $size: u16,
+    $f: |&$T| -> bool,
+): u8 {
     let p = $p;
     let g = $g;
     let (rows, cols) = (g.rows(), g.cols());
     let mut count = 0u8;
 
-    p.moore($size).destroy!(|cell| {
+    p.moore_neighbors($size).destroy!(|cell| {
         let (row1, col1) = cell.to_values();
         if (row1 >= rows || col1 >= cols) return;
         if (!$f(&g[row1, col1])) return;
@@ -386,10 +403,10 @@ public macro fun moore_count<$T>($g: &Grid<$T>, $p: Cell, $size: u16, $f: |&$T| 
 ///
 /// ```move
 /// // finds a group of cells with value 1 in von Neumann neighborhood
-/// grid.find_group!(0, 2, |p| p.von_neumann(1), |el| *el == 1);
+/// grid.find_group!(0, 2, |p| p.von_neumann_neighbors(1), |el| *el == 1);
 ///
 /// // finds a group of cells with value 1 in Moore neighborhood
-/// grid.find_group!(0, 2, |p| p.moore(1), |el| *el == 1);
+/// grid.find_group!(0, 2, |p| p.moore_neighbors(1), |el| *el == 1);
 ///
 /// // custom neighborhood, only checks the neighbor to the right
 /// grid.find_group!(0, 2, |p| vector[cell::new(p.x(), p.y() + 1)], |el| *el == 1);
@@ -437,7 +454,7 @@ public macro fun find_group<$T>(
 /// grid.trace!(
 ///     cell::new(0, 0),
 ///     cell::new(1, 4),
-///     |p| p.moore(1), // use moore neighborhood
+///     |p| p.moore_neighbors(1), // use moore neighborhood
 ///     |(prev_x, prev_y), (next_x, next_y)| cell == 0,
 ///     6,
 /// );
@@ -477,8 +494,8 @@ public macro fun trace<$T>(
 
         // Flush the queue, marking all cells around the current number.
         queue.destroy!(|from| $n(&from).destroy!(|to| {
-            let (row0, col0) = from.into_values();
-            let (row1, col1) = to.into_values();
+            let (row0, col0) = from.to_values();
+            let (row1, col1) = to.to_values();
             if (row1 >= rows || col1 >= cols) return;
 
             // If we can't pass through the cell, skip it.

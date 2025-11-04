@@ -89,6 +89,26 @@ public macro fun is_equal<$T: drop>($row0: $T, $col0: $T, $row1: $T, $col1: $T):
     $row0 == $row1 && $col0 == $col1
 }
 
+// === Direction Checks ===
+
+/// Validate `u8` direction input.
+public macro fun is_direction_valid($d: u8): bool {
+    if ($d & up!() > 0 && $d & down!() > 0) return false
+    else if ($d & left!() > 0 && $d & right!() > 0) return false
+    else true
+}
+
+/// Check whether given `u8` direction is vertical: up or down.
+public macro fun is_direction_vertical($d: u8): bool { $d == up!() || $d == down!() }
+
+/// Check whether given `u8` direction is horizontal: left or right.
+public macro fun is_direction_horizontal($d: u8): bool { $d == left!() || $d == right!() }
+
+/// Check whether given `u8` direction is diagonal.
+public macro fun is_direction_diagonal($d: u8): bool {
+    $d == up_right!() || $d == up_left!() || $d == down_right!() || $d == down_left!()
+}
+
 // === Constants ===
 
 /// Direction: up

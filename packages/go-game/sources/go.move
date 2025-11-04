@@ -74,8 +74,8 @@ public fun place(board: &mut Board, x: u16, y: u16) {
     // Get all neighbors of the cell. Split them into my stones and enemy stones.
     // All my stones which are neighbors, actually form a group. The only tricky
     // part is checking the enemy stones and their groups.
-    cell::new(x, y).von_neumann(1).destroy!(|p| {
-        let (x, y) = p.into_values();
+    cell::new(x, y).von_neumann_neighbors(1).destroy!(|p| {
+        let (x, y) = p.to_values();
         if (x >= board.size || y >= board.size) return;
         match (board.grid[x, y]) {
             Tile::Empty => (empty_num = empty_num + 1),
@@ -144,7 +144,7 @@ public fun find_group(board: &Board, x: u16, y: u16): Group {
     // Find the group of stones of the same color.
     let mut group = board
         .grid // Go Game relies on the Von Neumann neighborhood.
-        .find_group!(cell::new(x, y), |p| p.von_neumann(1), |tile| tile == &stone);
+        .find_group!(cell::new(x, y), |p| p.von_neumann_neighbors(1), |tile| tile == &stone);
 
     // Sort the group to make them comparable.
     group.insertion_sort_by!(|a, b| a.le(b));
@@ -161,7 +161,7 @@ public fun is_group_surrounded(board: &Board, group: &Group): bool {
             // for a single empty field neighboring the group. If there isn't
             // one, the group is surrounded. That is, assuming that the group
             // is homogeneous and exhaustive.
-            let count = board.grid.von_neumann_count!(*p, 1, |t| t == &Tile::Empty);
+            let count = board.grid.von_neumann_neighbors_count!(*p, 1, |t| t == &Tile::Empty);
             if (count > 0) return 'search false;
         });
         true

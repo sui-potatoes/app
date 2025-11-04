@@ -137,7 +137,7 @@ fun rotate() {
 }
 
 #[test]
-fun moore() {
+fun moore_neighbors() {
     let grid = grid::from_vector(vector[
         vector[0, 1, 2, 3, 0],
         vector[0, 8, 1, 4, 0],
@@ -145,7 +145,7 @@ fun moore() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let mut neighbors = grid.moore(cell::new(1, 2), 1);
+    let mut neighbors = grid.moore_neighbors(cell::new(1, 2), 1);
     neighbors.insertion_sort_by!(|a, b| a.le(b));
 
     assert_eq!(
@@ -162,11 +162,11 @@ fun moore() {
         ].map!(|v| cell::from_vector(v)),
     );
 
-    assert_eq!(grid.moore_count!(cell::new(1, 2), 1, |v| *v > 4), 4);
+    assert_eq!(grid.moore_neighbors_count!(cell::new(1, 2), 1, |v| *v > 4), 4);
 }
 
 #[test]
-fun von_neumann() {
+fun von_neumann_neighbors() {
     let grid = grid::from_vector(vector[
         vector[0, 1, 2, 3, 0],
         vector[0, 8, 1, 4, 0],
@@ -174,7 +174,7 @@ fun von_neumann() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let mut neighbors = grid.von_neumann(cell::new(1, 2), 1);
+    let mut neighbors = grid.von_neumann_neighbors(cell::new(1, 2), 1);
     neighbors.insertion_sort_by!(|a, b| a.le(b));
 
     assert_eq!(
@@ -184,7 +184,7 @@ fun von_neumann() {
         ),
     );
 
-    assert_eq!(grid.von_neumann_count!(cell::new(1, 2), 1, |v| *v > 4), 2);
+    assert_eq!(grid.von_neumann_neighbors_count!(cell::new(1, 2), 1, |v| *v > 4), 2);
 }
 
 #[test]
@@ -201,7 +201,7 @@ fun path_tracing() {
         &grid,
         cell::new(0, 0),
         cell::new(1, 4),
-        |p| p.von_neumann(1),
+        |p| p.von_neumann_neighbors(1),
         |(_, _), (_, _)| true,
         6,
     );
@@ -222,7 +222,7 @@ fun path_tracing() {
         &grid,
         cell::new(0, 1),
         cell::new(3, 0),
-        |p| p.von_neumann(1),
+        |p| p.von_neumann_neighbors(1),
         |(_, _), (x1, y1)| {
             grid[x1, y1] == 0 || (x1 == 3 && y1 == 0)
         },
@@ -255,7 +255,7 @@ fun find_group() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let group = grid.find_group!(cell::new(0, 2), |p| p.von_neumann(1), |el| *el == 1);
+    let group = grid.find_group!(cell::new(0, 2), |p| p.von_neumann_neighbors(1), |el| *el == 1);
     assert_eq!(group.length(), 6);
 }
 

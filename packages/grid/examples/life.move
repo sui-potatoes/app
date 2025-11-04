@@ -1,7 +1,12 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Implements Conway's game of life using grid.
+/// Implements Conway's Game of Life using Grid.
+///
+/// - Defines inner `Cell` with binary state.
+/// - Keeps track of live cells to optimize gas usage.
+/// - Uses `moore_neighborhood` to count neighbors of live cells.
+/// - Showcases `tabulate!` and `destroy!` macros.
 module grid::life;
 
 use grid::{cell::{Self, Cell as GridCell}, grid::{Self, Grid}};
@@ -52,8 +57,8 @@ public fun tick(l: &mut Life) {
     // We only need to check the live cells and their neighbors: based on the
     // rules, live cells die and dead cells become live only where life exists.
     l.live_cells.do!(|p| {
-        p.moore(1).destroy!(|p| {
-            let (row, col) = p.into_values();
+        p.moore_neighbors(1).destroy!(|p| {
+            let (row, col) = p.to_values();
             if (row >= height || col >= width) return;
             let mut_ref = &mut visited[row, col];
             if (*mut_ref) return;
@@ -64,7 +69,7 @@ public fun tick(l: &mut Life) {
 
     to_check.destroy!(|p| {
         let is_live = l.grid.borrow_cell(&p).0;
-        let count = l.grid.moore_count!(p, 1, |v| v.0);
+        let count = l.grid.moore_neighbors_count!(p, 1, |v| v.0);
         if (is_live && (count < 2 || count > 3)) {
             // Mark as dead.
             dead_cells.push_back(p);

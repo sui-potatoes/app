@@ -316,7 +316,7 @@ fun find_mismatch(solution: &Grid<SolverTile>, check_tiles: vector<CheckedTile>)
         len.do!(|i| {
             let i = len - i - 1;
             let CheckedTile { cell, score, .. } = check_tiles[i];
-            let mines = solution.moore_count!(cell, 1, |tile| tile == SolverTile::Mine);
+            let mines = solution.moore_neighbors_count!(cell, 1, |tile| tile == SolverTile::Mine);
             if (mines as u8 != score) {
                 // dbg!(
                 //     b"not all mines found for cell {}: {} != {}; at index {}",
@@ -355,7 +355,7 @@ public fun solver_tile_to_string(t: &SolverTile): String {
 use fun neighbors as Grid.neighbors;
 
 fun neighbors<T>(grid: &Grid<T>, cell: Cell): vector<Cell> {
-    grid.moore(cell, 1)
+    grid.moore_neighbors(cell, 1)
 }
 
 #[test_only]
