@@ -3,7 +3,7 @@
 
 module grid::grid_tests;
 
-use grid::{grid, point};
+use grid::{cell, grid};
 use std::unit_test::{assert_eq, assert_ref_eq};
 use sui::bcs;
 
@@ -126,7 +126,7 @@ fun rotate() {
 
     // rotate large grid
     let size = 15u16;
-    let mut grid = grid::tabulate!(size, size, |x, y| x + y);
+    let mut grid = grid::tabulate!(size, size, |row, col| row + col);
     grid.rotate(5); // 5 is equivalent to 1
 
     // check the last column that it's 0 to 14
@@ -137,7 +137,7 @@ fun rotate() {
 }
 
 #[test]
-fun moore() {
+fun moore_neighbors() {
     let grid = grid::from_vector(vector[
         vector[0, 1, 2, 3, 0],
         vector[0, 8, 1, 4, 0],
@@ -145,7 +145,7 @@ fun moore() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let mut neighbors = grid.moore(point::new(1, 2), 1);
+    let mut neighbors = grid.moore_neighbors(cell::new(1, 2), 1);
     neighbors.insertion_sort_by!(|a, b| a.le(b));
 
     assert_eq!(
@@ -159,14 +159,14 @@ fun moore() {
             vector[2, 1],
             vector[2, 2],
             vector[2, 3],
-        ].map!(|v| point::from_vector(v)),
+        ].map!(|v| cell::from_vector(v)),
     );
 
-    assert_eq!(grid.moore_count!(point::new(1, 2), 1, |v| *v > 4), 4);
+    assert_eq!(grid.moore_neighbors_count!(cell::new(1, 2), 1, |v| *v > 4), 4);
 }
 
 #[test]
-fun von_neumann() {
+fun von_neumann_neighbors() {
     let grid = grid::from_vector(vector[
         vector[0, 1, 2, 3, 0],
         vector[0, 8, 1, 4, 0],
@@ -174,17 +174,17 @@ fun von_neumann() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let mut neighbors = grid.von_neumann(point::new(1, 2), 1);
+    let mut neighbors = grid.von_neumann_neighbors(cell::new(1, 2), 1);
     neighbors.insertion_sort_by!(|a, b| a.le(b));
 
     assert_eq!(
         neighbors,
         vector[vector[0, 2], vector[1, 1], vector[1, 3], vector[2, 2]].map!(
-            |v| point::from_vector(v),
+            |v| cell::from_vector(v),
         ),
     );
 
-    assert_eq!(grid.von_neumann_count!(point::new(1, 2), 1, |v| *v > 4), 2);
+    assert_eq!(grid.von_neumann_neighbors_count!(cell::new(1, 2), 1, |v| *v > 4), 2);
 }
 
 #[test]
@@ -197,18 +197,18 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace!(
+    let path = grid::trace_path!(
         &grid,
-        point::new(0, 0),
-        point::new(1, 4),
-        |p| p.von_neumann(1),
+        cell::new(0, 0),
+        cell::new(1, 4),
+        |p| p.von_neumann_neighbors(1),
         |(_, _), (_, _)| true,
         6,
     );
 
-    assert!(path.is_some());
-    assert_eq!(path.borrow().length(), 5);
-    assert_eq!(path.borrow()[4], point::new(1, 4));
+    let path = path.destroy_or!(abort);
+    assert_eq!(path.length(), 5);
+    assert_eq!(path[4], cell::new(1, 4));
 
     let grid = grid::from_vector(vector[
         vector[0, 1, 0, 0, 0],
@@ -218,29 +218,28 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace!(
+    let path = grid::trace_path!(
         &grid,
-        point::new(0, 1),
-        point::new(3, 0),
-        |p| p.von_neumann(1),
-        |(_, _), (x1, y1)| {
-            grid[x1, y1] == 0 || (x1 == 3 && y1 == 0)
+        cell::new(0, 1),
+        cell::new(3, 0),
+        |p| p.von_neumann_neighbors(1),
+        |(_, _), (row1, col1)| {
+            grid[row1, col1] == 0 || (row1 == 3 && col1 == 0)
         },
         8,
     );
 
-    assert!(path.is_some());
-    assert_ref_eq!(
-        path.borrow(),
-        &vector[
-            point::new(1, 1), // down
-            point::new(1, 2), // right
-            point::new(2, 2), // down
-            point::new(3, 2), // down
-            point::new(4, 2), // down
-            point::new(4, 1), // left
-            point::new(4, 0), // left
-            point::new(3, 0), // up
+    assert_eq!(
+        path.destroy_or!(abort),
+        vector[
+            cell::new(1, 1), // down
+            cell::new(1, 2), // right
+            cell::new(2, 2), // down
+            cell::new(3, 2), // down
+            cell::new(4, 2), // down
+            cell::new(4, 1), // left
+            cell::new(4, 0), // left
+            cell::new(3, 0), // up
         ],
     )
 }
@@ -256,7 +255,7 @@ fun find_group() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let group = grid.find_group!(point::new(0, 2), |p| p.von_neumann(1), |el| *el == 1);
+    let group = grid.find_group!(cell::new(0, 2), |p| p.von_neumann_neighbors(1), |el| *el == 1);
     assert_eq!(group.length(), 6);
 }
 
@@ -278,9 +277,9 @@ fun from_bcs() {
 
 #[test]
 fun from_bcs_with_custom_type() {
-    let grid = grid::tabulate!(3, 3, |x, y| point::new(x, y));
+    let grid = grid::tabulate!(3, 3, |row, col| cell::new(row, col));
     let bytes = bcs::to_bytes(&grid);
-    let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| point::from_bcs(bcs));
+    let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| cell::from_bcs(bcs));
 
     assert!(grid2.cols() == 3);
     assert_ref_eq!(&grid, &grid2);

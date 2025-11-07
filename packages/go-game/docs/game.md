@@ -23,8 +23,8 @@
 
 <pre><code><b>use</b> (codec=0x0)::base64;
 <b>use</b> (codec=0x0)::urlencode;
+<b>use</b> (grid=0x0)::cell;
 <b>use</b> (grid=0x0)::grid;
-<b>use</b> (grid=0x0)::point;
 <b>use</b> (svg=0x0)::animation;
 <b>use</b> (svg=0x0)::container;
 <b>use</b> (svg=0x0)::coordinate;
@@ -42,6 +42,7 @@
 <b>use</b> <a href="../../.doc-deps/std/string.md#std_string">std::string</a>;
 <b>use</b> <a href="../../.doc-deps/std/type_name.md#std_type_name">std::type_name</a>;
 <b>use</b> <a href="../../.doc-deps/std/u16.md#std_u16">std::u16</a>;
+<b>use</b> <a href="../../.doc-deps/std/u32.md#std_u32">std::u32</a>;
 <b>use</b> <a href="../../.doc-deps/std/vector.md#std_vector">std::vector</a>;
 <b>use</b> <a href="../../.doc-deps/sui/address.md#sui_address">sui::address</a>;
 <b>use</b> <a href="../../.doc-deps/sui/bcs.md#sui_bcs">sui::bcs</a>;

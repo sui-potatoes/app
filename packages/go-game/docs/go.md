@@ -26,13 +26,14 @@ Implements the actual game of Go.
 -  [Function `tile_to_number`](#go_game_go_tile_to_number)
 
 
-<pre><code><b>use</b> (<a href="./go.md#go_game_go_grid">grid</a>=0x0)::<a href="./go.md#go_game_go_grid">grid</a>;
-<b>use</b> (<a href="./go.md#go_game_go_grid">grid</a>=0x0)::point;
+<pre><code><b>use</b> (<a href="./go.md#go_game_go_grid">grid</a>=0x0)::cell;
+<b>use</b> (<a href="./go.md#go_game_go_grid">grid</a>=0x0)::<a href="./go.md#go_game_go_grid">grid</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
 <b>use</b> <a href="../../.doc-deps/std/string.md#std_string">std::string</a>;
 <b>use</b> <a href="../../.doc-deps/std/u16.md#std_u16">std::u16</a>;
+<b>use</b> <a href="../../.doc-deps/std/u32.md#std_u32">std::u32</a>;
 <b>use</b> <a href="../../.doc-deps/std/vector.md#std_vector">std::vector</a>;
 <b>use</b> <a href="../../.doc-deps/sui/address.md#sui_address">sui::address</a>;
 <b>use</b> <a href="../../.doc-deps/sui/bcs.md#sui_bcs">sui::bcs</a>;
@@ -83,7 +84,7 @@ The game board.
  Captured stones.
 </dd>
 <dt>
-<code>moves: vector&lt;(<a href="./go.md#go_game_go_grid">grid</a>=0x0)::point::Point&gt;</code>
+<code>moves: vector&lt;(<a href="./go.md#go_game_go_grid">grid</a>=0x0)::cell::Cell&gt;</code>
 </dt>
 <dd>
  Stores history of moves.
@@ -155,7 +156,7 @@ Empty tile returns an empty group.
 <dd>
 </dd>
 <dt>
-<code>1: vector&lt;(<a href="./go.md#go_game_go_grid">grid</a>=0x0)::point::Point&gt;</code>
+<code>1: vector&lt;(<a href="./go.md#go_game_go_grid">grid</a>=0x0)::cell::Cell&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -287,16 +288,16 @@ Place a stone on the board at the given position.
 <pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_place">place</a>(board: &<b>mut</b> <a href="./go.md#go_game_go_Board">Board</a>, x: u16, y: u16) {
     <b>let</b> stone = <b>if</b> (board.<a href="./go.md#go_game_go_is_black">is_black</a>) Tile::Black <b>else</b> Tile::White;
     <b>assert</b>!(board.<a href="./go.md#go_game_go_grid">grid</a>.swap(x, y, stone) == Tile::Empty, <a href="./go.md#go_game_go_EInvalidMove">EInvalidMove</a>);
-    // Check <b>for</b> suicide <b>move</b>: count neighbors of the point, <b>if</b> all of them are
+    // Check <b>for</b> suicide <b>move</b>: count neighbors of the cell, <b>if</b> all of them are
     // opponent's stones, the <b>move</b> is suicide. However, <b>if</b> the surrounding group
     // is surrounded, the <b>move</b> is a capture.
     <b>let</b> (<b>mut</b> my_stones, <b>mut</b> enemy_stones) = (vector[], vector[]);
     <b>let</b> <b>mut</b> empty_num = 0;
-    // Get all neighbors of the point. Split them into my stones and enemy stones.
+    // Get all neighbors of the cell. Split them into my stones and enemy stones.
     // All my stones which are neighbors, actually form a group. The only tricky
     // part is checking the enemy stones and their groups.
-    point::new(x, y).von_neumann(1).destroy!(|p| {
-        <b>let</b> (x, y) = p.into_values();
+    cell::new(x, y).von_neumann_neighbors(1).destroy!(|p| {
+        <b>let</b> (x, y) = p.to_values();
         <b>if</b> (x &gt;= board.<a href="./go.md#go_game_go_size">size</a> || y &gt;= board.<a href="./go.md#go_game_go_size">size</a>) <b>return</b>;
         match (board.<a href="./go.md#go_game_go_grid">grid</a>[x, y]) {
             Tile::Empty =&gt; (empty_num = empty_num + 1),
@@ -312,20 +313,20 @@ Place a stone on the board at the given position.
     <b>let</b> <b>mut</b> enemy_groups = vector[];
     enemy_stones.destroy!(|p| {
         enemy_groups
-            // Check <b>if</b> the point is already in a group.
-            .find_index!(|<a href="./go.md#go_game_go_Group">Group</a>(_, points)| points.contains(&p))
-            .destroy_or!({ enemy_groups.push_back(board.<a href="./go.md#go_game_go_find_group">find_group</a>(p.x(), p.y())); 0 });
+            // Check <b>if</b> the cell is already in a group.
+            .find_index!(|<a href="./go.md#go_game_go_Group">Group</a>(_, cells)| cells.contains(&p))
+            .destroy_or!({ enemy_groups.push_back(board.<a href="./go.md#go_game_go_find_group">find_group</a>(p.row(), p.col())); 0 });
     });
     // Now we need to check <b>if</b> any of the enemy groups are surrounded.
     <b>let</b> surrounded_groups = enemy_groups.filter!(|g| board.<a href="./go.md#go_game_go_is_group_surrounded">is_group_surrounded</a>(g));
     // If any of the enemy groups are surrounded, we capture them.
     <b>if</b> (surrounded_groups.length() &gt; 0) {
-        surrounded_groups.destroy!(|<a href="./go.md#go_game_go_Group">Group</a>(_, points)| {
+        surrounded_groups.destroy!(|<a href="./go.md#go_game_go_Group">Group</a>(_, cells)| {
             // Increase score by the number of stones in the group.
-            <b>if</b> (board.<a href="./go.md#go_game_go_is_black">is_black</a>) board.score.black = points.length() <b>as</b> u16 + board.score.black
-            <b>else</b> board.score.white = points.length() <b>as</b> u16 + board.score.white;
+            <b>if</b> (board.<a href="./go.md#go_game_go_is_black">is_black</a>) board.score.black = cells.length() <b>as</b> u16 + board.score.black
+            <b>else</b> board.score.white = cells.length() <b>as</b> u16 + board.score.white;
             // Remove the group from the board.
-            points.destroy!(|p| board.<a href="./go.md#go_game_go_grid">grid</a>.swap(p.x(), p.y(), Tile::Empty));
+            cells.destroy!(|p| board.<a href="./go.md#go_game_go_grid">grid</a>.swap(p.row(), p.col(), Tile::Empty));
         });
     } <b>else</b> <b>if</b> (empty_num == 0) {
         // If there are no empty neighbors, we need to check <b>if</b> the <b>move</b> is a
@@ -341,7 +342,7 @@ Place a stone on the board at the given position.
     };
     // Add the <b>move</b> and the current state to the history.
     board.prev_states.push_back(<b>copy</b> board.<a href="./go.md#go_game_go_grid">grid</a>);
-    board.moves.push_back(point::new(x, y));
+    board.moves.push_back(cell::new(x, y));
     board.<a href="./go.md#go_game_go_is_black">is_black</a> = !board.<a href="./go.md#go_game_go_is_black">is_black</a>;
 }
 </code></pre>
@@ -377,7 +378,7 @@ group if they are of the same color.
     // Find the group of stones of the same color.
     <b>let</b> <b>mut</b> group = board
         .<a href="./go.md#go_game_go_grid">grid</a> // Go Game relies on the Von Neumann neighborhood.
-        .<a href="./go.md#go_game_go_find_group">find_group</a>!(point::new(x, y), |p| p.von_neumann(1), |tile| tile == &stone);
+        .<a href="./go.md#go_game_go_find_group">find_group</a>!(cell::new(x, y), |p| p.von_neumann_neighbors(1), |tile| tile == &stone);
     // Sort the group to make them comparable.
     group.insertion_sort_by!(|a, b| a.le(b));
     <a href="./go.md#go_game_go_Group">Group</a>(stone, group)
@@ -406,13 +407,13 @@ Checks if the group is surrounded.
 
 <pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_is_group_surrounded">is_group_surrounded</a>(board: &<a href="./go.md#go_game_go_Board">Board</a>, group: &<a href="./go.md#go_game_go_Group">Group</a>): bool {
     'search: {
-        <b>let</b> <a href="./go.md#go_game_go_Group">Group</a>(_, points) = group;
-        points.do_ref!(|p| {
+        <b>let</b> <a href="./go.md#go_game_go_Group">Group</a>(_, cells) = group;
+        cells.do_ref!(|p| {
             // To make a call whether a group is surrounded, we need to check
             // <b>for</b> a single empty field neighboring the group. If there isn't
             // one, the group is surrounded. That is, assuming that the group
             // is homogeneous and exhaustive.
-            <b>let</b> count = board.<a href="./go.md#go_game_go_grid">grid</a>.von_neumann_count!(*p, 1, |t| t == &Tile::Empty);
+            <b>let</b> count = board.<a href="./go.md#go_game_go_grid">grid</a>.von_neumann_neighbors_count!(*p, 1, |t| t == &Tile::Empty);
             <b>if</b> (count &gt; 0) <b>return</b> 'search <b>false</b>;
         });
         <b>true</b>

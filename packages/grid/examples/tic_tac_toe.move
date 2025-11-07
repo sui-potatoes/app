@@ -3,7 +3,11 @@
 
 /// Tic-Tac-Toe game with custom grid and custom victory condition. A regular
 /// game can be expressed as `3x3` grid with `3` in a row, while a custom game
-/// could, for example, be a `10x10` grid with `5` in a row.
+/// could be a `10x10` grid with `5` in a row.
+///
+/// Showcases Grid features:
+/// - Custom element `Tile` with a `to_string` method.
+/// - Use of `cursor` and `direction` to check victory of a player.
 module grid::tic_tac_toe;
 
 use grid::{cursor, direction, grid::{Self, Grid}};
@@ -26,12 +30,15 @@ public enum Tile has copy, drop, store {
 public struct TicTacToe has key, store {
     id: UID,
     grid: Grid<Tile>,
+    /// Number of elements in a row to win the game.
     win_condition: u8,
     /// True means X, false means O. Rotates on each play.
     current_player: bool,
 }
 
-/// Create a new `TicTacToe` game and transfer it to the caller.
+/// Create a new `TicTacToe` game of `size` size and return it.
+/// Winning condition is passed as the second argument and defines the number
+/// of elements in a row required to win the game.
 public fun new(size: u8, win_condition: u8, ctx: &mut TxContext): TicTacToe {
     TicTacToe {
         id: object::new(ctx),
@@ -42,10 +49,10 @@ public fun new(size: u8, win_condition: u8, ctx: &mut TxContext): TicTacToe {
 }
 
 /// Play a move in the `TicTacToe` game.
-public fun play(game: &mut TicTacToe, x: u8, y: u8) {
+public fun play(game: &mut TicTacToe, row: u8, col: u8) {
     let swapped_tile = game
         .grid
-        .swap(x as u16, y as u16, if (game.current_player) Tile::X else Tile::O);
+        .swap(row as u16, col as u16, if (game.current_player) Tile::X else Tile::O);
 
     assert!(swapped_tile == Tile::Empty, EInvalidMove);
     game.current_player = !game.current_player;
@@ -69,9 +76,9 @@ public fun prove_victory(game: &mut TicTacToe, tiles: vector<vector<u8>>) {
 
     // skips the first tile
     tiles.do!(|tile| {
-        let (x, y) = cursor.to_values();
-        assert!(tile[0] as u16 == x && tile[1] as u16 == y, EInvalidDirection);
-        assert!(game.grid[x, y] == if (is_x) Tile::X else Tile::O, EInvalidVictory);
+        let (row, col) = cursor.to_values();
+        assert!(tile[0] as u16 == row && tile[1] as u16 == col, EInvalidDirection);
+        assert!(game.grid[row, col] == if (is_x) Tile::X else Tile::O, EInvalidVictory);
         if (tile != end) cursor.move_to(direction);
     });
 }

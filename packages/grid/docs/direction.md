@@ -4,14 +4,14 @@
 # Module `grid::direction`
 
 The <code><a href="./direction.md#grid_direction">direction</a></code> module provides macros to check the relative positions of
-points on a grid as well as constants for the directions. Currently, the
+cells on a grid as well as constants for the directions. Currently, the
 main consumer of this module is <code><a href="./cursor.md#grid_cursor">cursor</a></code>.
 
 Grid axes are defined as follows:
-- X-axis: vertical axis (top->down)
-- Y-axis: horizontal axis (left->right)
+- X-axis: horizontal axis (left->right)
+- Y-axis: vertical axis (top->down)
 
-Hence, the (0, 0) point is at the top-left corner of the grid.
+Hence, the (0, 0) cell is at the top-left corner of the grid.
 
 Direction is packed as a bit field in a single byte. Diagonals are represented
 as a combination of two orthogonal directions. For example, <code><a href="./direction.md#grid_direction_up_right">up_right</a>!()</code> is
@@ -28,7 +28,7 @@ as a combination of two orthogonal directions. For example, <code><a href="./dir
 - <code>b00001001</code> - up | left - 9
 
 Directions can be combined using bitwise OR or checked using bitwise AND.
-```
+```move
 use grid::direction;
 
 
@@ -56,6 +56,10 @@ assert!(is_left);
 -  [Macro function `is_down_left`](#grid_direction_is_down_left)
 -  [Macro function `is_up_left`](#grid_direction_is_up_left)
 -  [Macro function `is_equal`](#grid_direction_is_equal)
+-  [Macro function `is_direction_valid`](#grid_direction_is_direction_valid)
+-  [Macro function `is_direction_vertical`](#grid_direction_is_direction_vertical)
+-  [Macro function `is_direction_horizontal`](#grid_direction_is_direction_horizontal)
+-  [Macro function `is_direction_diagonal`](#grid_direction_is_direction_diagonal)
 -  [Macro function `up`](#grid_direction_up)
 -  [Macro function `right`](#grid_direction_right)
 -  [Macro function `down`](#grid_direction_down)
@@ -78,10 +82,10 @@ assert!(is_left);
 
 ## Macro function `is_up`
 
-Check if a point is above another point (decrease in X).
+Check if direction from <code>Cell0</code> to <code>Cell1</code> is up.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up">is_up</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up">is_up</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool
 </code></pre>
 
 
@@ -90,8 +94,8 @@ Check if a point is above another point (decrease in X).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up">is_up</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 &gt; $x1 && $y0 == $y1
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up">is_up</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 &gt; $row1 && $col0 == $col1
 }
 </code></pre>
 
@@ -103,10 +107,10 @@ Check if a point is above another point (decrease in X).
 
 ## Macro function `is_down`
 
-Check if a point is below another point (increase in X).
+Check if direction from <code>Cell0</code> to <code>Cell1</code> is down.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down">is_down</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down">is_down</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool
 </code></pre>
 
 
@@ -115,8 +119,8 @@ Check if a point is below another point (increase in X).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down">is_down</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 &lt; $x1 && $y0 == $y1
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down">is_down</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 &lt; $row1 && $col0 == $col1
 }
 </code></pre>
 
@@ -128,10 +132,10 @@ Check if a point is below another point (increase in X).
 
 ## Macro function `is_left`
 
-Check if a point is to the left of another point (decrease in Y).
+Check if direction from <code>Cell0</code> to <code>Cell1</code> is left.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_left">is_left</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_left">is_left</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool
 </code></pre>
 
 
@@ -140,8 +144,8 @@ Check if a point is to the left of another point (decrease in Y).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_left">is_left</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 == $x1 && $y0 &gt; $y1
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_left">is_left</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 == $row1 && $col0 &gt; $col1
 }
 </code></pre>
 
@@ -153,10 +157,10 @@ Check if a point is to the left of another point (decrease in Y).
 
 ## Macro function `is_right`
 
-Check if a point is to the right of another point (increase in Y).
+Check if direction from <code>Cell0</code> to <code>Cell1</code> is right.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_right">is_right</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_right">is_right</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool
 </code></pre>
 
 
@@ -165,8 +169,8 @@ Check if a point is to the right of another point (increase in Y).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_right">is_right</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 == $x1 && $y0 &lt; $y1
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_right">is_right</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 == $row1 && $col0 &lt; $col1
 }
 </code></pre>
 
@@ -178,10 +182,10 @@ Check if a point is to the right of another point (increase in Y).
 
 ## Macro function `is_up_right`
 
-Check if a point is up-right of another point (decrease in X, increase in Y).
+Check if direction from <code>Cell0</code> to <code>Cell1</code> is up-right.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up_right">is_up_right</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up_right">is_up_right</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool
 </code></pre>
 
 
@@ -190,8 +194,8 @@ Check if a point is up-right of another point (decrease in X, increase in Y).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up_right">is_up_right</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 &gt; $x1 && $y0 &lt; $y1
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up_right">is_up_right</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 &gt; $row1 && $col0 &lt; $col1
 }
 </code></pre>
 
@@ -203,10 +207,10 @@ Check if a point is up-right of another point (decrease in X, increase in Y).
 
 ## Macro function `is_down_right`
 
-Check if a point is down-right of another point (increase in X, increase in Y).
+Check if direction from <code>Cell0</code> to <code>Cell1</code> is down-right.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down_right">is_down_right</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down_right">is_down_right</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool
 </code></pre>
 
 
@@ -215,8 +219,8 @@ Check if a point is down-right of another point (increase in X, increase in Y).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down_right">is_down_right</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 &lt; $x1 && $y0 &lt; $y1
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down_right">is_down_right</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 &lt; $row1 && $col0 &lt; $col1
 }
 </code></pre>
 
@@ -228,10 +232,10 @@ Check if a point is down-right of another point (increase in X, increase in Y).
 
 ## Macro function `is_down_left`
 
-Check if a point is down-left of another point (increase in X, decrease in Y).
+Check if direction from <code>Cell0</code> to <code>Cell1</code> is down-left.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down_left">is_down_left</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down_left">is_down_left</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool
 </code></pre>
 
 
@@ -240,8 +244,8 @@ Check if a point is down-left of another point (increase in X, decrease in Y).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down_left">is_down_left</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 &lt; $x1 && $y0 &gt; $y1
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_down_left">is_down_left</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 &gt; $row1 && $col0 &lt; $col1
 }
 </code></pre>
 
@@ -253,10 +257,10 @@ Check if a point is down-left of another point (increase in X, decrease in Y).
 
 ## Macro function `is_up_left`
 
-Check if a point is up-left of another point (decrease in X, decrease in Y).
+Check if direction from <code>Cell0</code> to <code>Cell1</code> is up-left.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up_left">is_up_left</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up_left">is_up_left</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool
 </code></pre>
 
 
@@ -265,8 +269,8 @@ Check if a point is up-left of another point (decrease in X, decrease in Y).
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up_left">is_up_left</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 &gt; $x1 && $y0 &gt; $y1
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_up_left">is_up_left</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 &gt; $row1 && $col0 &gt; $col1
 }
 </code></pre>
 
@@ -278,10 +282,10 @@ Check if a point is up-left of another point (decrease in X, decrease in Y).
 
 ## Macro function `is_equal`
 
-Check if a point is equal to another point.
+Check if position of <code>Cell0</code> to <code>Cell1</code> is the same.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_equal">is_equal</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_equal">is_equal</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool
 </code></pre>
 
 
@@ -290,8 +294,110 @@ Check if a point is equal to another point.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_equal">is_equal</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): bool {
-    $x0 == $x1 && $y0 == $y1
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_equal">is_equal</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
+    $row0 == $row1 && $col0 == $col1
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_direction_is_direction_valid"></a>
+
+## Macro function `is_direction_valid`
+
+Validate <code>u8</code> direction input.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_valid">is_direction_valid</a>($d: u8): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_valid">is_direction_valid</a>($d: u8): bool {
+    <b>if</b> ($d & <a href="./direction.md#grid_direction_up">up</a>!() &gt; 0 && $d & <a href="./direction.md#grid_direction_down">down</a>!() &gt; 0) <b>return</b> <b>false</b>
+    <b>else</b> <b>if</b> ($d & <a href="./direction.md#grid_direction_left">left</a>!() &gt; 0 && $d & <a href="./direction.md#grid_direction_right">right</a>!() &gt; 0) <b>return</b> <b>false</b>
+    <b>else</b> <b>true</b>
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_direction_is_direction_vertical"></a>
+
+## Macro function `is_direction_vertical`
+
+Check whether given <code>u8</code> direction is vertical: up or down.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_vertical">is_direction_vertical</a>($d: u8): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_vertical">is_direction_vertical</a>($d: u8): bool {
+    $d == <a href="./direction.md#grid_direction_up">up</a>!() || $d == <a href="./direction.md#grid_direction_down">down</a>!()
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_direction_is_direction_horizontal"></a>
+
+## Macro function `is_direction_horizontal`
+
+Check whether given <code>u8</code> direction is horizontal: left or right.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_horizontal">is_direction_horizontal</a>($d: u8): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_horizontal">is_direction_horizontal</a>($d: u8): bool {
+    $d == <a href="./direction.md#grid_direction_left">left</a>!() || $d == <a href="./direction.md#grid_direction_right">right</a>!()
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_direction_is_direction_diagonal"></a>
+
+## Macro function `is_direction_diagonal`
+
+Check whether given <code>u8</code> direction is diagonal.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_diagonal">is_direction_diagonal</a>($d: u8): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_diagonal">is_direction_diagonal</a>($d: u8): bool {
+    $d == <a href="./direction.md#grid_direction_up_right">up_right</a>!() || $d == <a href="./direction.md#grid_direction_up_left">up_left</a>!() || $d == <a href="./direction.md#grid_direction_down_right">down_right</a>!() || $d == <a href="./direction.md#grid_direction_down_left">down_left</a>!()
 }
 </code></pre>
 
@@ -514,7 +620,7 @@ Direction: none
 
 ## Macro function `inverse`
 
-Get the inverse direction of a given direction.
+Get the inverse of a given direction.
 
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_inverse">inverse</a>($<a href="./direction.md#grid_direction">direction</a>: u8): u8
@@ -549,10 +655,10 @@ Get the inverse direction of a given direction.
 
 ## Macro function `direction`
 
-Get the direction from point <code>(x0, y0)</code> to point <code>(x1, y1)</code>.
+Get the direction from cell <code>(x0, y0)</code> to cell <code>(x1, y1)</code>.
 For convenience, takes any integer type, but <code>Grid</code> uses <code>u16</code>.
 
-```rust
+```move
 use grid::direction;
 
 
@@ -567,7 +673,7 @@ assert_eq!(dir, direction::right!());
 ```
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction">direction</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): u8
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction">direction</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): u8
 </code></pre>
 
 
@@ -576,20 +682,20 @@ assert_eq!(dir, direction::right!());
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction">direction</a>&lt;$T: drop&gt;($x0: $T, $y0: $T, $x1: $T, $y1: $T): u8 {
-    <b>let</b> diff_x = num_diff!($x0, $x1);
-    <b>let</b> diff_y = num_diff!($y0, $y1);
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction">direction</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): u8 {
+    <b>let</b> diff_x = num_diff!($row0, $row1);
+    <b>let</b> diff_y = num_diff!($col0, $col1);
     // same tile, one of the axis matches or one dominates
     <b>if</b> (diff_x == 0 && diff_y == 0) <b>return</b> <a href="./direction.md#grid_direction_none">none</a>!();
-    <b>let</b> x_direction = <b>if</b> ($x0 &lt; $x1) <a href="./direction.md#grid_direction_down">down</a>!()
-    <b>else</b> <b>if</b> ($x0 &gt; $x1) <a href="./direction.md#grid_direction_up">up</a>!()
+    <b>let</b> horizontal_direction = <b>if</b> ($row0 &lt; $row1) <a href="./direction.md#grid_direction_down">down</a>!()
+    <b>else</b> <b>if</b> ($row0 &gt; $row1) <a href="./direction.md#grid_direction_up">up</a>!()
     <b>else</b> <a href="./direction.md#grid_direction_none">none</a>!();
-    <b>let</b> y_direction = <b>if</b> ($y0 &lt; $y1) <a href="./direction.md#grid_direction_right">right</a>!()
-    <b>else</b> <b>if</b> ($y0 &gt; $y1) <a href="./direction.md#grid_direction_left">left</a>!()
+    <b>let</b> vertical_direction = <b>if</b> ($col0 &lt; $col1) <a href="./direction.md#grid_direction_right">right</a>!()
+    <b>else</b> <b>if</b> ($col0 &gt; $col1) <a href="./direction.md#grid_direction_left">left</a>!()
     <b>else</b> <a href="./direction.md#grid_direction_none">none</a>!();
-    <b>if</b> (x_direction == <a href="./direction.md#grid_direction_none">none</a>!() || diff_y &gt; diff_x) <b>return</b> y_direction;
-    <b>if</b> (y_direction == <a href="./direction.md#grid_direction_none">none</a>!() || diff_x &gt; diff_y) <b>return</b> x_direction;
-    x_direction | y_direction // diagonals
+    <b>if</b> (horizontal_direction == <a href="./direction.md#grid_direction_none">none</a>!() || diff_y &gt; diff_x) <b>return</b> vertical_direction;
+    <b>if</b> (vertical_direction == <a href="./direction.md#grid_direction_none">none</a>!() || diff_x &gt; diff_y) <b>return</b> horizontal_direction;
+    horizontal_direction | vertical_direction // diagonals
 }
 </code></pre>
 

@@ -11,65 +11,65 @@ use std::unit_test::assert_eq;
 // then in zigzag: down-right, down-left, up-right, up-left
 fun cursor() {
     let mut cursor = cursor::new(0, 0);
-    let (x, y) = cursor.to_values();
-    assert_eq!(x + y, 0); // lazy check
+    let (row, col) = cursor.to_values();
+    assert_eq!(row + col, 0); // lazy check
 
     cursor.move_to(down!());
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 1);
-    assert_eq!(y, 0);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 1);
+    assert_eq!(col, 0);
 
     cursor.move_to(right!());
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 1);
-    assert_eq!(y, 1);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 1);
+    assert_eq!(col, 1);
 
     cursor.move_to(up!());
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 0);
-    assert_eq!(y, 1);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 0);
+    assert_eq!(col, 1);
 
     cursor.move_to(left!());
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 0);
-    assert_eq!(y, 0);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 0);
+    assert_eq!(col, 0);
 
     cursor.move_to(down!() | right!());
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 1);
-    assert_eq!(y, 1);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 1);
+    assert_eq!(col, 1);
 
     cursor.move_to(down!() | left!());
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 2);
-    assert_eq!(y, 0);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 2);
+    assert_eq!(col, 0);
 
     cursor.move_to(up!() | right!());
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 1);
-    assert_eq!(y, 1);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 1);
+    assert_eq!(col, 1);
 
     cursor.move_to(up!() | left!());
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 0);
-    assert_eq!(y, 0);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 0);
+    assert_eq!(col, 0);
 
     // === move back ===
 
     cursor.move_back();
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 1);
-    assert_eq!(y, 1);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 1);
+    assert_eq!(col, 1);
 
     cursor.move_back();
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 2);
-    assert_eq!(y, 0);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 2);
+    assert_eq!(col, 0);
 
     cursor.move_back();
-    let (x, y) = cursor.to_values();
-    assert_eq!(x, 1);
-    assert_eq!(y, 1);
+    let (row, col) = cursor.to_values();
+    assert_eq!(row, 1);
+    assert_eq!(col, 1);
 }
 
 #[test, expected_failure(abort_code = cursor::EOutOfBounds)]
@@ -85,14 +85,14 @@ fun move_back_no_history_fail() {
 }
 
 #[test]
-fun to_from_point() {
+fun to_from_cell() {
     let cursor = cursor::new(10, 10);
-    let point = cursor.to_point();
-    let cursor = point.to_cursor();
+    let cell = cursor.to_cell();
+    let cursor = cell.to_cursor();
 
-    let (xc, yc) = cursor.to_values();
-    let (xp, yp) = point.to_values();
+    let (cursor_row, cursor_col) = cursor.to_values();
+    let (cell_row, cell_col) = cell.to_values();
 
-    assert_eq!(xc, xp);
-    assert_eq!(yc, yp);
+    assert_eq!(cursor_row, cell_row);
+    assert_eq!(cursor_col, cell_col);
 }
