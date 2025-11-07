@@ -75,20 +75,6 @@ public fun as_vector<T: store, V: store>(v: T, ctx: &mut TxContext): vector<V> {
 /// Identify generic input `v` as the `R` type.
 public fun as_type<T: store, R: store>(v: T, ctx: &mut TxContext): R { as_internal!(v, ctx) }
 
-// === Integer Upscaling ===
-
-/// Convert any uint `T` to the largest integer type `u256`.
-public fun to_u256<T: copy + drop + store>(v: T, ctx: &mut TxContext): u256 {
-    let type_bytes = type_bytes!<T>();
-    if (type_bytes == b"u8") as_u8(v, ctx) as u256
-    else if (type_bytes == b"u16") as_u16(v, ctx) as u256
-    else if (type_bytes == b"u32") as_u32(v, ctx) as u256
-    else if (type_bytes == b"u64") as_u64(v, ctx) as u256
-    else if (type_bytes == b"u128") as_u128(v, ctx) as u256
-    else if (type_bytes == b"u256") as_u256(v, ctx)
-    else abort
-}
-
 // === Helper ===
 
 /// Identify the input `$V` as the `$R` type.

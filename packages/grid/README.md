@@ -37,7 +37,7 @@ Exported address of this package is:
 grid = "0x..."
 ```
 
-## Usagef
+## Usage
 
 > For example applications build with the `Grid`, [see examples](https://github.com/sui-potatoes/app/tree/main/packages/grid/examples)
 
