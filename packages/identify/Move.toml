@@ -1,0 +1,6 @@
+[package]
+name = "identify"
+edition = "2024.beta"
+
+[addresses]
+identify = "0x0"
