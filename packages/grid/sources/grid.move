@@ -623,8 +623,6 @@ public macro fun to_string<$T>($g: &Grid<$T>): String {
 public macro fun from_bcs<$T>($bcs: &mut BCS, $f: |&mut BCS| -> $T): Grid<$T> {
     let bcs = $bcs;
     let grid = bcs.peel_vec!(|row| row.peel_vec!(|val| $f(val)));
-    let _rows = bcs.peel_u16();
-    let _cols = bcs.peel_u16();
     from_vector_unchecked(grid)
 }
 
