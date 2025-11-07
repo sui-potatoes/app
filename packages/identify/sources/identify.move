@@ -1,6 +1,9 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+/// Identify is a library that provides a way to identify the type of a value at
+/// runtime. It is using type-identification mechanism of dynamic fields to
+/// identify the type of a value.
 module identify::identify;
 
 use std::type_name;
@@ -78,7 +81,7 @@ public fun as_type<T: store, R: store>(v: T, ctx: &mut TxContext): R { as_intern
 // === Helper ===
 
 /// Identify the input `$V` as the `$R` type.
-public macro fun as_internal<$V: store, $R>($v: $V, $ctx: &mut TxContext): $R {
+macro fun as_internal<$V: store, $R>($v: $V, $ctx: &mut TxContext): $R {
     let mut id = object::new($ctx);
     df::add(&mut id, true, $v);
     let value: $R = df::remove(&mut id, true);

@@ -53,6 +53,7 @@ the <code><a href="./direction.md#grid_direction">direction</a></code> module fo
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
 <b>use</b> <a href="../../.doc-deps/std/string.md#std_string">std::string</a>;
 <b>use</b> <a href="../../.doc-deps/std/u16.md#std_u16">std::u16</a>;
+<b>use</b> <a href="../../.doc-deps/std/u32.md#std_u32">std::u32</a>;
 <b>use</b> <a href="../../.doc-deps/std/vector.md#std_vector">std::vector</a>;
 <b>use</b> <a href="../../.doc-deps/sui/address.md#sui_address">sui::address</a>;
 <b>use</b> <a href="../../.doc-deps/sui/bcs.md#sui_bcs">sui::bcs</a>;

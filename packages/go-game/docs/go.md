@@ -33,6 +33,7 @@ Implements the actual game of Go.
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
 <b>use</b> <a href="../../.doc-deps/std/string.md#std_string">std::string</a>;
 <b>use</b> <a href="../../.doc-deps/std/u16.md#std_u16">std::u16</a>;
+<b>use</b> <a href="../../.doc-deps/std/u32.md#std_u32">std::u32</a>;
 <b>use</b> <a href="../../.doc-deps/std/vector.md#std_vector">std::vector</a>;
 <b>use</b> <a href="../../.doc-deps/sui/address.md#sui_address">sui::address</a>;
 <b>use</b> <a href="../../.doc-deps/sui/bcs.md#sui_bcs">sui::bcs</a>;
@@ -295,8 +296,8 @@ Place a stone on the board at the given position.
     // Get all neighbors of the cell. Split them into my stones and enemy stones.
     // All my stones which are neighbors, actually form a group. The only tricky
     // part is checking the enemy stones and their groups.
-    cell::new(x, y).von_neumann(1).destroy!(|p| {
-        <b>let</b> (x, y) = p.into_values();
+    cell::new(x, y).von_neumann_neighbors(1).destroy!(|p| {
+        <b>let</b> (x, y) = p.to_values();
         <b>if</b> (x &gt;= board.<a href="./go.md#go_game_go_size">size</a> || y &gt;= board.<a href="./go.md#go_game_go_size">size</a>) <b>return</b>;
         match (board.<a href="./go.md#go_game_go_grid">grid</a>[x, y]) {
             Tile::Empty =&gt; (empty_num = empty_num + 1),
@@ -377,7 +378,7 @@ group if they are of the same color.
     // Find the group of stones of the same color.
     <b>let</b> <b>mut</b> group = board
         .<a href="./go.md#go_game_go_grid">grid</a> // Go Game relies on the Von Neumann neighborhood.
-        .<a href="./go.md#go_game_go_find_group">find_group</a>!(cell::new(x, y), |p| p.von_neumann(1), |tile| tile == &stone);
+        .<a href="./go.md#go_game_go_find_group">find_group</a>!(cell::new(x, y), |p| p.von_neumann_neighbors(1), |tile| tile == &stone);
     // Sort the group to make them comparable.
     group.insertion_sort_by!(|a, b| a.le(b));
     <a href="./go.md#go_game_go_Group">Group</a>(stone, group)
@@ -412,7 +413,7 @@ Checks if the group is surrounded.
             // <b>for</b> a single empty field neighboring the group. If there isn't
             // one, the group is surrounded. That is, assuming that the group
             // is homogeneous and exhaustive.
-            <b>let</b> count = board.<a href="./go.md#go_game_go_grid">grid</a>.von_neumann_count!(*p, 1, |t| t == &Tile::Empty);
+            <b>let</b> count = board.<a href="./go.md#go_game_go_grid">grid</a>.von_neumann_neighbors_count!(*p, 1, |t| t == &Tile::Empty);
             <b>if</b> (count &gt; 0) <b>return</b> 'search <b>false</b>;
         });
         <b>true</b>

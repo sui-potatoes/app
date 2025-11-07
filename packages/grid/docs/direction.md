@@ -56,6 +56,10 @@ assert!(is_left);
 -  [Macro function `is_down_left`](#grid_direction_is_down_left)
 -  [Macro function `is_up_left`](#grid_direction_is_up_left)
 -  [Macro function `is_equal`](#grid_direction_is_equal)
+-  [Macro function `is_direction_valid`](#grid_direction_is_direction_valid)
+-  [Macro function `is_direction_vertical`](#grid_direction_is_direction_vertical)
+-  [Macro function `is_direction_horizontal`](#grid_direction_is_direction_horizontal)
+-  [Macro function `is_direction_diagonal`](#grid_direction_is_direction_diagonal)
 -  [Macro function `up`](#grid_direction_up)
 -  [Macro function `right`](#grid_direction_right)
 -  [Macro function `down`](#grid_direction_down)
@@ -292,6 +296,108 @@ Check if position of <code>Cell0</code> to <code>Cell1</code> is the same.
 
 <pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_equal">is_equal</a>&lt;$T: drop&gt;($row0: $T, $col0: $T, $row1: $T, $col1: $T): bool {
     $row0 == $row1 && $col0 == $col1
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_direction_is_direction_valid"></a>
+
+## Macro function `is_direction_valid`
+
+Validate <code>u8</code> direction input.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_valid">is_direction_valid</a>($d: u8): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_valid">is_direction_valid</a>($d: u8): bool {
+    <b>if</b> ($d & <a href="./direction.md#grid_direction_up">up</a>!() &gt; 0 && $d & <a href="./direction.md#grid_direction_down">down</a>!() &gt; 0) <b>return</b> <b>false</b>
+    <b>else</b> <b>if</b> ($d & <a href="./direction.md#grid_direction_left">left</a>!() &gt; 0 && $d & <a href="./direction.md#grid_direction_right">right</a>!() &gt; 0) <b>return</b> <b>false</b>
+    <b>else</b> <b>true</b>
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_direction_is_direction_vertical"></a>
+
+## Macro function `is_direction_vertical`
+
+Check whether given <code>u8</code> direction is vertical: up or down.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_vertical">is_direction_vertical</a>($d: u8): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_vertical">is_direction_vertical</a>($d: u8): bool {
+    $d == <a href="./direction.md#grid_direction_up">up</a>!() || $d == <a href="./direction.md#grid_direction_down">down</a>!()
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_direction_is_direction_horizontal"></a>
+
+## Macro function `is_direction_horizontal`
+
+Check whether given <code>u8</code> direction is horizontal: left or right.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_horizontal">is_direction_horizontal</a>($d: u8): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_horizontal">is_direction_horizontal</a>($d: u8): bool {
+    $d == <a href="./direction.md#grid_direction_left">left</a>!() || $d == <a href="./direction.md#grid_direction_right">right</a>!()
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_direction_is_direction_diagonal"></a>
+
+## Macro function `is_direction_diagonal`
+
+Check whether given <code>u8</code> direction is diagonal.
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_diagonal">is_direction_diagonal</a>($d: u8): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./direction.md#grid_direction_is_direction_diagonal">is_direction_diagonal</a>($d: u8): bool {
+    $d == <a href="./direction.md#grid_direction_up_right">up_right</a>!() || $d == <a href="./direction.md#grid_direction_up_left">up_left</a>!() || $d == <a href="./direction.md#grid_direction_down_right">down_right</a>!() || $d == <a href="./direction.md#grid_direction_down_left">down_left</a>!()
 }
 </code></pre>
 
