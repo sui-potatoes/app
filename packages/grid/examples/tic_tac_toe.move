@@ -3,7 +3,11 @@
 
 /// Tic-Tac-Toe game with custom grid and custom victory condition. A regular
 /// game can be expressed as `3x3` grid with `3` in a row, while a custom game
-/// could, for example, be a `10x10` grid with `5` in a row.
+/// could be a `10x10` grid with `5` in a row.
+///
+/// Showcases Grid features:
+/// - Custom element `Tile` with a `to_string` method.
+/// - Use of `cursor` and `direction` to check victory of a player.
 module grid::tic_tac_toe;
 
 use grid::{cursor, direction, grid::{Self, Grid}};
@@ -26,12 +30,15 @@ public enum Tile has copy, drop, store {
 public struct TicTacToe has key, store {
     id: UID,
     grid: Grid<Tile>,
+    /// Number of elements in a row to win the game.
     win_condition: u8,
     /// True means X, false means O. Rotates on each play.
     current_player: bool,
 }
 
-/// Create a new `TicTacToe` game and transfer it to the caller.
+/// Create a new `TicTacToe` game of `size` size and return it.
+/// Winning condition is passed as the second argument and defines the number
+/// of elements in a row required to win the game.
 public fun new(size: u8, win_condition: u8, ctx: &mut TxContext): TicTacToe {
     TicTacToe {
         id: object::new(ctx),

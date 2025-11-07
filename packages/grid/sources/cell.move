@@ -82,10 +82,10 @@ public fun manhattan_distance(c1: &Cell, c2: &Cell): u16 {
 /// Alias for `chebyshev_distance`.
 public use fun chebyshev_distance as Cell.linf_distance;
 
-/// Get the L-Infinity, Chebyshev distance between two cells. Chebyshev distance
+/// Get the L-Infinity / Chebyshev distance between two cells. Chebyshev distance
 /// is the maximum of the absolute differences of the x and y coordinates.
 ///
-/// Represents distance in in 8-directional movement.
+/// Represents distance in 8-directional movement.
 /// Also known as the "King" distance.
 ///
 /// Example:
@@ -101,6 +101,7 @@ public fun chebyshev_distance(c1: &Cell, c2: &Cell): u16 {
 
 /// Get the Euclidean distance between two cells. Euclidean distance is the
 /// square root of the sum of the squared differences of the x and y coordinates.
+/// The value is rounded down to the nearest integer.
 ///
 /// Example:
 /// ```move

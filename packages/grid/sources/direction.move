@@ -99,10 +99,14 @@ public macro fun is_direction_valid($d: u8): bool {
 }
 
 /// Check whether given `u8` direction is vertical: up or down.
-public macro fun is_direction_vertical($d: u8): bool { $d == up!() || $d == down!() }
+public macro fun is_direction_vertical($d: u8): bool {
+    $d == up!() || $d == down!()
+}
 
 /// Check whether given `u8` direction is horizontal: left or right.
-public macro fun is_direction_horizontal($d: u8): bool { $d == left!() || $d == right!() }
+public macro fun is_direction_horizontal($d: u8): bool {
+    $d == left!() || $d == right!()
+}
 
 /// Check whether given `u8` direction is diagonal.
 public macro fun is_direction_diagonal($d: u8): bool {

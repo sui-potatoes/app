@@ -6,14 +6,27 @@
 ///
 /// Additionally, the module provides functions to work with the grid, such as
 /// getting the cols and rows, borrowing elements, and finding the shortest
-/// path between two cells using the Wave Algorithm.
+/// path between two cells using the Wave Algorithm, as well as rotating and
+/// traversing the grid.
 ///
-/// Structure, printing and directions:
-/// - the grid is a 2-dimensional vector of elements.
-/// - the grid is printed vertically, with the top left corner being the first
-/// element and the bottom right corner being the last element
-/// - the grid provides macro functions to check if a cell is above, below, to
-/// the left or to the right of another cell
+/// ## Implementation notes
+///
+/// ### Coordinate system
+///
+/// Instead of using world coordinates indexing (x, y), the grid takes a neutral
+/// approach of using `row` and `column`, which is a reversed indexing of world
+/// coordinates: (y, x) -> (row, column).
+///
+/// Similarly, the `Cell` type stores row and column - (y, x) in world
+/// coordinates.
+///
+/// ### Index type
+///
+/// The grid uses `u16` as the index type for two main reasons:
+/// - vector length limit
+/// - object size limit
+///
+/// Using a different type would not bring any benefits to the implementation.
 module grid::grid;
 
 use grid::cell::Cell;
@@ -36,14 +49,16 @@ public struct Grid<T> has copy, drop, store {
 /// have different lengths.
 public fun from_vector<T>(grid: vector<vector<T>>): Grid<T> {
     assert!(grid.length() > 0, EIncorrectLength);
-    let cols = grid[0].length();
     let rows = grid.length() as u16;
+    let cols = grid[0].length();
     grid.do_ref!(|row| assert!(row.length() == cols, EIncorrectLength));
     Grid { grid, rows, cols: cols as u16 }
 }
 
 /// Same as `from_vector` but doesn't check the lengths. May be used for optimal
 /// performance when the grid is known to be correct.
+///
+/// Caution: an invalid `Grid` will cause unexpected failures in some operations.
 public fun from_vector_unchecked<T>(grid: vector<vector<T>>): Grid<T> {
     Grid {
         rows: grid.length() as u16,
@@ -64,13 +79,13 @@ public fun into_vector<T>(grid: Grid<T>): vector<vector<T>> {
 public use fun rows as Grid.height;
 
 /// Get the number of rows of the `Grid`.
-public fun rows<T>(g: &Grid<T>): u16 { g.rows as u16 }
+public fun rows<T>(g: &Grid<T>): u16 { g.rows }
 
 /// Alias for the `cols` function.
 public use fun cols as Grid.width;
 
 /// Get the number of columns of the `Grid`.
-public fun cols<T>(g: &Grid<T>): u16 { g.cols as u16 }
+public fun cols<T>(g: &Grid<T>): u16 { g.cols }
 
 /// Get a reference to the inner vector of the grid.
 public fun inner<T>(g: &Grid<T>): &vector<vector<T>> { &g.grid }
@@ -106,14 +121,28 @@ public fun swap<T>(g: &mut Grid<T>, row: u16, col: u16, element: T): T {
 
 /// Rotate the grid `times` * 90º degrees clockwise. Mutates the grid in place.
 /// If `times` is greater than 3, it will be reduced to the equivalent rotation.
+///
+/// ```move
+/// let mut grid = grid::from_vector(vector[
+///   vector[1, 2, 3],
+///   vector[4, 5, 6],
+///   vector[7, 8, 9],
+/// ]);
+///
+/// grid.rotate(1); // 90º
+/// assert_eq!(grid.into_vector(), vector[
+///   vector[7, 4, 1],
+///   vector[8, 5, 2],
+///   vector[9, 6, 3],
+/// ]);
+/// ```
 public fun rotate<T>(g: &mut Grid<T>, times: u8) {
     let times = times % 4;
 
-    // no rotation
+    // No rotation.
     if (times == 0) return;
 
-    // first deal with times = 1, keep the grid value, only modify it
-    // if we're only rotating 90º, we can perform swaps
+    // 90º rotation.
     if (times == 1) {
         let Grid { grid: source, rows, cols } = g;
         let (rows, cols) = (*rows as u64, *cols as u64);
@@ -129,14 +158,13 @@ public fun rotate<T>(g: &mut Grid<T>, times: u8) {
         target.do!(|row| source.push_back(row));
     };
 
-    // 180º degrees rotation
-    // mirror the grid diagonally, reverse the rows and columns
+    // 180º rotation.
     if (times == 2) {
         g.grid.reverse();
         g.grid.do_mut!(|row| row.reverse());
     };
 
-    // 270º degrees rotation
+    // 270º rotation.
     if (times == 3) {
         let Grid { grid: source, rows, cols } = g;
         let (rows, cols) = (*rows as u64, *cols as u64);
@@ -267,19 +295,17 @@ public macro fun destroy<$T, $R: drop>($g: Grid<$T>, $f: |$T| -> $R) {
 
 /// Consume the `Grid` by calling the function `f` for each element. Preserves the
 /// order of elements (goes from top to bottom, left to right). If the order does not
-/// matter, use `destroy` instead.
+/// matter, use `destroy` macro instead.
 public macro fun do<$T, $R: drop>($g: Grid<$T>, $f: |$T| -> $R) {
     into_vector($g).do!(|row| row.do!(|cell| $f(cell)));
 }
 
-/// Apply the function `f` for each element of the `Grid`.
-/// The function receives a reference to the cell.
+/// Apply the function `f` to a reference of each element of the `Grid`.
 public macro fun do_ref<$T, $R: drop>($g: &Grid<$T>, $f: |&$T| -> $R) {
     inner($g).do_ref!(|row| row.do_ref!(|cell| $f(cell)));
 }
 
-/// Apply the function `f` for each element of the `Grid`. The function receives
-/// a mutable reference to the cell.
+/// Apply the function `f` to a mutable reference of each element of the `Grid`.
 public macro fun do_mut<$T, $R: drop>($g: &mut Grid<$T>, $f: |&mut $T| -> $R) {
     let grid = $g;
     let (rows, cols) = (grid.rows(), grid.cols());
@@ -301,7 +327,7 @@ public macro fun traverse<$T, $R: drop>($g: &Grid<$T>, $f: |&$T, (u16, u16)| -> 
     rows.do!(|row| cols.do!(|col| $f(&g[row, col], (row, col))));
 }
 
-/// Map the grid to a new grid by applying the function `f` to each cell.
+/// Map the `Grid` to a new `Grid` by applying the function `f` to each cell.
 public macro fun map<$T, $U>($g: Grid<$T>, $f: |$T| -> $U): Grid<$U> {
     from_vector_unchecked(into_vector($g).map!(|row| row.map!(|cell| $f(cell))))
 }
@@ -312,20 +338,24 @@ public macro fun map_ref<$T, $U>($g: &Grid<$T>, $f: |&$T| -> $U): Grid<$U> {
     from_vector_unchecked(inner($g).map_ref!(|row| row.map_ref!(|cell| $f(cell))))
 }
 
-/// Get all von Neumann neighbors of a cell, checking if the cell is within
-/// the bounds of the grid. The size parameter specifies the size of the neighborhood.
+/// Alias for the `von_neumann_neighbors` function.
+public use fun von_neumann_neighbors as Grid.l1_neighbors;
+
+/// Get all cells in the L1 `distance` of the given cell (also known as von Neumann
+/// neighborhood). Returned cells are guaranteed to be within the bounds of the grid.
 ///
 /// See `Cell` for more information on the von Neumann neighborhood.
 /// See https://en.wikipedia.org/wiki/Von_Neumann_neighborhood for more information.
-public fun von_neumann_neighbors<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
+public fun von_neumann_neighbors<T>(g: &Grid<T>, p: Cell, distance: u16): vector<Cell> {
     let (rows, cols) = (g.rows(), g.cols());
-    p.von_neumann_neighbors(size).filter!(|cell| {
+    p.von_neumann_neighbors(distance).filter!(|cell| {
         let (row, col) = cell.to_values();
         row < rows && col < cols
     })
 }
 
-/// Count the number of Von Neumann neighbors of a cell that satisfy the predicate $f.
+/// Count the number cells that satisfy the predicate `$f` in the L1 distance
+/// of the given cell (also known as von Neumann neighborhood).
 ///
 /// Example:
 /// ```move
@@ -335,16 +365,16 @@ public fun von_neumann_neighbors<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cel
 /// ```
 public macro fun von_neumann_neighbors_count<$T>(
     $g: &Grid<$T>,
-    $p: Cell,
-    $size: u16,
+    $c: Cell,
+    $distance: u16,
     $f: |&$T| -> bool,
 ): u8 {
-    let p = $p;
+    let p = $c;
     let g = $g;
     let (rows, cols) = (g.rows(), g.cols());
     let mut count = 0u8;
 
-    p.von_neumann_neighbors($size).destroy!(|cell| {
+    p.von_neumann_neighbors($distance).destroy!(|cell| {
         let (row1, col1) = cell.to_values();
         if (row1 >= rows || col1 >= cols) return;
         if (!$f(&g[row1, col1])) return;
@@ -355,8 +385,12 @@ public macro fun von_neumann_neighbors_count<$T>(
     count
 }
 
-/// Get all Moore neighbors of a `Cell`, checking if the cell is within the
-/// bounds of the grid. The size parameter specifies the size of the neighborhood.
+/// Alias for the `moore_neighbors` function.
+public use fun moore_neighbors as Grid.linf_neighbors;
+
+/// Get all cells in the L-Infinity `distance` of the given cell (also known as
+/// Moore neighborhood). Returned cells are guaranteed to be within the bounds
+/// of the grid.
 ///
 /// See `Cell` for more information on the Moore neighborhood.
 /// See https://en.wikipedia.org/wiki/Moore_neighborhood for more information.
@@ -366,8 +400,8 @@ public macro fun von_neumann_neighbors_count<$T>(
 /// let neighbors = grid.moore_neighbors(0, 2, 1);
 /// neighbors.destroy!(|p| std::debug::print(&p.to_string!()));
 /// ```
-public fun moore_neighbors<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
-    p.moore_neighbors(size).filter!(|cell| {
+public fun moore_neighbors<T>(g: &Grid<T>, p: Cell, distance: u16): vector<Cell> {
+    p.moore_neighbors(distance).filter!(|cell| {
         let (row, col) = cell.to_values();
         row < g.rows && col < g.cols
     })
@@ -382,16 +416,16 @@ public fun moore_neighbors<T>(g: &Grid<T>, p: Cell, size: u16): vector<Cell> {
 /// ```
 public macro fun moore_neighbors_count<$T>(
     $g: &Grid<$T>,
-    $p: Cell,
-    $size: u16,
+    $c: Cell,
+    $distance: u16,
     $f: |&$T| -> bool,
 ): u8 {
-    let p = $p;
+    let p = $c;
     let g = $g;
     let (rows, cols) = (g.rows(), g.cols());
     let mut count = 0u8;
 
-    p.moore_neighbors($size).destroy!(|cell| {
+    p.moore_neighbors($distance).destroy!(|cell| {
         let (row1, col1) = cell.to_values();
         if (row1 >= rows || col1 >= cols) return;
         if (!$f(&g[row1, col1])) return;
@@ -424,30 +458,30 @@ public macro fun moore_neighbors_count<$T>(
 /// ```
 public macro fun find_group<$T>(
     $map: &Grid<$T>,
-    $p: Cell,
+    $c: Cell,
     $n: |&Cell| -> vector<Cell>,
     $f: |&$T| -> bool,
 ): vector<Cell> {
-    let p = $p;
+    let c = $c;
     let map = $map;
     let (rows, cols) = (map.rows(), map.cols());
     let mut group = vector[];
     let mut visited = tabulate!(rows, cols, |_, _| false);
 
-    if (!$f(map.borrow_cell(&p))) return group;
+    if (!$f(map.borrow_cell(&c))) return group;
 
-    group.push_back(p);
-    *visited.borrow_cell_mut(&p) = true;
+    group.push_back(c);
+    *visited.borrow_cell_mut(&c) = true;
 
-    let mut queue = vector[p];
+    let mut queue = vector[c];
 
     while (queue.length() != 0) {
-        $n(&queue.pop_back()).destroy!(|p| {
-            if (!p.is_within_bounds(rows, cols) || *visited.borrow_cell(&p)) return;
-            if ($f(map.borrow_cell(&p))) {
-                *visited.borrow_cell_mut(&p) = true;
-                group.push_back(p);
-                queue.push_back(p);
+        $n(&queue.pop_back()).destroy!(|c| {
+            if (!c.is_within_bounds(rows, cols) || *visited.borrow_cell(&c)) return;
+            if ($f(map.borrow_cell(&c))) {
+                *visited.borrow_cell_mut(&c) = true;
+                group.push_back(c);
+                queue.push_back(c);
             }
         });
     };
@@ -474,30 +508,30 @@ public macro fun find_group<$T>(
 /// Transition to the last tile must match the predicate `f`.
 public macro fun trace_path<$T>(
     $map: &Grid<$T>,
-    $p0: Cell,
-    $p1: Cell,
+    $c0: Cell,
+    $c1: Cell,
     $n: |&Cell| -> vector<Cell>,
     $f: |(u16, u16), (u16, u16)| -> bool, // whether the cell is passable
     $limit: u16,
 ): Option<vector<Cell>> {
-    let p0 = $p0;
-    let p1 = $p1;
+    let c0 = $c0;
+    let c1 = $c1;
     let limit = $limit + 1; // we start from 1, not 0.
 
     let map = $map;
     let (rows, cols) = (map.rows(), map.cols());
 
     // If the cells are out of bounds, return none.
-    if (!p0.is_within_bounds(rows, cols) || !p1.is_within_bounds(rows, cols)) {
+    if (!c0.is_within_bounds(rows, cols) || !c1.is_within_bounds(rows, cols)) {
         return option::none()
     };
 
     // Surround the first element with 1s.
     let mut num = 1;
-    let mut queue = vector[p0];
+    let mut queue = vector[c0];
     let mut grid = tabulate!(rows, cols, |_, _| 0);
 
-    *grid.borrow_cell_mut(&p0) = num;
+    *grid.borrow_cell_mut(&c0) = num;
 
     let mut found = false;
     'search: while (num < limit && !queue.is_empty()) {
@@ -513,7 +547,7 @@ public macro fun trace_path<$T>(
             if (!$f((row0, col0), (row1, col1))) return;
 
             // If we reached the destination, break the loop.
-            if (to == p1) {
+            if (to == c1) {
                 *grid.borrow_cell_mut(&to) = num;
                 found = true;
                 break 'search
@@ -533,13 +567,13 @@ public macro fun trace_path<$T>(
     };
 
     // Reconstruct the path by going from the destination to the source.
-    let mut path = vector[p1];
-    let mut last_cell = p1;
+    let mut path = vector[c1];
+    let mut last_cell = c1;
 
     'reconstruct: while (num > 1) {
         num = num - 1;
         $n(&last_cell).destroy!(|cell| {
-            if (cell == p0) break 'reconstruct;
+            if (cell == c0) break 'reconstruct;
             if (!cell.is_within_bounds(rows, cols)) return;
             if (grid.borrow_cell(&cell) == num) {
                 path.push_back(cell);

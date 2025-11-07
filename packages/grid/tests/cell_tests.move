@@ -57,6 +57,18 @@ fun distance() {
 }
 
 #[test]
+// Note: practically speaking, we don't need to support distances that large.
+// This test is here to ensure that the upscaling is done correctly.
+// And, if needed, there's an option to use a larger type.
+fun distance_overflow() {
+    let u16_max = std::u16::max_value!();
+    let c1 = cell::new(0, 0);
+    let c2 = cell::new(u16_max / 2, u16_max / 2);
+
+    assert_eq!(c1.euclidean_distance(&c2), 46339);
+}
+
+#[test]
 fun moore_neighbors() {
     let neighbors = cell::new(0, 0).moore_neighbors(0);
     assert_eq!(neighbors, vector[]);
