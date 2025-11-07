@@ -35,7 +35,7 @@ module my::awesome_project;
 
 use identify::identify;
 
-public fun do<T>() {
+public fun do<T: store>() {
     assert!(identify::is_u8<u8>());
     let value: u8 = identify::as_u8(v, ctx);
 }
@@ -48,6 +48,10 @@ Functions of the `identify` module can be split into two categories:
 -   `is_xxx` functions, where `xxx` is the name of the type you want to check
 -   `as_xxx` functions, where `xxx` is the name of the type you want to identify value as
 
+## Limitations
+
+Identified type must have `store` ability.
+
 ### `is`-functions
 
 These functions check if the value is of the given type. They return a boolean value.
@@ -58,10 +62,10 @@ assert!(!identify::is_bool<u16>());
 
 // for vector, there's no check for the element type
 // if you want to check the element type, you can use `is_type` function
-assert!(identify::is_vector<vector<u8>>());
+assert!(identify::is_vector<T>());
 
 // for custom and framework types, use `is_type` function
-assert!(identify::is_type<MyType, MyType>());
+assert!(identify::is_type<T, MyType>());
 ```
 
 ### `as`-functions
@@ -77,21 +81,21 @@ let value: bool = identify::as_bool(v, ctx);
 let value: vector<u8> = identify::as_vector<_, u8>(v, ctx);
 
 // for custom and framework types, use `as_type` function
-let value: MyType = identify::as_type<MyType, MyType>(v, ctx);
+let value: MyType = identify::as_type<_, MyType>(v, ctx);
 ```
 
 To better understand the application of these functions, consider an example:
 
 ```move
-public fun show_identify<T>(v: T, ctx: &mut TxContext) {
+public fun show_identify<T: store>(v: T, ctx: &mut TxContext) {
     if (identify::is_u8<T>()) {
         let value: u8 = identify::as_u8(v, ctx);
         // do something with the `u8` value
     } else if (identify::is_bool<T>()) {
         let value: bool = identify::as_bool(v, ctx);
         // do something with the `bool` value
-    } else if (identify::is_type<MyType, MyType>()) {
-        let value: MyType = identify::as_type<MyType, MyType>(v, ctx);
+    } else if (identify::is_type<T, MyType>()) {
+        let value: MyType = identify::as_type(v, ctx);
         // do something with the `MyType` value
     } else {
         abort
