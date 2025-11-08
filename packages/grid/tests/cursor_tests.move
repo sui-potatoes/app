@@ -13,6 +13,8 @@ fun cursor() {
     let mut cursor = cursor::new(0, 0);
     let (row, col) = cursor.to_values();
     assert_eq!(row + col, 0); // lazy check
+    assert_eq!(row, cursor.row());
+    assert_eq!(col, cursor.col());
 
     cursor.move_to(down!());
     let (row, col) = cursor.to_values();
@@ -78,6 +80,12 @@ fun move_back_out_of_bounds_fail() {
     cursor.move_to(up!());
 }
 
+#[test, expected_failure(abort_code = cursor::EOutOfBounds)]
+fun move_back_out_of_bounds_2_fail() {
+    let mut cursor = cursor::new(0, 0);
+    cursor.move_to(left!());
+}
+
 #[test, expected_failure(abort_code = cursor::ENoHistory)]
 fun move_back_no_history_fail() {
     let mut cursor = cursor::new(0, 0);
@@ -95,4 +103,40 @@ fun to_from_cell() {
 
     assert_eq!(cursor_row, cell_row);
     assert_eq!(cursor_col, cell_col);
+}
+
+#[test]
+fun to_vector() {
+    let cursor = cursor::new(1, 2);
+    assert_eq!(cursor.to_vector(), vector[1, 2]);
+}
+
+#[test]
+fun can_move_to() {
+    let cursor = cursor::new(0, 0);
+    assert!(cursor.can_move_to(down!()));
+    assert!(cursor.can_move_to(right!()));
+    assert!(!cursor.can_move_to(up!()));
+    assert!(!cursor.can_move_to(left!()));
+}
+
+#[test]
+fun to_from_bcs() {
+    use sui::bcs;
+
+    let mut cursor = cursor::new(1, 2);
+
+    cursor.move_to(down!());
+    cursor.move_to(right!());
+
+    let bytes = bcs::to_bytes(&cursor);
+    let copied = cursor::from_bytes(bytes);
+
+    assert_eq!(cursor, copied);
+}
+
+#[test]
+fun to_string() {
+    let cursor = cursor::new(1, 2);
+    assert_eq!(cursor.to_string(), b"[1, 2]".to_string());
 }

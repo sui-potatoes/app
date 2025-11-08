@@ -6,8 +6,8 @@
 /// position.
 ///
 /// ```move
-/// use grid::direction;
 /// use grid::cursor;
+/// use grid::direction;
 ///
 /// #[test]
 /// fun test_cursor() {
@@ -46,10 +46,17 @@ public fun to_values(c: &Cursor): (u16, u16) {
     (*row, *column)
 }
 
+/// Get the `row` coordinate of the cursor.
+public fun row(c: &Cursor): u16 { c.0 }
+
+public use fun col as Cursor.column;
+
+/// Get the `column` coordinate of the cursor.
+public fun col(c: &Cursor): u16 { c.1 }
+
 /// Construct a `Cell` from a `Cursor`.
 ///
 /// ```move
-/// use grid::cursor;
 /// use grid::cell;
 ///
 /// let cursor = cursor::new(1, 2);
@@ -59,8 +66,6 @@ public fun to_cell(c: &Cursor): Cell { cell::new(c.0, c.1) }
 
 /// Convert a `Cursor` to a vector of two values.
 /// ```move
-/// use grid::cursor;
-///
 /// let cursor = cursor::new(1, 2);
 /// assert!(cursor.to_vector() == vector[1, 2]); // (row, column)
 /// ```
@@ -69,7 +74,6 @@ public fun to_vector(c: &Cursor): vector<u16> { vector[c.0, c.1] }
 /// Construct a `Cursor` from a `Cell`. Alias: `Cell.to_cursor`.
 ///
 /// ```move
-/// use grid::cursor;
 /// use grid::cell;
 ///
 /// let cursor = cell::new(1, 2).to_cursor();
@@ -91,7 +95,6 @@ public fun reset(c: &mut Cursor, row: u16, column: u16) {
 /// Stores the direction in the history.
 ///
 /// ```move
-/// use grid::cursor;
 /// use grid::direction;
 ///
 /// let mut cursor = cursor::new(0, 0);
@@ -120,7 +123,6 @@ public fun move_to(c: &mut Cursor, direction: u8) {
 /// Move the `Cursor` back to the previous position. Aborts if there is no history.
 ///
 /// ```move
-/// use grid::cursor;
 /// use grid::direction;
 ///
 /// let mut cursor = cursor::new(0, 0);
@@ -161,17 +163,10 @@ public fun from_bcs(bcs: &mut BCS): Cursor {
 /// Print a `Cursor` as a string.
 ///
 /// ```move
-/// use grid::cursor;
 ///
 /// let cursor = cursor::new(1, 2);
 /// assert!(cursor.to_string() == b"[1, 2]".to_string());
 /// ```
 public fun to_string(p: &Cursor): String {
-    let mut str = b"[".to_string();
-    let Cursor(row, column, _) = *p;
-    str.append(row.to_string());
-    str.append_utf8(b", ");
-    str.append(column.to_string());
-    str.append_utf8(b"]");
-    str
+    p.to_cell().to_string()
 }

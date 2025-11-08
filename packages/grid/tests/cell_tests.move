@@ -3,7 +3,7 @@
 
 module grid::cell_tests;
 
-use grid::cell;
+use grid::{cell, direction};
 use std::unit_test::assert_eq;
 
 #[test]
@@ -44,6 +44,11 @@ fun from() {
     assert_eq!(a.row(), 0);
     assert_eq!(a.col(), 1);
     assert_eq!(a, b);
+
+    let (x, y) = a.to_world();
+
+    assert_eq!(x, 1);
+    assert_eq!(y, 0);
 }
 
 #[test]
@@ -109,6 +114,16 @@ fun le_compare() {
             cell::new(2, 2),
         ],
     );
+}
+
+#[test]
+fun direction_to() {
+    let c0 = cell::new(0, 0);
+    let c1 = cell::new(2, 0);
+    let c2 = cell::new(2, 2);
+
+    assert_eq!(c0.direction_to(&c1), direction::down!());
+    assert_eq!(c0.direction_to(&c2), direction::down_right!());
 }
 
 #[test]

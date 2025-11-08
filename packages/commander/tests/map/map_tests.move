@@ -5,7 +5,7 @@ module commander::map_tests;
 
 use commander::{map, recruit};
 use grid::direction;
-use std::{bcs, unit_test::{assert_eq, assert_ref_eq}};
+use std::{bcs, unit_test::assert_eq};
 
 #[test]
 // To better understand the test, please refer to the `demo_1` function and see

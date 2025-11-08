@@ -14,6 +14,7 @@ fun creation() {
     assert_eq!(grid.rows(), 1);
     assert_eq!(grid[0, 0], 0);
 
+    let _inner = grid.inner(); // ref read
     let inner = grid.into_vector();
     assert_eq!(inner.length(), 1);
     assert_eq!(inner[0].length(), 1);
@@ -99,6 +100,12 @@ fun swap() {
     assert_eq!(grid[1, 1], 3);
     assert_eq!(grid[1, 0], 0);
     assert_eq!(grid[1, 2], 0);
+
+    let swapped = grid.swap_cell(&cell::new(1, 1), 10);
+    assert_eq!(swapped, 3);
+    assert_eq!(grid[1, 1], 10);
+    assert_eq!(grid[1, 0], 0);
+    assert_eq!(grid[1, 2], 0);
 }
 
 #[test]
@@ -134,6 +141,18 @@ fun rotate() {
 
     // check the first column that it's 14 to 28
     size.do!(|i| assert_eq!(grid[i, 0], i + size - 1));
+}
+
+#[test]
+fun borrow_cell() {
+    let mut grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
+    let cell = cell::new(1, 1);
+    let cell_ref = grid.borrow_cell(&cell);
+    assert_eq!(*cell_ref, 4);
+
+    let cell_ref_mut = grid.borrow_cell_mut(&cell);
+    *cell_ref_mut = 9;
+    assert_eq!(*cell_ref_mut, 9);
 }
 
 #[test]
@@ -272,6 +291,7 @@ fun from_bcs() {
     let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| bcs.peel_u8());
 
     assert!(grid2.cols() == 3);
+    assert!(grid2.rows() == 3);
     assert_ref_eq!(&grid, &grid2);
 }
 
@@ -283,4 +303,14 @@ fun from_bcs_with_custom_type() {
 
     assert!(grid2.cols() == 3);
     assert_ref_eq!(&grid, &grid2);
+}
+
+// === Other Macros ===
+
+public struct Tile()
+
+#[test]
+fun tabulate_do_destroy() {
+    grid::tabulate!(3, 3, |_, _| Tile()).destroy!(|Tile()| {});
+    grid::tabulate!(3, 3, |_, _| Tile()).do!(|Tile()| {});
 }
