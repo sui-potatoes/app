@@ -2,7 +2,9 @@
 
 Identify is a library that provides a way to identify the type of a value at runtime. It is using type-identification mechanism of dynamic fields to identify the type of a value.
 
-> This library solves a set of very specific and niche use cases. For most common type operations, refer to the [TypeName]() module documentation.
+> This library solves a set of very specific and niche use cases. For most common type operations, refer to the [TypeName](https://docs.sui.io/references/framework/sui_std/type_name) module documentation.
+
+_Idea for the library was originally proposed by DanielZ from NAVI._
 
 ## Installing
 
@@ -48,7 +50,7 @@ Functions of the `identify` module can be split into two categories:
 -   `is_xxx` functions, where `xxx` is the name of the type you want to check
 -   `as_xxx` functions, where `xxx` is the name of the type you want to identify value as
 
-## Limitations
+### Limitations
 
 Identified type must have `store` ability.
 
