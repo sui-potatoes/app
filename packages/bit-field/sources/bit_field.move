@@ -5,6 +5,34 @@ module bit_field::bit_field;
 
 // === Pack ===
 
+public(package) macro fun pack<$X,$Y>($values: vector<$X>): $Y {
+    let mut values = $values; 
+
+    // return the bit size of type $X
+    let x_type = std::type_name::get<$X>().into_string();
+    
+    // size of type X
+    let x_size = if (x_type.as_bytes() == b"u8") {
+        8
+    }  else if (x_type.as_bytes() == b"u16") {
+        16
+    } else if (x_type.as_bytes() == b"u32") {
+        32
+    } else { // u64
+        64
+    };
+
+    let mut v: $Y = 0;
+    let (mut i, len) = (0, values.length() as u8);
+    values.reverse();
+
+    while (i < len) {
+        v = v | (values.pop_back() as $Y) << (x_size * i);
+        i = i + 1;
+    };
+    v
+} 
+
 /// Pack a vector of `bool` into an unsigned integer.
 /// Unlike other pack functions, this one shifts bit by bit.
 public macro fun pack_bool<$T>($values: vector<bool>): $T {
@@ -22,58 +50,22 @@ public macro fun pack_bool<$T>($values: vector<bool>): $T {
 
 /// Pack a vector of `u8` into an unsigned integer.
 public macro fun pack_u8<$T>($values: vector<u8>): $T {
-    let mut values = $values;
-    let mut v: $T = 0;
-    let (mut i, len) = (0, values.length() as u8);
-    values.reverse();
-
-    while (i < len) {
-        v = v | (values.pop_back() as $T) << (8 * i);
-        i = i + 1;
-    };
-    v
+    pack!<u8, $T>($values)
 }
 
 /// Pack a vector of `u16` into an unsigned integer.
 public macro fun pack_u16<$T>($values: vector<u16>): $T {
-    let mut values = $values;
-    let mut v: $T = 0;
-    let (mut i, len) = (0, values.length() as u8);
-    values.reverse();
-
-    while (i < len) {
-        v = v | (values.pop_back() as $T) << (16 * i);
-        i = i + 1;
-    };
-    v
+    pack!<u16, $T>($values)
 }
 
 /// Pack a vector of `u32` into an unsigned integer.
 public macro fun pack_u32<$T>($values: vector<u32>): $T {
-    let mut values = $values;
-    let mut v: $T = 0;
-    let (mut i, len) = (0, values.length() as u8);
-    values.reverse();
-
-    while (i < len) {
-        v = v | (values.pop_back() as $T) << (32 * i);
-        i = i + 1;
-    };
-    v
+    pack!<u32, $T>($values)
 }
 
 /// Pack a vector of `u64` into an unsigned integer.
 public macro fun pack_u64<$T>($values: vector<u64>): $T {
-    let mut values = $values;
-    let mut v: $T = 0;
-    let (mut i, len) = (0, values.length() as u8);
-    values.reverse();
-
-    while (i < len) {
-        v = v | (values.pop_back() as $T) << (64 * i);
-        i = i + 1;
-    };
-    v
+    pack!<u64, $T>($values)
 }
 
 // === Unpack ===
