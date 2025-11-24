@@ -1,12 +1,13 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+use futures::StreamExt;
 use sui_rpc::{
     Client,
     field::FieldMask,
-    proto::sui::rpc::v2beta2::{GetEpochRequest, GetObjectRequest, ListOwnedObjectsRequest},
+    proto::sui::rpc::v2::{GetEpochRequest, GetObjectRequest, ListOwnedObjectsRequest},
 };
-use sui_sdk_types::{Address, ObjectId};
+use sui_sdk_types::Address;
 
 use crate::{
     WithRef,
@@ -27,9 +28,7 @@ impl GameClient {
         let epoch = self
             .client
             .ledger_client()
-            .get_epoch(GetEpochRequest {
-                ..Default::default()
-            })
+            .get_epoch(GetEpochRequest::default())
             .await?
             .into_inner()
             .epoch
@@ -38,16 +37,16 @@ impl GameClient {
         Ok(epoch.epoch())
     }
 
-    pub async fn get_game(&mut self, game_id: ObjectId) -> Result<Game, anyhow::Error> {
+    pub async fn get_game(&mut self, game_id: Address) -> Result<Game, anyhow::Error> {
         self.client
             .ledger_client()
-            .get_object(GetObjectRequest {
-                object_id: Some(game_id.to_string()),
-                version: None,
-                read_mask: Some(FieldMask {
-                    paths: vec!["contents".to_string(), "digest".to_string()],
-                }),
-            })
+            .get_object(
+                GetObjectRequest::default()
+                    .with_object_id(game_id.to_string())
+                    .with_read_mask(FieldMask {
+                        paths: vec!["contents".to_string(), "digest".to_string()],
+                    }),
+            )
             .await?
             .into_inner()
             .object
@@ -60,64 +59,49 @@ impl GameClient {
 
     pub async fn list_presets(&mut self) -> Vec<WithRef<Preset>> {
         self.client
-            .live_data_client()
-            .list_owned_objects(ListOwnedObjectsRequest {
-                owner: Some(COMMANDER_OBJ.to_string()),
-                object_type: Some(PRESET_STRUCT_TAG.to_string()),
-                read_mask: Some(FieldMask {
-                    paths: vec!["contents".to_string(), "digest".to_string()],
-                }),
-                ..Default::default()
-            })
-            .await
-            .unwrap()
-            .get_ref()
-            .objects
-            .iter()
-            .map(|obj| WithRef::from_rpc_object(obj).unwrap())
+            .list_owned_objects(
+                ListOwnedObjectsRequest::default()
+                    .with_owner(COMMANDER_OBJ.to_string())
+                    .with_object_type(PRESET_STRUCT_TAG.to_string())
+                    .with_read_mask(FieldMask {
+                        paths: vec!["contents".to_string(), "digest".to_string()],
+                    }),
+            )
+            .map(|obj| WithRef::from_rpc_object(&obj.unwrap()).unwrap())
             .collect::<Vec<WithRef<Preset>>>()
+            .await
     }
 
     pub async fn list_recruits(&mut self, address: Address) -> Vec<WithRef<Recruit>> {
         self.client
-            .live_data_client()
-            .list_owned_objects(ListOwnedObjectsRequest {
-                owner: Some(address.to_string()),
-                object_type: Some(RECRUIT_STRUCT_TAG.to_string()),
-                page_size: Some(100),
-                read_mask: Some(FieldMask {
-                    paths: vec!["contents".to_string(), "digest".to_string()],
-                }),
-                ..Default::default()
-            })
-            .await
-            .unwrap()
-            .get_ref()
-            .objects
-            .iter()
-            .map(|obj| WithRef::from_rpc_object(obj).unwrap())
+            .list_owned_objects(
+                ListOwnedObjectsRequest::default()
+                    .with_owner(address.to_string())
+                    .with_object_type(RECRUIT_STRUCT_TAG.to_string())
+                    .with_page_size(100)
+                    .with_read_mask(FieldMask {
+                        paths: vec!["contents".to_string(), "digest".to_string()],
+                    }),
+            )
+            .map(|obj| WithRef::from_rpc_object(&obj.unwrap()).unwrap())
             .collect::<Vec<WithRef<Recruit>>>()
+            .await
     }
 
     pub async fn list_replays(&mut self, address: Address) -> Vec<WithRef<Replay>> {
         self.client
-            .live_data_client()
-            .list_owned_objects(ListOwnedObjectsRequest {
-                owner: Some(address.to_string()),
-                object_type: Some(REPLAY_STRUCT_TAG.to_string()),
-                page_size: Some(100),
-                read_mask: Some(FieldMask {
-                    paths: vec!["contents".to_string(), "digest".to_string()],
-                }),
-                ..Default::default()
-            })
-            .await
-            .unwrap()
-            .get_ref()
-            .objects
-            .iter()
-            .map(|obj| WithRef::from_rpc_object(obj).unwrap())
+            .list_owned_objects(
+                ListOwnedObjectsRequest::default()
+                    .with_owner(address.to_string())
+                    .with_object_type(REPLAY_STRUCT_TAG.to_string())
+                    .with_page_size(100)
+                    .with_read_mask(FieldMask {
+                        paths: vec!["contents".to_string(), "digest".to_string()],
+                    }),
+            )
+            .map(|obj| WithRef::from_rpc_object(&obj.unwrap()).unwrap())
             .collect::<Vec<WithRef<Replay>>>()
+            .await
     }
 }
 

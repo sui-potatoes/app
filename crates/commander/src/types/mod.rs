@@ -18,7 +18,7 @@ use std::fmt::Display;
 
 use macroquad::prelude::*;
 use serde::{Deserialize, Serialize};
-use sui_sdk_types::{Address, ObjectId};
+use sui_sdk_types::Address;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct ID(pub Address);
@@ -371,8 +371,8 @@ impl Default for ID {
     }
 }
 
-impl Into<ObjectId> for ID {
-    fn into(self) -> ObjectId {
-        ObjectId::from(self.0)
+impl Into<Address> for ID {
+    fn into(self) -> Address {
+        Address::from(self.0)
     }
 }

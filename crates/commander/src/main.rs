@@ -17,10 +17,8 @@ use quad_storage::STORAGE;
 use serde::{Deserialize, Serialize};
 
 use sui_crypto::ed25519::Ed25519PrivateKey;
-use sui_rpc::{Client, proto::sui::rpc::v2beta2::Object};
-use sui_sdk_types::{
-    Address, Ed25519PublicKey, ObjectDigest, ObjectId, ObjectReference, Version, ZkLoginInputs,
-};
+use sui_rpc::{Client, proto::sui::rpc::v2::Object};
+use sui_sdk_types::{Address, Digest, Ed25519PublicKey, ObjectReference, Version, ZkLoginInputs};
 use tokio::runtime::Runtime;
 
 mod config;
@@ -546,9 +544,9 @@ impl<'de, T> WithRef<T> {
                     .value(),
             )?,
             object_ref: ObjectReference::new(
-                ObjectId::from_str(&obj.object_id()).unwrap(),
+                Address::from_str(&obj.object_id()).unwrap(),
                 Version::from(obj.version()),
-                ObjectDigest::from_base58(&obj.digest()).unwrap(),
+                Digest::from_base58(&obj.digest()).unwrap(),
             ),
         })
     }

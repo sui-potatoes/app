@@ -6,19 +6,18 @@
 
 use std::{collections::HashMap, ops::Deref, str::FromStr, time::Instant};
 
+use futures::StreamExt;
 use serde::Deserialize;
 use sui_crypto::{SuiSigner, ed25519::Ed25519PrivateKey};
 use sui_rpc::{
     Client,
     field::FieldMask,
-    proto::sui::rpc::v2beta2::{
-        ExecuteTransactionRequest, GetObjectRequest, ListOwnedObjectsRequest,
-    },
+    proto::sui::rpc::v2::{ExecuteTransactionRequest, GetObjectRequest, ListOwnedObjectsRequest},
 };
 use sui_sdk_types::{
-    Address, IdOperation, Identifier, ObjectDigest, ObjectId, ObjectOut, ObjectReference, Owner,
-    Transaction, TransactionEffects, TransactionEffectsV2, TransactionEvents, UserSignature,
-    Version, ZkLoginAuthenticator, ZkLoginInputs,
+    Address, Digest, IdOperation, Identifier, ObjectOut, ObjectReference, Owner, Transaction,
+    TransactionEffects, TransactionEffectsV2, TransactionEvents, UserSignature, Version,
+    ZkLoginAuthenticator, ZkLoginInputs,
 };
 use sui_transaction_builder::{Function, Serialized, TransactionBuilder, unresolved::Input};
 
@@ -39,22 +38,22 @@ pub struct TxExecutor {
     rgp: Option<u64>,
 
     /// Cache of shared object refs.
-    shared_refs: HashMap<ObjectId, SharedObjectRef>,
+    shared_refs: HashMap<Address, SharedObjectRef>,
     /// Cache of owned object refs (also includes coins, but they're tracked in
     /// the `coins` field).
-    owned_refs: HashMap<ObjectId, ObjectReference>,
+    owned_refs: HashMap<Address, ObjectReference>,
 }
 
 #[derive(Debug, Clone)]
 pub struct SharedObjectRef {
-    id: ObjectId,
+    id: Address,
     initial_shared_version: Version,
     mutable: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Coin {
-    id: ObjectId,
+    id: Address,
     balance: u64,
 }
 
@@ -75,12 +74,7 @@ impl TxExecutor {
         max_epoch: u64,
         client: Client,
     ) -> Self {
-        let address: Address = zkp
-            .public_identifier()
-            .unwrap()
-            .derive_address()
-            .next()
-            .unwrap();
+        let address: Address = zkp.public_identifier().derive_address().next().unwrap();
 
         Self {
             address,
@@ -95,7 +89,7 @@ impl TxExecutor {
         }
     }
 
-    pub async fn start_game(&mut self, preset: WithRef<Preset>) -> Result<ObjectId, anyhow::Error> {
+    pub async fn start_game(&mut self, preset: WithRef<Preset>) -> Result<Address, anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
         let gas_coins = self.get_gas_coins().await?;
         let preset_ref = self
@@ -103,7 +97,7 @@ impl TxExecutor {
             .await?;
 
         let commander = self
-            .get_shared_object_ref(ObjectId::from_str(COMMANDER_OBJ)?, true)
+            .get_shared_object_ref(Address::from_str(COMMANDER_OBJ)?, true)
             .await?;
 
         let recruits_num = preset.data.positions.len();
@@ -190,7 +184,7 @@ impl TxExecutor {
 
     pub async fn move_unit(
         &mut self,
-        game_id: ObjectId,
+        game_id: Address,
         path: GridPath,
     ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
@@ -222,7 +216,7 @@ impl TxExecutor {
 
     pub async fn perform_reload(
         &mut self,
-        game_id: ObjectId,
+        game_id: Address,
         p0: (u8, u8),
     ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
@@ -255,7 +249,7 @@ impl TxExecutor {
 
     pub async fn perform_attack(
         &mut self,
-        game_id: ObjectId,
+        game_id: Address,
         p0: (u8, u8),
         p1: (u8, u8),
     ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
@@ -265,7 +259,7 @@ impl TxExecutor {
 
         let game = self.get_shared_object_ref(game_id, true).await?;
         let rng = self
-            .get_shared_object_ref(ObjectId::from_str("0x8")?, false)
+            .get_shared_object_ref(Address::from_str("0x8")?, false)
             .await?;
 
         let x0 = ptb.input(Serialized(&(p0.0 as u16)));
@@ -297,7 +291,7 @@ impl TxExecutor {
 
     pub async fn next_turn(
         &mut self,
-        game_id: ObjectId,
+        game_id: Address,
     ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
         let gas_coins = self.get_gas_coins().await?;
@@ -327,14 +321,14 @@ impl TxExecutor {
 
     pub async fn quit_game(
         &mut self,
-        game_id: ObjectId,
+        game_id: Address,
     ) -> Result<(TransactionEffectsV2, Option<TransactionEvents>), anyhow::Error> {
         let rgp = self.rgp.unwrap_or(1000);
         let gas_coins = self.get_gas_coins().await?;
         let mut ptb = TransactionBuilder::new();
 
         let registry = self
-            .get_shared_object_ref(ObjectId::from_str(COMMANDER_OBJ)?, true)
+            .get_shared_object_ref(Address::from_str(COMMANDER_OBJ)?, true)
             .await?;
 
         let registry_arg = ptb.input(registry);
@@ -367,21 +361,17 @@ impl TxExecutor {
             None => {
                 let coins = self
                     .client
-                    .live_data_client()
-                    .list_owned_objects(ListOwnedObjectsRequest {
-                        owner: Some(self.address.to_string()),
-                        object_type: Some(SUI_COIN_TYPE.to_string()),
-                        read_mask: Some(FieldMask {
-                            paths: vec!["contents".to_string(), "digest".to_string()],
-                        }),
-                        ..Default::default()
-                    })
-                    .await?
-                    .get_ref()
-                    .objects
-                    .iter()
-                    .map(|obj| WithRef::from_rpc_object(obj).unwrap())
-                    .collect::<Vec<WithRef<Coin>>>();
+                    .list_owned_objects(
+                        ListOwnedObjectsRequest::default()
+                            .with_owner(self.address.to_string())
+                            .with_object_type(SUI_COIN_TYPE.to_string())
+                            .with_read_mask(FieldMask {
+                                paths: vec!["contents".to_string(), "digest".to_string()],
+                            }),
+                    )
+                    .map(|obj| WithRef::from_rpc_object(&obj.unwrap()).unwrap())
+                    .collect::<Vec<_>>()
+                    .await;
 
                 self.coins = Some(coins.clone());
                 Ok(coins)
@@ -392,7 +382,7 @@ impl TxExecutor {
     /// Try to fetch SharedObjectRef from cache, if not found, fetch from the network.
     async fn get_shared_object_ref(
         &mut self,
-        id: ObjectId,
+        id: Address,
         mutable: bool,
     ) -> Result<SharedObjectRef, anyhow::Error> {
         match self.shared_refs.get(&id) {
@@ -405,13 +395,13 @@ impl TxExecutor {
                 let shared_ref = self
                     .client
                     .ledger_client()
-                    .get_object(GetObjectRequest {
-                        object_id: Some(id.to_string()),
-                        version: None,
-                        read_mask: Some(FieldMask {
-                            paths: vec!["owner".to_string()],
-                        }),
-                    })
+                    .get_object(
+                        GetObjectRequest::default()
+                            .with_object_id(id.to_string())
+                            .with_read_mask(FieldMask {
+                                paths: vec!["owner".to_string()],
+                            }),
+                    )
                     .await?;
 
                 let shared_ref = SharedObjectRef {
@@ -435,7 +425,7 @@ impl TxExecutor {
 
     async fn get_owned_object_ref(
         &mut self,
-        id: ObjectId,
+        id: Address,
     ) -> Result<ObjectReference, anyhow::Error> {
         match self.owned_refs.get(&id) {
             Some(owned_ref) => Ok(owned_ref.clone()),
@@ -443,17 +433,13 @@ impl TxExecutor {
                 let owned_ref = self
                     .client
                     .ledger_client()
-                    .get_object(GetObjectRequest {
-                        object_id: Some(id.to_string()),
-                        version: None,
-                        read_mask: None,
-                    })
+                    .get_object(GetObjectRequest::default().with_object_id(id.to_string()))
                     .await?;
                 let object = owned_ref.into_inner().object.unwrap();
                 let owned_ref = ObjectReference::new(
                     id,
                     object.version.unwrap(),
-                    ObjectDigest::from_str(object.digest.unwrap().as_str()).unwrap(),
+                    Digest::from_str(object.digest.unwrap().as_str()).unwrap(),
                 );
                 self.owned_refs.insert(id, owned_ref.clone());
                 Ok(owned_ref)
@@ -463,7 +449,7 @@ impl TxExecutor {
 
     async fn clock(&mut self) -> Result<SharedObjectRef, anyhow::Error> {
         Ok(self
-            .get_shared_object_ref(ObjectId::from_str("0x6")?, false)
+            .get_shared_object_ref(Address::from_str("0x6")?, false)
             .await?)
     }
 
@@ -487,18 +473,14 @@ impl TxExecutor {
         let tx_result = self
             .client
             .execution_client()
-            .execute_transaction(ExecuteTransactionRequest {
-                transaction: Some(tx.into()),
-                signatures: vec![zklogin_signature.into()],
-                read_mask: Some(FieldMask {
-                    paths: vec![
-                        "transaction.effects.bcs".to_string(),
-                        "transaction.events".to_string(),
-                        "finality".to_string(),
-                    ],
-                }),
-                ..Default::default()
-            })
+            .execute_transaction(
+                ExecuteTransactionRequest::default()
+                    .with_transaction(tx)
+                    .with_signatures(vec![zklogin_signature.into()])
+                    .with_read_mask(FieldMask {
+                        paths: vec!["effects.bcs".to_string(), "events".to_string()],
+                    }),
+            )
             .await?;
 
         println!("Execution time: {:?}", timer.elapsed());
@@ -582,6 +564,7 @@ impl TxExecutor {
                     self.shared_refs.remove(&obj.object_id);
                     self.owned_refs.remove(&obj.object_id);
                 }
+                _ => panic!("Incompatible ID operation, sui_rpc extended type definition"),
             }
         }
     }
@@ -597,6 +580,9 @@ impl TxExecutor {
                             ObjectOut::NotExist => return,
                             ObjectOut::ObjectWrite { digest, .. } => *digest,
                             ObjectOut::PackageWrite { digest, .. } => *digest,
+                            _ => panic!(
+                                "Incompatible output state, sui_rpc extended type definition"
+                            ),
                         };
 
                         coin.object_ref =

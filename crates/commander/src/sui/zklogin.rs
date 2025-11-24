@@ -9,7 +9,8 @@ use thiserror::Error;
 use tokio::sync::{Mutex, oneshot};
 
 use sui_sdk_types::{
-    Address, Bn254FieldElement, Ed25519PublicKey, ZkLoginClaim, ZkLoginInputs, ZkLoginProof,
+    Address, Bn254FieldElement, Ed25519PublicKey, InvalidZkLoginAuthenticatorError, ZkLoginClaim,
+    ZkLoginInputs, ZkLoginProof,
 };
 
 use crate::errors::Error;
@@ -264,7 +265,7 @@ pub async fn get_zkp(
         ZkLoginError::FailedToParseResponse.into()
     })?;
 
-    Ok(data.data.into())
+    Ok(data.data.try_into().unwrap())
 }
 
 /// Pad the public key with a 0x00 byte to make it 32 bytes long and encode it in base64.
@@ -277,7 +278,7 @@ pub fn ephemeral_public_key(public_key: &Ed25519PublicKey) -> String {
 
 /// Convert the ZKP to an address.
 pub fn zkp_to_address(zkp: &ZkLoginInputs) -> Result<Address, anyhow::Error> {
-    Ok(zkp.public_identifier()?.derive_address().next().unwrap())
+    Ok(zkp.public_identifier().derive_address().next().unwrap())
 }
 
 // === Into impls ===
@@ -288,14 +289,16 @@ impl Into<Error> for ZkLoginError {
     }
 }
 
-impl Into<ZkLoginInputs> for ZkpResponse {
-    fn into(self) -> ZkLoginInputs {
-        ZkLoginInputs {
-            proof_points: self.proof_points,
-            iss_base64_details: self.iss_base64_details.into(),
-            header_base64: self.header_base64,
-            address_seed: self.address_seed,
-        }
+impl TryInto<ZkLoginInputs> for ZkpResponse {
+    type Error = InvalidZkLoginAuthenticatorError;
+
+    fn try_into(self) -> Result<ZkLoginInputs, InvalidZkLoginAuthenticatorError> {
+        Ok(ZkLoginInputs::new(
+            self.proof_points,
+            self.iss_base64_details.into(),
+            self.header_base64,
+            self.address_seed,
+        )?)
     }
 }
 
