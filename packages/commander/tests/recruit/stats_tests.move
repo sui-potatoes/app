@@ -24,7 +24,6 @@ fun test_in_game_stats() {
     assert_eq!(stats.armor(), 0);
     assert_eq!(stats.dodge(), 0);
     assert_eq!(stats.defense(), 0);
-    
 }
 
 #[test]
