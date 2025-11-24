@@ -3,13 +3,13 @@
 
 # Module `grid::cursor`
 
-The <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> struct represents a movable point on the grid, and can be used
+The <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> struct represents a movable <code>Cell</code> on the grid, and can be used
 to trace paths, use the <code><a href="./direction.md#grid_direction">direction</a></code> API and get coordinates for the current
 position.
 
 ```move
-use grid::direction;
 use grid::cursor;
+use grid::direction;
 
 
 <a name="@[test]_0"></a>
@@ -21,8 +21,8 @@ let mut cursor = cursor::new(0, 0);
 cursor.move_to(direction::down!());
 cursor.move_to(direction::down!() | direction::right!());
 
-let (x, y) = cursor.to_values();
-assert!(x == 2 && y == 1);
+let (row, col) = cursor.to_values();
+assert!(row == 2 && col == 1);
 }
 ```
 
@@ -35,9 +35,11 @@ the <code><a href="./direction.md#grid_direction">direction</a></code> module fo
 -  [Constants](#@Constants_1)
 -  [Function `new`](#grid_cursor_new)
 -  [Function `to_values`](#grid_cursor_to_values)
--  [Function `to_point`](#grid_cursor_to_point)
+-  [Function `row`](#grid_cursor_row)
+-  [Function `col`](#grid_cursor_col)
+-  [Function `to_cell`](#grid_cursor_to_cell)
 -  [Function `to_vector`](#grid_cursor_to_vector)
--  [Function `from_point`](#grid_cursor_from_point)
+-  [Function `from_cell`](#grid_cursor_from_cell)
 -  [Function `reset`](#grid_cursor_reset)
 -  [Function `move_to`](#grid_cursor_move_to)
 -  [Function `move_back`](#grid_cursor_move_back)
@@ -47,12 +49,13 @@ the <code><a href="./direction.md#grid_direction">direction</a></code> module fo
 -  [Function `to_string`](#grid_cursor_to_string)
 
 
-<pre><code><b>use</b> <a href="./point.md#grid_point">grid::point</a>;
+<pre><code><b>use</b> <a href="./cell.md#grid_cell">grid::cell</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
 <b>use</b> <a href="../../.doc-deps/std/string.md#std_string">std::string</a>;
 <b>use</b> <a href="../../.doc-deps/std/u16.md#std_u16">std::u16</a>;
+<b>use</b> <a href="../../.doc-deps/std/u32.md#std_u32">std::u32</a>;
 <b>use</b> <a href="../../.doc-deps/std/vector.md#std_vector">std::vector</a>;
 <b>use</b> <a href="../../.doc-deps/sui/address.md#sui_address">sui::address</a>;
 <b>use</b> <a href="../../.doc-deps/sui/bcs.md#sui_bcs">sui::bcs</a>;
@@ -65,7 +68,7 @@ the <code><a href="./direction.md#grid_direction">direction</a></code> module fo
 
 ## Struct `Cursor`
 
-Cursor is similar to a <code>Point</code> as it stores the coordinates, but also tracks
+Cursor is similar to a <code>Cell</code> as it stores the coordinates, but also tracks
 directions where it was moved, so it could be moved back.
 
 
@@ -128,10 +131,10 @@ Trying to move back when there is no history.
 
 ## Function `new`
 
-Get the X coordinate of the cursor.
+Create a new <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> at <code>(<a href="./cursor.md#grid_cursor_row">row</a>, column)</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_new">new</a>(x: u16, y: u16): <a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_new">new</a>(<a href="./cursor.md#grid_cursor_row">row</a>: u16, column: u16): <a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>
 </code></pre>
 
 
@@ -140,7 +143,7 @@ Get the X coordinate of the cursor.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_new">new</a>(x: u16, y: u16): <a href="./cursor.md#grid_cursor_Cursor">Cursor</a> { <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(x, y, vector[]) }
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_new">new</a>(<a href="./cursor.md#grid_cursor_row">row</a>: u16, column: u16): <a href="./cursor.md#grid_cursor_Cursor">Cursor</a> { <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(<a href="./cursor.md#grid_cursor_row">row</a>, column, vector[]) }
 </code></pre>
 
 
@@ -164,8 +167,8 @@ Get both coordinates of the cursor.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_to_values">to_values</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">Cursor</a>): (u16, u16) {
-    <b>let</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(x, y, _) = c;
-    (*x, *y)
+    <b>let</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(<a href="./cursor.md#grid_cursor_row">row</a>, column, _) = c;
+    (*<a href="./cursor.md#grid_cursor_row">row</a>, *column)
 }
 </code></pre>
 
@@ -173,22 +176,14 @@ Get both coordinates of the cursor.
 
 </details>
 
-<a name="grid_cursor_to_point"></a>
+<a name="grid_cursor_row"></a>
 
-## Function `to_point`
+## Function `row`
 
-Construct a <code>Point</code> from a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code>.
-
-```rust
-use grid::cursor;
-use grid::point;
-
-let cursor = cursor::new(1, 2);
-assert!(cursor.to_point() == point::new(1, 2));
-```
+Get the <code><a href="./cursor.md#grid_cursor_row">row</a></code> coordinate of the cursor.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_to_point">to_point</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>): <a href="./point.md#grid_point_Point">grid::point::Point</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_row">row</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>): u16
 </code></pre>
 
 
@@ -197,7 +192,60 @@ assert!(cursor.to_point() == point::new(1, 2));
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_to_point">to_point</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">Cursor</a>): Point { <a href="./point.md#grid_point_new">point::new</a>(c.0, c.1) }
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_row">row</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">Cursor</a>): u16 { c.0 }
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_cursor_col"></a>
+
+## Function `col`
+
+Get the <code>column</code> coordinate of the cursor.
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_col">col</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>): u16
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_col">col</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">Cursor</a>): u16 { c.1 }
+</code></pre>
+
+
+
+</details>
+
+<a name="grid_cursor_to_cell"></a>
+
+## Function `to_cell`
+
+Construct a <code>Cell</code> from a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code>.
+
+```move
+use grid::cell;
+
+let cursor = cursor::new(1, 2);
+assert!(cursor.to_cell() == cell::new(1, 2));
+```
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_to_cell">to_cell</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>): <a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_to_cell">to_cell</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">Cursor</a>): Cell { <a href="./cell.md#grid_cell_new">cell::new</a>(c.0, c.1) }
 </code></pre>
 
 
@@ -209,11 +257,9 @@ assert!(cursor.to_point() == point::new(1, 2));
 ## Function `to_vector`
 
 Convert a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> to a vector of two values.
-```rust
-use grid::cursor;
-
+```move
 let cursor = cursor::new(1, 2);
-assert!(cursor.to_vector() == vector[1, 2]); // (x, y)
+assert!(cursor.to_vector() == vector[1, 2]); // (row, column)
 ```
 
 
@@ -233,22 +279,21 @@ assert!(cursor.to_vector() == vector[1, 2]); // (x, y)
 
 </details>
 
-<a name="grid_cursor_from_point"></a>
+<a name="grid_cursor_from_cell"></a>
 
-## Function `from_point`
+## Function `from_cell`
 
-Construct a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> from a <code>Point</code>. Alias: <code>Point.to_cursor</code>.
+Construct a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> from a <code>Cell</code>. Alias: <code>Cell.to_cursor</code>.
 
-```rust
-use grid::cursor;
-use grid::point;
+```move
+use grid::cell;
 
-let cursor = point::new(1, 2).to_cursor();
+let cursor = cell::new(1, 2).to_cursor();
 assert!(cursor == cursor::new(1, 2));
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_from_point">from_point</a>(p: &<a href="./point.md#grid_point_Point">grid::point::Point</a>): <a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_from_cell">from_cell</a>(p: &<a href="./cell.md#grid_cell_Cell">grid::cell::Cell</a>): <a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>
 </code></pre>
 
 
@@ -257,9 +302,9 @@ assert!(cursor == cursor::new(1, 2));
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_from_point">from_point</a>(p: &Point): <a href="./cursor.md#grid_cursor_Cursor">Cursor</a> {
-    <b>let</b> (x, y) = p.<a href="./cursor.md#grid_cursor_to_values">to_values</a>();
-    <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(x, y, vector[])
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_from_cell">from_cell</a>(p: &Cell): <a href="./cursor.md#grid_cursor_Cursor">Cursor</a> {
+    <b>let</b> (<a href="./cursor.md#grid_cursor_row">row</a>, <a href="./cursor.md#grid_cursor_col">col</a>) = p.<a href="./cursor.md#grid_cursor_to_values">to_values</a>();
+    <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(<a href="./cursor.md#grid_cursor_row">row</a>, <a href="./cursor.md#grid_cursor_col">col</a>, vector[])
 }
 </code></pre>
 
@@ -271,10 +316,10 @@ assert!(cursor == cursor::new(1, 2));
 
 ## Function `reset`
 
-Reset the <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> to a given point, clears the history.
+Reset the <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> to a given cell, clears the history.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_reset">reset</a>(c: &<b>mut</b> <a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>, x: u16, y: u16)
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_reset">reset</a>(c: &<b>mut</b> <a href="./cursor.md#grid_cursor_Cursor">grid::cursor::Cursor</a>, <a href="./cursor.md#grid_cursor_row">row</a>: u16, column: u16)
 </code></pre>
 
 
@@ -283,9 +328,9 @@ Reset the <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> to a 
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_reset">reset</a>(c: &<b>mut</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>, x: u16, y: u16) {
-    c.0 = x;
-    c.1 = y;
+<pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_reset">reset</a>(c: &<b>mut</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>, <a href="./cursor.md#grid_cursor_row">row</a>: u16, column: u16) {
+    c.0 = <a href="./cursor.md#grid_cursor_row">row</a>;
+    c.1 = column;
     c.2 = vector[]; // resets history!
 }
 </code></pre>
@@ -301,8 +346,7 @@ Reset the <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> to a 
 Move <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> in a given direction. Aborts if the <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> is out of bounds.
 Stores the direction in the history.
 
-```rust
-use grid::cursor;
+```move
 use grid::direction;
 
 let mut cursor = cursor::new(0, 0);
@@ -321,18 +365,18 @@ cursor.move_to(direction::right!() | direction::down!());
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_move_to">move_to</a>(c: &<b>mut</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>, <a href="./direction.md#grid_direction">direction</a>: u8) {
-    <b>let</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(x, y, path) = c;
+    <b>let</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(<a href="./cursor.md#grid_cursor_row">row</a>, <a href="./cursor.md#grid_cursor_col">col</a>, path) = c;
     <b>if</b> (<a href="./direction.md#grid_direction">direction</a> & up!() &gt; 0) {
-        <b>assert</b>!(*x &gt; 0, <a href="./cursor.md#grid_cursor_EOutOfBounds">EOutOfBounds</a>);
-        *x = *x - 1;
+        <b>assert</b>!(*<a href="./cursor.md#grid_cursor_row">row</a> &gt; 0, <a href="./cursor.md#grid_cursor_EOutOfBounds">EOutOfBounds</a>);
+        *<a href="./cursor.md#grid_cursor_row">row</a> = *<a href="./cursor.md#grid_cursor_row">row</a> - 1;
     } <b>else</b> <b>if</b> (<a href="./direction.md#grid_direction">direction</a> & down!() &gt; 0) {
-        *x = *x + 1;
+        *<a href="./cursor.md#grid_cursor_row">row</a> = *<a href="./cursor.md#grid_cursor_row">row</a> + 1;
     };
     <b>if</b> (<a href="./direction.md#grid_direction">direction</a> & left!() &gt; 0) {
-        <b>assert</b>!(*y &gt; 0, <a href="./cursor.md#grid_cursor_EOutOfBounds">EOutOfBounds</a>);
-        *y = *y - 1;
+        <b>assert</b>!(*<a href="./cursor.md#grid_cursor_col">col</a> &gt; 0, <a href="./cursor.md#grid_cursor_EOutOfBounds">EOutOfBounds</a>);
+        *<a href="./cursor.md#grid_cursor_col">col</a> = *<a href="./cursor.md#grid_cursor_col">col</a> - 1;
     } <b>else</b> <b>if</b> (<a href="./direction.md#grid_direction">direction</a> & right!() &gt; 0) {
-        *y = *y + 1;
+        *<a href="./cursor.md#grid_cursor_col">col</a> = *<a href="./cursor.md#grid_cursor_col">col</a> + 1;
     };
     path.push_back(<a href="./direction.md#grid_direction">direction</a>);
 }
@@ -348,8 +392,7 @@ cursor.move_to(direction::right!() | direction::down!());
 
 Move the <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> back to the previous position. Aborts if there is no history.
 
-```rust
-use grid::cursor;
+```move
 use grid::direction;
 
 let mut cursor = cursor::new(0, 0);
@@ -399,10 +442,10 @@ Check if a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> can 
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_can_move_to">can_move_to</a>(c: &<a href="./cursor.md#grid_cursor_Cursor">Cursor</a>, <a href="./direction.md#grid_direction">direction</a>: u8): bool {
-    <b>let</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(x, y, _) = c;
+    <b>let</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(<a href="./cursor.md#grid_cursor_row">row</a>, column, _) = c;
     <b>let</b> is_up = <a href="./direction.md#grid_direction">direction</a> & up!() &gt; 0;
     <b>let</b> is_left = <a href="./direction.md#grid_direction">direction</a> & left!() &gt; 0;
-    (is_up && *x &gt; 0 || !is_up) && (is_left && *y &gt; 0 || !is_left)
+    (is_up && *<a href="./cursor.md#grid_cursor_row">row</a> &gt; 0 || !is_up) && (is_left && *column &gt; 0 || !is_left)
 }
 </code></pre>
 
@@ -467,11 +510,10 @@ struct that is being deserialized from BCS.
 
 Print a <code><a href="./cursor.md#grid_cursor_Cursor">Cursor</a></code> as a string.
 
-```rust
-use grid::cursor;
+```move
 
 let cursor = cursor::new(1, 2);
-assert!(cursor.to_string() == b"(1, 2)".to_string());
+assert!(cursor.to_string() == b"[1, 2]".to_string());
 ```
 
 
@@ -485,13 +527,7 @@ assert!(cursor.to_string() == b"(1, 2)".to_string());
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./cursor.md#grid_cursor_to_string">to_string</a>(p: &<a href="./cursor.md#grid_cursor_Cursor">Cursor</a>): String {
-    <b>let</b> <b>mut</b> str = b"(".<a href="./cursor.md#grid_cursor_to_string">to_string</a>();
-    <b>let</b> <a href="./cursor.md#grid_cursor_Cursor">Cursor</a>(x, y, _) = *p;
-    str.append(x.<a href="./cursor.md#grid_cursor_to_string">to_string</a>());
-    str.append_utf8(b", ");
-    str.append(y.<a href="./cursor.md#grid_cursor_to_string">to_string</a>());
-    str.append_utf8(b")");
-    str
+    p.<a href="./cursor.md#grid_cursor_to_cell">to_cell</a>().<a href="./cursor.md#grid_cursor_to_string">to_string</a>()
 }
 </code></pre>
 

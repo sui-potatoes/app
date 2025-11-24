@@ -14,9 +14,10 @@ Monorepo for the Potatoes project. Contains all the applications and services th
 - [ascii](/packages/ascii) ([mvr](https://www.moveregistry.com/package/@potatoes/ascii)) - ASCII codes table and utilities
 - [bit-field](/packages/bit-field) ([mvr](https://www.moveregistry.com/package/@potatoes/bit-field)) - 0-cost bit packing library
 - [codec](/packages/codec) ([mvr](https://www.moveregistry.com/package/@potatoes/codec)) - ultimate encoding solution for Sui
+- [identify](/packages/identify) ([mvr](https://www.moveregistry.com/package/@potatoes/identify)) - generic type casting / identification library, utilizes dynamic fields to identify the type of a value at runtime
 - [date](/packages/date) ([mvr](https://www.moveregistry.com/package/@potatoes/date)) - date and time formatting library
 - [format!](/packages/format) ([mvr](https://www.moveregistry.com/package/@potatoes/format)) - string formatting library, inspired by Rust's `format!` macro
-- [Grid](/packages/grid) - all in one solution for 2D-grid applications or games
+- [grid](/packages/grid) ([mvr](https://www.moveregistry.com/package/@potatoes/grid)) - all in one solution for 2D-grid applications or games
 - [Name Generator](/packages/name-gen/) - Cyberpunk Name Generator, uses on-chain randomness
 - [SVG](/packages/svg) - SVG (XML) standard implemented in Move
 

@@ -1,10 +1,15 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-/// Implements Conway's game of life using grid.
+/// Implements Conway's Game of Life using Grid.
+///
+/// - Defines inner `Cell` with binary state.
+/// - Keeps track of live cells to optimize gas usage.
+/// - Uses `moore_neighborhood` to count neighbors of live cells.
+/// - Showcases `tabulate!` and `destroy!` macros.
 module grid::life;
 
-use grid::{grid::{Self, Grid}, point::{Self, Point}};
+use grid::{cell::{Self, Cell as GridCell}, grid::{Self, Grid}};
 use std::string::String;
 
 /// Rules:
@@ -17,7 +22,7 @@ public struct Life has key, store {
     /// Each cell is represented as a boolean value.
     grid: Grid<Cell>,
     /// Keep track of live cells to avoid traversing the grid.
-    live_cells: vector<Point>,
+    live_cells: vector<GridCell>,
 }
 
 /// Represents the game state. We use the wrapper type to implement `to_string`,
@@ -28,23 +33,23 @@ public struct Cell(bool) has copy, drop, store;
 public fun new(width: u16, height: u16, ctx: &mut TxContext): Life {
     Life {
         id: object::new(ctx),
-        grid: grid::tabulate!(width, height, |_, _| Cell(false)),
+        grid: grid::tabulate!(height, width, |_, _| Cell(false)),
         live_cells: vector[],
     }
 }
 
-/// Place a live cell on the grid at (x, y).
-public fun place(l: &mut Life, x: u16, y: u16) {
-    l.live_cells.push_back(point::new(x, y));
-    let _ = l.grid.swap(x, y, Cell(true));
+/// Place a live cell on the grid at (row, col).
+public fun place(l: &mut Life, row: u16, col: u16) {
+    l.live_cells.push_back(cell::new(row, col));
+    let _ = l.grid.swap(row, col, Cell(true));
 }
 
 /// Perform a single tick of the game, calculate the next state.
 public fun tick(l: &mut Life) {
     // Keep track of visited cells. Using `Grid` instead of `vec_set`-likes
     // significantly improves performance by avoiding `contains` loops.
-    let (width, height) = (l.grid.cols(), l.grid.rows());
-    let mut visited = grid::tabulate!(width, height, |_, _| false);
+    let (cols, rows) = (l.grid.cols(), l.grid.rows());
+    let mut visited = grid::tabulate!(rows, cols, |_, _| false);
     let mut live_cells = vector[];
     let mut dead_cells = vector[];
     let mut to_check = vector[];
@@ -52,10 +57,10 @@ public fun tick(l: &mut Life) {
     // We only need to check the live cells and their neighbors: based on the
     // rules, live cells die and dead cells become live only where life exists.
     l.live_cells.do!(|p| {
-        p.moore(1).destroy!(|p| {
-            let (x, y) = p.into_values();
-            if (x >= height || y >= width) return;
-            let mut_ref = &mut visited[x, y];
+        p.moore_neighbors(1).destroy!(|p| {
+            let (row, col) = p.to_values();
+            if (row >= rows || col >= cols) return;
+            let mut_ref = &mut visited[row, col];
             if (*mut_ref) return;
             *mut_ref = true;
             to_check.push_back(p);
@@ -63,8 +68,8 @@ public fun tick(l: &mut Life) {
     });
 
     to_check.destroy!(|p| {
-        let is_live = l.grid.borrow_point(&p).0;
-        let count = l.grid.moore_count!(p, 1, |v| v.0);
+        let is_live = l.grid.borrow_cell(&p).0;
+        let count = l.grid.moore_neighbors_count!(p, 1, |v| v.0);
         if (is_live && (count < 2 || count > 3)) {
             // Mark as dead.
             dead_cells.push_back(p);
@@ -77,8 +82,8 @@ public fun tick(l: &mut Life) {
         }
     });
 
-    dead_cells.destroy!(|p| *&mut l.grid.borrow_point_mut(&p).0 = false);
-    live_cells.destroy!(|p| *&mut l.grid.borrow_point_mut(&p).0 = true);
+    dead_cells.destroy!(|p| *&mut l.grid.borrow_cell_mut(&p).0 = false);
+    live_cells.destroy!(|p| *&mut l.grid.borrow_cell_mut(&p).0 = true);
 
     l.live_cells = live_cells;
 }
