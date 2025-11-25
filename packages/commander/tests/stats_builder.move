@@ -267,7 +267,7 @@ public fun build_weapon(self: StatsBuilder): Stats {
 
 #[test_only]
 public fun destroy(self: StatsBuilder) {
-    sui::test_utils::destroy(self)
+    std::unit_test::destroy(self)
 }
 
 #[test]

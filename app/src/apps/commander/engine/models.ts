@@ -6,7 +6,6 @@ import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
 const modelsList = {
     soldier: "/models/soldier_3.glb",
-    // base_tile: "/models/base_tile.glb",
     barrier_steel: "/models/barrier_steel.glb",
     barrel_stack: "/models/barrel_stack.glb",
     the_dude: "/models/the_dude.glb",

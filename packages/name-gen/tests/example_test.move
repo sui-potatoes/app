@@ -4,7 +4,8 @@
 module name_gen::hero_tests;
 
 use name_gen::hero::{Self, Hero};
-use sui::{random::{Self, Random}, test_scenario, test_utils};
+use std::unit_test::destroy;
+use sui::{random::{Self, Random}, test_scenario};
 
 #[test]
 fun test_new_hero() {
@@ -22,7 +23,7 @@ fun test_new_hero() {
     // make sure a new object was sent to the sender
     let hero = test_scenario::take_from_address<Hero>(&test, @0);
     assert!(hero.name().length() > 0);
-    test_utils::destroy(hero);
+    destroy(hero);
 
     test_scenario::return_shared(rng);
     test.end();

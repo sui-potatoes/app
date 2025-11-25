@@ -1,0 +1,28 @@
+name: Potatoes Rust QA
+
+on:
+    pull_request:
+
+env:
+    GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+    GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+    ENOKI_API_KEY: ${{ secrets.ENOKI_PUBLIC_KEY }}
+
+jobs:
+    test-rust-packages:
+        name: Build and Test Rust Packages
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions-rust-lang/setup-rust-toolchain@v1
+            - run: sudo apt-get update && sudo apt-get install -y libudev-dev libasound2-dev
+            - run: cargo build --release --all
+            - run: cargo test --all
+
+    cargo-fmt:
+        name: Check Rust formatting
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions-rust-lang/setup-rust-toolchain@v1
+            - run: cargo fmt --all --check

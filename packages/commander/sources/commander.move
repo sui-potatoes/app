@@ -180,7 +180,7 @@ public fun new_game(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut Tx
 
 /// Create a new public game, allowing anyone to spectate.
 public fun register_game(cmd: &mut Commander, clock: &Clock, game: &Game, _ctx: &mut TxContext) {
-    if (cmd.games.size() == PUBLIC_GAMES_LIMIT) {
+    if (cmd.games.length() == PUBLIC_GAMES_LIMIT) {
         // remove the oldest game, given that the VecMap is following the insertion order
         let (_, _) = cmd.games.remove_entry_by_idx(0);
     };

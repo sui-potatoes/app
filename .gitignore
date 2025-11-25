@@ -2,3 +2,9 @@
 .idea
 .vscode
 .DS_Store
+
+# Commander
+*.data
+
+/build
+/target
