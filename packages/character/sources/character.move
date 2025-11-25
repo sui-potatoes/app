@@ -226,7 +226,7 @@ public fun update_image(
 /// TODO: a stricter check would be to check against the `0x1` and `0x2` origin
 ///      of the type, but we can leave it for now.
 public fun add<K: store + copy + drop, V: store>(c: &mut Character, key: K, value: V) {
-    assert!(!type_name::get<K>().is_primitive(), EIncorrectDynamicField);
+    assert!(!type_name::with_defining_ids<K>().is_primitive(), EIncorrectDynamicField);
     df::add(&mut c.id, key, value)
 }
 

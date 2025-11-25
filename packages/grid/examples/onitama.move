@@ -278,8 +278,7 @@ public fun debug(field: &Field) {
 
 #[test]
 fun test_game() {
-    use sui::test_utils::destroy;
-    use std::unit_test::assert_eq;
+    use std::unit_test::{assert_eq, destroy};
 
     let use_debug = false;
     let mut field = new(vector[0, 1, 2, 3, 4]); // cards 0-4 are used

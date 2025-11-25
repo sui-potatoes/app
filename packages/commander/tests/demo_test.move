@@ -4,8 +4,8 @@
 module commander::demo_test;
 
 use commander::{history, items, map, recruit::{Self, Recruit}};
-use std::unit_test::assert_eq;
-use sui::{random, test_utils::destroy};
+use std::unit_test::{assert_eq, destroy};
+use sui::random;
 
 #[test]
 fun play_test_demo_1() {
