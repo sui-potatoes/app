@@ -4,7 +4,7 @@
 module character::character_tests;
 
 use character::character;
-use std::unit_test::{assert_eq,destroy};
+use std::unit_test::{assert_eq, destroy};
 
 /// The key to use in application tests.
 public struct ApplicationKey(u8) has copy, drop, store;

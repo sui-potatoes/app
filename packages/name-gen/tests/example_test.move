@@ -4,8 +4,8 @@
 module name_gen::hero_tests;
 
 use name_gen::hero::{Self, Hero};
-use sui::{random::{Self, Random}, test_scenario};
 use std::unit_test::destroy;
+use sui::{random::{Self, Random}, test_scenario};
 
 #[test]
 fun test_new_hero() {
