@@ -50,7 +50,7 @@ public struct Checkers has key, store {
 public fun new(ctx: &mut TxContext): Checkers {
     Checkers {
         id: object::new(ctx),
-        grid: grid::tabulate!(8, 8, |row, col| {
+        grid: grid::tabulate!(8u8, 8, |row, col| {
             if ((row + col) % 2 == 1) Tile::Unavailable
             else if (row < 3 && (row + col) % 2 == 0) Tile::Red(false)
             else if (row > 4 && (row + col) % 2 == 0) Tile::Blue(false)

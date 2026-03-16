@@ -1,6 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+#[allow(untyped_literal)]
 module grid::direction_tests;
 
 use grid::direction::{Self, none, up, down, left, right, inverse};

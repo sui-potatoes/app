@@ -1,6 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+#[allow(untyped_literal)]
 module grid::grid_tests;
 
 use grid::{cell, grid};
@@ -9,7 +10,7 @@ use sui::bcs;
 
 #[test]
 fun creation() {
-    let grid = grid::from_vector(vector[vector[0]]);
+    let grid = grid::from_vector(vector[vector[0u8]]);
     assert_eq!(grid.cols(), 1);
     assert_eq!(grid.rows(), 1);
     assert_eq!(grid[0, 0], 0);
@@ -38,7 +39,7 @@ fun from_vector_inconsistent_lengths_fail() {
 
 #[test]
 fun do_and_do_ref_mut() {
-    let mut grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
+    let mut grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8u8]]);
 
     let mut sum = 0;
     grid.do_ref!(|cell| sum = sum + *cell);

@@ -40,7 +40,7 @@
 /// ```
 module grid::direction;
 
-use std::macros::{num_min, num_diff};
+use grid::macros::num_diff;
 
 // === Check Directions ===
 

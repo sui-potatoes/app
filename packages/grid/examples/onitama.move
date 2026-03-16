@@ -46,7 +46,7 @@ public enum MoveCard has store {
 }
 
 public fun new(mut cards: vector<u8>): Field {
-    let grid = grid::tabulate!(5, 5, |row, col| {
+    let grid = grid::tabulate!(5u8, 5, |row, col| {
         if (row == 0 && col != 2) Figure::BlueStudent
         else if (row == 0 && col == 2) Figure::BlueMaster
         else if (row == 4 && col != 2) Figure::RedStudent

@@ -12,7 +12,7 @@ module commander::map;
 
 use commander::{history::{Self, Record}, recruit::Recruit, unit::{Self, Unit}};
 use grid::{cell, cursor, grid::{Self, Grid}};
-use std::{macros::{num_min, num_max}, string::String};
+use std::string::String;
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
 /// Attempt to place a `Recruit` on a tile that already has a unit.
@@ -252,36 +252,36 @@ public(package) fun cover_bonus(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16): 
             right
         }
     } else if (direction == up!() | left!()) {
-        let cover_type = num_max!(down, right);
+        let cover_type = down.max(right);
         if (cover_type  != 0) cover_type
         else {
             let (top, _, _, _) = map.tile_cover!(x1 + 1, y1);
             let (_, _, left, _) = map.tile_cover!(x1, y1 + 1);
-            num_max!(top, left)
+            top.max(left)
         }
     } else if (direction == up!() | right!()) {
-        let cover_type = num_max!(down, left);
+        let cover_type = down.max(left);
         if (cover_type != 0) cover_type
         else {
             let (top, _, _, _) = map.tile_cover!(x1 + 1, y1);
             let (_, _, _, right) = map.tile_cover!(x1, y1 - 1);
-            num_max!(top, right)
+            top.max(right)
         }
     } else if (direction == down!() | left!()) {
-        let cover_type = num_max!(up, right);
+        let cover_type = up.max(right);
         if (cover_type != 0) cover_type
         else {
             let (_, bottom, _, _) = map.tile_cover!(x1 - 1, y1);
             let (_, _, left, _) = map.tile_cover!(x1, y1 + 1);
-            num_max!(bottom, left)
+            bottom.max(left)
         }
     } else if (direction == down!() | right!()) {
-        let cover_type = num_max!(up, left);
+        let cover_type = up.max(left);
         if (cover_type != 0) cover_type
         else {
             let (_, bottom, _, _) = map.tile_cover!(x1 - 1, y1);
             let (_, _, _, right) = map.tile_cover!(x1, y1 - 1);
-            num_max!(bottom, right)
+            bottom.max(right)
         }
     } else abort; // unreachable
 

@@ -55,6 +55,8 @@ public fun format(template: String, values: vector<String>): String {
         offset = indices[i] + 2;
     });
 
+    s.append(t.substring(offset, len));
+
     s
 }
 
@@ -100,5 +102,11 @@ fun test_format() {
         ),
     );
 
-    dbg!(b"Hello, {}! It's good to see you, {}!", vector[b"John".to_string(), b"Jane".to_string()]);
+    assert_eq!(
+        b"Hello, John! It's good to see you, Jane!".to_string(),
+        format(
+            b"Hello, {}! It's good to see you, {}!".to_string(),
+            vector[b"John".to_string(), b"Jane".to_string()],
+        ),
+    );
 }

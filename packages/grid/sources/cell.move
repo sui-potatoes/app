@@ -6,8 +6,8 @@
 /// cell in 2D space.
 module grid::cell;
 
-use grid::direction;
-use std::{macros::{num_diff, num_max}, string::String};
+use grid::{direction, macros::{num_diff, num_max}};
+use std::string::String;
 use sui::bcs::{Self, BCS};
 
 public use fun grid::cursor::from_cell as Cell.to_cursor;
