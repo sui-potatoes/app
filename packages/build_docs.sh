@@ -32,8 +32,8 @@ for dir in */ ; do
   # Step 4: Copy generated docs to ./docs
   pkg_name=$(basename "$(pwd)")
   upkg_name=$(basename "$(pwd)" | sed 's/-/_/g')
-  if [ -d "build/$pkg_name/docs/$upkg_name" ]; then
-    cp -r build/$pkg_name/docs/$upkg_name/* docs/
+  if [ -d "build/$upkg_name/docs/$upkg_name" ]; then
+    cp -r build/$upkg_name/docs/$upkg_name/* docs/
   else
     echo "No docs found in build/docs/$upkg_name"
   fi
