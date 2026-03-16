@@ -4,8 +4,7 @@
 module go_game::game_tests;
 
 use go_game::game::{Self, Game};
-use sui::test_scenario;
-use sui::clock;
+use sui::{clock, test_scenario};
 
 #[test]
 fun play_solo_game() {
