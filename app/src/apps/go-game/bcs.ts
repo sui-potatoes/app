@@ -17,7 +17,7 @@ const Grid = bcs.struct("Grid", {
     grid: bcs.vector(bcs.vector(bcs.u8())),
     rows: bcs.u16(),
     cols: bcs.u16(),
-})
+});
 
 const Board = bcs.struct("Board", {
     size: bcs.u16(),
