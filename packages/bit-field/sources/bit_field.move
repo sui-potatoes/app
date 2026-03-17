@@ -14,7 +14,7 @@ public macro fun pack_bool<$T>($values: vector<bool>): $T {
     values.reverse();
 
     while (i < len) {
-        v = v | (if (values.pop_back()) 1 else 0 as $T) << i;
+        v = v | (if (values.pop_back()) 1 else 0u64 as $T) << i;
         i = i + 1;
     };
     v

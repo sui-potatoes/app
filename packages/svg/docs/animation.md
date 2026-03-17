@@ -1,7 +1,7 @@
 
-<a name="(svg=0x0)_animation"></a>
+<a name="svg_animation"></a>
 
-# Module `(svg=0x0)::animation`
+# Module `svg::animation`
 
 Implements SVG animations. Animations can be applied to SVG elements to create
 interactive and dynamic content.
@@ -15,7 +15,7 @@ See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/SVG_animatio
 
 
 Animation can be added to any <code>Shape</code> element by calling <code>add_animation</code> on the
-element. The <code>add_animation</code> method takes an <code><a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a></code> struct as an argument.
+element. The <code>add_animation</code> method takes an <code><a href="./animation.md#svg_animation_Animation">Animation</a></code> struct as an argument.
 
 ```rust
 use svg::{animation, shape, svg};
@@ -36,8 +36,8 @@ svg.add_root(vector[rect]);
 svg.to_string();
 ```
 
-The <code><a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a></code> struct has several builder methods to set the properties of the
-animation. The <code><a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a></code> method can be called on the <code><a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a></code> struct to
+The <code><a href="./animation.md#svg_animation_Animation">Animation</a></code> struct has several builder methods to set the properties of the
+animation. The <code><a href="./animation.md#svg_animation_to_string">to_string</a></code> method can be called on the <code><a href="./animation.md#svg_animation_Animation">Animation</a></code> struct to
 convert it to a string.
 
 ```rust
@@ -54,45 +54,45 @@ animation.to_string();
 
 
         -  [Usage](#@Usage_0)
--  [Struct `MPath`](#(svg=0x0)_animation_MPath)
--  [Struct `Animation`](#(svg=0x0)_animation_Animation)
--  [Enum `AnimationType`](#(svg=0x0)_animation_AnimationType)
--  [Function `animate`](#(svg=0x0)_animation_animate)
+-  [Struct `MPath`](#svg_animation_MPath)
+-  [Struct `Animation`](#svg_animation_Animation)
+-  [Enum `AnimationType`](#svg_animation_AnimationType)
+-  [Function `animate`](#svg_animation_animate)
         -  [Description](#@Description_1)
         -  [Usage](#@Usage_2)
--  [Function `animate_motion`](#(svg=0x0)_animation_animate_motion)
+-  [Function `animate_motion`](#svg_animation_animate_motion)
         -  [Description](#@Description_3)
         -  [Usage](#@Usage_4)
--  [Function `animate_transform`](#(svg=0x0)_animation_animate_transform)
+-  [Function `animate_transform`](#svg_animation_animate_transform)
         -  [Description](#@Description_5)
         -  [Usage](#@Usage_6)
--  [Function `set`](#(svg=0x0)_animation_set)
+-  [Function `set`](#svg_animation_set)
         -  [Description](#@Description_7)
         -  [Usage](#@Usage_8)
--  [Function `custom`](#(svg=0x0)_animation_custom)
--  [Function `mpath`](#(svg=0x0)_animation_mpath)
+-  [Function `custom`](#svg_animation_custom)
+-  [Function `mpath`](#svg_animation_mpath)
         -  [Description](#@Description_9)
         -  [Usage](#@Usage_10)
--  [Function `attribute_name`](#(svg=0x0)_animation_attribute_name)
--  [Function `values`](#(svg=0x0)_animation_values)
--  [Function `duration`](#(svg=0x0)_animation_duration)
--  [Function `repeat_count`](#(svg=0x0)_animation_repeat_count)
--  [Function `attributes_mut`](#(svg=0x0)_animation_attributes_mut)
--  [Macro function `map_attributes`](#(svg=0x0)_animation_map_attributes)
--  [Function `to_string`](#(svg=0x0)_animation_to_string)
+-  [Function `attribute_name`](#svg_animation_attribute_name)
+-  [Function `values`](#svg_animation_values)
+-  [Function `duration`](#svg_animation_duration)
+-  [Function `repeat_count`](#svg_animation_repeat_count)
+-  [Function `attributes_mut`](#svg_animation_attributes_mut)
+-  [Macro function `map_attributes`](#svg_animation_map_attributes)
+-  [Function `to_string`](#svg_animation_to_string)
 
 
-<pre><code><b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./print.md#(svg=0x0)_print">print</a>;
-<b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
+<pre><code><b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
 <b>use</b> <a href="../../.doc-deps/std/string.md#std_string">std::string</a>;
 <b>use</b> <a href="../../.doc-deps/std/vector.md#std_vector">std::vector</a>;
 <b>use</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
+<b>use</b> <a href="./print.md#svg_print">svg::print</a>;
 </code></pre>
 
 
 
-<a name="(svg=0x0)_animation_MPath"></a>
+<a name="svg_animation_MPath"></a>
 
 ## Struct `MPath`
 
@@ -103,7 +103,7 @@ MPath animation, defines a path for an element to follow. Used in the
 See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/mpath)
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="./animation.md#(svg=0x0)_animation_MPath">MPath</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="./animation.md#svg_animation_MPath">MPath</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -123,14 +123,14 @@ See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/mpat
 
 </details>
 
-<a name="(svg=0x0)_animation_Animation"></a>
+<a name="svg_animation_Animation"></a>
 
 ## Struct `Animation`
 
 Animation struct, represents an animation that can be applied to SVG elements.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="./animation.md#svg_animation_Animation">Animation</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -141,33 +141,33 @@ Animation struct, represents an animation that can be applied to SVG elements.
 
 <dl>
 <dt>
-<code><a href="./animation.md#(svg=0x0)_animation">animation</a>: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_AnimationType">animation::AnimationType</a></code>
+<code><a href="./animation.md#svg_animation">animation</a>: <a href="./animation.md#svg_animation_AnimationType">svg::animation::AnimationType</a></code>
 </dt>
 <dd>
  The type of animation element.
 </dd>
 <dt>
-<code><a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;</code>
+<code><a href="./animation.md#svg_animation_attribute_name">attribute_name</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;</code>
 </dt>
 <dd>
  The name of the attribute to animate. Translates to the <code>attributeName</code>
  property in the SVG element.
 </dd>
 <dt>
-<code><a href="./animation.md#(svg=0x0)_animation_values">values</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;</code>
+<code><a href="./animation.md#svg_animation_values">values</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;</code>
 </dt>
 <dd>
  The path to animate along. Translates to the <code>path</code> property in the SVG element.
  Used in the <code>animateMotion</code> and <code>animateTransform</code> elements.
 </dd>
 <dt>
-<code><a href="./animation.md#(svg=0x0)_animation_duration">duration</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;</code>
+<code><a href="./animation.md#svg_animation_duration">duration</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;</code>
 </dt>
 <dd>
  Duration of the animation. Translates to the <code>dur</code> property in the SVG element.
 </dd>
 <dt>
-<code><a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;</code>
+<code><a href="./animation.md#svg_animation_repeat_count">repeat_count</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;</code>
 </dt>
 <dd>
  Number of times to repeat the animation. Translates to the <code>repeatCount</code>
@@ -184,7 +184,7 @@ Animation struct, represents an animation that can be applied to SVG elements.
 
 </details>
 
-<a name="(svg=0x0)_animation_AnimationType"></a>
+<a name="svg_animation_AnimationType"></a>
 
 ## Enum `AnimationType`
 
@@ -197,7 +197,7 @@ applied to SVG elements.
 - <code>Set</code> - set animation, sets the value of an attribute at a specific time.
 
 
-<pre><code><b>public</b> <b>enum</b> <a href="./animation.md#(svg=0x0)_animation_AnimationType">AnimationType</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>enum</b> <a href="./animation.md#svg_animation_AnimationType">AnimationType</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -229,7 +229,7 @@ Variant <code>AnimateMotion</code>
 
 <dl>
 <dt>
-<code><a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_MPath">animation::MPath</a>&gt;</code>
+<code><a href="./animation.md#svg_animation_mpath">mpath</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="./animation.md#svg_animation_MPath">svg::animation::MPath</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -302,11 +302,11 @@ Variant <code>Custom</code>
 
 </details>
 
-<a name="(svg=0x0)_animation_animate"></a>
+<a name="svg_animation_animate"></a>
 
 ## Function `animate`
 
-Create a new <code>&lt;<a href="./animation.md#(svg=0x0)_animation_animate">animate</a>&gt;</code> element.
+Create a new <code>&lt;<a href="./animation.md#svg_animation_animate">animate</a>&gt;</code> element.
 Animates an attribute from one value to another.
 
 
@@ -315,11 +315,11 @@ Animates an attribute from one value to another.
 #### Description
 
 
-- Element: <code>&lt;<a href="./animation.md#(svg=0x0)_animation_animate">animate</a>&gt;</code>
+- Element: <code>&lt;<a href="./animation.md#svg_animation_animate">animate</a>&gt;</code>
 - Own properties: None.
 - Inherited properties:
 - <code>attribute</code> - the name of the attribute to animate.
-- <code><a href="./animation.md#(svg=0x0)_animation_values">values</a></code> - a list of values to animate between.
+- <code><a href="./animation.md#svg_animation_values">values</a></code> - a list of values to animate between.
 - <code>dur</code> - the duration of the animation.
 - <code>repeatCount</code> - the number of times to repeat the animation.
 - Extended properties:
@@ -349,7 +349,7 @@ animation.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_animate">animate</a>(): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_animate">animate</a>(): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -358,13 +358,13 @@ animation.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_animate">animate</a>(): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-    <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-        <a href="./animation.md#(svg=0x0)_animation">animation</a>: AnimationType::Animate,
-        <a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_values">values</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>: option::none(),
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_animate">animate</a>(): <a href="./animation.md#svg_animation_Animation">Animation</a> {
+    <a href="./animation.md#svg_animation_Animation">Animation</a> {
+        <a href="./animation.md#svg_animation">animation</a>: AnimationType::Animate,
+        <a href="./animation.md#svg_animation_attribute_name">attribute_name</a>: option::none(),
+        <a href="./animation.md#svg_animation_values">values</a>: option::none(),
+        <a href="./animation.md#svg_animation_duration">duration</a>: option::none(),
+        <a href="./animation.md#svg_animation_repeat_count">repeat_count</a>: option::none(),
         attributes: vec_map::empty(),
     }
 }
@@ -374,7 +374,7 @@ animation.to_string();
 
 </details>
 
-<a name="(svg=0x0)_animation_animate_motion"></a>
+<a name="svg_animation_animate_motion"></a>
 
 ## Function `animate_motion`
 
@@ -391,7 +391,7 @@ Animates an element along a path.
 - Element: <code>&lt;animateMotion&gt;</code>
 - Own properties:
 - <code>path</code> - the path to animate along.
-- <code><a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a></code> - the path element to follow.
+- <code><a href="./animation.md#svg_animation_mpath">mpath</a></code> - the path element to follow.
 - Inherited properties:
 - <code>dur</code> - the duration of the animation.
 - <code>repeatCount</code> - the number of times to repeat the animation.
@@ -419,7 +419,7 @@ let animation1 = animation::animate_motion(option::some(b"M10,90 Q90,90 z"), opt
 let mut circle = shape::circle(5);
 circle.add_animation(animation1);
 
-// Reference a path element by id using <code><a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a></code>.
+// Reference a path element by id using <code><a href="./animation.md#svg_animation_mpath">mpath</a></code>.
 let mpath = animation::mpath(b"#path");
 let animation2 = animation::animate_motion(option::none(), option::some(mpath));
 
@@ -428,7 +428,7 @@ rect.add_animation(animation2);
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_animate_motion">animate_motion</a>(path: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;vector&lt;u8&gt;&gt;, <a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_MPath">animation::MPath</a>&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_animate_motion">animate_motion</a>(path: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;vector&lt;u8&gt;&gt;, <a href="./animation.md#svg_animation_mpath">mpath</a>: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;<a href="./animation.md#svg_animation_MPath">svg::animation::MPath</a>&gt;): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -437,16 +437,16 @@ rect.add_animation(animation2);
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_animate_motion">animate_motion</a>(path: Option&lt;vector&lt;u8&gt;&gt;, <a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>: Option&lt;<a href="./animation.md#(svg=0x0)_animation_MPath">MPath</a>&gt;): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-    <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-        <a href="./animation.md#(svg=0x0)_animation">animation</a>: AnimationType::AnimateMotion {
-            path: path.map!(|p| p.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>()),
-            <a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>,
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_animate_motion">animate_motion</a>(path: Option&lt;vector&lt;u8&gt;&gt;, <a href="./animation.md#svg_animation_mpath">mpath</a>: Option&lt;<a href="./animation.md#svg_animation_MPath">MPath</a>&gt;): <a href="./animation.md#svg_animation_Animation">Animation</a> {
+    <a href="./animation.md#svg_animation_Animation">Animation</a> {
+        <a href="./animation.md#svg_animation">animation</a>: AnimationType::AnimateMotion {
+            path: path.map!(|p| p.<a href="./animation.md#svg_animation_to_string">to_string</a>()),
+            <a href="./animation.md#svg_animation_mpath">mpath</a>,
         },
-        <a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_values">values</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>: option::none(),
+        <a href="./animation.md#svg_animation_attribute_name">attribute_name</a>: option::none(),
+        <a href="./animation.md#svg_animation_values">values</a>: option::none(),
+        <a href="./animation.md#svg_animation_duration">duration</a>: option::none(),
+        <a href="./animation.md#svg_animation_repeat_count">repeat_count</a>: option::none(),
         attributes: vec_map::empty(),
     }
 }
@@ -456,7 +456,7 @@ rect.add_animation(animation2);
 
 </details>
 
-<a name="(svg=0x0)_animation_animate_transform"></a>
+<a name="svg_animation_animate_transform"></a>
 
 ## Function `animate_transform`
 
@@ -479,7 +479,7 @@ Animate transform animation.
 - <code>attribute</code> - the name of the attribute to animate.
 - <code>dur</code> - the duration of the animation.
 - <code>repeatCount</code> - the number of times to repeat the animation.
-- <code><a href="./animation.md#(svg=0x0)_animation_values">values</a></code> - the values to animate between.
+- <code><a href="./animation.md#svg_animation_values">values</a></code> - the values to animate between.
 - Extended properties:
 - <code>by</code> - the amount to change the transformation by.
 - <code>begin</code> - the time to start the animation.
@@ -506,7 +506,7 @@ shape.add_animation(animation);
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_animate_transform">animate_transform</a>(transform_type: vector&lt;u8&gt;, from: vector&lt;u8&gt;, to: vector&lt;u8&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_animate_transform">animate_transform</a>(transform_type: vector&lt;u8&gt;, from: vector&lt;u8&gt;, to: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -515,21 +515,21 @@ shape.add_animation(animation);
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_animate_transform">animate_transform</a>(
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_animate_transform">animate_transform</a>(
     transform_type: vector&lt;u8&gt;,
     from: vector&lt;u8&gt;,
     to: vector&lt;u8&gt;,
-): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-    <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-        <a href="./animation.md#(svg=0x0)_animation">animation</a>: AnimationType::AnimateTransform {
-            transform_type: transform_type.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(),
-            from: from.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(),
-            to: to.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(),
+): <a href="./animation.md#svg_animation_Animation">Animation</a> {
+    <a href="./animation.md#svg_animation_Animation">Animation</a> {
+        <a href="./animation.md#svg_animation">animation</a>: AnimationType::AnimateTransform {
+            transform_type: transform_type.<a href="./animation.md#svg_animation_to_string">to_string</a>(),
+            from: from.<a href="./animation.md#svg_animation_to_string">to_string</a>(),
+            to: to.<a href="./animation.md#svg_animation_to_string">to_string</a>(),
         },
-        <a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_values">values</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>: option::none(),
+        <a href="./animation.md#svg_animation_attribute_name">attribute_name</a>: option::none(),
+        <a href="./animation.md#svg_animation_values">values</a>: option::none(),
+        <a href="./animation.md#svg_animation_duration">duration</a>: option::none(),
+        <a href="./animation.md#svg_animation_repeat_count">repeat_count</a>: option::none(),
         attributes: vec_map::empty(),
     }
 }
@@ -539,11 +539,11 @@ shape.add_animation(animation);
 
 </details>
 
-<a name="(svg=0x0)_animation_set"></a>
+<a name="svg_animation_set"></a>
 
 ## Function `set`
 
-Create a new <code>&lt;<a href="./animation.md#(svg=0x0)_animation_set">set</a>&gt;</code> element.
+Create a new <code>&lt;<a href="./animation.md#svg_animation_set">set</a>&gt;</code> element.
 
 
 <a name="@Description_7"></a>
@@ -553,7 +553,7 @@ Create a new <code>&lt;<a href="./animation.md#(svg=0x0)_animation_set">set</a>&
 
 Sets the value of an attribute at a specific time.
 
-- Element: <code>&lt;<a href="./animation.md#(svg=0x0)_animation_set">set</a>&gt;</code>
+- Element: <code>&lt;<a href="./animation.md#svg_animation_set">set</a>&gt;</code>
 - Own properties:
 - <code>to</code> - the value to set the attribute to.
 - Inherited properties:
@@ -585,7 +585,7 @@ shape.add_animation(animation);
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_set">set</a>(to: vector&lt;u8&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_set">set</a>(to: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -594,15 +594,15 @@ shape.add_animation(animation);
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_set">set</a>(to: vector&lt;u8&gt;): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-    <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-        <a href="./animation.md#(svg=0x0)_animation">animation</a>: AnimationType::Set {
-            to: to.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(),
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_set">set</a>(to: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">Animation</a> {
+    <a href="./animation.md#svg_animation_Animation">Animation</a> {
+        <a href="./animation.md#svg_animation">animation</a>: AnimationType::Set {
+            to: to.<a href="./animation.md#svg_animation_to_string">to_string</a>(),
         },
-        <a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_values">values</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>: option::none(),
+        <a href="./animation.md#svg_animation_attribute_name">attribute_name</a>: option::none(),
+        <a href="./animation.md#svg_animation_values">values</a>: option::none(),
+        <a href="./animation.md#svg_animation_duration">duration</a>: option::none(),
+        <a href="./animation.md#svg_animation_repeat_count">repeat_count</a>: option::none(),
         attributes: vec_map::empty(),
     }
 }
@@ -612,7 +612,7 @@ shape.add_animation(animation);
 
 </details>
 
-<a name="(svg=0x0)_animation_custom"></a>
+<a name="svg_animation_custom"></a>
 
 ## Function `custom`
 
@@ -627,7 +627,7 @@ shape.add_animation(animation);
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_custom">custom</a>(content: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_custom">custom</a>(content: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -636,13 +636,13 @@ shape.add_animation(animation);
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_custom">custom</a>(content: String): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-    <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-        <a href="./animation.md#(svg=0x0)_animation">animation</a>: AnimationType::Custom(content),
-        <a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_values">values</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>: option::none(),
-        <a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>: option::none(),
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_custom">custom</a>(content: String): <a href="./animation.md#svg_animation_Animation">Animation</a> {
+    <a href="./animation.md#svg_animation_Animation">Animation</a> {
+        <a href="./animation.md#svg_animation">animation</a>: AnimationType::Custom(content),
+        <a href="./animation.md#svg_animation_attribute_name">attribute_name</a>: option::none(),
+        <a href="./animation.md#svg_animation_values">values</a>: option::none(),
+        <a href="./animation.md#svg_animation_duration">duration</a>: option::none(),
+        <a href="./animation.md#svg_animation_repeat_count">repeat_count</a>: option::none(),
         attributes: vec_map::empty(),
     }
 }
@@ -652,11 +652,11 @@ shape.add_animation(animation);
 
 </details>
 
-<a name="(svg=0x0)_animation_mpath"></a>
+<a name="svg_animation_mpath"></a>
 
 ## Function `mpath`
 
-Create a new <code>&lt;<a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>&gt;</code> element. Special element used in the <code>animateMotion</code> element
+Create a new <code>&lt;<a href="./animation.md#svg_animation_mpath">mpath</a>&gt;</code> element. Special element used in the <code>animateMotion</code> element
 to reference a <code>path</code> element by id. Passed as an argument to the <code>animateMotion</code>.
 
 
@@ -684,7 +684,7 @@ animation::mpath(b"#path");
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>(href: vector&lt;u8&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_MPath">animation::MPath</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_mpath">mpath</a>(href: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_MPath">svg::animation::MPath</a>
 </code></pre>
 
 
@@ -693,21 +693,21 @@ animation::mpath(b"#path");
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>(href: vector&lt;u8&gt;): <a href="./animation.md#(svg=0x0)_animation_MPath">MPath</a> { <a href="./animation.md#(svg=0x0)_animation_MPath">MPath</a>(href.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>()) }
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_mpath">mpath</a>(href: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_MPath">MPath</a> { <a href="./animation.md#svg_animation_MPath">MPath</a>(href.<a href="./animation.md#svg_animation_to_string">to_string</a>()) }
 </code></pre>
 
 
 
 </details>
 
-<a name="(svg=0x0)_animation_attribute_name"></a>
+<a name="svg_animation_attribute_name"></a>
 
 ## Function `attribute_name`
 
 Set the name of the attribute to animate.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>(self: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>, name: vector&lt;u8&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_attribute_name">attribute_name</a>(self: <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>, name: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -716,8 +716,8 @@ Set the name of the attribute to animate.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>(<b>mut</b> self: <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a>, name: vector&lt;u8&gt;): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-    self.<a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>.fill(name.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>());
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_attribute_name">attribute_name</a>(<b>mut</b> self: <a href="./animation.md#svg_animation_Animation">Animation</a>, name: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">Animation</a> {
+    self.<a href="./animation.md#svg_animation_attribute_name">attribute_name</a>.fill(name.<a href="./animation.md#svg_animation_to_string">to_string</a>());
     self
 }
 </code></pre>
@@ -726,14 +726,14 @@ Set the name of the attribute to animate.
 
 </details>
 
-<a name="(svg=0x0)_animation_values"></a>
+<a name="svg_animation_values"></a>
 
 ## Function `values`
 
 Set the values to animate between.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_values">values</a>(self: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>, <a href="./animation.md#(svg=0x0)_animation_values">values</a>: vector&lt;u8&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_values">values</a>(self: <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>, <a href="./animation.md#svg_animation_values">values</a>: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -742,8 +742,8 @@ Set the values to animate between.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_values">values</a>(<b>mut</b> self: <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a>, <a href="./animation.md#(svg=0x0)_animation_values">values</a>: vector&lt;u8&gt;): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-    self.<a href="./animation.md#(svg=0x0)_animation_values">values</a>.fill(<a href="./animation.md#(svg=0x0)_animation_values">values</a>.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>());
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_values">values</a>(<b>mut</b> self: <a href="./animation.md#svg_animation_Animation">Animation</a>, <a href="./animation.md#svg_animation_values">values</a>: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">Animation</a> {
+    self.<a href="./animation.md#svg_animation_values">values</a>.fill(<a href="./animation.md#svg_animation_values">values</a>.<a href="./animation.md#svg_animation_to_string">to_string</a>());
     self
 }
 </code></pre>
@@ -752,14 +752,14 @@ Set the values to animate between.
 
 </details>
 
-<a name="(svg=0x0)_animation_duration"></a>
+<a name="svg_animation_duration"></a>
 
 ## Function `duration`
 
 Set the duration of the animation.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>(self: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>, <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>: vector&lt;u8&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_duration">duration</a>(self: <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>, <a href="./animation.md#svg_animation_duration">duration</a>: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -768,8 +768,8 @@ Set the duration of the animation.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>(<b>mut</b> self: <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a>, <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>: vector&lt;u8&gt;): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-    self.<a href="./animation.md#(svg=0x0)_animation_duration">duration</a>.fill(<a href="./animation.md#(svg=0x0)_animation_duration">duration</a>.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>());
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_duration">duration</a>(<b>mut</b> self: <a href="./animation.md#svg_animation_Animation">Animation</a>, <a href="./animation.md#svg_animation_duration">duration</a>: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">Animation</a> {
+    self.<a href="./animation.md#svg_animation_duration">duration</a>.fill(<a href="./animation.md#svg_animation_duration">duration</a>.<a href="./animation.md#svg_animation_to_string">to_string</a>());
     self
 }
 </code></pre>
@@ -778,14 +778,14 @@ Set the duration of the animation.
 
 </details>
 
-<a name="(svg=0x0)_animation_repeat_count"></a>
+<a name="svg_animation_repeat_count"></a>
 
 ## Function `repeat_count`
 
 Set the number of times to repeat the animation.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>(self: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>, count: vector&lt;u8&gt;): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_repeat_count">repeat_count</a>(self: <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>, count: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -794,8 +794,8 @@ Set the number of times to repeat the animation.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>(<b>mut</b> self: <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a>, count: vector&lt;u8&gt;): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
-    self.<a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>.fill(count.<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>());
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_repeat_count">repeat_count</a>(<b>mut</b> self: <a href="./animation.md#svg_animation_Animation">Animation</a>, count: vector&lt;u8&gt;): <a href="./animation.md#svg_animation_Animation">Animation</a> {
+    self.<a href="./animation.md#svg_animation_repeat_count">repeat_count</a>.fill(count.<a href="./animation.md#svg_animation_to_string">to_string</a>());
     self
 }
 </code></pre>
@@ -804,14 +804,14 @@ Set the number of times to repeat the animation.
 
 </details>
 
-<a name="(svg=0x0)_animation_attributes_mut"></a>
+<a name="svg_animation_attributes_mut"></a>
 
 ## Function `attributes_mut`
 
 Get mutable access to the attributes of the animation.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_attributes_mut">attributes_mut</a>(self: &<b>mut</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>): &<b>mut</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_attributes_mut">attributes_mut</a>(self: &<b>mut</b> <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>): &<b>mut</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;
 </code></pre>
 
 
@@ -820,7 +820,7 @@ Get mutable access to the attributes of the animation.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_attributes_mut">attributes_mut</a>(self: &<b>mut</b> <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a>): &<b>mut</b> VecMap&lt;String, String&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_attributes_mut">attributes_mut</a>(self: &<b>mut</b> <a href="./animation.md#svg_animation_Animation">Animation</a>): &<b>mut</b> VecMap&lt;String, String&gt; {
     &<b>mut</b> self.attributes
 }
 </code></pre>
@@ -829,7 +829,7 @@ Get mutable access to the attributes of the animation.
 
 </details>
 
-<a name="(svg=0x0)_animation_map_attributes"></a>
+<a name="svg_animation_map_attributes"></a>
 
 ## Macro function `map_attributes`
 
@@ -843,7 +843,7 @@ attrs.insert(b"stroke".to_string(), b"black".to_string());
 ```
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_map_attributes">map_attributes</a>($self: (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>, $f: |&<b>mut</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;| -&gt; ()): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./animation.md#svg_animation_map_attributes">map_attributes</a>($self: <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>, $f: |&<b>mut</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;| -&gt; ()): <a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>
 </code></pre>
 
 
@@ -852,9 +852,9 @@ attrs.insert(b"stroke".to_string(), b"black".to_string());
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_map_attributes">map_attributes</a>($self: <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a>, $f: |&<b>mut</b> VecMap&lt;String, String&gt;|): <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="./animation.md#svg_animation_map_attributes">map_attributes</a>($self: <a href="./animation.md#svg_animation_Animation">Animation</a>, $f: |&<b>mut</b> VecMap&lt;String, String&gt;|): <a href="./animation.md#svg_animation_Animation">Animation</a> {
     <b>let</b> <b>mut</b> self = $self;
-    <b>let</b> attributes = self.<a href="./animation.md#(svg=0x0)_animation_attributes_mut">attributes_mut</a>();
+    <b>let</b> attributes = self.<a href="./animation.md#svg_animation_attributes_mut">attributes_mut</a>();
     $f(attributes);
     self
 }
@@ -864,7 +864,7 @@ attrs.insert(b"stroke".to_string(), b"black".to_string());
 
 </details>
 
-<a name="(svg=0x0)_animation_to_string"></a>
+<a name="svg_animation_to_string"></a>
 
 ## Function `to_string`
 
@@ -880,7 +880,7 @@ animation.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(self: &(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./animation.md#(svg=0x0)_animation_Animation">animation::Animation</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_to_string">to_string</a>(self: &<a href="./animation.md#svg_animation_Animation">svg::animation::Animation</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -889,39 +889,39 @@ animation.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(self: &<a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a>): String {
-    <b>let</b> <a href="./animation.md#(svg=0x0)_animation_Animation">Animation</a> { <a href="./animation.md#(svg=0x0)_animation">animation</a>, <a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>, <a href="./animation.md#(svg=0x0)_animation_values">values</a>, <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>, <a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>, attributes } = self;
+<pre><code><b>public</b> <b>fun</b> <a href="./animation.md#svg_animation_to_string">to_string</a>(self: &<a href="./animation.md#svg_animation_Animation">Animation</a>): String {
+    <b>let</b> <a href="./animation.md#svg_animation_Animation">Animation</a> { <a href="./animation.md#svg_animation">animation</a>, <a href="./animation.md#svg_animation_attribute_name">attribute_name</a>, <a href="./animation.md#svg_animation_values">values</a>, <a href="./animation.md#svg_animation_duration">duration</a>, <a href="./animation.md#svg_animation_repeat_count">repeat_count</a>, attributes } = self;
     <b>let</b> <b>mut</b> attrs = *attributes;
-    <a href="./animation.md#(svg=0x0)_animation_attribute_name">attribute_name</a>.do_ref!(|attr| attrs.insert(b"attributeName".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), *attr));
-    <a href="./animation.md#(svg=0x0)_animation_values">values</a>.do_ref!(|val| attrs.insert(b"<a href="./animation.md#(svg=0x0)_animation_values">values</a>".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), *val));
-    <a href="./animation.md#(svg=0x0)_animation_duration">duration</a>.do_ref!(|dur| attrs.insert(b"dur".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), *dur));
-    <a href="./animation.md#(svg=0x0)_animation_repeat_count">repeat_count</a>.do_ref!(|count| attrs.insert(b"repeatCount".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), *count));
+    <a href="./animation.md#svg_animation_attribute_name">attribute_name</a>.do_ref!(|attr| attrs.insert(b"attributeName".<a href="./animation.md#svg_animation_to_string">to_string</a>(), *attr));
+    <a href="./animation.md#svg_animation_values">values</a>.do_ref!(|val| attrs.insert(b"<a href="./animation.md#svg_animation_values">values</a>".<a href="./animation.md#svg_animation_to_string">to_string</a>(), *val));
+    <a href="./animation.md#svg_animation_duration">duration</a>.do_ref!(|dur| attrs.insert(b"dur".<a href="./animation.md#svg_animation_to_string">to_string</a>(), *dur));
+    <a href="./animation.md#svg_animation_repeat_count">repeat_count</a>.do_ref!(|count| attrs.insert(b"repeatCount".<a href="./animation.md#svg_animation_to_string">to_string</a>(), *count));
     // modify the internal attribute <b>if</b> needed and <b>return</b> the name
-    <b>let</b> (name, content) = match (<a href="./animation.md#(svg=0x0)_animation">animation</a>) {
-        AnimationType::Animate =&gt; (b"<a href="./animation.md#(svg=0x0)_animation_animate">animate</a>".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), option::none()),
-        AnimationType::AnimateMotion { path, <a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a> } =&gt; {
+    <b>let</b> (name, content) = match (<a href="./animation.md#svg_animation">animation</a>) {
+        AnimationType::Animate =&gt; (b"<a href="./animation.md#svg_animation_animate">animate</a>".<a href="./animation.md#svg_animation_to_string">to_string</a>(), option::none()),
+        AnimationType::AnimateMotion { path, <a href="./animation.md#svg_animation_mpath">mpath</a> } =&gt; {
             <b>let</b> <b>mut</b> contents = option::none();
-            path.do_ref!(|p| attrs.insert(b"path".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), *p));
-            <a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>.do_ref!(|<a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>| contents.fill({
+            path.do_ref!(|p| attrs.insert(b"path".<a href="./animation.md#svg_animation_to_string">to_string</a>(), *p));
+            <a href="./animation.md#svg_animation_mpath">mpath</a>.do_ref!(|<a href="./animation.md#svg_animation_mpath">mpath</a>| contents.fill({
                 <b>let</b> <b>mut</b> attrs = vec_map::empty();
-                attrs.insert(b"href".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), <a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>.0);
-                vector[<a href="./print.md#(svg=0x0)_print_print">print::print</a>(b"<a href="./animation.md#(svg=0x0)_animation_mpath">mpath</a>".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), attrs, option::none())]
+                attrs.insert(b"href".<a href="./animation.md#svg_animation_to_string">to_string</a>(), <a href="./animation.md#svg_animation_mpath">mpath</a>.0);
+                vector[<a href="./print.md#svg_print_print">print::print</a>(b"<a href="./animation.md#svg_animation_mpath">mpath</a>".<a href="./animation.md#svg_animation_to_string">to_string</a>(), attrs, option::none())]
             }));
-            (b"animateMotion".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), contents)
+            (b"animateMotion".<a href="./animation.md#svg_animation_to_string">to_string</a>(), contents)
         },
         AnimationType::AnimateTransform { transform_type, from, to } =&gt; {
-            attrs.insert(b"type".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), *transform_type);
-            attrs.insert(b"from".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), *from);
-            attrs.insert(b"to".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), *to);
-            (b"animateTransform".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), option::none())
+            attrs.insert(b"type".<a href="./animation.md#svg_animation_to_string">to_string</a>(), *transform_type);
+            attrs.insert(b"from".<a href="./animation.md#svg_animation_to_string">to_string</a>(), *from);
+            attrs.insert(b"to".<a href="./animation.md#svg_animation_to_string">to_string</a>(), *to);
+            (b"animateTransform".<a href="./animation.md#svg_animation_to_string">to_string</a>(), option::none())
         },
         AnimationType::Set { to } =&gt; {
-            attrs.insert(b"to".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), *to);
-            (b"<a href="./animation.md#(svg=0x0)_animation_set">set</a>".<a href="./animation.md#(svg=0x0)_animation_to_string">to_string</a>(), option::none())
+            attrs.insert(b"to".<a href="./animation.md#svg_animation_to_string">to_string</a>(), *to);
+            (b"<a href="./animation.md#svg_animation_set">set</a>".<a href="./animation.md#svg_animation_to_string">to_string</a>(), option::none())
         },
         AnimationType::Custom(content) =&gt; <b>return</b> *content,
     };
-    <a href="./print.md#(svg=0x0)_print_print">print::print</a>(name, attrs, content)
+    <a href="./print.md#svg_print_print">print::print</a>(name, attrs, content)
 }
 </code></pre>
 

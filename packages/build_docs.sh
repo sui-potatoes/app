@@ -32,8 +32,8 @@ for dir in */ ; do
   # Step 4: Copy generated docs to ./docs
   pkg_name=$(basename "$(pwd)")
   upkg_name=$(basename "$(pwd)" | sed 's/-/_/g')
-  if [ -d "build/$pkg_name/docs/$upkg_name" ]; then
-    cp -r build/$pkg_name/docs/$upkg_name/* docs/
+  if [ -d "build/$upkg_name/docs/$upkg_name" ]; then
+    cp -r build/$upkg_name/docs/$upkg_name/* docs/
   else
     echo "No docs found in build/docs/$upkg_name"
   fi
@@ -48,7 +48,8 @@ for dir in */ ; do
   rm -rf $(pwd)/../.doc-deps/$pkg_name;
 
   # Step 8: Create symlink to this docs folder in ../dependencies
-  ln -sf "$(pwd)/docs" "$(pwd)/../.doc-deps/$pkg_name"
+  echo "Creating symlink to $pkg_name/docs in .doc-deps/$pkg_name"
+  ln -sf ../$pkg_name/docs ../.doc-deps/$pkg_name
 
   cd ..
 done

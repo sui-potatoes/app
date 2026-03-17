@@ -25,17 +25,17 @@
 -  [Function `receive_impl`](#sui_transfer_receive_impl)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/bcs.md#std_bcs">std::bcs</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/string.md#std_string">std::string</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
-<b>use</b> <a href="../../dependencies/sui/address.md#sui_address">sui::address</a>;
-<b>use</b> <a href="../../dependencies/sui/hex.md#sui_hex">sui::hex</a>;
-<b>use</b> <a href="../../dependencies/sui/object.md#sui_object">sui::object</a>;
-<b>use</b> <a href="../../dependencies/sui/party.md#sui_party">sui::party</a>;
-<b>use</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
-<b>use</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
+<pre><code><b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/bcs.md#std_bcs">std::bcs</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/string.md#std_string">std::string</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
+<b>use</b> <a href="../sui/address.md#sui_address">sui::address</a>;
+<b>use</b> <a href="../sui/hex.md#sui_hex">sui::hex</a>;
+<b>use</b> <a href="../sui/object.md#sui_object">sui::object</a>;
+<b>use</b> <a href="../sui/party.md#sui_party">sui::party</a>;
+<b>use</b> <a href="../sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
+<b>use</b> <a href="../sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
 </code></pre>
 
 
@@ -44,7 +44,7 @@
 
 ## Struct `Receiving`
 
-This represents the ability to <code><a href="../../dependencies/sui/transfer.md#sui_transfer_receive">receive</a></code> an object of type <code>T</code>.
+This represents the ability to <code><a href="../sui/transfer.md#sui_transfer_receive">receive</a></code> an object of type <code>T</code>.
 This type is ephemeral per-transaction and cannot be stored on-chain.
 This does not represent the obligation to receive the object that it
 references, but simply the ability to receive the object with object ID
@@ -53,7 +53,7 @@ object during the transaction.
 Internals of this struct are opaque outside this module.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">Receiving</a>&lt;<b>phantom</b> T: key&gt; <b>has</b> drop
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/transfer.md#sui_transfer_Receiving">Receiving</a>&lt;<b>phantom</b> T: key&gt; <b>has</b> drop
 </code></pre>
 
 
@@ -64,7 +64,7 @@ Internals of this struct are opaque outside this module.
 
 <dl>
 <dt>
-<code>id: <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a></code>
+<code>id: <a href="../sui/object.md#sui_object_ID">sui::object::ID</a></code>
 </dt>
 <dd>
 </dd>
@@ -89,7 +89,7 @@ Shared an object that was previously created. Shared objects must currently
 be constructed in the transaction they are created.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_ESharedNonNewObject">ESharedNonNewObject</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../sui/transfer.md#sui_transfer_ESharedNonNewObject">ESharedNonNewObject</a>: u64 = 0;
 </code></pre>
 
 
@@ -99,7 +99,7 @@ be constructed in the transaction they are created.
 Serialization of the object failed.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_EBCSSerializationFailure">EBCSSerializationFailure</a>: u64 = 1;
+<pre><code><b>const</b> <a href="../sui/transfer.md#sui_transfer_EBCSSerializationFailure">EBCSSerializationFailure</a>: u64 = 1;
 </code></pre>
 
 
@@ -109,7 +109,7 @@ Serialization of the object failed.
 The object being received is not of the expected type.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_EReceivingObjectTypeMismatch">EReceivingObjectTypeMismatch</a>: u64 = 2;
+<pre><code><b>const</b> <a href="../sui/transfer.md#sui_transfer_EReceivingObjectTypeMismatch">EReceivingObjectTypeMismatch</a>: u64 = 2;
 </code></pre>
 
 
@@ -120,7 +120,7 @@ Represents both the case where the object does not exist and the case where the 
 able to be accessed through the parent that is passed-in.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_EUnableToReceiveObject">EUnableToReceiveObject</a>: u64 = 3;
+<pre><code><b>const</b> <a href="../sui/transfer.md#sui_transfer_EUnableToReceiveObject">EUnableToReceiveObject</a>: u64 = 3;
 </code></pre>
 
 
@@ -130,7 +130,7 @@ able to be accessed through the parent that is passed-in.
 Shared object operations such as wrapping, freezing, and converting to owned are not allowed.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_ESharedObjectOperationNotSupported">ESharedObjectOperationNotSupported</a>: u64 = 4;
+<pre><code><b>const</b> <a href="../sui/transfer.md#sui_transfer_ESharedObjectOperationNotSupported">ESharedObjectOperationNotSupported</a>: u64 = 4;
 </code></pre>
 
 
@@ -140,7 +140,7 @@ Shared object operations such as wrapping, freezing, and converting to owned are
 Operation is not yet supported by the network. The functionality might still be in development.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_ENotSupported">ENotSupported</a>: u64 = 5;
+<pre><code><b>const</b> <a href="../sui/transfer.md#sui_transfer_ENotSupported">ENotSupported</a>: u64 = 5;
 </code></pre>
 
 
@@ -150,7 +150,7 @@ Operation is not yet supported by the network. The functionality might still be 
 
 
 <pre><code>#[error]
-<b>const</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_EInvalidPartyPermissions">EInvalidPartyPermissions</a>: vector&lt;u8&gt; = b"Party <a href="../../dependencies/sui/transfer.md#sui_transfer_transfer">transfer</a> is currently limited to one party.";
+<b>const</b> <a href="../sui/transfer.md#sui_transfer_EInvalidPartyPermissions">EInvalidPartyPermissions</a>: vector&lt;u8&gt; = b"Party <a href="../sui/transfer.md#sui_transfer_transfer">transfer</a> is currently limited to one party.";
 </code></pre>
 
 
@@ -164,11 +164,11 @@ which (in turn) ensures that <code>obj</code> has a globally unique ID. Note tha
 address represents an object ID, the <code>obj</code> sent will be inaccessible after the transfer
 (though they will be retrievable at a future date once new features are added).
 This function has custom rules performed by the Sui Move bytecode verifier that ensures
-that <code>T</code> is an object defined in the module where <code><a href="../../dependencies/sui/transfer.md#sui_transfer_transfer">transfer</a></code> is invoked. Use
-<code><a href="../../dependencies/sui/transfer.md#sui_transfer_public_transfer">public_transfer</a></code> to transfer an object with <code>store</code> outside of its module.
+that <code>T</code> is an object defined in the module where <code><a href="../sui/transfer.md#sui_transfer_transfer">transfer</a></code> is invoked. Use
+<code><a href="../sui/transfer.md#sui_transfer_public_transfer">public_transfer</a></code> to transfer an object with <code>store</code> outside of its module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_transfer">transfer</a>&lt;T: key&gt;(obj: T, recipient: <b>address</b>)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_transfer">transfer</a>&lt;T: key&gt;(obj: T, recipient: <b>address</b>)
 </code></pre>
 
 
@@ -177,8 +177,8 @@ that <code>T</code> is an object defined in the module where <code><a href="../.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_transfer">transfer</a>&lt;T: key&gt;(obj: T, recipient: <b>address</b>) {
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_transfer_impl">transfer_impl</a>(obj, recipient)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_transfer">transfer</a>&lt;T: key&gt;(obj: T, recipient: <b>address</b>) {
+    <a href="../sui/transfer.md#sui_transfer_transfer_impl">transfer_impl</a>(obj, recipient)
 }
 </code></pre>
 
@@ -197,7 +197,7 @@ address represents an object ID, the <code>obj</code> sent will be inaccessible 
 The object must have <code>store</code> to be transferred outside of its module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_transfer">public_transfer</a>&lt;T: key, store&gt;(obj: T, recipient: <b>address</b>)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_transfer">public_transfer</a>&lt;T: key, store&gt;(obj: T, recipient: <b>address</b>)
 </code></pre>
 
 
@@ -206,8 +206,8 @@ The object must have <code>store</code> to be transferred outside of its module.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_transfer">public_transfer</a>&lt;T: key + store&gt;(obj: T, recipient: <b>address</b>) {
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_transfer_impl">transfer_impl</a>(obj, recipient)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_transfer">public_transfer</a>&lt;T: key + store&gt;(obj: T, recipient: <b>address</b>) {
+    <a href="../sui/transfer.md#sui_transfer_transfer_impl">transfer_impl</a>(obj, recipient)
 }
 </code></pre>
 
@@ -219,21 +219,21 @@ The object must have <code>store</code> to be transferred outside of its module.
 
 ## Function `party_transfer`
 
-NOT YET SUPPORTED. The function will abort with <code><a href="../../dependencies/sui/transfer.md#sui_transfer_ENotSupported">ENotSupported</a></code> if used on a network,
+NOT YET SUPPORTED. The function will abort with <code><a href="../sui/transfer.md#sui_transfer_ENotSupported">ENotSupported</a></code> if used on a network,
 e.g. mainnet, where party objects are not yet supported.
 Transfer ownership of <code>obj</code> to the <code>party</code>. This transfer behaves similar to both
-<code><a href="../../dependencies/sui/transfer.md#sui_transfer_transfer">transfer</a></code> and <code><a href="../../dependencies/sui/transfer.md#sui_transfer_share_object">share_object</a></code>. It is similar to <code><a href="../../dependencies/sui/transfer.md#sui_transfer_transfer">transfer</a></code> in that the object be authenticated
+<code><a href="../sui/transfer.md#sui_transfer_transfer">transfer</a></code> and <code><a href="../sui/transfer.md#sui_transfer_share_object">share_object</a></code>. It is similar to <code><a href="../sui/transfer.md#sui_transfer_transfer">transfer</a></code> in that the object be authenticated
 only by the recipient(s), in this case the <code>party</code>. This means that only the members
-can use the object as an input to a transaction. It is similar to <code><a href="../../dependencies/sui/transfer.md#sui_transfer_share_object">share_object</a></code> two ways. One
+can use the object as an input to a transaction. It is similar to <code><a href="../sui/transfer.md#sui_transfer_share_object">share_object</a></code> two ways. One
 in that the object can potentially be used by anyone, as defined by the <code>default</code> permissions of
 the <code>Party</code> value. The other in that the object must be used in consensus and cannot be
 used in the fast path.
 This function has custom rules performed by the Sui Move bytecode verifier that ensures that <code>T</code>
-is an object defined in the module where <code><a href="../../dependencies/sui/transfer.md#sui_transfer_transfer">transfer</a></code> is invoked. Use <code><a href="../../dependencies/sui/transfer.md#sui_transfer_public_party_transfer">public_party_transfer</a></code>
+is an object defined in the module where <code><a href="../sui/transfer.md#sui_transfer_transfer">transfer</a></code> is invoked. Use <code><a href="../sui/transfer.md#sui_transfer_public_party_transfer">public_party_transfer</a></code>
 to transfer an object with <code>store</code> outside of its module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_party_transfer">party_transfer</a>&lt;T: key&gt;(obj: T, party: <a href="../../dependencies/sui/party.md#sui_party_Party">sui::party::Party</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_party_transfer">party_transfer</a>&lt;T: key&gt;(obj: T, party: <a href="../sui/party.md#sui_party_Party">sui::party::Party</a>)
 </code></pre>
 
 
@@ -242,10 +242,10 @@ to transfer an object with <code>store</code> outside of its module.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_party_transfer">party_transfer</a>&lt;T: key&gt;(obj: T, party: <a href="../../dependencies/sui/party.md#sui_party_Party">sui::party::Party</a>) {
-    <b>assert</b>!(party.is_single_owner(), <a href="../../dependencies/sui/transfer.md#sui_transfer_EInvalidPartyPermissions">EInvalidPartyPermissions</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_party_transfer">party_transfer</a>&lt;T: key&gt;(obj: T, party: <a href="../sui/party.md#sui_party_Party">sui::party::Party</a>) {
+    <b>assert</b>!(party.is_single_owner(), <a href="../sui/transfer.md#sui_transfer_EInvalidPartyPermissions">EInvalidPartyPermissions</a>);
     <b>let</b> (default, addresses, permissions) = party.into_native();
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_party_transfer_impl">party_transfer_impl</a>(obj, default, addresses, permissions)
+    <a href="../sui/transfer.md#sui_transfer_party_transfer_impl">party_transfer_impl</a>(obj, default, addresses, permissions)
 }
 </code></pre>
 
@@ -257,19 +257,19 @@ to transfer an object with <code>store</code> outside of its module.
 
 ## Function `public_party_transfer`
 
-NOT YET SUPPORTED. The function will abort with <code><a href="../../dependencies/sui/transfer.md#sui_transfer_ENotSupported">ENotSupported</a></code> if used on a network,
+NOT YET SUPPORTED. The function will abort with <code><a href="../sui/transfer.md#sui_transfer_ENotSupported">ENotSupported</a></code> if used on a network,
 e.g. mainnet, where party objects are not yet supported.
 Transfer ownership of <code>obj</code> to the <code>party</code>. This transfer behaves similar to both
-<code><a href="../../dependencies/sui/transfer.md#sui_transfer_transfer">transfer</a></code> and <code><a href="../../dependencies/sui/transfer.md#sui_transfer_share_object">share_object</a></code>. It is similar to <code><a href="../../dependencies/sui/transfer.md#sui_transfer_transfer">transfer</a></code> in that the object be authenticated
+<code><a href="../sui/transfer.md#sui_transfer_transfer">transfer</a></code> and <code><a href="../sui/transfer.md#sui_transfer_share_object">share_object</a></code>. It is similar to <code><a href="../sui/transfer.md#sui_transfer_transfer">transfer</a></code> in that the object be authenticated
 only by the recipient(s), in this case the <code>party</code>. This means that only the members
-can use the object as an input to a transaction. It is similar to <code><a href="../../dependencies/sui/transfer.md#sui_transfer_share_object">share_object</a></code> two ways. One
+can use the object as an input to a transaction. It is similar to <code><a href="../sui/transfer.md#sui_transfer_share_object">share_object</a></code> two ways. One
 in that the object can potentially be used by anyone, as defined by the <code>default</code> permissions of
 the <code>Party</code> value. The other in that the object must be used in consensus and cannot be
 used in the fast path.
 The object must have <code>store</code> to be transferred outside of its module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_party_transfer">public_party_transfer</a>&lt;T: key, store&gt;(obj: T, party: <a href="../../dependencies/sui/party.md#sui_party_Party">sui::party::Party</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_party_transfer">public_party_transfer</a>&lt;T: key, store&gt;(obj: T, party: <a href="../sui/party.md#sui_party_Party">sui::party::Party</a>)
 </code></pre>
 
 
@@ -278,10 +278,10 @@ The object must have <code>store</code> to be transferred outside of its module.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_party_transfer">public_party_transfer</a>&lt;T: key + store&gt;(obj: T, party: <a href="../../dependencies/sui/party.md#sui_party_Party">sui::party::Party</a>) {
-    <b>assert</b>!(party.is_single_owner(), <a href="../../dependencies/sui/transfer.md#sui_transfer_EInvalidPartyPermissions">EInvalidPartyPermissions</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_party_transfer">public_party_transfer</a>&lt;T: key + store&gt;(obj: T, party: <a href="../sui/party.md#sui_party_Party">sui::party::Party</a>) {
+    <b>assert</b>!(party.is_single_owner(), <a href="../sui/transfer.md#sui_transfer_EInvalidPartyPermissions">EInvalidPartyPermissions</a>);
     <b>let</b> (default, addresses, permissions) = party.into_native();
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_party_transfer_impl">party_transfer_impl</a>(obj, default, addresses, permissions)
+    <a href="../sui/transfer.md#sui_transfer_party_transfer_impl">party_transfer_impl</a>(obj, default, addresses, permissions)
 }
 </code></pre>
 
@@ -296,11 +296,11 @@ The object must have <code>store</code> to be transferred outside of its module.
 Freeze <code>obj</code>. After freezing <code>obj</code> becomes immutable and can no longer be transferred or
 mutated.
 This function has custom rules performed by the Sui Move bytecode verifier that ensures
-that <code>T</code> is an object defined in the module where <code><a href="../../dependencies/sui/transfer.md#sui_transfer_freeze_object">freeze_object</a></code> is invoked. Use
-<code><a href="../../dependencies/sui/transfer.md#sui_transfer_public_freeze_object">public_freeze_object</a></code> to freeze an object with <code>store</code> outside of its module.
+that <code>T</code> is an object defined in the module where <code><a href="../sui/transfer.md#sui_transfer_freeze_object">freeze_object</a></code> is invoked. Use
+<code><a href="../sui/transfer.md#sui_transfer_public_freeze_object">public_freeze_object</a></code> to freeze an object with <code>store</code> outside of its module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_freeze_object">freeze_object</a>&lt;T: key&gt;(obj: T)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_freeze_object">freeze_object</a>&lt;T: key&gt;(obj: T)
 </code></pre>
 
 
@@ -309,8 +309,8 @@ that <code>T</code> is an object defined in the module where <code><a href="../.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_freeze_object">freeze_object</a>&lt;T: key&gt;(obj: T) {
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_freeze_object_impl">freeze_object_impl</a>(obj)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_freeze_object">freeze_object</a>&lt;T: key&gt;(obj: T) {
+    <a href="../sui/transfer.md#sui_transfer_freeze_object_impl">freeze_object_impl</a>(obj)
 }
 </code></pre>
 
@@ -327,7 +327,7 @@ mutated.
 The object must have <code>store</code> to be frozen outside of its module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_freeze_object">public_freeze_object</a>&lt;T: key, store&gt;(obj: T)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_freeze_object">public_freeze_object</a>&lt;T: key, store&gt;(obj: T)
 </code></pre>
 
 
@@ -336,8 +336,8 @@ The object must have <code>store</code> to be frozen outside of its module.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_freeze_object">public_freeze_object</a>&lt;T: key + store&gt;(obj: T) {
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_freeze_object_impl">freeze_object_impl</a>(obj)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_freeze_object">public_freeze_object</a>&lt;T: key + store&gt;(obj: T) {
+    <a href="../sui/transfer.md#sui_transfer_freeze_object_impl">freeze_object_impl</a>(obj)
 }
 </code></pre>
 
@@ -351,14 +351,14 @@ The object must have <code>store</code> to be frozen outside of its module.
 
 Turn the given object into a mutable shared object that everyone can access and mutate.
 This is irreversible, i.e. once an object is shared, it will stay shared forever.
-Aborts with <code><a href="../../dependencies/sui/transfer.md#sui_transfer_ESharedNonNewObject">ESharedNonNewObject</a></code> of the object being shared was not created in this
+Aborts with <code><a href="../sui/transfer.md#sui_transfer_ESharedNonNewObject">ESharedNonNewObject</a></code> of the object being shared was not created in this
 transaction. This restriction may be relaxed in the future.
 This function has custom rules performed by the Sui Move bytecode verifier that ensures
-that <code>T</code> is an object defined in the module where <code><a href="../../dependencies/sui/transfer.md#sui_transfer_share_object">share_object</a></code> is invoked. Use
-<code><a href="../../dependencies/sui/transfer.md#sui_transfer_public_share_object">public_share_object</a></code> to share an object with <code>store</code> outside of its module.
+that <code>T</code> is an object defined in the module where <code><a href="../sui/transfer.md#sui_transfer_share_object">share_object</a></code> is invoked. Use
+<code><a href="../sui/transfer.md#sui_transfer_public_share_object">public_share_object</a></code> to share an object with <code>store</code> outside of its module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_share_object">share_object</a>&lt;T: key&gt;(obj: T)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_share_object">share_object</a>&lt;T: key&gt;(obj: T)
 </code></pre>
 
 
@@ -367,8 +367,8 @@ that <code>T</code> is an object defined in the module where <code><a href="../.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_share_object">share_object</a>&lt;T: key&gt;(obj: T) {
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_share_object_impl">share_object_impl</a>(obj)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_share_object">share_object</a>&lt;T: key&gt;(obj: T) {
+    <a href="../sui/transfer.md#sui_transfer_share_object_impl">share_object_impl</a>(obj)
 }
 </code></pre>
 
@@ -382,12 +382,12 @@ that <code>T</code> is an object defined in the module where <code><a href="../.
 
 Turn the given object into a mutable shared object that everyone can access and mutate.
 This is irreversible, i.e. once an object is shared, it will stay shared forever.
-Aborts with <code><a href="../../dependencies/sui/transfer.md#sui_transfer_ESharedNonNewObject">ESharedNonNewObject</a></code> of the object being shared was not created in this
+Aborts with <code><a href="../sui/transfer.md#sui_transfer_ESharedNonNewObject">ESharedNonNewObject</a></code> of the object being shared was not created in this
 transaction. This restriction may be relaxed in the future.
 The object must have <code>store</code> to be shared outside of its module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_share_object">public_share_object</a>&lt;T: key, store&gt;(obj: T)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_share_object">public_share_object</a>&lt;T: key, store&gt;(obj: T)
 </code></pre>
 
 
@@ -396,8 +396,8 @@ The object must have <code>store</code> to be shared outside of its module.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_share_object">public_share_object</a>&lt;T: key + store&gt;(obj: T) {
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_share_object_impl">share_object_impl</a>(obj)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_share_object">public_share_object</a>&lt;T: key + store&gt;(obj: T) {
+    <a href="../sui/transfer.md#sui_transfer_share_object_impl">share_object_impl</a>(obj)
 }
 </code></pre>
 
@@ -409,15 +409,15 @@ The object must have <code>store</code> to be shared outside of its module.
 
 ## Function `receive`
 
-Given mutable (i.e., locked) access to the <code>parent</code> and a <code><a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">Receiving</a></code> argument
+Given mutable (i.e., locked) access to the <code>parent</code> and a <code><a href="../sui/transfer.md#sui_transfer_Receiving">Receiving</a></code> argument
 referencing an object of type <code>T</code> owned by <code>parent</code> use the <code>to_receive</code>
 argument to receive and return the referenced owned object of type <code>T</code>.
 This function has custom rules performed by the Sui Move bytecode verifier that ensures
-that <code>T</code> is an object defined in the module where <code><a href="../../dependencies/sui/transfer.md#sui_transfer_receive">receive</a></code> is invoked. Use
-<code><a href="../../dependencies/sui/transfer.md#sui_transfer_public_receive">public_receive</a></code> to receivne an object with <code>store</code> outside of its module.
+that <code>T</code> is an object defined in the module where <code><a href="../sui/transfer.md#sui_transfer_receive">receive</a></code> is invoked. Use
+<code><a href="../sui/transfer.md#sui_transfer_public_receive">public_receive</a></code> to receivne an object with <code>store</code> outside of its module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_receive">receive</a>&lt;T: key&gt;(parent: &<b>mut</b> <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>, to_receive: <a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">sui::transfer::Receiving</a>&lt;T&gt;): T
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_receive">receive</a>&lt;T: key&gt;(parent: &<b>mut</b> <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>, to_receive: <a href="../sui/transfer.md#sui_transfer_Receiving">sui::transfer::Receiving</a>&lt;T&gt;): T
 </code></pre>
 
 
@@ -426,9 +426,9 @@ that <code>T</code> is an object defined in the module where <code><a href="../.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_receive">receive</a>&lt;T: key&gt;(parent: &<b>mut</b> UID, to_receive: <a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">Receiving</a>&lt;T&gt;): T {
-    <b>let</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">Receiving</a> { id, version } = to_receive;
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_receive_impl">receive_impl</a>(parent.to_address(), id, version)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_receive">receive</a>&lt;T: key&gt;(parent: &<b>mut</b> UID, to_receive: <a href="../sui/transfer.md#sui_transfer_Receiving">Receiving</a>&lt;T&gt;): T {
+    <b>let</b> <a href="../sui/transfer.md#sui_transfer_Receiving">Receiving</a> { id, version } = to_receive;
+    <a href="../sui/transfer.md#sui_transfer_receive_impl">receive_impl</a>(parent.to_address(), id, version)
 }
 </code></pre>
 
@@ -440,13 +440,13 @@ that <code>T</code> is an object defined in the module where <code><a href="../.
 
 ## Function `public_receive`
 
-Given mutable (i.e., locked) access to the <code>parent</code> and a <code><a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">Receiving</a></code> argument
+Given mutable (i.e., locked) access to the <code>parent</code> and a <code><a href="../sui/transfer.md#sui_transfer_Receiving">Receiving</a></code> argument
 referencing an object of type <code>T</code> owned by <code>parent</code> use the <code>to_receive</code>
 argument to receive and return the referenced owned object of type <code>T</code>.
 The object must have <code>store</code> to be received outside of its defining module.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_receive">public_receive</a>&lt;T: key, store&gt;(parent: &<b>mut</b> <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>, to_receive: <a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">sui::transfer::Receiving</a>&lt;T&gt;): T
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_receive">public_receive</a>&lt;T: key, store&gt;(parent: &<b>mut</b> <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>, to_receive: <a href="../sui/transfer.md#sui_transfer_Receiving">sui::transfer::Receiving</a>&lt;T&gt;): T
 </code></pre>
 
 
@@ -455,9 +455,9 @@ The object must have <code>store</code> to be received outside of its defining m
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_public_receive">public_receive</a>&lt;T: key + store&gt;(parent: &<b>mut</b> UID, to_receive: <a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">Receiving</a>&lt;T&gt;): T {
-    <b>let</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">Receiving</a> { id, version } = to_receive;
-    <a href="../../dependencies/sui/transfer.md#sui_transfer_receive_impl">receive_impl</a>(parent.to_address(), id, version)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_public_receive">public_receive</a>&lt;T: key + store&gt;(parent: &<b>mut</b> UID, to_receive: <a href="../sui/transfer.md#sui_transfer_Receiving">Receiving</a>&lt;T&gt;): T {
+    <b>let</b> <a href="../sui/transfer.md#sui_transfer_Receiving">Receiving</a> { id, version } = to_receive;
+    <a href="../sui/transfer.md#sui_transfer_receive_impl">receive_impl</a>(parent.to_address(), id, version)
 }
 </code></pre>
 
@@ -469,10 +469,10 @@ The object must have <code>store</code> to be received outside of its defining m
 
 ## Function `receiving_object_id`
 
-Return the object ID that the given <code><a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">Receiving</a></code> argument references.
+Return the object ID that the given <code><a href="../sui/transfer.md#sui_transfer_Receiving">Receiving</a></code> argument references.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_receiving_object_id">receiving_object_id</a>&lt;T: key&gt;(receiving: &<a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">sui::transfer::Receiving</a>&lt;T&gt;): <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_receiving_object_id">receiving_object_id</a>&lt;T: key&gt;(receiving: &<a href="../sui/transfer.md#sui_transfer_Receiving">sui::transfer::Receiving</a>&lt;T&gt;): <a href="../sui/object.md#sui_object_ID">sui::object::ID</a>
 </code></pre>
 
 
@@ -481,7 +481,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_receiving_object_id">receiving_object_id</a>&lt;T: key&gt;(receiving: &<a href="../../dependencies/sui/transfer.md#sui_transfer_Receiving">Receiving</a>&lt;T&gt;): ID {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_receiving_object_id">receiving_object_id</a>&lt;T: key&gt;(receiving: &<a href="../sui/transfer.md#sui_transfer_Receiving">Receiving</a>&lt;T&gt;): ID {
     receiving.id
 }
 </code></pre>
@@ -496,7 +496,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_freeze_object_impl">freeze_object_impl</a>&lt;T: key&gt;(obj: T)
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/transfer.md#sui_transfer_freeze_object_impl">freeze_object_impl</a>&lt;T: key&gt;(obj: T)
 </code></pre>
 
 
@@ -505,7 +505,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>native</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_freeze_object_impl">freeze_object_impl</a>&lt;T: key&gt;(obj: T);
+<pre><code><b>public</b>(package) <b>native</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_freeze_object_impl">freeze_object_impl</a>&lt;T: key&gt;(obj: T);
 </code></pre>
 
 
@@ -518,7 +518,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_share_object_impl">share_object_impl</a>&lt;T: key&gt;(obj: T)
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/transfer.md#sui_transfer_share_object_impl">share_object_impl</a>&lt;T: key&gt;(obj: T)
 </code></pre>
 
 
@@ -527,7 +527,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>native</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_share_object_impl">share_object_impl</a>&lt;T: key&gt;(obj: T);
+<pre><code><b>public</b>(package) <b>native</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_share_object_impl">share_object_impl</a>&lt;T: key&gt;(obj: T);
 </code></pre>
 
 
@@ -540,7 +540,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_party_transfer_impl">party_transfer_impl</a>&lt;T: key&gt;(obj: T, default_permissions: u64, addresses: vector&lt;<b>address</b>&gt;, permissions: vector&lt;u64&gt;)
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/transfer.md#sui_transfer_party_transfer_impl">party_transfer_impl</a>&lt;T: key&gt;(obj: T, default_permissions: u64, addresses: vector&lt;<b>address</b>&gt;, permissions: vector&lt;u64&gt;)
 </code></pre>
 
 
@@ -549,7 +549,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>native</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_party_transfer_impl">party_transfer_impl</a>&lt;T: key&gt;(
+<pre><code><b>public</b>(package) <b>native</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_party_transfer_impl">party_transfer_impl</a>&lt;T: key&gt;(
     obj: T,
     default_permissions: u64,
     addresses: vector&lt;<b>address</b>&gt;,
@@ -567,7 +567,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_transfer_impl">transfer_impl</a>&lt;T: key&gt;(obj: T, recipient: <b>address</b>)
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/transfer.md#sui_transfer_transfer_impl">transfer_impl</a>&lt;T: key&gt;(obj: T, recipient: <b>address</b>)
 </code></pre>
 
 
@@ -576,7 +576,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>native</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_transfer_impl">transfer_impl</a>&lt;T: key&gt;(obj: T, recipient: <b>address</b>);
+<pre><code><b>public</b>(package) <b>native</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_transfer_impl">transfer_impl</a>&lt;T: key&gt;(obj: T, recipient: <b>address</b>);
 </code></pre>
 
 
@@ -589,7 +589,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_receive_impl">receive_impl</a>&lt;T: key&gt;(parent: <b>address</b>, to_receive: <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>, version: u64): T
+<pre><code><b>fun</b> <a href="../sui/transfer.md#sui_transfer_receive_impl">receive_impl</a>&lt;T: key&gt;(parent: <b>address</b>, to_receive: <a href="../sui/object.md#sui_object_ID">sui::object::ID</a>, version: u64): T
 </code></pre>
 
 
@@ -598,7 +598,7 @@ Return the object ID that the given <code><a href="../../dependencies/sui/transf
 <summary>Implementation</summary>
 
 
-<pre><code><b>native</b> <b>fun</b> <a href="../../dependencies/sui/transfer.md#sui_transfer_receive_impl">receive_impl</a>&lt;T: key&gt;(parent: <b>address</b>, to_receive: ID, version: u64): T;
+<pre><code><b>native</b> <b>fun</b> <a href="../sui/transfer.md#sui_transfer_receive_impl">receive_impl</a>&lt;T: key&gt;(parent: <b>address</b>, to_receive: ID, version: u64): T;
 </code></pre>
 
 

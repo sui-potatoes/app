@@ -35,14 +35,14 @@ Sui object identifiers
 -  [Function `record_new_uid`](#sui_object_record_new_uid)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/ascii.md#std_ascii">std::ascii</a>;
-<b>use</b> <a href="../../dependencies/std/bcs.md#std_bcs">std::bcs</a>;
-<b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/string.md#std_string">std::string</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
-<b>use</b> <a href="../../dependencies/sui/address.md#sui_address">sui::address</a>;
-<b>use</b> <a href="../../dependencies/sui/hex.md#sui_hex">sui::hex</a>;
-<b>use</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
+<pre><code><b>use</b> <a href="../std/ascii.md#std_ascii">std::ascii</a>;
+<b>use</b> <a href="../std/bcs.md#std_bcs">std::bcs</a>;
+<b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/string.md#std_string">std::string</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
+<b>use</b> <a href="../sui/address.md#sui_address">sui::address</a>;
+<b>use</b> <a href="../sui/hex.md#sui_hex">sui::hex</a>;
+<b>use</b> <a href="../sui/tx_context.md#sui_tx_context">sui::tx_context</a>;
 </code></pre>
 
 
@@ -52,14 +52,14 @@ Sui object identifiers
 ## Struct `ID`
 
 An object ID. This is used to reference Sui Objects.
-This is *not* guaranteed to be globally unique--anyone can create an <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code> from a <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> or
+This is *not* guaranteed to be globally unique--anyone can create an <code><a href="../sui/object.md#sui_object_ID">ID</a></code> from a <code><a href="../sui/object.md#sui_object_UID">UID</a></code> or
 from an object, and ID's can be freely copied and dropped.
-Here, the values are not globally unique because there can be multiple values of type <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code>
+Here, the values are not globally unique because there can be multiple values of type <code><a href="../sui/object.md#sui_object_ID">ID</a></code>
 with the same underlying bytes. For example, <code>object::id(&obj)</code> can be called as many times
-as you want for a given <code>obj</code>, and each <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code> value will be identical.
+as you want for a given <code>obj</code>, and each <code><a href="../sui/object.md#sui_object_ID">ID</a></code> value will be identical.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/object.md#sui_object_ID">ID</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -84,14 +84,14 @@ as you want for a given <code>obj</code>, and each <code><a href="../../dependen
 ## Struct `UID`
 
 Globally unique IDs that define an object's ID in storage. Any Sui Object, that is a struct
-with the <code>key</code> ability, must have <code><a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> as its first field.
-These are globally unique in the sense that no two values of type <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> are ever equal, in
-other words for any two values <code>id1: <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> and <code>id2: <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code>, <code>id1</code> != <code>id2</code>.
+with the <code>key</code> ability, must have <code><a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_UID">UID</a></code> as its first field.
+These are globally unique in the sense that no two values of type <code><a href="../sui/object.md#sui_object_UID">UID</a></code> are ever equal, in
+other words for any two values <code>id1: <a href="../sui/object.md#sui_object_UID">UID</a></code> and <code>id2: <a href="../sui/object.md#sui_object_UID">UID</a></code>, <code>id1</code> != <code>id2</code>.
 This is a privileged type that can only be derived from a <code>TxContext</code>.
-<code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> doesn't have the <code>drop</code> ability, so deleting a <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> requires a call to <code><a href="../../dependencies/sui/object.md#sui_object_delete">delete</a></code>.
+<code><a href="../sui/object.md#sui_object_UID">UID</a></code> doesn't have the <code>drop</code> ability, so deleting a <code><a href="../sui/object.md#sui_object_UID">UID</a></code> requires a call to <code><a href="../sui/object.md#sui_object_delete">delete</a></code>.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> <b>has</b> store
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/object.md#sui_object_UID">UID</a> <b>has</b> store
 </code></pre>
 
 
@@ -102,7 +102,7 @@ This is a privileged type that can only be derived from a <code>TxContext</code>
 
 <dl>
 <dt>
-<code><a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a></code>
+<code><a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">sui::object::ID</a></code>
 </dt>
 <dd>
 </dd>
@@ -121,7 +121,7 @@ This is a privileged type that can only be derived from a <code>TxContext</code>
 The hardcoded ID for the singleton Sui System State Object.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/object.md#sui_object_SUI_SYSTEM_STATE_OBJECT_ID">SUI_SYSTEM_STATE_OBJECT_ID</a>: <b>address</b> = 0x5;
+<pre><code><b>const</b> <a href="../sui/object.md#sui_object_SUI_SYSTEM_STATE_OBJECT_ID">SUI_SYSTEM_STATE_OBJECT_ID</a>: <b>address</b> = 0x5;
 </code></pre>
 
 
@@ -131,7 +131,7 @@ The hardcoded ID for the singleton Sui System State Object.
 The hardcoded ID for the singleton Clock Object.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/object.md#sui_object_SUI_CLOCK_OBJECT_ID">SUI_CLOCK_OBJECT_ID</a>: <b>address</b> = 0x6;
+<pre><code><b>const</b> <a href="../sui/object.md#sui_object_SUI_CLOCK_OBJECT_ID">SUI_CLOCK_OBJECT_ID</a>: <b>address</b> = 0x6;
 </code></pre>
 
 
@@ -141,7 +141,7 @@ The hardcoded ID for the singleton Clock Object.
 The hardcoded ID for the singleton AuthenticatorState Object.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/object.md#sui_object_SUI_AUTHENTICATOR_STATE_ID">SUI_AUTHENTICATOR_STATE_ID</a>: <b>address</b> = 0x7;
+<pre><code><b>const</b> <a href="../sui/object.md#sui_object_SUI_AUTHENTICATOR_STATE_ID">SUI_AUTHENTICATOR_STATE_ID</a>: <b>address</b> = 0x7;
 </code></pre>
 
 
@@ -151,7 +151,7 @@ The hardcoded ID for the singleton AuthenticatorState Object.
 The hardcoded ID for the singleton Random Object.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/object.md#sui_object_SUI_RANDOM_ID">SUI_RANDOM_ID</a>: <b>address</b> = 0x8;
+<pre><code><b>const</b> <a href="../sui/object.md#sui_object_SUI_RANDOM_ID">SUI_RANDOM_ID</a>: <b>address</b> = 0x8;
 </code></pre>
 
 
@@ -161,7 +161,7 @@ The hardcoded ID for the singleton Random Object.
 The hardcoded ID for the singleton DenyList.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/object.md#sui_object_SUI_DENY_LIST_OBJECT_ID">SUI_DENY_LIST_OBJECT_ID</a>: <b>address</b> = 0x403;
+<pre><code><b>const</b> <a href="../sui/object.md#sui_object_SUI_DENY_LIST_OBJECT_ID">SUI_DENY_LIST_OBJECT_ID</a>: <b>address</b> = 0x403;
 </code></pre>
 
 
@@ -171,7 +171,7 @@ The hardcoded ID for the singleton DenyList.
 The hardcoded ID for the Bridge Object.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/object.md#sui_object_SUI_BRIDGE_ID">SUI_BRIDGE_ID</a>: <b>address</b> = 0x9;
+<pre><code><b>const</b> <a href="../sui/object.md#sui_object_SUI_BRIDGE_ID">SUI_BRIDGE_ID</a>: <b>address</b> = 0x9;
 </code></pre>
 
 
@@ -181,7 +181,7 @@ The hardcoded ID for the Bridge Object.
 Sender is not @0x0 the system address.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/object.md#sui_object_ENotSystemAddress">ENotSystemAddress</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../sui/object.md#sui_object_ENotSystemAddress">ENotSystemAddress</a>: u64 = 0;
 </code></pre>
 
 
@@ -190,10 +190,10 @@ Sender is not @0x0 the system address.
 
 ## Function `id_to_bytes`
 
-Get the raw bytes of a <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code>
+Get the raw bytes of a <code><a href="../sui/object.md#sui_object_ID">ID</a></code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_to_bytes">id_to_bytes</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: &<a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_to_bytes">id_to_bytes</a>(<a href="../sui/object.md#sui_object_id">id</a>: &<a href="../sui/object.md#sui_object_ID">sui::object::ID</a>): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -202,8 +202,8 @@ Get the raw bytes of a <code><a href="../../dependencies/sui/object.md#sui_objec
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_to_bytes">id_to_bytes</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: &<a href="../../dependencies/sui/object.md#sui_object_ID">ID</a>): vector&lt;u8&gt; {
-    bcs::to_bytes(&<a href="../../dependencies/sui/object.md#sui_object_id">id</a>.bytes)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_to_bytes">id_to_bytes</a>(<a href="../sui/object.md#sui_object_id">id</a>: &<a href="../sui/object.md#sui_object_ID">ID</a>): vector&lt;u8&gt; {
+    bcs::to_bytes(&<a href="../sui/object.md#sui_object_id">id</a>.bytes)
 }
 </code></pre>
 
@@ -215,10 +215,10 @@ Get the raw bytes of a <code><a href="../../dependencies/sui/object.md#sui_objec
 
 ## Function `id_to_address`
 
-Get the inner bytes of <code><a href="../../dependencies/sui/object.md#sui_object_id">id</a></code> as an address.
+Get the inner bytes of <code><a href="../sui/object.md#sui_object_id">id</a></code> as an address.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_to_address">id_to_address</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: &<a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>): <b>address</b>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_to_address">id_to_address</a>(<a href="../sui/object.md#sui_object_id">id</a>: &<a href="../sui/object.md#sui_object_ID">sui::object::ID</a>): <b>address</b>
 </code></pre>
 
 
@@ -227,8 +227,8 @@ Get the inner bytes of <code><a href="../../dependencies/sui/object.md#sui_objec
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_to_address">id_to_address</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: &<a href="../../dependencies/sui/object.md#sui_object_ID">ID</a>): <b>address</b> {
-    <a href="../../dependencies/sui/object.md#sui_object_id">id</a>.bytes
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_to_address">id_to_address</a>(<a href="../sui/object.md#sui_object_id">id</a>: &<a href="../sui/object.md#sui_object_ID">ID</a>): <b>address</b> {
+    <a href="../sui/object.md#sui_object_id">id</a>.bytes
 }
 </code></pre>
 
@@ -240,10 +240,10 @@ Get the inner bytes of <code><a href="../../dependencies/sui/object.md#sui_objec
 
 ## Function `id_from_bytes`
 
-Make an <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code> from raw bytes.
+Make an <code><a href="../sui/object.md#sui_object_ID">ID</a></code> from raw bytes.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_from_bytes">id_from_bytes</a>(bytes: vector&lt;u8&gt;): <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_from_bytes">id_from_bytes</a>(bytes: vector&lt;u8&gt;): <a href="../sui/object.md#sui_object_ID">sui::object::ID</a>
 </code></pre>
 
 
@@ -252,7 +252,7 @@ Make an <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></c
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_from_bytes">id_from_bytes</a>(bytes: vector&lt;u8&gt;): <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_from_bytes">id_from_bytes</a>(bytes: vector&lt;u8&gt;): <a href="../sui/object.md#sui_object_ID">ID</a> {
     address::from_bytes(bytes).to_id()
 }
 </code></pre>
@@ -265,10 +265,10 @@ Make an <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></c
 
 ## Function `id_from_address`
 
-Make an <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code> from an address.
+Make an <code><a href="../sui/object.md#sui_object_ID">ID</a></code> from an address.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_from_address">id_from_address</a>(bytes: <b>address</b>): <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_from_address">id_from_address</a>(bytes: <b>address</b>): <a href="../sui/object.md#sui_object_ID">sui::object::ID</a>
 </code></pre>
 
 
@@ -277,8 +277,8 @@ Make an <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></c
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_from_address">id_from_address</a>(bytes: <b>address</b>): <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> {
-    <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes }
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_from_address">id_from_address</a>(bytes: <b>address</b>): <a href="../sui/object.md#sui_object_ID">ID</a> {
+    <a href="../sui/object.md#sui_object_ID">ID</a> { bytes }
 }
 </code></pre>
 
@@ -290,11 +290,11 @@ Make an <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></c
 
 ## Function `sui_system_state`
 
-Create the <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>SuiSystemState</code> object.
+Create the <code><a href="../sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>SuiSystemState</code> object.
 This should only be called once from <code>sui_system</code>.
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_sui_system_state">sui_system_state</a>(ctx: &<a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>
+<pre><code><b>fun</b> <a href="../sui/object.md#sui_object_sui_system_state">sui_system_state</a>(ctx: &<a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>
 </code></pre>
 
 
@@ -303,10 +303,10 @@ This should only be called once from <code>sui_system</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_sui_system_state">sui_system_state</a>(ctx: &TxContext): <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-    <b>assert</b>!(ctx.sender() == @0x0, <a href="../../dependencies/sui/object.md#sui_object_ENotSystemAddress">ENotSystemAddress</a>);
-    <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-        <a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../../dependencies/sui/object.md#sui_object_SUI_SYSTEM_STATE_OBJECT_ID">SUI_SYSTEM_STATE_OBJECT_ID</a> },
+<pre><code><b>fun</b> <a href="../sui/object.md#sui_object_sui_system_state">sui_system_state</a>(ctx: &TxContext): <a href="../sui/object.md#sui_object_UID">UID</a> {
+    <b>assert</b>!(ctx.sender() == @0x0, <a href="../sui/object.md#sui_object_ENotSystemAddress">ENotSystemAddress</a>);
+    <a href="../sui/object.md#sui_object_UID">UID</a> {
+        <a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../sui/object.md#sui_object_SUI_SYSTEM_STATE_OBJECT_ID">SUI_SYSTEM_STATE_OBJECT_ID</a> },
     }
 }
 </code></pre>
@@ -319,11 +319,11 @@ This should only be called once from <code>sui_system</code>.
 
 ## Function `clock`
 
-Create the <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>Clock</code> object.
-This should only be called once from <code><a href="../../dependencies/sui/object.md#sui_object_clock">clock</a></code>.
+Create the <code><a href="../sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>Clock</code> object.
+This should only be called once from <code><a href="../sui/object.md#sui_object_clock">clock</a></code>.
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_clock">clock</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_clock">clock</a>(): <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>
 </code></pre>
 
 
@@ -332,9 +332,9 @@ This should only be called once from <code><a href="../../dependencies/sui/objec
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_clock">clock</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-    <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-        <a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../../dependencies/sui/object.md#sui_object_SUI_CLOCK_OBJECT_ID">SUI_CLOCK_OBJECT_ID</a> },
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_clock">clock</a>(): <a href="../sui/object.md#sui_object_UID">UID</a> {
+    <a href="../sui/object.md#sui_object_UID">UID</a> {
+        <a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../sui/object.md#sui_object_SUI_CLOCK_OBJECT_ID">SUI_CLOCK_OBJECT_ID</a> },
     }
 }
 </code></pre>
@@ -347,11 +347,11 @@ This should only be called once from <code><a href="../../dependencies/sui/objec
 
 ## Function `authenticator_state`
 
-Create the <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>AuthenticatorState</code> object.
-This should only be called once from <code><a href="../../dependencies/sui/object.md#sui_object_authenticator_state">authenticator_state</a></code>.
+Create the <code><a href="../sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>AuthenticatorState</code> object.
+This should only be called once from <code><a href="../sui/object.md#sui_object_authenticator_state">authenticator_state</a></code>.
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_authenticator_state">authenticator_state</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_authenticator_state">authenticator_state</a>(): <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>
 </code></pre>
 
 
@@ -360,9 +360,9 @@ This should only be called once from <code><a href="../../dependencies/sui/objec
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_authenticator_state">authenticator_state</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-    <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-        <a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../../dependencies/sui/object.md#sui_object_SUI_AUTHENTICATOR_STATE_ID">SUI_AUTHENTICATOR_STATE_ID</a> },
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_authenticator_state">authenticator_state</a>(): <a href="../sui/object.md#sui_object_UID">UID</a> {
+    <a href="../sui/object.md#sui_object_UID">UID</a> {
+        <a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../sui/object.md#sui_object_SUI_AUTHENTICATOR_STATE_ID">SUI_AUTHENTICATOR_STATE_ID</a> },
     }
 }
 </code></pre>
@@ -375,11 +375,11 @@ This should only be called once from <code><a href="../../dependencies/sui/objec
 
 ## Function `randomness_state`
 
-Create the <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>Random</code> object.
+Create the <code><a href="../sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>Random</code> object.
 This should only be called once from <code>random</code>.
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_randomness_state">randomness_state</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_randomness_state">randomness_state</a>(): <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>
 </code></pre>
 
 
@@ -388,9 +388,9 @@ This should only be called once from <code>random</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_randomness_state">randomness_state</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-    <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-        <a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../../dependencies/sui/object.md#sui_object_SUI_RANDOM_ID">SUI_RANDOM_ID</a> },
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_randomness_state">randomness_state</a>(): <a href="../sui/object.md#sui_object_UID">UID</a> {
+    <a href="../sui/object.md#sui_object_UID">UID</a> {
+        <a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../sui/object.md#sui_object_SUI_RANDOM_ID">SUI_RANDOM_ID</a> },
     }
 }
 </code></pre>
@@ -403,11 +403,11 @@ This should only be called once from <code>random</code>.
 
 ## Function `sui_deny_list_object_id`
 
-Create the <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>DenyList</code> object.
+Create the <code><a href="../sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>DenyList</code> object.
 This should only be called once from <code>deny_list</code>.
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_sui_deny_list_object_id">sui_deny_list_object_id</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_sui_deny_list_object_id">sui_deny_list_object_id</a>(): <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>
 </code></pre>
 
 
@@ -416,9 +416,9 @@ This should only be called once from <code>deny_list</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_sui_deny_list_object_id">sui_deny_list_object_id</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-    <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-        <a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../../dependencies/sui/object.md#sui_object_SUI_DENY_LIST_OBJECT_ID">SUI_DENY_LIST_OBJECT_ID</a> },
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_sui_deny_list_object_id">sui_deny_list_object_id</a>(): <a href="../sui/object.md#sui_object_UID">UID</a> {
+    <a href="../sui/object.md#sui_object_UID">UID</a> {
+        <a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../sui/object.md#sui_object_SUI_DENY_LIST_OBJECT_ID">SUI_DENY_LIST_OBJECT_ID</a> },
     }
 }
 </code></pre>
@@ -431,11 +431,11 @@ This should only be called once from <code>deny_list</code>.
 
 ## Function `bridge`
 
-Create the <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>Bridge</code> object.
-This should only be called once from <code><a href="../../dependencies/sui/object.md#sui_object_bridge">bridge</a></code>.
+Create the <code><a href="../sui/object.md#sui_object_UID">UID</a></code> for the singleton <code>Bridge</code> object.
+This should only be called once from <code><a href="../sui/object.md#sui_object_bridge">bridge</a></code>.
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_bridge">bridge</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>
+<pre><code><b>fun</b> <a href="../sui/object.md#sui_object_bridge">bridge</a>(): <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>
 </code></pre>
 
 
@@ -444,9 +444,9 @@ This should only be called once from <code><a href="../../dependencies/sui/objec
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_bridge">bridge</a>(): <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-    <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-        <a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../../dependencies/sui/object.md#sui_object_SUI_BRIDGE_ID">SUI_BRIDGE_ID</a> },
+<pre><code><b>fun</b> <a href="../sui/object.md#sui_object_bridge">bridge</a>(): <a href="../sui/object.md#sui_object_UID">UID</a> {
+    <a href="../sui/object.md#sui_object_UID">UID</a> {
+        <a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">ID</a> { bytes: <a href="../sui/object.md#sui_object_SUI_BRIDGE_ID">SUI_BRIDGE_ID</a> },
     }
 }
 </code></pre>
@@ -459,10 +459,10 @@ This should only be called once from <code><a href="../../dependencies/sui/objec
 
 ## Function `uid_as_inner`
 
-Get the inner <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code> of <code>uid</code>
+Get the inner <code><a href="../sui/object.md#sui_object_ID">ID</a></code> of <code>uid</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_uid_as_inner">uid_as_inner</a>(uid: &<a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>): &<a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_uid_as_inner">uid_as_inner</a>(uid: &<a href="../sui/object.md#sui_object_UID">sui::object::UID</a>): &<a href="../sui/object.md#sui_object_ID">sui::object::ID</a>
 </code></pre>
 
 
@@ -471,8 +471,8 @@ Get the inner <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID<
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_uid_as_inner">uid_as_inner</a>(uid: &<a href="../../dependencies/sui/object.md#sui_object_UID">UID</a>): &<a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> {
-    &uid.<a href="../../dependencies/sui/object.md#sui_object_id">id</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_uid_as_inner">uid_as_inner</a>(uid: &<a href="../sui/object.md#sui_object_UID">UID</a>): &<a href="../sui/object.md#sui_object_ID">ID</a> {
+    &uid.<a href="../sui/object.md#sui_object_id">id</a>
 }
 </code></pre>
 
@@ -484,10 +484,10 @@ Get the inner <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID<
 
 ## Function `uid_to_inner`
 
-Get the raw bytes of a <code>uid</code>'s inner <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code>
+Get the raw bytes of a <code>uid</code>'s inner <code><a href="../sui/object.md#sui_object_ID">ID</a></code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_uid_to_inner">uid_to_inner</a>(uid: &<a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>): <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_uid_to_inner">uid_to_inner</a>(uid: &<a href="../sui/object.md#sui_object_UID">sui::object::UID</a>): <a href="../sui/object.md#sui_object_ID">sui::object::ID</a>
 </code></pre>
 
 
@@ -496,8 +496,8 @@ Get the raw bytes of a <code>uid</code>'s inner <code><a href="../../dependencie
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_uid_to_inner">uid_to_inner</a>(uid: &<a href="../../dependencies/sui/object.md#sui_object_UID">UID</a>): <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> {
-    uid.<a href="../../dependencies/sui/object.md#sui_object_id">id</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_uid_to_inner">uid_to_inner</a>(uid: &<a href="../sui/object.md#sui_object_UID">UID</a>): <a href="../sui/object.md#sui_object_ID">ID</a> {
+    uid.<a href="../sui/object.md#sui_object_id">id</a>
 }
 </code></pre>
 
@@ -509,10 +509,10 @@ Get the raw bytes of a <code>uid</code>'s inner <code><a href="../../dependencie
 
 ## Function `uid_to_bytes`
 
-Get the raw bytes of a <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code>
+Get the raw bytes of a <code><a href="../sui/object.md#sui_object_UID">UID</a></code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_uid_to_bytes">uid_to_bytes</a>(uid: &<a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_uid_to_bytes">uid_to_bytes</a>(uid: &<a href="../sui/object.md#sui_object_UID">sui::object::UID</a>): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -521,8 +521,8 @@ Get the raw bytes of a <code><a href="../../dependencies/sui/object.md#sui_objec
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_uid_to_bytes">uid_to_bytes</a>(uid: &<a href="../../dependencies/sui/object.md#sui_object_UID">UID</a>): vector&lt;u8&gt; {
-    bcs::to_bytes(&uid.<a href="../../dependencies/sui/object.md#sui_object_id">id</a>.bytes)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_uid_to_bytes">uid_to_bytes</a>(uid: &<a href="../sui/object.md#sui_object_UID">UID</a>): vector&lt;u8&gt; {
+    bcs::to_bytes(&uid.<a href="../sui/object.md#sui_object_id">id</a>.bytes)
 }
 </code></pre>
 
@@ -534,10 +534,10 @@ Get the raw bytes of a <code><a href="../../dependencies/sui/object.md#sui_objec
 
 ## Function `uid_to_address`
 
-Get the inner bytes of <code><a href="../../dependencies/sui/object.md#sui_object_id">id</a></code> as an address.
+Get the inner bytes of <code><a href="../sui/object.md#sui_object_id">id</a></code> as an address.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_uid_to_address">uid_to_address</a>(uid: &<a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>): <b>address</b>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_uid_to_address">uid_to_address</a>(uid: &<a href="../sui/object.md#sui_object_UID">sui::object::UID</a>): <b>address</b>
 </code></pre>
 
 
@@ -546,8 +546,8 @@ Get the inner bytes of <code><a href="../../dependencies/sui/object.md#sui_objec
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_uid_to_address">uid_to_address</a>(uid: &<a href="../../dependencies/sui/object.md#sui_object_UID">UID</a>): <b>address</b> {
-    uid.<a href="../../dependencies/sui/object.md#sui_object_id">id</a>.bytes
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_uid_to_address">uid_to_address</a>(uid: &<a href="../sui/object.md#sui_object_UID">UID</a>): <b>address</b> {
+    uid.<a href="../sui/object.md#sui_object_id">id</a>.bytes
 }
 </code></pre>
 
@@ -559,11 +559,11 @@ Get the inner bytes of <code><a href="../../dependencies/sui/object.md#sui_objec
 
 ## Function `new`
 
-Create a new object. Returns the <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> that must be stored in a Sui object.
-This is the only way to create <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code>s.
+Create a new object. Returns the <code><a href="../sui/object.md#sui_object_UID">UID</a></code> that must be stored in a Sui object.
+This is the only way to create <code><a href="../sui/object.md#sui_object_UID">UID</a></code>s.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_new">new</a>(ctx: &<b>mut</b> <a href="../../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_new">new</a>(ctx: &<b>mut</b> <a href="../sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>
 </code></pre>
 
 
@@ -572,9 +572,9 @@ This is the only way to create <code><a href="../../dependencies/sui/object.md#s
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_new">new</a>(ctx: &<b>mut</b> TxContext): <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-    <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-        <a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes: ctx.fresh_object_address() },
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_new">new</a>(ctx: &<b>mut</b> TxContext): <a href="../sui/object.md#sui_object_UID">UID</a> {
+    <a href="../sui/object.md#sui_object_UID">UID</a> {
+        <a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">ID</a> { bytes: ctx.fresh_object_address() },
     }
 }
 </code></pre>
@@ -587,14 +587,14 @@ This is the only way to create <code><a href="../../dependencies/sui/object.md#s
 
 ## Function `delete`
 
-Delete the object and its <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code>. This is the only way to eliminate a <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code>.
+Delete the object and its <code><a href="../sui/object.md#sui_object_UID">UID</a></code>. This is the only way to eliminate a <code><a href="../sui/object.md#sui_object_UID">UID</a></code>.
 This exists to inform Sui of object deletions. When an object
 gets unpacked, the programmer will have to do something with its
-<code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code>. The implementation of this function emits a deleted
+<code><a href="../sui/object.md#sui_object_UID">UID</a></code>. The implementation of this function emits a deleted
 system event so Sui knows to process the object deletion
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_delete">delete</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_delete">delete</a>(<a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>)
 </code></pre>
 
 
@@ -603,9 +603,9 @@ system event so Sui knows to process the object deletion
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_delete">delete</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a>) {
-    <b>let</b> <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> { <a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes } } = <a href="../../dependencies/sui/object.md#sui_object_id">id</a>;
-    <a href="../../dependencies/sui/object.md#sui_object_delete_impl">delete_impl</a>(bytes)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_delete">delete</a>(<a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_UID">UID</a>) {
+    <b>let</b> <a href="../sui/object.md#sui_object_UID">UID</a> { <a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">ID</a> { bytes } } = <a href="../sui/object.md#sui_object_id">id</a>;
+    <a href="../sui/object.md#sui_object_delete_impl">delete_impl</a>(bytes)
 }
 </code></pre>
 
@@ -617,10 +617,10 @@ system event so Sui knows to process the object deletion
 
 ## Function `id`
 
-Get the underlying <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code> of <code>obj</code>
+Get the underlying <code><a href="../sui/object.md#sui_object_ID">ID</a></code> of <code>obj</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id">id</a>&lt;T: key&gt;(obj: &T): <a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id">id</a>&lt;T: key&gt;(obj: &T): <a href="../sui/object.md#sui_object_ID">sui::object::ID</a>
 </code></pre>
 
 
@@ -629,8 +629,8 @@ Get the underlying <code><a href="../../dependencies/sui/object.md#sui_object_ID
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id">id</a>&lt;T: key&gt;(obj: &T): <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> {
-    <a href="../../dependencies/sui/object.md#sui_object_borrow_uid">borrow_uid</a>(obj).<a href="../../dependencies/sui/object.md#sui_object_id">id</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id">id</a>&lt;T: key&gt;(obj: &T): <a href="../sui/object.md#sui_object_ID">ID</a> {
+    <a href="../sui/object.md#sui_object_borrow_uid">borrow_uid</a>(obj).<a href="../sui/object.md#sui_object_id">id</a>
 }
 </code></pre>
 
@@ -642,10 +642,10 @@ Get the underlying <code><a href="../../dependencies/sui/object.md#sui_object_ID
 
 ## Function `borrow_id`
 
-Borrow the underlying <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code> of <code>obj</code>
+Borrow the underlying <code><a href="../sui/object.md#sui_object_ID">ID</a></code> of <code>obj</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_borrow_id">borrow_id</a>&lt;T: key&gt;(obj: &T): &<a href="../../dependencies/sui/object.md#sui_object_ID">sui::object::ID</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_borrow_id">borrow_id</a>&lt;T: key&gt;(obj: &T): &<a href="../sui/object.md#sui_object_ID">sui::object::ID</a>
 </code></pre>
 
 
@@ -654,8 +654,8 @@ Borrow the underlying <code><a href="../../dependencies/sui/object.md#sui_object
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_borrow_id">borrow_id</a>&lt;T: key&gt;(obj: &T): &<a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> {
-    &<a href="../../dependencies/sui/object.md#sui_object_borrow_uid">borrow_uid</a>(obj).<a href="../../dependencies/sui/object.md#sui_object_id">id</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_borrow_id">borrow_id</a>&lt;T: key&gt;(obj: &T): &<a href="../sui/object.md#sui_object_ID">ID</a> {
+    &<a href="../sui/object.md#sui_object_borrow_uid">borrow_uid</a>(obj).<a href="../sui/object.md#sui_object_id">id</a>
 }
 </code></pre>
 
@@ -667,10 +667,10 @@ Borrow the underlying <code><a href="../../dependencies/sui/object.md#sui_object
 
 ## Function `id_bytes`
 
-Get the raw bytes for the underlying <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code> of <code>obj</code>
+Get the raw bytes for the underlying <code><a href="../sui/object.md#sui_object_ID">ID</a></code> of <code>obj</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_bytes">id_bytes</a>&lt;T: key&gt;(obj: &T): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_bytes">id_bytes</a>&lt;T: key&gt;(obj: &T): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -679,8 +679,8 @@ Get the raw bytes for the underlying <code><a href="../../dependencies/sui/objec
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_bytes">id_bytes</a>&lt;T: key&gt;(obj: &T): vector&lt;u8&gt; {
-    bcs::to_bytes(&<a href="../../dependencies/sui/object.md#sui_object_borrow_uid">borrow_uid</a>(obj).<a href="../../dependencies/sui/object.md#sui_object_id">id</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_bytes">id_bytes</a>&lt;T: key&gt;(obj: &T): vector&lt;u8&gt; {
+    bcs::to_bytes(&<a href="../sui/object.md#sui_object_borrow_uid">borrow_uid</a>(obj).<a href="../sui/object.md#sui_object_id">id</a>)
 }
 </code></pre>
 
@@ -692,10 +692,10 @@ Get the raw bytes for the underlying <code><a href="../../dependencies/sui/objec
 
 ## Function `id_address`
 
-Get the inner bytes for the underlying <code><a href="../../dependencies/sui/object.md#sui_object_ID">ID</a></code> of <code>obj</code>
+Get the inner bytes for the underlying <code><a href="../sui/object.md#sui_object_ID">ID</a></code> of <code>obj</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_address">id_address</a>&lt;T: key&gt;(obj: &T): <b>address</b>
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_address">id_address</a>&lt;T: key&gt;(obj: &T): <b>address</b>
 </code></pre>
 
 
@@ -704,8 +704,8 @@ Get the inner bytes for the underlying <code><a href="../../dependencies/sui/obj
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_id_address">id_address</a>&lt;T: key&gt;(obj: &T): <b>address</b> {
-    <a href="../../dependencies/sui/object.md#sui_object_borrow_uid">borrow_uid</a>(obj).<a href="../../dependencies/sui/object.md#sui_object_id">id</a>.bytes
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/object.md#sui_object_id_address">id_address</a>&lt;T: key&gt;(obj: &T): <b>address</b> {
+    <a href="../sui/object.md#sui_object_borrow_uid">borrow_uid</a>(obj).<a href="../sui/object.md#sui_object_id">id</a>.bytes
 }
 </code></pre>
 
@@ -717,14 +717,14 @@ Get the inner bytes for the underlying <code><a href="../../dependencies/sui/obj
 
 ## Function `borrow_uid`
 
-Get the <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> for <code>obj</code>.
+Get the <code><a href="../sui/object.md#sui_object_UID">UID</a></code> for <code>obj</code>.
 Safe because Sui has an extra bytecode verifier pass that forces every struct with
-the <code>key</code> ability to have a distinguished <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> field.
-Cannot be made public as the access to <code><a href="../../dependencies/sui/object.md#sui_object_UID">UID</a></code> for a given object must be privileged, and
+the <code>key</code> ability to have a distinguished <code><a href="../sui/object.md#sui_object_UID">UID</a></code> field.
+Cannot be made public as the access to <code><a href="../sui/object.md#sui_object_UID">UID</a></code> for a given object must be privileged, and
 restrictable in the object's module.
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_borrow_uid">borrow_uid</a>&lt;T: key&gt;(obj: &T): &<a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>
+<pre><code><b>fun</b> <a href="../sui/object.md#sui_object_borrow_uid">borrow_uid</a>&lt;T: key&gt;(obj: &T): &<a href="../sui/object.md#sui_object_UID">sui::object::UID</a>
 </code></pre>
 
 
@@ -733,7 +733,7 @@ restrictable in the object's module.
 <summary>Implementation</summary>
 
 
-<pre><code><b>native</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_borrow_uid">borrow_uid</a>&lt;T: key&gt;(obj: &T): &<a href="../../dependencies/sui/object.md#sui_object_UID">UID</a>;
+<pre><code><b>native</b> <b>fun</b> <a href="../sui/object.md#sui_object_borrow_uid">borrow_uid</a>&lt;T: key&gt;(obj: &T): &<a href="../sui/object.md#sui_object_UID">UID</a>;
 </code></pre>
 
 
@@ -747,7 +747,7 @@ restrictable in the object's module.
 Generate a new UID specifically used for creating a UID from a hash
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_new_uid_from_hash">new_uid_from_hash</a>(bytes: <b>address</b>): <a href="../../dependencies/sui/object.md#sui_object_UID">sui::object::UID</a>
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_new_uid_from_hash">new_uid_from_hash</a>(bytes: <b>address</b>): <a href="../sui/object.md#sui_object_UID">sui::object::UID</a>
 </code></pre>
 
 
@@ -756,9 +756,9 @@ Generate a new UID specifically used for creating a UID from a hash
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_new_uid_from_hash">new_uid_from_hash</a>(bytes: <b>address</b>): <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> {
-    <a href="../../dependencies/sui/object.md#sui_object_record_new_uid">record_new_uid</a>(bytes);
-    <a href="../../dependencies/sui/object.md#sui_object_UID">UID</a> { <a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <a href="../../dependencies/sui/object.md#sui_object_ID">ID</a> { bytes } }
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../sui/object.md#sui_object_new_uid_from_hash">new_uid_from_hash</a>(bytes: <b>address</b>): <a href="../sui/object.md#sui_object_UID">UID</a> {
+    <a href="../sui/object.md#sui_object_record_new_uid">record_new_uid</a>(bytes);
+    <a href="../sui/object.md#sui_object_UID">UID</a> { <a href="../sui/object.md#sui_object_id">id</a>: <a href="../sui/object.md#sui_object_ID">ID</a> { bytes } }
 }
 </code></pre>
 
@@ -772,7 +772,7 @@ Generate a new UID specifically used for creating a UID from a hash
 
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_delete_impl">delete_impl</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <b>address</b>)
+<pre><code><b>fun</b> <a href="../sui/object.md#sui_object_delete_impl">delete_impl</a>(<a href="../sui/object.md#sui_object_id">id</a>: <b>address</b>)
 </code></pre>
 
 
@@ -781,7 +781,7 @@ Generate a new UID specifically used for creating a UID from a hash
 <summary>Implementation</summary>
 
 
-<pre><code><b>native</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_delete_impl">delete_impl</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <b>address</b>);
+<pre><code><b>native</b> <b>fun</b> <a href="../sui/object.md#sui_object_delete_impl">delete_impl</a>(<a href="../sui/object.md#sui_object_id">id</a>: <b>address</b>);
 </code></pre>
 
 
@@ -794,7 +794,7 @@ Generate a new UID specifically used for creating a UID from a hash
 
 
 
-<pre><code><b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_record_new_uid">record_new_uid</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <b>address</b>)
+<pre><code><b>fun</b> <a href="../sui/object.md#sui_object_record_new_uid">record_new_uid</a>(<a href="../sui/object.md#sui_object_id">id</a>: <b>address</b>)
 </code></pre>
 
 
@@ -803,7 +803,7 @@ Generate a new UID specifically used for creating a UID from a hash
 <summary>Implementation</summary>
 
 
-<pre><code><b>native</b> <b>fun</b> <a href="../../dependencies/sui/object.md#sui_object_record_new_uid">record_new_uid</a>(<a href="../../dependencies/sui/object.md#sui_object_id">id</a>: <b>address</b>);
+<pre><code><b>native</b> <b>fun</b> <a href="../sui/object.md#sui_object_record_new_uid">record_new_uid</a>(<a href="../sui/object.md#sui_object_id">id</a>: <b>address</b>);
 </code></pre>
 
 

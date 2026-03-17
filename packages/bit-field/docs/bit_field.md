@@ -49,7 +49,7 @@ Unlike other pack functions, this one shifts bit by bit.
     <b>let</b> (<b>mut</b> i, len) = (0, values.length() <b>as</b> u8);
     values.reverse();
     <b>while</b> (i &lt; len) {
-        v = v | (<b>if</b> (values.pop_back()) 1 <b>else</b> 0 <b>as</b> $T) &lt;&lt; i;
+        v = v | (<b>if</b> (values.pop_back()) 1 <b>else</b> 0u64 <b>as</b> $T) &lt;&lt; i;
         i = i + 1;
     };
     v

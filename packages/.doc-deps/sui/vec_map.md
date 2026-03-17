@@ -29,8 +29,8 @@
 -  [Function `remove_entry_by_idx`](#sui_vec_map_remove_entry_by_idx)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/option.md#std_option">std::option</a>;
-<b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
+<pre><code><b>use</b> <a href="../std/option.md#std_option">std::option</a>;
+<b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
 </code></pre>
 
 
@@ -47,7 +47,7 @@ Large maps should use handwritten parent/child relationships instead.
 Maps that need sorted iteration rather than insertion order iteration should also be handwritten.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K: <b>copy</b>, V&gt; <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K: <b>copy</b>, V&gt; <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -58,7 +58,7 @@ Maps that need sorted iteration rather than insertion order iteration should als
 
 <dl>
 <dt>
-<code>contents: vector&lt;<a href="../../dependencies/sui/vec_map.md#sui_vec_map_Entry">sui::vec_map::Entry</a>&lt;K, V&gt;&gt;</code>
+<code>contents: vector&lt;<a href="../sui/vec_map.md#sui_vec_map_Entry">sui::vec_map::Entry</a>&lt;K, V&gt;&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -74,7 +74,7 @@ Maps that need sorted iteration rather than insertion order iteration should als
 An entry in the map
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_Entry">Entry</a>&lt;K: <b>copy</b>, V&gt; <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="../sui/vec_map.md#sui_vec_map_Entry">Entry</a>&lt;K: <b>copy</b>, V&gt; <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -109,7 +109,7 @@ An entry in the map
 This key already exists in the map
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EKeyAlreadyExists">EKeyAlreadyExists</a>: u64 = 0;
+<pre><code><b>const</b> <a href="../sui/vec_map.md#sui_vec_map_EKeyAlreadyExists">EKeyAlreadyExists</a>: u64 = 0;
 </code></pre>
 
 
@@ -119,7 +119,7 @@ This key already exists in the map
 This key does not exist in the map
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EKeyDoesNotExist">EKeyDoesNotExist</a>: u64 = 1;
+<pre><code><b>const</b> <a href="../sui/vec_map.md#sui_vec_map_EKeyDoesNotExist">EKeyDoesNotExist</a>: u64 = 1;
 </code></pre>
 
 
@@ -129,7 +129,7 @@ This key does not exist in the map
 Trying to destroy a map that is not empty
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EMapNotEmpty">EMapNotEmpty</a>: u64 = 2;
+<pre><code><b>const</b> <a href="../sui/vec_map.md#sui_vec_map_EMapNotEmpty">EMapNotEmpty</a>: u64 = 2;
 </code></pre>
 
 
@@ -139,7 +139,7 @@ Trying to destroy a map that is not empty
 Trying to access an element of the map at an invalid index
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EIndexOutOfBounds">EIndexOutOfBounds</a>: u64 = 3;
+<pre><code><b>const</b> <a href="../sui/vec_map.md#sui_vec_map_EIndexOutOfBounds">EIndexOutOfBounds</a>: u64 = 3;
 </code></pre>
 
 
@@ -149,7 +149,7 @@ Trying to access an element of the map at an invalid index
 Trying to pop from a map that is empty
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EMapEmpty">EMapEmpty</a>: u64 = 4;
+<pre><code><b>const</b> <a href="../sui/vec_map.md#sui_vec_map_EMapEmpty">EMapEmpty</a>: u64 = 4;
 </code></pre>
 
 
@@ -159,7 +159,7 @@ Trying to pop from a map that is empty
 Trying to construct a map from keys and values of different lengths
 
 
-<pre><code><b>const</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EUnequalLengths">EUnequalLengths</a>: u64 = 5;
+<pre><code><b>const</b> <a href="../sui/vec_map.md#sui_vec_map_EUnequalLengths">EUnequalLengths</a>: u64 = 5;
 </code></pre>
 
 
@@ -168,10 +168,10 @@ Trying to construct a map from keys and values of different lengths
 
 ## Function `empty`
 
-Create an empty <code><a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a></code>
+Create an empty <code><a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a></code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_empty">empty</a>&lt;K: <b>copy</b>, V&gt;(): <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_empty">empty</a>&lt;K: <b>copy</b>, V&gt;(): <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;
 </code></pre>
 
 
@@ -180,8 +180,8 @@ Create an empty <code><a href="../../dependencies/sui/vec_map.md#sui_vec_map_Vec
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_empty">empty</a>&lt;K: <b>copy</b>, V&gt;(): <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt; {
-    <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a> { contents: vector[] }
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_empty">empty</a>&lt;K: <b>copy</b>, V&gt;(): <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt; {
+    <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a> { contents: vector[] }
 }
 </code></pre>
 
@@ -197,7 +197,7 @@ Insert the entry <code>key</code> |-> <code>value</code> into <code>self</code>.
 Aborts if <code>key</code> is already bound in <code>self</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_insert">insert</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: K, value: V)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_insert">insert</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: K, value: V)
 </code></pre>
 
 
@@ -206,9 +206,9 @@ Aborts if <code>key</code> is already bound in <code>self</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_insert">insert</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: K, value: V) {
-    <b>assert</b>!(!self.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_contains">contains</a>(&key), <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EKeyAlreadyExists">EKeyAlreadyExists</a>);
-    self.contents.push_back(<a href="../../dependencies/sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value })
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_insert">insert</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: K, value: V) {
+    <b>assert</b>!(!self.<a href="../sui/vec_map.md#sui_vec_map_contains">contains</a>(&key), <a href="../sui/vec_map.md#sui_vec_map_EKeyAlreadyExists">EKeyAlreadyExists</a>);
+    self.contents.push_back(<a href="../sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value })
 }
 </code></pre>
 
@@ -223,7 +223,7 @@ Aborts if <code>key</code> is already bound in <code>self</code>.
 Remove the entry <code>key</code> |-> <code>value</code> from self. Aborts if <code>key</code> is not bound in <code>self</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_remove">remove</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): (K, V)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_remove">remove</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): (K, V)
 </code></pre>
 
 
@@ -232,9 +232,9 @@ Remove the entry <code>key</code> |-> <code>value</code> from self. Aborts if <c
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_remove">remove</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): (K, V) {
-    <b>let</b> idx = self.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>(key);
-    <b>let</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value } = self.contents.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_remove">remove</a>(idx);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_remove">remove</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): (K, V) {
+    <b>let</b> idx = self.<a href="../sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>(key);
+    <b>let</b> <a href="../sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value } = self.contents.<a href="../sui/vec_map.md#sui_vec_map_remove">remove</a>(idx);
     (key, value)
 }
 </code></pre>
@@ -250,7 +250,7 @@ Remove the entry <code>key</code> |-> <code>value</code> from self. Aborts if <c
 Pop the most recently inserted entry from the map. Aborts if the map is empty.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_pop">pop</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): (K, V)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_pop">pop</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): (K, V)
 </code></pre>
 
 
@@ -259,9 +259,9 @@ Pop the most recently inserted entry from the map. Aborts if the map is empty.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_pop">pop</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): (K, V) {
-    <b>assert</b>!(self.contents.length() != 0, <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EMapEmpty">EMapEmpty</a>);
-    <b>let</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value } = self.contents.pop_back();
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_pop">pop</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): (K, V) {
+    <b>assert</b>!(self.contents.length() != 0, <a href="../sui/vec_map.md#sui_vec_map_EMapEmpty">EMapEmpty</a>);
+    <b>let</b> <a href="../sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value } = self.contents.pop_back();
     (key, value)
 }
 </code></pre>
@@ -278,7 +278,7 @@ Get a mutable reference to the value bound to <code>key</code> in <code>self</co
 Aborts if <code>key</code> is not bound in <code>self</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_mut">get_mut</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): &<b>mut</b> V
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_mut">get_mut</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): &<b>mut</b> V
 </code></pre>
 
 
@@ -287,8 +287,8 @@ Aborts if <code>key</code> is not bound in <code>self</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_mut">get_mut</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): &<b>mut</b> V {
-    <b>let</b> idx = self.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>(key);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_mut">get_mut</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): &<b>mut</b> V {
+    <b>let</b> idx = self.<a href="../sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>(key);
     <b>let</b> <b>entry</b> = &<b>mut</b> self.contents[idx];
     &<b>mut</b> <b>entry</b>.value
 }
@@ -306,7 +306,7 @@ Get a reference to the value bound to <code>key</code> in <code>self</code>.
 Aborts if <code>key</code> is not bound in <code>self</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get">get</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): &V
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get">get</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): &V
 </code></pre>
 
 
@@ -315,8 +315,8 @@ Aborts if <code>key</code> is not bound in <code>self</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get">get</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): &V {
-    <b>let</b> idx = self.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>(key);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get">get</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): &V {
+    <b>let</b> idx = self.<a href="../sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>(key);
     <b>let</b> <b>entry</b> = &self.contents[idx];
     &<b>entry</b>.value
 }
@@ -335,7 +335,7 @@ Return Some(V) if the value exists, None otherwise.
 Only works for a "copyable" value as references cannot be stored in <code>vector</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_try_get">try_get</a>&lt;K: <b>copy</b>, V: <b>copy</b>&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;V&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_try_get">try_get</a>&lt;K: <b>copy</b>, V: <b>copy</b>&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;V&gt;
 </code></pre>
 
 
@@ -344,9 +344,9 @@ Only works for a "copyable" value as references cannot be stored in <code>vector
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_try_get">try_get</a>&lt;K: <b>copy</b>, V: <b>copy</b>&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): Option&lt;V&gt; {
-    <b>if</b> (self.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_contains">contains</a>(key)) {
-        option::some(*<a href="../../dependencies/sui/vec_map.md#sui_vec_map_get">get</a>(self, key))
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_try_get">try_get</a>&lt;K: <b>copy</b>, V: <b>copy</b>&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): Option&lt;V&gt; {
+    <b>if</b> (self.<a href="../sui/vec_map.md#sui_vec_map_contains">contains</a>(key)) {
+        option::some(*<a href="../sui/vec_map.md#sui_vec_map_get">get</a>(self, key))
     } <b>else</b> {
         option::none()
     }
@@ -364,7 +364,7 @@ Only works for a "copyable" value as references cannot be stored in <code>vector
 Return true if <code>self</code> contains an entry for <code>key</code>, false otherwise
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_contains">contains</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_contains">contains</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): bool
 </code></pre>
 
 
@@ -373,8 +373,8 @@ Return true if <code>self</code> contains an entry for <code>key</code>, false o
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_contains">contains</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): bool {
-    <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_idx_opt">get_idx_opt</a>(self, key).is_some()
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_contains">contains</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): bool {
+    <a href="../sui/vec_map.md#sui_vec_map_get_idx_opt">get_idx_opt</a>(self, key).is_some()
 }
 </code></pre>
 
@@ -389,7 +389,7 @@ Return true if <code>self</code> contains an entry for <code>key</code>, false o
 Return the number of entries in <code>self</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_size">size</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): u64
 </code></pre>
 
 
@@ -398,7 +398,7 @@ Return the number of entries in <code>self</code>
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): u64 {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_size">size</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): u64 {
     self.contents.length()
 }
 </code></pre>
@@ -414,7 +414,7 @@ Return the number of entries in <code>self</code>
 Return true if <code>self</code> has 0 elements, false otherwise
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_is_empty">is_empty</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_is_empty">is_empty</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): bool
 </code></pre>
 
 
@@ -423,8 +423,8 @@ Return true if <code>self</code> has 0 elements, false otherwise
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_is_empty">is_empty</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): bool {
-    self.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>() == 0
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_is_empty">is_empty</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): bool {
+    self.<a href="../sui/vec_map.md#sui_vec_map_size">size</a>() == 0
 }
 </code></pre>
 
@@ -439,7 +439,7 @@ Return true if <code>self</code> has 0 elements, false otherwise
 Destroy an empty map. Aborts if <code>self</code> is not empty
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>&lt;K: <b>copy</b>, V&gt;(self: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>&lt;K: <b>copy</b>, V&gt;(self: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;)
 </code></pre>
 
 
@@ -448,10 +448,10 @@ Destroy an empty map. Aborts if <code>self</code> is not empty
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>&lt;K: <b>copy</b>, V&gt;(self: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;) {
-    <b>let</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a> { contents } = self;
-    <b>assert</b>!(contents.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_is_empty">is_empty</a>(), <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EMapNotEmpty">EMapNotEmpty</a>);
-    contents.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>()
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>&lt;K: <b>copy</b>, V&gt;(self: <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;) {
+    <b>let</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a> { contents } = self;
+    <b>assert</b>!(contents.<a href="../sui/vec_map.md#sui_vec_map_is_empty">is_empty</a>(), <a href="../sui/vec_map.md#sui_vec_map_EMapNotEmpty">EMapNotEmpty</a>);
+    contents.<a href="../sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>()
 }
 </code></pre>
 
@@ -467,7 +467,7 @@ Unpack <code>self</code> into vectors of its keys and values.
 The output keys and values are stored in insertion order, *not* sorted by key.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_into_keys_values">into_keys_values</a>&lt;K: <b>copy</b>, V&gt;(self: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): (vector&lt;K&gt;, vector&lt;V&gt;)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_into_keys_values">into_keys_values</a>&lt;K: <b>copy</b>, V&gt;(self: <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): (vector&lt;K&gt;, vector&lt;V&gt;)
 </code></pre>
 
 
@@ -476,22 +476,22 @@ The output keys and values are stored in insertion order, *not* sorted by key.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_into_keys_values">into_keys_values</a>&lt;K: <b>copy</b>, V&gt;(self: <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): (vector&lt;K&gt;, vector&lt;V&gt;) {
-    <b>let</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a> { <b>mut</b> contents } = self;
-    // reverse the vector so the output <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a> and values will appear in insertion order
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_into_keys_values">into_keys_values</a>&lt;K: <b>copy</b>, V&gt;(self: <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): (vector&lt;K&gt;, vector&lt;V&gt;) {
+    <b>let</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a> { <b>mut</b> contents } = self;
+    // reverse the vector so the output <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a> and values will appear in insertion order
     contents.reverse();
     <b>let</b> <b>mut</b> i = 0;
     <b>let</b> n = contents.length();
-    <b>let</b> <b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a> = vector[];
+    <b>let</b> <b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a> = vector[];
     <b>let</b> <b>mut</b> values = vector[];
     <b>while</b> (i &lt; n) {
-        <b>let</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value } = contents.pop_back();
-        <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>.push_back(key);
+        <b>let</b> <a href="../sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value } = contents.pop_back();
+        <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>.push_back(key);
         values.push_back(value);
         i = i + 1;
     };
-    contents.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>();
-    (<a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>, values)
+    contents.<a href="../sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>();
+    (<a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>, values)
 }
 </code></pre>
 
@@ -503,14 +503,14 @@ The output keys and values are stored in insertion order, *not* sorted by key.
 
 ## Function `from_keys_values`
 
-Construct a new <code><a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a></code> from two vectors, one for keys and one for values.
+Construct a new <code><a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a></code> from two vectors, one for keys and one for values.
 The key value pairs are associated via their indices in the vectors, e.g. the key at index i
-in <code><a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a></code> is associated with the value at index i in <code>values</code>.
+in <code><a href="../sui/vec_map.md#sui_vec_map_keys">keys</a></code> is associated with the value at index i in <code>values</code>.
 The key value pairs are stored in insertion order (the original vectors ordering)
 and are *not* sorted.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_from_keys_values">from_keys_values</a>&lt;K: <b>copy</b>, V&gt;(<a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>: vector&lt;K&gt;, values: vector&lt;V&gt;): <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_from_keys_values">from_keys_values</a>&lt;K: <b>copy</b>, V&gt;(<a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>: vector&lt;K&gt;, values: vector&lt;V&gt;): <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;
 </code></pre>
 
 
@@ -519,14 +519,14 @@ and are *not* sorted.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_from_keys_values">from_keys_values</a>&lt;K: <b>copy</b>, V&gt;(<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>: vector&lt;K&gt;, <b>mut</b> values: vector&lt;V&gt;): <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt; {
-    <b>assert</b>!(<a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>.length() == values.length(), <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EUnequalLengths">EUnequalLengths</a>);
-    <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>.reverse();
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_from_keys_values">from_keys_values</a>&lt;K: <b>copy</b>, V&gt;(<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>: vector&lt;K&gt;, <b>mut</b> values: vector&lt;V&gt;): <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt; {
+    <b>assert</b>!(<a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>.length() == values.length(), <a href="../sui/vec_map.md#sui_vec_map_EUnequalLengths">EUnequalLengths</a>);
+    <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>.reverse();
     values.reverse();
-    <b>let</b> <b>mut</b> map = <a href="../../dependencies/sui/vec_map.md#sui_vec_map_empty">empty</a>();
-    <b>while</b> (<a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>.length() != 0) map.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_insert">insert</a>(<a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>.pop_back(), values.pop_back());
-    <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>();
-    values.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>();
+    <b>let</b> <b>mut</b> map = <a href="../sui/vec_map.md#sui_vec_map_empty">empty</a>();
+    <b>while</b> (<a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>.length() != 0) map.<a href="../sui/vec_map.md#sui_vec_map_insert">insert</a>(<a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>.pop_back(), values.pop_back());
+    <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>.<a href="../sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>();
+    values.<a href="../sui/vec_map.md#sui_vec_map_destroy_empty">destroy_empty</a>();
     map
 }
 </code></pre>
@@ -543,7 +543,7 @@ Returns a list of keys in the map.
 Do not assume any particular ordering.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): vector&lt;K&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;): vector&lt;K&gt;
 </code></pre>
 
 
@@ -552,16 +552,16 @@ Do not assume any particular ordering.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): vector&lt;K&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;): vector&lt;K&gt; {
     <b>let</b> <b>mut</b> i = 0;
     <b>let</b> n = self.contents.length();
-    <b>let</b> <b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a> = vector[];
+    <b>let</b> <b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a> = vector[];
     <b>while</b> (i &lt; n) {
         <b>let</b> <b>entry</b> = self.contents.borrow(i);
-        <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>.push_back(<b>entry</b>.key);
+        <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>.push_back(<b>entry</b>.key);
         i = i + 1;
     };
-    <a href="../../dependencies/sui/vec_map.md#sui_vec_map_keys">keys</a>
+    <a href="../sui/vec_map.md#sui_vec_map_keys">keys</a>
 }
 </code></pre>
 
@@ -577,7 +577,7 @@ Find the index of <code>key</code> in <code>self</code>. Return <code>None</code
 Note that map entries are stored in insertion order, *not* sorted by key.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_idx_opt">get_idx_opt</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;u64&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_idx_opt">get_idx_opt</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;u64&gt;
 </code></pre>
 
 
@@ -586,9 +586,9 @@ Note that map entries are stored in insertion order, *not* sorted by key.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_idx_opt">get_idx_opt</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): Option&lt;u64&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_idx_opt">get_idx_opt</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): Option&lt;u64&gt; {
     <b>let</b> <b>mut</b> i = 0;
-    <b>let</b> n = <a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>(self);
+    <b>let</b> n = <a href="../sui/vec_map.md#sui_vec_map_size">size</a>(self);
     <b>while</b> (i &lt; n) {
         <b>if</b> (&self.contents[i].key == key) {
             <b>return</b> option::some(i)
@@ -611,7 +611,7 @@ Find the index of <code>key</code> in <code>self</code>. Aborts if <code>key</co
 Note that map entries are stored in insertion order, *not* sorted by key.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, key: &K): u64
 </code></pre>
 
 
@@ -620,9 +620,9 @@ Note that map entries are stored in insertion order, *not* sorted by key.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): u64 {
-    <b>let</b> idx_opt = self.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_idx_opt">get_idx_opt</a>(key);
-    <b>assert</b>!(idx_opt.is_some(), <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EKeyDoesNotExist">EKeyDoesNotExist</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_idx">get_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, key: &K): u64 {
+    <b>let</b> idx_opt = self.<a href="../sui/vec_map.md#sui_vec_map_get_idx_opt">get_idx_opt</a>(key);
+    <b>assert</b>!(idx_opt.is_some(), <a href="../sui/vec_map.md#sui_vec_map_EKeyDoesNotExist">EKeyDoesNotExist</a>);
     idx_opt.destroy_some()
 }
 </code></pre>
@@ -637,10 +637,10 @@ Note that map entries are stored in insertion order, *not* sorted by key.
 
 Return a reference to the <code>idx</code>th entry of <code>self</code>. This gives direct access into the backing array of the map--use with caution.
 Note that map entries are stored in insertion order, *not* sorted by key.
-Aborts if <code>idx</code> is greater than or equal to <code><a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>(self)</code>
+Aborts if <code>idx</code> is greater than or equal to <code><a href="../sui/vec_map.md#sui_vec_map_size">size</a>(self)</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_entry_by_idx">get_entry_by_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, idx: u64): (&K, &V)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_entry_by_idx">get_entry_by_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, idx: u64): (&K, &V)
 </code></pre>
 
 
@@ -649,8 +649,8 @@ Aborts if <code>idx</code> is greater than or equal to <code><a href="../../depe
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_entry_by_idx">get_entry_by_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, idx: u64): (&K, &V) {
-    <b>assert</b>!(idx &lt; <a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>(self), <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EIndexOutOfBounds">EIndexOutOfBounds</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_entry_by_idx">get_entry_by_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, idx: u64): (&K, &V) {
+    <b>assert</b>!(idx &lt; <a href="../sui/vec_map.md#sui_vec_map_size">size</a>(self), <a href="../sui/vec_map.md#sui_vec_map_EIndexOutOfBounds">EIndexOutOfBounds</a>);
     <b>let</b> <b>entry</b> = &self.contents[idx];
     (&<b>entry</b>.key, &<b>entry</b>.value)
 }
@@ -666,10 +666,10 @@ Aborts if <code>idx</code> is greater than or equal to <code><a href="../../depe
 
 Return a mutable reference to the <code>idx</code>th entry of <code>self</code>. This gives direct access into the backing array of the map--use with caution.
 Note that map entries are stored in insertion order, *not* sorted by key.
-Aborts if <code>idx</code> is greater than or equal to <code><a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>(self)</code>
+Aborts if <code>idx</code> is greater than or equal to <code><a href="../sui/vec_map.md#sui_vec_map_size">size</a>(self)</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_entry_by_idx_mut">get_entry_by_idx_mut</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, idx: u64): (&K, &<b>mut</b> V)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_entry_by_idx_mut">get_entry_by_idx_mut</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, idx: u64): (&K, &<b>mut</b> V)
 </code></pre>
 
 
@@ -678,8 +678,8 @@ Aborts if <code>idx</code> is greater than or equal to <code><a href="../../depe
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_get_entry_by_idx_mut">get_entry_by_idx_mut</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, idx: u64): (&K, &<b>mut</b> V) {
-    <b>assert</b>!(idx &lt; <a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>(self), <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EIndexOutOfBounds">EIndexOutOfBounds</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_get_entry_by_idx_mut">get_entry_by_idx_mut</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, idx: u64): (&K, &<b>mut</b> V) {
+    <b>assert</b>!(idx &lt; <a href="../sui/vec_map.md#sui_vec_map_size">size</a>(self), <a href="../sui/vec_map.md#sui_vec_map_EIndexOutOfBounds">EIndexOutOfBounds</a>);
     <b>let</b> <b>entry</b> = &<b>mut</b> self.contents[idx];
     (&<b>entry</b>.key, &<b>mut</b> <b>entry</b>.value)
 }
@@ -694,10 +694,10 @@ Aborts if <code>idx</code> is greater than or equal to <code><a href="../../depe
 ## Function `remove_entry_by_idx`
 
 Remove the entry at index <code>idx</code> from self.
-Aborts if <code>idx</code> is greater than or equal to <code><a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>(self)</code>
+Aborts if <code>idx</code> is greater than or equal to <code><a href="../sui/vec_map.md#sui_vec_map_size">size</a>(self)</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_remove_entry_by_idx">remove_entry_by_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, idx: u64): (K, V)
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_remove_entry_by_idx">remove_entry_by_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;K, V&gt;, idx: u64): (K, V)
 </code></pre>
 
 
@@ -706,9 +706,9 @@ Aborts if <code>idx</code> is greater than or equal to <code><a href="../../depe
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_remove_entry_by_idx">remove_entry_by_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, idx: u64): (K, V) {
-    <b>assert</b>!(idx &lt; <a href="../../dependencies/sui/vec_map.md#sui_vec_map_size">size</a>(self), <a href="../../dependencies/sui/vec_map.md#sui_vec_map_EIndexOutOfBounds">EIndexOutOfBounds</a>);
-    <b>let</b> <a href="../../dependencies/sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value } = self.contents.<a href="../../dependencies/sui/vec_map.md#sui_vec_map_remove">remove</a>(idx);
+<pre><code><b>public</b> <b>fun</b> <a href="../sui/vec_map.md#sui_vec_map_remove_entry_by_idx">remove_entry_by_idx</a>&lt;K: <b>copy</b>, V&gt;(self: &<b>mut</b> <a href="../sui/vec_map.md#sui_vec_map_VecMap">VecMap</a>&lt;K, V&gt;, idx: u64): (K, V) {
+    <b>assert</b>!(idx &lt; <a href="../sui/vec_map.md#sui_vec_map_size">size</a>(self), <a href="../sui/vec_map.md#sui_vec_map_EIndexOutOfBounds">EIndexOutOfBounds</a>);
+    <b>let</b> <a href="../sui/vec_map.md#sui_vec_map_Entry">Entry</a> { key, value } = self.contents.<a href="../sui/vec_map.md#sui_vec_map_remove">remove</a>(idx);
     (key, value)
 }
 </code></pre>

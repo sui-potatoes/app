@@ -27,7 +27,7 @@ export function Param({ name, disabled, defaultValue, values, isColour, onChange
     useEffect(() => setIdx(values.indexOf(defaultValue)), [defaultValue]);
 
     return (
-        <div className="flex md:grid grid-cols-2 max-md:justify-between md:max-w-[400px]">
+        <div className="flex md:grid grid-cols-2 max-md:justify-between md:max-w-[400px] text-sm tracking-wider">
             <div className="md:flex-1 decoration-none uppercase mr-5 text-left">{name}</div>
             <div className="uppercase flex flex-wrap items-center gap-3">
                 <button
@@ -38,6 +38,7 @@ export function Param({ name, disabled, defaultValue, values, isColour, onChange
                         onChange && onChange(values[newIdx]);
                     }}
                     className="disabled:opacity-70"
+                    style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
                     disabled={disabled}
                 >
                     {"‹"}
@@ -55,6 +56,7 @@ export function Param({ name, disabled, defaultValue, values, isColour, onChange
                         onChange && onChange(values[newIdx]);
                     }}
                     className="disabled:opacity-70"
+                    style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
                     disabled={disabled}
                 >
                     {"›"}

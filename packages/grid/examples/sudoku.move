@@ -2,14 +2,21 @@
 // SPDX-License-Identifier: MIT
 
 /// Simple Sudoku Generator and verifier.
+///
+/// - Uses `Grid` of `u8` values;
+/// - Board generated using `Random`.
+/// - Object can be destroyed if a correct solution is provided.
 module grid::sudoku;
 
 use grid::grid::{Self, Grid};
 use sui::random::{Random, RandomGenerator};
 
-const EModifiedPuzzle: u64 = 0;
-const EIncorrectSolution: u64 = 1;
+#[error(code = 0)]
+const EModifiedPuzzle: vector<u8> = b"Values on original board were modified";
+#[error(code = 1)]
+const EIncorrectSolution: vector<u8> = b"Provided solution is incorrect";
 
+/// Bit mask: 0-9 bits are set to 1. Used in solution verification.
 const COMPLETE: u16 = 0x3fe;
 
 /// A Sudoku puzzle. Can be burned by solving it.
@@ -20,6 +27,7 @@ public struct Sudoku has key {
 }
 
 /// Create a new `Sudoku` object and transfer it to the caller.
+/// Function must be `entry` to use `Random`.
 entry fun new(r: &Random, level: u8, ctx: &mut TxContext) {
     transfer::transfer(
         Sudoku {
@@ -74,7 +82,7 @@ fun generate(rng: &mut RandomGenerator, level: u8): Grid<u8> {
         seed.rotate(3),
     ]);
 
-    // Remove 40% of the cells
+    // Remove level*10 % of the cells.
     9u16.do!(|i| 9u16.do!(|j| {
         if (rng.generate_u8() % 10 < level) {
             *&mut sudoku[i, j] = 0;
@@ -91,6 +99,11 @@ fun rotate<T: copy>(seed: &mut vector<T>, num: u64): vector<T> {
     num.do!(|_| { let n = seed.remove(0); seed.push_back(n) });
     *seed
 }
+
+#[test_only]
+#[allow(unused_function)]
+/// Utility to demonstrate debug printing ability.
+public fun print(s: &Sudoku) { s.grid.debug!() }
 
 #[random_test]
 fun test_generate_verify(seed: vector<u8>) {

@@ -4,6 +4,7 @@
 import "./character.css";
 import { useEffect, useState } from "react";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
+import { GO_BACK_KEY } from "../../App";
 import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
 import { useNetworkVariable } from "../../networkConfig";
 import { Transaction } from "@mysten/sui/transactions";
@@ -91,7 +92,6 @@ export default function App() {
     const {
         data: characters,
         refetch,
-        isPending,
     } = useSuiClientQuery(
         "getOwnedObjects",
         {
@@ -133,41 +133,71 @@ export default function App() {
         setInitialCharacter(JSON.stringify({ ...image }));
     }, [characters]);
 
-    if (isPending) return <div>Loading...</div>;
-    if (!zkLogin.address && !characterId) return <div>Sign in to use the app</div>;
-
-    // use for fetching the character
-    // useEffect(() => {
-    //     if (!character?.data) return;
-    //     setChar(() => ({
-    //         // @ts-ignore
-    //         ...CharBCS.parse(fromB64(character.data.bcs.bcsBytes)).image,
-    //     }));
-    // }, [character]);
+    const isConnected = !!zkLogin.address;
+    const isSaveDisabled = !zkLogin.address || !canInteract || JSON.stringify(char) === initialCharacter;
 
     return (
-        <div className="grid md:grid-cols-2 gap-5 items-center">
-            <div className="max-h-fit">
+        <div className="md:grid md:grid-cols-[1fr_auto] gap-5 flex flex-col items-center md:flex-none relative md:h-[calc(100vh-40px)] md:content-center">
+            <div className="flex items-center justify-center relative">
                 <Char {...char} />
+                {!isConnected && (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm" style={{ background: "color-mix(in srgb, var(--background-color) 80%, transparent)" }}>
+                        <p className="text-sm tracking-wider uppercase" style={{ color: "var(--text-color)" }}>
+                            <button
+                                style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
+                                onClick={async () => {
+                                    localStorage.setItem(GO_BACK_KEY, window.location.href);
+                                    history.pushState({}, "", "/");
+                                    window.location.href = await flow.createAuthorizationURL({
+                                        provider: "google",
+                                        clientId: "591411088609-6kbt6b07a6np6mq2mnlq97i150amussh.apps.googleusercontent.com",
+                                        redirectUrl: window.location.href.split("#")[0],
+                                        network: "testnet",
+                                    });
+                                }}
+                            >
+                                Sign in
+                            </button>{" "}
+                            to use the app
+                        </p>
+                    </div>
+                )}
             </div>
-            <div className="text-center sm-show">
-                <button
-                    disabled={
-                        !zkLogin.address ||
-                        !canInteract ||
-                        JSON.stringify(char) === initialCharacter
-                    }
-                    onClick={() => {
-                        characterId ? updateCharacter(char) : createCharacter(char);
-                    }}
-                >
-                    {characterId ? "Update" : "Create"} Character{" "}
-                    {!zkLogin.address && " (Login required)"}
-                </button>
-            </div>
-            <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
-                <div className="flex flex-col gap-3 justify-center">
-                    <Param
+            <div className="flex flex-col gap-3 justify-center md:w-[240px] md:flex-shrink-0">
+                <div className="sm-show text-sm tracking-wider uppercase">
+                    <button
+                        disabled={isSaveDisabled}
+                        style={{ color: isSaveDisabled ? "var(--disabled-color)" : "var(--accent-color)", textTransform: "uppercase" }}
+                        onClick={() => {
+                            characterId ? updateCharacter(char) : createCharacter(char);
+                        }}
+                    >
+                        {characterId ? "Update" : "Create"} Character{" "}
+                        {!zkLogin.address && " (Login required)"}
+                    </button>
+                </div>
+                <div className="text-sm tracking-wider uppercase">
+                    <button
+                        disabled={!canInteract}
+                        style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
+                        onClick={() => {
+                            const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+                            setChar({
+                                hair_type: pick(["wind", "flat", "bang", "punk"]),
+                                body_type: pick(["office", "blazer", "tshirt"]),
+                                hairColour: pick(COLOURS),
+                                eyesColour: pick(COLOURS),
+                                skinColour: pick(COLOURS),
+                                baseColour: pick(COLOURS),
+                                pantsColour: pick(COLOURS),
+                                accentColour: pick(COLOURS),
+                            });
+                        }}
+                    >
+                        Randomize
+                    </button>
+                </div>
+                <Param
                         name="hair type"
                         defaultValue={char.hair_type}
                         disabled={!canInteract}
@@ -229,14 +259,10 @@ export default function App() {
                         values={COLOURS}
                         onChange={(accentColour) => setChar({ ...char, accentColour })}
                     />
-                    <div className="md-show param">
+                    <div className="md-show param text-sm tracking-wider uppercase">
                         <button
-                            style={{ padding: "20px 0" }}
-                            disabled={
-                                !zkLogin.address ||
-                                !canInteract ||
-                                JSON.stringify(char) === initialCharacter
-                            }
+                            style={{ padding: "20px 0", color: isSaveDisabled ? "var(--disabled-color)" : "var(--accent-color)", textTransform: "uppercase" }}
+                            disabled={isSaveDisabled}
                             onClick={() => {
                                 characterId ? updateCharacter(char) : createCharacter(char);
                             }}
@@ -246,17 +272,17 @@ export default function App() {
                         </button>
                     </div>
                     {characterId && (
-                        <div className="param" style={{ display: "block", margin: "10px 0" }}>
+                        <div className="param text-sm tracking-wider uppercase" style={{ display: "block", margin: "10px 0" }}>
                             <a
                                 href={`https://suiscan.xyz/testnet/object/${characterId}`}
                                 target="_blank"
                                 rel="noreferrer"
+                                style={{ textTransform: "uppercase" }}
                             >
                                 View on SuiScan
                             </a>
                         </div>
                     )}
-                </div>
             </div>
             <Toaster position="bottom-center" />
         </div>

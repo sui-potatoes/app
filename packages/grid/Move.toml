@@ -3,6 +3,3 @@ name = "grid"
 edition = "2024.beta"
 license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
-
-[addresses]
-grid = "0x0"

@@ -1,0 +1,6 @@
+[package]
+name = "commander_names"
+edition = "2024"
+
+[dependencies]
+suins = { git = "https://github.com/MystenLabs/suins-contracts.git", subdir = "packages/suins", rev = "main" }

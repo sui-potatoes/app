@@ -27,7 +27,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_TOKEN">TOKEN</a>: u8 = 0;
+<pre><code><b>const</b> <a href="../bridge/message_types.md#bridge_message_types_TOKEN">TOKEN</a>: u8 = 0;
 </code></pre>
 
 
@@ -36,7 +36,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_COMMITTEE_BLOCKLIST">COMMITTEE_BLOCKLIST</a>: u8 = 1;
+<pre><code><b>const</b> <a href="../bridge/message_types.md#bridge_message_types_COMMITTEE_BLOCKLIST">COMMITTEE_BLOCKLIST</a>: u8 = 1;
 </code></pre>
 
 
@@ -45,7 +45,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_EMERGENCY_OP">EMERGENCY_OP</a>: u8 = 2;
+<pre><code><b>const</b> <a href="../bridge/message_types.md#bridge_message_types_EMERGENCY_OP">EMERGENCY_OP</a>: u8 = 2;
 </code></pre>
 
 
@@ -54,7 +54,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_UPDATE_BRIDGE_LIMIT">UPDATE_BRIDGE_LIMIT</a>: u8 = 3;
+<pre><code><b>const</b> <a href="../bridge/message_types.md#bridge_message_types_UPDATE_BRIDGE_LIMIT">UPDATE_BRIDGE_LIMIT</a>: u8 = 3;
 </code></pre>
 
 
@@ -63,7 +63,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_UPDATE_ASSET_PRICE">UPDATE_ASSET_PRICE</a>: u8 = 4;
+<pre><code><b>const</b> <a href="../bridge/message_types.md#bridge_message_types_UPDATE_ASSET_PRICE">UPDATE_ASSET_PRICE</a>: u8 = 4;
 </code></pre>
 
 
@@ -72,7 +72,7 @@
 
 
 
-<pre><code><b>const</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_ADD_TOKENS_ON_SUI">ADD_TOKENS_ON_SUI</a>: u8 = 6;
+<pre><code><b>const</b> <a href="../bridge/message_types.md#bridge_message_types_ADD_TOKENS_ON_SUI">ADD_TOKENS_ON_SUI</a>: u8 = 6;
 </code></pre>
 
 
@@ -83,7 +83,7 @@
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_token">token</a>(): u8
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_token">token</a>(): u8
 </code></pre>
 
 
@@ -92,7 +92,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_token">token</a>(): u8 { <a href="../../dependencies/bridge/message_types.md#bridge_message_types_TOKEN">TOKEN</a> }
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_token">token</a>(): u8 { <a href="../bridge/message_types.md#bridge_message_types_TOKEN">TOKEN</a> }
 </code></pre>
 
 
@@ -105,7 +105,7 @@
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_committee_blocklist">committee_blocklist</a>(): u8
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_committee_blocklist">committee_blocklist</a>(): u8
 </code></pre>
 
 
@@ -114,7 +114,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_committee_blocklist">committee_blocklist</a>(): u8 { <a href="../../dependencies/bridge/message_types.md#bridge_message_types_COMMITTEE_BLOCKLIST">COMMITTEE_BLOCKLIST</a> }
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_committee_blocklist">committee_blocklist</a>(): u8 { <a href="../bridge/message_types.md#bridge_message_types_COMMITTEE_BLOCKLIST">COMMITTEE_BLOCKLIST</a> }
 </code></pre>
 
 
@@ -127,7 +127,7 @@
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_emergency_op">emergency_op</a>(): u8
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_emergency_op">emergency_op</a>(): u8
 </code></pre>
 
 
@@ -136,7 +136,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_emergency_op">emergency_op</a>(): u8 { <a href="../../dependencies/bridge/message_types.md#bridge_message_types_EMERGENCY_OP">EMERGENCY_OP</a> }
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_emergency_op">emergency_op</a>(): u8 { <a href="../bridge/message_types.md#bridge_message_types_EMERGENCY_OP">EMERGENCY_OP</a> }
 </code></pre>
 
 
@@ -149,7 +149,7 @@
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_update_bridge_limit">update_bridge_limit</a>(): u8
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_update_bridge_limit">update_bridge_limit</a>(): u8
 </code></pre>
 
 
@@ -158,7 +158,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_update_bridge_limit">update_bridge_limit</a>(): u8 { <a href="../../dependencies/bridge/message_types.md#bridge_message_types_UPDATE_BRIDGE_LIMIT">UPDATE_BRIDGE_LIMIT</a> }
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_update_bridge_limit">update_bridge_limit</a>(): u8 { <a href="../bridge/message_types.md#bridge_message_types_UPDATE_BRIDGE_LIMIT">UPDATE_BRIDGE_LIMIT</a> }
 </code></pre>
 
 
@@ -171,7 +171,7 @@
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_update_asset_price">update_asset_price</a>(): u8
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_update_asset_price">update_asset_price</a>(): u8
 </code></pre>
 
 
@@ -180,7 +180,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_update_asset_price">update_asset_price</a>(): u8 { <a href="../../dependencies/bridge/message_types.md#bridge_message_types_UPDATE_ASSET_PRICE">UPDATE_ASSET_PRICE</a> }
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_update_asset_price">update_asset_price</a>(): u8 { <a href="../bridge/message_types.md#bridge_message_types_UPDATE_ASSET_PRICE">UPDATE_ASSET_PRICE</a> }
 </code></pre>
 
 
@@ -193,7 +193,7 @@
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_add_tokens_on_sui">add_tokens_on_sui</a>(): u8
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_add_tokens_on_sui">add_tokens_on_sui</a>(): u8
 </code></pre>
 
 
@@ -202,7 +202,7 @@
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/bridge/message_types.md#bridge_message_types_add_tokens_on_sui">add_tokens_on_sui</a>(): u8 { <a href="../../dependencies/bridge/message_types.md#bridge_message_types_ADD_TOKENS_ON_SUI">ADD_TOKENS_ON_SUI</a> }
+<pre><code><b>public</b> <b>fun</b> <a href="../bridge/message_types.md#bridge_message_types_add_tokens_on_sui">add_tokens_on_sui</a>(): u8 { <a href="../bridge/message_types.md#bridge_message_types_ADD_TOKENS_ON_SUI">ADD_TOKENS_ON_SUI</a> }
 </code></pre>
 
 

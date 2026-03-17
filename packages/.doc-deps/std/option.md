@@ -39,7 +39,7 @@ This module defines the Option type and its methods to represent and handle an o
 -  [Macro function `destroy_or`](#std_option_destroy_or)
 
 
-<pre><code><b>use</b> <a href="../../dependencies/std/vector.md#std_vector">std::vector</a>;
+<pre><code><b>use</b> <a href="../std/vector.md#std_vector">std::vector</a>;
 </code></pre>
 
 
@@ -52,7 +52,7 @@ Abstraction of a value that may or may not be present. Implemented with a vector
 zero or one because Move bytecode does not have ADTs.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt; <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt; <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -79,22 +79,22 @@ zero or one because Move bytecode does not have ADTs.
 
 <a name="std_option_EOPTION_IS_SET"></a>
 
-The <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a></code> is in an invalid state for the operation attempted.
-The <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a></code> is <code>Some</code> while it should be <code>None</code>.
+The <code><a href="../std/option.md#std_option_Option">Option</a></code> is in an invalid state for the operation attempted.
+The <code><a href="../std/option.md#std_option_Option">Option</a></code> is <code>Some</code> while it should be <code>None</code>.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/option.md#std_option_EOPTION_IS_SET">EOPTION_IS_SET</a>: u64 = 262144;
+<pre><code><b>const</b> <a href="../std/option.md#std_option_EOPTION_IS_SET">EOPTION_IS_SET</a>: u64 = 262144;
 </code></pre>
 
 
 
 <a name="std_option_EOPTION_NOT_SET"></a>
 
-The <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a></code> is in an invalid state for the operation attempted.
-The <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a></code> is <code>None</code> while it should be <code>Some</code>.
+The <code><a href="../std/option.md#std_option_Option">Option</a></code> is in an invalid state for the operation attempted.
+The <code><a href="../std/option.md#std_option_Option">Option</a></code> is <code>None</code> while it should be <code>Some</code>.
 
 
-<pre><code><b>const</b> <a href="../../dependencies/std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>: u64 = 262145;
+<pre><code><b>const</b> <a href="../std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>: u64 = 262145;
 </code></pre>
 
 
@@ -103,10 +103,10 @@ The <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a
 
 ## Function `none`
 
-Return an empty <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a></code>
+Return an empty <code><a href="../std/option.md#std_option_Option">Option</a></code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_none">none</a>&lt;Element&gt;(): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_none">none</a>&lt;Element&gt;(): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;
 </code></pre>
 
 
@@ -115,8 +115,8 @@ Return an empty <code><a href="../../dependencies/std/option.md#std_option_Optio
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_none">none</a>&lt;Element&gt;(): <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt; {
-    <a href="../../dependencies/std/option.md#std_option_Option">Option</a> { vec: vector::empty() }
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_none">none</a>&lt;Element&gt;(): <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt; {
+    <a href="../std/option.md#std_option_Option">Option</a> { vec: vector::empty() }
 }
 </code></pre>
 
@@ -128,10 +128,10 @@ Return an empty <code><a href="../../dependencies/std/option.md#std_option_Optio
 
 ## Function `some`
 
-Return an <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a></code> containing <code>e</code>
+Return an <code><a href="../std/option.md#std_option_Option">Option</a></code> containing <code>e</code>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_some">some</a>&lt;Element&gt;(e: Element): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_some">some</a>&lt;Element&gt;(e: Element): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;
 </code></pre>
 
 
@@ -140,8 +140,8 @@ Return an <code><a href="../../dependencies/std/option.md#std_option_Option">Opt
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_some">some</a>&lt;Element&gt;(e: Element): <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt; {
-    <a href="../../dependencies/std/option.md#std_option_Option">Option</a> { vec: vector::singleton(e) }
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_some">some</a>&lt;Element&gt;(e: Element): <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt; {
+    <a href="../std/option.md#std_option_Option">Option</a> { vec: vector::singleton(e) }
 }
 </code></pre>
 
@@ -156,7 +156,7 @@ Return an <code><a href="../../dependencies/std/option.md#std_option_Option">Opt
 Return true if <code>t</code> does not hold a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_is_none">is_none</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_is_none">is_none</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): bool
 </code></pre>
 
 
@@ -165,7 +165,7 @@ Return true if <code>t</code> does not hold a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_is_none">is_none</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;): bool {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_is_none">is_none</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;): bool {
     t.vec.is_empty()
 }
 </code></pre>
@@ -181,7 +181,7 @@ Return true if <code>t</code> does not hold a value
 Return true if <code>t</code> holds a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_is_some">is_some</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): bool
 </code></pre>
 
 
@@ -190,7 +190,7 @@ Return true if <code>t</code> holds a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;): bool {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_is_some">is_some</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;): bool {
     !t.vec.is_empty()
 }
 </code></pre>
@@ -207,7 +207,7 @@ Return true if the value in <code>t</code> is equal to <code>e_ref</code>
 Always returns <code><b>false</b></code> if <code>t</code> does not hold a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_contains">contains</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, e_ref: &Element): bool
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_contains">contains</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, e_ref: &Element): bool
 </code></pre>
 
 
@@ -216,8 +216,8 @@ Always returns <code><b>false</b></code> if <code>t</code> does not hold a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_contains">contains</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;, e_ref: &Element): bool {
-    t.vec.<a href="../../dependencies/std/option.md#std_option_contains">contains</a>(e_ref)
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_contains">contains</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;, e_ref: &Element): bool {
+    t.vec.<a href="../std/option.md#std_option_contains">contains</a>(e_ref)
 }
 </code></pre>
 
@@ -233,7 +233,7 @@ Return an immutable reference to the value inside <code>t</code>
 Aborts if <code>t</code> does not hold a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_borrow">borrow</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): &Element
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_borrow">borrow</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): &Element
 </code></pre>
 
 
@@ -242,8 +242,8 @@ Aborts if <code>t</code> does not hold a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_borrow">borrow</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;): &Element {
-    <b>assert</b>!(t.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>(), <a href="../../dependencies/std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_borrow">borrow</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;): &Element {
+    <b>assert</b>!(t.<a href="../std/option.md#std_option_is_some">is_some</a>(), <a href="../std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
     &t.vec[0]
 }
 </code></pre>
@@ -260,7 +260,7 @@ Return a reference to the value inside <code>t</code> if it holds one
 Return <code>default_ref</code> if <code>t</code> does not hold a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_borrow_with_default">borrow_with_default</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, default_ref: &Element): &Element
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_borrow_with_default">borrow_with_default</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, default_ref: &Element): &Element
 </code></pre>
 
 
@@ -269,7 +269,7 @@ Return <code>default_ref</code> if <code>t</code> does not hold a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_borrow_with_default">borrow_with_default</a>&lt;Element&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;, default_ref: &Element): &Element {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_borrow_with_default">borrow_with_default</a>&lt;Element&gt;(t: &<a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;, default_ref: &Element): &Element {
     <b>let</b> vec_ref = &t.vec;
     <b>if</b> (vec_ref.is_empty()) default_ref <b>else</b> &vec_ref[0]
 }
@@ -287,7 +287,7 @@ Return the value inside <code>t</code> if it holds one
 Return <code>default</code> if <code>t</code> does not hold a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_get_with_default">get_with_default</a>&lt;Element: <b>copy</b>, drop&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, default: Element): Element
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_get_with_default">get_with_default</a>&lt;Element: <b>copy</b>, drop&gt;(t: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, default: Element): Element
 </code></pre>
 
 
@@ -296,7 +296,7 @@ Return <code>default</code> if <code>t</code> does not hold a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_get_with_default">get_with_default</a>&lt;Element: <b>copy</b> + drop&gt;(t: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;, default: Element): Element {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_get_with_default">get_with_default</a>&lt;Element: <b>copy</b> + drop&gt;(t: &<a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;, default: Element): Element {
     <b>let</b> vec_ref = &t.vec;
     <b>if</b> (vec_ref.is_empty()) default <b>else</b> vec_ref[0]
 }
@@ -314,7 +314,7 @@ Convert the none option <code>t</code> to a some option by adding <code>e</code>
 Aborts if <code>t</code> already holds a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_fill">fill</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, e: Element)
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_fill">fill</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, e: Element)
 </code></pre>
 
 
@@ -323,9 +323,9 @@ Aborts if <code>t</code> already holds a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_fill">fill</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;, e: Element) {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_fill">fill</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;, e: Element) {
     <b>let</b> vec_ref = &<b>mut</b> t.vec;
-    <b>if</b> (vec_ref.is_empty()) vec_ref.push_back(e) <b>else</b> <b>abort</b> <a href="../../dependencies/std/option.md#std_option_EOPTION_IS_SET">EOPTION_IS_SET</a>
+    <b>if</b> (vec_ref.is_empty()) vec_ref.push_back(e) <b>else</b> <b>abort</b> <a href="../std/option.md#std_option_EOPTION_IS_SET">EOPTION_IS_SET</a>
 }
 </code></pre>
 
@@ -337,11 +337,11 @@ Aborts if <code>t</code> already holds a value
 
 ## Function `extract`
 
-Convert a <code><a href="../../dependencies/std/option.md#std_option_some">some</a></code> option to a <code><a href="../../dependencies/std/option.md#std_option_none">none</a></code> by removing and returning the value stored inside <code>t</code>
+Convert a <code><a href="../std/option.md#std_option_some">some</a></code> option to a <code><a href="../std/option.md#std_option_none">none</a></code> by removing and returning the value stored inside <code>t</code>
 Aborts if <code>t</code> does not hold a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_extract">extract</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): Element
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_extract">extract</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): Element
 </code></pre>
 
 
@@ -350,8 +350,8 @@ Aborts if <code>t</code> does not hold a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_extract">extract</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;): Element {
-    <b>assert</b>!(t.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>(), <a href="../../dependencies/std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_extract">extract</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;): Element {
+    <b>assert</b>!(t.<a href="../std/option.md#std_option_is_some">is_some</a>(), <a href="../std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
     t.vec.pop_back()
 }
 </code></pre>
@@ -368,7 +368,7 @@ Return a mutable reference to the value inside <code>t</code>
 Aborts if <code>t</code> does not hold a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_borrow_mut">borrow_mut</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): &<b>mut</b> Element
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_borrow_mut">borrow_mut</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): &<b>mut</b> Element
 </code></pre>
 
 
@@ -377,8 +377,8 @@ Aborts if <code>t</code> does not hold a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_borrow_mut">borrow_mut</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;): &<b>mut</b> Element {
-    <b>assert</b>!(t.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>(), <a href="../../dependencies/std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_borrow_mut">borrow_mut</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;): &<b>mut</b> Element {
+    <b>assert</b>!(t.<a href="../std/option.md#std_option_is_some">is_some</a>(), <a href="../std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
     &<b>mut</b> t.vec[0]
 }
 </code></pre>
@@ -395,7 +395,7 @@ Swap the old value inside <code>t</code> with <code>e</code> and return the old 
 Aborts if <code>t</code> does not hold a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_swap">swap</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, e: Element): Element
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_swap">swap</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, e: Element): Element
 </code></pre>
 
 
@@ -404,8 +404,8 @@ Aborts if <code>t</code> does not hold a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_swap">swap</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;, e: Element): Element {
-    <b>assert</b>!(t.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>(), <a href="../../dependencies/std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_swap">swap</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;, e: Element): Element {
+    <b>assert</b>!(t.<a href="../std/option.md#std_option_is_some">is_some</a>(), <a href="../std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
     <b>let</b> vec_ref = &<b>mut</b> t.vec;
     <b>let</b> old_value = vec_ref.pop_back();
     vec_ref.push_back(e);
@@ -426,7 +426,7 @@ or if there is no old value, fill it with <code>e</code>.
 Different from swap(), swap_or_fill() allows for <code>t</code> not holding a value.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_swap_or_fill">swap_or_fill</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, e: Element): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_swap_or_fill">swap_or_fill</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, e: Element): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;
 </code></pre>
 
 
@@ -435,9 +435,9 @@ Different from swap(), swap_or_fill() allows for <code>t</code> not holding a va
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_swap_or_fill">swap_or_fill</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;, e: Element): <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_swap_or_fill">swap_or_fill</a>&lt;Element&gt;(t: &<b>mut</b> <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;, e: Element): <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt; {
     <b>let</b> vec_ref = &<b>mut</b> t.vec;
-    <b>let</b> old_value = <b>if</b> (vec_ref.is_empty()) <a href="../../dependencies/std/option.md#std_option_none">none</a>() <b>else</b> <a href="../../dependencies/std/option.md#std_option_some">some</a>(vec_ref.pop_back());
+    <b>let</b> old_value = <b>if</b> (vec_ref.is_empty()) <a href="../std/option.md#std_option_none">none</a>() <b>else</b> <a href="../std/option.md#std_option_some">some</a>(vec_ref.pop_back());
     vec_ref.push_back(e);
     old_value
 }
@@ -454,7 +454,7 @@ Different from swap(), swap_or_fill() allows for <code>t</code> not holding a va
 Destroys <code>t.</code> If <code>t</code> holds a value, return it. Returns <code>default</code> otherwise
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy_with_default">destroy_with_default</a>&lt;Element: drop&gt;(t: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, default: Element): Element
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_destroy_with_default">destroy_with_default</a>&lt;Element: drop&gt;(t: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;, default: Element): Element
 </code></pre>
 
 
@@ -463,8 +463,8 @@ Destroys <code>t.</code> If <code>t</code> holds a value, return it. Returns <co
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy_with_default">destroy_with_default</a>&lt;Element: drop&gt;(t: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;, default: Element): Element {
-    <b>let</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a> { <b>mut</b> vec } = t;
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_destroy_with_default">destroy_with_default</a>&lt;Element: drop&gt;(t: <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;, default: Element): Element {
+    <b>let</b> <a href="../std/option.md#std_option_Option">Option</a> { <b>mut</b> vec } = t;
     <b>if</b> (vec.is_empty()) default <b>else</b> vec.pop_back()
 }
 </code></pre>
@@ -481,7 +481,7 @@ Unpack <code>t</code> and return its contents
 Aborts if <code>t</code> does not hold a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy_some">destroy_some</a>&lt;Element&gt;(t: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): Element
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_destroy_some">destroy_some</a>&lt;Element&gt;(t: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): Element
 </code></pre>
 
 
@@ -490,9 +490,9 @@ Aborts if <code>t</code> does not hold a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy_some">destroy_some</a>&lt;Element&gt;(t: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;): Element {
-    <b>assert</b>!(t.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>(), <a href="../../dependencies/std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
-    <b>let</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a> { <b>mut</b> vec } = t;
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_destroy_some">destroy_some</a>&lt;Element&gt;(t: <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;): Element {
+    <b>assert</b>!(t.<a href="../std/option.md#std_option_is_some">is_some</a>(), <a href="../std/option.md#std_option_EOPTION_NOT_SET">EOPTION_NOT_SET</a>);
+    <b>let</b> <a href="../std/option.md#std_option_Option">Option</a> { <b>mut</b> vec } = t;
     <b>let</b> elem = vec.pop_back();
     vec.destroy_empty();
     elem
@@ -511,7 +511,7 @@ Unpack <code>t</code>
 Aborts if <code>t</code> holds a value
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy_none">destroy_none</a>&lt;Element&gt;(t: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;)
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_destroy_none">destroy_none</a>&lt;Element&gt;(t: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;)
 </code></pre>
 
 
@@ -520,9 +520,9 @@ Aborts if <code>t</code> holds a value
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy_none">destroy_none</a>&lt;Element&gt;(t: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;) {
-    <b>assert</b>!(t.<a href="../../dependencies/std/option.md#std_option_is_none">is_none</a>(), <a href="../../dependencies/std/option.md#std_option_EOPTION_IS_SET">EOPTION_IS_SET</a>);
-    <b>let</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a> { vec } = t;
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_destroy_none">destroy_none</a>&lt;Element&gt;(t: <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;) {
+    <b>assert</b>!(t.<a href="../std/option.md#std_option_is_none">is_none</a>(), <a href="../std/option.md#std_option_EOPTION_IS_SET">EOPTION_IS_SET</a>);
+    <b>let</b> <a href="../std/option.md#std_option_Option">Option</a> { vec } = t;
     vec.destroy_empty()
 }
 </code></pre>
@@ -539,7 +539,7 @@ Convert <code>t</code> into a vector of length 1 if it is <code>Some</code>,
 and an empty vector otherwise
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_to_vec">to_vec</a>&lt;Element&gt;(t: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): vector&lt;Element&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_to_vec">to_vec</a>&lt;Element&gt;(t: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;Element&gt;): vector&lt;Element&gt;
 </code></pre>
 
 
@@ -548,8 +548,8 @@ and an empty vector otherwise
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_to_vec">to_vec</a>&lt;Element&gt;(t: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;Element&gt;): vector&lt;Element&gt; {
-    <b>let</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a> { vec } = t;
+<pre><code><b>public</b> <b>fun</b> <a href="../std/option.md#std_option_to_vec">to_vec</a>&lt;Element&gt;(t: <a href="../std/option.md#std_option_Option">Option</a>&lt;Element&gt;): vector&lt;Element&gt; {
+    <b>let</b> <a href="../std/option.md#std_option_Option">Option</a> { vec } = t;
     vec
 }
 </code></pre>
@@ -562,10 +562,10 @@ and an empty vector otherwise
 
 ## Macro function `destroy`
 
-Destroy <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> and call the closure <code>f</code> on the value inside if it holds one.
+Destroy <code><a href="../std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> and call the closure <code>f</code> on the value inside if it holds one.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy">destroy</a>&lt;$T, $R: drop&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |$T| -&gt; $R)
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_destroy">destroy</a>&lt;$T, $R: drop&gt;($o: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |$T| -&gt; $R)
 </code></pre>
 
 
@@ -574,9 +574,9 @@ Destroy <code><a href="../../dependencies/std/option.md#std_option_Option">Optio
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy">destroy</a>&lt;$T, $R: drop&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |$T| -&gt; $R) {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_destroy">destroy</a>&lt;$T, $R: drop&gt;($o: <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |$T| -&gt; $R) {
     <b>let</b> o = $o;
-    o.<a href="../../dependencies/std/option.md#std_option_do">do</a>!($f);
+    o.<a href="../std/option.md#std_option_do">do</a>!($f);
 }
 </code></pre>
 
@@ -588,10 +588,10 @@ Destroy <code><a href="../../dependencies/std/option.md#std_option_Option">Optio
 
 ## Macro function `do`
 
-Destroy <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> and call the closure <code>f</code> on the value inside if it holds one.
+Destroy <code><a href="../std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> and call the closure <code>f</code> on the value inside if it holds one.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_do">do</a>&lt;$T, $R: drop&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |$T| -&gt; $R)
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_do">do</a>&lt;$T, $R: drop&gt;($o: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |$T| -&gt; $R)
 </code></pre>
 
 
@@ -600,9 +600,9 @@ Destroy <code><a href="../../dependencies/std/option.md#std_option_Option">Optio
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_do">do</a>&lt;$T, $R: drop&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |$T| -&gt; $R) {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_do">do</a>&lt;$T, $R: drop&gt;($o: <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |$T| -&gt; $R) {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>()) { $f(o.<a href="../../dependencies/std/option.md#std_option_destroy_some">destroy_some</a>()); } <b>else</b> o.<a href="../../dependencies/std/option.md#std_option_destroy_none">destroy_none</a>()
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>()) { $f(o.<a href="../std/option.md#std_option_destroy_some">destroy_some</a>()); } <b>else</b> o.<a href="../std/option.md#std_option_destroy_none">destroy_none</a>()
 }
 </code></pre>
 
@@ -617,7 +617,7 @@ Destroy <code><a href="../../dependencies/std/option.md#std_option_Option">Optio
 Execute a closure on the value inside <code>t</code> if it holds one.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_do_ref">do_ref</a>&lt;$T, $R: drop&gt;($o: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; $R)
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_do_ref">do_ref</a>&lt;$T, $R: drop&gt;($o: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; $R)
 </code></pre>
 
 
@@ -626,9 +626,9 @@ Execute a closure on the value inside <code>t</code> if it holds one.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_do_ref">do_ref</a>&lt;$T, $R: drop&gt;($o: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; $R) {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_do_ref">do_ref</a>&lt;$T, $R: drop&gt;($o: &<a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; $R) {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>()) { $f(o.<a href="../../dependencies/std/option.md#std_option_borrow">borrow</a>()); }
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>()) { $f(o.<a href="../std/option.md#std_option_borrow">borrow</a>()); }
 }
 </code></pre>
 
@@ -643,7 +643,7 @@ Execute a closure on the value inside <code>t</code> if it holds one.
 Execute a closure on the mutable reference to the value inside <code>t</code> if it holds one.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_do_mut">do_mut</a>&lt;$T, $R: drop&gt;($o: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&<b>mut</b> $T| -&gt; $R)
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_do_mut">do_mut</a>&lt;$T, $R: drop&gt;($o: &<b>mut</b> <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&<b>mut</b> $T| -&gt; $R)
 </code></pre>
 
 
@@ -652,9 +652,9 @@ Execute a closure on the mutable reference to the value inside <code>t</code> if
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_do_mut">do_mut</a>&lt;$T, $R: drop&gt;($o: &<b>mut</b> <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&<b>mut</b> $T| -&gt; $R) {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_do_mut">do_mut</a>&lt;$T, $R: drop&gt;($o: &<b>mut</b> <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&<b>mut</b> $T| -&gt; $R) {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>()) { $f(o.<a href="../../dependencies/std/option.md#std_option_borrow_mut">borrow_mut</a>()); }
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>()) { $f(o.<a href="../std/option.md#std_option_borrow_mut">borrow_mut</a>()); }
 }
 </code></pre>
 
@@ -667,10 +667,10 @@ Execute a closure on the mutable reference to the value inside <code>t</code> if
 ## Macro function `or`
 
 Select the first <code>Some</code> value from the two options, or <code>None</code> if both are <code>None</code>.
-Equivalent to Rust's <code>a.<a href="../../dependencies/std/option.md#std_option_or">or</a>(b)</code>.
+Equivalent to Rust's <code>a.<a href="../std/option.md#std_option_or">or</a>(b)</code>.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_or">or</a>&lt;$T&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $default: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_or">or</a>&lt;$T&gt;($o: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $default: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;
 </code></pre>
 
 
@@ -679,12 +679,12 @@ Equivalent to Rust's <code>a.<a href="../../dependencies/std/option.md#std_optio
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_or">or</a>&lt;$T&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $default: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;): <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt; {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_or">or</a>&lt;$T&gt;($o: <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $default: <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;): <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt; {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>()) {
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>()) {
         o
     } <b>else</b> {
-        o.<a href="../../dependencies/std/option.md#std_option_destroy_none">destroy_none</a>();
+        o.<a href="../std/option.md#std_option_destroy_none">destroy_none</a>();
         $default
     }
 }
@@ -702,7 +702,7 @@ If the value is <code>Some</code>, call the closure <code>f</code> on it. Otherw
 Equivalent to Rust's <code>t.and_then(f)</code>.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_and">and</a>&lt;$T, $U&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |$T| -&gt; <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_and">and</a>&lt;$T, $U&gt;($o: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |$T| -&gt; <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;
 </code></pre>
 
 
@@ -711,13 +711,13 @@ Equivalent to Rust's <code>t.and_then(f)</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_and">and</a>&lt;$T, $U&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |$T| -&gt; <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$U&gt;): <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$U&gt; {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_and">and</a>&lt;$T, $U&gt;($o: <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |$T| -&gt; <a href="../std/option.md#std_option_Option">Option</a>&lt;$U&gt;): <a href="../std/option.md#std_option_Option">Option</a>&lt;$U&gt; {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>()) {
-        $f(o.<a href="../../dependencies/std/option.md#std_option_destroy_some">destroy_some</a>())
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>()) {
+        $f(o.<a href="../std/option.md#std_option_destroy_some">destroy_some</a>())
     } <b>else</b> {
-        o.<a href="../../dependencies/std/option.md#std_option_destroy_none">destroy_none</a>();
-        <a href="../../dependencies/std/option.md#std_option_none">none</a>()
+        o.<a href="../std/option.md#std_option_destroy_none">destroy_none</a>();
+        <a href="../std/option.md#std_option_none">none</a>()
     }
 }
 </code></pre>
@@ -734,7 +734,7 @@ If the value is <code>Some</code>, call the closure <code>f</code> on it. Otherw
 Equivalent to Rust's <code>t.and_then(f)</code>.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_and_ref">and_ref</a>&lt;$T, $U&gt;($o: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_and_ref">and_ref</a>&lt;$T, $U&gt;($o: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;
 </code></pre>
 
 
@@ -743,9 +743,9 @@ Equivalent to Rust's <code>t.and_then(f)</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_and_ref">and_ref</a>&lt;$T, $U&gt;($o: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$U&gt;): <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$U&gt; {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_and_ref">and_ref</a>&lt;$T, $U&gt;($o: &<a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; <a href="../std/option.md#std_option_Option">Option</a>&lt;$U&gt;): <a href="../std/option.md#std_option_Option">Option</a>&lt;$U&gt; {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>()) $f(o.<a href="../../dependencies/std/option.md#std_option_borrow">borrow</a>()) <b>else</b> <a href="../../dependencies/std/option.md#std_option_none">none</a>()
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>()) $f(o.<a href="../std/option.md#std_option_borrow">borrow</a>()) <b>else</b> <a href="../std/option.md#std_option_none">none</a>()
 }
 </code></pre>
 
@@ -757,11 +757,11 @@ Equivalent to Rust's <code>t.and_then(f)</code>.
 
 ## Macro function `map`
 
-Map an <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> to <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;U&gt;</code> by applying a function to a contained value.
-Equivalent to Rust's <code>t.<a href="../../dependencies/std/option.md#std_option_map">map</a>(f)</code>.
+Map an <code><a href="../std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> to <code><a href="../std/option.md#std_option_Option">Option</a>&lt;U&gt;</code> by applying a function to a contained value.
+Equivalent to Rust's <code>t.<a href="../std/option.md#std_option_map">map</a>(f)</code>.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_map">map</a>&lt;$T, $U&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |$T| -&gt; $U): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_map">map</a>&lt;$T, $U&gt;($o: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |$T| -&gt; $U): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;
 </code></pre>
 
 
@@ -770,13 +770,13 @@ Equivalent to Rust's <code>t.<a href="../../dependencies/std/option.md#std_optio
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_map">map</a>&lt;$T, $U&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |$T| -&gt; $U): <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$U&gt; {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_map">map</a>&lt;$T, $U&gt;($o: <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |$T| -&gt; $U): <a href="../std/option.md#std_option_Option">Option</a>&lt;$U&gt; {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>()) {
-        <a href="../../dependencies/std/option.md#std_option_some">some</a>($f(o.<a href="../../dependencies/std/option.md#std_option_destroy_some">destroy_some</a>()))
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>()) {
+        <a href="../std/option.md#std_option_some">some</a>($f(o.<a href="../std/option.md#std_option_destroy_some">destroy_some</a>()))
     } <b>else</b> {
-        o.<a href="../../dependencies/std/option.md#std_option_destroy_none">destroy_none</a>();
-        <a href="../../dependencies/std/option.md#std_option_none">none</a>()
+        o.<a href="../std/option.md#std_option_destroy_none">destroy_none</a>();
+        <a href="../std/option.md#std_option_none">none</a>()
     }
 }
 </code></pre>
@@ -789,12 +789,12 @@ Equivalent to Rust's <code>t.<a href="../../dependencies/std/option.md#std_optio
 
 ## Macro function `map_ref`
 
-Map an <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> value to <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;U&gt;</code> by applying a function to a contained value by reference.
-Original <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> is preserved.
-Equivalent to Rust's <code>t.<a href="../../dependencies/std/option.md#std_option_map">map</a>(f)</code>.
+Map an <code><a href="../std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> value to <code><a href="../std/option.md#std_option_Option">Option</a>&lt;U&gt;</code> by applying a function to a contained value by reference.
+Original <code><a href="../std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> is preserved.
+Equivalent to Rust's <code>t.<a href="../std/option.md#std_option_map">map</a>(f)</code>.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_map_ref">map_ref</a>&lt;$T, $U&gt;($o: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; $U): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_map_ref">map_ref</a>&lt;$T, $U&gt;($o: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; $U): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$U&gt;
 </code></pre>
 
 
@@ -803,9 +803,9 @@ Equivalent to Rust's <code>t.<a href="../../dependencies/std/option.md#std_optio
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_map_ref">map_ref</a>&lt;$T, $U&gt;($o: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; $U): <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$U&gt; {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_map_ref">map_ref</a>&lt;$T, $U&gt;($o: &<a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; $U): <a href="../std/option.md#std_option_Option">Option</a>&lt;$U&gt; {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>()) <a href="../../dependencies/std/option.md#std_option_some">some</a>($f(o.<a href="../../dependencies/std/option.md#std_option_borrow">borrow</a>())) <b>else</b> <a href="../../dependencies/std/option.md#std_option_none">none</a>()
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>()) <a href="../std/option.md#std_option_some">some</a>($f(o.<a href="../std/option.md#std_option_borrow">borrow</a>())) <b>else</b> <a href="../std/option.md#std_option_none">none</a>()
 }
 </code></pre>
 
@@ -817,10 +817,10 @@ Equivalent to Rust's <code>t.<a href="../../dependencies/std/option.md#std_optio
 
 ## Macro function `filter`
 
-Return <code>None</code> if the value is <code>None</code>, otherwise return <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> if the predicate <code>f</code> returns true.
+Return <code>None</code> if the value is <code>None</code>, otherwise return <code><a href="../std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> if the predicate <code>f</code> returns true.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_filter">filter</a>&lt;$T: drop&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; bool): <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_filter">filter</a>&lt;$T: drop&gt;($o: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; bool): <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;
 </code></pre>
 
 
@@ -829,9 +829,9 @@ Return <code>None</code> if the value is <code>None</code>, otherwise return <co
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_filter">filter</a>&lt;$T: drop&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; bool): <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt; {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_filter">filter</a>&lt;$T: drop&gt;($o: <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; bool): <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt; {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>() && $f(o.<a href="../../dependencies/std/option.md#std_option_borrow">borrow</a>())) o <b>else</b> <a href="../../dependencies/std/option.md#std_option_none">none</a>()
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>() && $f(o.<a href="../std/option.md#std_option_borrow">borrow</a>())) o <b>else</b> <a href="../std/option.md#std_option_none">none</a>()
 }
 </code></pre>
 
@@ -846,7 +846,7 @@ Return <code>None</code> if the value is <code>None</code>, otherwise return <co
 Return <code><b>false</b></code> if the value is <code>None</code>, otherwise return the result of the predicate <code>f</code>.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_is_some_and">is_some_and</a>&lt;$T&gt;($o: &<a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; bool): bool
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_is_some_and">is_some_and</a>&lt;$T&gt;($o: &<a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $f: |&$T| -&gt; bool): bool
 </code></pre>
 
 
@@ -855,9 +855,9 @@ Return <code><b>false</b></code> if the value is <code>None</code>, otherwise re
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_is_some_and">is_some_and</a>&lt;$T&gt;($o: &<a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; bool): bool {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_is_some_and">is_some_and</a>&lt;$T&gt;($o: &<a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $f: |&$T| -&gt; bool): bool {
     <b>let</b> o = $o;
-    o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>() && $f(o.<a href="../../dependencies/std/option.md#std_option_borrow">borrow</a>())
+    o.<a href="../std/option.md#std_option_is_some">is_some</a>() && $f(o.<a href="../std/option.md#std_option_borrow">borrow</a>())
 }
 </code></pre>
 
@@ -869,15 +869,15 @@ Return <code><b>false</b></code> if the value is <code>None</code>, otherwise re
 
 ## Macro function `destroy_or`
 
-Destroy <code><a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> and return the value inside if it holds one, or <code>default</code> otherwise.
+Destroy <code><a href="../std/option.md#std_option_Option">Option</a>&lt;T&gt;</code> and return the value inside if it holds one, or <code>default</code> otherwise.
 Equivalent to Rust's <code>t.unwrap_or(default)</code>.
 
-Note: this function is a more efficient version of <code><a href="../../dependencies/std/option.md#std_option_destroy_with_default">destroy_with_default</a></code>, as it does not
-evaluate the default value unless necessary. The <code><a href="../../dependencies/std/option.md#std_option_destroy_with_default">destroy_with_default</a></code> function should be
+Note: this function is a more efficient version of <code><a href="../std/option.md#std_option_destroy_with_default">destroy_with_default</a></code>, as it does not
+evaluate the default value unless necessary. The <code><a href="../std/option.md#std_option_destroy_with_default">destroy_with_default</a></code> function should be
 deprecated in favor of this function.
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy_or">destroy_or</a>&lt;$T&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $default: $T): $T
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_destroy_or">destroy_or</a>&lt;$T&gt;($o: <a href="../std/option.md#std_option_Option">std::option::Option</a>&lt;$T&gt;, $default: $T): $T
 </code></pre>
 
 
@@ -886,12 +886,12 @@ deprecated in favor of this function.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../../dependencies/std/option.md#std_option_destroy_or">destroy_or</a>&lt;$T&gt;($o: <a href="../../dependencies/std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $default: $T): $T {
+<pre><code><b>public</b> <b>macro</b> <b>fun</b> <a href="../std/option.md#std_option_destroy_or">destroy_or</a>&lt;$T&gt;($o: <a href="../std/option.md#std_option_Option">Option</a>&lt;$T&gt;, $default: $T): $T {
     <b>let</b> o = $o;
-    <b>if</b> (o.<a href="../../dependencies/std/option.md#std_option_is_some">is_some</a>()) {
-        o.<a href="../../dependencies/std/option.md#std_option_destroy_some">destroy_some</a>()
+    <b>if</b> (o.<a href="../std/option.md#std_option_is_some">is_some</a>()) {
+        o.<a href="../std/option.md#std_option_destroy_some">destroy_some</a>()
     } <b>else</b> {
-        o.<a href="../../dependencies/std/option.md#std_option_destroy_none">destroy_none</a>();
+        o.<a href="../std/option.md#std_option_destroy_none">destroy_none</a>();
         $default
     }
 }

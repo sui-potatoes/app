@@ -1,0 +1,11 @@
+[package]
+name = "commander"
+edition = "2024.beta"
+license = "MIT"
+authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
+
+[dependencies]
+bit_field = { local = "../bit-field" }
+codec = { local = "../codec" }
+grid = { local = "../grid" }
+name_gen = { local = "../name-gen" }

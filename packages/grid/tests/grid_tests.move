@@ -1,19 +1,21 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+#[allow(untyped_literal)]
 module grid::grid_tests;
 
-use grid::{grid, point};
+use grid::{cell, grid};
 use std::unit_test::{assert_eq, assert_ref_eq};
 use sui::bcs;
 
 #[test]
 fun creation() {
-    let grid = grid::from_vector(vector[vector[0]]);
+    let grid = grid::from_vector(vector[vector[0u8]]);
     assert_eq!(grid.cols(), 1);
     assert_eq!(grid.rows(), 1);
     assert_eq!(grid[0, 0], 0);
 
+    let _inner = grid.inner(); // ref read
     let inner = grid.into_vector();
     assert_eq!(inner.length(), 1);
     assert_eq!(inner[0].length(), 1);
@@ -25,9 +27,19 @@ fun creation() {
     assert_eq!(grid2[0, 0], 0);
 }
 
+#[test, expected_failure(abort_code = grid::EIncorrectLength)]
+fun from_vector_fail() {
+    grid::from_vector<u8>(vector[]);
+}
+
+#[test, expected_failure(abort_code = grid::EIncorrectLength)]
+fun from_vector_inconsistent_lengths_fail() {
+    grid::from_vector<u8>(vector[vector[], vector[1]]);
+}
+
 #[test]
-fun do_and_do_ref() {
-    let grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
+fun do_and_do_ref_mut() {
+    let mut grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8u8]]);
 
     let mut sum = 0;
     grid.do_ref!(|cell| sum = sum + *cell);
@@ -36,6 +48,12 @@ fun do_and_do_ref() {
     let mut sum = 0;
     grid.do!(|cell| sum = sum + cell);
     assert_eq!(sum, 36);
+
+    grid.do_mut!(|cell| *cell = 0);
+
+    let zero_vec = vector[0, 0, 0];
+
+    assert_eq!(grid, grid::from_vector(vector::tabulate!(3, |_| zero_vec)));
 }
 
 #[test]
@@ -83,6 +101,110 @@ fun swap() {
     assert_eq!(grid[1, 1], 3);
     assert_eq!(grid[1, 0], 0);
     assert_eq!(grid[1, 2], 0);
+
+    let swapped = grid.swap_cell(&cell::new(1, 1), 10);
+    assert_eq!(swapped, 3);
+    assert_eq!(grid[1, 1], 10);
+    assert_eq!(grid[1, 0], 0);
+    assert_eq!(grid[1, 2], 0);
+}
+
+#[test]
+fun rotate() {
+    let mut grid = grid::from_vector(vector[vector[1, 2, 3], vector[4, 5, 6], vector[7, 8, 9]]);
+
+    grid.rotate(0);
+
+    assert_eq!(grid.into_vector(), vector[vector[1, 2, 3], vector[4, 5, 6], vector[7, 8, 9]]);
+
+    grid.rotate(1); // 90º
+
+    assert_eq!(grid.into_vector(), vector[vector[7, 4, 1], vector[8, 5, 2], vector[9, 6, 3]]);
+
+    grid.rotate(2); // 180º
+
+    assert_eq!(grid.into_vector(), vector[vector[3, 6, 9], vector[2, 5, 8], vector[1, 4, 7]]);
+
+    grid.rotate(1); // 90º
+    grid.rotate(3); // 270º
+
+    assert_eq!(grid.into_vector(), vector[vector[3, 6, 9], vector[2, 5, 8], vector[1, 4, 7]]);
+
+    grid.rotate(4);
+
+    // rotate large grid
+    let size = 15u16;
+    let mut grid = grid::tabulate!(size, size, |row, col| row + col);
+    grid.rotate(5); // 5 is equivalent to 1
+
+    // check the last column that it's 0 to 14
+    size.do!(|i| assert_eq!(grid[i, size - 1], i));
+
+    // check the first column that it's 14 to 28
+    size.do!(|i| assert_eq!(grid[i, 0], i + size - 1));
+}
+
+#[test]
+fun borrow_cell() {
+    let mut grid = grid::from_vector(vector[vector[0, 1, 2], vector[3, 4, 5], vector[6, 7, 8]]);
+    let cell = cell::new(1, 1);
+    let cell_ref = grid.borrow_cell(&cell);
+    assert_eq!(*cell_ref, 4);
+
+    let cell_ref_mut = grid.borrow_cell_mut(&cell);
+    *cell_ref_mut = 9;
+    assert_eq!(*cell_ref_mut, 9);
+}
+
+#[test]
+fun moore_neighbors() {
+    let grid = grid::from_vector(vector[
+        vector[0, 1, 2, 3, 0],
+        vector[0, 8, 1, 4, 0],
+        vector[0, 7, 6, 5, 0],
+        vector[0, 0, 0, 0, 0],
+    ]);
+
+    let mut neighbors = grid.moore_neighbors(cell::new(1, 2), 1);
+    neighbors.insertion_sort_by!(|a, b| a.le(b));
+
+    assert_eq!(
+        neighbors,
+        vector[
+            vector[0, 1],
+            vector[0, 2],
+            vector[0, 3],
+            vector[1, 1],
+            vector[1, 3],
+            vector[2, 1],
+            vector[2, 2],
+            vector[2, 3],
+        ].map!(|v| cell::from_vector(v)),
+    );
+
+    assert_eq!(grid.moore_neighbors_count!(cell::new(1, 2), 1, |v| *v > 4), 4);
+}
+
+#[test]
+fun von_neumann_neighbors() {
+    let grid = grid::from_vector(vector[
+        vector[0, 1, 2, 3, 0],
+        vector[0, 8, 1, 4, 0],
+        vector[0, 7, 6, 5, 0],
+        vector[0, 0, 0, 0, 0],
+    ]);
+
+    let mut neighbors = grid.von_neumann_neighbors(cell::new(1, 2), 1);
+    neighbors.insertion_sort_by!(|a, b| a.le(b));
+
+    assert_eq!(
+        neighbors,
+        vector[vector[0, 2], vector[1, 1], vector[1, 3], vector[2, 2]].map!(
+            |v| cell::from_vector(v),
+        ),
+    );
+
+    assert_eq!(grid.von_neumann_neighbors_count!(cell::new(1, 2), 1, |v| *v > 4), 2);
 }
 
 #[test]
@@ -95,18 +217,18 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace!(
+    let path = grid::trace_path!(
         &grid,
-        point::new(0, 0),
-        point::new(1, 4),
-        |p| p.von_neumann(1),
+        cell::new(0, 0),
+        cell::new(1, 4),
+        |p| p.von_neumann_neighbors(1),
         |(_, _), (_, _)| true,
         6,
     );
 
-    assert!(path.is_some());
-    assert_eq!(path.borrow().length(), 5);
-    assert_eq!(path.borrow()[4], point::new(1, 4));
+    let path = path.destroy_or!(abort);
+    assert_eq!(path.length(), 5);
+    assert_eq!(path[4], cell::new(1, 4));
 
     let grid = grid::from_vector(vector[
         vector[0, 1, 0, 0, 0],
@@ -116,27 +238,28 @@ fun path_tracing() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let path = grid::trace!(
+    let path = grid::trace_path!(
         &grid,
-        point::new(0, 1),
-        point::new(3, 0),
-        |p| p.von_neumann(1),
-        |(_, _), (x1, y1)| grid[x1, y1] == 0,
+        cell::new(0, 1),
+        cell::new(3, 0),
+        |p| p.von_neumann_neighbors(1),
+        |(_, _), (row1, col1)| {
+            grid[row1, col1] == 0 || (row1 == 3 && col1 == 0)
+        },
         8,
     );
 
-    assert!(path.is_some());
-    assert_ref_eq!(
-        path.borrow(),
-        &vector[
-            point::new(1, 1), // down
-            point::new(1, 2), // right
-            point::new(2, 2), // down
-            point::new(3, 2), // down
-            point::new(4, 2), // down
-            point::new(4, 1), // left
-            point::new(4, 0), // left
-            point::new(3, 0), // up
+    assert_eq!(
+        path.destroy_or!(abort),
+        vector[
+            cell::new(1, 1), // down
+            cell::new(1, 2), // right
+            cell::new(2, 2), // down
+            cell::new(3, 2), // down
+            cell::new(4, 2), // down
+            cell::new(4, 1), // left
+            cell::new(4, 0), // left
+            cell::new(3, 0), // up
         ],
     )
 }
@@ -152,7 +275,7 @@ fun find_group() {
         vector[0, 0, 0, 0, 0],
     ]);
 
-    let group = grid.find_group!(point::new(0, 2), |p| p.von_neumann(1), |el| *el == 1);
+    let group = grid.find_group!(cell::new(0, 2), |p| p.von_neumann_neighbors(1), |el| *el == 1);
     assert_eq!(group.length(), 6);
 }
 
@@ -169,15 +292,26 @@ fun from_bcs() {
     let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| bcs.peel_u8());
 
     assert!(grid2.cols() == 3);
+    assert!(grid2.rows() == 3);
     assert_ref_eq!(&grid, &grid2);
 }
 
 #[test]
 fun from_bcs_with_custom_type() {
-    let grid = grid::tabulate!(3, 3, |x, y| point::new(x, y));
+    let grid = grid::tabulate!(3, 3, |row, col| cell::new(row, col));
     let bytes = bcs::to_bytes(&grid);
-    let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| point::from_bcs(bcs));
+    let grid2 = grid::from_bcs!(&mut bcs::new(bytes), |bcs| cell::from_bcs(bcs));
 
     assert!(grid2.cols() == 3);
     assert_ref_eq!(&grid, &grid2);
+}
+
+// === Other Macros ===
+
+public struct Tile()
+
+#[test]
+fun tabulate_do_destroy() {
+    grid::tabulate!(3, 3, |_, _| Tile()).destroy!(|Tile()| {});
+    grid::tabulate!(3, 3, |_, _| Tile()).do!(|Tile()| {});
 }

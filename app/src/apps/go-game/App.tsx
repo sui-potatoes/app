@@ -2,407 +2,375 @@
 // SPDX-License-Identifier: MIT
 
 import "./go-game.css";
-import { Board as PlayableBoard } from "./Board";
-import { useEffect, useState } from "react";
+import { Board } from "./Board";
+import { useState, useEffect } from "react";
 import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
-import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
-import { useNetworkVariable } from "../../networkConfig";
-import { Transaction } from "@mysten/sui/transactions";
-import { bcs } from "@mysten/sui/bcs";
-import { fromB64 } from "@mysten/bcs";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatAddress } from "@mysten/sui/utils";
 import { toast } from "react-hot-toast";
+import { GO_BACK_KEY } from "../../App";
+import { useNetworkVariable } from "../../networkConfig";
+import { useAccount } from "./hooks/useAccount";
+import { useGame } from "./hooks/useGame";
+import { useMyGames } from "./hooks/useMyGames";
+import { useOpenGames } from "./hooks/useOpenGames";
+import { useGameActions } from "./hooks/useGameActions";
 
 const BOARD_SIZES = [9, 13, 19];
 
-const Turn = bcs.enum("Turn", {
-    Black: null,
-    White: null,
-});
+const DEMO_BOARD = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0],
+    [0, 0, 1, 0, 1, 0, 0, 0, 2, 0, 2, 0, 0],
+    [0, 1, 0, 1, 0, 0, 0, 0, 0, 2, 0, 2, 0],
+    [0, 0, 1, 0, 1, 1, 0, 0, 2, 0, 2, 0, 0],
+    [0, 0, 0, 1, 0, 1, 0, 2, 0, 2, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 1, 0, 2, 0, 2, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0],
+    [0, 1, 0, 1, 0, 2, 0, 2, 0, 2, 0, 2, 0],
+    [0, 0, 1, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+];
 
-const Move = bcs.struct("Move", {
-    x: bcs.u8(),
-    y: bcs.u8(),
-});
-
-const Account = bcs.struct("Account", {
-    id: bcs.Address,
-    games: bcs.vector(bcs.Address),
-});
-
-const Players = bcs.struct("Players", {
-    player1: bcs.option(bcs.Address),
-    player2: bcs.option(bcs.Address),
-});
-
-const Board = bcs.struct("Board", {
-    data: bcs.vector(bcs.vector(bcs.u8())),
-    size: bcs.u8(),
-    turn: Turn,
-    moves: bcs.vector(Move),
-    scores: bcs.vector(bcs.u64()),
-    ko_store: bcs.vector(bcs.vector(bcs.u8())),
-});
-const Game = bcs.struct("Game", {
-    id: bcs.Address,
-    players: Players,
-    // Board is incomplete parsing, so must go last!
-    board: Board,
-});
+function timeAgo(ms: number): string {
+    const diff = Date.now() - ms;
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
+}
 
 export default function App() {
-    const { id: urlGameId } = useParams();
+    const { id: gameId } = useParams();
+
+    if (!gameId) return <Lobby />;
+    return <GameView gameId={gameId} />;
+}
+
+// ─── Lobby ────────────────────────────────────────────────────────────────────
+
+function Lobby() {
+    const navigate = useNavigate();
     const flow = useEnokiFlow();
     const zkLogin = useZkLogin();
-    const client = useSuiClient();
     const packageId = useNetworkVariable("goPackageId");
-    const navigate = useNavigate();
 
-    const [account, setAccount] = useState<typeof Account | any>();
-    const [canInteract, setCanInteract] = useState(false);
-    const [turn, setTurn] = useState<typeof Turn.$inferInput>({ Black: true });
-    const [game, setGame] = useState<typeof Game.$inferType>();
-    const [data, setData] = useState<number[][]>(Array(9).fill(Array(9).fill(0)));
-    const { data: accounts, refetch } = useSuiClientQuery("getOwnedObjects", {
-        owner: zkLogin.address!,
-        filter: { MoveModule: { package: packageId, module: "game" } },
-        options: { showContent: true, showBcs: true },
-    });
-
-    const { data: gameData, refetch: fetchGame } = useSuiClientQuery(
-        "getObject",
-        {
-            id: urlGameId || "",
-            options: { showBcs: true },
-        },
-        {
-            enabled: !!urlGameId,
-        },
+    const { data: account, refetch: refetchAccount } = useAccount(
+        packageId,
+        zkLogin.address ?? undefined,
     );
+    const { data: openGames = [] } = useOpenGames(packageId, account?.id, !!zkLogin.address);
+    const { data: myGamesDetails = {} } = useMyGames(account?.games as string[] | undefined);
+    const actions = useGameActions();
 
-    useEffect(() => {
-        // can create a new game if there are no games
-        if (!gameData && !accounts?.data.length) {
-            setCanInteract(true);
-        }
+    const [busy, setBusy] = useState(false);
 
-        if (accounts?.data.length) {
-            setAccount(
-                // @ts-ignore
-                Account.parse(fromB64(accounts?.data[0].data?.bcs?.bcsBytes!)),
-            );
-            setCanInteract(true);
-        }
-
-        // if there is a cap but no game, we're waiting for the fetch
-        if (!urlGameId) return;
-        if (!gameData?.data) return;
-
-        const game = Game.parse(fromB64((gameData?.data!.bcs! as { bcsBytes: string }).bcsBytes));
-
-        // game is found, set the board state
-        setData(game.board.data);
-        setTurn(game.board.turn);
-        setCanInteract(true);
-        setGame(game);
-    }, [gameData, accounts, urlGameId]);
-
-    useEffect(() => {
-        const id = setInterval(fetchGame, 1000);
-        return () => clearInterval(id);
-    }, []);
-
-    // pardon my copipasta
-    useEffect(() => {
-        if (!game) return;
-
-        const players = [];
-        game?.players.player1 && players.push(game.players.player1);
-        game?.players.player2 && players.push(game.players.player2);
-    }, [turn]);
-
-    // No game found
-    if (urlGameId && !game) return <div>Loading...</div>;
-
-    // Account exists
-    if (!urlGameId)
+    if (!zkLogin.address) {
         return (
-            <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
-                <div>My Games</div>
-                <ul className="my-games px-6">
-                    {account &&
-                        (account.games as string[]).map((game, i) => {
-                            return (
-                                <li key={`game-${i}`} className="list-disc">
-                                    <Link to={`/go/${game}`}>{formatAddress(game)}</Link>
-                                </li>
-                            );
-                        })}
-                </ul>
-
-                <div className="pt-3">
-                    <div className="w-[200px] h-[1px] bg-gray-300 mb-4" />
-                    {!zkLogin.address && <p className="mb-2">Sign in to start playing</p>}
-                    <p>
-                        {BOARD_SIZES.map((size: number) => (
-                            <button
-                                key={size}
-                                disabled={!canInteract || !zkLogin.address}
-                                onClick={() => newGame(size)}
-                                className="block"
-                            >
-                                New {size}x{size}
-                            </button>
-                        ))}
+            <div className="flex items-center justify-center relative md:h-[calc(100vh-40px)]">
+                <Board
+                    disabled
+                    size={13}
+                    data={DEMO_BOARD}
+                    lastMove={{ x: 10, y: 8 }}
+                    turn={1}
+                    onClick={() => {}}
+                />
+                <div
+                    className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm"
+                    style={{
+                        background:
+                            "color-mix(in srgb, var(--background-color) 80%, transparent)",
+                    }}
+                >
+                    <p
+                        className="text-sm tracking-wider uppercase"
+                        style={{ color: "var(--text-color)" }}
+                    >
+                        <button
+                            style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
+                            onClick={signIn}
+                        >
+                            Sign in
+                        </button>{" "}
+                        to play
                     </p>
                 </div>
-                <div className={`loader ${canInteract ? "hidden" : ""}`} />
             </div>
         );
+    }
 
-    if (!game) return <div>Loading...</div>;
+    return (
+        <div className="flex flex-col gap-3 justify-center md:h-[calc(100vh-40px)] text-sm uppercase tracking-wider">
+            <div className="flex flex-col md:flex-row gap-8">
+                <div className="flex flex-col gap-3">
+                    <div>My Games</div>
+                    {!account || !(account.games as string[]).length ? (
+                        <p style={{ color: "var(--text-secondary)" }}>No games yet</p>
+                    ) : (
+                        <ul className="my-games">
+                            {(account.games as string[]).map((id, i) => {
+                                const details = myGamesDetails[id];
+                                return (
+                                    <li key={`game-${i}`} className="flex items-baseline gap-3">
+                                        <Link to={`/go/${id}`}>{formatAddress(id)}</Link>
+                                        {details && (
+                                            <span
+                                                style={{
+                                                    color: "var(--text-secondary)",
+                                                    fontSize: "11px",
+                                                }}
+                                            >
+                                                {details.board.size}×{details.board.size} ·{" "}
+                                                {details.players.player1 === details.players.player2 ? "S" : "M"} ·{" "}
+                                                {timeAgo(Number(details.created_at))}
+                                            </span>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
+                </div>
+                <div
+                    className="flex flex-col gap-3 md:border-l md:pl-8"
+                    style={{ borderColor: "var(--border-color)" }}
+                >
+                    <div>Open Games</div>
+                    {openGames.length === 0 ? (
+                        <p style={{ color: "var(--text-secondary)" }}>No open games</p>
+                    ) : (
+                        <ul className="my-games">
+                            {openGames.map((g) => (
+                                <li key={g.id} className="flex items-baseline gap-3">
+                                    <Link to={`/go/${g.id}`}>{formatAddress(g.id)}</Link>
+                                    <span
+                                        style={{ color: "var(--text-secondary)", fontSize: "11px" }}
+                                    >
+                                        {g.size}×{g.size} · {timeAgo(g.timestampMs)}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            </div>
+            <div className="pt-3">
+                <div className="divider w-[200px] mb-4" />
+                <div>
+                    NEW GAME:{" "}
+                    {BOARD_SIZES.map((size, i) => (
+                        <span key={size}>
+                            <button
+                                disabled={busy}
+                                onClick={() => handleNewGame(size)}
+                                style={{ textTransform: "uppercase", color: "var(--accent-color)" }}
+                            >
+                                {size}x{size}
+                            </button>
+                            {i < BOARD_SIZES.length - 1 && " / "}
+                        </span>
+                    ))}
+                </div>
+            </div>
+            {busy && <div className="spinner" />}
+        </div>
+    );
 
-    const players = [];
-    game.players.player1 && players.push(game.players.player1);
-    game.players.player2 && players.push(game.players.player2);
+    async function signIn() {
+        localStorage.setItem(GO_BACK_KEY, window.location.href);
+        history.pushState({}, "", "/");
+        window.location.href = await flow.createAuthorizationURL({
+            provider: "google",
+            clientId: "591411088609-6kbt6b07a6np6mq2mnlq97i150amussh.apps.googleusercontent.com",
+            redirectUrl: window.location.href.split("#")[0],
+            network: "testnet",
+        });
+    }
 
-    const isMyGame = players.includes(account?.id);
-    const myColour = game.players.player1 === account?.id ? "Black" : "White";
-    const myClrId = "Black" === myColour ? 1 : 2;
+    async function handleNewGame(size: number) {
+        setBusy(true);
+        try {
+            const newGameId = await actions.newGame(account ?? null, size);
+            if (newGameId) {
+                await toast.success("Game created!");
+                await refetchAccount();
+                navigate(`/go/${newGameId}`);
+            }
+        } finally {
+            setBusy(false);
+        }
+    }
+}
 
-    const isMyTurn = isMyGame && myColour in turn;
-    const lastMove = game.board.moves.slice(-1)[0];
+// ─── Game view ────────────────────────────────────────────────────────────────
+
+function GameView({ gameId }: { gameId: string }) {
+    const packageId = useNetworkVariable("goPackageId");
+    const zkLogin = useZkLogin();
+
+    const { data: account, refetch: refetchAccount } = useAccount(
+        packageId,
+        zkLogin.address ?? undefined,
+    );
+    const { data: game, refetch: refetchGame } = useGame(gameId);
+    const actions = useGameActions();
+    const navigate = useNavigate();
+
+    const [busy, setBusy] = useState(false);
+    const [boardData, setBoardData] = useState<number[][]>(Array(9).fill(Array(9).fill(0)));
+    const [isBlackTurn, setIsBlackTurn] = useState(true);
+
+    // Sync board state from on-chain data, preserving optimistic updates until confirmed
+    useEffect(() => {
+        if (game) {
+            setBoardData(game.board.grid.grid);
+            setIsBlackTurn(game.board.is_black);
+        }
+    }, [game]);
+
+    console.log(game);
+
+    if (!game) return null;
+
+    const players = [game.players.player1, game.players.player2].filter(Boolean) as string[];
+    const isSolo = game.players.player1 === game.players.player2;
+    const isMyGame = account ? players.includes(account.id) : false;
+    const myColor = game.players.player1 === account?.id ? "Black" : "White";
+    const currentTurn = isBlackTurn ? "Black" : "White";
+    const isMyTurn = isMyGame && (isSolo || myColor === currentTurn);
+    const moves = game.board.moves;
+    const lastMove = moves.length ? moves[moves.length - 1] : undefined;
     const size = game.board.size as 9 | 13 | 19;
 
     return (
-        game && (
-            <div className="max-md:flex max-md:flex-col gap-3 max-md:justify-center max-md:items-center">
-                <PlayableBoard
-                    disabled={!canInteract && !isMyTurn}
+        <div className="flex max-md:flex-col max-md:items-center items-center md:h-[calc(100vh-40px)] md:gap-5">
+            <div className="max-md:w-full md:flex-1 flex items-center justify-center relative">
+                <Board
+                    disabled={busy || !isMyTurn || players.length < 2}
                     size={size}
-                    data={data}
-                    lastMove={lastMove}
-                    turn={myClrId}
-                    zoom={(19 - size / 2) * 10 + "%"}
-                    onClick={handleClick}
+                    data={boardData}
+                    lastMove={lastMove ? { x: lastMove.row, y: lastMove.column } : undefined}
+                    turn={(isBlackTurn ? 1 : 2) as 1 | 2}
+                    onClick={handlePlay}
                 />
-                <p>
-                    {!players.includes(account?.id) && players.length == 1 && (
-                        <button disabled={!canInteract} onClick={() => joinGame()}>
-                            Join? {!account ? "(You have to sign in first)" : ""}
-                        </button>
-                    )}
-                </p>
-                <p style={{ padding: "0 10px" }}>{players.length == 1 && "Waiting for players"}</p>
-                <p style={{ padding: "0 10px" }}>
-                    {isMyGame && (isMyTurn ? "Your turn" : "Opponent's turn")}
-                </p>
-                <div
-                    className="loader"
-                    style={{
-                        visibility: canInteract ? "hidden" : "visible",
-                        margin: "10px 0px 0px 10px",
-                    }}
-                ></div>
-                <div className="buttons">
-                    {game && (
-                        <button>
-                            <a
-                                type="button"
-                                className="explorer-link"
-                                href={`https://suiscan.xyz/testnet/object/${game.id}`}
-                                target="_blank"
-                            >
-                                Game (Explorer)
-                            </a>
-                        </button>
-                    )}
-                    <button
-                        style={{ visibility: isMyGame ? "visible" : "hidden" }}
-                        disabled={!canInteract}
-                        className="explorer-link"
-                        onClick={endGame}
+                {game.is_over && (
+                    <div
+                        className="absolute inset-0 z-10 flex flex-col gap-3 items-center justify-center backdrop-blur-sm"
+                        style={{
+                            background:
+                                "color-mix(in srgb, var(--background-color) 80%, transparent)",
+                        }}
                     >
-                        Quit / End game
-                    </button>
+                        <p
+                            className="text-sm tracking-wider uppercase"
+                            style={{ color: "var(--text-secondary)" }}
+                        >
+                            Opponent left the game
+                        </p>
+                        {isMyGame && (
+                            <button
+                                disabled={busy}
+                                onClick={handleEnd}
+                                style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
+                            >
+                                Wrap Up
+                            </button>
+                        )}
+                    </div>
+                )}
+                {!game.is_over && players.length < 2 && (
+                    <div
+                        className="absolute inset-0 z-10 flex flex-col gap-3 items-center justify-center backdrop-blur-sm"
+                        style={{
+                            background:
+                                "color-mix(in srgb, var(--background-color) 80%, transparent)",
+                        }}
+                    >
+                        <p
+                            className="text-sm tracking-wider uppercase"
+                            style={{ color: "var(--text-secondary)" }}
+                        >
+                            Waiting for players
+                        </p>
+                        <button
+                            disabled={busy}
+                            onClick={handleJoin}
+                            style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
+                        >
+                            {isMyGame ? "Play Solo" : `Join? ${!account ? "(Sign in first)" : ""}`}
+                        </button>
+                    </div>
+                )}
+            </div>
+            <div className="flex flex-col gap-3 justify-center text-sm uppercase tracking-wider text-left items-start md:w-[170px] md:flex-shrink-0">
+                <p style={{ color: "var(--text-secondary)" }}>
+                    {isMyGame && isSolo
+                        ? `${currentTurn} turn`
+                        : isMyGame && players.length === 2
+                          ? isMyTurn
+                              ? "Your turn"
+                              : "Opponent's turn"
+                          : ""}
+                </p>
+                {busy && <div className="spinner" />}
+                <div className="divider w-[150px]" />
+                <div className="flex flex-col gap-3">
+                    <a
+                        href={`https://suiscan.xyz/testnet/object/${game.id}`}
+                        target="_blank"
+                        style={{ textTransform: "uppercase" }}
+                    >
+                        Game (Explorer)
+                    </a>
+                    {isMyGame && (
+                        <button disabled={busy} className="text-left" style={{ textTransform: "uppercase" }} onClick={handleEnd}>
+                            Quit / End Game
+                        </button>
+                    )}
                 </div>
             </div>
-        )
+        </div>
     );
 
-    async function handleClick(x: number, y: number) {
-        if (!isMyTurn) return console.log("Not your turn");
-        if (data[x][y] !== 0) return console.log("Cell is already occupied");
-        if (!account) return console.log("Account not found");
-        if (!game) return console.log("Game not found");
-        if (!canInteract) return console.log("Not your turn, or the state is loading");
-
-        setCanInteract(false);
-
-        const inspect = new Transaction();
-        inspect.moveCall({
-            target: `${packageId}::game::board_state`,
-            arguments: [inspect.object(game.id), inspect.pure.u8(x), inspect.pure.u8(y)],
-        });
-
-        const res = await client.devInspectTransactionBlock({
-            sender: zkLogin.address!,
-            transactionBlock: inspect as any,
-        });
-
-        if (!res.results || !res.results[0]) {
-            console.log("Invalid move");
-            setCanInteract(true);
-            return;
-        }
-
-        if (res.error) {
-            console.error(res.error);
-            setCanInteract(true);
-            return;
-        }
-
-        const boardBytes = res.results[0].mutableReferenceOutputs as any;
-        const updatedGame = Game.parse(new Uint8Array(boardBytes[0][1]));
-
-        setTurn(updatedGame.board.turn);
-        setData(updatedGame.board.data);
-
-        const tx = new Transaction();
-        tx.moveCall({
-            target: `${packageId}::game::play`,
-            arguments: [
-                tx.object(game.id),
-                tx.object(account.id),
-                tx.pure.u8(x),
-                tx.pure.u8(y),
-                tx.object("0x6"),
-            ],
-        });
-
-        const result = await client.signAndExecuteTransaction({
-            signer: (await flow.getKeypair({ network: "testnet" })) as any,
-            transaction: tx as any,
-        });
-
-        console.log("move played");
-
-        await client.waitForTransaction({ digest: result.digest });
-        await fetchGame();
-        setCanInteract(true);
-    }
-
-    /** Creates a new Game Object and starts a new game. */
-    async function newGame(size: number = 13) {
-        if (!BOARD_SIZES.includes(size)) throw new Error("Invalid board size");
-
-        setCanInteract(false);
-        console.log("Creating new game");
-        const tx = new Transaction();
-        const accArg = account
-            ? tx.object(account.id)
-            : tx.moveCall({
-                  target: `${packageId}::game::new_account`,
-              });
-
-        tx.moveCall({
-            target: `${packageId}::game::new`,
-            arguments: [accArg, tx.pure.u8(size)],
-        });
-
-        // if there wasn't an account, we need to create one
-        if (!account) {
-            tx.moveCall({
-                target: `${packageId}::game::keep`,
-                arguments: [accArg],
+    async function handlePlay(x: number, y: number) {
+        if (busy || !isMyTurn || boardData[x][y] !== 0 || !account || !game) return;
+        setBusy(true);
+        try {
+            await actions.play(game, account, x, y, (updated) => {
+                setBoardData(updated.board.grid.grid);
+                setIsBlackTurn(updated.board.is_black);
+                setBusy(false);
             });
+            await refetchGame();
+        } finally {
+            setBusy(false);
         }
-
-        const result = await client.signAndExecuteTransaction({
-            signer: (await flow.getKeypair({ network: "testnet" })) as any,
-            transaction: tx as any,
-        });
-
-        const { objectChanges } = await client.waitForTransaction({
-            digest: result.digest,
-            timeout: 10000,
-            pollInterval: 500,
-            options: { showObjectChanges: true },
-        });
-
-        if (!objectChanges) {
-            console.log("No object changes");
-            return navigate(`/go`);
-        }
-
-        const change = objectChanges.find(
-            (c) => c.type === "created" && c.objectType === `${packageId}::game::Game`,
-        );
-
-        if (change?.type !== "created") {
-            console.log("No game created");
-            return navigate(`/go`);
-        }
-
-        await toast.success("Game created successfully!");
-
-        return navigate(`/go/${change.objectId}`);
     }
 
-    async function joinGame() {
-        setCanInteract(false);
-        if (!game) return console.log("Game not found");
-
-        const tx = new Transaction();
-        const accArg = account
-            ? tx.object(account.id)
-            : tx.moveCall({
-                  target: `${packageId}::game::new_account`,
-              });
-
-        tx.moveCall({
-            target: `${packageId}::game::join`,
-            arguments: [tx.object(game.id), tx.object(account.id)],
-        });
-
-        if (!account) {
-            tx.moveCall({
-                target: `${packageId}::game::keep`,
-                arguments: [accArg],
-            });
+    async function handleJoin() {
+        setBusy(true);
+        try {
+            await actions.joinGame(game!, account ?? null);
+            await refetchAccount();
+            await refetchGame();
+        } finally {
+            setBusy(false);
         }
-
-        const result = await client.signAndExecuteTransaction({
-            signer: (await flow.getKeypair({ network: "testnet" })) as any,
-            transaction: tx as any,
-        });
-
-        await client.waitForTransaction({ digest: result.digest });
-        await refetch();
     }
 
-    /** Deletes the game object and ends the game. */
-    async function endGame() {
-        setCanInteract(false);
-        if (!game) return console.log("No game found");
-        if (!account) return console.log("Account not found");
-        if (!isMyGame) return console.log("Not your game");
-
-        const action = game.players.player1 && game.players.player2 ? "quit" : "wrap_up";
-
-        const tx = new Transaction();
-        tx.moveCall({
-            target: `${packageId}::game::${action}`,
-            arguments: [tx.object(game.id), tx.object(account.id)],
-        });
-        const result = await client.signAndExecuteTransaction({
-            signer: (await flow.getKeypair({ network: "testnet" })) as any,
-            // @ts-ignore
-            transaction: tx,
-        });
-
-        await client.waitForTransaction({ digest: result.digest });
-        navigate(`/go`);
+    async function handleEnd() {
+        if (!account) return;
+        setBusy(true);
+        try {
+            await actions.endGame(game!, account);
+            navigate("/go");
+        } finally {
+            setBusy(false);
+        }
     }
 }

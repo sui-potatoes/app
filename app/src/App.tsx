@@ -52,7 +52,7 @@ export function App() {
     }, [zkLogin.address]);
 
     return (
-        <div className="md:flex flex-wrap gap-5 items-center">
+        <div className="flex flex-col md:flex-row md:items-start">
             <div className="sidebar">
                 <ul>
                     <li>

@@ -1,6 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
+#[allow(untyped_literal)]
 /// Implementation of the Date type and related functions in Move.
 ///
 /// Supports:

@@ -128,6 +128,7 @@ function suinsSetting() {
         signer: () => flow.getKeypair({ network: "testnet" }),
         enabled: !!zkLogin.address,
     });
+    // @ts-ignore
     const nsClient = new SuinsClient({ client, network: "testnet" });
     const [suinsName, setSuinsName] = useState(name || "");
 

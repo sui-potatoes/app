@@ -1,47 +1,47 @@
 
-<a name="(svg=0x0)_desc"></a>
+<a name="svg_desc"></a>
 
-# Module `(svg=0x0)::desc`
+# Module `svg::desc`
 
-Defines SVG description elements: <code>&lt;<a href="./desc.md#(svg=0x0)_desc">desc</a>&gt;</code>, <code>&lt;<a href="./desc.md#(svg=0x0)_desc_metadata">metadata</a>&gt;</code>, and <code>&lt;<a href="./desc.md#(svg=0x0)_desc_title">title</a>&gt;</code>.
+Defines SVG description elements: <code>&lt;<a href="./desc.md#svg_desc">desc</a>&gt;</code>, <code>&lt;<a href="./desc.md#svg_desc_metadata">metadata</a>&gt;</code>, and <code>&lt;<a href="./desc.md#svg_desc_title">title</a>&gt;</code>.
 
 These elements may be used to provide additional information about the SVG content, such as
 descriptions, metadata, and titles.
 
 
--  [Struct `Desc`](#(svg=0x0)_desc_Desc)
+-  [Struct `Desc`](#svg_desc_Desc)
 -  [Constants](#@Constants_0)
--  [Function `desc`](#(svg=0x0)_desc_desc)
+-  [Function `desc`](#svg_desc_desc)
         -  [Description](#@Description_1)
         -  [Usage](#@Usage_2)
--  [Function `metadata`](#(svg=0x0)_desc_metadata)
+-  [Function `metadata`](#svg_desc_metadata)
         -  [Description](#@Description_3)
         -  [Usage](#@Usage_4)
--  [Function `title`](#(svg=0x0)_desc_title)
+-  [Function `title`](#svg_desc_title)
         -  [Description](#@Description_5)
         -  [Usage](#@Usage_6)
--  [Function `custom`](#(svg=0x0)_desc_custom)
--  [Function `to_string`](#(svg=0x0)_desc_to_string)
+-  [Function `custom`](#svg_desc_custom)
+-  [Function `to_string`](#svg_desc_to_string)
 
 
-<pre><code><b>use</b> (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./print.md#(svg=0x0)_print">print</a>;
-<b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
+<pre><code><b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
 <b>use</b> <a href="../../.doc-deps/std/string.md#std_string">std::string</a>;
 <b>use</b> <a href="../../.doc-deps/std/vector.md#std_vector">std::vector</a>;
 <b>use</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
+<b>use</b> <a href="./print.md#svg_print">svg::print</a>;
 </code></pre>
 
 
 
-<a name="(svg=0x0)_desc_Desc"></a>
+<a name="svg_desc_Desc"></a>
 
 ## Struct `Desc`
 
 Special container for SVG descriptions.
 
 
-<pre><code><b>public</b> <b>struct</b> <a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="./desc.md#svg_desc_Desc">Desc</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
@@ -71,47 +71,47 @@ Special container for SVG descriptions.
 ## Constants
 
 
-<a name="(svg=0x0)_desc_TYPE_DESC"></a>
+<a name="svg_desc_TYPE_DESC"></a>
 
 
 
-<pre><code><b>const</b> <a href="./desc.md#(svg=0x0)_desc_TYPE_DESC">TYPE_DESC</a>: u8 = 0;
+<pre><code><b>const</b> <a href="./desc.md#svg_desc_TYPE_DESC">TYPE_DESC</a>: u8 = 0;
 </code></pre>
 
 
 
-<a name="(svg=0x0)_desc_TYPE_METADATA"></a>
+<a name="svg_desc_TYPE_METADATA"></a>
 
 
 
-<pre><code><b>const</b> <a href="./desc.md#(svg=0x0)_desc_TYPE_METADATA">TYPE_METADATA</a>: u8 = 1;
+<pre><code><b>const</b> <a href="./desc.md#svg_desc_TYPE_METADATA">TYPE_METADATA</a>: u8 = 1;
 </code></pre>
 
 
 
-<a name="(svg=0x0)_desc_TYPE_TITLE"></a>
+<a name="svg_desc_TYPE_TITLE"></a>
 
 
 
-<pre><code><b>const</b> <a href="./desc.md#(svg=0x0)_desc_TYPE_TITLE">TYPE_TITLE</a>: u8 = 2;
+<pre><code><b>const</b> <a href="./desc.md#svg_desc_TYPE_TITLE">TYPE_TITLE</a>: u8 = 2;
 </code></pre>
 
 
 
-<a name="(svg=0x0)_desc_TYPE_CUSTOM"></a>
+<a name="svg_desc_TYPE_CUSTOM"></a>
 
 
 
-<pre><code><b>const</b> <a href="./desc.md#(svg=0x0)_desc_TYPE_CUSTOM">TYPE_CUSTOM</a>: u8 = 3;
+<pre><code><b>const</b> <a href="./desc.md#svg_desc_TYPE_CUSTOM">TYPE_CUSTOM</a>: u8 = 3;
 </code></pre>
 
 
 
-<a name="(svg=0x0)_desc_desc"></a>
+<a name="svg_desc_desc"></a>
 
 ## Function `desc`
 
-Create a new <code>&lt;<a href="./desc.md#(svg=0x0)_desc">desc</a>&gt;</code> element with the given text.
+Create a new <code>&lt;<a href="./desc.md#svg_desc">desc</a>&gt;</code> element with the given text.
 
 
 <a name="@Description_1"></a>
@@ -124,7 +124,7 @@ tooltip. Authors are encouraged to provide such a description, which can improve
 However, in the blockchain environment, space optimization is crucial, so it is recommended to
 use this element only when necessary.
 
-- Element: <code>&lt;<a href="./desc.md#(svg=0x0)_desc">desc</a>&gt;</code>.
+- Element: <code>&lt;<a href="./desc.md#svg_desc">desc</a>&gt;</code>.
 - Owned property: description string.
 - Extended properties: None.
 
@@ -150,7 +150,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc">desc</a>(content: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./desc.md#(svg=0x0)_desc_Desc">desc::Desc</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc">desc</a>(content: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): <a href="./desc.md#svg_desc_Desc">svg::desc::Desc</a>
 </code></pre>
 
 
@@ -159,18 +159,18 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc">desc</a>(content: String): <a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a> { <a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a> { desc_type: <a href="./desc.md#(svg=0x0)_desc_TYPE_DESC">TYPE_DESC</a>, content } }
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc">desc</a>(content: String): <a href="./desc.md#svg_desc_Desc">Desc</a> { <a href="./desc.md#svg_desc_Desc">Desc</a> { desc_type: <a href="./desc.md#svg_desc_TYPE_DESC">TYPE_DESC</a>, content } }
 </code></pre>
 
 
 
 </details>
 
-<a name="(svg=0x0)_desc_metadata"></a>
+<a name="svg_desc_metadata"></a>
 
 ## Function `metadata`
 
-Create a new <code>&lt;<a href="./desc.md#(svg=0x0)_desc_metadata">metadata</a>&gt;</code> element with the given raw content.
+Create a new <code>&lt;<a href="./desc.md#svg_desc_metadata">metadata</a>&gt;</code> element with the given raw content.
 
 
 <a name="@Description_3"></a>
@@ -182,7 +182,7 @@ Organizes arbitrary metadata for the parent element, which can be used by user a
 Metadata should be structured data, such as elements from other XML namespaces, JSON, or
 RDF.
 
-- Element: <code>&lt;<a href="./desc.md#(svg=0x0)_desc_metadata">metadata</a>&gt;</code>.
+- Element: <code>&lt;<a href="./desc.md#svg_desc_metadata">metadata</a>&gt;</code>.
 - Owned property: content.
 - Extended properties: None.
 
@@ -204,7 +204,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc_metadata">metadata</a>(content: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./desc.md#(svg=0x0)_desc_Desc">desc::Desc</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc_metadata">metadata</a>(content: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): <a href="./desc.md#svg_desc_Desc">svg::desc::Desc</a>
 </code></pre>
 
 
@@ -213,14 +213,14 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc_metadata">metadata</a>(content: String): <a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a> { <a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a> { desc_type: <a href="./desc.md#(svg=0x0)_desc_TYPE_METADATA">TYPE_METADATA</a>, content } }
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc_metadata">metadata</a>(content: String): <a href="./desc.md#svg_desc_Desc">Desc</a> { <a href="./desc.md#svg_desc_Desc">Desc</a> { desc_type: <a href="./desc.md#svg_desc_TYPE_METADATA">TYPE_METADATA</a>, content } }
 </code></pre>
 
 
 
 </details>
 
-<a name="(svg=0x0)_desc_title"></a>
+<a name="svg_desc_title"></a>
 
 ## Function `title`
 
@@ -234,7 +234,7 @@ Create a new title description.
 
 Provides a title for the parent element, which can be rendered by user agents in a tooltip.
 
-- Element: <code>&lt;<a href="./desc.md#(svg=0x0)_desc_title">title</a>&gt;</code>.
+- Element: <code>&lt;<a href="./desc.md#svg_desc_title">title</a>&gt;</code>.
 - Owned property: title text.
 - Extended properties: None.
 
@@ -260,7 +260,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc_title">title</a>(text: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./desc.md#(svg=0x0)_desc_Desc">desc::Desc</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc_title">title</a>(text: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): <a href="./desc.md#svg_desc_Desc">svg::desc::Desc</a>
 </code></pre>
 
 
@@ -269,18 +269,18 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc_title">title</a>(text: String): <a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a> { <a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a> { desc_type: <a href="./desc.md#(svg=0x0)_desc_TYPE_TITLE">TYPE_TITLE</a>, content: text } }
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc_title">title</a>(text: String): <a href="./desc.md#svg_desc_Desc">Desc</a> { <a href="./desc.md#svg_desc_Desc">Desc</a> { desc_type: <a href="./desc.md#svg_desc_TYPE_TITLE">TYPE_TITLE</a>, content: text } }
 </code></pre>
 
 
 
 </details>
 
-<a name="(svg=0x0)_desc_custom"></a>
+<a name="svg_desc_custom"></a>
 
 ## Function `custom`
 
-Insert a custom element into the <code><a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a></code> container.
+Insert a custom element into the <code><a href="./desc.md#svg_desc_Desc">Desc</a></code> container.
 
 ```rust
 use svg::{desc, svg};
@@ -293,7 +293,7 @@ let str = svg.to_string();
 ```
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc_custom">custom</a>(text: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): (<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./desc.md#(svg=0x0)_desc_Desc">desc::Desc</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc_custom">custom</a>(text: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>): <a href="./desc.md#svg_desc_Desc">svg::desc::Desc</a>
 </code></pre>
 
 
@@ -302,14 +302,14 @@ let str = svg.to_string();
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc_custom">custom</a>(text: String): <a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a> { <a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a> { desc_type: <a href="./desc.md#(svg=0x0)_desc_TYPE_CUSTOM">TYPE_CUSTOM</a>, content: text } }
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc_custom">custom</a>(text: String): <a href="./desc.md#svg_desc_Desc">Desc</a> { <a href="./desc.md#svg_desc_Desc">Desc</a> { desc_type: <a href="./desc.md#svg_desc_TYPE_CUSTOM">TYPE_CUSTOM</a>, content: text } }
 </code></pre>
 
 
 
 </details>
 
-<a name="(svg=0x0)_desc_to_string"></a>
+<a name="svg_desc_to_string"></a>
 
 ## Function `to_string`
 
@@ -318,7 +318,7 @@ Print the shape as an <code>SVG</code> element.
 TODO: replace with constants when compiler bug is fixed.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc_to_string">to_string</a>(<a href="./shape.md#(svg=0x0)_shape">shape</a>: &(<a href="./svg.md#(svg=0x0)_svg">svg</a>=0x0)::<a href="./desc.md#(svg=0x0)_desc_Desc">desc::Desc</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc_to_string">to_string</a>(<a href="./shape.md#svg_shape">shape</a>: &<a href="./desc.md#svg_desc_Desc">svg::desc::Desc</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -327,15 +327,15 @@ TODO: replace with constants when compiler bug is fixed.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#(svg=0x0)_desc_to_string">to_string</a>(<a href="./shape.md#(svg=0x0)_shape">shape</a>: &<a href="./desc.md#(svg=0x0)_desc_Desc">Desc</a>): String {
-    <b>let</b> (name, content) = match (<a href="./shape.md#(svg=0x0)_shape">shape</a>.desc_type) {
-        0 =&gt; (b"<a href="./desc.md#(svg=0x0)_desc">desc</a>", vector[<a href="./shape.md#(svg=0x0)_shape">shape</a>.content]),
-        1 =&gt; (b"<a href="./desc.md#(svg=0x0)_desc_metadata">metadata</a>", vector[<a href="./shape.md#(svg=0x0)_shape">shape</a>.content]),
-        2 =&gt; (b"<a href="./desc.md#(svg=0x0)_desc_title">title</a>", vector[<a href="./shape.md#(svg=0x0)_shape">shape</a>.content]),
-        3 =&gt; <b>return</b> <a href="./shape.md#(svg=0x0)_shape">shape</a>.content,
+<pre><code><b>public</b> <b>fun</b> <a href="./desc.md#svg_desc_to_string">to_string</a>(<a href="./shape.md#svg_shape">shape</a>: &<a href="./desc.md#svg_desc_Desc">Desc</a>): String {
+    <b>let</b> (name, content) = match (<a href="./shape.md#svg_shape">shape</a>.desc_type) {
+        0 =&gt; (b"<a href="./desc.md#svg_desc">desc</a>", vector[<a href="./shape.md#svg_shape">shape</a>.content]),
+        1 =&gt; (b"<a href="./desc.md#svg_desc_metadata">metadata</a>", vector[<a href="./shape.md#svg_shape">shape</a>.content]),
+        2 =&gt; (b"<a href="./desc.md#svg_desc_title">title</a>", vector[<a href="./shape.md#svg_shape">shape</a>.content]),
+        3 =&gt; <b>return</b> <a href="./shape.md#svg_shape">shape</a>.content,
         _ =&gt; <b>abort</b>,
     };
-    <a href="./print.md#(svg=0x0)_print_print">print::print</a>(name.<a href="./desc.md#(svg=0x0)_desc_to_string">to_string</a>(), vec_map::empty(), option::some(content))
+    <a href="./print.md#svg_print_print">print::print</a>(name.<a href="./desc.md#svg_desc_to_string">to_string</a>(), vec_map::empty(), option::some(content))
 }
 </code></pre>
 
