@@ -47,13 +47,12 @@ fun test_encode_decode() {
     let annoying_str =
         "abc def ghi jkl mno pqrs tuv wxyz ABC DEF GHI JKL MNO PQRS TUV WXYZ /() =?* ' {} abc def ghi jkl mno pqrs tuv wxyz ABC DEF GHI JKL MNO PQRS TUV WXYZ !";
 
-    assert_eq!(
-        decode("ZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"),
-        std::bcs::to_bytes(&100u256),
-    );
+    assert_eq!(decode("ZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), std::bcs::to_bytes(&100u256));
 
     assert_eq!(
-        decode("YWJjIGRlZiBnaGkgamtsIG1ubyBwcXJzIHR1diB3eHl6IEFCQyBERUYgR0hJIEpLTCBNTk8gUFFSUyBUVVYgV1hZWiAvKCkgPT8qICcge30gYWJjIGRlZiBnaGkgamtsIG1ubyBwcXJzIHR1diB3eHl6IEFCQyBERUYgR0hJIEpLTCBNTk8gUFFSUyBUVVYgV1hZWiAh"),
+        decode(
+            "YWJjIGRlZiBnaGkgamtsIG1ubyBwcXJzIHR1diB3eHl6IEFCQyBERUYgR0hJIEpLTCBNTk8gUFFSUyBUVVYgV1hZWiAvKCkgPT8qICcge30gYWJjIGRlZiBnaGkgamtsIG1ubyBwcXJzIHR1diB3eHl6IEFCQyBERUYgR0hJIEpLTCBNTk8gUFFSUyBUVVYgV1hZWiAh",
+        ),
         annoying_str,
     );
 
