@@ -4,6 +4,42 @@
 [move]
 version = 4
 
+[pinned.mainnet.MoveStdlib]
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "b38bca86f0323b3fe8b6b7f4ca0cd7ae7faebe4b" }
+use_environment = "mainnet"
+manifest_digest = "C4FE4C91DE74CBF223B2E380AE40F592177D21870DC2D7EB6227D2D694E05363"
+deps = {}
+
+[pinned.mainnet.Sui]
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "b38bca86f0323b3fe8b6b7f4ca0cd7ae7faebe4b" }
+use_environment = "mainnet"
+manifest_digest = "CD547CB1ACCE0880C835DAED2D8FFCB91D56C833AE5240D3AA5B918398263195"
+deps = { MoveStdlib = "MoveStdlib" }
+
+[pinned.mainnet.ascii]
+source = { local = "../ascii" }
+use_environment = "mainnet"
+manifest_digest = "E41BBD67BE8940D26C79D78B028477EF5B33BA217A1282C78ACB344CF8A5ECF6"
+deps = { std = "MoveStdlib", sui = "Sui" }
+
+[pinned.mainnet.codec]
+source = { local = "../codec" }
+use_environment = "mainnet"
+manifest_digest = "0598BE7FBFCBA7568F21B1D4409A8B8652756AD8559A70539BC995E7DCB74B85"
+deps = { ascii = "ascii", std = "MoveStdlib", sui = "Sui" }
+
+[pinned.mainnet.date]
+source = { root = true }
+use_environment = "mainnet"
+manifest_digest = "4DC742493B9507C14366842FEF08201B8FD4B7BBF2B086A43CD12F6A396A2886"
+deps = { ascii = "ascii", std = "MoveStdlib", sui = "Sui", svg = "svg" }
+
+[pinned.mainnet.svg]
+source = { local = "../svg" }
+use_environment = "mainnet"
+manifest_digest = "7806F5888B26930A9FFCEFA2D77BE1CA72F2078CE0571A63F2A3B0849A430A0E"
+deps = { codec = "codec", std = "MoveStdlib", sui = "Sui" }
+
 [pinned.testnet.MoveStdlib]
 source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "868c226359ef914f1f3b080518f27eb13d8967f5" }
 use_environment = "testnet"
