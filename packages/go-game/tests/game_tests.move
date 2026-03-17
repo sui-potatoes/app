@@ -18,12 +18,14 @@ fun play_solo_game() {
     // 2nd tx: join the game
     test.next_tx(@1);
     test.with_shared!<Game>(|game, test| {
+        game.make_public(&account, test.ctx());
         game.join(&mut account, &clock, test.ctx());
         game.play(&account, 3, 3, &clock, test.ctx());
         game.play(&account, 4, 4, &clock, test.ctx());
         game.play(&account, 5, 5, &clock, test.ctx());
     });
 
+    // 3rd tx: wrap up the game as a solo player
     test.next_tx(@1);
     let game = test.take_shared<Game>();
     game.wrap_up(&mut account, test.ctx());

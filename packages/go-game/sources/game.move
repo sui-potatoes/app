@@ -20,9 +20,18 @@ const ENotYourTurn: u64 = 2;
 const ENotInGame: u64 = 3;
 /// The other player hasn't quit the game.
 const EQuitFirst: u64 = 4;
+/// The game is still registered in the registry.
+const EGameStillRegistered: u64 = 5;
+/// The game is not public.
+const EGameNotPublic: u64 = 6;
 
 /// OTW for Display & Publisher.
 public struct GAME has drop {}
+
+/// An event emitted when a game is searched for players.
+public struct PlayerSearchEvent has copy, drop {
+    game_id: ID,
+}
 
 /// An account in the game. Stores currently active games (can be more than
 /// one at a time).
@@ -49,6 +58,8 @@ public struct Game has key {
     created_at: u64,
     /// The time the second player joined the game.
     joined_at: Option<u64>,
+    /// Whether the game is over.
+    is_over: bool,
 }
 
 /// Create a new account and send it to the sender.
@@ -77,13 +88,19 @@ public fun new(acc: &mut Account, size: u8, clock: &Clock, ctx: &mut TxContext) 
         image_blob: board.to_svg().to_url(),
         created_at: clock.timestamp_ms(),
         joined_at: option::none(),
+        is_over: false,
     });
+}
+
+/// A game can be made public by the owner.
+public fun make_public(game: &mut Game, acc: &Account, ctx: &mut TxContext) {
+    assert!(game.players.1.is_none(), EGameFull);
+    sui::event::emit(PlayerSearchEvent { game_id: game.id.to_inner() });
 }
 
 /// Join an existing game. The game must not be full.
 public fun join(game: &mut Game, acc: &mut Account, clock: &Clock, ctx: &mut TxContext) {
     let Players(p1, p2) = &mut game.players;
-
     assert!(p2.is_none(), EGameFull);
 
     // if this is my game, I can join it solo
@@ -130,6 +147,8 @@ public fun quit(game: &mut Game, acc: &mut Account) {
         let _id = p1.extract();
         acc.games.remove(game.id.as_inner());
     };
+
+    game.is_over = true;
 }
 
 /// Wrap up the game if the second player has left.
@@ -171,15 +190,12 @@ fun init(otw: GAME, ctx: &mut TxContext) {
     let pub = package::claim(otw, ctx);
     let mut d = display::new<Game>(&pub, ctx);
 
-    d.add(
-        b"image_url".to_string(),
-        b"data:image/svg+xml;charset=utf8,{image_blob}".to_string(),
-    );
-    d.add(b"name".to_string(), b"Go Game Board {id}".to_string());
-    d.add(b"description".to_string(), b"{board.size}".to_string());
-    d.add(b"link".to_string(), b"https://potatoes.app/go/{id}".to_string());
-    d.add(b"project_url".to_string(), b"https://potatoes.app/".to_string());
-    d.add(b"creator".to_string(), b"Sui Potatoes (c)".to_string());
+    d.add("image_url", "{image_blob}");
+    d.add("name", "Go Game Board {id}");
+    d.add("description", "{board.size}");
+    d.add("link", "https://potatoes.app/go/{id}");
+    d.add("project_url", "https://potatoes.app/");
+    d.add("creator", "Sui Potatoes (c)");
     d.update_version();
 
     transfer::public_transfer(pub, ctx.sender());
