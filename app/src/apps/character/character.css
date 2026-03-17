@@ -1,11 +1,10 @@
 @reference "../../index.css";
 
 .param .disabled {
-    color: grey;
+    color: var(--disabled-color);
     cursor: not-allowed;
 }
 
-/* Recenter on smaller screens */
 @media screen and (max-width: 768px) {
     .param {
         text-align: center;

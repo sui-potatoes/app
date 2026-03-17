@@ -13,14 +13,12 @@ export function Board({
     disabled,
     onClick,
     lastMove,
-    zoom = "%100",
     padding = 2,
     cellSize = 20,
 }: {
     size: 9 | 13 | 19;
     data: Matrix;
     turn: 1 | 2;
-    zoom?: string;
     disabled: boolean;
     padding?: number;
     cellSize?: number;
@@ -31,10 +29,9 @@ export function Board({
 
     return (
         <svg
-            style={{ zoom, display: "inline-flex" }}
+            viewBox={`0 0 ${width} ${width}`}
+            style={{ display: "block", margin: "0 auto", width: "100%", maxWidth: "min(80vw, 80vh)", height: "auto", aspectRatio: "1" }}
             className={(disabled ? "disabled " : " ") + (turn == 1 ? "black" : "white")}
-            width={width}
-            height={width}
         >
             <defs>
                 <pattern
