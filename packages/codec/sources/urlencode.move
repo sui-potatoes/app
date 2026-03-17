@@ -8,11 +8,11 @@
 /// ```rust
 /// use codec::urlencode;
 ///
-/// let encoded = urlencode::encode(b"hello, potato!");
+/// let encoded = urlencode::encode("hello, potato!");
 /// let decoded = urlencode::decode(encoded);
 ///
-/// assert!(encoded == b"hello%2C%20potato%21".to_string());
-/// assert!(decoded == b"hello, potato!");
+/// assert!(encoded == "hello%2C%20potato%21");
+/// assert!(decoded == "hello, potato!");
 /// ```
 module codec::urlencode;
 
@@ -90,13 +90,13 @@ fun test_decode_random(bytes: vector<u8>) {
 
 #[test]
 fun test_urlencode() {
-    assert_eq!(decode(b"hello+world".to_string()), b"hello world");
-    assert_eq!(encode(b"Hello, World!"), b"Hello%2C%20World%21".to_string());
+    assert_eq!(decode("hello+world"), "hello world");
+    assert_eq!(encode("Hello, World!"), "Hello%2C%20World%21");
 
-    let str = b"Hello, World!?<>aa:;";
+    let str = "Hello, World!?<>aa:;";
     assert_eq!(decode(encode(str)), str);
 
-    let str = b"    ";
+    let str = "    ";
     assert_eq!(decode(encode(str)), str);
 
     let str = x"00FF00";
@@ -105,9 +105,9 @@ fun test_urlencode() {
     let str = x"FF00FF";
     assert_eq!(decode(encode(str)), str);
 
-    let str = b"🦄🦄🦄🦄🦄";
+    let str = "🦄🦄🦄🦄🦄";
     assert_eq!(decode(encode(str)), str);
 
-    let str = b"картошки самые крутые";
+    let str = "картошки самые крутые";
     assert_eq!(decode(encode(str)), str);
 }

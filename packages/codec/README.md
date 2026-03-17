@@ -36,7 +36,7 @@ module my::awesome_project;
 use codec::hex;
 
 public fun do() {
-    let _ = hex::encode(b"hey y'all");
+    let _ = hex::encode("hey y'all");
 }
 ```
 
@@ -52,8 +52,8 @@ use codec::hex;
 use std::string::String;
 
 // while the type annotation is not necessary, we've added it to be explicit
-let encoded: String = hex::encode(b"hello, potato!"); // takes vector<u8>
-let decoded: vector<u8> = hex::decode(b"DEADBEEF".to_string()); // takes String
+let encoded: String = hex::encode("hello, potato!"); // takes vector<u8>
+let decoded: vector<u8> = hex::decode("DEADBEEF"); // takes String
 ```
 
 ## Available Codecs
@@ -68,8 +68,8 @@ Implements the Base16 encoding scheme. The module is called `hex`.
 use codec::hex;
 use std::string::String;
 
-let encoded: String = hex::encode(b"hello, potato!");
-let decoded: vector<u8> = hex::decode(b"DEADBEEF".to_string());
+let encoded: String = hex::encode("hello, potato!");
+let decoded: vector<u8> = hex::decode("DEADBEEF");
 ```
 
 ### Base64
@@ -80,8 +80,8 @@ Implements the Base64 encoding scheme. The module is called `base64`.
 use codec::base64;
 use std::string::String;
 
-let encoded: String = base64::encode(b"hello, potato!");
-let decoded: vector<u8> = base64::decode(b"SGVsbG8sIHBvdGF0byE=".to_string());
+let encoded: String = base64::encode("hello, potato!");
+let decoded: vector<u8> = base64::decode("SGVsbG8sIHBvdGF0byE=");
 ```
 
 ### Base64url
@@ -92,8 +92,8 @@ Implements the Base64url encoding - a URL-friendly modification of `base64`, usi
 use codec::base64url;
 use std::string::String;
 
-let encoded: String = base64url::encode(b"hello, potato!");
-let decoded: vector<u8> = base64url::decode(b"SGVsbG8sIHBvdGF0byE".to_string());
+let encoded: String = base64url::encode("hello, potato!");
+let decoded: vector<u8> = base64url::decode("SGVsbG8sIHBvdGF0byE");
 ```
 
 ### URL Encoding
@@ -104,8 +104,8 @@ Implements the URL encoding scheme. The module is called `urlencode`.
 use codec::urlencode;
 use std::string::String;
 
-let encoded: String = urlencode::encode(b"hello, potato!");
-let decoded: vector<u8> = urlencode::decode(b"hello%2C%20potato%21".to_string());
+let encoded: String = urlencode::encode("hello, potato!");
+let decoded: vector<u8> = urlencode::decode("hello%2C%20potato%21");
 ```
 
 ### Potatoes
@@ -116,8 +116,8 @@ Implements the POTAES encoding scheme. The module is called `potatoes`.
 use codec::potatoes;
 use std::string::String;
 
-let encoded: String = potatoes::encode(b"hello, potato!");
-let decoded: vector<u8> = potatoes::decode(b"10potatoes".to_string());
+let encoded: String = potatoes::encode("hello, potato!");
+let decoded: vector<u8> = potatoes::decode("10potatoes");
 ```
 
 ## Changelog
