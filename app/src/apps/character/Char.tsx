@@ -17,7 +17,7 @@ export function Char({
 }: CharOptions) {
     return (
         <svg
-            className="max-md:max-w-[240px]"
+            className="w-[220px] max-md:max-w-[220px] md:w-auto md:max-h-[70vh]"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 220 240"
         >

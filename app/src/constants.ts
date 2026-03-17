@@ -3,7 +3,7 @@
 
 export const NETWORK = "testnet";
 export const GOGAME_PACKAGE_ID =
-    "0xebb5b2184891b9712ad831d61ac2557a3f81ac64a089f5bb406146ec982e637e";
+    "0x13c81db0a08e20c38b8606c774e9f89777938cc5a55b78f9b5b49fed27a15712";
 export const CHARACTER_PACKAGE_ID =
     "0xfe50fd35667c48ec3342c5182a262aeb8b367188f71524ac8a3ea3e20141e78e";
 export const CHARACTER_BUILDER_ID =

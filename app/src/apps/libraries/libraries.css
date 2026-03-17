@@ -1,41 +1,88 @@
-/* I want to use tailwind values like text-lg for elements */
-
 @reference "../../index.css";
 
 .markdown h1 {
     @apply text-2xl;
-    @apply mb-10;
+    @apply mb-6;
+    letter-spacing: 0.05em;
 }
 
 .markdown h2 {
-    @apply text-xl;
-    @apply mt-10 mb-5;
+    @apply text-lg;
+    @apply mt-10 mb-4;
+    color: var(--accent-color);
+    letter-spacing: 0.03em;
+}
+
+.markdown h2 a[href^="#"] {
+    color: var(--border-color);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.markdown h2 a[href^="#"]:hover {
+    color: var(--accent-color);
+}
+
+.markdown h3 {
+    @apply text-base;
+    @apply mt-6 mb-3;
 }
 
 .markdown p {
-    @apply text-base;
-    @apply my-5;
+    @apply text-sm;
+    @apply my-4;
+    color: var(--text-secondary);
+    line-height: 1.7;
 }
 
 .markdown a {
-    @apply text-blue-500;
+    color: var(--accent-color);
     @apply hover:underline;
     @apply normal-case;
 }
 
 .markdown ul {
-    @apply list-inside;
-    @apply ml-5;
+    @apply list-none;
+    @apply ml-0;
+    @apply text-sm;
+}
+
+.markdown ul li::before {
+    content: "// ";
+    color: var(--accent-color);
+    font-family: monospace;
 }
 
 .markdown ul p {
     @apply my-0;
+    display: inline;
 }
 
 .markdown pre {
     background: var(--code-color);
-    @apply p-5;
-    @apply rounded-md;
-    @apply my-5;
+    border: 1px solid var(--border-color);
+    @apply p-4;
+    @apply rounded-sm;
+    @apply my-4;
     @apply overflow-x-auto;
+    @apply text-sm;
+    font-family: monospace;
+}
+
+.markdown code {
+    font-family: monospace;
+    @apply text-sm;
+}
+
+.markdown blockquote {
+    border-left: 2px solid var(--accent-color);
+    @apply pl-4;
+    @apply my-4;
+    color: var(--text-secondary);
+}
+
+.markdown hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    @apply my-8;
 }

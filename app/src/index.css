@@ -5,22 +5,30 @@ button.disabled {
     opacity: 0.5;
 }
 
-/* I want to create variables for colours, text color, navbar colour and so on */
-/* I want to create a global style for the body */
 :root {
-    --text-color: #000;
-    --background-color: hsl(0, 0%, 100%);
-    --button-color: #eee;
+    --text-color: #1a1a2e;
+    --text-secondary: #666;
+    --background-color: #fafafa;
+    --surface-color: #f0f0f0;
+    --button-color: #e8e8e8;
     --disabled-color: #aaa;
-    --code-color: #eee;
+    --code-color: #f0f0f3;
+    --border-color: #e0e0e0;
+    --accent-color: #0a9e84;
+    --accent-dim: rgba(10, 158, 132, 0.15);
 }
 
 .dark-theme * {
-    --text-color: #fff;
-    --background-color: #000;
-    --button-color: #333;
-    --disabled-color: #666;
-    --code-color: #212121;
+    --text-color: #e0e0e0;
+    --text-secondary: #888;
+    --background-color: #0a0a0f;
+    --surface-color: #141420;
+    --button-color: #1a1a2e;
+    --disabled-color: #555;
+    --code-color: #141420;
+    --border-color: #2a2a3e;
+    --accent-color: #1df7cf;
+    --accent-dim: rgba(29, 247, 207, 0.08);
 }
 
 body {
@@ -29,6 +37,36 @@ body {
     color: var(--text-color);
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+}
+
+/* Scanline overlay for techy feel */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.015) 2px,
+        rgba(0, 0, 0, 0.015) 4px
+    );
+    z-index: 9999;
+}
+
+.dark-theme body::after {
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.01) 2px,
+        rgba(255, 255, 255, 0.01) 4px
+    );
 }
 
 .switch {
@@ -42,6 +80,13 @@ body {
     padding: 10px;
     border-radius: 50%;
     cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: border-color 0.2s ease;
+    z-index: 100;
+}
+
+.switch:hover {
+    border-color: var(--accent-color);
 }
 
 .container p img {
@@ -55,10 +100,6 @@ body {
     display: none !important;
 }
 
-.sidebar ul > li::before {
-    content: "> ";
-}
-
 @media screen and (max-width: 768px) {
     .container {
         flex-direction: column;
@@ -70,50 +111,96 @@ body {
     .sm-show {
         display: block !important;
     }
-
-    .sidebar {
-        text-align: center;
-    }
-
-    .sidebar ul > li::before {
-        content: "";
-    }
 }
 
+/* Mobile-first sidebar: horizontal scrollable nav bar */
 .sidebar {
     display: flex;
-    flex-direction: column;
-    height: 100vh;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    padding: 20px;
-    text-align: left;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-color);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.sidebar::-webkit-scrollbar {
+    display: none;
 }
 
 .sidebar ul {
     list-style: none;
     padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+.sidebar ul li {
+    margin-bottom: 0;
+    white-space: nowrap;
 }
 
 .sidebar ul li,
 .sidebar ul li a {
     color: var(--text-color);
     padding: 0px;
-    margin-bottom: 20px;
     font-weight: normal;
     text-transform: uppercase;
     text-decoration: none;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    transition: color 0.15s ease;
 }
 
 .sidebar ul li a:hover {
-    font-weight: bold;
+    color: var(--accent-color);
     cursor: pointer;
 }
 
 .sidebar ul a.active {
-    /* font-weight: bold; */
+    color: var(--accent-color);
     cursor: none;
-    text-decoration: underline;
+    text-decoration: none;
+}
+
+/* Desktop sidebar: vertical sticky column */
+@media screen and (min-width: 769px) {
+    .sidebar {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow-x: visible;
+        overflow-y: visible;
+        padding: 20px;
+        text-align: left;
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+        border-bottom: none;
+        scrollbar-width: auto;
+    }
+
+    .sidebar ul {
+        flex-direction: column;
+        gap: 0;
+        align-items: flex-start;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 20px;
+        white-space: normal;
+    }
+
+    .sidebar ul > li::before {
+        content: "> ";
+        color: var(--accent-color);
+    }
 }
 
 .content {
@@ -135,22 +222,28 @@ body {
 
 .buttons button {
     background-color: var(--button-color);
-    border: none;
-    padding: 10px;
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
     cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.buttons button:hover {
+    border-color: var(--accent-color);
 }
 
 .wallet {
     text-align: left;
     font-weight: normal;
-    /* padding: 5px; */
     margin-bottom: 20px;
 }
 
 .connect {
     color: var(--text-color);
-    text-decoration: underline;
+    text-decoration: none;
     text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.05em;
 }
 .connect button,
 .connect button * {
@@ -163,13 +256,15 @@ body {
     text-transform: uppercase !important;
     box-shadow: none !important;
     color: var(--text-color) !important;
-    text-decoration: underline !important;
-    font-size: 16px;
+    text-decoration: none !important;
+    font-size: 14px;
+    letter-spacing: 0.05em;
 }
 
-.connect:hover {
+.connect:hover,
+.connect button:hover {
+    color: var(--accent-color) !important;
     cursor: pointer;
-    font-weight: bold;
 }
 
 /* Global button styles */
@@ -182,16 +277,24 @@ button {
     cursor: pointer;
     text-transform: capitalize;
     text-decoration: none;
+    transition: color 0.15s ease;
 }
 
 a:hover,
 button:hover {
-    color: var(--text-color);
-    text-decoration: underline;
+    color: var(--accent-color);
+    text-decoration: none;
 }
 
 button:disabled {
     color: var(--disabled-color);
     cursor: not-allowed;
-    /* text-decoration: underline !important; */
+}
+
+/* Shared section divider */
+.divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border-color);
+    margin: 16px 0;
 }
