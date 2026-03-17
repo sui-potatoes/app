@@ -8,19 +8,11 @@
 -  [Function `svg`](#go_game_render_svg)
 
 
-<pre><code><b>use</b> (codec=0x0)::base64;
-<b>use</b> (codec=0x0)::urlencode;
-<b>use</b> (grid=0x0)::cell;
-<b>use</b> (grid=0x0)::grid;
-<b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::animation;
-<b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::container;
-<b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::coordinate;
-<b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::desc;
-<b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::filter;
-<b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::print;
-<b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::shape;
-<b>use</b> (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::<a href="./render.md#go_game_render_svg">svg</a>;
+<pre><code><b>use</b> <a href="../../.doc-deps/codec/base64.md#codec_base64">codec::base64</a>;
+<b>use</b> <a href="../../.doc-deps/codec/urlencode.md#codec_urlencode">codec::urlencode</a>;
 <b>use</b> <a href="./go.md#go_game_go">go_game::go</a>;
+<b>use</b> <a href="../../.doc-deps/grid/cell.md#grid_cell">grid::cell</a>;
+<b>use</b> <a href="../../.doc-deps/grid/grid.md#grid_grid">grid::grid</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
@@ -32,6 +24,14 @@
 <b>use</b> <a href="../../.doc-deps/sui/bcs.md#sui_bcs">sui::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/sui/hex.md#sui_hex">sui::hex</a>;
 <b>use</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
+<b>use</b> <a href="../../.doc-deps/svg/animation.md#svg_animation">svg::animation</a>;
+<b>use</b> <a href="../../.doc-deps/svg/container.md#svg_container">svg::container</a>;
+<b>use</b> <a href="../../.doc-deps/svg/coordinate.md#svg_coordinate">svg::coordinate</a>;
+<b>use</b> <a href="../../.doc-deps/svg/desc.md#svg_desc">svg::desc</a>;
+<b>use</b> <a href="../../.doc-deps/svg/filter.md#svg_filter">svg::filter</a>;
+<b>use</b> <a href="../../.doc-deps/svg/print.md#svg_print">svg::print</a>;
+<b>use</b> <a href="../../.doc-deps/svg/shape.md#svg_shape">svg::shape</a>;
+<b>use</b> <a href="../../.doc-deps/svg/svg.md#svg_svg">svg::svg</a>;
 </code></pre>
 
 
@@ -43,7 +43,7 @@
 Print the board as an SVG.
 
 
-<pre><code><b>public</b>(package) <b>fun</b> <a href="./render.md#go_game_render_svg">svg</a>(b: &<a href="./go.md#go_game_go_Board">go_game::go::Board</a>): (<a href="./render.md#go_game_render_svg">svg</a>=0x0)::svg::Svg
+<pre><code><b>public</b>(package) <b>fun</b> <a href="./render.md#go_game_render_svg">svg</a>(b: &<a href="./go.md#go_game_go_Board">go_game::go::Board</a>): <a href="../../.doc-deps/svg/svg.md#svg_svg_Svg">svg::svg::Svg</a>
 </code></pre>
 
 
@@ -58,7 +58,7 @@ Print the board as an SVG.
     <b>let</b> size = b.size() <b>as</b> u16;
     <b>let</b> width = ((size * (cell_size + 1)) + (size * padding)) <b>as</b> u16;
     // create a new SVG document
-    <b>let</b> <b>mut</b> <a href="./render.md#go_game_render_svg">svg</a> = <a href="../../.doc-deps/svg/svg.md#(svg=0x0)_svg">svg::svg</a>(vector[0, 0, width, width]);
+    <b>let</b> <b>mut</b> <a href="./render.md#go_game_render_svg">svg</a> = <a href="../../.doc-deps/svg/svg.md#svg_svg">svg::svg</a>(vector[0, 0, width, width]);
     // construct a circle definition <b>for</b> black stones
     <b>let</b> black = shape::circle(10).map_attributes!(|attrs| {
         attrs.insert(b"id".to_string(), b"b".to_string());

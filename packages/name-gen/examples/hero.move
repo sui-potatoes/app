@@ -1,7 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-module 0::hero;
+module name_gen::hero;
 
 use name_gen::name_gen;
 use std::string::String;

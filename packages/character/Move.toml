@@ -6,6 +6,3 @@ authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 [dependencies]
 svg = { local = "../svg" }
 codec = { local = "../codec" }
-
-[addresses]
-character = "0x0"

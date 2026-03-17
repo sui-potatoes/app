@@ -1,8 +1,5 @@
 [package]
-name = "name-gen"
+name = "name_gen"
 edition = "2024"
 license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com"]
-
-[addresses]
-name_gen = "0x0"

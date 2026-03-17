@@ -10,7 +10,7 @@
 module commander::stats;
 
 use bit_field::bit_field as bf;
-use std::{macros::num_min, string::String};
+use std::string::String;
 use sui::bcs::{Self, BCS};
 
 /// Capped at 7 bits. Max value for signed 8-bit integers.
@@ -153,13 +153,13 @@ public fun add(stats: &Stats, modifier: &Stats): Stats {
         // skip 0 and -0 values
         if (modifier == 0 || modifier == sign) return;
         let new_value = if (modifier > sign) {
-            value - num_min!(modifier - sign, value)
+            value - (modifier - sign).min(value)
         } else {
             // cannot overflow (127 is the max for modifier, below we cap values)
             value + modifier
         };
 
-        *&mut stat_values[i] = num_min!(new_value, SIGN_VALUE - 1);
+        *&mut stat_values[i] = new_value.min(SIGN_VALUE - 1);
     });
 
     Stats(bf::pack_u8!(stat_values))

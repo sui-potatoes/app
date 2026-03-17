@@ -12,7 +12,7 @@
 module commander::unit;
 
 use commander::{param::{Self, Param}, recruit::Recruit, stats::{Self, Stats}};
-use std::{macros::num_min, string::String};
+use std::string::String;
 use sui::{bcs::{Self, BCS}, random::RandomGenerator};
 
 /// Trying to attack a target that is out of range.
@@ -127,13 +127,13 @@ public fun perform_attack(
     let hit_chance = if (eff_range == range) {
         aim_stat
     } else if (eff_range > range) {
-        num_min!(aim_stat + DISTANCE_BONUS * (eff_range - range), 100)
+        (aim_stat + DISTANCE_BONUS * (eff_range - range)).min(100)
     } else {
-        aim_stat - num_min!(DISTANCE_PENALTY * (range - eff_range), aim_stat)
+        aim_stat - (DISTANCE_PENALTY * (range - eff_range)).min(aim_stat)
     };
 
     // adjust the hit chance by the target's defense, avoid underflow
-    let hit_chance = hit_chance - num_min!(hit_chance, target_defense);
+    let hit_chance = hit_chance - hit_chance.min(target_defense);
 
     let is_hit = rng.generate_u8_in_range(0, 99) < hit_chance;
     if (!is_hit) return (false, false, false, 0, hit_chance);

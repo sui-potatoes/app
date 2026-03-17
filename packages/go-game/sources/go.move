@@ -69,7 +69,7 @@ public fun place(board: &mut Board, x: u16, y: u16) {
     // opponent's stones, the move is suicide. However, if the surrounding group
     // is surrounded, the move is a capture.
     let (mut my_stones, mut enemy_stones) = (vector[], vector[]);
-    let mut empty_num = 0;
+    let mut empty_num = 0u16;
 
     // Get all neighbors of the cell. Split them into my stones and enemy stones.
     // All my stones which are neighbors, actually form a group. The only tricky

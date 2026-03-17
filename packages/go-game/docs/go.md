@@ -26,8 +26,8 @@ Implements the actual game of Go.
 -  [Function `tile_to_number`](#go_game_go_tile_to_number)
 
 
-<pre><code><b>use</b> (<a href="./go.md#go_game_go_grid">grid</a>=0x0)::cell;
-<b>use</b> (<a href="./go.md#go_game_go_grid">grid</a>=0x0)::<a href="./go.md#go_game_go_grid">grid</a>;
+<pre><code><b>use</b> <a href="../../.doc-deps/grid/cell.md#grid_cell">grid::cell</a>;
+<b>use</b> <a href="../../.doc-deps/grid/grid.md#grid_grid">grid::grid</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
@@ -66,7 +66,7 @@ The game board.
  The size of the board.
 </dd>
 <dt>
-<code><a href="./go.md#go_game_go_grid">grid</a>: (<a href="./go.md#go_game_go_grid">grid</a>=0x0)::grid::Grid&lt;<a href="./go.md#go_game_go_Tile">go_game::go::Tile</a>&gt;</code>
+<code><a href="./go.md#go_game_go_grid">grid</a>: <a href="../../.doc-deps/grid/grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;<a href="./go.md#go_game_go_Tile">go_game::go::Tile</a>&gt;</code>
 </dt>
 <dd>
  The internal grid of the Game.
@@ -84,13 +84,13 @@ The game board.
  Captured stones.
 </dd>
 <dt>
-<code>moves: vector&lt;(<a href="./go.md#go_game_go_grid">grid</a>=0x0)::cell::Cell&gt;</code>
+<code>moves: vector&lt;<a href="../../.doc-deps/grid/cell.md#grid_cell_Cell">grid::cell::Cell</a>&gt;</code>
 </dt>
 <dd>
  Stores history of moves.
 </dd>
 <dt>
-<code>prev_states: vector&lt;(<a href="./go.md#go_game_go_grid">grid</a>=0x0)::grid::Grid&lt;<a href="./go.md#go_game_go_Tile">go_game::go::Tile</a>&gt;&gt;</code>
+<code>prev_states: vector&lt;<a href="../../.doc-deps/grid/grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;<a href="./go.md#go_game_go_Tile">go_game::go::Tile</a>&gt;&gt;</code>
 </dt>
 <dd>
  Stores last 2 states to implement the ko rule.
@@ -156,7 +156,7 @@ Empty tile returns an empty group.
 <dd>
 </dd>
 <dt>
-<code>1: vector&lt;(<a href="./go.md#go_game_go_grid">grid</a>=0x0)::cell::Cell&gt;</code>
+<code>1: vector&lt;<a href="../../.doc-deps/grid/cell.md#grid_cell_Cell">grid::cell::Cell</a>&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -292,7 +292,7 @@ Place a stone on the board at the given position.
     // opponent's stones, the <b>move</b> is suicide. However, <b>if</b> the surrounding group
     // is surrounded, the <b>move</b> is a capture.
     <b>let</b> (<b>mut</b> my_stones, <b>mut</b> enemy_stones) = (vector[], vector[]);
-    <b>let</b> <b>mut</b> empty_num = 0;
+    <b>let</b> <b>mut</b> empty_num = 0u16;
     // Get all neighbors of the cell. Split them into my stones and enemy stones.
     // All my stones which are neighbors, actually form a group. The only tricky
     // part is checking the enemy stones and their groups.
@@ -455,7 +455,7 @@ Get the size of the board.
 Get a reference to the inner <code>Grid</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_grid">grid</a>(b: &<a href="./go.md#go_game_go_Board">go_game::go::Board</a>): &(<a href="./go.md#go_game_go_grid">grid</a>=0x0)::grid::Grid&lt;<a href="./go.md#go_game_go_Tile">go_game::go::Tile</a>&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_grid">grid</a>(b: &<a href="./go.md#go_game_go_Board">go_game::go::Board</a>): &<a href="../../.doc-deps/grid/grid.md#grid_grid_Grid">grid::grid::Grid</a>&lt;<a href="./go.md#go_game_go_Tile">go_game::go::Tile</a>&gt;
 </code></pre>
 
 

@@ -1,10 +1,5 @@
 [package]
-name = "bit-field"
+name = "bit_field"
 edition = "2024"
 license = "MIT"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
-
-[dependencies]
-
-[addresses]
-bit_field = "0x0"

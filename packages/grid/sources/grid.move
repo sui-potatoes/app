@@ -29,8 +29,8 @@
 /// Using a different type would not bring any benefits to the implementation.
 module grid::grid;
 
-use grid::cell::Cell;
-use std::{macros::{num_diff, num_max}, string::String};
+use grid::{cell::Cell, macros::{num_diff, num_max}};
+use std::string::String;
 use sui::bcs::BCS;
 
 /// Vector length is incorrect during initialization.

@@ -23,7 +23,7 @@ jobs:
             - run: suiup install sui -y; suiup install mvr -y
             - run: sui --version; mvr --version; mvr search @potatoes
             - run: ls -d ./*/ | xargs -I {} bash -c "sui move build --path '{}'"
-            - run: ls -d ./*/ | xargs -I {} bash -c "sui move test --path '{}'"
+            - run: ls -d ./*/ | xargs -I {} bash -c "sui move test -i 10000000000 --path '{}'"
 
     prettier-move:
         name: Check Move formatting

@@ -17,24 +17,17 @@
 -  [Function `play`](#go_game_game_play)
 -  [Function `quit`](#go_game_game_quit)
 -  [Function `wrap_up`](#go_game_game_wrap_up)
+-  [Function `delete`](#go_game_game_delete)
 -  [Function `board_state`](#go_game_game_board_state)
 -  [Function `init`](#go_game_game_init)
 
 
-<pre><code><b>use</b> (codec=0x0)::base64;
-<b>use</b> (codec=0x0)::urlencode;
-<b>use</b> (grid=0x0)::cell;
-<b>use</b> (grid=0x0)::grid;
-<b>use</b> (svg=0x0)::animation;
-<b>use</b> (svg=0x0)::container;
-<b>use</b> (svg=0x0)::coordinate;
-<b>use</b> (svg=0x0)::desc;
-<b>use</b> (svg=0x0)::filter;
-<b>use</b> (svg=0x0)::print;
-<b>use</b> (svg=0x0)::shape;
-<b>use</b> (svg=0x0)::svg;
+<pre><code><b>use</b> <a href="../../.doc-deps/codec/base64.md#codec_base64">codec::base64</a>;
+<b>use</b> <a href="../../.doc-deps/codec/urlencode.md#codec_urlencode">codec::urlencode</a>;
 <b>use</b> <a href="./go.md#go_game_go">go_game::go</a>;
 <b>use</b> <a href="./render.md#go_game_render">go_game::render</a>;
+<b>use</b> <a href="../../.doc-deps/grid/cell.md#grid_cell">grid::cell</a>;
+<b>use</b> <a href="../../.doc-deps/grid/grid.md#grid_grid">grid::grid</a>;
 <b>use</b> <a href="../../.doc-deps/std/address.md#std_address">std::address</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
@@ -44,11 +37,15 @@
 <b>use</b> <a href="../../.doc-deps/std/u16.md#std_u16">std::u16</a>;
 <b>use</b> <a href="../../.doc-deps/std/u32.md#std_u32">std::u32</a>;
 <b>use</b> <a href="../../.doc-deps/std/vector.md#std_vector">std::vector</a>;
+<b>use</b> <a href="../../.doc-deps/sui/accumulator.md#sui_accumulator">sui::accumulator</a>;
+<b>use</b> <a href="../../.doc-deps/sui/accumulator_settlement.md#sui_accumulator_settlement">sui::accumulator_settlement</a>;
 <b>use</b> <a href="../../.doc-deps/sui/address.md#sui_address">sui::address</a>;
 <b>use</b> <a href="../../.doc-deps/sui/bcs.md#sui_bcs">sui::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/sui/clock.md#sui_clock">sui::clock</a>;
 <b>use</b> <a href="../../.doc-deps/sui/display.md#sui_display">sui::display</a>;
+<b>use</b> <a href="../../.doc-deps/sui/dynamic_field.md#sui_dynamic_field">sui::dynamic_field</a>;
 <b>use</b> <a href="../../.doc-deps/sui/event.md#sui_event">sui::event</a>;
+<b>use</b> <a href="../../.doc-deps/sui/hash.md#sui_hash">sui::hash</a>;
 <b>use</b> <a href="../../.doc-deps/sui/hex.md#sui_hex">sui::hex</a>;
 <b>use</b> <a href="../../.doc-deps/sui/object.md#sui_object">sui::object</a>;
 <b>use</b> <a href="../../.doc-deps/sui/package.md#sui_package">sui::package</a>;
@@ -58,6 +55,14 @@
 <b>use</b> <a href="../../.doc-deps/sui/types.md#sui_types">sui::types</a>;
 <b>use</b> <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map">sui::vec_map</a>;
 <b>use</b> <a href="../../.doc-deps/sui/vec_set.md#sui_vec_set">sui::vec_set</a>;
+<b>use</b> <a href="../../.doc-deps/svg/animation.md#svg_animation">svg::animation</a>;
+<b>use</b> <a href="../../.doc-deps/svg/container.md#svg_container">svg::container</a>;
+<b>use</b> <a href="../../.doc-deps/svg/coordinate.md#svg_coordinate">svg::coordinate</a>;
+<b>use</b> <a href="../../.doc-deps/svg/desc.md#svg_desc">svg::desc</a>;
+<b>use</b> <a href="../../.doc-deps/svg/filter.md#svg_filter">svg::filter</a>;
+<b>use</b> <a href="../../.doc-deps/svg/print.md#svg_print">svg::print</a>;
+<b>use</b> <a href="../../.doc-deps/svg/shape.md#svg_shape">svg::shape</a>;
+<b>use</b> <a href="../../.doc-deps/svg/svg.md#svg_svg">svg::svg</a>;
 </code></pre>
 
 
@@ -191,6 +196,18 @@ A single instance of the game.
  The SVG representation of the board.
  Updated on every move. Purely for demonstration purposes!
 </dd>
+<dt>
+<code>created_at: u64</code>
+</dt>
+<dd>
+ The time the game was created.
+</dd>
+<dt>
+<code>joined_at: <a href="../../.doc-deps/std/option.md#std_option_Option">std::option::Option</a>&lt;u64&gt;</code>
+</dt>
+<dd>
+ The time the second player joined the game.
+</dd>
 </dl>
 
 
@@ -308,7 +325,7 @@ Keep the Account at the sender's address.
 Start a new Game.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_new">new</a>(acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">go_game::game::Account</a>, size: u8, ctx: &<b>mut</b> <a href="../../.doc-deps/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_new">new</a>(acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">go_game::game::Account</a>, size: u8, clock: &<a href="../../.doc-deps/sui/clock.md#sui_clock_Clock">sui::clock::Clock</a>, ctx: &<b>mut</b> <a href="../../.doc-deps/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
 </code></pre>
 
 
@@ -317,7 +334,7 @@ Start a new Game.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_new">new</a>(acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">Account</a>, size: u8, ctx: &<b>mut</b> TxContext) {
+<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_new">new</a>(acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">Account</a>, size: u8, clock: &Clock, ctx: &<b>mut</b> TxContext) {
     <b>assert</b>!(size == 9 || size == 13 || size == 19, <a href="./game.md#go_game_game_EInvalidSize">EInvalidSize</a>);
     <b>let</b> id = object::new(ctx);
     <b>let</b> board = <a href="./go.md#go_game_go_new">go::new</a>(size <b>as</b> u16);
@@ -327,6 +344,8 @@ Start a new Game.
         board: <a href="./go.md#go_game_go_new">go::new</a>(size <b>as</b> u16),
         players: <a href="./game.md#go_game_game_Players">Players</a>(option::some(acc.id.to_inner()), option::none()),
         image_blob: board.to_svg().to_url(),
+        created_at: clock.timestamp_ms(),
+        joined_at: option::none(),
     });
 }
 </code></pre>
@@ -342,7 +361,7 @@ Start a new Game.
 Join an existing game. The game must not be full.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_join">join</a>(<a href="./game.md#go_game_game">game</a>: &<b>mut</b> <a href="./game.md#go_game_game_Game">go_game::game::Game</a>, acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">go_game::game::Account</a>, ctx: &<b>mut</b> <a href="../../.doc-deps/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_join">join</a>(<a href="./game.md#go_game_game">game</a>: &<b>mut</b> <a href="./game.md#go_game_game_Game">go_game::game::Game</a>, acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">go_game::game::Account</a>, clock: &<a href="../../.doc-deps/sui/clock.md#sui_clock_Clock">sui::clock::Clock</a>, ctx: &<b>mut</b> <a href="../../.doc-deps/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
 </code></pre>
 
 
@@ -351,12 +370,15 @@ Join an existing game. The game must not be full.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_join">join</a>(<a href="./game.md#go_game_game">game</a>: &<b>mut</b> <a href="./game.md#go_game_game_Game">Game</a>, acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">Account</a>, ctx: &<b>mut</b> TxContext) {
+<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_join">join</a>(<a href="./game.md#go_game_game">game</a>: &<b>mut</b> <a href="./game.md#go_game_game_Game">Game</a>, acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">Account</a>, clock: &Clock, ctx: &<b>mut</b> TxContext) {
     <b>let</b> <a href="./game.md#go_game_game_Players">Players</a>(p1, p2) = &<b>mut</b> <a href="./game.md#go_game_game">game</a>.players;
-    <b>assert</b>!(p1.borrow() != acc.id.as_inner(), <a href="./game.md#go_game_game_EGameFull">EGameFull</a>);
     <b>assert</b>!(p2.is_none(), <a href="./game.md#go_game_game_EGameFull">EGameFull</a>);
+    // <b>if</b> this is my <a href="./game.md#go_game_game">game</a>, I can <a href="./game.md#go_game_game_join">join</a> it solo
+    <b>if</b> (p1.is_some_and!(|p| p != acc.id.to_inner())) {
+        acc.games.insert(<a href="./game.md#go_game_game">game</a>.id.to_inner());
+    };
+    <a href="./game.md#go_game_game">game</a>.joined_at = option::some(clock.timestamp_ms());
     p2.fill(acc.id.to_inner());
-    acc.games.insert(<a href="./game.md#go_game_game">game</a>.id.to_inner());
 }
 </code></pre>
 
@@ -443,7 +465,7 @@ Join an existing game. The game must not be full.
 Wrap up the game if the second player has left.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_wrap_up">wrap_up</a>(<a href="./game.md#go_game_game">game</a>: <a href="./game.md#go_game_game_Game">go_game::game::Game</a>, acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">go_game::game::Account</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_wrap_up">wrap_up</a>(<a href="./game.md#go_game_game">game</a>: <a href="./game.md#go_game_game_Game">go_game::game::Game</a>, acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">go_game::game::Account</a>, _ctx: &<b>mut</b> <a href="../../.doc-deps/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
 </code></pre>
 
 
@@ -452,14 +474,48 @@ Wrap up the game if the second player has left.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_wrap_up">wrap_up</a>(<a href="./game.md#go_game_game">game</a>: <a href="./game.md#go_game_game_Game">Game</a>, acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">Account</a>) {
-    <b>let</b> <a href="./game.md#go_game_game_Game">Game</a> { id, board: _, players, image_blob: _ } = <a href="./game.md#go_game_game">game</a>;
+<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_wrap_up">wrap_up</a>(<a href="./game.md#go_game_game">game</a>: <a href="./game.md#go_game_game_Game">Game</a>, acc: &<b>mut</b> <a href="./game.md#go_game_game_Account">Account</a>, _ctx: &<b>mut</b> TxContext) {
+    <b>let</b> <a href="./game.md#go_game_game_Game">Game</a> { id, players, .. } = <a href="./game.md#go_game_game">game</a>;
     <b>let</b> <a href="./game.md#go_game_game_Players">Players</a>(p1, p2) = players;
+    <b>let</b> my_id = acc.id.as_inner();
+    // I am playing with myself, I can wrap up the <a href="./game.md#go_game_game">game</a>
+    <b>if</b> (p1.is_some_and!(|p| p == my_id) && p2.is_some_and!(|p| p == my_id)) {
+        acc.games.remove(id.as_inner());
+        id.<a href="./game.md#go_game_game_delete">delete</a>();
+        <b>return</b>
+    };
     // one of the players must have left already
     <b>assert</b>!(p1.is_none() || p2.is_none(), <a href="./game.md#go_game_game_EQuitFirst">EQuitFirst</a>);
     <b>if</b> (p2.is_some()) acc.games.remove(id.as_inner());
     <b>if</b> (p1.is_some()) acc.games.remove(id.as_inner());
-    id.delete();
+    id.<a href="./game.md#go_game_game_delete">delete</a>();
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="go_game_game_delete"></a>
+
+## Function `delete`
+
+Delete the account. Has to leave all games first.
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_delete">delete</a>(account: <a href="./game.md#go_game_game_Account">go_game::game::Account</a>, _ctx: &<b>mut</b> <a href="../../.doc-deps/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./game.md#go_game_game_delete">delete</a>(account: <a href="./game.md#go_game_game_Account">Account</a>, _ctx: &<b>mut</b> TxContext) {
+    <b>let</b> <a href="./game.md#go_game_game_Account">Account</a> { id, games } = account;
+    <b>assert</b>!(games.is_empty(), <a href="./game.md#go_game_game_EQuitFirst">EQuitFirst</a>);
+    id.<a href="./game.md#go_game_game_delete">delete</a>();
 }
 </code></pre>
 
