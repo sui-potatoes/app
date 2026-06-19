@@ -74,8 +74,8 @@ export class Game extends THREE.Object3D {
 
         for (let x = 0; x < size; x++) {
             for (let z = 0; z < size; z++) {
-                let mapTile = map.grid[x][z];
-                let unit = mapTile.unit;
+                const mapTile = map.grid[x][z];
+                const unit = mapTile.unit;
 
                 if (mapTile.tile_type.$kind == "Unwalkable") {
                     game.grid.setCell(x, z, { type: "Unwalkable", unit: null });
@@ -97,7 +97,7 @@ export class Game extends THREE.Object3D {
                         unit.ap.value = unit.ap.max_value;
                     }
 
-                    let unitObj = new Unit(unit, models.the_dude!, x, z);
+                    const unitObj = new Unit(unit, models.the_dude!, x, z);
                     game.addUnit(unitObj);
                 }
             }
@@ -296,7 +296,7 @@ export class Game extends THREE.Object3D {
         }
 
         // update all units
-        for (let id in this.units) {
+        for (const id in this.units) {
             this.units[id].update(delta);
         }
     }

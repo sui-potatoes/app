@@ -38,7 +38,7 @@ export class AnimationPlayer {
 
         action.timeScale = timeScale;
         action.reset();
-        fadeIn == 0 && this.mixer.stopAllAction();
+        if (fadeIn == 0) this.mixer.stopAllAction();
 
         if (this.currentAction) {
             this.currentAction.setLoop(THREE.LoopOnce, 1);

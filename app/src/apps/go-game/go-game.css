@@ -1,37 +1,62 @@
 @reference "../../index.css";
 
-svg circle {
-    stroke: var(--border-color);
+/* Grid lines and star points use the muted grid tone. */
+svg .grid-line {
+    stroke: var(--grid-color);
+}
+
+svg .star-point {
+    fill: var(--grid-color);
+    stroke: none;
+}
+
+svg .cell {
+    stroke: var(--grid-color);
 }
 
 .dark-theme svg .black {
-    stroke: #fff;
+    stroke: #3a3a3a;
     stroke-width: 1px;
 }
 
 svg .black {
-    fill: #000;
+    fill: #111;
 }
 svg .white {
-    fill: #fff;
+    fill: #fafafa;
+    stroke: var(--grid-color);
 }
 svg .empty {
     opacity: 0;
+    /* Resting fill must be transparent, NOT the UA default (black). The ghost
+     * preview fades out via the 0.1s opacity transition on `.cell`, but `fill`
+     * is not transitioned — so on mouse-leave it snaps back instantly. With a
+     * default-black fill, a white player's ghost flashed black for ~100ms as it
+     * faded ("preview briefly turns the enemy's colour"). Transparent never
+     * exposes a colour during the fade. */
+    fill: transparent;
 }
 svg {
     margin-left: auto;
     margin-right: auto;
 }
 
+/* Center-dot last-move marker — legible on either stone colour. */
 svg .last-move {
-    stroke: var(--accent-color) !important;
-    stroke-width: 2px;
+    pointer-events: none;
+    stroke: none;
+}
+svg .last-move.on-black {
+    fill: #fafafa;
+}
+svg .last-move.on-white {
+    fill: #111;
 }
 
 .spinner {
     position: fixed;
-    top: 14px;
-    right: 16px;
+    bottom: 16px;
+    right: 18px;
     width: 14px;
     height: 14px;
     border-radius: 50%;
@@ -42,29 +67,47 @@ svg .last-move {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .cell {
+    transition: opacity 0.1s ease;
+}
+
+/* Only empty intersections invite a click; occupied points are inert so
+ * hovering an existing stone never looks like a placement preview. */
+.empty {
     cursor: pointer;
 }
 
-.dark-theme .black:not(.disabled) .empty:hover {
-    stroke: #fff;
-    stroke-width: 1px;
+svg .black.cell,
+svg .white.cell {
+    cursor: default;
 }
 
-.white:not(.disabled) .empty:hover {
-    background-color: #fff;
-    fill: #fff;
-    opacity: 0.5;
+/* Ghost stone: a translucent preview of the colour to play, shown only on
+ * empty intersections. The colour comes from the board's *turn* flag
+ * (`to-move-*` on the <svg>), never from the stone under the cursor — the
+ * `to-move-*` names are deliberately distinct from the `.black`/`.white`
+ * stone classes so the two can never collide. */
+svg.to-move-white:not(.disabled) .cell.empty:hover {
+    fill: #fafafa;
+    stroke: var(--grid-color);
+    opacity: 0.4;
 }
 
-.black:not(.disabled) .empty:hover {
-    background-color: #fff;
-    fill: #000;
-    border: #000;
-    opacity: 0.5;
+svg.to-move-black:not(.disabled) .cell.empty:hover {
+    fill: #111;
+    opacity: 0.4;
+}
+
+/* Hard guarantee: an occupied point is never previewed. Hovering an existing
+ * stone keeps it fully opaque in its own colour, whatever the turn is. */
+svg .cell.black:hover,
+svg .cell.white:hover {
+    opacity: 1;
 }
 
 .disabled .cell {
@@ -118,25 +161,31 @@ svg.disabled {
 
 .my-games {
     list-style: none;
-    padding: 0 10px;
+    padding: 0;
 }
 
 .my-games li::before {
-    content: "// ";
+    content: "›";
+    color: var(--text-secondary);
+    margin-right: 8px;
+    transition: color 0.15s ease;
+}
+
+.my-games li:hover::before {
     color: var(--accent-color);
 }
 
 .my-games li,
 .my-games li a {
-    margin: 10px 0;
+    margin: 4px 0;
     text-decoration: none;
     color: var(--text-color);
     font-family: monospace;
     font-size: 14px;
+    transition: color 0.15s ease;
 }
 
-.my-games li:hover,
-.my-games li:hover a {
+.my-games li a:hover {
     cursor: pointer;
     color: var(--accent-color);
 }

@@ -29,7 +29,7 @@ export function pathToCoordinates(path: number[]): [number, number][] {
     }
 
     while (path.length) {
-        let direction = path.shift()!;
+        const direction = path.shift()!;
         if (direction == UP) cursor.x--;
         if (direction == RIGHT) cursor.y++;
         if (direction == DOWN) cursor.x++;

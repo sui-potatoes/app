@@ -1,15 +1,21 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClientQuery } from "@mysten/dapp-kit";
+import { useCurrentClient } from "@mysten/dapp-kit-react";
+import { useQuery } from "@tanstack/react-query";
 import { COMMANDER_BASE_NAME } from "../../../constants";
 
 export function useSuinsName({ address }: { address?: string }) {
-    const { data: names } = useSuiClientQuery(
-        "resolveNameServiceNames",
-        { address: address! },
-        { enabled: !!address },
-    );
+    const client = useCurrentClient();
+    const { data: name } = useQuery({
+        queryKey: ["suins-name", address],
+        enabled: !!address,
+        queryFn: () =>
+            client.core
+                .defaultNameServiceName({ address: address! })
+                .then(({ data }) => data.name ?? null)
+                .catch(() => null),
+    });
 
-    return names?.data.find((n) => n.includes(COMMANDER_BASE_NAME))?.split(".")[0];
+    return name?.includes(COMMANDER_BASE_NAME) ? name.split(".")[0] : undefined;
 }

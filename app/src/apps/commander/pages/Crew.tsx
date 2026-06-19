@@ -3,14 +3,14 @@
 
 import { NavLink } from "react-router-dom";
 import { Transaction } from "@mysten/sui/transactions";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
-import { useNetworkVariable } from "../../../networkConfig";
-import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { COMMANDER_V2_PACKAGE_ID as packageId } from "../../../constants";
+import { ObjectRef } from "../../../hooks/useBcsObjects";
+import { useTransactionExecutor } from "../../../hooks/useTransactionExecutor";
+import { ExecutedTransaction } from "../hooks/useGameTransactions";
 import { useRecruits, Recruit } from "../hooks/useRecruits";
-import { useSuiClient } from "@mysten/dapp-kit";
 import { normalizeSuiAddress } from "@mysten/sui/utils";
-import { useNameGenerator } from "../hooks/useNameGenerator";
-import { SuiObjectRef, SuiTransactionBlockResponse } from "@mysten/sui/client";
+import { generateRecruitName } from "../utils/nameGenerator";
 import { Footer, Modal, StatRecord, Loader } from "./Components";
 import { useState } from "react";
 import { Armor, useArmor } from "../hooks/useArmor";
@@ -49,37 +49,30 @@ export const RECRUIT_STATS: StatRecord[] = [
 ];
 
 export function Crew() {
-    const flow = useEnokiFlow();
-    const zkLogin = useZkLogin();
-    const client = useSuiClient();
+    const account = useCurrentAccount();
+    const address = account?.address;
     const [showModal, setShowModal] = useState<"armor" | "weapon" | false>(false);
     const [selected, setSelected] = useState<Recruit | undefined>();
-    const packageId = useNetworkVariable("commanderV2PackageId");
     const {
         data: recruits,
         refetch,
         isPending,
-    } = useRecruits({ owner: zkLogin.address!, enabled: !!zkLogin.address });
+    } = useRecruits({ owner: address!, enabled: !!address });
 
     const {
         data: weapons,
         refetch: refetchWeapons,
         isPending: weaponsFetching,
-    } = useWeapons({ address: zkLogin.address, unique: true });
+    } = useWeapons({ address, unique: true });
 
     const {
         data: armors,
         refetch: refetchArmors,
         isPending: armorsFetching,
-    } = useArmor({ address: zkLogin.address, unique: true });
+    } = useArmor({ address, unique: true });
 
-    const { executeTransaction, isExecuting } = useTransactionExecutor({
-        // @ts-ignore
-        client,
-        signer: () => flow.getKeypair({ network: "testnet" }),
-        enabled: !!zkLogin.address,
-    });
-    const canTransact = !!zkLogin.address && !!executeTransaction;
+    const { executeTransaction, isExecuting } = useTransactionExecutor();
+    const canTransact = !!address && !!executeTransaction;
 
     if (weapons && selected?.weapon) weapons.unshift(selected.weapon as Weapon);
     if (armors && selected?.armor && !armors.some((a) => a.name == selected.armor?.name)) {
@@ -309,11 +302,11 @@ export function Crew() {
                                             (isSelected ? " selected" : "")
                                         }
                                         key={w.objectId}
-                                        onClick={() => {
+                                        onClick={() =>
                                             isSelected
                                                 ? removeWeapon(selected!)
-                                                : addWeapon(selected!, w);
-                                        }}
+                                                : addWeapon(selected!, w)
+                                        }
                                     >
                                         <label className="text-xl mb-10">
                                             {w.name}
@@ -362,11 +355,11 @@ export function Crew() {
      *  UI while the name is being generated and the transaction is being process.
      */
     async function hireRecruit() {
-        if (!zkLogin.address) throw new Error("Not signed in");
+        if (!address) throw new Error("Not signed in");
         if (!executeTransaction) throw new Error("No transaction executor");
         if (isExecuting) throw new Error("Already executing a transaction");
 
-        const { name, backstory } = await useNameGenerator();
+        const { name, backstory } = generateRecruitName();
 
         const tx = new Transaction();
         const recruit = tx.moveCall({
@@ -374,7 +367,7 @@ export function Crew() {
             arguments: [tx.pure.string(name), tx.pure.string(backstory)],
         });
 
-        tx.transferObjects([recruit], zkLogin.address);
+        tx.transferObjects([recruit], address);
 
         await executeTransaction(tx);
         setTimeout(() => refetch(), 1000);
@@ -385,8 +378,8 @@ export function Crew() {
      * @param id
      * @returns
      */
-    async function dismissRecruit(recruit: SuiObjectRef) {
-        if (!zkLogin.address) throw new Error("Not signed in");
+    async function dismissRecruit(recruit: ObjectRef) {
+        if (!address) throw new Error("Not signed in");
         if (!executeTransaction) throw new Error("No transaction executor");
         if (isExecuting) throw new Error("Already executing a transaction");
         if (!confirm("Are you sure you want to dismiss a recruit?")) return;
@@ -411,14 +404,14 @@ export function Crew() {
 
         await executeTransaction(tx);
         const removedIdx = recruits?.findIndex((r) => r.id == recruit.objectId);
-        removedIdx && recruits?.splice(removedIdx, 1);
+        if (removedIdx !== undefined && removedIdx >= 0) recruits!.splice(removedIdx, 1);
         setSelected(undefined);
         setTimeout(() => refetch(), 1000);
     }
 
     /** Adds Armor to the Recruit */
     async function addArmor(r: Recruit, a: Armor) {
-        if (!zkLogin.address) throw new Error("Not signed in");
+        if (!address) throw new Error("Not signed in");
         if (!executeTransaction) throw new Error("No transaction executor");
         if (isExecuting) throw new Error("Already executing a transaction");
         if (!selected) throw new Error("Recruit has to be selected");
@@ -432,7 +425,7 @@ export function Crew() {
                 arguments: [recruitArg],
             });
 
-            tx.transferObjects([armor], zkLogin.address);
+            tx.transferObjects([armor], address);
         }
 
         tx.moveCall({
@@ -440,8 +433,7 @@ export function Crew() {
             arguments: [recruitArg, tx.objectRef(a)],
         });
 
-        const { data } = await executeTransaction(tx);
-        updateRef(data);
+        updateRef(await executeTransaction(tx));
 
         setTimeout(() => {
             refetchArmors();
@@ -453,7 +445,7 @@ export function Crew() {
 
     /** Removes Armor from the Recruit */
     async function removeArmor(r: Recruit) {
-        if (!zkLogin.address) throw new Error("Not signed in");
+        if (!address) throw new Error("Not signed in");
         if (!executeTransaction) throw new Error("No transaction executor");
         if (isExecuting) throw new Error("Already executing a transaction");
         if (!selected) throw new Error("Recruit has to be selected");
@@ -464,10 +456,9 @@ export function Crew() {
             arguments: [tx.objectRef(r)],
         });
 
-        tx.transferObjects([armor], zkLogin.address);
+        tx.transferObjects([armor], address);
 
-        const { data } = await executeTransaction(tx);
-        updateRef(data);
+        updateRef(await executeTransaction(tx));
 
         setTimeout(() => {
             refetchArmors();
@@ -479,7 +470,7 @@ export function Crew() {
 
     /** Adds Weapon to the Recruit */
     async function addWeapon(r: Recruit, w: Weapon) {
-        if (!zkLogin.address) throw new Error("Not signed in");
+        if (!address) throw new Error("Not signed in");
         if (!executeTransaction) throw new Error("No transaction executor");
         if (isExecuting) throw new Error("Already executing a transaction");
         if (!selected) throw new Error("Recruit has to be selected");
@@ -493,7 +484,7 @@ export function Crew() {
                 arguments: [recruitArg],
             });
 
-            tx.transferObjects([weapon], zkLogin.address);
+            tx.transferObjects([weapon], address);
         }
 
         tx.moveCall({
@@ -501,8 +492,7 @@ export function Crew() {
             arguments: [recruitArg, tx.objectRef(w)],
         });
 
-        const { data } = await executeTransaction(tx);
-        updateRef(data);
+        updateRef(await executeTransaction(tx));
 
         setTimeout(() => {
             refetchWeapons();
@@ -513,7 +503,7 @@ export function Crew() {
     }
 
     async function removeWeapon(r: Recruit) {
-        if (!zkLogin.address) throw new Error("Not signed in");
+        if (!address) throw new Error("Not signed in");
         if (!executeTransaction) throw new Error("No transaction executor");
         if (isExecuting) throw new Error("Already executing a transaction");
         if (!selected) throw new Error("Recruit has to be selected");
@@ -524,10 +514,9 @@ export function Crew() {
             arguments: [tx.objectRef(r)],
         });
 
-        tx.transferObjects([weapon], zkLogin.address);
+        tx.transferObjects([weapon], address);
 
-        const { data } = await executeTransaction(tx);
-        updateRef(data);
+        updateRef(await executeTransaction(tx));
 
         setTimeout(() => {
             refetchWeapons();
@@ -537,20 +526,16 @@ export function Crew() {
         setShowModal(false);
     }
 
-    function updateRef(data?: SuiTransactionBlockResponse) {
+    function updateRef(result: ExecutedTransaction) {
         if (!selected) return;
-        if (!data) throw new Error("Expected transaction data");
-        if (!data.objectChanges) throw new Error("Expected object changes");
 
-        const objectId = selected.objectId;
-        const newRef = data.objectChanges.find(
-            (c) => c.type === "mutated" && c.objectId == objectId,
-        ) as SuiObjectRef | undefined;
+        const changed = result.effects.changedObjects.find(
+            (c) => c.objectId === selected.objectId && c.outputState === "ObjectWrite",
+        );
 
-        if (!newRef) throw new Error("Expected new object reference");
+        if (!changed) throw new Error("Expected new object reference");
 
-        selected.objectId = newRef.objectId;
-        selected.version = newRef.version;
-        selected.digest = newRef.digest;
+        selected.version = changed.outputVersion!;
+        selected.digest = changed.outputDigest!;
     }
 }

@@ -35,10 +35,9 @@ export function Param({ name, disabled, defaultValue, values, isColour, onChange
                         if (disabled) return;
                         const newIdx = idx === 0 ? values.length - 1 : idx - 1;
                         setIdx(newIdx);
-                        onChange && onChange(values[newIdx]);
+                        onChange?.(values[newIdx]);
                     }}
-                    className="disabled:opacity-70"
-                    style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
+                    className="disabled:opacity-70 text-accent uppercase"
                     disabled={disabled}
                 >
                     {"‹"}
@@ -53,10 +52,9 @@ export function Param({ name, disabled, defaultValue, values, isColour, onChange
                         if (disabled) return;
                         const newIdx = idx === values.length - 1 ? 0 : idx + 1;
                         setIdx(newIdx);
-                        onChange && onChange(values[newIdx]);
+                        onChange?.(values[newIdx]);
                     }}
-                    className="disabled:opacity-70"
-                    style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
+                    className="disabled:opacity-70 text-accent uppercase"
                     disabled={disabled}
                 >
                     {"›"}

@@ -80,7 +80,7 @@ export const Stats = bcs.u128().transform({
         };
 
         // additionally process i8 values encoded in the stats
-        for (let key in asObject) {
+        for (const key in asObject) {
             if (typeof asObject[key] == "number" && asObject[key] > 128) {
                 asObject[key] = 128 - asObject[key];
             }
@@ -192,7 +192,7 @@ export const Game = bcs
     })
     .transform({
         output(game) {
-            let recruits: string[] = [];
+            const recruits: string[] = [];
             game.map.grid.forEach((row) => {
                 row.forEach((cell) => {
                     if (cell.unit) recruits.push(cell.unit.recruit);

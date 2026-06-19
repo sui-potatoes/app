@@ -53,7 +53,7 @@ export class ShootMode implements Mode {
             // can't aim at yourself
             if (unit.id === selectedUnit.id) return false;
 
-            let hitChance = chance(selectedUnit, unit);
+            const hitChance = chance(selectedUnit, unit);
             if (hitChance === 0) return false;
 
             // TODO: in the future, add team tags
@@ -101,8 +101,8 @@ export class ShootMode implements Mode {
 
         // unsubscribe from the UI events
         (this.mode as ShootMode).currentTarget?.removeTarget();
-        mode._nextCb && this.eventBus?.removeEventListener("ui:next_target", mode._nextCb);
-        mode._prevCb && this.eventBus?.removeEventListener("ui:prev_target", mode._prevCb);
+        if (mode._nextCb) this.eventBus?.removeEventListener("ui:next_target", mode._nextCb);
+        if (mode._prevCb) this.eventBus?.removeEventListener("ui:prev_target", mode._prevCb);
         mode._nextCb = null;
         mode._prevCb = null;
 
@@ -263,8 +263,8 @@ function damage(unit: Unit | null): [number, number] {
     if (!unit) return [0, 0];
     const stats = unit.props.stats;
 
-    let damage_low = stats.damage - stats.spread;
-    let damage_high = stats.damage + stats.spread + (stats.plus_one ? 1 : 0);
+    const damage_low = stats.damage - stats.spread;
+    const damage_high = stats.damage + stats.spread + (stats.plus_one ? 1 : 0);
 
     return [damage_low, damage_high];
 }
@@ -374,11 +374,11 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
 function chance(unit: Unit | null, target: Unit | null): number {
     if (!unit || !target) return 0;
 
-    let aim = unit.props.stats.aim;
-    let distance =
+    const aim = unit.props.stats.aim;
+    const distance =
         Math.abs(unit.gridPosition.x - target.gridPosition.x) +
         Math.abs(unit.gridPosition.y - target.gridPosition.y);
-    let eff_range = unit.props.stats.range;
+    const eff_range = unit.props.stats.range;
 
     if (distance == eff_range) return aim;
     if (distance < eff_range) return aim + (eff_range - distance) * CLOSE_DISTANCE_MODIFIER;

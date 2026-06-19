@@ -1,6 +1,27 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+import type { SuiClientTypes } from "@mysten/sui/client";
+
+/** Thrown when a transaction simulation (dry-run) fails before execution. */
+export class SimulationError extends Error {
+    constructor(public readonly error: SuiClientTypes.ExecutionError | null) {
+        super(error?.message || "Transaction simulation failed");
+    }
+
+    /** `[module, function, abortCode]` when the failure is a Move abort. */
+    get abortInfo(): [string, string, number] | null {
+        const abort = this.error?.MoveAbort;
+        if (!abort) return null;
+
+        return [
+            abort.location?.module || "unknown",
+            abort.location?.functionName || "unknown",
+            Number(abort.abortCode),
+        ];
+    }
+}
+
 /** Maps abort codes from each module to a text message */
 export function vmAbortCodeToMessage(mod: string, fun: string, code: number) {
     let errorName = code.toString();

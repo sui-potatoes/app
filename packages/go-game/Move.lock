@@ -5,43 +5,37 @@
 version = 4
 
 [pinned.testnet.MoveStdlib]
-source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "b38bca86f0323b3fe8b6b7f4ca0cd7ae7faebe4b" }
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "718ae563a42fb4ba0d055588f81c704dcef58c25" }
 use_environment = "testnet"
 manifest_digest = "C4FE4C91DE74CBF223B2E380AE40F592177D21870DC2D7EB6227D2D694E05363"
 deps = {}
 
 [pinned.testnet.Sui]
-source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "b38bca86f0323b3fe8b6b7f4ca0cd7ae7faebe4b" }
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "718ae563a42fb4ba0d055588f81c704dcef58c25" }
 use_environment = "testnet"
 manifest_digest = "7AFB66695545775FBFBB2D3078ADFD084244D5002392E837FDE21D9EA1C6D01C"
 deps = { MoveStdlib = "MoveStdlib" }
 
 [pinned.testnet.ascii]
-source = { local = "../ascii" }
+source = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/ascii", rev = "f900cd51282a0ebc1fc3925f4fdd996bc207a7f6" }
 use_environment = "testnet"
 manifest_digest = "5745706258F61D6CE210904B3E6AE87A73CE9D31A6F93BE4718C442529332A87"
 deps = { std = "MoveStdlib", sui = "Sui" }
 
 [pinned.testnet.codec]
-source = { local = "../codec" }
+source = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/codec", rev = "081771a284c894c90707b913e19d877f34c7d460" }
 use_environment = "testnet"
-manifest_digest = "E22EB6C08F1816CA5736191C632FFAD87A1510FFA286FB6B4C623DCFC4CF9E14"
+manifest_digest = "624D41042F5F47193828DAC045952B3FE07852A914B46C6075691767CE20EFE7"
 deps = { ascii = "ascii", std = "MoveStdlib", sui = "Sui" }
 
 [pinned.testnet.go_game]
 source = { root = true }
 use_environment = "testnet"
-manifest_digest = "317A967F175F59DEC0711715581414A5A06AC36857D7FFCC545CC36A1C37FBBE"
-deps = { codec = "codec", grid = "grid", std = "MoveStdlib", sui = "Sui", svg = "svg" }
+manifest_digest = "530160CCE5BC90ED273E558D616C2A4F21578FA2401F0F16BCDFC4F61A6D0BAA"
+deps = { codec = "codec", grid = "grid", std = "MoveStdlib", sui = "Sui" }
 
 [pinned.testnet.grid]
-source = { local = "../grid" }
+source = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/grid", rev = "8886d4dbd9a15483f04185f1daaf5992eaef26e4" }
 use_environment = "testnet"
 manifest_digest = "5745706258F61D6CE210904B3E6AE87A73CE9D31A6F93BE4718C442529332A87"
 deps = { std = "MoveStdlib", sui = "Sui" }
-
-[pinned.testnet.svg]
-source = { local = "../svg" }
-use_environment = "testnet"
-manifest_digest = "76BF4E990C75D452D7BE8920334ADEA08DBF217C2B87E05BF442F5794C654B2A"
-deps = { codec = "codec", std = "MoveStdlib", sui = "Sui" }

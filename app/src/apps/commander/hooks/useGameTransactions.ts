@@ -1,38 +1,41 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useState } from "react";
-import { useNetworkVariable } from "../../../networkConfig";
-import { useNameGenerator } from "./useNameGenerator";
+import { bcs } from "@mysten/bcs";
+import { useCurrentAccount, useCurrentClient } from "@mysten/dapp-kit-react";
+import type { SuiClientTypes } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
-import { GameMap } from "./useGame";
-import { useSuiClient } from "@mysten/dapp-kit";
-import { bcs, fromBase64 } from "@mysten/bcs";
-import { useTransactionExecutor } from "./useTransactionExecutor";
-import { coordinatesToPath } from "../types/cursor";
-import type { SuiObjectRef } from "@mysten/sui/client";
-import { Preset } from "./useMaps";
-import { Host } from "./useHostedGames";
+import { useState } from "react";
+import { COMMANDER_V2_PACKAGE_ID, COMMANDER_V2_REGISTRY_ID } from "../../../constants";
+import { ObjectRef } from "../../../hooks/useBcsObjects";
+import { SimulationError } from "../types/abort-codes";
 import { Game } from "../types/bcs";
+import { coordinatesToPath } from "../types/cursor";
+import { generateRecruitName } from "../utils/nameGenerator";
+import { GameMap } from "./useGame";
+import { Host } from "./useHostedGames";
+import { Preset } from "./useMaps";
+import { useTransactionExecutor } from "../../../hooks/useTransactionExecutor";
 
 export const LS_KEY = "commander-v2";
 
+const PKG = COMMANDER_V2_PACKAGE_ID;
+const REGISTRY = COMMANDER_V2_REGISTRY_ID;
+
+/** Result of an executed transaction with effects, events and object types. */
+export type ExecutedTransaction = SuiClientTypes.Transaction<{
+    effects: true;
+    events: true;
+    objectTypes: true;
+}>;
+
 export function useGameTransactions({ map }: { map: GameMap | null | undefined }) {
-    const zkLogin = useZkLogin();
-    const client = useSuiClient();
-    const flow = useEnokiFlow();
-    const registryId = useNetworkVariable("commanderV2RegistryId");
-    const packageId = useNetworkVariable("commanderV2PackageId");
+    const account = useCurrentAccount();
+    const client = useCurrentClient();
     const [lockedTx, setLockedTx] = useState<Transaction | null>(null);
     const [isChecking, setIsChecking] = useState(false);
-    const { executeTransaction, isExecuting } = useTransactionExecutor({
-        // @ts-ignore
-        client,
-        signer: () => flow.getKeypair({ network: "testnet" }),
-        enabled: !!zkLogin.address,
-    });
-    const canTransact = !!zkLogin.address && !isExecuting && executeTransaction;
+    const { executeTransaction, isExecuting } = useTransactionExecutor();
+    const canTransact = !!account && !isExecuting && !!executeTransaction;
 
     return {
         canTransact,
@@ -57,173 +60,106 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
      * Create a demo map (1 or 2) with the given positions.
      * Add recruits to the given positions.
      */
-    async function createDemo(preset: Preset & SuiObjectRef) {
+    async function createDemo(preset: Preset & ObjectRef) {
         if (!canTransact) return;
 
         const tx = new Transaction();
-        const positions = preset.positions;
-        const registryArg = tx.object(registryId);
+        const registryArg = tx.object(REGISTRY);
         const game = tx.moveCall({
-            target: `${packageId}::commander::new_game`,
+            target: `${PKG}::commander::new_game`,
             arguments: [registryArg, tx.receivingRef(preset)],
         });
 
-        for (let _ of positions) {
-            const { name, backstory } = await useNameGenerator();
-            const recruit = tx.moveCall({
-                target: `${packageId}::recruit::new`,
-                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
-            });
-
+        for (const _ of preset.positions) {
+            const recruit = newRecruit(tx);
             const armor = tx.moveCall({
-                target: `${packageId}::items::armor`,
+                target: `${PKG}::items::armor`,
                 arguments: [tx.pure.u8(1)],
             });
 
-            tx.moveCall({
-                target: `${packageId}::recruit::add_armor`,
-                arguments: [recruit, armor],
-            });
-
-            tx.moveCall({
-                target: `${packageId}::commander::place_recruit`,
-                arguments: [game, recruit],
-            });
+            tx.moveCall({ target: `${PKG}::recruit::add_armor`, arguments: [recruit, armor] });
+            tx.moveCall({ target: `${PKG}::commander::place_recruit`, arguments: [game, recruit] });
         }
 
         // register the game in the Commander object.
         tx.moveCall({
-            target: `${packageId}::commander::register_game`,
+            target: `${PKG}::commander::register_game`,
             arguments: [registryArg, tx.object.clock(), game],
         });
 
-        tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
+        tx.moveCall({ target: `${PKG}::commander::share`, arguments: [game] });
 
-        const res = await executeTransaction(tx);
-        const map = res.data.objectChanges?.find((change) => {
-            return (
-                change.type === "created" && change.objectType === `${packageId}::commander::Game`
-            );
-        });
-
-        if (!map)
-            throw new Error(`Map not found, something is off: ${res.data.effects?.status.error}`);
-        if (map.type !== "created") throw new Error("Map not created, something is off");
-
-        sessionStorage.setItem(LS_KEY, map.objectId);
-        return map;
+        const res = await executeTransaction!(tx);
+        const gameRef = findGameRef(res, "Created");
+        sessionStorage.setItem(LS_KEY, gameRef.objectId);
+        return gameRef;
     }
 
-    async function hostGame(preset: Preset & SuiObjectRef) {
+    async function hostGame(preset: Preset & ObjectRef) {
         if (!canTransact) return;
 
         const tx = new Transaction();
         const game = tx.moveCall({
-            target: `${packageId}::commander::host_game`,
-            arguments: [tx.object(registryId), tx.object.clock(), tx.receivingRef(preset)],
+            target: `${PKG}::commander::host_game`,
+            arguments: [tx.object(REGISTRY), tx.object.clock(), tx.receivingRef(preset)],
         });
 
-        const numRecruits = preset.positions.length;
-        const myRecruits = numRecruits / 2;
-
+        const myRecruits = preset.positions.length / 2;
         for (let i = 0; i < myRecruits; i++) {
-            const { name, backstory } = await useNameGenerator();
-            const recruit = tx.moveCall({
-                target: `${packageId}::recruit::new`,
-                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
-            });
-
-            tx.moveCall({
-                target: `${packageId}::commander::place_recruit`,
-                arguments: [game, recruit],
-            });
+            const recruit = newRecruit(tx);
+            tx.moveCall({ target: `${PKG}::commander::place_recruit`, arguments: [game, recruit] });
         }
 
-        tx.moveCall({ target: `${packageId}::commander::share`, arguments: [game] });
+        tx.moveCall({ target: `${PKG}::commander::share`, arguments: [game] });
 
-        const res = await executeTransaction(tx);
-        const map = res.data.objectChanges?.find((change) => {
-            return (
-                change.type === "created" && change.objectType === `${packageId}::commander::Game`
-            );
-        });
-
-        if (!map)
-            throw new Error(`Map not found, something is off: ${res.data.effects?.status.error}`);
-        if (map.type !== "created") throw new Error("Map not created, something is off");
-
-        sessionStorage.setItem(LS_KEY, map.objectId);
-        return map;
+        const res = await executeTransaction!(tx);
+        const gameRef = findGameRef(res, "Created");
+        sessionStorage.setItem(LS_KEY, gameRef.objectId);
+        return gameRef;
     }
 
     async function joinGame(host: Host) {
         if (!canTransact) return;
 
-        const game = await client.getObject({
-            id: host.gameId,
-            options: { showBcs: true, showOwner: true },
+        const { object } = await client.core.getObject({
+            objectId: host.gameId,
+            include: { content: true },
         });
 
-        if (!game || !game.data || !game.data.bcs || game.data.bcs.dataType !== "moveObject") {
-            throw new Error("Game not found");
-        }
-
-        const parsedGame = Game.parse(fromBase64(game.data.bcs.bcsBytes));
-        const positions = parsedGame.positions;
+        const positions = Game.parse(object.content).positions;
 
         const tx = new Transaction();
         const gameArg = tx.object(host.gameId);
         tx.moveCall({
-            target: `${packageId}::commander::join_game`,
-            arguments: [tx.object(registryId), gameArg, tx.receivingRef(host)],
+            target: `${PKG}::commander::join_game`,
+            arguments: [tx.object(REGISTRY), gameArg, tx.receivingRef(host)],
         });
 
         for (let i = 0; i < positions.length; i++) {
-            const { name, backstory } = await useNameGenerator();
-            const recruit = tx.moveCall({
-                target: `${packageId}::recruit::new`,
-                arguments: [tx.pure.string(name), tx.pure.string(backstory)],
-            });
-
+            const recruit = newRecruit(tx);
             tx.moveCall({
-                target: `${packageId}::commander::place_recruit`,
+                target: `${PKG}::commander::place_recruit`,
                 arguments: [gameArg, recruit],
             });
         }
 
-        tx.setSender(zkLogin.address!);
+        tx.setSender(account!.address);
 
-        const res = await executeTransaction(tx);
-        const map = res.data.objectChanges?.find((change) => {
-            return (
-                change.type === "mutated" && change.objectType === `${packageId}::commander::Game`
-            );
-        });
-
-        if (!map)
-            throw new Error(`Map not found, something is off: ${res.data.effects?.status.error}`);
-        if (map.type !== "mutated") throw new Error("Map not created, something is off");
-
-        sessionStorage.setItem(LS_KEY, map.objectId);
+        const res = await executeTransaction!(tx);
+        const gameRef = findGameRef(res, "None");
+        sessionStorage.setItem(LS_KEY, gameRef.objectId);
     }
 
     /** Perform ranged attack. I've been waiting for this soooo long */
     async function performAttack(unit: [number, number], target: [number, number]) {
         if (!map) return;
         if (!canTransact) return;
-        setIsChecking(true);
 
         const tx = new Transaction();
-        const game = tx.sharedObjectRef({
-            objectId: map.objectId,
-            initialSharedVersion: map.initialSharedVersion,
-            mutable: true,
-        });
-
         tx.moveCall({
-            target: `${packageId}::commander::perform_attack`,
+            target: `${PKG}::commander::perform_attack`,
             arguments: [
-                game,
+                sharedGame(tx),
                 tx.object.random(),
                 tx.pure.u16(unit[0]),
                 tx.pure.u16(unit[1]),
@@ -232,13 +168,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             ],
         });
 
-        tx.setSender(zkLogin.address!);
-
-        const res = await client.dryRunTransactionBlock({
-            transactionBlock: await tx.build({ client: client as any }),
-        });
-
-        setIsChecking(false);
+        const res = await simulate(tx);
         setLockedTx(tx);
 
         return { res, tx };
@@ -247,27 +177,14 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     async function performReload(unit: [number, number]) {
         if (!map) return;
         if (!canTransact) return;
-        setIsChecking(true);
 
         const tx = new Transaction();
-        const game = tx.sharedObjectRef({
-            objectId: map.objectId,
-            initialSharedVersion: map.initialSharedVersion,
-            mutable: true,
-        });
-
         tx.moveCall({
-            target: `${packageId}::commander::perform_reload`,
-            arguments: [game, tx.pure.u16(unit[0]), tx.pure.u16(unit[1])],
+            target: `${PKG}::commander::perform_reload`,
+            arguments: [sharedGame(tx), tx.pure.u16(unit[0]), tx.pure.u16(unit[1])],
         });
 
-        tx.setSender(zkLogin.address!);
-
-        const res = await client.dryRunTransactionBlock({
-            transactionBlock: await tx.build({ client: client as any }),
-        });
-
-        setIsChecking(false);
+        const res = await simulate(tx);
         setLockedTx(tx);
 
         return { res, tx };
@@ -276,18 +193,12 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     async function performGrenade(from: [number, number], to: [number, number]) {
         if (!map) return;
         if (!canTransact) return;
-        setIsChecking(true);
-        const tx = new Transaction();
-        const game = tx.sharedObjectRef({
-            objectId: map.objectId,
-            initialSharedVersion: map.initialSharedVersion,
-            mutable: true,
-        });
 
+        const tx = new Transaction();
         tx.moveCall({
-            target: `${packageId}::commander::perform_grenade`,
+            target: `${PKG}::commander::perform_grenade`,
             arguments: [
-                game,
+                sharedGame(tx),
                 tx.object.random(),
                 tx.pure.u16(from[0]),
                 tx.pure.u16(from[1]),
@@ -296,13 +207,7 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
             ],
         });
 
-        tx.setSender(zkLogin.address!);
-
-        const res = await client.dryRunTransactionBlock({
-            transactionBlock: await tx.build({ client: client as any }),
-        });
-
-        setIsChecking(false);
+        const res = await simulate(tx);
         setLockedTx(tx);
 
         return { res, tx };
@@ -312,25 +217,16 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
     async function moveUnit(path: [number, number][]) {
         if (!map) throw new Error("Map not found");
         if (!canTransact) throw new Error("Cannot transact");
-        setIsChecking(true);
 
         const tx = new Transaction();
-        const game = tx.sharedObjectRef({
-            objectId: map.objectId,
-            initialSharedVersion: map.initialSharedVersion,
-            mutable: true,
-        });
-
         const pathArg = tx.pure(bcs.vector(bcs.u8()).serialize(coordinatesToPath(path)));
 
-        tx.moveCall({ target: `${packageId}::commander::move_unit`, arguments: [game, pathArg] });
-        tx.setSender(zkLogin.address!);
-
-        const res = await client.dryRunTransactionBlock({
-            transactionBlock: await tx.build({ client: client as any }),
+        tx.moveCall({
+            target: `${PKG}::commander::move_unit`,
+            arguments: [sharedGame(tx), pathArg],
         });
 
-        setIsChecking(false);
+        const res = await simulate(tx);
         setLockedTx(tx);
 
         return { res, tx };
@@ -342,16 +238,10 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         if (!canTransact) return;
 
         const tx = new Transaction();
-        const game = tx.sharedObjectRef({
-            objectId: map.objectId,
-            initialSharedVersion: map.initialSharedVersion,
-            mutable: true,
-        });
+        tx.moveCall({ target: `${PKG}::commander::next_turn`, arguments: [sharedGame(tx)] });
+        tx.setSender(account!.address);
 
-        tx.moveCall({ target: `${packageId}::commander::next_turn`, arguments: [game] });
-        tx.setSender(zkLogin.address!);
-
-        return await executeTransaction(tx);
+        return await executeTransaction!(tx);
     }
 
     async function destroyGame(gameId: string, saveReplay: boolean) {
@@ -359,25 +249,22 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
 
         const tx = new Transaction();
         tx.moveCall({
-            target: `${packageId}::commander::destroy_game`,
-            arguments: [tx.object(registryId), tx.object(gameId), tx.pure.bool(saveReplay)],
+            target: `${PKG}::commander::destroy_game`,
+            arguments: [tx.object(REGISTRY), tx.object(gameId), tx.pure.bool(saveReplay)],
         });
-        tx.setSender(zkLogin.address!);
+        tx.setSender(account!.address);
 
-        return await executeTransaction(tx);
+        return await executeTransaction!(tx);
     }
 
     async function deleteReplay(replayId: string) {
         if (!canTransact) return;
 
         const tx = new Transaction();
-        tx.moveCall({
-            target: `${packageId}::replay::delete`,
-            arguments: [tx.object(replayId)],
-        });
-        tx.setSender(zkLogin.address!);
+        tx.moveCall({ target: `${PKG}::replay::delete`, arguments: [tx.object(replayId)] });
+        tx.setSender(account!.address);
 
-        return await executeTransaction(tx);
+        return await executeTransaction!(tx);
     }
 
     /** Publish a map to the registry. */
@@ -385,16 +272,17 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         if (!canTransact) return;
 
         const tx = new Transaction();
-        const nameArg = tx.pure.string(name);
-        const mapBytesArg = tx.pure(bcs.vector(bcs.u8()).serialize(map));
-
         tx.moveCall({
-            target: `${packageId}::commander::publish_map`,
-            arguments: [tx.object(registryId), nameArg, mapBytesArg],
+            target: `${PKG}::commander::publish_map`,
+            arguments: [
+                tx.object(REGISTRY),
+                tx.pure.string(name),
+                tx.pure(bcs.vector(bcs.u8()).serialize(map)),
+            ],
         });
-        tx.setSender(zkLogin.address!);
+        tx.setSender(account!.address);
 
-        return await executeTransaction(tx);
+        return await executeTransaction!(tx);
     }
 
     /** Execute locked transaction */
@@ -402,8 +290,71 @@ export function useGameTransactions({ map }: { map: GameMap | null | undefined }
         if (!lockedTx) throw new Error("No locked transaction to execute");
         if (!canTransact) throw new Error("Cannot execute transaction");
 
-        const res = await executeTransaction(lockedTx);
+        const res = await executeTransaction!(lockedTx);
         setLockedTx(null);
         return res;
+    }
+
+    // === Helpers ===
+
+    /** Add a freshly named recruit to the transaction. */
+    function newRecruit(tx: Transaction) {
+        const { name, backstory } = generateRecruitName();
+        return tx.moveCall({
+            target: `${PKG}::recruit::new`,
+            arguments: [tx.pure.string(name), tx.pure.string(backstory)],
+        });
+    }
+
+    /** Mutable shared object input for the current game. */
+    function sharedGame(tx: Transaction) {
+        return tx.sharedObjectRef({
+            objectId: map!.objectId,
+            initialSharedVersion: map!.initialSharedVersion,
+            mutable: true,
+        });
+    }
+
+    /**
+     * Simulate (dry-run) a transaction; throws `SimulationError` when the
+     * transaction would fail on-chain.
+     */
+    async function simulate(tx: Transaction) {
+        tx.setSender(account!.address);
+        setIsChecking(true);
+
+        try {
+            const result = await client.core.simulateTransaction({
+                transaction: tx,
+                include: { effects: true, events: true },
+            });
+
+            if (result.FailedTransaction) {
+                throw new SimulationError(result.FailedTransaction.status.error);
+            }
+
+            return result.Transaction;
+        } finally {
+            setIsChecking(false);
+        }
+    }
+
+    /** Find the `Game` object created or mutated by the transaction. */
+    function findGameRef(result: ExecutedTransaction, operation: "Created" | "None"): ObjectRef {
+        const changed = result.effects.changedObjects.find(
+            (object) =>
+                object.idOperation === operation &&
+                result.objectTypes[object.objectId] === `${PKG}::commander::Game`,
+        );
+
+        if (!changed) {
+            throw new Error(`Game not found, something is off: ${result.status.error?.message}`);
+        }
+
+        return {
+            objectId: changed.objectId,
+            version: changed.outputVersion!,
+            digest: changed.outputDigest!,
+        };
     }
 }

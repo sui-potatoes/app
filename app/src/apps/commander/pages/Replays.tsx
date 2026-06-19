@@ -1,55 +1,25 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClientQuery } from "@mysten/dapp-kit";
-import { useZkLogin } from "@mysten/enoki/react";
-import { useNetworkVariable } from "../../../networkConfig";
-import { formatAddress, fromBase64 } from "@mysten/sui/utils";
-import { SuiObjectRef } from "@mysten/sui/client";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { formatAddress } from "@mysten/sui/utils";
 import { NavLink } from "react-router-dom";
-import { Footer } from "./Components";
-import { Replay } from "../types/bcs";
+import { COMMANDER_V2_PACKAGE_ID } from "../../../constants";
+import { useOwnedBcsObjects, WithRef } from "../../../hooks/useBcsObjects";
+import { Replay as ReplayBcs } from "../types/bcs";
 import { useGameTransactions } from "../hooks/useGameTransactions";
-import { Loader } from "./Components";
+import { Footer, Loader } from "./Components";
 
-export type Replay = typeof Replay.$inferType & SuiObjectRef;
+export type Replay = WithRef<typeof ReplayBcs.$inferType>;
 
 export function Replays() {
-    const zkLogin = useZkLogin();
-    const packageId = useNetworkVariable("commanderV2PackageId");
+    const address = useCurrentAccount()?.address;
     const { deleteReplay, canTransact } = useGameTransactions({ map: null });
-    const { data: replays, refetch } = useSuiClientQuery(
-        "getOwnedObjects",
-        {
-            owner: zkLogin.address!,
-            filter: { StructType: `${packageId}::replay::Replay` },
-            options: { showBcs: true },
-        },
-        {
-            enabled: !!zkLogin.address,
-            select(data): Replay[] {
-                if (!data.data) return [];
-                return data.data
-                    .map((obj) => {
-                        if (!obj.data) return null;
-                        if (!obj.data.bcs) return null;
-                        if (obj.data.bcs.dataType !== "moveObject") return null;
-
-                        const bytes = fromBase64(obj.data.bcs.bcsBytes);
-                        const replay = Replay.parse(bytes);
-                        return {
-                            id: replay.id,
-                            presetId: replay.presetId,
-                            history: replay.history,
-                            objectId: obj.data.objectId,
-                            version: obj.data.version,
-                            digest: obj.data.digest,
-                        };
-                    })
-                    .filter((r) => r !== null);
-            },
-        },
-    );
+    const { data: replays, refetch } = useOwnedBcsObjects({
+        owner: address,
+        type: `${COMMANDER_V2_PACKAGE_ID}::replay::Replay`,
+        schema: ReplayBcs,
+    });
 
     if (!replays) return <Loader text="Fetching replays..." />;
 
@@ -67,8 +37,8 @@ export function Replays() {
                         Replays can be saved after a game is finished.
                     </div>
                 )}
-                {replays?.map((replay) => (
-                    <div className="options-row interactive w-full">
+                {replays.map((replay) => (
+                    <div key={replay.objectId} className="options-row interactive w-full">
                         <a>
                             {formatAddress(replay.objectId)} ({replay.history.length} actions)
                         </a>

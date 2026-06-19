@@ -33,6 +33,7 @@ public enum Record has copy, drop, store {
     Miss,
     Explosion,
     CriticalHit(u8),
+    /// Grenade thrown at `(x, y)` with the given radius.
     Grenade(u16, u16, u16),
     UnitKIA(ID),
     Dodged,
@@ -87,8 +88,8 @@ public fun new_damage(dmg: u8): Record { Record::Damage(dmg) }
 /// Create new `Record::UnitKIA` history record.
 public fun new_kia(id: ID): Record { Record::UnitKIA(id) }
 
-/// Create new `Record::Grenade` history record.
-public fun new_grenade(r: u16, x: u16, y: u16): Record { Record::Grenade(r, x, y) }
+/// Create new `Record::Grenade` history record: target `(x, y)` and radius.
+public fun new_grenade(x: u16, y: u16, r: u16): Record { Record::Grenade(x, y, r) }
 
 /// Create new `Record::Move` history record.
 public fun new_move(steps: vector<u8>): Record { Record::Move(steps) }

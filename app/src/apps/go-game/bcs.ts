@@ -14,7 +14,18 @@ const Players = bcs.struct("Players", {
 });
 
 const Grid = bcs.struct("Grid", {
-    grid: bcs.vector(bcs.vector(bcs.u8())),
+    grid: bcs.vector(
+        bcs.vector(
+            bcs
+                .struct("Tile", {
+                    svg: bcs.string(),
+                    variant: bcs.u8(),
+                })
+                .transform({
+                    output: ({ variant }) => variant,
+                }),
+        ),
+    ),
     rows: bcs.u16(),
     cols: bcs.u16(),
 });
@@ -29,6 +40,7 @@ const Board = bcs.struct("Board", {
     }),
     moves: bcs.vector(Cell),
     prev_states: bcs.vector(Grid),
+    rendered_rows: bcs.vector(bcs.string()),
 });
 
 export const Account = bcs.struct("Account", {
@@ -40,7 +52,6 @@ export const Game = bcs.struct("Game", {
     id: bcs.Address,
     players: Players,
     board: Board,
-    image_blob: bcs.string(),
     created_at: bcs.u64(),
     joined_at: bcs.option(bcs.u64()),
     is_over: bcs.bool(),

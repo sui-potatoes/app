@@ -1,7 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-// @ts-ignore
+// @ts-expect-error: troika-three-text ships no type definitions
 import { Text } from "troika-three-text";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
@@ -86,7 +86,7 @@ export class UnitModel extends THREE.Object3D {
 
     async defaultAnimation(timeScale: number = 1, fadeIn: number = 0) {
         // this.animationPlayer.
-        let animation: Animation = this.cover == "low" ? "crouch_idle" : "idle";
+        const animation: Animation = this.cover == "low" ? "crouch_idle" : "idle";
         return this.animationPlayer.play(animation, timeScale, fadeIn);
     }
 
@@ -96,7 +96,7 @@ export class UnitModel extends THREE.Object3D {
     async walk(path: THREE.Vector2[]) {
         this.animationPlayer.play("run", 0.5);
 
-        let easings: [{ x: number; z: number }, JEASINGS.JEasing][] = path
+        const easings: [{ x: number; z: number }, JEASINGS.JEasing][] = path
             .slice(1)
             .map(({ x, y: z }) => [
                 { x, z },
@@ -105,14 +105,14 @@ export class UnitModel extends THREE.Object3D {
 
         while (easings.length) {
             await new Promise((resolve) => {
-                let [target, easing] = easings.shift()!;
+                const [target, easing] = easings.shift()!;
                 this.lookAt(target.x, 0, target.z);
                 easing.onComplete(() => resolve(void 0));
                 easing.start();
             });
         }
 
-        let animation: Animation = this.cover == "low" ? "crouch_idle" : "idle";
+        const animation: Animation = this.cover == "low" ? "crouch_idle" : "idle";
 
         this.animationPlayer.play(animation, 0.5);
     }
@@ -170,7 +170,7 @@ export class UnitModel extends THREE.Object3D {
 
     /** Do the "fancy" shooting animation with particles flying toward the target */
     async shoot(target: this) {
-        let startAnimation: Animation = this.cover == "low" ? "shooting" : "crouch_shooting";
+        const startAnimation: Animation = this.cover == "low" ? "shooting" : "crouch_shooting";
 
         this.animationPlayer.play(startAnimation, 3, 0);
 
@@ -301,12 +301,12 @@ export class UnitModel extends THREE.Object3D {
 
         if (ap === 0) return;
         if (ap > 0) {
-            let line = createCircleSegmentLine(0.4, 32, 0x1ae7bf, 0, Math.PI / 2, 4);
+            const line = createCircleSegmentLine(0.4, 32, 0x1ae7bf, 0, Math.PI / 2, 4);
             line.position.set(0, 0.1, 0);
             this.statsPanel.add(line);
         }
         if (ap > 1) {
-            let line = createCircleSegmentLine(0.4, 32, 0x1ae7bf, Math.PI / 2 + 0.3, Math.PI, 4);
+            const line = createCircleSegmentLine(0.4, 32, 0x1ae7bf, Math.PI / 2 + 0.3, Math.PI, 4);
             line.position.set(0, 0.1, 0);
             this.statsPanel.add(line);
         }

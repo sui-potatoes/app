@@ -1,27 +1,31 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClient } from "@mysten/dapp-kit";
+import { useCurrentClient } from "@mysten/dapp-kit-react";
 import { useQuery } from "@tanstack/react-query";
-import { fromBase64 } from "@mysten/bcs";
 import { Account, AccountType } from "../bcs";
 
-export function useAccount(packageId: string, owner?: string) {
-    const client = useSuiClient();
+/**
+ * All `Account` objects owned by the address. An address can own several
+ * (creating a game without an account mints a new one), so consumers pick
+ * the relevant account per game, or merge the game lists.
+ */
+export function useAccounts(packageId: string, owner?: string) {
+    const client = useCurrentClient();
 
-    return useQuery<AccountType | null>({
-        queryKey: ["go-account", packageId, owner],
+    return useQuery<AccountType[]>({
+        queryKey: ["go-accounts", packageId, owner],
         enabled: !!owner,
         queryFn: async () => {
-            const result = await client.getOwnedObjects({
+            const { objects } = await client.core.listOwnedObjects({
                 owner: owner!,
-                filter: { MoveModule: { package: packageId, module: "game" } },
-                options: { showBcs: true },
+                type: `${packageId}::game::Account`,
+                include: { content: true },
             });
-            if (!result.data.length) return null;
-            const bcsData = result.data[0].data?.bcs;
-            if (!bcsData || !("bcsBytes" in bcsData)) return null;
-            return Account.parse(fromBase64(bcsData.bcsBytes as string));
+
+            return objects
+                .map((object) => Account.parse(object.content))
+                .sort((a, b) => b.games.length - a.games.length);
         },
     });
 }

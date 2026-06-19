@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 export const NETWORK = "testnet";
+export const GOOGLE_CLIENT_ID =
+    "591411088609-6kbt6b07a6np6mq2mnlq97i150amussh.apps.googleusercontent.com";
 export const GOGAME_PACKAGE_ID =
-    "0x13c81db0a08e20c38b8606c774e9f89777938cc5a55b78f9b5b49fed27a15712";
+    "0x0fb3bd9b55c6e21b516b0707e59b9e5dc887a1fad2686c780ffc649181b5765c";
 export const CHARACTER_PACKAGE_ID =
     "0xfe50fd35667c48ec3342c5182a262aeb8b367188f71524ac8a3ea3e20141e78e";
 export const CHARACTER_BUILDER_ID =

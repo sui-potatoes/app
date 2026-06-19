@@ -1,17 +1,21 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
+import { useCurrentAccount, useCurrentClient } from "@mysten/dapp-kit-react";
+import { useQuery } from "@tanstack/react-query";
 import { formatAddress } from "@mysten/sui/utils";
 import { useState } from "react";
 import { Modal, YesOrNo, Footer } from "./Components";
 import { Transaction } from "@mysten/sui/transactions";
 import { SuinsClient, SuinsTransaction } from "@mysten/suins";
-import { useNetworkVariable } from "../../../networkConfig";
-import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
+import { useTransactionExecutor } from "../../../hooks/useTransactionExecutor";
 import { useSuinsName } from "../hooks/useSuinsName";
-import { COMMANDER_BASE_NAME } from "../../../constants";
+import {
+    COMMANDER_BASE_NAME,
+    COMMANDER_NAMES_OBJECT_ID as registry,
+    COMMANDER_NAMES_PACKAGE_ID as namesPackageId,
+    NETWORK,
+} from "../../../constants";
 
 /**
  * Page that stores the options of the user.
@@ -27,17 +31,19 @@ import { COMMANDER_BASE_NAME } from "../../../constants";
  * - UI size options
  */
 export function Options() {
-    const zkLogin = useZkLogin();
+    const address = useCurrentAccount()?.address;
+    const client = useCurrentClient();
     const checkIsFullscreen = window.innerHeight == screen.height;
     const [isFullscreen, setIsFullscreen] = useState(checkIsFullscreen);
     const [optModels, setOptModels] = useState(true);
-    const { name, modal: suinsModal, showNameModal } = suinsSetting();
+    const { name, modal: suinsModal, showNameModal } = useSuinsSetting();
 
-    const { data: balanceQuery, isPending } = useSuiClientQuery(
-        "getBalance",
-        { owner: zkLogin.address! },
-        { enabled: !!zkLogin.address },
-    );
+    const { data: balance, isPending } = useQuery({
+        queryKey: ["balance", address],
+        enabled: !!address,
+        queryFn: () =>
+            client.core.getBalance({ owner: address! }).then(({ balance }) => balance.balance),
+    });
 
     return (
         <div className="flex justify-between align-middle flex-col w-full">
@@ -47,42 +53,42 @@ export function Options() {
             <div className="p-10 text-uppercase text-lg rounded max-w-3xl">
                 <div className="options-row">
                     <label>ADDRESS</label>
-                    {zkLogin.address && (
+                    {address && (
                         <a
                             onClick={(e) => {
                                 e.preventDefault();
                                 const target = e.target as HTMLAnchorElement;
-                                navigator.clipboard.writeText(zkLogin.address!);
-                                target.textContent = `${formatAddress(zkLogin.address!)} (copied)`;
+                                navigator.clipboard.writeText(address);
+                                target.textContent = `${formatAddress(address)} (copied)`;
                                 setTimeout(() => {
-                                    target.textContent = `${formatAddress(zkLogin.address!)}`;
+                                    target.textContent = `${formatAddress(address)}`;
                                 }, 1000);
                             }}
                         >
-                            {formatAddress(zkLogin.address)}
+                            {formatAddress(address)}
                         </a>
                     )}
-                    {!zkLogin.address && <div>NOT SIGNED IN</div>}
+                    {!address && <div>NOT SIGNED IN</div>}
                 </div>
                 <div className="options-row">
                     <label>BALANCE</label>
                     <p>
-                        {isPending ? "..." : formatBalance(balanceQuery?.totalBalance!)}
-                        {balanceQuery && BigInt(balanceQuery?.totalBalance) < 1000000000n && (
+                        {isPending || !balance ? "..." : formatBalance(balance)}
+                        {balance && BigInt(balance) < 1000000000n && (
                             <>Top up your account to play</>
                         )}
                     </p>
                 </div>
                 <div className="options-row">
                     <label>NAME</label>
-                    {!name && zkLogin.address && (
+                    {!name && address && (
                         <div className="flex">
                             <div className="yes-no" onClick={() => showNameModal()}>
                                 SET
                             </div>
                         </div>
                     )}
-                    {!name && !zkLogin.address && <div className="yes-no non-interactive">SET</div>}
+                    {!name && !address && <div className="yes-no non-interactive">SET</div>}
                     {name && (
                         <div className="flex" onClick={() => showNameModal()}>
                             {name}.{COMMANDER_BASE_NAME}.sui
@@ -111,25 +117,13 @@ export function Options() {
     );
 }
 
-function suinsSetting() {
-    const zkLogin = useZkLogin();
-    const flow = useEnokiFlow();
-    const client = useSuiClient();
-    const name = useSuinsName({ address: zkLogin.address });
-    // TODO: get this from the network config
-    // const suinsAddress = "0x22fa05f21b1ad71442491220bb9338f7b7095fe35000ef88d5400d28523bdd93";
-
-    const packageId = useNetworkVariable("commanderRegistryPackageId");
-    const registry = useNetworkVariable("commanderNamesObjectId");
+function useSuinsSetting() {
+    const address = useCurrentAccount()?.address;
+    const client = useCurrentClient();
+    const name = useSuinsName({ address });
     const [showModal, setShowModal] = useState(false);
-    const { executeTransaction } = useTransactionExecutor({
-        // @ts-ignore
-        client,
-        signer: () => flow.getKeypair({ network: "testnet" }),
-        enabled: !!zkLogin.address,
-    });
-    // @ts-ignore
-    const nsClient = new SuinsClient({ client, network: "testnet" });
+    const { executeTransaction } = useTransactionExecutor();
+    const nsClient = new SuinsClient({ client, network: NETWORK });
     const [suinsName, setSuinsName] = useState(name || "");
 
     return {
@@ -174,7 +168,7 @@ function suinsSetting() {
         const tx = new Transaction();
         const registryArg = tx.object(registry);
         const [ns, borrow] = tx.moveCall({
-            target: `${packageId}::commander_names::borrow`,
+            target: `${namesPackageId}::commander_names::borrow`,
             arguments: [registryArg],
         });
 
@@ -189,34 +183,32 @@ function suinsSetting() {
 
         nsTx.setTargetAddress({
             nft: subname,
-            address: zkLogin.address,
+            address,
             isSubname: true,
         });
 
         nsTx.setDefault(`${name}@${COMMANDER_BASE_NAME}`);
 
         tx.moveCall({
-            target: `${packageId}::commander_names::put_back`,
+            target: `${namesPackageId}::commander_names::put_back`,
             arguments: [registryArg, ns, borrow],
         });
 
-        tx.transferObjects([subname], tx.pure.address(zkLogin.address as string));
+        tx.transferObjects([subname], tx.pure.address(address as string));
 
-        const {
-            data: { effects },
-        } = await executeTransaction!(tx);
-        if (effects && effects.status.status === "success") {
+        try {
+            await executeTransaction!(tx);
             setShowModal(false);
-            return location.reload();
+            location.reload();
+        } catch (e) {
+            alert(`Failed to create name. Reason: ${(e as Error).message}`);
         }
-
-        alert("Failed to create name. Reason: " + effects?.status.error);
     }
 }
 
 function formatBalance(balance: string) {
     if (!balance) return `0 SUI`;
-    let num = balance.slice(0, -9);
-    let dec = balance.slice(-9).slice(0, 2);
+    const num = balance.slice(0, -9);
+    const dec = balance.slice(-9).slice(0, 2);
     return `${num}.${dec} SUI`;
 }

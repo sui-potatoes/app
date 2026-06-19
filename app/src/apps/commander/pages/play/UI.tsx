@@ -88,8 +88,8 @@ export function UI({
 
         function onGameUnitSelected(event: GameAction["unit_selected"]) {
             if (!recruits) return;
-            let unit = event.unit;
-            let recruitId = unit.props.recruit;
+            const unit = event.unit;
+            const recruitId = unit.props.recruit;
             if (recruitId in recruits) {
                 setRecruit(recruits[recruitId]);
                 setUnit(unit);

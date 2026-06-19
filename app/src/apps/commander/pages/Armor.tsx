@@ -1,12 +1,11 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClient } from "@mysten/dapp-kit";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { Transaction } from "@mysten/sui/transactions";
-import { useNetworkVariable } from "../../../networkConfig";
+import { COMMANDER_V2_PACKAGE_ID as packageId } from "../../../constants";
 import { NavLink } from "react-router-dom";
-import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
+import { useTransactionExecutor } from "../../../hooks/useTransactionExecutor";
 import { Footer, Loader, StatRecord } from "./Components";
 import { useState } from "react";
 import { type Armor, useArmor } from "../hooks/useArmor";
@@ -37,19 +36,11 @@ export const ARMOR_STATS: StatRecord[] = [
 export function Armor() {
     armorImgUrls().map((url) => preload(url, { as: "image" }));
 
-    const flow = useEnokiFlow();
-    const client = useSuiClient();
-    const zkLogin = useZkLogin();
+    const address = useCurrentAccount()?.address;
     const [selected, setSelected] = useState<Armor | undefined>();
-    const packageId = useNetworkVariable("commanderV2PackageId");
-    const { data, isPending, error, isError, refetch } = useArmor({ address: zkLogin.address });
-    const { executeTransaction, isExecuting } = useTransactionExecutor({
-        // @ts-ignore
-        client,
-        signer: () => flow.getKeypair({ network: "testnet" }),
-        enabled: !!zkLogin.address,
-    });
-    const canTransact = !!zkLogin.address && !!executeTransaction;
+    const { data, isPending, error, isError, refetch } = useArmor({ address });
+    const { executeTransaction, isExecuting } = useTransactionExecutor();
+    const canTransact = !!address && !!executeTransaction;
 
     if (isError) {
         return (
@@ -139,7 +130,7 @@ export function Armor() {
 
     /** Mints a random armor object of the given tier. */
     async function mintArmor(tier: number) {
-        if (!zkLogin.address) throw new Error("Not logged in");
+        if (!address) throw new Error("Not logged in");
         if (isExecuting) throw new Error("Already executing a transaction");
         if (![1, 2, 3].includes(tier)) throw new Error(`Invalid armor tier ${tier}`);
 
@@ -149,7 +140,7 @@ export function Armor() {
             arguments: [tx.pure.u8(tier)],
         });
 
-        tx.transferObjects([armor], zkLogin.address!);
+        tx.transferObjects([armor], address);
 
         await executeTransaction!(tx);
         setTimeout(() => refetch(), 1000);
@@ -157,7 +148,7 @@ export function Armor() {
 
     /** Destroys the given armor object. */
     async function throwAway(ref: Armor) {
-        if (!zkLogin.address) throw new Error("Not logged in");
+        if (!address) throw new Error("Not logged in");
         if (!executeTransaction) throw new Error("No transaction executor");
         if (isExecuting) throw new Error("Already executing a transaction");
 
@@ -170,7 +161,7 @@ export function Armor() {
         await executeTransaction(tx);
         setTimeout(() => refetch(), 1000);
         setSelected(undefined);
-        data && data.splice(data.indexOf(ref), 1);
+        if (data) data.splice(data.indexOf(ref), 1);
     }
 }
 

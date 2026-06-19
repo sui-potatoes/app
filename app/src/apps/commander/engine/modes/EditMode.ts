@@ -56,10 +56,10 @@ export class EditMode extends Mode {
         mode.pointerMesh?.geometry.dispose();
         mode.pointerMesh?.material.dispose();
         mode.pointerMesh?.clear();
-        mode.pointerMesh && this.remove(mode.pointerMesh);
+        if (mode.pointerMesh) this.remove(mode.pointerMesh);
         mode.pointerMesh = null;
-        mode._clickCb !== null && mode.controls.removeEventListener("click", mode._clickCb);
-        mode._keyupCb !== null && mode.controls.removeEventListener("keyup", mode._keyupCb);
+        if (mode._clickCb !== null) mode.controls.removeEventListener("click", mode._clickCb);
+        if (mode._keyupCb !== null) mode.controls.removeEventListener("keyup", mode._keyupCb);
     }
 
     input(this: Game, controls: Controls, mode: this) {

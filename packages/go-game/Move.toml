@@ -4,6 +4,5 @@ edition = "2024.beta"
 authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
 [dependencies]
-svg = { local = "../svg" }
-codec = { local = "../codec" }
-grid = { local = "../grid" }
+codec = { r.mvr = "@potatoes/codec", override = true }
+grid = { r.mvr = "@potatoes/grid" }

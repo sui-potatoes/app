@@ -1,300 +1,482 @@
 @import "tailwindcss";
 
-button.disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
+/*
+ * Expose the runtime theme palette to Tailwind, so components can use
+ * `text-accent`, `text-secondary`, `border-line`, `bg-overlay`, … instead of
+ * inline `style={{ color: "var(--accent-color)" }}`.
+ */
+@theme inline {
+    --color-accent: var(--accent-color);
+    --color-secondary: var(--text-secondary);
+    --color-foreground: var(--text-color);
+    --color-line: var(--border-color);
+    --color-muted: var(--disabled-color);
+    --color-surface: var(--surface-color);
+    --color-overlay: color-mix(in srgb, var(--background-color) 80%, transparent);
+    /*
+     * Fully monochrome — there is no chromatic accent. `brand` resolves to
+     * ink (see :root / .dark-theme); it stays a named token so wayfinding
+     * (links, active nav, primary buttons, focus rings) can take a hue again
+     * later by changing a single variable.
+     */
+    --color-brand: var(--brand-color);
+    --color-brand-dim: var(--brand-dim);
+    --color-on-brand: var(--on-brand-color);
 }
 
+/*
+ * Near-monochrome palette: emphasis comes from contrast and brightness, not
+ * hue. The "accent" is simply the highest-contrast ink (near-ink in light,
+ * near-white in dark) used for active/hover/highlight states — minimalistic,
+ * technical, hue-neutral.
+ */
 :root {
-    --text-color: #1a1a2e;
-    --text-secondary: #666;
-    --background-color: #fafafa;
-    --surface-color: #f0f0f0;
-    --button-color: #e8e8e8;
-    --disabled-color: #aaa;
-    --code-color: #f0f0f3;
-    --border-color: #e0e0e0;
-    --accent-color: #0a9e84;
-    --accent-dim: rgba(10, 158, 132, 0.15);
+    --text-color: #1b1b18;
+    --text-secondary: #87867f;
+    --background-color: #f8f7f5;
+    --surface-color: #f1f0ec;
+    --button-color: #ebeae5;
+    --disabled-color: #b9b8b1;
+    --code-color: #f1f0ec;
+    --border-color: #e6e5df;
+    --grid-color: #ccccc4;
+    --accent-color: #0d0d0a;
+    --accent-dim: rgba(13, 13, 10, 0.05);
+    /* Monochrome: brand === ink (no hue). See the @theme note above. */
+    --brand-color: #1b1b18;
+    --brand-strong: #000000;
+    --brand-dim: rgba(0, 0, 0, 0.06);
+    --on-brand-color: #f8f7f5;
 }
 
 .dark-theme * {
-    --text-color: #e0e0e0;
-    --text-secondary: #888;
-    --background-color: #0a0a0f;
-    --surface-color: #141420;
-    --button-color: #1a1a2e;
-    --disabled-color: #555;
-    --code-color: #141420;
-    --border-color: #2a2a3e;
-    --accent-color: #1df7cf;
-    --accent-dim: rgba(29, 247, 207, 0.08);
+    --text-color: #d8d7d2;
+    --text-secondary: #76756e;
+    --background-color: #0c0c0b;
+    --surface-color: #161614;
+    --button-color: #191915;
+    --disabled-color: #46453f;
+    --code-color: #161614;
+    --border-color: #24241f;
+    --grid-color: #35352e;
+    --accent-color: #f3f2ee;
+    --accent-dim: rgba(243, 242, 238, 0.07);
+    --brand-color: #f3f2ee;
+    --brand-strong: #ffffff;
+    --brand-dim: rgba(243, 242, 238, 0.1);
+    --on-brand-color: #0c0c0b;
 }
 
-body {
-    font-family: "Rubik", sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-}
+/*
+ * Global styles live in `@layer base` so that Tailwind utility classes
+ * (which are emitted in a later layer) can override them — e.g. `uppercase`
+ * wins over the global `a, button { text-transform: capitalize }`.
+ */
+@layer base {
+    button.disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
 
-/* Scanline overlay for techy feel */
-body::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 0, 0, 0.015) 2px,
-        rgba(0, 0, 0, 0.015) 4px
-    );
-    z-index: 9999;
-}
+    body {
+        font-family: "Rubik", sans-serif;
+        /* Ultra-thin by default; emphasis steps up to normal (400), never bold. */
+        font-weight: 300;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
 
-.dark-theme body::after {
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(255, 255, 255, 0.01) 2px,
-        rgba(255, 255, 255, 0.01) 4px
-    );
-}
+    /* Background is flat — no scanline/texture overlay. */
 
-.switch {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--button-color);
-    padding: 10px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 1px solid var(--border-color);
-    transition: border-color 0.2s ease;
-    z-index: 100;
-}
+    .switch {
+        position: fixed;
+        top: 16px;
+        right: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: color 0.15s ease;
+        z-index: 100;
+    }
 
-.switch:hover {
-    border-color: var(--accent-color);
-}
+    /* Labelled toggle: a moon in dark mode, a sun in light mode, so the
+     * control reads as "switch theme" rather than an anonymous dot. */
+    .switch::before {
+        content: "☀";
+        font-size: 15px;
+        line-height: 1;
+    }
 
-.container p img {
-    text-align: center;
-}
+    .dark-theme .switch::before {
+        content: "☾";
+    }
 
-.md-show {
-    display: block !important;
-}
-.sm-show {
-    display: none !important;
-}
+    .switch:hover {
+        color: var(--accent-color);
+    }
 
-@media screen and (max-width: 768px) {
-    .container {
-        flex-direction: column;
+    .container p img {
+        text-align: center;
     }
 
     .md-show {
-        display: none !important;
-    }
-    .sm-show {
         display: block !important;
     }
-}
+    .sm-show {
+        display: none !important;
+    }
 
-/* Mobile-first sidebar: horizontal scrollable nav bar */
-.sidebar {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border-color);
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
+    @media screen and (max-width: 768px) {
+        .container {
+            flex-direction: column;
+        }
 
-.sidebar::-webkit-scrollbar {
-    display: none;
-}
+        .md-show {
+            display: none !important;
+        }
+        .sm-show {
+            display: block !important;
+        }
+    }
 
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-}
-
-.sidebar ul li {
-    margin-bottom: 0;
-    white-space: nowrap;
-}
-
-.sidebar ul li,
-.sidebar ul li a {
-    color: var(--text-color);
-    padding: 0px;
-    font-weight: normal;
-    text-transform: uppercase;
-    text-decoration: none;
-    font-size: 14px;
-    letter-spacing: 0.05em;
-    transition: color 0.15s ease;
-}
-
-.sidebar ul li a:hover {
-    color: var(--accent-color);
-    cursor: pointer;
-}
-
-.sidebar ul a.active {
-    color: var(--accent-color);
-    cursor: none;
-    text-decoration: none;
-}
-
-/* Desktop sidebar: vertical sticky column */
-@media screen and (min-width: 769px) {
+    /* Mobile-first sidebar: horizontal scrollable nav bar */
     .sidebar {
-        flex-direction: column;
+        display: flex;
+        flex-direction: row;
         align-items: center;
-        justify-content: center;
-        height: 100vh;
-        overflow-x: visible;
-        overflow-y: visible;
-        padding: 20px;
-        text-align: left;
-        position: sticky;
-        top: 0;
-        align-self: flex-start;
-        border-bottom: none;
-        scrollbar-width: auto;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 20px;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--border-color);
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .sidebar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Wordmark — the way back home, and the brand anchor of the shell. */
+    .sidebar-brand {
+        font-size: 16px;
+        font-weight: 300;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent-color);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: color 0.15s ease;
+    }
+
+    .sidebar-brand:hover {
+        color: var(--brand-color);
+    }
+
+    /* Footer cluster (auth + source) sits a tone quieter than page nav. */
+    .sidebar-footer li,
+    .sidebar-footer li a,
+    .sidebar-footer .connect {
+        font-size: 13px;
     }
 
     .sidebar ul {
-        flex-direction: column;
-        gap: 0;
-        align-items: flex-start;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
     }
 
     .sidebar ul li {
-        margin-bottom: 20px;
-        white-space: normal;
+        margin-bottom: 0;
+        white-space: nowrap;
     }
 
-    .sidebar ul > li::before {
-        content: "> ";
+    /* Inactive links sit at the muted tone; the current page and hovered
+     * links rise to full-contrast ink — "you are here" reads via contrast,
+     * not hue. */
+    .sidebar ul li,
+    .sidebar ul li a {
+        color: var(--text-secondary);
+        padding: 0px;
+        font-weight: 300;
+        text-transform: uppercase;
+        text-decoration: none;
+        font-size: 14px;
+        letter-spacing: 0.05em;
+        transition: color 0.15s ease;
+    }
+
+    .sidebar ul li a:hover {
+        color: var(--text-color);
+        cursor: pointer;
+    }
+
+    .sidebar ul a.active {
+        color: var(--brand-color);
+        cursor: default;
+        text-decoration: none;
+        font-weight: 400;
+    }
+
+    /* Desktop sidebar: vertical sticky column — wordmark up top, page nav
+     * in the middle, the quieter auth/source footer pinned to the bottom. */
+    @media screen and (min-width: 769px) {
+        .sidebar {
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0;
+            height: 100vh;
+            min-width: 180px;
+            overflow-x: visible;
+            overflow-y: visible;
+            padding: 32px 24px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            align-self: flex-start;
+            border-bottom: none;
+            scrollbar-width: auto;
+        }
+
+        .sidebar-brand {
+            font-size: 20px;
+        }
+
+        /* Page nav rides the vertical centre of the column. */
+        .sidebar > ul:not(.sidebar-footer) {
+            margin: auto 0;
+        }
+
+        .sidebar ul {
+            flex-direction: column;
+            gap: 0;
+            align-items: flex-start;
+        }
+
+        .sidebar-footer li {
+            margin-bottom: 12px;
+        }
+
+        .sidebar-footer li:last-child {
+            margin-bottom: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 20px;
+            white-space: normal;
+        }
+
+        /* Pointer caret: dim on every row, lit on the active / hovered row
+         * so the current page is unambiguous. */
+        .sidebar ul > li::before {
+            content: "›";
+            margin-right: 8px;
+            color: var(--text-secondary);
+            opacity: 0.4;
+            transition:
+                color 0.15s ease,
+                opacity 0.15s ease;
+        }
+
+        .sidebar ul > li:has(a:hover)::before,
+        .sidebar ul > li:has(.connect:hover)::before {
+            content: "›";
+            color: var(--accent-color);
+            opacity: 1;
+        }
+
+        /* The current page's caret takes the brand hue. */
+        .sidebar ul > li:has(a.active)::before {
+            content: "›";
+            color: var(--brand-color);
+            opacity: 1;
+        }
+    }
+
+    .content {
+        flex: 7;
+        padding: 20px;
+    }
+
+    .controls,
+    .advanced {
+        margin-bottom: 20px;
+    }
+
+    .control-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .buttons button {
+        background-color: var(--button-color);
+        border: 1px solid var(--border-color);
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: border-color 0.15s ease;
+    }
+
+    .buttons button:hover {
+        border-color: var(--accent-color);
+    }
+
+    .wallet {
+        text-align: left;
+        font-weight: 300;
+        margin-bottom: 20px;
+    }
+
+    .connect {
+        color: var(--text-color);
+        text-decoration: none;
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 0.05em;
+    }
+    .connect button,
+    .connect button * {
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background: none !important;
+        text-align: left !important;
+        text-transform: uppercase !important;
+        box-shadow: none !important;
+        color: var(--text-color) !important;
+        text-decoration: none !important;
+        font-size: 14px;
+        letter-spacing: 0.05em;
+    }
+
+    .connect:hover,
+    .connect button:hover {
+        color: var(--accent-color) !important;
+        cursor: pointer;
+    }
+
+    /* Global button styles */
+
+    a,
+    button {
+        color: var(--text-color);
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-transform: capitalize;
+        text-decoration: none;
+        transition: color 0.15s ease;
+    }
+
+    /* Real links lean on the brand hue on hover; buttons stay ink so the
+     * interface keeps its near-monochrome calm. */
+    a:hover {
+        color: var(--brand-color);
+        text-decoration: none;
+    }
+
+    button:hover {
+        color: var(--accent-color);
+        text-decoration: none;
+    }
+
+    button:disabled {
+        color: var(--disabled-color);
+        cursor: not-allowed;
+    }
+
+    /* Shared section divider */
+    .divider {
+        width: 100%;
+        height: 1px;
+        background: var(--border-color);
+        margin: 16px 0;
+    }
+
+    /* Shared outline button — used across the sub-apps for a cohesive look.
+     * Emphasis on hover via contrast (border + ink), not hue. */
+    .btn {
+        border: 1px solid var(--border-color);
+        padding: 7px 14px;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.05em;
+        color: var(--text-color);
+        background: none;
+        transition:
+            border-color 0.15s ease,
+            color 0.15s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+        border-color: var(--accent-color);
         color: var(--accent-color);
     }
-}
 
-.content {
-    flex: 7;
-    padding: 20px;
-}
+    .btn:disabled {
+        color: var(--disabled-color);
+        border-color: var(--border-color);
+        cursor: not-allowed;
+    }
 
-.controls,
-.advanced {
-    margin-bottom: 20px;
-}
+    /* Primary variant: filled with the brand hue, for the main call-to-action. */
+    .btn-primary {
+        background: var(--brand-color);
+        border-color: var(--brand-color);
+        color: var(--on-brand-color);
+    }
 
-.control-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
+    .btn-primary:hover:not(:disabled) {
+        background: var(--brand-strong);
+        border-color: var(--brand-strong);
+        color: var(--on-brand-color);
+    }
 
-.buttons button {
-    background-color: var(--button-color);
-    border: 1px solid var(--border-color);
-    padding: 8px 16px;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
-}
+    .btn-primary:disabled {
+        background: var(--surface-color);
+        border-color: var(--border-color);
+        color: var(--disabled-color);
+    }
 
-.buttons button:hover {
-    border-color: var(--accent-color);
-}
+    /* Keyboard focus is always visible and brand-tinted (accessibility). */
+    :focus-visible {
+        outline: 2px solid var(--brand-color);
+        outline-offset: 2px;
+        border-radius: 1px;
+    }
 
-.wallet {
-    text-align: left;
-    font-weight: normal;
-    margin-bottom: 20px;
-}
+    /* Loading placeholder — a quiet shimmer in the surface tone. */
+    .skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--surface-color) 0%,
+            color-mix(in srgb, var(--surface-color) 60%, var(--border-color)) 50%,
+            var(--surface-color) 100%
+        );
+        background-size: 200% 100%;
+        animation: skeleton-shimmer 1.2s ease-in-out infinite;
+        border-radius: 2px;
+    }
 
-.connect {
-    color: var(--text-color);
-    text-decoration: none;
-    text-transform: uppercase;
-    font-size: 14px;
-    letter-spacing: 0.05em;
-}
-.connect button,
-.connect button * {
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    background: none !important;
-    text-align: left !important;
-    text-transform: uppercase !important;
-    box-shadow: none !important;
-    color: var(--text-color) !important;
-    text-decoration: none !important;
-    font-size: 14px;
-    letter-spacing: 0.05em;
-}
-
-.connect:hover,
-.connect button:hover {
-    color: var(--accent-color) !important;
-    cursor: pointer;
-}
-
-/* Global button styles */
-
-a,
-button {
-    color: var(--text-color);
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-transform: capitalize;
-    text-decoration: none;
-    transition: color 0.15s ease;
-}
-
-a:hover,
-button:hover {
-    color: var(--accent-color);
-    text-decoration: none;
-}
-
-button:disabled {
-    color: var(--disabled-color);
-    cursor: not-allowed;
-}
-
-/* Shared section divider */
-.divider {
-    width: 100%;
-    height: 1px;
-    background: var(--border-color);
-    margin: 16px 0;
+    @keyframes skeleton-shimmer {
+        to {
+            background-position: -200% 0;
+        }
+    }
 }

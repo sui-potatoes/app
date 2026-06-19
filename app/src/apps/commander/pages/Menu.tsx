@@ -4,19 +4,19 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { NavLink } from "react-router-dom";
-import { GO_BACK_KEY } from "../../../App";
 import { useEffect } from "react";
 import { Footer } from "./Components";
 import { useSuinsName } from "../hooks/useSuinsName";
+import { useGoogleSignIn } from "../../../hooks/useGoogleSignIn";
 
 export function Menu() {
-    const flow = useEnokiFlow();
-    const zkLogin = useZkLogin();
-    const disabled = !zkLogin.address;
+    const account = useCurrentAccount();
+    const { signIn } = useGoogleSignIn();
+    const disabled = !account;
     const className = disabled ? "options-row non-interactive" : "options-row interactive";
-    const name = useSuinsName({ address: zkLogin.address });
+    const name = useSuinsName({ address: account?.address });
 
     useEffect(() => {
         createMenuScene("menu-scene");
@@ -35,24 +35,7 @@ export function Menu() {
                 <div className="text-left p-10 max-w-md">
                     <div className="">
                         {disabled && (
-                            <div
-                                className="main-menu-button interactive"
-                                onClick={async () => {
-                                    localStorage.setItem(GO_BACK_KEY, window.location.href);
-
-                                    // Refresh the page to go back to the root path, this is a
-                                    // workaround for the issue where google auth doesn't work
-                                    // when the app is hosted on a subpath.
-                                    history.pushState({}, "", "/");
-                                    window.location.href = await flow.createAuthorizationURL({
-                                        provider: "google",
-                                        clientId:
-                                            "591411088609-6kbt6b07a6np6mq2mnlq97i150amussh.apps.googleusercontent.com",
-                                        redirectUrl: window.location.href.split("#")[0],
-                                        network: "testnet",
-                                    });
-                                }}
-                            >
+                            <div className="main-menu-button interactive" onClick={() => signIn()}>
                                 Sign in to play
                             </div>
                         )}
@@ -227,9 +210,9 @@ export async function createMenuScene(element: string) {
 
     function animate() {
         renderer.render(scene, camera);
-        mixer1 && mixer1.update(0.002);
-        mixer2 && mixer2.update(0.001);
-        mixer3 && mixer3.update(0.003);
+        mixer1.update(0.002);
+        mixer2.update(0.001);
+        mixer3.update(0.003);
 
         // camera rotation
         const center = new THREE.Vector3(0, 1, 0);

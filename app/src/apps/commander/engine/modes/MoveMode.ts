@@ -37,7 +37,7 @@ export class MoveMode implements Mode {
     /** Line used for drawing paths */
     private line: Line2 | null = null;
     /** Click callback  */
-    private _clickCb = ({}: { button: number }) => {};
+    private _clickCb = (_: { button: number }) => {};
     /** The Group used for highlighting tiles */
     public readonly highlight = new THREE.Group();
 
@@ -149,12 +149,11 @@ export class MoveMode implements Mode {
     }
 
     clearHighlight() {
-        // @ts-ignore
+        // @ts-expect-error: highlight children are always Meshes
         this.highlight.children.forEach((child: THREE.Mesh) => {
             child.geometry.dispose();
-            Array.isArray(child.material)
-                ? child.material.forEach((m) => m.dispose())
-                : child.material.dispose();
+            if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose());
+            else child.material.dispose();
         });
         this.highlight.clear();
     }
@@ -182,7 +181,7 @@ export class MoveMode implements Mode {
             mode.target = new THREE.Vector2(x, z);
             const limit = this.selectedUnit.props.stats.mobility + 1;
 
-            let path = this.grid.tracePath(this.selectedUnit?.gridPosition!, mode.target, limit);
+            let path = this.grid.tracePath(this.selectedUnit.gridPosition, mode.target, limit);
             if (!path || path.length === 0) return;
             if (path.length > limit) path = path.slice(-limit);
             path.reverse();

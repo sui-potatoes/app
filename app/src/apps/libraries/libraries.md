@@ -131,3 +131,25 @@ entry fun new(rng: &Random, ctx: &mut TxContext) {
 ```
 
 Used in: [Commander](/commander) for crew member names.
+
+---
+
+# Applications
+
+Full on-chain games and app packages built with the libraries above. Not published to the registry, but open source and a good reference for how the libraries compose.
+
+## <a id="go-game-pkg" href="#go-game-pkg">#</a> Go Game ([source](https://github.com/sui-potatoes/app/tree/main/packages/go-game))
+
+The Game of Go in Move: board, capture and scoring rules, accounts, and fully on-chain matches. Powers [Go Game](/go).
+
+## <a id="character-pkg" href="#character-pkg">#</a> Character ([source](https://github.com/sui-potatoes/app/tree/main/packages/character))
+
+Customizable character object with an on-chain SVG visual representation, designed as a programmable "base" object for other applications to build on. Powers [Character](/character).
+
+## <a id="commander-pkg" href="#commander-pkg">#</a> Commander ([source](https://github.com/sui-potatoes/app/tree/main/packages/commander))
+
+Turn-based tactical combat: grid maps, recruits, items, action history and replays. Powers [Commander](/commander).
+
+## <a id="commander-names-pkg" href="#commander-names-pkg">#</a> Commander Names ([source](https://github.com/sui-potatoes/app/tree/main/packages/commander-names))
+
+Wraps a `SuinsRegistration` object so in-game names can be registered as SuiNS subnames from a PTB. Demo-grade security model — not intended for production reuse.

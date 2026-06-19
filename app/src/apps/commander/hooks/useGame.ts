@@ -1,11 +1,11 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClientQuery } from "@mysten/dapp-kit";
-import { fromBase64 } from "@mysten/bcs";
+import { useCurrentClient } from "@mysten/dapp-kit-react";
+import { useQuery } from "@tanstack/react-query";
+import { COMMANDER_V2_PACKAGE_ID } from "../../../constants";
+import { ObjectRef } from "../../../hooks/useBcsObjects";
 import { Game } from "../types/bcs";
-import type { SuiObjectRef } from "@mysten/sui/client";
-import { useNetworkVariable } from "../../../networkConfig";
 
 type Props = {
     id: string | null;
@@ -13,41 +13,33 @@ type Props = {
     refetchInterval?: number;
 };
 
-export type GameMap = SuiObjectRef & {
+export type GameMap = ObjectRef & {
     initialSharedVersion: string;
     map: typeof Game.$inferType;
 };
 
-export function useGame({ id, enabled, refetchInterval }: Props) {
-    const packageId = useNetworkVariable("commanderV2PackageId");
-    return useSuiClientQuery(
-        "getObject",
-        { id: id!, options: { showBcs: true, showOwner: true, showType: true } },
-        {
-            refetchInterval,
-            enabled: enabled == undefined ? true : enabled && !!id,
-            select(data): GameMap | null {
-                if (!data.data) return null;
-                if (!data.data.bcs) return null;
-                if (!data.data.type) return null;
-                if (data.data.type !== `${packageId}::commander::Game`) return null;
-                if (
-                    !data.data.owner ||
-                    data.data.owner == "Immutable" ||
-                    !("Shared" in data.data.owner)
-                )
-                    return null;
-                if (data.data.bcs.dataType !== "moveObject") return null;
-                const map = Game.parse(fromBase64(data.data.bcs.bcsBytes));
+export function useGame({ id, enabled = true, refetchInterval }: Props) {
+    const client = useCurrentClient();
+    return useQuery({
+        queryKey: ["commander", "game", id],
+        enabled: enabled && !!id,
+        refetchInterval,
+        async queryFn(): Promise<GameMap | null> {
+            const { object } = await client.core
+                .getObject({ objectId: id!, include: { content: true } })
+                .catch(() => ({ object: null }));
 
-                return {
-                    objectId: data.data.objectId,
-                    version: data.data.version,
-                    digest: data.data.digest,
-                    initialSharedVersion: data.data.owner.Shared.initial_shared_version,
-                    map,
-                };
-            },
+            if (!object) return null;
+            if (object.type !== `${COMMANDER_V2_PACKAGE_ID}::commander::Game`) return null;
+            if (object.owner.$kind !== "Shared") return null;
+
+            return {
+                objectId: object.objectId,
+                version: object.version,
+                digest: object.digest,
+                initialSharedVersion: object.owner.Shared.initialSharedVersion,
+                map: Game.parse(object.content),
+            };
         },
-    );
+    });
 }

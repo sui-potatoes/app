@@ -24,6 +24,7 @@ const ENotPlayer: u64 = 1;
 const EInvalidGame: u64 = 2;
 const ENotYourRecruit: u64 = 3;
 const ENoPositions: u64 = 4;
+const EInvalidPosition: u64 = 5;
 
 /// Stack limit of public games in the `Commander` object.
 const PUBLIC_GAMES_LIMIT: u64 = 20;
@@ -32,7 +33,7 @@ const PUBLIC_GAMES_LIMIT: u64 = 20;
 /// serves as the registry for all users and their recruits.
 public struct Commander has key {
     id: UID,
-    /// List of the 10 most recent games.
+    /// List of the most recent public games (up to `PUBLIC_GAMES_LIMIT`).
     games: VecMap<ID, u64>,
 }
 
@@ -80,10 +81,21 @@ public struct Game has key {
 // === Map Registration & Removal ===
 
 /// Register a new `Map` so it can be played.
+/// Spawn positions must be in bounds, walkable and unoccupied.
 public fun publish_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx: &mut TxContext) {
     let mut bcs = bcs::new(bytes);
     let mut map = map::from_bcs(&mut bcs);
     let positions = bcs.peel_vec!(|bcs| bcs.peel_vec!(|bcs| bcs.peel_u8()));
+    let (rows, cols) = map.size();
+
+    positions.do_ref!(|position| {
+        assert!(position.length() == 2, EInvalidPosition);
+        let (x, y) = (position[0] as u16, position[1] as u16);
+        assert!(x < rows && y < cols, EInvalidPosition);
+        assert!(!map.is_tile_unwalkable(x, y), EInvalidPosition);
+        assert!(!map.tile_has_unit(x, y), EInvalidPosition);
+    });
+
     let id = object::new(ctx);
 
     map.set_id(id.to_inner());
@@ -246,6 +258,7 @@ entry fun perform_grenade(
     let history = game.map.perform_grenade(&mut rng, x0, y0, x1, y1);
 
     history::list_kia(&history).do!(|id| {
+        if (id.to_address() == @0) return; // skip empty addresses
         let recruit = game.recruits.remove(id);
         let leader = recruit.leader();
         transfer::public_transfer(recruit.kill(ctx), leader);
@@ -289,9 +302,8 @@ public fun share(game: Game) {
 
 // === Getters ===
 
-#[allow(unused_function)]
 /// Get the current turn of the game.
-fun turn(self: &Game): u16 { self.map.turn() }
+public fun turn(self: &Game): u16 { self.map.turn() }
 
 // === Init ===
 

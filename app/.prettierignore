@@ -1,0 +1,2 @@
+# invalid YAML (free-form notes), prettier cannot parse it
+src/apps/commander/mechanics.yml

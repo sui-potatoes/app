@@ -11,7 +11,7 @@ import { Crew } from "./pages/Crew";
 import { Headquarters } from "./pages/Headquarters";
 import { Weapons } from "./pages/Weapons";
 import { Editor } from "./pages/Editor";
-import { useZkLogin } from "@mysten/enoki/react";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import * as Tone from "tone";
 import { useEffect } from "react";
 import { Observer } from "./pages/Observer";
@@ -20,7 +20,7 @@ import { preload } from "react-dom";
 import { Replays } from "./pages/Replays";
 import { WatchReplay } from "./pages/WatchReplay";
 export default function App() {
-    const zkLogin = useZkLogin();
+    const account = useCurrentAccount();
     const location = useLocation();
 
     preload("/images/rotorelief.svg", { as: "image" });
@@ -50,7 +50,7 @@ export default function App() {
                 });
             });
         }, 500);
-    }, [location.pathname, zkLogin.address]);
+    }, [location.pathname, account?.address]);
 
     return (
         <div className="commander-v2">
@@ -60,18 +60,14 @@ export default function App() {
                     <Route path="options" element={<Options />} />
                     <Route path="/spectate" element={<Spectate />} />
                     <Route path="/spectate/:gameId" element={<Observer />} />
-                    {zkLogin && (
-                        <>
-                            <Route path="headquarters/crew" element={<Crew />} />
-                            <Route path="headquarters/armor" element={<Armor />} />
-                            <Route path="headquarters/weapons" element={<Weapons />} />
-                            <Route path="headquarters" element={<Headquarters />} />
-                            <Route path="play" element={<Playground />} />
-                            <Route path="editor" element={<Editor />} />
-                            <Route path="replays" element={<Replays />} />
-                            <Route path="watch/:gameId" element={<WatchReplay />} />
-                        </>
-                    )}
+                    <Route path="headquarters/crew" element={<Crew />} />
+                    <Route path="headquarters/armor" element={<Armor />} />
+                    <Route path="headquarters/weapons" element={<Weapons />} />
+                    <Route path="headquarters" element={<Headquarters />} />
+                    <Route path="play" element={<Playground />} />
+                    <Route path="editor" element={<Editor />} />
+                    <Route path="replays" element={<Replays />} />
+                    <Route path="watch/:gameId" element={<WatchReplay />} />
                 </Routes>
             </div>
         </div>

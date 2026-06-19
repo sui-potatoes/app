@@ -1,25 +1,23 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClient } from "@mysten/dapp-kit";
+import { useCurrentClient } from "@mysten/dapp-kit-react";
 import { useQuery } from "@tanstack/react-query";
-import { fromBase64 } from "@mysten/bcs";
 import { Game, GameType } from "../bcs";
 
 export function useGame(gameId?: string) {
-    const client = useSuiClient();
+    const client = useCurrentClient();
 
     return useQuery<GameType | null>({
         queryKey: ["go-game", gameId],
         enabled: !!gameId,
         refetchInterval: 1000,
         queryFn: async () => {
-            const result = await client.getObject({ id: gameId!, options: { showBcs: true } });
-            console.log(result);
-            if (!result.data?.bcs || !("bcsBytes" in result.data.bcs)) return null;
-            const game = Game.parse(fromBase64(result.data.bcs.bcsBytes));
-            console.log(game);
-            return game;
+            const { object } = await client.core
+                .getObject({ objectId: gameId!, include: { content: true } })
+                .catch(() => ({ object: null }));
+
+            return object ? Game.parse(object.content) : null;
         },
     });
 }

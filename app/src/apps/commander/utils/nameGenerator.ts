@@ -3,7 +3,8 @@
 
 import { EGender, Name } from "@undergroundsociety/cybername-gen";
 
-export async function useNameGenerator() {
+/** Generate a random name + backstory for a freshly hired recruit. */
+export function generateRecruitName() {
     const name = new Name(EGender.male);
 
     return {

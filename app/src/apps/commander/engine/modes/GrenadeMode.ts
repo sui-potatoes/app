@@ -23,7 +23,7 @@ export class GrenadeMode implements Mode {
     /** The Group used for highlighting tiles */
     public readonly elements = new THREE.Group();
     /** Click callback  */
-    private _clickCb = ({}: { button: number }) => {};
+    private _clickCb = (_: { button: number }) => {};
     /** Target, where grenade can be thrown */
     private targetTile: THREE.Vector2 | null = null;
 

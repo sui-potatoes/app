@@ -3,18 +3,20 @@
 
 import "./character.css";
 import { useEffect, useState } from "react";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
-import { GO_BACK_KEY } from "../../App";
-import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
-import { useNetworkVariable } from "../../networkConfig";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { Transaction } from "@mysten/sui/transactions";
-import { fromB64 } from "@mysten/bcs";
 import { useParams } from "react-router-dom";
 import { Char } from "./Char";
 import { bcs } from "@mysten/sui/bcs";
 import { Param } from "./Param";
-import { normalizeSuiAddress } from "@mysten/sui/utils";
 import { toast, Toaster } from "react-hot-toast";
+import {
+    CHARACTER_BUILDER_ID as builderId,
+    CHARACTER_PACKAGE_ID as packageId,
+} from "../../constants";
+import { useOwnedBcsObjects } from "../../hooks/useBcsObjects";
+import { useGoogleSignIn } from "../../hooks/useGoogleSignIn";
+import { useSignAndExecute } from "../../hooks/useSignAndExecute";
 
 const image = bcs.struct("Props", {
     body_type: bcs.String,
@@ -82,25 +84,17 @@ export const COLOURS = [
 
 export default function App() {
     const { id: urlId } = useParams();
-    const flow = useEnokiFlow();
-    const zkLogin = useZkLogin();
-    const client = useSuiClient();
-    const packageId = useNetworkVariable("characterPackageId");
-    const builderId = useNetworkVariable("characterBuilderId");
+    const account = useCurrentAccount();
+    const address = account?.address;
+    const { signIn } = useGoogleSignIn();
+    const signAndExecute = useSignAndExecute();
     const [characterId, setCharacterId] = useState(urlId);
     const [canInteract, setCanInteract] = useState(false);
-    const {
-        data: characters,
-        refetch,
-    } = useSuiClientQuery(
-        "getOwnedObjects",
-        {
-            owner: zkLogin?.address!,
-            options: { showBcs: true },
-            filter: { StructType: `${packageId}::character::Character` },
-        },
-        { enabled: !!zkLogin },
-    );
+    const { data: characters, refetch } = useOwnedBcsObjects({
+        owner: address,
+        type: `${packageId}::character::Character`,
+        schema: CharBCS,
+    });
     const [char, setChar] = useState<Character>({
         hair_type: "wind",
         body_type: "office",
@@ -116,45 +110,32 @@ export default function App() {
 
     useEffect(() => {
         if (!characters) return;
-        if (!characters.data.length) {
+        if (!characters.length) {
             setCanInteract(true);
             return;
         }
 
-        const data = characters.data[0].data!;
-        const { image } = CharBCS.parse(
-            // @ts-ignore
-            new Uint8Array(fromB64(data.bcs.bcsBytes)),
-        );
+        const { objectId, image } = characters[0];
 
         setCanInteract(true);
-        setCharacterId(data.objectId);
+        setCharacterId(objectId);
         setChar({ ...image });
         setInitialCharacter(JSON.stringify({ ...image }));
     }, [characters]);
 
-    const isConnected = !!zkLogin.address;
-    const isSaveDisabled = !zkLogin.address || !canInteract || JSON.stringify(char) === initialCharacter;
+    const isConnected = !!address;
+    const isSaveDisabled = !address || !canInteract || JSON.stringify(char) === initialCharacter;
 
     return (
-        <div className="md:grid md:grid-cols-[1fr_auto] gap-5 flex flex-col items-center md:flex-none relative md:h-[calc(100vh-40px)] md:content-center">
+        <div className="md:grid md:grid-cols-[1fr_auto] gap-10 md:gap-16 flex flex-col items-center md:flex-none relative md:h-[calc(100vh-40px)] md:content-center">
             <div className="flex items-center justify-center relative">
                 <Char {...char} />
                 {!isConnected && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm" style={{ background: "color-mix(in srgb, var(--background-color) 80%, transparent)" }}>
-                        <p className="text-sm tracking-wider uppercase" style={{ color: "var(--text-color)" }}>
+                    <div className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm bg-overlay">
+                        <p className="text-sm tracking-wider uppercase text-foreground">
                             <button
-                                style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
-                                onClick={async () => {
-                                    localStorage.setItem(GO_BACK_KEY, window.location.href);
-                                    history.pushState({}, "", "/");
-                                    window.location.href = await flow.createAuthorizationURL({
-                                        provider: "google",
-                                        clientId: "591411088609-6kbt6b07a6np6mq2mnlq97i150amussh.apps.googleusercontent.com",
-                                        redirectUrl: window.location.href.split("#")[0],
-                                        network: "testnet",
-                                    });
-                                }}
+                                className="text-brand hover:text-brand uppercase"
+                                onClick={() => signIn()}
                             >
                                 Sign in
                             </button>{" "}
@@ -164,24 +145,40 @@ export default function App() {
                 )}
             </div>
             <div className="flex flex-col gap-3 justify-center md:w-[240px] md:flex-shrink-0">
-                <div className="sm-show text-sm tracking-wider uppercase">
+                <div className="flex flex-col gap-1.5">
+                    <div className="text-sm tracking-wider uppercase">Character</div>
+                    <p className="text-secondary text-[11px] tracking-wider uppercase">
+                        {!address
+                            ? "sign in to edit"
+                            : characterId
+                              ? "editing your character"
+                              : "new character"}
+                    </p>
+                    <div className="w-[60px] h-px bg-line mt-1" />
+                </div>
+                <div className="text-sm tracking-wider uppercase">
                     <button
                         disabled={isSaveDisabled}
-                        style={{ color: isSaveDisabled ? "var(--disabled-color)" : "var(--accent-color)", textTransform: "uppercase" }}
-                        onClick={() => {
-                            characterId ? updateCharacter(char) : createCharacter(char);
-                        }}
+                        className="btn btn-primary w-full"
+                        onClick={() =>
+                            characterId ? updateCharacter(char) : createCharacter(char)
+                        }
                     >
-                        {characterId ? "Update" : "Create"} Character{" "}
-                        {!zkLogin.address && " (Login required)"}
+                        {characterId ? "Update" : "Create"} Character
                     </button>
+                    {!address && (
+                        <p className="text-secondary text-[11px] tracking-wider uppercase mt-1.5">
+                            sign in to save
+                        </p>
+                    )}
                 </div>
                 <div className="text-sm tracking-wider uppercase">
                     <button
                         disabled={!canInteract}
-                        style={{ color: "var(--accent-color)", textTransform: "uppercase" }}
+                        className="btn w-full"
                         onClick={() => {
-                            const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+                            const pick = (arr: string[]) =>
+                                arr[Math.floor(Math.random() * arr.length)];
                             setChar({
                                 hair_type: pick(["wind", "flat", "bang", "punk"]),
                                 body_type: pick(["office", "blazer", "tshirt"]),
@@ -198,91 +195,79 @@ export default function App() {
                     </button>
                 </div>
                 <Param
-                        name="hair type"
-                        defaultValue={char.hair_type}
-                        disabled={!canInteract}
-                        values={["wind", "flat", "bang", "punk"]}
-                        onChange={(hair_type) => setChar({ ...char, hair_type })}
-                    />
-                    <Param
-                        name="body type"
-                        defaultValue={char.body_type}
-                        disabled={!canInteract}
-                        values={["office", "blazer", "tshirt"]}
-                        onChange={(body_type) => setChar({ ...char, body_type })}
-                    />
-                    <Param
-                        isColour
-                        name="hair"
-                        defaultValue={char.hairColour}
-                        disabled={!canInteract}
-                        values={COLOURS}
-                        onChange={(hairColour) => setChar({ ...char, hairColour })}
-                    />
-                    <Param
-                        isColour
-                        name="eyes"
-                        defaultValue={char.eyesColour}
-                        disabled={!canInteract}
-                        values={COLOURS}
-                        onChange={(eyesColour) => setChar({ ...char, eyesColour })}
-                    />
-                    <Param
-                        isColour
-                        name="skin"
-                        defaultValue={char.skinColour}
-                        disabled={!canInteract}
-                        values={COLOURS}
-                        onChange={(skinColour) => setChar({ ...char, skinColour })}
-                    />
-                    <Param
-                        isColour
-                        name="base"
-                        defaultValue={char.baseColour}
-                        disabled={!canInteract}
-                        values={COLOURS}
-                        onChange={(baseColour) => setChar({ ...char, baseColour })}
-                    />
-                    <Param
-                        isColour
-                        name="pants"
-                        defaultValue={char.pantsColour}
-                        disabled={!canInteract}
-                        values={COLOURS}
-                        onChange={(pantsColour) => setChar({ ...char, pantsColour })}
-                    />
-                    <Param
-                        isColour
-                        name="accent"
-                        defaultValue={char.accentColour}
-                        disabled={!canInteract}
-                        values={COLOURS}
-                        onChange={(accentColour) => setChar({ ...char, accentColour })}
-                    />
-                    <div className="md-show param text-sm tracking-wider uppercase">
-                        <button
-                            style={{ padding: "20px 0", color: isSaveDisabled ? "var(--disabled-color)" : "var(--accent-color)", textTransform: "uppercase" }}
-                            disabled={isSaveDisabled}
-                            onClick={() => {
-                                characterId ? updateCharacter(char) : createCharacter(char);
-                            }}
+                    name="hair type"
+                    defaultValue={char.hair_type}
+                    disabled={!canInteract}
+                    values={["wind", "flat", "bang", "punk"]}
+                    onChange={(hair_type) => setChar({ ...char, hair_type })}
+                />
+                <Param
+                    name="body type"
+                    defaultValue={char.body_type}
+                    disabled={!canInteract}
+                    values={["office", "blazer", "tshirt"]}
+                    onChange={(body_type) => setChar({ ...char, body_type })}
+                />
+                <Param
+                    isColour
+                    name="hair"
+                    defaultValue={char.hairColour}
+                    disabled={!canInteract}
+                    values={COLOURS}
+                    onChange={(hairColour) => setChar({ ...char, hairColour })}
+                />
+                <Param
+                    isColour
+                    name="eyes"
+                    defaultValue={char.eyesColour}
+                    disabled={!canInteract}
+                    values={COLOURS}
+                    onChange={(eyesColour) => setChar({ ...char, eyesColour })}
+                />
+                <Param
+                    isColour
+                    name="skin"
+                    defaultValue={char.skinColour}
+                    disabled={!canInteract}
+                    values={COLOURS}
+                    onChange={(skinColour) => setChar({ ...char, skinColour })}
+                />
+                <Param
+                    isColour
+                    name="base"
+                    defaultValue={char.baseColour}
+                    disabled={!canInteract}
+                    values={COLOURS}
+                    onChange={(baseColour) => setChar({ ...char, baseColour })}
+                />
+                <Param
+                    isColour
+                    name="pants"
+                    defaultValue={char.pantsColour}
+                    disabled={!canInteract}
+                    values={COLOURS}
+                    onChange={(pantsColour) => setChar({ ...char, pantsColour })}
+                />
+                <Param
+                    isColour
+                    name="accent"
+                    defaultValue={char.accentColour}
+                    disabled={!canInteract}
+                    values={COLOURS}
+                    onChange={(accentColour) => setChar({ ...char, accentColour })}
+                />
+                {characterId && (
+                    <div className="param block my-[10px] text-sm tracking-wider uppercase">
+                        <a
+                            href={`https://suiscan.xyz/testnet/object/${characterId}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="uppercase"
                         >
-                            {characterId ? "Update" : "Create"} Character{" "}
-                            {!zkLogin.address && " (Login required)"}
-                        </button>
+                            View on SuiScan
+                        </a>
                     </div>
-                    {characterId && (
-                        <div className="param text-sm tracking-wider uppercase" style={{ display: "block", margin: "10px 0" }}>
-                            <a
-                                href={`https://suiscan.xyz/testnet/object/${characterId}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ textTransform: "uppercase" }}
-                            >
-                                View on SuiScan
-                            </a>
-                        </div>
-                    )}
+                )}
             </div>
             <Toaster position="bottom-center" />
         </div>
@@ -292,7 +277,7 @@ export default function App() {
      * Send the `new` command to the `character` module.
      */
     async function createCharacter(data: Character) {
-        if (!flow || !zkLogin) return;
+        if (!address) return;
         if (!canInteract) return;
         setCanInteract(false);
 
@@ -312,19 +297,9 @@ export default function App() {
             ],
         });
 
-        tx.transferObjects([char], zkLogin.address!);
+        tx.transferObjects([char], address);
 
-        const result = await client.signAndExecuteTransaction({
-            signer: (await flow.getKeypair({ network: "testnet" })) as any,
-            transaction: tx as any,
-        });
-
-        console.log("Transaction sent", result.digest);
-        await client.waitForTransaction({
-            digest: result.digest,
-            timeout: 10000,
-            pollInterval: 500,
-        });
+        await signAndExecute(tx);
         toast.success("Character created successfully!");
         refetch();
     }
@@ -333,7 +308,7 @@ export default function App() {
      * Send the `update` command to the `character` module.
      */
     async function updateCharacter(data: Character) {
-        if (!flow || !zkLogin) return;
+        if (!address) return;
         if (!canInteract) return;
         if (!characterId) return;
         setCanInteract(false);
@@ -355,63 +330,9 @@ export default function App() {
             ],
         });
 
-        const result = await client.signAndExecuteTransaction({
-            signer: (await flow.getKeypair({ network: "testnet" })) as any,
-            transaction: tx as any,
-        });
-
-        console.log("Transaction sent", result.digest);
-        await client.waitForTransaction({
-            digest: result.digest,
-            timeout: 10000,
-            pollInterval: 500,
-        });
+        await signAndExecute(tx);
         toast.success("Character updated successfully!");
 
         refetch();
-    }
-
-    /**
-     * Get the character image from the builder Move module.
-     *
-     * Currently unused to avoid unnecessary Move calls and improve UI, but if
-     * the builder object was modifiable, this would be the way to get the image.
-     */
-    // @ts-ignore
-    async function getCharacter(data: Character) {
-        setCanInteract(false);
-        const inspect = new Transaction();
-        inspect.moveCall({
-            target: `${packageId}::character::new`,
-            arguments: [
-                inspect.object(builderId),
-                inspect.pure.string(data.body_type),
-                inspect.pure.string(data.hair_type),
-                inspect.pure.string(data.hairColour),
-                inspect.pure.string(data.eyesColour),
-                inspect.pure.string(data.pantsColour),
-                inspect.pure.string(data.skinColour),
-                inspect.pure.string(data.baseColour),
-                inspect.pure.string(data.accentColour),
-            ],
-        });
-
-        const { results, error } = await client.devInspectTransactionBlock({
-            sender: normalizeSuiAddress("0xa11ce"),
-            transactionBlock: inspect as any,
-        });
-
-        if (!results || !results[0] || !results[0].returnValues) {
-            console.error("Invalid character", error);
-            setCanInteract(true);
-            return;
-        }
-
-        // const [bcsBytes, _type] = results[0].returnValues[0];
-        // const { body, hair } = CharBCS.parse(new Uint8Array(bcsBytes)).image;
-
-        setChar(data);
-        // setExtra(body + hair); // both urlencoded!
-        setCanInteract(true);
     }
 }

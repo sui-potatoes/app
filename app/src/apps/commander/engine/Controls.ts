@@ -91,7 +91,7 @@ export class Controls extends THREE.Controls<ControlsEvents> {
         if (event instanceof WheelEvent && event.type === "wheel") {
             event.preventDefault();
 
-            let hasDecimals = event.deltaY % 1 !== 0;
+            const hasDecimals = event.deltaY % 1 !== 0;
             if (hasDecimals) {
                 this.dispatchEvent({ type: "zoom", delta: event.deltaY });
             } else {
@@ -187,25 +187,21 @@ export class Controls extends THREE.Controls<ControlsEvents> {
                 // pinch zoom
                 // TODO: somehow resolve a conflict with the rotation
                 if (Object.keys(this.pointers).length == 2 && event.pointerType === "touch") {
-                    let other = Object.values(this.pointers).find(
+                    const other = Object.values(this.pointers).find(
                         (p) => p.pointerId !== event.pointerId,
                     )!;
-                    let old = this.pointers[event.pointerId];
+                    const old = this.pointers[event.pointerId];
 
-                    let oldX = old.clientX - other.clientX;
-                    let oldY = old.clientY - other.clientY;
-                    let oldDistance = Math.sqrt(oldX * oldX + oldY * oldY);
+                    const oldX = old.clientX - other.clientX;
+                    const oldY = old.clientY - other.clientY;
+                    const oldDistance = Math.sqrt(oldX * oldX + oldY * oldY);
 
-                    let newX = event.clientX - other.clientX;
-                    let newY = event.clientY - other.clientY;
-                    let newDistance = Math.sqrt(newX * newX + newY * newY);
+                    const newX = event.clientX - other.clientX;
+                    const newY = event.clientY - other.clientY;
+                    const newDistance = Math.sqrt(newX * newX + newY * newY);
 
                     // if (oldDistance > newDistance) {
                     this.dispatchEvent({ type: "zoom", delta: oldDistance - newDistance });
-                }
-
-                // rotation and pan
-                if (Object.keys(this.pointers).length == 2) {
                 }
 
                 this.pointers[event.pointerId] = event;

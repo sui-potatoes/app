@@ -194,7 +194,7 @@ function App({ map, camera, eventBus, history }: AppProps) {
     }
 
     function onZoom({ delta }: { delta: number }) {
-        let newPosition = camera.position.y + delta * 0.01;
+        const newPosition = camera.position.y + delta * 0.01;
         if (newPosition >= 0 && newPosition <= 15) {
             camera.position.y = newPosition;
             camera.lookAt(camera.defaultTarget);
@@ -202,7 +202,7 @@ function App({ map, camera, eventBus, history }: AppProps) {
     }
 
     function onScroll({ delta }: { delta: number }) {
-        let newPosition = camera.position.z + delta * 0.01;
+        const newPosition = camera.position.z + delta * 0.01;
         if (newPosition >= 0 && newPosition < 15) {
             camera.position.z = newPosition;
             camera.lookAt(camera.defaultTarget);

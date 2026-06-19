@@ -60,7 +60,7 @@ export function Footer({ to, text }: { to?: string; text?: string }) {
     );
 }
 
-export function TextInput({}: { value: boolean; onChange: (v: string) => void }) {
+export function TextInput(_props: { value: boolean; onChange: (v: string) => void }) {
     return <input type="text" />;
 }
 

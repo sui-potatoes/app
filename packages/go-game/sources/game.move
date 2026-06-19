@@ -6,9 +6,11 @@ module go_game::game;
 
 use go_game::go::{Self, Board};
 use std::string::String;
-use sui::{clock::Clock, display, package, vec_set::{Self, VecSet}};
-
-use fun go_game::render::svg as Board.to_svg;
+use sui::{
+    clock::Clock,
+    display_registry::DisplayRegistry,
+    vec_set::{Self, VecSet}
+};
 
 /// The size of the board is invalid (not 9, 13, or 19)
 const EInvalidSize: u64 = 0;
@@ -50,10 +52,6 @@ public struct Game has key {
     players: Players,
     /// The game state.
     board: Board,
-    /// The players in the game.
-    /// The SVG representation of the board.
-    /// Updated on every move. Purely for demonstration purposes!
-    image_blob: String,
     /// The time the game was created.
     created_at: u64,
     /// The time the second player joined the game.
@@ -85,7 +83,6 @@ public fun new(acc: &mut Account, size: u8, clock: &Clock, ctx: &mut TxContext) 
         id,
         board: go::new(size as u16),
         players: Players(option::some(acc.id.to_inner()), option::none()),
-        image_blob: board.to_svg().to_url(),
         created_at: clock.timestamp_ms(),
         joined_at: option::none(),
         is_over: false,
@@ -132,7 +129,6 @@ public fun play(
     };
 
     game.board.place(x, y);
-    game.image_blob = game.board.to_svg().to_url();
 }
 
 public fun quit(game: &mut Game, acc: &mut Account) {
@@ -185,19 +181,69 @@ fun board_state(game: &mut Game, x: u16, y: u16) {
     game.board.place(x, y);
 }
 
-///
-fun init(otw: GAME, ctx: &mut TxContext) {
-    let pub = package::claim(otw, ctx);
-    let mut d = display::new<Game>(&pub, ctx);
+entry fun create_display(r: &mut DisplayRegistry, ctx: &mut TxContext) {
+    let (mut d, cap) = r.new<Game>(internal::permit(), ctx);
+    d.set(&cap, "image_url", prepare_display());
+    d.set(&cap, "name", "Game Go Board #{id}");
+    d.set(&cap, "description", "Board: {board.size}x{board.size}");
+    d.set(&cap, "link", "https://potatoes.app/go/{id}");
+    d.set(&cap, "project_url", "https://potatoes.app/");
+    d.set(&cap, "creator", "Sui Potatoes (c)");
+    d.share();
 
-    d.add("image_url", "{image_blob}");
-    d.add("name", "Go Game Board {id}");
-    d.add("description", "{board.size}");
-    d.add("link", "https://potatoes.app/go/{id}");
-    d.add("project_url", "https://potatoes.app/");
-    d.add("creator", "Sui Potatoes (c)");
-    d.update_version();
-
-    transfer::public_transfer(pub, ctx.sender());
-    transfer::public_transfer(d, ctx.sender());
+    transfer::public_transfer(cap, ctx.sender());
 }
+
+fun prepare_display(): String {
+    let mut header: String =
+        "data:image/svg+xml,{'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 198 198\">':url}";
+    header.append_utf8("{'<defs>':url}");
+    header.append_utf8("{'<circle id=\"b\" fill=\"#000\" r=\"10\"/>':url}");
+    header.append_utf8("{'<circle id=\"w\" fill=\"#fff\" stroke=\"#000\" r=\"10\"/>':url}");
+    header.append_utf8(
+        "{'<pattern id=\"g\" width=\"21\" height=\"21\" x=\"20\" y=\"20\" patternUnits=\"userSpaceOnUse\"><path d=\"M 40 0 L 0 0 0 40\" fill=\"none\" stroke=\"gray\" stroke-width=\"0.8\"/></pattern>':url}",
+    );
+    header.append_utf8("{'</defs>':url}");
+    header.append_utf8("{'<rect fill=\"url(#g)\" width=\"198\" height=\"198\"/>':url}");
+
+    // now the fun part: use vector indexing
+    header.append_utf8("{board.rendered_rows[0u8]:url}");
+    header.append_utf8("{board.rendered_rows[1u8]:url}");
+    header.append_utf8("{board.rendered_rows[2u8]:url}");
+    header.append_utf8("{board.rendered_rows[3u8]:url}");
+    header.append_utf8("{board.rendered_rows[4u8]:url}");
+    header.append_utf8("{board.rendered_rows[5u8]:url}");
+    header.append_utf8("{board.rendered_rows[6u8]:url}");
+    header.append_utf8("{board.rendered_rows[7u8]:url}");
+    header.append_utf8("{board.rendered_rows[8u8]:url}");
+    header.append_utf8("{board.rendered_rows[9u8] | '':url}");
+    header.append_utf8("{board.rendered_rows[10u8] | '':url}");
+    header.append_utf8("{board.rendered_rows[11u8] | '':url}");
+    header.append_utf8("{board.rendered_rows[12u8] | '':url}");
+    header.append_utf8("{board.rendered_rows[13u8] | '':url}");
+    header.append_utf8("{board.rendered_rows[14u8] | '':url}");
+    header.append_utf8("{board.rendered_rows[15u8] | '':url}");
+    header.append_utf8("{board.rendered_rows[16u8] | '':url}");
+    header.append_utf8("{board.rendered_rows[17u8] | '':url}");
+    header.append_utf8("{board.rendered_rows[18u8] | '':url}");
+    header.append_utf8("{'</svg>':url}");
+    header
+}
+
+#[test]
+fun t() {
+    std::debug::print(&prepare_display());
+}
+
+/*
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 198 198'>
+<defs>
+<circle id='b' fill='#000' r='10'/>
+<circle id='w' fill='#fff' stroke='#000' r='10'/>
+<pattern id='g' width='21' height='21' x='20' y='20' patternUnits='userSpaceOnUse'>
+<path d='M 40 0 L 0 0 0 40' fill='none' stroke='gray' stroke-width='0.8'/>
+</pattern>
+</defs>
+<rect fill='url(#g)' width='198' height='198'/>
+</svg>
+*/

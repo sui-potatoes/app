@@ -50,7 +50,7 @@ export class Grid {
     }
 
     clearCell(x: number, y: number) {
-        let unit = this.grid[x][y].unit;
+        const unit = this.grid[x][y].unit;
         this._clearCell(x, y, this.grid[x][y]);
         this.grid[x][y] = { type: "Empty", unit };
     }
@@ -65,8 +65,8 @@ export class Grid {
 
     /** Returns the direction from one coordinate to another. */
     protected coordsToDirection(from: [number, number], to: [number, number]) {
-        let [x0, y0] = from;
-        let [x1, y1] = to;
+        const [x0, y0] = from;
+        const [x1, y1] = to;
 
         if (x0 < x1) return "DOWN";
         if (x0 > x1) return "UP";
@@ -78,27 +78,27 @@ export class Grid {
      * Use wave algorithm to find walkable tiles from a starting point.
      */
     walkableTiles(start: [number, number], limit: number = 30) {
-        let [x0, y0] = start;
-        let map = Array.from({ length: this.grid.length }, () =>
+        const [x0, y0] = start;
+        const map = Array.from({ length: this.grid.length }, () =>
             Array(this.grid[0].length).fill(0),
         );
         let queue = [[x0, y0]];
-        let tiles: Set<[number, number, number]> = new Set([[x0, y0, 1]]);
+        const tiles: Set<[number, number, number]> = new Set([[x0, y0, 1]]);
         let num = 1;
 
         map[x0][y0] = num;
 
         while (queue.length > 0) {
             num += 1;
-            let tempQueue = [...queue];
+            const tempQueue = [...queue];
             queue = [];
 
             if (num > limit + 1) {
                 break;
             }
 
-            for (let [nx, ny] of tempQueue) {
-                for (let [x, y] of this.vonNeumann(nx, ny)) {
+            for (const [nx, ny] of tempQueue) {
+                for (const [x, y] of this.vonNeumann(nx, ny)) {
                     // cover in the target tile restricts movement
                     const to = this.grid[x][y];
                     const from = this.grid[nx][ny];
@@ -137,27 +137,27 @@ export class Grid {
      * This is useful for finding tiles within a certain range, like for a grenade throw.
      */
     radiusTiles(start: [number, number], radius: number) {
-        let [x0, y0] = start;
-        let map = Array.from({ length: this.grid.length }, () =>
+        const [x0, y0] = start;
+        const map = Array.from({ length: this.grid.length }, () =>
             Array(this.grid[0].length).fill(0),
         );
         let queue = [[x0, y0]];
-        let tiles: Set<[number, number, number]> = new Set([[x0, y0, 1]]);
+        const tiles: Set<[number, number, number]> = new Set([[x0, y0, 1]]);
         let num = 1;
 
         map[x0][y0] = num;
 
         while (queue.length > 0) {
             num += 1;
-            let tempQueue = [...queue];
+            const tempQueue = [...queue];
             queue = [];
 
             if (num > radius + 1) {
                 break;
             }
 
-            for (let [nx, ny] of tempQueue) {
-                for (let [x, y] of this.vonNeumann(nx, ny)) {
+            for (const [nx, ny] of tempQueue) {
+                for (const [x, y] of this.vonNeumann(nx, ny)) {
                     if (map[x][y] !== 0) continue;
 
                     map[x][y] = num;
@@ -200,16 +200,16 @@ export class Grid {
      * Traces a path from start to end using the wave algorithm.
      */
     tracePath(start: THREE.Vector2, end: THREE.Vector2, _limit: number = 30) {
-        let [x0, y0] = start;
+        const [x0, y0] = start;
         let [x1, y1] = end;
-        let [width, height] = [this.grid.length, this.grid[0].length];
+        const [width, height] = [this.grid.length, this.grid[0].length];
 
         // early return
         if (x0 == x1 && y0 == y1) return;
         if (x0 < 0 || x0 >= width || x1 < 0 || x1 >= width) return;
         // if (Math.abs(x0 - x1) + Math.abs(y0 - y1) > limit) return;
 
-        let map = Array.from({ length: width }, () => Array(height).fill(0));
+        const map = Array.from({ length: width }, () => Array(height).fill(0));
         let queue = [[x0, y0]];
         let num = 1;
 
@@ -217,11 +217,11 @@ export class Grid {
 
         search: while (queue.length > 0) {
             num += 1;
-            let tempQueue = [...queue];
+            const tempQueue = [...queue];
             queue = [];
 
-            for (let [nx, ny] of tempQueue) {
-                for (let [x, y] of this.vonNeumann(nx, ny)) {
+            for (const [nx, ny] of tempQueue) {
+                for (const [x, y] of this.vonNeumann(nx, ny)) {
                     if (map[x][y] !== 0) continue;
 
                     const to = this.grid[x][y];
@@ -259,11 +259,11 @@ export class Grid {
             return;
         }
 
-        let path = [[x1, y1]];
+        const path = [[x1, y1]];
         let num2 = map[x1][y1];
 
         while (num2 > 1) {
-            for (let [dx, dy] of [
+            for (const [dx, dy] of [
                 [1, 0],
                 [-1, 0],
                 [0, 1],

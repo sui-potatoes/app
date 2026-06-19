@@ -1,10 +1,9 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useParams } from "react-router-dom";
 import { Replay, Preset, HistoryRecord } from "../types/bcs";
-import { fromBase64 } from "@mysten/sui/utils";
+import { useBcsObject } from "../../../hooks/useBcsObjects";
 import { Footer, Loader } from "./Components";
 import { useMemo, useState, useEffect } from "react";
 import { Camera, EventBus, loadModels } from "../engine";
@@ -23,39 +22,15 @@ export function WatchReplay() {
         loadModels().then(() => setModelsLoaded(true));
     }, []);
 
-    const { data: replay, isFetching: isFetchingReplay } = useSuiClientQuery(
-        "getObject",
-        {
-            id: gameId || "",
-            options: { showBcs: true },
-        },
-        {
-            enabled: !!gameId,
-            select(data) {
-                if (!data.data) return null;
-                if (!data.data.bcs) return null;
-                if (data.data.bcs.dataType !== "moveObject") return null;
+    const { data: replay, isFetching: isFetchingReplay } = useBcsObject({
+        id: gameId,
+        schema: Replay,
+    });
 
-                const bytes = fromBase64(data.data.bcs.bcsBytes);
-                return Replay.parse(bytes);
-            },
-        },
-    );
-
-    const { data: preset, isFetching: isFetchingPreset } = useSuiClientQuery(
-        "getObject",
-        { id: replay?.presetId || "", options: { showBcs: true } },
-        {
-            enabled: !!replay?.presetId,
-            select(data) {
-                if (!data.data) return null;
-                if (!data.data.bcs) return null;
-                if (data.data.bcs.dataType !== "moveObject") return null;
-                const bytes = fromBase64(data.data.bcs.bcsBytes);
-                return Preset.parse(bytes);
-            },
-        },
-    );
+    const { data: preset, isFetching: isFetchingPreset } = useBcsObject({
+        id: replay?.presetId,
+        schema: Preset,
+    });
 
     useEffect(() => {
         if (!replay || !preset || !!initialGame) return;

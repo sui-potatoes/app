@@ -17,7 +17,7 @@ fun init(otw: DISPLAY, ctx: &mut TxContext) {
     let recruit_display = {
         let mut display = display::new<Recruit>(&publisher, ctx);
         display.add(b"name".to_string(), b"{metadata.name} (Rank: {rank})".to_string());
-        display.add(b"description".to_string(), b"{metadata.description}".to_string());
+        display.add(b"description".to_string(), b"{metadata.backstory}".to_string());
         display.add(
             b"image_url".to_string(),
             b"https://potatoes.app/images/recruit.webp".to_string(),
@@ -33,10 +33,10 @@ fun init(otw: DISPLAY, ctx: &mut TxContext) {
     // Display for the `Weapon` object.
     let weapon_display = {
         let mut display = display::new<Weapon>(&publisher, ctx);
-        display.add(b"name".to_string(), b"Standard Issue Rifle".to_string());
+        display.add(b"name".to_string(), b"{name}".to_string());
         display.add(
             b"description".to_string(),
-            b"Standard Rifle (DMG {damage}; RNG {range}; AMMO {ammo})".to_string(),
+            b"A weapon that Recruits can use in battle.".to_string(),
         );
         display.add(
             b"image_url".to_string(),
@@ -50,10 +50,10 @@ fun init(otw: DISPLAY, ctx: &mut TxContext) {
     // Armor display
     let armor_display = {
         let mut display = display::new<Armor>(&publisher, ctx);
-        display.add(b"name".to_string(), b"Standard Issue Rifle".to_string());
+        display.add(b"name".to_string(), b"{name}".to_string());
         display.add(
             b"description".to_string(),
-            b"Standard Rifle (DMG {damage}; RNG {range}; AMMO {ammo})".to_string(),
+            b"Armor that Recruits can wear in battle.".to_string(),
         );
         display.add(
             b"image_url".to_string(),
@@ -68,7 +68,7 @@ fun init(otw: DISPLAY, ctx: &mut TxContext) {
     let dogtag_display = {
         let mut display = display::new<DogTag>(&publisher, ctx);
         display.add(b"name".to_string(), b"{metadata.name} (Rank: {rank})".to_string());
-        display.add(b"description".to_string(), b"{metadata.description}".to_string());
+        display.add(b"description".to_string(), b"{metadata.backstory}".to_string());
         display.add(
             b"image_url".to_string(),
             b"https://potatoes.app/images/recruit.webp".to_string(),

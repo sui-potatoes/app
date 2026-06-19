@@ -151,12 +151,12 @@ public fun move_unit(map: &mut Map, path: vector<u8>): Record {
 
     let distance = path.length() - 2;
     let (x0, y0) = (path[0] as u16, path[1] as u16);
-    let (width, height) = (map.grid.rows(), map.grid.cols());
+    let (rows, cols) = (map.grid.rows(), map.grid.cols());
 
-    assert!(y0 < width && x0 < height, ETileOutOfBounds);
+    assert!(x0 < rows && y0 < cols, ETileOutOfBounds);
     let search = map.check_path(path).destroy_or!(abort EPathUnwalkable);
     let (x1, y1) = (search[0], search[1]);
-    assert!(y1 < width && x1 < height, ETileOutOfBounds);
+    assert!(x1 < rows && y1 < cols, ETileOutOfBounds);
 
     let mut unit = map.grid[x0, y0].unit.extract();
     unit.try_reset_ap(map.turn);
@@ -300,7 +300,8 @@ macro fun tile_cover($map: &Map, $x: u16, $y: u16): (u8, u8, u8, u8) {
 
 #[allow(lint(public_random))]
 /// Throw a grenade. This action costs 1AP, deals area damage and destroys
-/// covers in the area of effect (currently 3x3).
+/// covers in the area of effect (a von Neumann neighborhood of radius 2 —
+/// a diamond around the target tile).
 public fun perform_grenade(
     map: &mut Map,
     rng: &mut RandomGenerator,
@@ -309,7 +310,7 @@ public fun perform_grenade(
     x1: u16,
     y1: u16,
 ): vector<Record> {
-    let radius = 2; // 5x5 area of effect
+    let radius = 2;
     let unit = &mut map.grid[x, y].unit;
     assert!(grid::manhattan_distance!(x, y, x1, y1) <= GRENADE_RANGE, EPathTooShort);
     assert!(unit.is_some(), ENoUnit);
@@ -349,6 +350,9 @@ public fun perform_grenade(
 
 /// Get the current turn number.
 public fun turn(map: &Map): u16 { map.turn }
+
+/// Get the size of the map as `(rows, cols)`.
+public fun size(map: &Map): (u16, u16) { (map.grid.rows(), map.grid.cols()) }
 
 /// Read the Unit at the given position.
 public fun unit(map: &Map, x: u16, y: u16): &Option<Unit> {

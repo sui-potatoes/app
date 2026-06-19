@@ -1,14 +1,13 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useSuiClient } from "@mysten/dapp-kit";
-import { useEnokiFlow, useZkLogin } from "@mysten/enoki/react";
-import { useNetworkVariable } from "../../../networkConfig";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { COMMANDER_V2_PACKAGE_ID as packageId } from "../../../constants";
 import { NavLink } from "react-router-dom";
-import { useTransactionExecutor } from "../hooks/useTransactionExecutor";
+import { useTransactionExecutor } from "../../../hooks/useTransactionExecutor";
 import { Transaction } from "@mysten/sui/transactions";
 import { Loader, Footer, StatRecord } from "./Components";
-import { SuiObjectRef } from "@mysten/sui/client";
+import { ObjectRef } from "../../../hooks/useBcsObjects";
 import { useState } from "react";
 import { type Weapon, useWeapons } from "../hooks/useWeapons";
 import { weaponImgUrls, weaponMetadata } from "../types/metadata";
@@ -36,19 +35,11 @@ export const WEAPON_STATS: StatRecord[] = [
 export function Weapons() {
     weaponImgUrls().map((url) => preload(url, { as: "image" }));
 
-    const flow = useEnokiFlow();
-    const client = useSuiClient();
-    const zkLogin = useZkLogin();
+    const address = useCurrentAccount()?.address;
     const [selected, setSelected] = useState<Weapon | undefined>();
-    const packageId = useNetworkVariable("commanderV2PackageId");
-    const { data, isPending, isError, error, refetch } = useWeapons({ address: zkLogin.address });
-    const { executeTransaction, isExecuting } = useTransactionExecutor({
-        // @ts-ignore
-        client,
-        signer: () => flow.getKeypair({ network: "testnet" }),
-        enabled: !!zkLogin.address,
-    });
-    const canTransact = !!zkLogin.address && !!executeTransaction;
+    const { data, isPending, isError, error, refetch } = useWeapons({ address });
+    const { executeTransaction, isExecuting } = useTransactionExecutor();
+    const canTransact = !!address && !!executeTransaction;
 
     if (isError) {
         return (
@@ -188,7 +179,7 @@ export function Weapons() {
      * Each upgrade can be tier 1, 2, or 3.
      */
     async function mintWeapon(tier: number, upgrades: { [key: string]: number }) {
-        if (!zkLogin.address) throw new Error("Not logged in");
+        if (!address) throw new Error("Not logged in");
         if (isExecuting) throw new Error("Already executing a transaction");
         if (![1, 2, 3].includes(tier)) throw new Error(`Invalid weapon tier ${tier}`);
 
@@ -246,30 +237,14 @@ export function Weapons() {
             });
         }
 
-        tx.transferObjects([weapon], zkLogin.address!);
+        tx.transferObjects([weapon], address);
 
         await executeTransaction!(tx);
         setTimeout(() => refetch(), 1000);
     }
 
-    // async function removeWeaponUpgrade(ref: SuiObjectRef, idx: number) {
-    //     if (!zkLogin.address) throw new Error("Not logged in");
-    //     if (!executeTransaction) throw new Error("No transaction executor");
-    //     if (isExecuting) throw new Error("Already executing a transaction");
-
-    //     const tx = new Transaction();
-    //     const weapon = tx.objectRef(ref);
-    //     tx.moveCall({
-    //         target: `${packageId}::weapon::remove_upgrade`,
-    //         arguments: [weapon, tx.pure.u8(idx)],
-    //     });
-
-    //     await executeTransaction(tx);
-    //     refetch();
-    // }
-
-    async function throwAway(ref: SuiObjectRef) {
-        if (!zkLogin.address) throw new Error("Not logged in");
+    async function throwAway(ref: ObjectRef) {
+        if (!address) throw new Error("Not logged in");
         if (!executeTransaction) throw new Error("No transaction executor");
         if (isExecuting) throw new Error("Already executing a transaction");
         if (!confirm("Are you sure you want to throw away this weapon? It will be gone forever!"))
@@ -292,8 +267,8 @@ function rngTier(): number {
 }
 
 function rngUpgrade(): { [key: string]: number } {
-    let tier = +((Math.random() * 10000) % 2).toFixed(0);
-    let idx = +((Math.random() * 10000) % 4).toFixed(0);
+    const tier = +((Math.random() * 10000) % 2).toFixed(0);
+    const idx = +((Math.random() * 10000) % 4).toFixed(0);
 
     return {
         [["scope", "laser_sight", "stock", "expanded_clip"][idx]]: tier,

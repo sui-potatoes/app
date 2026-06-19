@@ -98,7 +98,7 @@ public fun perform_grenade(unit: &mut Unit) {
 /// - Regular attack can be + or - 10% of the base damage - random.
 /// - The attack fully depletes the `Unit`'s AP.
 ///
-/// Returns: (is_hit, is_critical, is_plus_one, damage, hit_chance)
+/// Returns: (is_hit, is_plus_one, is_critical, damage, hit_chance)
 ///
 /// Rng security:
 /// - this function is more expensive in the happy path, so the gas limit attack
@@ -123,11 +123,12 @@ public fun perform_attack(
 
     assert!(eff_range + spread >= range, ERangeExceeded);
 
-    // aim stat is affected by the range
+    // aim stat is affected by the range; intermediate math is done in u16 to
+    // avoid overflow on high `aim` / `range` stats
     let hit_chance = if (eff_range == range) {
         aim_stat
     } else if (eff_range > range) {
-        (aim_stat + DISTANCE_BONUS * (eff_range - range)).min(100)
+        ((aim_stat as u16) + (DISTANCE_BONUS as u16) * ((eff_range - range) as u16)).min(100) as u8
     } else {
         aim_stat - (DISTANCE_PENALTY * (range - eff_range)).min(aim_stat)
     };
@@ -138,18 +139,20 @@ public fun perform_attack(
     let is_hit = rng.generate_u8_in_range(0, 99) < hit_chance;
     if (!is_hit) return (false, false, false, 0, hit_chance);
 
+    // damage math is done in u16 and capped at u8 max to avoid overflow and
+    // underflow on extreme `damage` / `spread` stats
     let spread = unit.stats.spread();
     let is_critical = rng.generate_u8_in_range(0, 99) < crit_chance;
     let damage = match (rng.generate_bool()) {
-        true => dmg_stat + rng.generate_u8_in_range(0, spread),
-        false => dmg_stat - rng.generate_u8_in_range(0, spread),
+        true => (dmg_stat as u16) + (rng.generate_u8_in_range(0, spread) as u16),
+        false => (dmg_stat - rng.generate_u8_in_range(0, spread.min(dmg_stat))) as u16,
     };
 
     let is_plus_one = rng.generate_u8_in_range(0, 99) < unit.stats.plus_one();
     let damage = if (is_plus_one) damage + 1 else damage;
-    let damage = if (is_critical) damage + (dmg_stat / 2) else damage;
+    let damage = if (is_critical) damage + (dmg_stat as u16) / 2 else damage;
 
-    (true, is_plus_one, is_critical, damage, hit_chance)
+    (true, is_plus_one, is_critical, damage.min(0xFF) as u8, hit_chance)
 }
 
 #[allow(lint(public_random))]

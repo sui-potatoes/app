@@ -10,12 +10,11 @@ import { bcs, HistoryRecord } from "../types/bcs";
 import { useGame } from "../hooks/useGame";
 import { useGameRecruits } from "../hooks/useGameRecruits";
 import { NavLink } from "react-router-dom";
-import { fromBase64 } from "@mysten/bcs";
 import { GameApp } from "./play/Game";
 import { useGameTransactions } from "../hooks/useGameTransactions";
-import { useNetworkVariable } from "../../../networkConfig";
-import { DryRunTransactionBlockResponse, SuiObjectRef } from "@mysten/sui/client";
-import { parseVMError, vmAbortCodeToMessage } from "../types/abort-codes";
+import { COMMANDER_V2_PACKAGE_ID as packageId } from "../../../constants";
+import { ObjectRef } from "../../../hooks/useBcsObjects";
+import { SimulationError, vmAbortCodeToMessage } from "../types/abort-codes";
 import { pathToCoordinates } from "../types/cursor";
 import { Preset, useMaps } from "../hooks/useMaps";
 import { formatAddress, normalizeSuiAddress } from "@mysten/sui/utils";
@@ -32,7 +31,6 @@ type Mode = "single" | "multi" | "join";
  * The main component of the game.
  */
 export function Playground() {
-    const packageId = useNetworkVariable("commanderV2PackageId");
     const camera = useMemo(() => loadCamera(), []);
     const eventBus = useMemo(() => new EventBus(), []);
     const [modelsLoaded, setModelsLoaded] = useState(false);
@@ -191,7 +189,7 @@ export function Playground() {
 
     // === Initiation ===
 
-    async function createGame(type: Mode, preset: Preset & SuiObjectRef) {
+    async function createGame(type: Mode, preset: Preset & ObjectRef) {
         switch (type) {
             case "join":
                 throw new Error("Incompatible mode");
@@ -208,11 +206,11 @@ export function Playground() {
     async function onConfirm() {
         if (!tx.lockedTx) return;
         const res = await tx.executeLocked();
-        const events = res.data.events || [];
+        const events = res.events || [];
         const eventType = `${packageId}::history::HistoryUpdated`;
-        const historyBcs = events.find((e) => e.type == eventType)?.bcs;
+        const historyBcs = events.find((e) => e.eventType === eventType)?.bcs;
         if (!historyBcs) return;
-        const history = bcs.vector(HistoryRecord).parse(fromBase64(historyBcs));
+        const history = bcs.vector(HistoryRecord).parse(historyBcs);
         if (!history) return;
 
         eventBus.dispatchEvent({ type: "sui:tx_success", history });
@@ -340,11 +338,11 @@ export function Playground() {
 
         if (!result) throw new Error("Failed to execute next turn transaction");
 
-        const events = result.data.events || [];
+        const events = result.events || [];
         const eventType = `${packageId}::history::HistoryUpdated`;
-        const historyBcs = events.find((e) => e.type == eventType)?.bcs;
+        const historyBcs = events.find((e) => e.eventType === eventType)?.bcs;
         if (!historyBcs) return;
-        const history = bcs.vector(HistoryRecord).parse(fromBase64(historyBcs));
+        const history = bcs.vector(HistoryRecord).parse(historyBcs);
         if (!history) return;
         const first = history[0]; // the first record cannot be an empty
         if (!first?.NextTurn) throw new Error("NextTurn record is missing in the history log");
@@ -370,10 +368,12 @@ export function Playground() {
     }
 
     /** Universal try-catch mechanism for all dry runs */
-    function catchDryRunError(e: any): null {
-        const cause = e.cause as DryRunTransactionBlockResponse & { executionErrorSource: string };
-        const message = cause.executionErrorSource;
-        const [mod, fun, code] = parseVMError(message);
+    function catchDryRunError(e: unknown): null {
+        const [mod, fun, code] = (e instanceof SimulationError && e.abortInfo) || [
+            "unknown",
+            "unknown",
+            -1,
+        ];
 
         eventBus.dispatchEvent({
             type: "sui:dry_run_failed",
@@ -396,7 +396,7 @@ export function Playground() {
  * A map item in the list of maps.
  * Displays the map name, popularity, and author.
  */
-function MapItem({ preset }: { preset: Preset & SuiObjectRef }) {
+function MapItem({ preset }: { preset: Preset & ObjectRef }) {
     const name = useSuinsName({ address: preset.author });
     const size = preset.map.grid.length;
 
@@ -420,13 +420,7 @@ function MapItem({ preset }: { preset: Preset & SuiObjectRef }) {
     );
 }
 
-function HostedGameItem({
-    game,
-    onSelect,
-}: {
-    game: Host & SuiObjectRef;
-    onSelect: (host: Host) => void;
-}) {
+function HostedGameItem({ game, onSelect }: { game: Host; onSelect: (host: Host) => void }) {
     const name = useSuinsName({ address: game.host });
 
     return (

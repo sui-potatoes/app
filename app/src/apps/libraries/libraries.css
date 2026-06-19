@@ -36,7 +36,7 @@
 }
 
 .markdown a {
-    color: var(--accent-color);
+    color: var(--brand-color);
     @apply hover:underline;
     @apply normal-case;
 }
