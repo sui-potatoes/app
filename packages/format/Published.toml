@@ -4,12 +4,12 @@
 
 [published.mainnet]
 chain-id = "35834a8a"
-published-at = "0xd3977293c984ff2f916870aa53aed338d4b2aab2952e98be70c62bc3a886173a"
+published-at = "0x7dd3049306509feb3e6cb578efd9c3ac63b37d3318ad19416a86d02a0cfa2cde"
 original-id = "0xd3977293c984ff2f916870aa53aed338d4b2aab2952e98be70c62bc3a886173a"
-version = 1
+version = 2
 
 [published.testnet]
 chain-id = "4c78adac"
-published-at = "0x3e6d3c2275b185c087be0519b7f8fbe32919d704fa5c5389bd691fac45665334"
+published-at = "0x62bc0882ad4e74751278154f1e5750868b16ebf9d7d68882730f19b2a2076d32"
 original-id = "0x3e6d3c2275b185c087be0519b7f8fbe32919d704fa5c5389bd691fac45665334"
-version = 1
+version = 2

@@ -13,7 +13,7 @@ const EIndicesLengthMismatch: u64 = 0;
 /// Format a string with the given values. Similar to `format!` in Rust.
 ///
 /// Example:
-/// ```
+/// ```move
 /// let result = format(b"Hello, {}! It's good to see you, {}!", vector[
 ///     b"John".to_string(),
 ///     b"Jane".to_string(),
