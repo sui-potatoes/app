@@ -13,7 +13,7 @@ Weapon:
     3. plus_one (PLO) - % chance of dealing extra point of damage
     4. crit_chance (CRT) - % chance of dealing critical damage
     5. can_be_dodged (IDG) - boolean - whether a weapon can be dodged
-    6. area_size (ARS) - size of the damage area in von neumann neighbourhood tiles
+    6. area_size (ARS) - radius of the damage area (von Neumann neighbourhood), 0 for a single target
     7. env damage (ENV) - whether a weapon can destroy env objects
     8. range (RAN) - Manhattan range of the weapon (in tiles)
     9. ammo (AMM) - number of shots a weapon can shoot until reload

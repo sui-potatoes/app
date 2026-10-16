@@ -35,6 +35,7 @@ export function vmAbortCodeToMessage(mod: string, fun: string, code: number) {
         case "map:5": errorName = `ENoUnit`; break;
         case "map:6": errorName = `EPathTooShort`; break;
         case "map:7": errorName = `ETileOutOfBounds`; break;
+        case "map:8": errorName = `ETileIsWall`; break;
     }
 
     return `Abort '${errorName}' at '${mod}::${fun}'`;

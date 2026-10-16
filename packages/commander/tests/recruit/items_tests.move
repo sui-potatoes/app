@@ -18,7 +18,7 @@ fun test_weapons() {
         assert_eq!(rifle.stats().plus_one(), 10);
         assert_eq!(rifle.stats().crit_chance(), 10);
         assert_eq!(rifle.stats().can_be_dodged(), 1);
-        assert_eq!(rifle.stats().area_size(), 1);
+        assert_eq!(rifle.stats().area_size(), 0);
         assert_eq!(rifle.stats().env_damage(), 0);
         assert_eq!(rifle.stats().range(), 4);
         assert_eq!(rifle.stats().ammo(), 3);
@@ -32,7 +32,7 @@ fun test_weapons() {
         assert_eq!(rifle.stats().plus_one(), 20);
         assert_eq!(rifle.stats().crit_chance(), 20);
         assert_eq!(rifle.stats().can_be_dodged(), 1);
-        assert_eq!(rifle.stats().area_size(), 1);
+        assert_eq!(rifle.stats().area_size(), 0);
         assert_eq!(rifle.stats().env_damage(), 0);
         assert_eq!(rifle.stats().range(), 5);
         assert_eq!(rifle.stats().ammo(), 3);
@@ -46,7 +46,7 @@ fun test_weapons() {
         assert_eq!(rifle.stats().plus_one(), 30);
         assert_eq!(rifle.stats().crit_chance(), 30);
         assert_eq!(rifle.stats().can_be_dodged(), 1);
-        assert_eq!(rifle.stats().area_size(), 1);
+        assert_eq!(rifle.stats().area_size(), 0);
         assert_eq!(rifle.stats().env_damage(), 0);
         assert_eq!(rifle.stats().range(), 5);
         assert_eq!(rifle.stats().ammo(), 3);

@@ -17,6 +17,7 @@ modify its stats.
 
 
 <pre><code><b>use</b> <a href="./stats.md#commander_stats">commander::stats</a>;
+<b>use</b> <a href="../../.doc-deps/format/format.md#format_format">format::format</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;

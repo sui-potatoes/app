@@ -246,3 +246,17 @@ fun from_bcs() {
     unit2.destroy();
     unit.destroy();
 }
+
+#[test]
+fun to_string() {
+    let ctx = &mut tx_context::dummy();
+    let recruit = recruit::default(ctx);
+    let unit = recruit.to_unit();
+
+    assert_eq!(unit.to_string(), b"HP 10/10 AP 2/2 AMMO 3/3".to_string());
+
+    let (weapon, armor) = recruit.dismiss();
+    weapon.destroy_none();
+    armor.destroy_none();
+    unit.destroy();
+}

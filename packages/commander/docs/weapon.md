@@ -21,6 +21,7 @@ Weapons have different stats and can be upgraded with additional modules.
 
 <pre><code><b>use</b> <a href="./stats.md#commander_stats">commander::stats</a>;
 <b>use</b> <a href="./weapon_upgrade.md#commander_weapon_upgrade">commander::weapon_upgrade</a>;
+<b>use</b> <a href="../../.doc-deps/format/format.md#format_format">format::format</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;

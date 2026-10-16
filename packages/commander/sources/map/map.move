@@ -27,6 +27,8 @@ const ENoUnit: u64 = 5;
 const EPathTooShort: u64 = 6;
 /// The tile is out of bounds.
 const ETileOutOfBounds: u64 = 7;
+/// Attempt to stand on or target a `Wall` tile.
+const ETileIsWall: u64 = 8;
 
 #[allow(unused_const)]
 /// Constant for no cover in the `TileType::Cover`.
@@ -41,6 +43,10 @@ const DEFENSE_BONUS: u8 = 25;
 
 /// The range of the grenade.
 const GRENADE_RANGE: u16 = 5;
+/// The radius of the grenade explosion (von Neumann neighborhood).
+const GRENADE_RADIUS: u16 = 2;
+/// The damage the grenade deals to every unit in the area.
+const GRENADE_DAMAGE: u8 = 4;
 
 /// Defines a single Tile in the game `Map`. Tiles can be empty, provide cover
 /// or be unwalkable. Additionally, a unit standing on a tile effectively makes
@@ -67,8 +73,12 @@ public enum TileType has copy, drop, store {
         right: u8,
         bottom: u8,
     },
-    /// Certain tiles cannot be walked on, like walls or water.
+    /// An empty tile that cannot be walked on, like water or a pit. Does not
+    /// block line of sight and can be targeted by area weapons.
     Unwalkable,
+    /// A solid tile: cannot be walked on, cannot be targeted and blocks line
+    /// of sight. A dead zone for both movement and aiming.
+    Wall,
 }
 
 /// Defines the game Map - a grid of tiles where the game takes place.
@@ -124,6 +134,7 @@ public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16): Reco
 
     assert!(target_tile.unit.is_none(), EUnitAlreadyOnTile);
     assert!(target_tile.tile_type != TileType::Unwalkable, ETileIsUnwalkable);
+    assert!(target_tile.tile_type != TileType::Wall, ETileIsWall);
 
     map.grid[x, y].unit.fill(recruit.to_unit());
     history::new_recruit_placed(x, y)
@@ -167,10 +178,19 @@ public fun move_unit(map: &mut Map, path: vector<u8>): Record {
 }
 
 #[allow(lint(public_random))]
-/// Perform a ranged attack.
+/// Perform a ranged attack from `(x0, y0)` at `(x1, y1)`.
 ///
-/// TODO: cover mechanic, provide `DEF` stat based on the direction of the
-///     attack and the relative position of the attacker and the target.
+/// The hit chance is the attacker's aim adjusted for range, minus the target's
+/// defense. With a single-target weapon (`area_size` of 0) the target tile must
+/// hold a unit, and the defense is the directional cover bonus plus the
+/// target's natural `defense` stat. With an area weapon (`area_size` above 0)
+/// the target is any tile but a `Wall`, defense does not apply, and a hit
+/// explodes with the radius `area_size` (see `explode`). The weapon's
+/// `can_be_dodged` stat decides whether the damage can be dodged.
+///
+/// Records: `Attack`, then `Miss`; or for a single target `[Dodged]`,
+/// `Damage` / `CriticalHit`, `[UnitKIA]`; or for an area weapon the records
+/// of `explode`.
 public fun perform_attack(
     map: &mut Map,
     rng: &mut RandomGenerator,
@@ -181,29 +201,52 @@ public fun perform_attack(
 ): vector<Record> {
     let mut history = vector[history::new_attack(vector[x0, y0], vector[x1, y1])];
     let range = grid::manhattan_distance!(x0, y0, x1, y1) as u8;
-    let defense_bonus = if (range > 0) map.cover_bonus(x0, y0, x1, y1) else 0;
-    let attacker = &mut map.grid[x0, y0].unit;
+
+    let attacker = &map.grid[x0, y0].unit;
     assert!(attacker.is_some(), ENoUnit);
 
-    let unit = attacker.borrow_mut();
+    let stats = attacker.borrow().stats();
+    let radius = stats.area_size() as u16;
+    let can_dodge = stats.can_be_dodged() != 0;
+    let env_damage = stats.env_damage() != 0;
+
+    // single target: the tile must hold a unit, whose cover and natural defense
+    // lower the hit chance; an area weapon targets a tile and ignores both
+    let target_defense = if (radius == 0) {
+        let target = &map.grid[x1, y1].unit;
+        assert!(target.is_some(), ENoUnit);
+        let cover = if (range > 0) map.cover_bonus(x0, y0, x1, y1) else 0;
+        let natural = target.borrow().stats().defense();
+        ((cover as u16) + (natural as u16)).min(100) as u8
+    } else {
+        assert!(!map.is_tile_wall(x1, y1), ETileIsWall);
+        0
+    };
+
+    let unit = map.grid[x0, y0].unit.borrow_mut();
     unit.try_reset_ap(map.turn);
 
-    let (is_hit, _, is_crit, damage, _) = unit.perform_attack(rng, range, defense_bonus);
-    let target = &mut map.grid[x1, y1].unit;
-    assert!(target.is_some(), ENoUnit);
+    let (is_hit, _, is_crit, damage, _) = unit.perform_attack(rng, range, target_defense);
+    if (!is_hit) {
+        history.push_back(history::new_miss());
+        return history
+    };
 
-    let mut target = target.extract();
-    let (is_dodged, damage, is_kia) = if (is_hit && damage > 0) {
-        target.apply_damage(rng, damage, true)
+    if (radius > 0) {
+        history.append(map.explode(rng, x1, y1, radius, damage, env_damage, can_dodge));
+        return history
+    };
+
+    let mut target = map.grid[x1, y1].unit.extract();
+    let (is_dodged, damage, is_kia) = if (damage > 0) {
+        target.apply_damage(rng, damage, can_dodge)
     } else (false, 0, false);
 
     if (is_dodged) history.push_back(history::new_dodged());
-    if (is_hit) {
-        history.push_back({
-            if (is_crit) history::new_critical_hit(damage) // same cost
-            else history::new_damage(damage)
-        });
-    } else history.push_back(history::new_miss());
+    history.push_back({
+        if (is_crit) history::new_critical_hit(damage) // same cost
+        else history::new_damage(damage)
+    });
 
     if (is_kia) history.push_back(history::new_kia(target.destroy()))
     else map.grid[x1, y1].unit.fill(target);
@@ -217,6 +260,8 @@ public fun perform_attack(
 /// - no cover - 0
 /// - LOW_COVER - 25
 /// - HIGH_COVER - 50
+///
+/// A `Wall` tile next to the target counts as high cover on that side.
 public(package) fun cover_bonus(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16): u8 {
     use grid::direction::{direction, none, up, down, left, right};
 
@@ -294,14 +339,18 @@ macro fun tile_cover($map: &Map, $x: u16, $y: u16): (u8, u8, u8, u8) {
     let map = $map;
     match (map.grid[$x, $y].tile_type) {
         TileType::Cover { left, right, top, bottom } => (top, bottom, left, right),
+        TileType::Wall => (HIGH_COVER, HIGH_COVER, HIGH_COVER, HIGH_COVER),
         _ => (0, 0, 0, 0),
     }
 }
 
 #[allow(lint(public_random))]
-/// Throw a grenade. This action costs 1AP, deals area damage and destroys
-/// covers in the area of effect (a von Neumann neighborhood of radius 2 —
-/// a diamond around the target tile).
+/// Throw a grenade from `(x, y)` at `(x1, y1)`. This action costs 1 AP, deals
+/// `GRENADE_DAMAGE` to every unit in the von Neumann neighborhood of radius
+/// `GRENADE_RADIUS` around the target tile (a diamond), cannot be dodged, and
+/// destroys covers in the area.
+///
+/// Records: `Grenade`, then the records of `explode`.
 public fun perform_grenade(
     map: &mut Map,
     rng: &mut RandomGenerator,
@@ -310,9 +359,9 @@ public fun perform_grenade(
     x1: u16,
     y1: u16,
 ): vector<Record> {
-    let radius = 2;
-    let unit = &mut map.grid[x, y].unit;
     assert!(grid::manhattan_distance!(x, y, x1, y1) <= GRENADE_RANGE, EPathTooShort);
+    assert!(!map.is_tile_wall(x1, y1), ETileIsWall);
+    let unit = &mut map.grid[x, y].unit;
     assert!(unit.is_some(), ENoUnit);
 
     // update unit's stats
@@ -320,28 +369,53 @@ public fun perform_grenade(
     unit.try_reset_ap(map.turn);
     unit.perform_grenade();
 
-    // update each tile: Cover -> Empty
-    let mut history = vector[history::new_grenade(x1, y1, radius)];
-    let mut cells = map.grid.von_neumann_neighbors(cell::new(x1, y1), radius);
+    let mut history = vector[history::new_grenade(vector[x, y], vector[x1, y1])];
+    history.append(map.explode(rng, x1, y1, GRENADE_RADIUS, GRENADE_DAMAGE, true, false));
+    history
+}
 
-    cells.push_back(cell::new(x1, y1));
+/// Apply area damage centered at `(x, y)`: every unit in the von Neumann
+/// neighborhood of `radius` (center included) takes `damage`, reduced by its
+/// armor and dodged only if `can_dodge`. With `env_damage`, covers in the area
+/// are destroyed (`Cover` -> `Empty`). Shared by grenades and area weapons.
+///
+/// Records: `Explosion`, then `[Dodged]`, `Damage`, `[UnitKIA]` per unit in
+/// the area. Tiles are visited in the order of `Grid.von_neumann_neighbors`
+/// with the center tile last; a replay must walk them in the same order.
+fun explode(
+    map: &mut Map,
+    rng: &mut RandomGenerator,
+    x: u16,
+    y: u16,
+    radius: u16,
+    damage: u8,
+    env_damage: bool,
+    can_dodge: bool,
+): vector<Record> {
+    let mut history = vector[history::new_explosion(x, y, radius)];
+    let mut cells = map.grid.von_neumann_neighbors(cell::new(x, y), radius);
+
+    cells.push_back(cell::new(x, y));
     cells.do!(|p| {
         let (x, y) = p.to_values();
         let tile = &mut map.grid[x, y];
 
         if (tile.unit.is_some()) {
             let mut unit = tile.unit.extract();
-            let (_, dmg, is_kia) = unit.apply_damage(rng, 4, false);
+            let (is_dodged, dmg, is_kia) = unit.apply_damage(rng, damage, can_dodge);
 
+            if (is_dodged) history.push_back(history::new_dodged());
             history.push_back(history::new_damage(dmg));
 
             if (!is_kia) tile.unit.fill(unit)
             else history.push_back(history::new_kia(unit.destroy()));
         };
 
-        match (tile.tile_type) {
-            TileType::Cover { .. } => tile.tile_type = TileType::Empty,
-            _ => (),
+        if (env_damage) {
+            match (tile.tile_type) {
+                TileType::Cover { .. } => tile.tile_type = TileType::Empty,
+                _ => (),
+            }
         };
     });
 
@@ -388,6 +462,14 @@ public fun is_tile_unwalkable(map: &Map, x: u16, y: u16): bool {
     }
 }
 
+/// Check if the given tile is a wall.
+public fun is_tile_wall(map: &Map, x: u16, y: u16): bool {
+    match (map.grid[x, y].tile_type) {
+        TileType::Wall => true,
+        _ => false,
+    }
+}
+
 /// Alias to support the `Grid.to_string` method.
 public use fun tile_to_string as Tile.to_string;
 
@@ -405,6 +487,7 @@ public fun tile_to_string(tile: &Tile): String {
             str
         },
         TileType::Unwalkable => b" XXX ".to_string(),
+        TileType::Wall => b" ### ".to_string(),
     }
 }
 
@@ -436,7 +519,7 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
             if (target.unit.is_some()) return 'path none;
             match (source.tile_type) {
                 TileType::Empty => (),
-                TileType::Unwalkable => return 'path none,
+                TileType::Unwalkable | TileType::Wall => return 'path none,
                 TileType::Cover { left, right, top, bottom } => {
                     if (direction == left!() && left == HIGH_COVER) return 'path none;
                     if (direction == right!() && right == HIGH_COVER) return 'path none;
@@ -447,7 +530,7 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
 
             match (target.tile_type) {
                 TileType::Empty => (),
-                TileType::Unwalkable => return 'path none,
+                TileType::Unwalkable | TileType::Wall => return 'path none,
                 TileType::Cover { left, right, top, bottom } => {
                     if (direction == left!() && right == HIGH_COVER) return 'path none;
                     if (direction == right!() && left == HIGH_COVER) return 'path none;
@@ -515,6 +598,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Map {
                     bottom: bcs.peel_u8(),
                 },
                 2 => TileType::Unwalkable,
+                3 => TileType::Wall,
                 _ => abort,
             },
             unit: bcs.peel_option!(|bcs| unit::from_bcs(bcs)),
@@ -753,4 +837,65 @@ fun test_map_with_units() {
     armor.destroy!(|a| a.destroy());
 
     map.destroy();
+}
+
+#[test]
+/// Walls block movement in and out, count as high cover for a neighbor, give
+/// no cover as `Unwalkable`, and survive a BCS roundtrip.
+fun test_wall() {
+    use grid::direction::{down, right};
+    use std::unit_test::assert_eq;
+
+    let mut map = new(@0.to_id(), 3);
+    *&mut map.grid[1, 1].tile_type = TileType::Wall;
+
+    assert!(map.is_tile_wall(1, 1));
+    assert!(!map.is_tile_unwalkable(1, 1));
+    assert!(map.check_path(vector[0, 1, down!()]).is_none());
+    assert!(map.check_path(vector[1, 0, right!()]).is_none());
+    assert!(map.check_path(vector[0, 0, right!(), right!(), down!()]).is_some());
+
+    // target (2, 1) attacked from (0, 1): the wall at (1, 1) is high cover
+    assert_eq!(map.cover_bonus(0, 1, 2, 1), 2 * DEFENSE_BONUS);
+    assert_eq!(map.cover_bonus(2, 0, 2, 1), 0); // attack from the side
+
+    *&mut map.grid[1, 1].tile_type = TileType::Unwalkable;
+    assert_eq!(map.cover_bonus(0, 1, 2, 1), 0);
+
+    *&mut map.grid[1, 1].tile_type = TileType::Wall;
+    let restored = from_bytes(bcs::to_bytes(&map));
+    assert!(restored.is_tile_wall(1, 1));
+    assert_eq!(map.to_string(), restored.to_string());
+
+    restored.destroy();
+    map.destroy();
+}
+
+#[test, expected_failure(abort_code = ETileIsWall)]
+fun test_place_recruit_on_wall_fails() {
+    let ctx = &mut tx_context::dummy();
+    let recruit = commander::recruit::default(ctx);
+    let mut map = new(@0.to_id(), 3);
+    *&mut map.grid[1, 1].tile_type = TileType::Wall;
+    map.place_recruit(&recruit, 1, 1);
+    abort
+}
+
+#[test, expected_failure(abort_code = ETileIsWall)]
+/// An area weapon cannot target a wall tile; checked before the roll.
+fun test_area_attack_on_wall_fails() {
+    use commander::{recruit, stats, weapon};
+
+    let ctx = &mut tx_context::dummy();
+    let mut rng = sui::random::new_generator_from_seed_for_testing(vector[1]);
+    let mut map = new(@0.to_id(), 3);
+    *&mut map.grid[0, 2].tile_type = TileType::Wall;
+
+    // default weapon with `area_size` 1 (radius 1)
+    let mut recruit = recruit::default(ctx);
+    let launcher = stats::new_unchecked(0x03_04_00_01_01_00_00_02_04 << (6 * 8));
+    recruit.add_weapon(weapon::new(b"Launcher".to_string(), launcher, ctx));
+    map.place_recruit(&recruit, 0, 0);
+    map.perform_attack(&mut rng, 0, 0, 0, 2);
+    abort
 }

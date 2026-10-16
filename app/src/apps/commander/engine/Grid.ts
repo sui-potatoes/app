@@ -105,7 +105,7 @@ export class Grid {
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
                     if (to.unit !== null) continue;
-                    if (to.type === "Unwalkable") continue;
+                    if (to.type === "Unwalkable" || to.type === "Wall") continue;
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.down) continue;
                         if (direction === "DOWN" && to.up) continue;
@@ -187,6 +187,8 @@ export class Grid {
                                 };
                             case "Unwalkable":
                                 return { tile_type: { ["Unwalkable"]: true }, unit: null };
+                            case "Wall":
+                                return { tile_type: { ["Wall"]: true }, unit: null };
                         }
                     }),
                 ),
@@ -229,7 +231,7 @@ export class Grid {
                     const direction = this.coordsToDirection([nx, ny], [x, y]);
 
                     if (to.unit !== null) continue;
-                    if (to.type === "Unwalkable") continue;
+                    if (to.type === "Unwalkable" || to.type === "Wall") continue;
                     if (to.type === "Cover") {
                         if (direction === "UP" && to.down) continue;
                         if (direction === "DOWN" && to.up) continue;
@@ -314,6 +316,8 @@ export class Grid {
                         return this.setCell(x, y, { type: "Empty", unit: null });
                     case "Unwalkable":
                         return this.setCell(x, y, { type: "Unwalkable", unit: null });
+                    case "Wall":
+                        return this.setCell(x, y, { type: "Wall", unit: null });
                     case "Cover": {
                         const { left, right, up, down } = cell.tile_type.Cover;
                         this.setCell(x, y, { type: "Cover", left, right, up, down, unit: null });

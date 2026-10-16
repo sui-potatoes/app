@@ -30,12 +30,15 @@ Traits:
 -  [Function `cover_bonus`](#commander_map_cover_bonus)
 -  [Macro function `tile_cover`](#commander_map_tile_cover)
 -  [Function `perform_grenade`](#commander_map_perform_grenade)
+-  [Function `explode`](#commander_map_explode)
 -  [Function `turn`](#commander_map_turn)
+-  [Function `size`](#commander_map_size)
 -  [Function `unit`](#commander_map_unit)
 -  [Function `tile_has_unit`](#commander_map_tile_has_unit)
 -  [Function `is_tile_cover`](#commander_map_is_tile_cover)
 -  [Function `is_tile_empty`](#commander_map_is_tile_empty)
 -  [Function `is_tile_unwalkable`](#commander_map_is_tile_unwalkable)
+-  [Function `is_tile_wall`](#commander_map_is_tile_wall)
 -  [Function `tile_to_string`](#commander_map_tile_to_string)
 -  [Function `check_path`](#commander_map_check_path)
 -  [Function `demo_1`](#commander_map_demo_1)
@@ -54,6 +57,7 @@ Traits:
 <b>use</b> <a href="./unit.md#commander_unit">commander::unit</a>;
 <b>use</b> <a href="./weapon.md#commander_weapon">commander::weapon</a>;
 <b>use</b> <a href="./weapon_upgrade.md#commander_weapon_upgrade">commander::weapon_upgrade</a>;
+<b>use</b> <a href="../../.doc-deps/format/format.md#format_format">format::format</a>;
 <b>use</b> <a href="../../.doc-deps/grid/cell.md#grid_cell">grid::cell</a>;
 <b>use</b> <a href="../../.doc-deps/grid/cursor.md#grid_cursor">grid::cursor</a>;
 <b>use</b> <a href="../../.doc-deps/grid/grid.md#grid_grid">grid::grid</a>;
@@ -235,7 +239,15 @@ Variant <code>Cover</code>
 Variant <code>Unwalkable</code>
 </dt>
 <dd>
- Certain tiles cannot be walked on, like walls or water.
+ An empty tile that cannot be walked on, like water or a pit. Does not
+ block line of sight and can be targeted by area weapons.
+</dd>
+<dt>
+Variant <code>Wall</code>
+</dt>
+<dd>
+ A solid tile: cannot be walked on, cannot be targeted and blocks line
+ of sight. A dead zone for both movement and aiming.
 </dd>
 </dl>
 
@@ -307,6 +319,16 @@ The tile is out of bounds.
 
 
 
+<a name="commander_map_ETileIsWall"></a>
+
+Attempt to stand on or target a <code>Wall</code> tile.
+
+
+<pre><code><b>const</b> <a href="./map.md#commander_map_ETileIsWall">ETileIsWall</a>: u64 = 8;
+</code></pre>
+
+
+
 <a name="commander_map_NO_COVER"></a>
 
 Constant for no cover in the <code>TileType::Cover</code>.
@@ -357,13 +379,33 @@ The range of the grenade.
 
 
 
+<a name="commander_map_GRENADE_RADIUS"></a>
+
+The radius of the grenade explosion (von Neumann neighborhood).
+
+
+<pre><code><b>const</b> <a href="./map.md#commander_map_GRENADE_RADIUS">GRENADE_RADIUS</a>: u16 = 2;
+</code></pre>
+
+
+
+<a name="commander_map_GRENADE_DAMAGE"></a>
+
+The damage the grenade deals to every unit in the area.
+
+
+<pre><code><b>const</b> <a href="./map.md#commander_map_GRENADE_DAMAGE">GRENADE_DAMAGE</a>: u8 = 4;
+</code></pre>
+
+
+
 <a name="commander_map_new"></a>
 
 ## Function `new`
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_new">new</a>(<a href="./map.md#commander_map_id">id</a>: <a href="../../.doc-deps/sui/object.md#sui_object_ID">sui::object::ID</a>, size: u16): <a href="./map.md#commander_map_Map">commander::map::Map</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_new">new</a>(<a href="./map.md#commander_map_id">id</a>: <a href="../../.doc-deps/sui/object.md#sui_object_ID">sui::object::ID</a>, <a href="./map.md#commander_map_size">size</a>: u16): <a href="./map.md#commander_map_Map">commander::map::Map</a>
 </code></pre>
 
 
@@ -372,13 +414,13 @@ The range of the grenade.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_new">new</a>(<a href="./map.md#commander_map_id">id</a>: ID, size: u16): <a href="./map.md#commander_map_Map">Map</a> {
+<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_new">new</a>(<a href="./map.md#commander_map_id">id</a>: ID, <a href="./map.md#commander_map_size">size</a>: u16): <a href="./map.md#commander_map_Map">Map</a> {
     <a href="./map.md#commander_map_Map">Map</a> {
         <a href="./map.md#commander_map_id">id</a>,
         <a href="./map.md#commander_map_turn">turn</a>: 0,
         grid: grid::tabulate!(
-            size,
-            size,
+            <a href="./map.md#commander_map_size">size</a>,
+            <a href="./map.md#commander_map_size">size</a>,
             |_, _| <a href="./map.md#commander_map_Tile">Tile</a> {
                 tile_type: TileType::Empty,
                 <a href="./unit.md#commander_unit">unit</a>: option::none(),
@@ -532,6 +574,7 @@ Place a <code>Recruit</code> on the map at the given position.
     <b>let</b> target_tile = &<a href="./map.md#commander_map">map</a>.grid[x, y];
     <b>assert</b>!(target_tile.<a href="./unit.md#commander_unit">unit</a>.is_none(), <a href="./map.md#commander_map_EUnitAlreadyOnTile">EUnitAlreadyOnTile</a>);
     <b>assert</b>!(target_tile.tile_type != TileType::Unwalkable, <a href="./map.md#commander_map_ETileIsUnwalkable">ETileIsUnwalkable</a>);
+    <b>assert</b>!(target_tile.tile_type != TileType::Wall, <a href="./map.md#commander_map_ETileIsWall">ETileIsWall</a>);
     <a href="./map.md#commander_map">map</a>.grid[x, y].<a href="./unit.md#commander_unit">unit</a>.fill(<a href="./recruit.md#commander_recruit">recruit</a>.to_unit());
     <a href="./history.md#commander_history_new_recruit_placed">history::new_recruit_placed</a>(x, y)
 }
@@ -616,11 +659,11 @@ Move a unit along the path. The first cell is the current position of the unit.
     <b>assert</b>!(path.length() &gt; 2, <a href="./map.md#commander_map_EPathTooShort">EPathTooShort</a>);
     <b>let</b> distance = path.length() - 2;
     <b>let</b> (x0, y0) = (path[0] <b>as</b> u16, path[1] <b>as</b> u16);
-    <b>let</b> (width, height) = (<a href="./map.md#commander_map">map</a>.grid.rows(), <a href="./map.md#commander_map">map</a>.grid.cols());
-    <b>assert</b>!(y0 &lt; width && x0 &lt; height, <a href="./map.md#commander_map_ETileOutOfBounds">ETileOutOfBounds</a>);
+    <b>let</b> (rows, cols) = (<a href="./map.md#commander_map">map</a>.grid.rows(), <a href="./map.md#commander_map">map</a>.grid.cols());
+    <b>assert</b>!(x0 &lt; rows && y0 &lt; cols, <a href="./map.md#commander_map_ETileOutOfBounds">ETileOutOfBounds</a>);
     <b>let</b> search = <a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_check_path">check_path</a>(path).destroy_or!(<b>abort</b> <a href="./map.md#commander_map_EPathUnwalkable">EPathUnwalkable</a>);
     <b>let</b> (x1, y1) = (search[0], search[1]);
-    <b>assert</b>!(y1 &lt; width && x1 &lt; height, <a href="./map.md#commander_map_ETileOutOfBounds">ETileOutOfBounds</a>);
+    <b>assert</b>!(x1 &lt; rows && y1 &lt; cols, <a href="./map.md#commander_map_ETileOutOfBounds">ETileOutOfBounds</a>);
     <b>let</b> <b>mut</b> <a href="./unit.md#commander_unit">unit</a> = <a href="./map.md#commander_map">map</a>.grid[x0, y0].<a href="./unit.md#commander_unit">unit</a>.extract();
     <a href="./unit.md#commander_unit">unit</a>.try_reset_ap(<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_turn">turn</a>);
     <a href="./unit.md#commander_unit">unit</a>.perform_move(distance <b>as</b> u8);
@@ -637,10 +680,19 @@ Move a unit along the path. The first cell is the current position of the unit.
 
 ## Function `perform_attack`
 
-Perform a ranged attack.
+Perform a ranged attack from <code>(x0, y0)</code> at <code>(x1, y1)</code>.
 
-TODO: cover mechanic, provide <code>DEF</code> stat based on the direction of the
-attack and the relative position of the attacker and the target.
+The hit chance is the attacker's aim adjusted for range, minus the target's
+defense. With a single-target weapon (<code>area_size</code> of 0) the target tile must
+hold a unit, and the defense is the directional cover bonus plus the
+target's natural <code>defense</code> stat. With an area weapon (<code>area_size</code> above 0)
+the target is any tile but a <code>Wall</code>, defense does not apply, and a hit
+explodes with the radius <code>area_size</code> (see <code><a href="./map.md#commander_map_explode">explode</a></code>). The weapon's
+<code>can_be_dodged</code> stat decides whether the damage can be dodged.
+
+Records: <code>Attack</code>, then <code>Miss</code>; or for a single target <code>[Dodged]</code>,
+<code>Damage</code> / <code>CriticalHit</code>, <code>[UnitKIA]</code>; or for an area weapon the records
+of <code><a href="./map.md#commander_map_explode">explode</a></code>.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_perform_attack">perform_attack</a>(<a href="./map.md#commander_map">map</a>: &<b>mut</b> <a href="./map.md#commander_map_Map">commander::map::Map</a>, rng: &<b>mut</b> <a href="../../.doc-deps/sui/random.md#sui_random_RandomGenerator">sui::random::RandomGenerator</a>, x0: u16, y0: u16, x1: u16, y1: u16): vector&lt;<a href="./history.md#commander_history_Record">commander::history::Record</a>&gt;
@@ -662,25 +714,44 @@ attack and the relative position of the attacker and the target.
 ): vector&lt;Record&gt; {
     <b>let</b> <b>mut</b> <a href="./history.md#commander_history">history</a> = vector[<a href="./history.md#commander_history_new_attack">history::new_attack</a>(vector[x0, y0], vector[x1, y1])];
     <b>let</b> range = grid::manhattan_distance!(x0, y0, x1, y1) <b>as</b> u8;
-    <b>let</b> defense_bonus = <b>if</b> (range &gt; 0) <a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_cover_bonus">cover_bonus</a>(x0, y0, x1, y1) <b>else</b> 0;
-    <b>let</b> attacker = &<b>mut</b> <a href="./map.md#commander_map">map</a>.grid[x0, y0].<a href="./unit.md#commander_unit">unit</a>;
+    <b>let</b> attacker = &<a href="./map.md#commander_map">map</a>.grid[x0, y0].<a href="./unit.md#commander_unit">unit</a>;
     <b>assert</b>!(attacker.is_some(), <a href="./map.md#commander_map_ENoUnit">ENoUnit</a>);
-    <b>let</b> <a href="./unit.md#commander_unit">unit</a> = attacker.borrow_mut();
+    <b>let</b> <a href="./stats.md#commander_stats">stats</a> = attacker.borrow().<a href="./stats.md#commander_stats">stats</a>();
+    <b>let</b> radius = <a href="./stats.md#commander_stats">stats</a>.area_size() <b>as</b> u16;
+    <b>let</b> can_dodge = <a href="./stats.md#commander_stats">stats</a>.can_be_dodged() != 0;
+    <b>let</b> env_damage = <a href="./stats.md#commander_stats">stats</a>.env_damage() != 0;
+    // single target: the tile must hold a <a href="./unit.md#commander_unit">unit</a>, whose cover and natural defense
+    // lower the hit chance; an area <a href="./weapon.md#commander_weapon">weapon</a> targets a tile and ignores both
+    <b>let</b> target_defense = <b>if</b> (radius == 0) {
+        <b>let</b> target = &<a href="./map.md#commander_map">map</a>.grid[x1, y1].<a href="./unit.md#commander_unit">unit</a>;
+        <b>assert</b>!(target.is_some(), <a href="./map.md#commander_map_ENoUnit">ENoUnit</a>);
+        <b>let</b> cover = <b>if</b> (range &gt; 0) <a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_cover_bonus">cover_bonus</a>(x0, y0, x1, y1) <b>else</b> 0;
+        <b>let</b> natural = target.borrow().<a href="./stats.md#commander_stats">stats</a>().defense();
+        ((cover <b>as</b> u16) + (natural <b>as</b> u16)).min(100) <b>as</b> u8
+    } <b>else</b> {
+        <b>assert</b>!(!<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_is_tile_wall">is_tile_wall</a>(x1, y1), <a href="./map.md#commander_map_ETileIsWall">ETileIsWall</a>);
+        0
+    };
+    <b>let</b> <a href="./unit.md#commander_unit">unit</a> = <a href="./map.md#commander_map">map</a>.grid[x0, y0].<a href="./unit.md#commander_unit">unit</a>.borrow_mut();
     <a href="./unit.md#commander_unit">unit</a>.try_reset_ap(<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_turn">turn</a>);
-    <b>let</b> (is_hit, _, is_crit, damage, _) = <a href="./unit.md#commander_unit">unit</a>.<a href="./map.md#commander_map_perform_attack">perform_attack</a>(rng, range, defense_bonus);
-    <b>let</b> target = &<b>mut</b> <a href="./map.md#commander_map">map</a>.grid[x1, y1].<a href="./unit.md#commander_unit">unit</a>;
-    <b>assert</b>!(target.is_some(), <a href="./map.md#commander_map_ENoUnit">ENoUnit</a>);
-    <b>let</b> <b>mut</b> target = target.extract();
-    <b>let</b> (is_dodged, damage, is_kia) = <b>if</b> (is_hit && damage &gt; 0) {
-        target.apply_damage(rng, damage, <b>true</b>)
+    <b>let</b> (is_hit, _, is_crit, damage, _) = <a href="./unit.md#commander_unit">unit</a>.<a href="./map.md#commander_map_perform_attack">perform_attack</a>(rng, range, target_defense);
+    <b>if</b> (!is_hit) {
+        <a href="./history.md#commander_history">history</a>.push_back(<a href="./history.md#commander_history_new_miss">history::new_miss</a>());
+        <b>return</b> <a href="./history.md#commander_history">history</a>
+    };
+    <b>if</b> (radius &gt; 0) {
+        <a href="./history.md#commander_history">history</a>.append(<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_explode">explode</a>(rng, x1, y1, radius, damage, env_damage, can_dodge));
+        <b>return</b> <a href="./history.md#commander_history">history</a>
+    };
+    <b>let</b> <b>mut</b> target = <a href="./map.md#commander_map">map</a>.grid[x1, y1].<a href="./unit.md#commander_unit">unit</a>.extract();
+    <b>let</b> (is_dodged, damage, is_kia) = <b>if</b> (damage &gt; 0) {
+        target.apply_damage(rng, damage, can_dodge)
     } <b>else</b> (<b>false</b>, 0, <b>false</b>);
     <b>if</b> (is_dodged) <a href="./history.md#commander_history">history</a>.push_back(<a href="./history.md#commander_history_new_dodged">history::new_dodged</a>());
-    <b>if</b> (is_hit) {
-        <a href="./history.md#commander_history">history</a>.push_back({
-            <b>if</b> (is_crit) <a href="./history.md#commander_history_new_critical_hit">history::new_critical_hit</a>(damage) // same cost
-            <b>else</b> <a href="./history.md#commander_history_new_damage">history::new_damage</a>(damage)
-        });
-    } <b>else</b> <a href="./history.md#commander_history">history</a>.push_back(<a href="./history.md#commander_history_new_miss">history::new_miss</a>());
+    <a href="./history.md#commander_history">history</a>.push_back({
+        <b>if</b> (is_crit) <a href="./history.md#commander_history_new_critical_hit">history::new_critical_hit</a>(damage) // same cost
+        <b>else</b> <a href="./history.md#commander_history_new_damage">history::new_damage</a>(damage)
+    });
     <b>if</b> (is_kia) <a href="./history.md#commander_history">history</a>.push_back(<a href="./history.md#commander_history_new_kia">history::new_kia</a>(target.<a href="./map.md#commander_map_destroy">destroy</a>()))
     <b>else</b> <a href="./map.md#commander_map">map</a>.grid[x1, y1].<a href="./unit.md#commander_unit">unit</a>.fill(target);
     <a href="./history.md#commander_history">history</a>
@@ -701,6 +772,8 @@ based on the direction of the attack and the type of cover on the tile.
 - no cover - 0
 - LOW_COVER - 25
 - HIGH_COVER - 50
+
+A <code>Wall</code> tile next to the target counts as high cover on that side.
 
 
 <pre><code><b>public</b>(package) <b>fun</b> <a href="./map.md#commander_map_cover_bonus">cover_bonus</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">commander::map::Map</a>, x0: u16, y0: u16, x1: u16, y1: u16): u8
@@ -805,6 +878,7 @@ based on the direction of the attack and the type of cover on the tile.
     <b>let</b> <a href="./map.md#commander_map">map</a> = $<a href="./map.md#commander_map">map</a>;
     match (<a href="./map.md#commander_map">map</a>.grid[$x, $y].tile_type) {
         TileType::Cover { left, right, top, bottom } =&gt; (top, bottom, left, right),
+        TileType::Wall =&gt; (<a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>, <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>, <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>, <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>),
         _ =&gt; (0, 0, 0, 0),
     }
 }
@@ -818,8 +892,12 @@ based on the direction of the attack and the type of cover on the tile.
 
 ## Function `perform_grenade`
 
-Throw a grenade. This action costs 1AP, deals area damage and destroys
-covers in the area of effect (currently 3x3).
+Throw a grenade from <code>(x, y)</code> at <code>(x1, y1)</code>. This action costs 1 AP, deals
+<code><a href="./map.md#commander_map_GRENADE_DAMAGE">GRENADE_DAMAGE</a></code> to every unit in the von Neumann neighborhood of radius
+<code><a href="./map.md#commander_map_GRENADE_RADIUS">GRENADE_RADIUS</a></code> around the target tile (a diamond), cannot be dodged, and
+destroys covers in the area.
+
+Records: <code>Grenade</code>, then the records of <code><a href="./map.md#commander_map_explode">explode</a></code>.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_perform_grenade">perform_grenade</a>(<a href="./map.md#commander_map">map</a>: &<b>mut</b> <a href="./map.md#commander_map_Map">commander::map::Map</a>, rng: &<b>mut</b> <a href="../../.doc-deps/sui/random.md#sui_random_RandomGenerator">sui::random::RandomGenerator</a>, x: u16, y: u16, x1: u16, y1: u16): vector&lt;<a href="./history.md#commander_history_Record">commander::history::Record</a>&gt;
@@ -839,31 +917,76 @@ covers in the area of effect (currently 3x3).
     x1: u16,
     y1: u16,
 ): vector&lt;Record&gt; {
-    <b>let</b> radius = 2; // 5x5 area of effect
-    <b>let</b> <a href="./unit.md#commander_unit">unit</a> = &<b>mut</b> <a href="./map.md#commander_map">map</a>.grid[x, y].<a href="./unit.md#commander_unit">unit</a>;
     <b>assert</b>!(grid::manhattan_distance!(x, y, x1, y1) &lt;= <a href="./map.md#commander_map_GRENADE_RANGE">GRENADE_RANGE</a>, <a href="./map.md#commander_map_EPathTooShort">EPathTooShort</a>);
+    <b>assert</b>!(!<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_is_tile_wall">is_tile_wall</a>(x1, y1), <a href="./map.md#commander_map_ETileIsWall">ETileIsWall</a>);
+    <b>let</b> <a href="./unit.md#commander_unit">unit</a> = &<b>mut</b> <a href="./map.md#commander_map">map</a>.grid[x, y].<a href="./unit.md#commander_unit">unit</a>;
     <b>assert</b>!(<a href="./unit.md#commander_unit">unit</a>.is_some(), <a href="./map.md#commander_map_ENoUnit">ENoUnit</a>);
     // update <a href="./unit.md#commander_unit">unit</a>'s <a href="./stats.md#commander_stats">stats</a>
     <b>let</b> <a href="./unit.md#commander_unit">unit</a> = <a href="./unit.md#commander_unit">unit</a>.borrow_mut();
     <a href="./unit.md#commander_unit">unit</a>.try_reset_ap(<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_turn">turn</a>);
     <a href="./unit.md#commander_unit">unit</a>.<a href="./map.md#commander_map_perform_grenade">perform_grenade</a>();
-    // update each tile: Cover -&gt; Empty
-    <b>let</b> <b>mut</b> <a href="./history.md#commander_history">history</a> = vector[<a href="./history.md#commander_history_new_grenade">history::new_grenade</a>(x1, y1, radius)];
-    <b>let</b> <b>mut</b> cells = <a href="./map.md#commander_map">map</a>.grid.von_neumann_neighbors(cell::new(x1, y1), radius);
-    cells.push_back(cell::new(x1, y1));
+    <b>let</b> <b>mut</b> <a href="./history.md#commander_history">history</a> = vector[<a href="./history.md#commander_history_new_grenade">history::new_grenade</a>(vector[x, y], vector[x1, y1])];
+    <a href="./history.md#commander_history">history</a>.append(<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_explode">explode</a>(rng, x1, y1, <a href="./map.md#commander_map_GRENADE_RADIUS">GRENADE_RADIUS</a>, <a href="./map.md#commander_map_GRENADE_DAMAGE">GRENADE_DAMAGE</a>, <b>true</b>, <b>false</b>));
+    <a href="./history.md#commander_history">history</a>
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="commander_map_explode"></a>
+
+## Function `explode`
+
+Apply area damage centered at <code>(x, y)</code>: every unit in the von Neumann
+neighborhood of <code>radius</code> (center included) takes <code>damage</code>, reduced by its
+armor and dodged only if <code>can_dodge</code>. With <code>env_damage</code>, covers in the area
+are destroyed (<code>Cover</code> -> <code>Empty</code>). Shared by grenades and area weapons.
+
+Records: <code>Explosion</code>, then <code>[Dodged]</code>, <code>Damage</code>, <code>[UnitKIA]</code> per unit in
+the area. Tiles are visited in the order of <code>Grid.von_neumann_neighbors</code>
+with the center tile last; a replay must walk them in the same order.
+
+
+<pre><code><b>fun</b> <a href="./map.md#commander_map_explode">explode</a>(<a href="./map.md#commander_map">map</a>: &<b>mut</b> <a href="./map.md#commander_map_Map">commander::map::Map</a>, rng: &<b>mut</b> <a href="../../.doc-deps/sui/random.md#sui_random_RandomGenerator">sui::random::RandomGenerator</a>, x: u16, y: u16, radius: u16, damage: u8, env_damage: bool, can_dodge: bool): vector&lt;<a href="./history.md#commander_history_Record">commander::history::Record</a>&gt;
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>fun</b> <a href="./map.md#commander_map_explode">explode</a>(
+    <a href="./map.md#commander_map">map</a>: &<b>mut</b> <a href="./map.md#commander_map_Map">Map</a>,
+    rng: &<b>mut</b> RandomGenerator,
+    x: u16,
+    y: u16,
+    radius: u16,
+    damage: u8,
+    env_damage: bool,
+    can_dodge: bool,
+): vector&lt;Record&gt; {
+    <b>let</b> <b>mut</b> <a href="./history.md#commander_history">history</a> = vector[<a href="./history.md#commander_history_new_explosion">history::new_explosion</a>(x, y, radius)];
+    <b>let</b> <b>mut</b> cells = <a href="./map.md#commander_map">map</a>.grid.von_neumann_neighbors(cell::new(x, y), radius);
+    cells.push_back(cell::new(x, y));
     cells.do!(|p| {
         <b>let</b> (x, y) = p.to_values();
         <b>let</b> tile = &<b>mut</b> <a href="./map.md#commander_map">map</a>.grid[x, y];
         <b>if</b> (tile.<a href="./unit.md#commander_unit">unit</a>.is_some()) {
             <b>let</b> <b>mut</b> <a href="./unit.md#commander_unit">unit</a> = tile.<a href="./unit.md#commander_unit">unit</a>.extract();
-            <b>let</b> (_, dmg, is_kia) = <a href="./unit.md#commander_unit">unit</a>.apply_damage(rng, 4, <b>false</b>);
+            <b>let</b> (is_dodged, dmg, is_kia) = <a href="./unit.md#commander_unit">unit</a>.apply_damage(rng, damage, can_dodge);
+            <b>if</b> (is_dodged) <a href="./history.md#commander_history">history</a>.push_back(<a href="./history.md#commander_history_new_dodged">history::new_dodged</a>());
             <a href="./history.md#commander_history">history</a>.push_back(<a href="./history.md#commander_history_new_damage">history::new_damage</a>(dmg));
             <b>if</b> (!is_kia) tile.<a href="./unit.md#commander_unit">unit</a>.fill(<a href="./unit.md#commander_unit">unit</a>)
             <b>else</b> <a href="./history.md#commander_history">history</a>.push_back(<a href="./history.md#commander_history_new_kia">history::new_kia</a>(<a href="./unit.md#commander_unit">unit</a>.<a href="./map.md#commander_map_destroy">destroy</a>()));
         };
-        match (tile.tile_type) {
-            TileType::Cover { .. } =&gt; tile.tile_type = TileType::Empty,
-            _ =&gt; (),
+        <b>if</b> (env_damage) {
+            match (tile.tile_type) {
+                TileType::Cover { .. } =&gt; tile.tile_type = TileType::Empty,
+                _ =&gt; (),
+            }
         };
     });
     <a href="./history.md#commander_history">history</a>
@@ -891,6 +1014,29 @@ Get the current turn number.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_turn">turn</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>): u16 { <a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_turn">turn</a> }
+</code></pre>
+
+
+
+</details>
+
+<a name="commander_map_size"></a>
+
+## Function `size`
+
+Get the size of the map as <code>(rows, cols)</code>.
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_size">size</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">commander::map::Map</a>): (u16, u16)
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_size">size</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>): (u16, u16) { (<a href="./map.md#commander_map">map</a>.grid.rows(), <a href="./map.md#commander_map">map</a>.grid.cols()) }
 </code></pre>
 
 
@@ -1031,6 +1177,34 @@ Check if the given tile is unwalkable.
 
 </details>
 
+<a name="commander_map_is_tile_wall"></a>
+
+## Function `is_tile_wall`
+
+Check if the given tile is a wall.
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_is_tile_wall">is_tile_wall</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">commander::map::Map</a>, x: u16, y: u16): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_is_tile_wall">is_tile_wall</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>, x: u16, y: u16): bool {
+    match (<a href="./map.md#commander_map">map</a>.grid[x, y].tile_type) {
+        TileType::Wall =&gt; <b>true</b>,
+        _ =&gt; <b>false</b>,
+    }
+}
+</code></pre>
+
+
+
+</details>
+
 <a name="commander_map_tile_to_string"></a>
 
 ## Function `tile_to_string`
@@ -1060,6 +1234,7 @@ Print the <code><a href="./map.md#commander_map_Tile">Tile</a></code> as a <code
             str
         },
         TileType::Unwalkable =&gt; b" XXX ".<a href="./map.md#commander_map_to_string">to_string</a>(),
+        TileType::Wall =&gt; b" ### ".<a href="./map.md#commander_map_to_string">to_string</a>(),
     }
 }
 </code></pre>
@@ -1106,7 +1281,7 @@ of the path.
             <b>if</b> (target.<a href="./unit.md#commander_unit">unit</a>.is_some()) <b>return</b> 'path none;
             match (source.tile_type) {
                 TileType::Empty =&gt; (),
-                TileType::Unwalkable =&gt; <b>return</b> 'path none,
+                TileType::Unwalkable | TileType::Wall =&gt; <b>return</b> 'path none,
                 TileType::Cover { left, right, top, bottom } =&gt; {
                     <b>if</b> (direction == left!() && left == <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>) <b>return</b> 'path none;
                     <b>if</b> (direction == right!() && right == <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>) <b>return</b> 'path none;
@@ -1116,7 +1291,7 @@ of the path.
             };
             match (target.tile_type) {
                 TileType::Empty =&gt; (),
-                TileType::Unwalkable =&gt; <b>return</b> 'path none,
+                TileType::Unwalkable | TileType::Wall =&gt; <b>return</b> 'path none,
                 TileType::Cover { left, right, top, bottom } =&gt; {
                     <b>if</b> (direction == left!() && right == <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>) <b>return</b> 'path none;
                     <b>if</b> (direction == right!() && left == <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>) <b>return</b> 'path none;
@@ -1259,6 +1434,7 @@ Deserialize the <code><a href="./map.md#commander_map_Map">Map</a></code> from t
                     bottom: bcs.peel_u8(),
                 },
                 2 =&gt; TileType::Unwalkable,
+                3 =&gt; TileType::Wall,
                 _ =&gt; <b>abort</b>,
             },
             <a href="./unit.md#commander_unit">unit</a>: bcs.peel_option!(|bcs| <a href="./unit.md#commander_unit_from_bcs">unit::from_bcs</a>(bcs)),

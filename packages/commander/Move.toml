@@ -9,3 +9,4 @@ bit_field = { local = "../bit-field" }
 codec = { local = "../codec" }
 grid = { local = "../grid" }
 name_gen = { local = "../name-gen" }
+format = { r.mvr = "@potatoes/format" }

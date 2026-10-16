@@ -10,6 +10,7 @@ export enum Cover {
 export type Tile =
     | { type: "Empty"; unit: number | null }
     | { type: "Unwalkable"; unit: number | null }
+    | { type: "Wall"; unit: number | null }
     | {
           type: "Cover";
           up: number;

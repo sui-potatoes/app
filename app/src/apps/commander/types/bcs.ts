@@ -116,6 +116,7 @@ const TileType = bcs.enum("TileType", {
     Empty: null,
     Cover: Cover,
     Unwalkable: null,
+    Wall: null,
 });
 
 export const Tile = bcs.struct("Tile", {
@@ -148,12 +149,15 @@ export const HistoryRecord = bcs.enum("HistoryRecord", {
     }),
     Damage: bcs.U8,
     Miss: null,
-    Explosion: null,
-    CriticalHit: bcs.U8,
-    Grenade: bcs.struct("Grenade", {
-        radius: bcs.U16,
+    Explosion: bcs.struct("Explosion", {
         x: bcs.U16,
         y: bcs.U16,
+        radius: bcs.U16,
+    }),
+    CriticalHit: bcs.U8,
+    Grenade: bcs.struct("Grenade", {
+        origin: bcs.vector(bcs.U16),
+        target: bcs.vector(bcs.U16),
     }),
     UnitKIA: bcs.Address,
     Dodged: null,

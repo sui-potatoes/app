@@ -37,6 +37,7 @@ Traits:
 <b>use</b> <a href="./stats.md#commander_stats">commander::stats</a>;
 <b>use</b> <a href="./weapon.md#commander_weapon">commander::weapon</a>;
 <b>use</b> <a href="./weapon_upgrade.md#commander_weapon_upgrade">commander::weapon_upgrade</a>;
+<b>use</b> <a href="../../.doc-deps/format/format.md#format_format">format::format</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
@@ -545,7 +546,7 @@ Create a new <code><a href="./recruit.md#commander_recruit_Recruit">Recruit</a><
 Create a new <code><a href="./recruit.md#commander_recruit_Recruit">Recruit</a></code> with the given name and backstory.
 TODOs:
 - [ ] restrict who can submit new names and backstory. Right now anyone can
-create a Recruit with any name and backstory.
+      create a Recruit with any name and backstory.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./recruit.md#commander_recruit_new">new</a>(name: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, backstory: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, ctx: &<b>mut</b> <a href="../../.doc-deps/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): <a href="./recruit.md#commander_recruit_Recruit">commander::recruit::Recruit</a>

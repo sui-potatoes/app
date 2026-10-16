@@ -71,7 +71,7 @@ fun test_defaults() {
     assert_eq!(weapon_stats.plus_one(), 0);
     assert_eq!(weapon_stats.crit_chance(), 0);
     assert_eq!(weapon_stats.can_be_dodged(), 1);
-    assert_eq!(weapon_stats.area_size(), 1);
+    assert_eq!(weapon_stats.area_size(), 0);
     assert_eq!(weapon_stats.env_damage(), 0);
     assert_eq!(weapon_stats.range(), 4);
     assert_eq!(weapon_stats.ammo(), 3);
@@ -106,4 +106,21 @@ fun test_with_modifier() {
     assert_eq!(modified.mobility(), SIGN_VALUE - 1); // overflow -> capped
     assert_eq!(modified.armor(), 0); // underflow -> 0
     assert_eq!(modified.dodge(), 0); // underflow -> 0
+}
+
+#[test]
+fun test_to_string() {
+    assert_eq!(
+        stats::default().to_string(),
+        "MOB:7 AIM:65 HP:10 ARM:0 DOG:0 DEF:0 DMG:0 SPR:0 PLO:0 CRT:0 IDG:0 ARS:0 ENV:0 RAN:0 AMM:0",
+    );
+
+    // a modifier: -1 MOB, +1 HP, +3 ARM, -10 DOG
+    let heavy = stats::new_unchecked(
+        bit_field::bit_field::pack_u8!(vector[SIGN_VALUE + 1, 0, 1, 3, SIGN_VALUE + 10]),
+    );
+    assert_eq!(
+        heavy.to_string(),
+        "MOB:-1 AIM:0 HP:1 ARM:3 DOG:-10 DEF:0 DMG:0 SPR:0 PLO:0 CRT:0 IDG:0 ARS:0 ENV:0 RAN:0 AMM:0",
+    );
 }

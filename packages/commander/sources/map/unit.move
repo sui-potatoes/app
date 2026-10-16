@@ -247,5 +247,13 @@ public(package) fun from_bcs(bcs: &mut BCS): Unit {
     }
 }
 
-/// Print the `Unit` as a `String`.
-public fun to_string(_unit: &Unit): String { b"Unit".to_string() }
+/// Print the `Unit` as a `String`: HP, AP and ammo as `value/max`.
+public fun to_string(unit: &Unit): String {
+    let mut str = b"HP ".to_string();
+    str.append(unit.hp.to_string());
+    str.append_utf8(b" AP ");
+    str.append(unit.ap.to_string());
+    str.append_utf8(b" AMMO ");
+    str.append(unit.ammo.to_string());
+    str
+}

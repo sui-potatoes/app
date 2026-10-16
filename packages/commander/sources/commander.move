@@ -93,6 +93,7 @@ public fun publish_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx
         let (x, y) = (position[0] as u16, position[1] as u16);
         assert!(x < rows && y < cols, EInvalidPosition);
         assert!(!map.is_tile_unwalkable(x, y), EInvalidPosition);
+        assert!(!map.is_tile_wall(x, y), EInvalidPosition);
         assert!(!map.tile_has_unit(x, y), EInvalidPosition);
     });
 

@@ -10,6 +10,7 @@
 module commander::stats;
 
 use bit_field::bit_field as bf;
+use format::format::format;
 use std::string::String;
 use sui::bcs::{Self, BCS};
 
@@ -17,9 +18,6 @@ use sui::bcs::{Self, BCS};
 const SIGN_VALUE: u8 = 0x80;
 /// Number of bitmap encoded parameters.
 const NUM_PARAMS: u8 = 15;
-
-/// Error code for not implemented functions.
-const ENotImplemented: u64 = 264;
 
 /// The `Stats` struct is a single uint value that stores all the stats of
 /// a `Recruit` in a single value. It uses bit manipulation to store the values
@@ -71,7 +69,7 @@ public fun default(): Stats { new(7, 65, 10, 0, 0) }
 public fun default_weapon(): Stats {
     // reverse:
     // 6-14 -> damage, spread, plus_one, crit_chance, can_be_dodged, area_size, env_damage, range, ammo
-    Stats(0x03_04_00_01_01_00_00_02_04 << (6 * 8))
+    Stats(0x03_04_00_00_01_00_00_02_04 << (6 * 8))
 }
 
 /// Default stats for an Armor.
@@ -112,7 +110,8 @@ public fun crit_chance(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 9) }
 /// Get the `can_be_dodged` stat.
 public fun can_be_dodged(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 10) }
 
-/// Get the `area_size` stat.
+/// Get the `area_size` stat: the radius of the damage area as a von Neumann
+/// neighborhood, `0` for a single-target weapon.
 public fun area_size(stats: &Stats): u8 { bf::read_u8_at_offset!(stats.0, 11) }
 
 /// Get the `env_damage` stat.
@@ -167,9 +166,22 @@ public fun add(stats: &Stats, modifier: &Stats): Stats {
 
 // === Convenience and compatibility ===
 
-/// Print the `Stats` as a string.
-public fun to_string(_stats: &Stats): String {
-    abort ENotImplemented
+/// Print the `Stats` as a string: space-separated `LABEL:value` pairs in the
+/// storage order. A value with the sign bit set (a modifier) is printed as a
+/// negative number, e.g. `MOB:-1`.
+public fun to_string(stats: &Stats): String {
+    let values = bf::unpack_u8!(stats.0, NUM_PARAMS).map!(|value| {
+        if (value >= SIGN_VALUE) {
+            let mut str = b"-".to_string();
+            str.append((value - SIGN_VALUE).to_string());
+            str
+        } else value.to_string()
+    });
+
+    format(
+        b"MOB:{} AIM:{} HP:{} ARM:{} DOG:{} DEF:{} DMG:{} SPR:{} PLO:{} CRT:{} IDG:{} ARS:{} ENV:{} RAN:{} AMM:{}".to_string(),
+        values,
+    )
 }
 
 /// Deserialize bytes into a `Rank`.

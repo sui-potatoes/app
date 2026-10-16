@@ -42,6 +42,7 @@ Traits:
 <b>use</b> <a href="./stats.md#commander_stats">commander::stats</a>;
 <b>use</b> <a href="./weapon.md#commander_weapon">commander::weapon</a>;
 <b>use</b> <a href="./weapon_upgrade.md#commander_weapon_upgrade">commander::weapon_upgrade</a>;
+<b>use</b> <a href="../../.doc-deps/format/format.md#format_format">format::format</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
@@ -354,7 +355,7 @@ Notes:
 - Regular attack can be + or - 10% of the base damage - random.
 - The attack fully depletes the <code><a href="./unit.md#commander_unit_Unit">Unit</a></code>'s AP.
 
-Returns: (is_hit, is_critical, is_plus_one, damage, hit_chance)
+Returns: (is_hit, is_plus_one, is_critical, damage, hit_chance)
 
 Rng security:
 - this function is more expensive in the happy path, so the gas limit attack
@@ -386,11 +387,12 @@ is less likely to be successful
     <b>let</b> aim_stat = <a href="./unit.md#commander_unit">unit</a>.<a href="./stats.md#commander_stats">stats</a>.aim();
     <b>let</b> spread = <a href="./unit.md#commander_unit_MAX_RANGE_OFFSET">MAX_RANGE_OFFSET</a>;
     <b>assert</b>!(eff_range + spread &gt;= range, <a href="./unit.md#commander_unit_ERangeExceeded">ERangeExceeded</a>);
-    // aim stat is affected by the range
+    // aim stat is affected by the range; intermediate math is done in u16 to
+    // avoid overflow on high `aim` / `range` <a href="./stats.md#commander_stats">stats</a>
     <b>let</b> hit_chance = <b>if</b> (eff_range == range) {
         aim_stat
     } <b>else</b> <b>if</b> (eff_range &gt; range) {
-        (aim_stat + <a href="./unit.md#commander_unit_DISTANCE_BONUS">DISTANCE_BONUS</a> * (eff_range - range)).min(100)
+        ((aim_stat <b>as</b> u16) + (<a href="./unit.md#commander_unit_DISTANCE_BONUS">DISTANCE_BONUS</a> <b>as</b> u16) * ((eff_range - range) <b>as</b> u16)).min(100) <b>as</b> u8
     } <b>else</b> {
         aim_stat - (<a href="./unit.md#commander_unit_DISTANCE_PENALTY">DISTANCE_PENALTY</a> * (range - eff_range)).min(aim_stat)
     };
@@ -398,16 +400,18 @@ is less likely to be successful
     <b>let</b> hit_chance = hit_chance - hit_chance.min(target_defense);
     <b>let</b> is_hit = rng.generate_u8_in_range(0, 99) &lt; hit_chance;
     <b>if</b> (!is_hit) <b>return</b> (<b>false</b>, <b>false</b>, <b>false</b>, 0, hit_chance);
+    // damage math is done in u16 and capped at u8 max to avoid overflow and
+    // underflow on extreme `damage` / `spread` <a href="./stats.md#commander_stats">stats</a>
     <b>let</b> spread = <a href="./unit.md#commander_unit">unit</a>.<a href="./stats.md#commander_stats">stats</a>.spread();
     <b>let</b> is_critical = rng.generate_u8_in_range(0, 99) &lt; crit_chance;
     <b>let</b> damage = match (rng.generate_bool()) {
-        <b>true</b> =&gt; dmg_stat + rng.generate_u8_in_range(0, spread),
-        <b>false</b> =&gt; dmg_stat - rng.generate_u8_in_range(0, spread),
+        <b>true</b> =&gt; (dmg_stat <b>as</b> u16) + (rng.generate_u8_in_range(0, spread) <b>as</b> u16),
+        <b>false</b> =&gt; (dmg_stat - rng.generate_u8_in_range(0, spread.min(dmg_stat))) <b>as</b> u16,
     };
     <b>let</b> is_plus_one = rng.generate_u8_in_range(0, 99) &lt; <a href="./unit.md#commander_unit">unit</a>.<a href="./stats.md#commander_stats">stats</a>.plus_one();
     <b>let</b> damage = <b>if</b> (is_plus_one) damage + 1 <b>else</b> damage;
-    <b>let</b> damage = <b>if</b> (is_critical) damage + (dmg_stat / 2) <b>else</b> damage;
-    (<b>true</b>, is_plus_one, is_critical, damage, hit_chance)
+    <b>let</b> damage = <b>if</b> (is_critical) damage + (dmg_stat <b>as</b> u16) / 2 <b>else</b> damage;
+    (<b>true</b>, is_plus_one, is_critical, damage.min(0xFF) <b>as</b> u8, hit_chance)
 }
 </code></pre>
 
@@ -723,10 +727,10 @@ Helper method to allow nested deserialization of <code><a href="./unit.md#comman
 
 ## Function `to_string`
 
-Print the <code><a href="./unit.md#commander_unit_Unit">Unit</a></code> as a <code>String</code>.
+Print the <code><a href="./unit.md#commander_unit_Unit">Unit</a></code> as a <code>String</code>: HP, AP and ammo as <code>value/max</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./unit.md#commander_unit_to_string">to_string</a>(_unit: &<a href="./unit.md#commander_unit_Unit">commander::unit::Unit</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./unit.md#commander_unit_to_string">to_string</a>(<a href="./unit.md#commander_unit">unit</a>: &<a href="./unit.md#commander_unit_Unit">commander::unit::Unit</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -735,7 +739,15 @@ Print the <code><a href="./unit.md#commander_unit_Unit">Unit</a></code> as a <co
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./unit.md#commander_unit_to_string">to_string</a>(_unit: &<a href="./unit.md#commander_unit_Unit">Unit</a>): String { b"<a href="./unit.md#commander_unit_Unit">Unit</a>".<a href="./unit.md#commander_unit_to_string">to_string</a>() }
+<pre><code><b>public</b> <b>fun</b> <a href="./unit.md#commander_unit_to_string">to_string</a>(<a href="./unit.md#commander_unit">unit</a>: &<a href="./unit.md#commander_unit_Unit">Unit</a>): String {
+    <b>let</b> <b>mut</b> str = b"HP ".<a href="./unit.md#commander_unit_to_string">to_string</a>();
+    str.append(<a href="./unit.md#commander_unit">unit</a>.<a href="./unit.md#commander_unit_hp">hp</a>.<a href="./unit.md#commander_unit_to_string">to_string</a>());
+    str.append_utf8(b" AP ");
+    str.append(<a href="./unit.md#commander_unit">unit</a>.<a href="./unit.md#commander_unit_ap">ap</a>.<a href="./unit.md#commander_unit_to_string">to_string</a>());
+    str.append_utf8(b" AMMO ");
+    str.append(<a href="./unit.md#commander_unit">unit</a>.<a href="./unit.md#commander_unit_ammo">ammo</a>.<a href="./unit.md#commander_unit_to_string">to_string</a>());
+    str
+}
 </code></pre>
 
 

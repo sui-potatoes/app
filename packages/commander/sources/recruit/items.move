@@ -34,12 +34,12 @@ public fun armor(tier: u8, ctx: &mut TxContext): Armor {
 /// Creates a new rifle with the given tier.
 public fun rifle(tier: u8, ctx: &mut TxContext): Weapon {
     let (name, stats) = match (tier) {
-        // 4 DMG, 2 SPREAD, +10% CRIT, 1 AREA, 4 RANGE, 3 AMMO
-        1 => (b"Standard Rifle", 0x03_04_00_01_01_0A_0A_02_04 << (6 * 8)),
-        // 5 DMG, 1 SPREAD, +20% CRIT, 1 AREA, 5 RANGE, 3 AMMO
-        2 => (b"Sharpshooter Rifle", 0x03_05_00_01_01_14_14_01_05 << (6 * 8)),
-        // 6 DMG, 1 SPREAD, +30% CRIT, 1 AREA, 5 RANGE, 3 AMMO
-        3 => (b"Plasma Rifle", 0x03_05_00_01_01_1E_1E_01_06 << (6 * 8)),
+        // 4 DMG, 2 SPREAD, +10% CRIT, 0 AREA, 4 RANGE, 3 AMMO
+        1 => (b"Standard Rifle", 0x03_04_00_00_01_0A_0A_02_04 << (6 * 8)),
+        // 5 DMG, 1 SPREAD, +20% CRIT, 0 AREA, 5 RANGE, 3 AMMO
+        2 => (b"Sharpshooter Rifle", 0x03_05_00_00_01_14_14_01_05 << (6 * 8)),
+        // 6 DMG, 1 SPREAD, +30% CRIT, 0 AREA, 5 RANGE, 3 AMMO
+        3 => (b"Plasma Rifle", 0x03_05_00_00_01_1E_1E_01_06 << (6 * 8)),
         _ => abort,
     };
     weapon::new(name.to_string(), stats::new_unchecked(stats), ctx)
@@ -119,7 +119,7 @@ fun test_weapons() {
         assert_eq!(rifle.stats().plus_one(), 10);
         assert_eq!(rifle.stats().crit_chance(), 10);
         assert_eq!(rifle.stats().can_be_dodged(), 1);
-        assert_eq!(rifle.stats().area_size(), 1);
+        assert_eq!(rifle.stats().area_size(), 0);
         assert_eq!(rifle.stats().env_damage(), 0);
         assert_eq!(rifle.stats().range(), 4);
         assert_eq!(rifle.stats().ammo(), 3);
@@ -133,7 +133,7 @@ fun test_weapons() {
         assert_eq!(rifle.stats().plus_one(), 20);
         assert_eq!(rifle.stats().crit_chance(), 20);
         assert_eq!(rifle.stats().can_be_dodged(), 1);
-        assert_eq!(rifle.stats().area_size(), 1);
+        assert_eq!(rifle.stats().area_size(), 0);
         assert_eq!(rifle.stats().env_damage(), 0);
         assert_eq!(rifle.stats().range(), 5);
         assert_eq!(rifle.stats().ammo(), 3);
@@ -147,7 +147,7 @@ fun test_weapons() {
         assert_eq!(rifle.stats().plus_one(), 30);
         assert_eq!(rifle.stats().crit_chance(), 30);
         assert_eq!(rifle.stats().can_be_dodged(), 1);
-        assert_eq!(rifle.stats().area_size(), 1);
+        assert_eq!(rifle.stats().area_size(), 0);
         assert_eq!(rifle.stats().env_damage(), 0);
         assert_eq!(rifle.stats().range(), 5);
         assert_eq!(rifle.stats().ammo(), 3);
