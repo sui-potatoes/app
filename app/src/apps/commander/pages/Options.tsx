@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 import { useCurrentAccount, useCurrentClient } from "@mysten/dapp-kit-react";
-import { useQuery } from "@tanstack/react-query";
-import { formatAddress } from "@mysten/sui/utils";
+import { formatAddress, MIST_PER_SUI } from "@mysten/sui/utils";
 import { useState } from "react";
 import { Modal, YesOrNo, Footer } from "./Components";
 import { Transaction } from "@mysten/sui/transactions";
 import { SuinsClient, SuinsTransaction } from "@mysten/suins";
+import { useBalance } from "../../../hooks/useBalance";
 import { useTransactionExecutor } from "../../../hooks/useTransactionExecutor";
 import { useSuinsName } from "../hooks/useSuinsName";
 import {
@@ -32,18 +32,12 @@ import {
  */
 export function Options() {
     const address = useCurrentAccount()?.address;
-    const client = useCurrentClient();
     const checkIsFullscreen = window.innerHeight == screen.height;
     const [isFullscreen, setIsFullscreen] = useState(checkIsFullscreen);
     const [optModels, setOptModels] = useState(true);
     const { name, modal: suinsModal, showNameModal } = useSuinsSetting();
 
-    const { data: balance, isPending } = useQuery({
-        queryKey: ["balance", address],
-        enabled: !!address,
-        queryFn: () =>
-            client.core.getBalance({ owner: address! }).then(({ balance }) => balance.balance),
-    });
+    const { data: balance, isPending } = useBalance();
 
     return (
         <div className="flex justify-between align-middle flex-col w-full">
@@ -73,8 +67,8 @@ export function Options() {
                 <div className="options-row">
                     <label>BALANCE</label>
                     <p>
-                        {isPending || !balance ? "..." : formatBalance(balance)}
-                        {balance && BigInt(balance) < 1000000000n && (
+                        {isPending || balance === undefined ? "..." : formatBalance(balance)}
+                        {balance !== undefined && balance < MIST_PER_SUI && (
                             <>Top up your account to play</>
                         )}
                     </p>
@@ -206,9 +200,6 @@ function useSuinsSetting() {
     }
 }
 
-function formatBalance(balance: string) {
-    if (!balance) return `0 SUI`;
-    const num = balance.slice(0, -9);
-    const dec = balance.slice(-9).slice(0, 2);
-    return `${num}.${dec} SUI`;
+function formatBalance(balance: bigint) {
+    return `${(Number(balance) / Number(MIST_PER_SUI)).toFixed(2)} SUI`;
 }

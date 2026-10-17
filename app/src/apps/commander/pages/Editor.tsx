@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Camera, Game, loadModels, EditMode, Controls, EventBus, GameAction } from "../engine";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
-import { fromHex } from "@mysten/bcs";
+import { fromHex } from "@mysten/sui/utils";
 import { Footer } from "./Components";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useGameTransactions } from "../hooks/useGameTransactions";
@@ -120,7 +120,9 @@ export function UI({ eventBus }: { eventBus: EventBus }) {
                 <div className="mb-10">
                     <p className="text-sm">Click to place objects; right-click to remove</p>
                     <p className="text-sm">Use WSAD keys to change direction</p>
-                    <p className="text-sm">C - Cover; H - High Cover; O - Object; U - Unwalkable; X - Wall</p>
+                    <p className="text-sm">
+                        C - Cover; H - High Cover; O - Object; U - Unwalkable; X - Wall
+                    </p>
                     <p className="text-sm">1 - Set Spawn Point; 2 - Remove Spawn</p>
                     <p className="text-sm">A Map MUST have at least one spawn point</p>
                 </div>

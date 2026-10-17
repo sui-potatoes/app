@@ -35,6 +35,8 @@ jobs:
             - uses: actions/checkout@v4
             - name: Use Node.js
               uses: actions/setup-node@v4
+              with:
+                  node-version: 24
             - run: npm i @mysten/prettier-plugin-move
             - run: npx prettier-move -c **/*.move
 
@@ -48,6 +50,8 @@ jobs:
             - uses: actions/checkout@v2
             - name: Use Node.js
               uses: actions/setup-node@v4
+              with:
+                  node-version: 24
             - run: npm i -g prettier
             - run: npx -g prettier -c src/**/*.ts
 
@@ -66,6 +70,7 @@ jobs:
             - name: Use Node.js
               uses: actions/setup-node@v4
               with:
+                  node-version: 24
                   cache: "pnpm"
                   cache-dependency-path: "./${{ env.APP_PATH }}/package.json"
             - name: Install dependencies

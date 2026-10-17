@@ -1,7 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { fromBase64 } from "@mysten/bcs";
+import { fromBase64 } from "@mysten/sui/utils";
 import { useCurrentClient, useDAppKit } from "@mysten/dapp-kit-react";
 import { Transaction } from "@mysten/sui/transactions";
 import { GOGAME_PACKAGE_ID as packageId } from "../../../constants";
