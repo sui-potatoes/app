@@ -1,15 +1,12 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
-import { getFaucetHost, requestSuiFromFaucetV2 } from "@mysten/sui/faucet";
-import { useEffect } from "react";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { NavLink, Route, Routes } from "react-router-dom";
 
 import Character from "./apps/character/App.tsx";
 import GoGame from "./apps/go-game/App.tsx";
 import Libraries from "./apps/libraries/App.tsx";
-import { NETWORK } from "./constants";
 import { FaucetModal } from "./FaucetModal";
 import { useGoogleSignIn } from "./hooks/useGoogleSignIn";
 import Root from "./Root.tsx";
@@ -23,27 +20,8 @@ const NAV_LINKS = [
 ];
 
 export function App() {
-    const dAppKit = useDAppKit();
     const account = useCurrentAccount();
     const { canSignIn, signIn, signOut } = useGoogleSignIn();
-
-    // Top up fresh zkLogin accounts from the testnet faucet.
-    useEffect(() => {
-        if (!account) return;
-
-        const client = dAppKit.getClient();
-        client.core
-            .getBalance({ owner: account.address })
-            .then(({ balance }) => {
-                if (BigInt(balance.balance) === 0n) {
-                    return requestSuiFromFaucetV2({
-                        host: getFaucetHost(NETWORK),
-                        recipient: account.address,
-                    });
-                }
-            })
-            .catch(console.warn);
-    }, [dAppKit, account]);
 
     return (
         <div className="flex flex-col md:flex-row md:items-start">

@@ -6,11 +6,7 @@ module go_game::game;
 
 use go_game::go::{Self, Board};
 use std::string::String;
-use sui::{
-    clock::Clock,
-    display_registry::DisplayRegistry,
-    vec_set::{Self, VecSet}
-};
+use sui::{clock::Clock, display_registry::DisplayRegistry, vec_set::{Self, VecSet}};
 
 /// The size of the board is invalid (not 9, 13, or 19)
 const EInvalidSize: u64 = 0;
