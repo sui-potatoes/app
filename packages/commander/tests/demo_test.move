@@ -10,10 +10,10 @@ use sui::random;
 #[test]
 fun play_test_demo_1() {
     assert_eq!(run_simulation_demo_1(b"demo_o1"), vector[5, 1]);
-    assert_eq!(run_simulation_demo_1(b"demo_o2"), vector[9, 2]);
+    assert_eq!(run_simulation_demo_1(b"demo_o2"), vector[7, 1]);
     assert_eq!(run_simulation_demo_1(b"demo_o3"), vector[3, 1]);
     assert_eq!(run_simulation_demo_1(b"demo_o4"), vector[7, 1]);
-    assert_eq!(run_simulation_demo_1(b"demo_o5"), vector[9, 2]);
+    assert_eq!(run_simulation_demo_1(b"demo_o5"), vector[8, 2]);
     assert_eq!(run_simulation_demo_1(b"demo_o6"), vector[8, 1]);
 }
 
@@ -30,15 +30,15 @@ fun play_test_demo_2() {
 // 0 |     |     |2002-|0001-|0002-|     |     |
 // 1 | XXX |     |     |     |     |     |     |
 // 2 |     |     |     |     |     |0001-|0001-|
-// 3 |0100-|0210-|     | XXX |     |1000-|1000-|
-// 4 |0001-|0012-|     |     |     |     |     |
+// 3 |0100-|0120-|     | XXX |     |1000-|1000-|
+// 4 |0001-|0102-|     |     |     |     |     |
 // 5 |     |     |     |     |     |     |     |
 // 6 |     | XXX |     |     |1100-|0100-|0110-|
 //
 // Actions:
-// - Move: (6, 5) -> (4, 1)
-// - Attack: (4, 1) -> (0, 3)
-// - Attack: (0, 3) -> (4, 1)
+// - Move: (6, 5) -> (3, 1)
+// - Attack: (3, 1) -> (0, 3)
+// - Attack: (0, 3) -> (3, 1)
 // - Repeat attack until one unit dies
 fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
     use grid::direction::{up, left};
@@ -55,9 +55,9 @@ fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
 
     // Unit 1 performs a move action and takes cover in the construction on
     // the left side (high cover + low cover mix)
-    map.move_unit(vector[6, 5, up!(), up!(), left!(), left!(), left!(), left!()]);
+    map.move_unit(vector[6, 5, up!(), up!(), left!(), left!(), left!(), left!(), up!()]);
 
-    map.unit(4, 1).do_ref!(|unit| {
+    map.unit(3, 1).do_ref!(|unit| {
         assert_eq!(unit.ap(), 1); // 1 AP used
         assert_eq!(unit.stats().dodge(), 0);
     });
@@ -71,24 +71,24 @@ fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
 
     // prettier-ignore
     let result = 'crossfire: loop {
-        map.unit(4, 1).do_ref!(|unit| if (unit.ammo() == 0) { map.perform_reload(4, 1); });
-        let history = map.perform_attack(&mut rng, 4, 1, 0, 3);
+        map.unit(3, 1).do_ref!(|unit| if (unit.ammo() == 0) { map.perform_reload(3, 1); });
+        let history = map.perform_attack(&mut rng, 3, 1, 0, 3);
         if (history::list_kia(&history).length() > 0) {
             break 'crossfire vector[map.turn(), 2]
         };
 
         // map.unit(0, 3).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
-        map.unit(4, 1).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // no more AP
+        map.unit(3, 1).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // no more AP
 
         // Unit 2 is in a good position already and chooses to perform an attack
         // Depending on the RNG seed, we want to check different outcomes
         map.unit(0, 3).do_ref!(|unit| if (unit.ammo() == 0) { map.perform_reload(0, 3); });
-        let history = map.perform_attack(&mut rng, 0, 3, 4, 1);
+        let history = map.perform_attack(&mut rng, 0, 3, 3, 1);
         if (history::list_kia(&history).length() > 0) {
             break 'crossfire vector[map.turn(), 1]
         };
 
-        // map.unit(4, 1).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
+        // map.unit(3, 1).do_ref!(|unit| if (is_hit) assert!(unit.hp() < 10)); // some damage
         map.unit(0, 3).do_ref!(|unit| assert_eq!(unit.ap(), 0)); // depleted AP
 
         // Reset the Map turn

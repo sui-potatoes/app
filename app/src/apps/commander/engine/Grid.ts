@@ -13,6 +13,25 @@ const LocalPreset = bcs.struct("LocalPreset", {
     positions: bcs.vector(bcs.vector(bcs.u8())),
 });
 
+const HIGH_COVER = 2;
+
+type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
+
+/** Cover value of the side of a tile facing the direction. */
+function sideCover(tile: Tile, direction: Direction): number {
+    if (tile.type !== "Cover") return 0;
+    switch (direction) {
+        case "UP":
+            return tile.up;
+        case "DOWN":
+            return tile.down;
+        case "LEFT":
+            return tile.left;
+        case "RIGHT":
+            return tile.right;
+    }
+}
+
 /**
  * Grid follows the structure of the game board, similar to how it is handled in
  * Move. Grid coordinates are 0-indexed, with the origin at the top-left corner.
@@ -72,6 +91,88 @@ export class Grid {
         if (x0 > x1) return "UP";
         if (y0 > y1) return "LEFT";
         if (y0 < y1) return "RIGHT";
+    }
+
+    /**
+     * Line of sight for a shot, mirroring `map::line_of_sight` in Move: walls
+     * and high covers block it, unwalkable tiles and units do not.
+     */
+    lineOfSight(x0: number, y0: number, x1: number, y1: number): boolean {
+        return this.traceLine(x0, y0, x1, y1, true);
+    }
+
+    /**
+     * Line of throw for a grenade, mirroring `map::line_of_throw` in Move:
+     * only walls block it, a grenade flies over covers.
+     */
+    lineOfThrow(x0: number, y0: number, x1: number, y1: number): boolean {
+        return this.traceLine(x0, y0, x1, y1, false);
+    }
+
+    /**
+     * Walk the segment between two tile centers one edge at a time: the same
+     * integer traversal as `map::trace_line` in Move, so the two never disagree.
+     * Entering a wall blocks. With `highCoverBlocks`, high cover on either side
+     * of an inner edge (one not touching the end tiles) blocks too. Where the
+     * segment passes through a corner, it is clear if either orthogonal route
+     * around the corner is clear.
+     */
+    protected traceLine(
+        x0: number,
+        y0: number,
+        x1: number,
+        y1: number,
+        highCoverBlocks: boolean,
+    ): boolean {
+        const dx = Math.abs(x1 - x0);
+        const dy = Math.abs(y1 - y0);
+        const sx = x1 > x0 ? 1 : -1;
+        const sy = y1 > y0 ? 1 : -1;
+        let [x, y, i, j] = [x0, y0, 0, 0];
+
+        const blocks = (cx: number, cy: number, stepX: number, stepY: number): boolean => {
+            const [nx, ny] = [cx + stepX, cy + stepY];
+            if (this.grid[nx][ny].type === "Wall") return true;
+            if (!highCoverBlocks) return false;
+            const isInner = !(cx === x0 && cy === y0) && !(nx === x1 && ny === y1);
+            return isInner && this.isEdgeHighCover(cx, cy, nx, ny);
+        };
+
+        while (i < dx || j < dy) {
+            const tRow = (2 * i + 1) * dy;
+            const tCol = (2 * j + 1) * dx;
+
+            if (tRow < tCol) {
+                if (blocks(x, y, sx, 0)) return false;
+                x += sx;
+                i += 1;
+            } else if (tCol < tRow) {
+                if (blocks(x, y, 0, sy)) return false;
+                y += sy;
+                j += 1;
+            } else {
+                const viaRow = !blocks(x, y, sx, 0) && !blocks(x + sx, y, 0, sy);
+                const viaCol = !blocks(x, y, 0, sy) && !blocks(x, y + sy, sx, 0);
+                if (!viaRow && !viaCol) return false;
+                x += sx;
+                y += sy;
+                i += 1;
+                j += 1;
+            }
+        }
+
+        return true;
+    }
+
+    /** Whether the edge between two adjacent tiles has high cover on either side. */
+    protected isEdgeHighCover(x0: number, y0: number, x1: number, y1: number): boolean {
+        const direction = this.coordsToDirection([x0, y0], [x1, y1]);
+        if (!direction) return false;
+        const inverse = { UP: "DOWN", DOWN: "UP", LEFT: "RIGHT", RIGHT: "LEFT" } as const;
+        return (
+            sideCover(this.grid[x0][y0], direction) === HIGH_COVER ||
+            sideCover(this.grid[x1][y1], inverse[direction]) === HIGH_COVER
+        );
     }
 
     /**

@@ -79,6 +79,11 @@ export class GrenadeMode implements Mode {
                 console.log("Target is out of range.");
                 return;
             }
+            // walls block the throw, covers do not, see `map::line_of_throw`
+            if (!this.grid.lineOfThrow(x0, y0, x, y)) {
+                console.log("No line of throw to the target.");
+                return;
+            }
             this.eventBus?.dispatchEvent({
                 type: "game:grenade:target",
                 unit: this.selectedUnit,

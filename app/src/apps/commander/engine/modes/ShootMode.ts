@@ -62,6 +62,11 @@ export class ShootMode implements Mode {
             const d = distance(selectedUnit, unit);
             if (d > selectedUnit.props.stats.range + MAX_DISTANCE_OFFSET) return false;
 
+            // walls and high covers block the shot, see `map::line_of_sight`
+            const { x: x0, y: y0 } = selectedUnit.gridPosition;
+            const { x: x1, y: y1 } = unit.gridPosition;
+            if (!this.grid.lineOfSight(x0, y0, x1, y1)) return false;
+
             return true;
         });
 
