@@ -1,7 +1,7 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { bcs } from "@mysten/bcs";
+import { bcs } from "@mysten/sui/bcs";
 import { useCurrentAccount, useCurrentClient } from "@mysten/dapp-kit-react";
 import type { SuiClientTypes } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
