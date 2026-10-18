@@ -265,7 +265,7 @@ export default function App() {
                             rel="noreferrer"
                             className="uppercase"
                         >
-                            View on SuiScan
+                            View on devxplorer
                         </a>
                     </div>
                 )}
