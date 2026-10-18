@@ -1,15 +1,18 @@
 // Copyright (c) Sui Potatoes
 // SPDX-License-Identifier: MIT
 
-import { useCurrentAccount } from "@mysten/dapp-kit-react";
+import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
+import { getFaucetHost, requestSuiFromFaucetV2 } from "@mysten/sui/faucet";
+import { useEffect, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 
 import Character from "./apps/character/App.tsx";
 import GoGame from "./apps/go-game/App.tsx";
 import Libraries from "./apps/libraries/App.tsx";
+import { NETWORK } from "./constants";
 import { FaucetModal } from "./FaucetModal";
-import { useGoogleSignIn } from "./hooks/useGoogleSignIn";
 import Root from "./Root.tsx";
+import { SignInModal } from "./SignInModal";
 
 // Commander is temporarily disabled — its nav link and route are removed.
 // The sub-app (`./apps/commander`) is kept in the tree for later re-enabling.
@@ -20,8 +23,29 @@ const NAV_LINKS = [
 ];
 
 export function App() {
+    const dAppKit = useDAppKit();
     const account = useCurrentAccount();
-    const { canSignIn, signIn, signOut } = useGoogleSignIn();
+    const [signInOpen, setSignInOpen] = useState(false);
+
+    // Top up fresh accounts from the testnet faucet, whichever way they signed
+    // in. When the faucet is rate-limited this fails quietly and `FaucetModal`
+    // takes over with links to the public faucets.
+    useEffect(() => {
+        if (!account) return;
+
+        const client = dAppKit.getClient();
+        client.core
+            .getBalance({ owner: account.address })
+            .then(({ balance }) => {
+                if (BigInt(balance.balance) === 0n) {
+                    return requestSuiFromFaucetV2({
+                        host: getFaucetHost(NETWORK),
+                        recipient: account.address,
+                    });
+                }
+            })
+            .catch(console.warn);
+    }, [dAppKit, account]);
 
     return (
         <div className="flex flex-col md:flex-row md:items-start">
@@ -39,15 +63,11 @@ export function App() {
                 <ul className="sidebar-footer">
                     <li>
                         {account ? (
-                            <button className="connect" onClick={() => signOut()}>
+                            <button className="connect" onClick={() => dAppKit.disconnectWallet()}>
                                 Sign Out
                             </button>
                         ) : (
-                            <button
-                                className="connect"
-                                disabled={!canSignIn}
-                                onClick={() => signIn()}
-                            >
+                            <button className="connect" onClick={() => setSignInOpen(true)}>
                                 Sign In
                             </button>
                         )}
@@ -69,6 +89,7 @@ export function App() {
                 </Routes>
             </div>
             <FaucetModal />
+            <SignInModal open={signInOpen} onClose={() => setSignInOpen(false)} />
         </div>
     );
 }

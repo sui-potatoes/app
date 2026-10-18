@@ -31,15 +31,15 @@
  * technical, hue-neutral.
  */
 :root {
-    --text-color: #1b1b18;
-    --text-secondary: #87867f;
+    --text-color: #111110;
+    --text-secondary: #4a4944;
     --background-color: #f8f7f5;
     --surface-color: #f1f0ec;
     --button-color: #ebeae5;
-    --disabled-color: #b9b8b1;
+    --disabled-color: #8f8e87;
     --code-color: #f1f0ec;
-    --border-color: #e6e5df;
-    --grid-color: #ccccc4;
+    --border-color: #d2d1ca;
+    --grid-color: #b5b4ac;
     --accent-color: #0d0d0a;
     --accent-dim: rgba(13, 13, 10, 0.05);
     /* Monochrome: brand === ink (no hue). See the @theme note above. */
@@ -50,15 +50,15 @@
 }
 
 .dark-theme * {
-    --text-color: #d8d7d2;
-    --text-secondary: #76756e;
+    --text-color: #ecebe6;
+    --text-secondary: #b3b2ab;
     --background-color: #0c0c0b;
     --surface-color: #161614;
     --button-color: #191915;
-    --disabled-color: #46453f;
+    --disabled-color: #6b6a63;
     --code-color: #161614;
-    --border-color: #24241f;
-    --grid-color: #35352e;
+    --border-color: #32322d;
+    --grid-color: #44443e;
     --accent-color: #f3f2ee;
     --accent-dim: rgba(243, 242, 238, 0.07);
     --brand-color: #f3f2ee;
