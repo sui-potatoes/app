@@ -17,28 +17,27 @@ type Props = { open: boolean; onClose: () => void };
 
 function describe(e: unknown): string {
     if (e instanceof DOMException && e.name === "NotAllowedError")
-        return "Cancelled by the authenticator";
+        return "Cancelled by the authenticator.";
     return e instanceof Error ? e.message : String(e);
 }
 
-/** Monochrome line glyphs so the three cards read as one set. */
 const GLYPHS = {
     google: (
         <>
-            <circle cx="10" cy="7" r="3.5" />
-            <path d="M3.5 17a6.5 6.5 0 0 1 13 0" />
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20a8 8 0 0 1 16 0" />
         </>
     ),
     passkey: (
         <>
-            <circle cx="7" cy="10" r="3.5" />
-            <path d="M10.5 10h7M15 10v3M17.5 10v2" />
+            <circle cx="8" cy="12" r="4" />
+            <path d="M12 12h9M18 12v3.5M21 12v2.5" />
         </>
     ),
     wallet: (
         <>
-            <rect x="2.5" y="5" width="15" height="11" rx="2" />
-            <path d="M12.5 10.5h5" />
+            <rect x="3" y="6" width="18" height="13" rx="2.5" />
+            <path d="M15 12.5h6" />
         </>
     ),
 };
@@ -46,11 +45,11 @@ const GLYPHS = {
 function Glyph({ kind }: { kind: keyof typeof GLYPHS }) {
     return (
         <svg
-            viewBox="0 0 20 20"
-            className="size-5 text-secondary transition-colors group-hover:text-accent"
+            viewBox="0 0 24 24"
+            className="size-6 shrink-0 text-foreground"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.25"
+            strokeWidth="1.5"
             strokeLinecap="round"
         >
             {GLYPHS[kind]}
@@ -58,42 +57,65 @@ function Glyph({ kind }: { kind: keyof typeof GLYPHS }) {
     );
 }
 
-function Card({
+/**
+ * One sign-in option: a full-width row that is itself the button. `extra` is
+ * rendered under the description for a secondary action and does not trigger
+ * the row.
+ */
+function Option({
     glyph,
+    icon,
     title,
-    subtitle,
-    children,
-    secondary,
+    description,
+    state,
+    disabled,
+    onClick,
+    extra,
 }: {
-    glyph: keyof typeof GLYPHS;
+    glyph?: keyof typeof GLYPHS;
+    icon?: string;
     title: string;
-    subtitle: string;
-    children: ReactNode;
-    secondary?: ReactNode;
+    description: string;
+    state?: string;
+    disabled?: boolean;
+    onClick: () => void;
+    extra?: ReactNode;
 }) {
     return (
-        <section className="group flex flex-col gap-5 border border-line p-6 transition-colors hover:border-accent">
-            <Glyph kind={glyph} />
-            <div className="flex flex-col gap-2">
-                <h3 className="text-sm uppercase tracking-[0.2em] text-foreground">{title}</h3>
-                <p className="text-[12px] leading-relaxed text-secondary normal-case">{subtitle}</p>
+        <div
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled}
+            onClick={() => !disabled && onClick()}
+            onKeyDown={(e) => e.key === "Enter" && !disabled && onClick()}
+            className={`group flex items-center gap-5 px-6 py-5 text-left transition-colors ${
+                disabled
+                    ? "opacity-40"
+                    : "cursor-pointer hover:bg-brand-dim focus-visible:bg-brand-dim"
+            }`}
+        >
+            {icon ? (
+                <img src={icon} alt="" className="size-6 shrink-0 rounded-full" />
+            ) : (
+                glyph && <Glyph kind={glyph} />
+            )}
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-[15px] font-medium text-foreground">{title}</span>
+                <span className="text-[13px] leading-snug text-foreground/70">{description}</span>
+                {extra && <span className="mt-1 text-[12px]">{extra}</span>}
             </div>
-            <div className="mt-auto flex flex-col gap-2">{children}</div>
-            {/* fixed-height slot keeps the primary buttons aligned across cards */}
-            <div className="flex min-h-4 justify-center text-[10px] uppercase tracking-[0.15em] text-secondary">
-                {secondary}
-            </div>
-        </section>
+            <span className="shrink-0 text-[13px] text-foreground/50 transition-colors group-hover:text-foreground">
+                {state ?? "→"}
+            </span>
+        </div>
     );
 }
 
-const LINK = "transition-colors hover:text-accent disabled:text-muted";
-
 /**
- * Shell-level sign-in prompt: one card per method. Google is zkLogin through
- * Enoki, Passkey is the WebAuthn wallet in `wallets/passkey.ts`, Wallet is any
- * wallet-standard wallet the browser exposes (extension or Slush web wallet).
- * Closes itself as soon as an account is connected.
+ * Shell-level sign-in prompt. Google is zkLogin through Enoki, Passkey is the
+ * WebAuthn wallet in `wallets/passkey.ts`, and every other wallet-standard
+ * wallet the browser exposes gets a row of its own. Closes itself once an
+ * account is connected.
  */
 export function SignInModal({ open, onClose }: Props) {
     const dAppKit = useDAppKit();
@@ -124,6 +146,7 @@ export function SignInModal({ open, onClose }: Props) {
     if (!open) return null;
 
     async function run(name: string, fn: () => Promise<unknown>) {
+        if (busy) return;
         setBusy(name);
         setError(null);
         try {
@@ -141,112 +164,102 @@ export function SignInModal({ open, onClose }: Props) {
         await dAppKit.connectWallet({ wallet: passkeyWallet });
     }
 
-    const google = () => run("google", signInWithGoogle);
-    // Attachment "any" defers to the browser's own chooser (Touch ID, key, phone).
-    const passkey = () =>
-        run("passkey", async () => {
-            if (!hasPasskey) await createPasskey("any");
-            await connectPasskey();
-        });
-    const recover = () =>
-        run("recover", async () => {
-            await recoverPasskey();
-            await connectPasskey();
-        });
-    const external = (wallet: (typeof wallets)[number]) =>
-        run(wallet.name, () => dAppKit.connectWallet({ wallet }));
-
-    const label = (name: string, idle: string, active: string) => (busy === name ? active : idle);
+    const state = (name: string, text: string) => (busy === name ? text : undefined);
 
     return (
         <div
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-overlay p-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-overlay p-6 normal-case backdrop-blur-sm"
             onClick={onClose}
         >
             <div
-                className="flex w-full max-w-2xl flex-col gap-6 border border-line bg-surface p-8"
+                className="flex w-full max-w-md flex-col border border-line bg-surface"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex items-baseline justify-between gap-4">
-                    <div className="flex flex-col gap-1.5">
-                        <h2 className="text-sm uppercase tracking-[0.2em] text-foreground">
-                            Sign in
+                <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4">
+                    <div className="flex flex-col gap-1">
+                        <h2 className="text-xl font-light lowercase tracking-tight text-foreground">
+                            sign in
                         </h2>
-                        <p className="text-[11px] uppercase tracking-wider text-secondary">
-                            Pick how you want to hold your account
+                        <p className="text-[13px] text-foreground/70">
+                            Choose how to hold your account.
                         </p>
                     </div>
                     <button
-                        className={`text-[11px] uppercase tracking-[0.15em] text-secondary ${LINK}`}
+                        className="text-[13px] text-foreground/50 transition-colors hover:text-foreground"
                         onClick={onClose}
+                        aria-label="Close"
                     >
-                        esc
+                        ✕
                     </button>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
-                    <Card
+                <div className="flex flex-col divide-y divide-line border-t border-line">
+                    <Option
                         glyph="google"
                         title="Google"
-                        subtitle="zkLogin. Your Google account becomes a Sui address. Nothing to install, nothing to back up."
-                        secondary={!canGoogle && "not configured"}
-                    >
-                        <button
-                            className="btn w-full"
-                            disabled={!canGoogle || !!busy}
-                            onClick={google}
-                        >
-                            {label("google", "Continue", "Opening…")}
-                        </button>
-                    </Card>
-
-                    <Card
+                        description="zkLogin: your Google account becomes a Sui address. Nothing to install or back up."
+                        disabled={!canGoogle}
+                        state={state("google", "Opening…")}
+                        onClick={() => run("google", signInWithGoogle)}
+                    />
+                    <Option
                         glyph="passkey"
                         title="Passkey"
-                        subtitle="Touch ID, iCloud Keychain or a security key is the signing key. No extension, no seed phrase."
-                        secondary={
-                            <button className={LINK} disabled={!!busy} onClick={recover}>
-                                {label(
-                                    "recover",
-                                    hasPasskey ? "use a different passkey" : "I already have one",
-                                    "sign twice…",
-                                )}
+                        description="Touch ID, iCloud Keychain or a security key signs for you. No extension, no seed phrase."
+                        state={state("passkey", "Waiting…")}
+                        // Attachment "any" defers to the browser's own chooser.
+                        onClick={() =>
+                            run("passkey", async () => {
+                                if (!hasPasskey) await createPasskey("any");
+                                await connectPasskey();
+                            })
+                        }
+                        extra={
+                            <button
+                                className="text-foreground/60 normal-case underline underline-offset-4 transition-colors hover:text-foreground"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    run("recover", async () => {
+                                        await recoverPasskey();
+                                        await connectPasskey();
+                                    });
+                                }}
+                            >
+                                {busy === "recover"
+                                    ? "Sign twice to recover…"
+                                    : hasPasskey
+                                      ? "Use a different passkey"
+                                      : "I already have one"}
                             </button>
                         }
-                    >
-                        <button className="btn w-full" disabled={!!busy} onClick={passkey}>
-                            {label("passkey", hasPasskey ? "Continue" : "Create", "Waiting…")}
-                        </button>
-                    </Card>
-
-                    <Card
-                        glyph="wallet"
-                        title="Wallet"
-                        subtitle="A Sui wallet you already use. Extensions and the Slush web wallet are detected automatically."
-                        secondary={externalWallets.length === 0 && "none detected"}
-                    >
-                        {externalWallets.map((w) => (
-                            <button
-                                key={w.name}
-                                className="btn flex w-full items-center justify-center gap-2"
-                                disabled={!!busy}
-                                onClick={() => external(w)}
-                            >
-                                {w.icon && (
-                                    <img src={w.icon} alt="" className="size-3.5 rounded-full" />
-                                )}
-                                {label(w.name, w.name, "Connecting…")}
-                            </button>
-                        ))}
-                    </Card>
+                    />
+                    {externalWallets.map((w) => (
+                        <Option
+                            key={w.name}
+                            icon={w.icon}
+                            glyph="wallet"
+                            title={w.name}
+                            description="A wallet you already use."
+                            state={state(w.name, "Connecting…")}
+                            onClick={() => run(w.name, () => dAppKit.connectWallet({ wallet: w }))}
+                        />
+                    ))}
+                    {externalWallets.length === 0 && (
+                        <Option
+                            glyph="wallet"
+                            title="Wallet"
+                            description="No Sui wallet detected in this browser."
+                            disabled
+                            onClick={() => {}}
+                        />
+                    )}
                 </div>
 
-                <p
-                    className="min-h-4 truncate text-[11px] uppercase tracking-wider text-accent"
-                    title={error ?? ""}
-                >
-                    {error}
-                </p>
+                {error && (
+                    <p className="border-t border-line px-6 py-3 text-[13px] text-foreground">
+                        {error}
+                    </p>
+                )}
             </div>
         </div>
     );
