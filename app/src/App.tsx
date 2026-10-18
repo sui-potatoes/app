@@ -9,7 +9,6 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import Character from "./apps/character/App.tsx";
 import GoGame from "./apps/go-game/App.tsx";
 import Libraries from "./apps/libraries/App.tsx";
-import Passkey from "./apps/passkey/App.tsx";
 import { NETWORK } from "./constants";
 import { FaucetModal } from "./FaucetModal";
 import Root from "./Root.tsx";
@@ -21,7 +20,6 @@ const NAV_LINKS = [
     { to: "/go", label: "go game" },
     { to: "/character", label: "character" },
     { to: "/libraries", label: "libraries (for devs)" },
-    { to: "/passkey", label: "passkey (demo)" },
 ];
 
 export function App() {
@@ -88,7 +86,6 @@ export function App() {
                     <Route path="/go/:id" element={<GoGame />} />
                     <Route path="/character" element={<Character />} />
                     <Route path="/libraries" element={<Libraries />} />
-                    <Route path="/passkey" element={<Passkey />} />
                 </Routes>
             </div>
             <FaucetModal />
