@@ -8,12 +8,28 @@ import {
     useDAppKit,
     type DAppKit,
 } from "@mysten/dapp-kit-react";
+import type { SuiClientTypes } from "@mysten/sui/client";
 import { SerialTransactionExecutor, Transaction } from "@mysten/sui/transactions";
 import { useMemo, useState } from "react";
+
+/** Same safety margin the SDK applies when it estimates a budget in `Transaction.build`. */
+const GAS_SAFE_OVERHEAD = 1000n;
+
+/** Budget from simulated gas usage, mirroring the SDK's own formula. */
+function computeGasBudget(gasUsed: SuiClientTypes.GasCostSummary, gasPrice: bigint): bigint {
+    const computation = BigInt(gasUsed.computationCost) + GAS_SAFE_OVERHEAD * gasPrice;
+    const total = computation + BigInt(gasUsed.storageCost) - BigInt(gasUsed.storageRebate);
+    return total > computation ? total : computation;
+}
 
 /**
  * Wraps `SerialTransactionExecutor` (gas-object caching for rapid sequential
  * transactions) around the currently connected wallet account.
+ *
+ * The executor always stamps a fixed budget before building, which skips the
+ * SDK's dry-run estimation and fails for any account holding less than that
+ * budget. So the budget is measured here instead: a simulation sets it from
+ * the actual gas used, unless the caller already set one.
  */
 export function useTransactionExecutor() {
     const dAppKit = useDAppKit();
@@ -27,15 +43,33 @@ export function useTransactionExecutor() {
                 ? new SerialTransactionExecutor({
                       client,
                       signer: new CurrentAccountSigner(dAppKit as unknown as DAppKit),
-                      // 0.05 SUI covers a game move or creation on testnet and keeps
-                      // accounts funded by the faucet (1 SUI) usable for a while.
-                      defaultGasBudget: 50_000_000n,
                   })
                 : null,
         [client, dAppKit, account],
     );
 
-    if (!executor) return { executor: null, isExecuting: false, executeTransaction: null };
+    if (!executor || !account) {
+        return { executor: null, isExecuting: false, executeTransaction: null };
+    }
+
+    async function setMeasuredBudget(tx: Transaction) {
+        if (tx.getData().gasData.budget !== null) return;
+        tx.setSenderIfNotSet(account!.address);
+
+        const [simulation, { referenceGasPrice }] = await Promise.all([
+            client.core.simulateTransaction({ transaction: tx, include: { effects: true } }),
+            client.core.getReferenceGasPrice(),
+        ]);
+        if (simulation.FailedTransaction) {
+            throw new Error(
+                `Transaction failed in simulation: ${simulation.FailedTransaction.status.error?.message}`,
+            );
+        }
+
+        tx.setGasBudget(
+            computeGasBudget(simulation.Transaction.effects.gasUsed, BigInt(referenceGasPrice)),
+        );
+    }
 
     return {
         executor,
@@ -43,6 +77,8 @@ export function useTransactionExecutor() {
         async executeTransaction(tx: Transaction) {
             setIsExecuting(true);
             try {
+                await setMeasuredBudget(tx);
+
                 const result = await executor.executeTransaction(tx, {
                     effects: true,
                     events: true,
