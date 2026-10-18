@@ -44,8 +44,8 @@ export const dAppKit = createDAppKit({
 });
 
 /**
- * GraphQL client for queries that have no gRPC equivalent
- * (e.g. filtered transaction history).
+ * GraphQL client for the one query gRPC cannot serve on public fullnodes:
+ * transaction history filtered by Move function (go-game `useOpenGames`).
  */
 export const graphqlClient = new SuiGraphQLClient({
     network: NETWORK,
