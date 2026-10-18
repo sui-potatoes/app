@@ -27,7 +27,9 @@ export function useTransactionExecutor() {
                 ? new SerialTransactionExecutor({
                       client,
                       signer: new CurrentAccountSigner(dAppKit as unknown as DAppKit),
-                      defaultGasBudget: 1_000_000_000n,
+                      // 0.05 SUI covers a game move or creation on testnet and keeps
+                      // accounts funded by the faucet (1 SUI) usable for a while.
+                      defaultGasBudget: 50_000_000n,
                   })
                 : null,
         [client, dAppKit, account],
