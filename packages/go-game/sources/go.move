@@ -278,6 +278,7 @@ public(package) fun from_vector(data: vector<vector<u8>>): Board {
         size: data.length() as u16,
         score: Score { black: 0, white: 0 },
         prev_states: vector[grid],
+        rendered_rows: vector::tabulate!(data.length(), |_| ""),
     }
 }
 

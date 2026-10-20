@@ -564,14 +564,7 @@ public fun line_of_throw(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16): bool {
 /// It takes `dx + dy` steps with two tile reads each. The same edges are
 /// visited from either end, so the result is symmetric: `a` sees `b` if and
 /// only if `b` sees `a`.
-fun trace_line(
-    map: &Map,
-    x0: u16,
-    y0: u16,
-    x1: u16,
-    y1: u16,
-    high_cover_blocks: bool,
-): bool {
+fun trace_line(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16, high_cover_blocks: bool): bool {
     use grid::direction::{up, down, left, right};
 
     let (dx, dy) = (x0.diff(x1) as u64, y0.diff(y1) as u64);
@@ -664,10 +657,9 @@ fun side_cover(map: &Map, x: u16, y: u16, direction: u8): u8 {
 fun neighbor(x: u16, y: u16, direction: u8): (u16, u16) {
     use grid::direction::{up, down, left};
 
-    if (direction == up!()) (x - 1, y)
-    else if (direction == down!()) (x + 1, y)
-    else if (direction == left!()) (x, y - 1)
-    else (x, y + 1)
+    if (direction == up!()) (x - 1, y) else if (direction == down!()) (x + 1, y) else if (
+        direction == left!()
+    ) (x, y - 1) else (x, y + 1)
 }
 
 // === Map Presets ===

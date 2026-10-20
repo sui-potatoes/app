@@ -108,7 +108,7 @@ fun run_simulation_demo_1(seed: vector<u8>): vector<u16> {
     // };
 
     destroy(vector[r1, r3]);
-    map.destroy();
+    let _ = map.destroy();
     result
 }
 

@@ -180,13 +180,19 @@ public fun apply_damage(
 }
 
 /// Creates a new `Unit` - an in-game representation of a `Recruit`.
+///
+/// Weapon and armor are applied to the `Recruit`'s own stats one after the
+/// other. `Stats::add` floors every field at zero against its base, so folding
+/// the armor into the weapon first would lose a negative armor modifier
+/// (heavy armor's mobility and dodge penalties) against the weapon's zero
+/// operative fields.
 public fun from_recruit(recruit: &Recruit): Unit {
     let stats = *recruit.stats();
     let mut armor_stats = stats::default_armor();
     let mut weapon_stats = stats::default_weapon();
     recruit.weapon().do_ref!(|w| weapon_stats = *w.stats());
     recruit.armor().do_ref!(|a| armor_stats = *a.stats());
-    let stats = stats.add(&weapon_stats.add(&armor_stats));
+    let stats = stats.add(&weapon_stats).add(&armor_stats);
 
     Unit {
         recruit: object::id(recruit),

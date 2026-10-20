@@ -111,8 +111,8 @@ public fun default(ctx: &mut TxContext): Recruit {
     Recruit {
         id: object::new(ctx),
         metadata: Metadata {
-            name: b"John Doe".to_string(),
-            backstory: b"A rookie soldier, ready to prove themselves.".to_string(),
+            name: "John Doe",
+            backstory: "A rookie soldier, ready to prove themselves.",
         },
         rank: rank::default(),
         stats: stats::default(),

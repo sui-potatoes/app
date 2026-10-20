@@ -5,19 +5,19 @@
 version = 4
 
 [pinned.mainnet.MoveStdlib]
-source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "b38bca86f0323b3fe8b6b7f4ca0cd7ae7faebe4b" }
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "83f11dc85d5695a57894329b005b78d75f9bb059" }
 use_environment = "mainnet"
 manifest_digest = "C4FE4C91DE74CBF223B2E380AE40F592177D21870DC2D7EB6227D2D694E05363"
 deps = {}
 
 [pinned.mainnet.Sui]
-source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "b38bca86f0323b3fe8b6b7f4ca0cd7ae7faebe4b" }
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "83f11dc85d5695a57894329b005b78d75f9bb059" }
 use_environment = "mainnet"
 manifest_digest = "CD547CB1ACCE0880C835DAED2D8FFCB91D56C833AE5240D3AA5B918398263195"
 deps = { MoveStdlib = "MoveStdlib" }
 
 [pinned.mainnet.ascii]
-source = { local = "../ascii" }
+source = { git = "https://github.com/sui-potatoes/app.git", subdir = "packages/ascii", rev = "d0abada5ba3a44979ccd1df7dbb2147ab668c08c" }
 use_environment = "mainnet"
 manifest_digest = "E41BBD67BE8940D26C79D78B028477EF5B33BA217A1282C78ACB344CF8A5ECF6"
 deps = { std = "MoveStdlib", sui = "Sui" }
@@ -25,13 +25,13 @@ deps = { std = "MoveStdlib", sui = "Sui" }
 [pinned.mainnet.codec]
 source = { local = "../codec" }
 use_environment = "mainnet"
-manifest_digest = "0598BE7FBFCBA7568F21B1D4409A8B8652756AD8559A70539BC995E7DCB74B85"
+manifest_digest = "7A20AD51071C2C2D0C573C35638AB49596AF15F0029383215E7DC94025C9D14A"
 deps = { ascii = "ascii", std = "MoveStdlib", sui = "Sui" }
 
 [pinned.mainnet.date]
 source = { root = true }
 use_environment = "mainnet"
-manifest_digest = "4DC742493B9507C14366842FEF08201B8FD4B7BBF2B086A43CD12F6A396A2886"
+manifest_digest = "5756207ED9D997A1C60E13812502BB0D7C967818F81C074E1C4AC10D7D6D6B6B"
 deps = { ascii = "ascii", std = "MoveStdlib", sui = "Sui", svg = "svg" }
 
 [pinned.mainnet.svg]

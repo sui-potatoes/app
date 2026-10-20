@@ -10,7 +10,7 @@
 module commander::stats;
 
 use bit_field::bit_field as bf;
-use format::format::format;
+use format::format;
 use std::string::String;
 use sui::bcs::{Self, BCS};
 
@@ -178,8 +178,8 @@ public fun to_string(stats: &Stats): String {
         } else value.to_string()
     });
 
-    format(
-        b"MOB:{} AIM:{} HP:{} ARM:{} DOG:{} DEF:{} DMG:{} SPR:{} PLO:{} CRT:{} IDG:{} ARS:{} ENV:{} RAN:{} AMM:{}".to_string(),
+    format::format(
+        "MOB:{} AIM:{} HP:{} ARM:{} DOG:{} DEF:{} DMG:{} SPR:{} PLO:{} CRT:{} IDG:{} ARS:{} ENV:{} RAN:{} AMM:{}",
         values,
     )
 }
