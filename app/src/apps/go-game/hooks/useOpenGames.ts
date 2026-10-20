@@ -10,8 +10,9 @@ export type OpenGame = { id: string; size: number; timestampMs: number; player1:
 
 /**
  * Recently created `Game` objects, found through transaction history.
- * Transaction queries have no gRPC equivalent, so this one goes through GraphQL;
- * object contents are then fetched over gRPC.
+ * gRPC `listTransactions` with a `function` filter returns nothing on the public
+ * testnet fullnode (checked against GraphQL, which does), so this query goes
+ * through GraphQL; object contents are then fetched over gRPC.
  */
 const RECENT_GAMES_QUERY = `
     query RecentGames($function: String!) {

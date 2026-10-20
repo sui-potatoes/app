@@ -9,6 +9,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { formatAddress } from "@mysten/sui/utils";
 import { toast } from "react-hot-toast";
 import { GOGAME_PACKAGE_ID as packageId } from "../../constants";
+import { explorerUrl } from "../../explorer";
 import { useGoogleSignIn } from "../../hooks/useGoogleSignIn";
 import { useAccounts } from "./hooks/useAccount";
 import { useGame } from "./hooks/useGame";
@@ -354,7 +355,7 @@ function GameView({ gameId }: { gameId: string }) {
 
                 <div className="flex flex-col gap-2.5 text-[11px]">
                     <a
-                        href={`https://suiscan.xyz/testnet/object/${game.id}`}
+                        href={explorerUrl(game.id)}
                         target="_blank"
                         className="uppercase hover:text-accent transition-colors"
                     >

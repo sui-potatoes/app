@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Camera, Game, loadModels, EditMode, Controls, EventBus, GameAction } from "../engine";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stats } from "@react-three/drei";
-import { fromHex } from "@mysten/bcs";
+import { fromHex } from "@mysten/sui/utils";
 import { Footer } from "./Components";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useGameTransactions } from "../hooks/useGameTransactions";

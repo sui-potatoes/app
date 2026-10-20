@@ -12,6 +12,9 @@ import { Transaction } from "@mysten/sui/transactions";
 /**
  * Sign a transaction with the connected wallet, execute it, and wait for it
  * to be indexed. Throws when the transaction fails on-chain.
+ *
+ * `CurrentAccountSigner` is typed against the bare `DAppKit<[]>`, so the
+ * registered `DAppKit<["testnet"], SuiGrpcClient>` needs the cast.
  */
 export function useSignAndExecute() {
     const dAppKit = useDAppKit();

@@ -6,6 +6,7 @@ import { enokiWalletsInitializer } from "@mysten/enoki";
 import { SuiGraphQLClient } from "@mysten/sui/graphql";
 import { SuiGrpcClient } from "@mysten/sui/grpc";
 import { GOOGLE_CLIENT_ID, NETWORK } from "./constants";
+import { passkeyWalletInitializer } from "./wallets/passkey";
 
 if (!import.meta.env.VITE_ENOKI_API_KEY) {
     console.error(
@@ -27,6 +28,7 @@ export const dAppKit = createDAppKit({
             baseUrl: `https://fullnode.${network}.sui.io:443`,
         }),
     walletInitializers: [
+        passkeyWalletInitializer(),
         enokiWalletsInitializer({
             apiKey: import.meta.env.VITE_ENOKI_API_KEY,
             providers: {
@@ -42,8 +44,8 @@ export const dAppKit = createDAppKit({
 });
 
 /**
- * GraphQL client for queries that have no gRPC equivalent
- * (e.g. filtered transaction history).
+ * GraphQL client for the one query gRPC cannot serve on public fullnodes:
+ * transaction history filtered by Move function (go-game `useOpenGames`).
  */
 export const graphqlClient = new SuiGraphQLClient({
     network: NETWORK,

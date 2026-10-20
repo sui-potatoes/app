@@ -4,7 +4,7 @@
 import * as THREE from "three";
 
 import { Map as GameMap } from "../types/bcs";
-import { bcs } from "@mysten/bcs";
+import { bcs } from "@mysten/sui/bcs";
 import { Tile } from "../types/common";
 import { normalizeSuiObjectId } from "@mysten/sui/utils";
 

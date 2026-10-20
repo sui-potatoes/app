@@ -1,19 +1,25 @@
 # Potatoes Web App
 
-This is a web application for the Potatoes project. It is built on with the [@mysten/create-dapp](https://npmjs.com/package/@mysten/create-dapp) package.
+React 19 + TypeScript + Vite single-page app for the Potatoes on-chain games on Sui testnet. It talks to the chain over gRPC (`SuiGrpcClient`) with GraphQL for the one transaction-history query, and signs users in through Enoki zkLogin wallets.
 
-## Structure
+## Requirements
 
-Base application manages routing and authentication. Applications are integraded as sub-applications placed in the [apps](./src/apps/) directory.
+- Node.js 24 (`.nvmrc`; Vercel builds pick it from `engines.node`)
+- pnpm 9 (`packageManager` in `package.json`)
+- a `.env` with `VITE_ENOKI_API_KEY=<key>`
 
 ## Running the application
 
-To run the application locally, use `pnpm dev`.
+`pnpm dev` starts the dev server, `pnpm build` type-checks and builds, `pnpm lint` and `pnpm prettify` keep the code tidy.
+
+## Structure
+
+The base application ([App.tsx](./src/App.tsx)) manages routing, sign-in and the low-balance faucet prompt. Each app lives in its own directory under [apps](./src/apps/) and is mounted as a route.
 
 ## Adding a new application
 
-To add a new application, follow these steps:
+1. Create a new directory in [apps](./src/apps/).
+2. Add a `NavLink` and a `<Route>` in [App.tsx](./src/App.tsx).
+3. Put package and object IDs into [constants.ts](./src/constants.ts).
 
-1. Create a new directory in the [apps](./src/apps/) directory.
-2. Update the [App.tsx](./src/App.tsx) file to include the link in the sidebar and the route.
-3. Add all necessary variables into the [constants.tsx](./src/constants.tsx) and [networkConfig.tsx](./src/networkConfig.tsx) files.
+See [CLAUDE.md](./CLAUDE.md) for the architecture overview.

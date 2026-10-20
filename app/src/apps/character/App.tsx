@@ -14,6 +14,7 @@ import {
     CHARACTER_BUILDER_ID as builderId,
     CHARACTER_PACKAGE_ID as packageId,
 } from "../../constants";
+import { explorerUrl } from "../../explorer";
 import { useOwnedBcsObjects } from "../../hooks/useBcsObjects";
 import { useGoogleSignIn } from "../../hooks/useGoogleSignIn";
 import { useSignAndExecute } from "../../hooks/useSignAndExecute";
@@ -259,12 +260,12 @@ export default function App() {
                 {characterId && (
                     <div className="param block my-[10px] text-sm tracking-wider uppercase">
                         <a
-                            href={`https://suiscan.xyz/testnet/object/${characterId}`}
+                            href={explorerUrl(characterId)}
                             target="_blank"
                             rel="noreferrer"
                             className="uppercase"
                         >
-                            View on SuiScan
+                            View on devxplorer
                         </a>
                     </div>
                 )}
