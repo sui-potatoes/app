@@ -31,10 +31,14 @@ public enum Record has copy, drop, store {
     // === Sub events ===
     Damage(u8),
     Miss,
-    Explosion,
+    /// Explosion at `(x, y)` with the given radius. The effect of a `Grenade`
+    /// throw or of an `Attack` with an area weapon. Followed by `[Dodged]`,
+    /// `Damage`, `[UnitKIA]` for each unit in the area, in the order the tiles
+    /// are visited (see `Map.explode`).
+    Explosion(u16, u16, u16),
     CriticalHit(u8),
-    /// Grenade thrown at `(x, y)` with the given radius.
-    Grenade(u16, u16, u16),
+    /// Block header for grenade action: the unit at `origin` throws at `target`.
+    Grenade { origin: vector<u16>, target: vector<u16> },
     UnitKIA(ID),
     Dodged,
 }
@@ -88,8 +92,13 @@ public fun new_damage(dmg: u8): Record { Record::Damage(dmg) }
 /// Create new `Record::UnitKIA` history record.
 public fun new_kia(id: ID): Record { Record::UnitKIA(id) }
 
-/// Create new `Record::Grenade` history record: target `(x, y)` and radius.
-public fun new_grenade(x: u16, y: u16, r: u16): Record { Record::Grenade(x, y, r) }
+/// Create new `Record::Grenade` history record: unit at `origin` throws at `target`.
+public fun new_grenade(origin: vector<u16>, target: vector<u16>): Record {
+    Record::Grenade { origin, target }
+}
+
+/// Create new `Record::Explosion` history record: center `(x, y)` and radius.
+public fun new_explosion(x: u16, y: u16, r: u16): Record { Record::Explosion(x, y, r) }
 
 /// Create new `Record::Move` history record.
 public fun new_move(steps: vector<u8>): Record { Record::Move(steps) }
@@ -138,9 +147,12 @@ public(package) fun from_bcs(bcs: &mut BCS): History {
             4 => Record::RecruitPlaced(bcs.peel_u16(), bcs.peel_u16()),
             5 => Record::Damage(bcs.peel_u8()),
             6 => Record::Miss,
-            7 => Record::Explosion,
+            7 => Record::Explosion(bcs.peel_u16(), bcs.peel_u16(), bcs.peel_u16()),
             8 => Record::CriticalHit(bcs.peel_u8()),
-            9 => Record::Grenade(bcs.peel_u16(), bcs.peel_u16(), bcs.peel_u16()),
+            9 => Record::Grenade {
+                origin: bcs.peel_vec!(|bcs| bcs.peel_u16()),
+                target: bcs.peel_vec!(|bcs| bcs.peel_u16()),
+            },
             10 => Record::UnitKIA(bcs.peel_address().to_id()),
             11 => Record::Dodged,
             _ => abort,

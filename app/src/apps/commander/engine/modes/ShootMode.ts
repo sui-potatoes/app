@@ -62,6 +62,11 @@ export class ShootMode implements Mode {
             const d = distance(selectedUnit, unit);
             if (d > selectedUnit.props.stats.range + MAX_DISTANCE_OFFSET) return false;
 
+            // walls and high covers block the shot, see `map::line_of_sight`
+            const { x: x0, y: y0 } = selectedUnit.gridPosition;
+            const { x: x1, y: y1 } = unit.gridPosition;
+            if (!this.grid.lineOfSight(x0, y0, x1, y1)) return false;
+
             return true;
         });
 
@@ -122,7 +127,7 @@ export class ShootMode implements Mode {
         const pos = this.selectedUnit?.gridPosition;
 
         if (pos?.x === x && pos?.y === y) return; // clicked on the selected unit
-        if (typeof cell.unit === "number" && cell.type !== "Unwalkable") {
+        if (typeof cell.unit === "number" && cell.type !== "Unwalkable" && cell.type !== "Wall") {
             this.selectedUnit = this.units[cell.unit];
             this.switchMode(new MoveMode(controls));
         }
@@ -298,8 +303,8 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
                 return targetTile.right * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.left * DEFENSE_MULTIPLIER;
-            } else if (middleTile.type === "Unwalkable") {
-                return DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Wall") {
+                return 2 * DEFENSE_MULTIPLIER;
             } else return 0;
         }
 
@@ -311,8 +316,8 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
                 return targetTile.left * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.right * DEFENSE_MULTIPLIER;
-            } else if (middleTile.type === "Unwalkable") {
-                return DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Wall") {
+                return 2 * DEFENSE_MULTIPLIER;
             } else return 0;
         }
     }
@@ -330,8 +335,8 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
                 return targetTile.down * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.up * DEFENSE_MULTIPLIER;
-            } else if (middleTile.type === "Unwalkable") {
-                return DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Wall") {
+                return 2 * DEFENSE_MULTIPLIER;
             } else return 0;
         }
 
@@ -343,8 +348,8 @@ function coverBonus(grid: Grid, unit: Unit, target: Unit): number {
                 return targetTile.up * DEFENSE_MULTIPLIER;
             } else if (middleTile.type === "Cover") {
                 return middleTile.down * DEFENSE_MULTIPLIER;
-            } else if (middleTile.type === "Unwalkable") {
-                return DEFENSE_MULTIPLIER;
+            } else if (middleTile.type === "Wall") {
+                return 2 * DEFENSE_MULTIPLIER;
             } else return 0;
         }
     }

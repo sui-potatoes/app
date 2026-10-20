@@ -143,13 +143,17 @@ history api:
     - values: null
   - explosion:
     - type: effect
-    - values: explosion: (u16, u16, u16)
+    - values: (x, y, radius): (u16, u16, u16)
+    - description: |
+        follows a grenade header or an attack header of an area weapon; then,
+        per unit in the area in the order the tiles are visited (von Neumann
+        neighbourhood, center last): [dodged], damage, [unitKIA]
   - criticalHit:
     - type: effect
     - values: criticalHit: (u8)
   - grenade:
-    - type: effect
-    - values: (radius, x, y): (u16, u16, u16)
+    - type: header
+    - values: (origin, target): ((u16, u16), (u16, u16))
   - unitKIA:
     - type: effect
     - values: unit: (u16, u16)
@@ -160,7 +164,8 @@ history api:
 tile types:
   - empty: walkable tile, no restrictions on movement
   - cover: walkable tile, depending on the cover type, may limit movement
-  - unwalkable: cannot be walked on
+  - unwalkable: empty tile that cannot be walked on (water, pit); does not block sight
+  - wall: solid tile; cannot be walked on or targeted, blocks line of sight, high cover for neighbours
   - ideas:
     - obstacle: tree / barrel / etc
     - edge: edge of the map

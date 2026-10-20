@@ -18,6 +18,7 @@ Contains all definitions for items that can be used by <code>Recruits</code>.
 <b>use</b> <a href="./stats.md#commander_stats">commander::stats</a>;
 <b>use</b> <a href="./weapon.md#commander_weapon">commander::weapon</a>;
 <b>use</b> <a href="./weapon_upgrade.md#commander_weapon_upgrade">commander::weapon_upgrade</a>;
+<b>use</b> <a href="../../.doc-deps/format/format.md#format_format">format::format</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
@@ -85,12 +86,12 @@ Creates a new rifle with the given tier.
 
 <pre><code><b>public</b> <b>fun</b> <a href="./items.md#commander_items_rifle">rifle</a>(tier: u8, ctx: &<b>mut</b> TxContext): Weapon {
     <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>) = match (tier) {
-        // 4 DMG, 2 SPREAD, +10% CRIT, 1 AREA, 4 RANGE, 3 AMMO
-        1 =&gt; (b"Standard Rifle", 0x03_04_00_01_01_0A_0A_02_04 &lt;&lt; (6 * 8)),
-        // 5 DMG, 1 SPREAD, +20% CRIT, 1 AREA, 5 RANGE, 3 AMMO
-        2 =&gt; (b"Sharpshooter Rifle", 0x03_05_00_01_01_14_14_01_05 &lt;&lt; (6 * 8)),
-        // 6 DMG, 1 SPREAD, +30% CRIT, 1 AREA, 5 RANGE, 3 AMMO
-        3 =&gt; (b"Plasma Rifle", 0x03_05_00_01_01_1E_1E_01_06 &lt;&lt; (6 * 8)),
+        // 4 DMG, 2 SPREAD, +10% CRIT, 0 AREA, 4 RANGE, 3 AMMO
+        1 =&gt; (b"Standard Rifle", 0x03_04_00_00_01_0A_0A_02_04 &lt;&lt; (6 * 8)),
+        // 5 DMG, 1 SPREAD, +20% CRIT, 0 AREA, 5 RANGE, 3 AMMO
+        2 =&gt; (b"Sharpshooter Rifle", 0x03_05_00_00_01_14_14_01_05 &lt;&lt; (6 * 8)),
+        // 6 DMG, 1 SPREAD, +30% CRIT, 0 AREA, 5 RANGE, 3 AMMO
+        3 =&gt; (b"Plasma Rifle", 0x03_05_00_00_01_1E_1E_01_06 &lt;&lt; (6 * 8)),
         _ =&gt; <b>abort</b>,
     };
     <a href="./weapon.md#commander_weapon_new">weapon::new</a>(name.to_string(), <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>), ctx)

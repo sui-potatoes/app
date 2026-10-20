@@ -170,6 +170,10 @@ export class Game3D extends Game implements Interface3D {
                     game.grid.setCell(x, z, { type: "Unwalkable", unit: null });
                 }
 
+                if (mapTile.tile_type.$kind == "Wall") {
+                    game.grid.setCell(x, z, { type: "Wall", unit: null });
+                }
+
                 if (mapTile.tile_type.$kind == "Empty") {
                     game.grid.setCell(x, z, { type: "Empty", unit: null });
                 }

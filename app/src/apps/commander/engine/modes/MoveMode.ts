@@ -169,7 +169,7 @@ export class MoveMode implements Mode {
         }
 
         if (button === THREE.MOUSE.LEFT) {
-            if (tile.type === "Unwalkable") return;
+            if (tile.type === "Unwalkable" || tile.type === "Wall") return;
             if (tile.unit) {
                 this.selectUnit(x, z); // order of operations is important!
                 this.switchMode(this.mode);

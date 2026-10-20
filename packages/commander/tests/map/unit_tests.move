@@ -3,7 +3,7 @@
 
 module commander::unit_tests;
 
-use commander::{recruit, stats_builder, unit, weapon};
+use commander::{items, recruit, stats_builder, unit, weapon};
 use std::{bcs, unit_test::assert_eq};
 use sui::random;
 
@@ -27,6 +27,46 @@ fun default() {
     let (weapon, armor) = recruit.dismiss();
     weapon.destroy_none();
     armor.destroy_none();
+    unit.destroy();
+}
+
+#[test]
+// Armor modifiers land on the recruit, including negative ones: heavy armor
+// is -1 MOB, +1 HP, +3 ARM, -10 DODGE on a default recruit (7, 65, 10, 0, 0)
+// carrying the default weapon.
+fun armor_modifiers_reach_the_recruit() {
+    let ctx = &mut tx_context::dummy();
+    let mut recruit = recruit::default(ctx);
+    recruit.add_armor(items::armor(3, ctx));
+    let unit = recruit.to_unit();
+
+    assert_eq!(unit.stats().mobility(), 6);
+    assert_eq!(unit.stats().health(), 11);
+    assert_eq!(unit.hp(), 11);
+    assert_eq!(unit.stats().armor(), 3);
+    assert_eq!(unit.stats().dodge(), 0); // 0 - 10 floors at zero
+    assert_eq!(unit.stats().aim(), 65);
+    // the default weapon still comes through
+    assert_eq!(unit.stats().damage(), 4);
+    assert_eq!(unit.ammo(), 3);
+
+    let (weapon, armor) = recruit.dismiss();
+    weapon.destroy_none();
+    armor.destroy_some().destroy();
+    unit.destroy();
+
+    // light armor: +1 ARM, +10 DODGE, no penalties
+    let mut recruit = recruit::default(ctx);
+    recruit.add_armor(items::armor(1, ctx));
+    let unit = recruit.to_unit();
+
+    assert_eq!(unit.stats().mobility(), 7);
+    assert_eq!(unit.stats().armor(), 1);
+    assert_eq!(unit.stats().dodge(), 10);
+
+    let (weapon, armor) = recruit.dismiss();
+    weapon.destroy_none();
+    armor.destroy_some().destroy();
     unit.destroy();
 }
 
@@ -244,5 +284,19 @@ fun from_bcs() {
     weapon.do!(|weapon| weapon.destroy());
     armor.do!(|armor| armor.destroy());
     unit2.destroy();
+    unit.destroy();
+}
+
+#[test]
+fun to_string() {
+    let ctx = &mut tx_context::dummy();
+    let recruit = recruit::default(ctx);
+    let unit = recruit.to_unit();
+
+    assert_eq!(unit.to_string(), b"HP 10/10 AP 2/2 AMMO 3/3".to_string());
+
+    let (weapon, armor) = recruit.dismiss();
+    weapon.destroy_none();
+    armor.destroy_none();
     unit.destroy();
 }
