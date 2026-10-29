@@ -470,19 +470,54 @@ public fun is_tile_unwalkable(map: &Map, x: u16, y: u16): bool {
 }
 
 /// Check if the given tile is a wall.
-public fun is_tile_wall(map: &Map, x: u16, y: u16): bool {
-    match (map.grid[x, y].tile_type) {
+public fun is_tile_wall(map: &Map, x: u16, y: u16): bool { is_wall!(&map.grid[x, y]) }
+
+/// Check if the given tile can be walked on: neither `Unwalkable` nor `Wall`.
+public fun is_tile_walkable(map: &Map, x: u16, y: u16): bool { is_walkable!(&map.grid[x, y]) }
+
+/// Whether `$tile` is a `Wall`.
+macro fun is_wall($tile: &Tile): bool {
+    let tile = $tile;
+    match (tile.tile_type) {
         TileType::Wall => true,
         _ => false,
     }
 }
 
-/// Check if the given tile can be walked on: neither `Unwalkable` nor `Wall`.
-public fun is_tile_walkable(map: &Map, x: u16, y: u16): bool {
-    match (map.grid[x, y].tile_type) {
+/// Whether `$tile` can be walked on: neither `Unwalkable` nor `Wall`.
+macro fun is_walkable($tile: &Tile): bool {
+    let tile = $tile;
+    match (tile.tile_type) {
         TileType::Unwalkable | TileType::Wall => false,
         _ => true,
     }
+}
+
+/// Cover value of the side of `$tile` facing `$direction`. A `Wall` has no
+/// cover here: it is handled as a wall before cover is looked at.
+macro fun side_cover($tile: &Tile, $direction: u8): u8 {
+    use grid::direction::{up, down, left};
+
+    let (tile, direction) = ($tile, $direction);
+    match (tile.tile_type) {
+        TileType::Cover { left: l, top, right, bottom } => {
+            if (direction == up!()) top
+            else if (direction == down!()) bottom
+            else if (direction == left!()) l
+            else right
+        },
+        _ => NO_COVER,
+    }
+}
+
+/// Whether the edge between `$from` and its neighbor `$to` in `$direction`
+/// has high cover on either side. Shared by `check_path` and `trace_line`.
+macro fun is_edge_high_cover($from: &Tile, $to: &Tile, $direction: u8): bool {
+    use grid::direction::inverse;
+
+    let (from, to, direction) = ($from, $to, $direction);
+    side_cover!(from, direction) == HIGH_COVER
+        || side_cover!(to, inverse!(direction)) == HIGH_COVER
 }
 
 /// Alias to support the `Grid.to_string` method.
@@ -515,20 +550,25 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
     path.reverse();
 
     // first two values are X and Y coordinates, the rest are directions
-    let (x0, y0) = (path.pop_back(), path.pop_back());
-    let mut cursor = cursor::new(x0 as u16, y0 as u16);
+    let (x0, y0) = (path.pop_back() as u16, path.pop_back() as u16);
+    let mut cursor = cursor::new(x0, y0);
     let none = option::none();
+
+    // the tile the path starts on; every later source is the previous target
+    let mut source = &map.grid[x0, y0];
+    if (!path.is_empty() && !is_walkable!(source)) return none;
 
     'path: {
         path.destroy!(|direction| {
-            let (x0, y0) = cursor.to_values();
             cursor.move_to(direction);
             let (x1, y1) = cursor.to_values();
+            let target = &map.grid[x1, y1];
 
             // units, walls, unwalkable tiles and high covers block the path
-            if (map.grid[x1, y1].unit.is_some()) return 'path none;
-            if (!map.is_tile_walkable(x0, y0) || !map.is_tile_walkable(x1, y1)) return 'path none;
-            if (map.is_edge_high_cover(x0, y0, direction)) return 'path none;
+            if (target.unit.is_some()) return 'path none;
+            if (!is_walkable!(target)) return 'path none;
+            if (is_edge_high_cover!(source, target, direction)) return 'path none;
+            source = target;
         });
 
         option::some(cursor.to_vector())
@@ -561,42 +601,60 @@ public fun line_of_throw(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16): bool {
 /// `i` row steps and `j` column steps the next row edge lies at
 /// `(i + 0.5) / dx` of the segment and the next column edge at
 /// `(j + 0.5) / dy`, compared as `(2i + 1) * dy` against `(2j + 1) * dx`.
-/// It takes `dx + dy` steps with two tile reads each. The same edges are
-/// visited from either end, so the result is symmetric: `a` sees `b` if and
-/// only if `b` sees `a`.
+/// It takes `dx + dy` steps with one tile read each: the tile being left was
+/// read when it was entered. An edge is inner when it is neither the first
+/// nor the last of the `dx + dy` edges crossed, counted as `i + j`. The same
+/// edges are visited from either end, so the result is symmetric: `a` sees
+/// `b` if and only if `b` sees `a`.
 fun trace_line(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16, high_cover_blocks: bool): bool {
     use grid::direction::{up, down, left, right};
 
     let (dx, dy) = (x0.diff(x1) as u64, y0.diff(y1) as u64);
-    let sx = if (x1 > x0) down!() else up!();
-    let sy = if (y1 > y0) right!() else left!();
+    let edges = dx + dy;
+    let (downward, rightward) = (x1 > x0, y1 > y0);
+    let sx = if (downward) down!() else up!();
+    let sy = if (rightward) right!() else left!();
     let (mut x, mut y) = (x0, y0);
+    let mut cur = &map.grid[x0, y0];
     let (mut i, mut j) = (0u64, 0u64);
 
-    while (i < dx || j < dy) {
+    while (i + j < edges) {
+        let k = i + j; // edges crossed so far
         let (t_row, t_col) = ((2 * i + 1) * dy, (2 * j + 1) * dx);
 
         if (t_row < t_col) {
-            if (map.blocks_line(x, y, sx, x0, y0, x1, y1, high_cover_blocks)) return false;
-            (x, y) = neighbor(x, y, sx);
+            let nx = if (downward) x + 1 else x - 1;
+            let next = &map.grid[nx, y];
+            if (step_blocks(cur, next, sx, k > 0 && k + 1 < edges, high_cover_blocks)) return false;
+            cur = next;
+            x = nx;
             i = i + 1;
         } else if (t_col < t_row) {
-            if (map.blocks_line(x, y, sy, x0, y0, x1, y1, high_cover_blocks)) return false;
-            (x, y) = neighbor(x, y, sy);
+            let ny = if (rightward) y + 1 else y - 1;
+            let next = &map.grid[x, ny];
+            if (step_blocks(cur, next, sy, k > 0 && k + 1 < edges, high_cover_blocks)) return false;
+            cur = next;
+            y = ny;
             j = j + 1;
         } else {
-            // corner: clear if either route around the vertex is clear
-            let (ax, ay) = neighbor(x, y, sx);
-            let (bx, by) = neighbor(x, y, sy);
+            // corner: two edges are crossed at once, and the line is clear if
+            // either route around the vertex is clear; the tiles beside the
+            // vertex are never the end tile, the one past it is when it ends
+            // the walk
+            let nx = if (downward) x + 1 else x - 1;
+            let ny = if (rightward) y + 1 else y - 1;
+            let (a, b, c) = (&map.grid[nx, y], &map.grid[x, ny], &map.grid[nx, ny]);
+            let (inner1, inner2) = (k > 0, k + 2 < edges);
             let via_row =
-                !map.blocks_line(x, y, sx, x0, y0, x1, y1, high_cover_blocks)
-                    && !map.blocks_line(ax, ay, sy, x0, y0, x1, y1, high_cover_blocks);
+                !step_blocks(cur, a, sx, inner1, high_cover_blocks)
+                    && !step_blocks(a, c, sy, inner2, high_cover_blocks);
             let via_col =
-                !map.blocks_line(x, y, sy, x0, y0, x1, y1, high_cover_blocks)
-                    && !map.blocks_line(bx, by, sx, x0, y0, x1, y1, high_cover_blocks);
+                !step_blocks(cur, b, sy, inner1, high_cover_blocks)
+                    && !step_blocks(b, c, sx, inner2, high_cover_blocks);
 
             if (!via_row && !via_col) return false;
-            (x, y) = neighbor(ax, ay, sy);
+            cur = c;
+            (x, y) = (nx, ny);
             i = i + 1;
             j = j + 1;
         }
@@ -605,61 +663,16 @@ fun trace_line(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16, high_cover_blocks:
     true
 }
 
-/// Whether crossing from `(x, y)` in `direction` blocks the line from
-/// `(x0, y0)` to `(x1, y1)`: the tile entered is a `Wall`, or, with
-/// `high_cover_blocks`, the edge has high cover on either side and touches
-/// neither end tile.
-fun blocks_line(
-    map: &Map,
-    x: u16,
-    y: u16,
-    direction: u8,
-    x0: u16,
-    y0: u16,
-    x1: u16,
-    y1: u16,
-    high_cover_blocks: bool,
-): bool {
-    let (nx, ny) = neighbor(x, y, direction);
-    if (map.is_tile_wall(nx, ny)) return true;
-    if (!high_cover_blocks) return false;
-
-    let is_inner = !(x == x0 && y == y0) && !(nx == x1 && ny == y1);
-    is_inner && map.is_edge_high_cover(x, y, direction)
-}
-
-/// Whether the edge between `(x, y)` and its neighbor in `direction` has high
-/// cover on either of its sides. Shared by `check_path` and `trace_line`.
-fun is_edge_high_cover(map: &Map, x: u16, y: u16, direction: u8): bool {
-    use grid::direction::inverse;
-
-    let (nx, ny) = neighbor(x, y, direction);
-    map.side_cover(x, y, direction) == HIGH_COVER
-        || map.side_cover(nx, ny, inverse!(direction)) == HIGH_COVER
-}
-
-/// Cover value of the side of the tile at `(x, y)` facing `direction`.
-fun side_cover(map: &Map, x: u16, y: u16, direction: u8): u8 {
-    use grid::direction::{up, down, left};
-
-    match (map.grid[x, y].tile_type) {
-        TileType::Cover { left: l, top, right, bottom } => {
-            if (direction == up!()) top
-            else if (direction == down!()) bottom
-            else if (direction == left!()) l
-            else right
-        },
-        _ => NO_COVER,
-    }
-}
-
-/// The neighbor of `(x, y)` in `direction` (`up` is the previous row).
-fun neighbor(x: u16, y: u16, direction: u8): (u16, u16) {
-    use grid::direction::{up, down, left};
-
-    if (direction == up!()) (x - 1, y) else if (direction == down!()) (x + 1, y) else if (
-        direction == left!()
-    ) (x, y - 1) else (x, y + 1)
+/// Whether stepping from `from` into its neighbor `to` in `direction` blocks
+/// the line: `to` is a `Wall`, or, with `high_cover_blocks`, the edge is
+/// `inner` (touches neither end tile) and has high cover on either side.
+///
+/// A function rather than a macro on purpose: `trace_line` calls it six times
+/// and the inlined matches would exceed the 255 locals a function may have.
+fun step_blocks(from: &Tile, to: &Tile, direction: u8, inner: bool, high_cover_blocks: bool): bool {
+    if (is_wall!(to)) true
+    else if (!high_cover_blocks || !inner) false
+    else is_edge_high_cover!(from, to, direction)
 }
 
 // === Map Presets ===
