@@ -44,7 +44,7 @@ const POST_CONSONANT: u8 = 30;
 #[allow(lint(public_random))]
 /// This function must be used as a part of a `Random` entry function call.
 public fun new_male_name(g: &mut RandomGenerator): String {
-    let mut res = b"".to_string();
+    let mut res: String = "";
     let name = name_gen::male::select(g.generate_u16_in_range(0, MALE_LIMIT));
 
     // whether to use consonant
@@ -58,7 +58,7 @@ public fun new_male_name(g: &mut RandomGenerator): String {
     };
 
     res.append(name);
-    res.append_utf8(b" ");
+    res.append_utf8(" ");
     res.append(last_name);
     res
 }
@@ -66,7 +66,7 @@ public fun new_male_name(g: &mut RandomGenerator): String {
 #[allow(lint(public_random))]
 /// This function must be used as a part of a `Random` entry function call.
 public fun new_female_name(g: &mut RandomGenerator): String {
-    let mut res = b"".to_string();
+    let mut res: String = "";
     let name = name_gen::female::select(g.generate_u16_in_range(0, FEMALE_LIMIT));
 
     // whether to use consonant
@@ -80,7 +80,7 @@ public fun new_female_name(g: &mut RandomGenerator): String {
     };
 
     res.append(name);
-    res.append_utf8(b" ");
+    res.append_utf8(" ");
     res.append(last_name);
     res
 }
