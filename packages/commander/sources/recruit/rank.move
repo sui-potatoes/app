@@ -168,5 +168,5 @@ public fun to_string(rank: &Rank): String {
         Rank::Captain => "Captain",
         Rank::Major => "Major",
         Rank::Colonel => "Colonel",
-    }.to_string()
+    }
 }

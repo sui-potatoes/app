@@ -11,12 +11,13 @@ use commander::{
     weapon::{Self, Weapon},
     weapon_upgrade::{Self as upgrade, WeaponUpgrade}
 };
+use std::string::String;
 
 // === Armor ===
 
 /// Creates a new `Armor` with the given tier.
 public fun armor(tier: u8, ctx: &mut TxContext): Armor {
-    let (name, stats) = match (tier) {
+    let (name, stats): (String, _) = match (tier) {
         // +1 ARM, +10% DODGE
         1 => ("Light Armor", vector[0, 0, 0, 1, 10]),
         // +2 ARM
@@ -26,14 +27,14 @@ public fun armor(tier: u8, ctx: &mut TxContext): Armor {
         _ => abort,
     };
 
-    armor::new(name.to_string(), stats::new_unchecked(bf::pack_u8!(stats)), ctx)
+    armor::new(name, stats::new_unchecked(bf::pack_u8!(stats)), ctx)
 }
 
 // === Weapons ===
 
 /// Creates a new rifle with the given tier.
 public fun rifle(tier: u8, ctx: &mut TxContext): Weapon {
-    let (name, stats) = match (tier) {
+    let (name, stats): (String, u128) = match (tier) {
         // 4 DMG, 2 SPREAD, +10% CRIT, 0 AREA, 4 RANGE, 3 AMMO
         1 => ("Standard Rifle", 0x03_04_00_00_01_0A_0A_02_04 << (6 * 8)),
         // 5 DMG, 1 SPREAD, +20% CRIT, 0 AREA, 5 RANGE, 3 AMMO
@@ -42,14 +43,14 @@ public fun rifle(tier: u8, ctx: &mut TxContext): Weapon {
         3 => ("Plasma Rifle", 0x03_05_00_00_01_1E_1E_01_06 << (6 * 8)),
         _ => abort,
     };
-    weapon::new(name.to_string(), stats::new_unchecked(stats), ctx)
+    weapon::new(name, stats::new_unchecked(stats), ctx)
 }
 
 // === Weapon Upgrades ===
 
 /// Adds `5-15%` to the `aim` stat of the `Weapon` depending on the tier.
 public fun scope(tier: u8): WeaponUpgrade {
-    let (name, stats) = match (tier) {
+    let (name, stats): (String, u128) = match (tier) {
         // +5 AIM
         1 => ("Basic Scope", 0x05 << (1 * 8)),
         // +10 AIM
@@ -59,12 +60,12 @@ public fun scope(tier: u8): WeaponUpgrade {
         _ => abort,
     };
 
-    upgrade::new(name.to_string(), tier, stats::new_unchecked(stats))
+    upgrade::new(name, tier, stats::new_unchecked(stats))
 }
 
 /// Adds `5-15%` to the `crit_chance` stat of the `Weapon` depending on the tier.
 public fun laser_sight(tier: u8): WeaponUpgrade {
-    let (name, stats) = match (tier) {
+    let (name, stats): (String, u128) = match (tier) {
         // +5 CRIT
         1 => ("Basic Laser Sight", 0x05 << (9 * 8)),
         // +10 CRIT
@@ -74,12 +75,12 @@ public fun laser_sight(tier: u8): WeaponUpgrade {
         _ => abort,
     };
 
-    upgrade::new(name.to_string(), tier, stats::new_unchecked(stats))
+    upgrade::new(name, tier, stats::new_unchecked(stats))
 }
 
 /// Adds 1-3 to `range` stat of the `Weapon` depending on the tier.
 public fun stock(tier: u8): WeaponUpgrade {
-    let (name, stats) = match (tier) {
+    let (name, stats): (String, u128) = match (tier) {
         // +1 RANGE
         1 => ("Basic Stock", 0x01 << (13 * 8)),
         // +2 RANGE
@@ -89,12 +90,12 @@ public fun stock(tier: u8): WeaponUpgrade {
         _ => abort,
     };
 
-    upgrade::new(name.to_string(), tier, stats::new_unchecked(stats))
+    upgrade::new(name, tier, stats::new_unchecked(stats))
 }
 
 /// Expanded clip increases the `ammo` stat by 1-3 depending on the tier.
 public fun expanded_clip(tier: u8): WeaponUpgrade {
-    let (name, stats) = match (tier) {
+    let (name, stats): (String, u128) = match (tier) {
         // +1 AMMO
         1 => ("Basic Expanded Clip", 0x01 << (14 * 8)),
         // +2 AMMO
@@ -104,7 +105,7 @@ public fun expanded_clip(tier: u8): WeaponUpgrade {
         _ => abort,
     };
 
-    upgrade::new(name.to_string(), tier, stats::new_unchecked(stats))
+    upgrade::new(name, tier, stats::new_unchecked(stats))
 }
 
 #[test]
