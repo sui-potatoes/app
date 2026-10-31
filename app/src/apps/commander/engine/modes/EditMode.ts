@@ -8,7 +8,7 @@ import { Controls } from "../Controls";
 import { Mode } from "./Mode";
 
 type Direction = "up" | "down" | "left" | "right";
-type Tool = "Cover" | "Spawn" | "Remove Spawn" | "High Cover" | "Object" | "Unwalkable";
+type Tool = "Cover" | "Spawn" | "Remove Spawn" | "High Cover" | "Object" | "Unwalkable" | "Wall";
 
 export type EditModeEvent = {
     message: { message: string };
@@ -83,7 +83,7 @@ export class EditMode extends Mode {
         const pointer = mode.pointerMesh;
 
         // if obstacle, color red, if empty, color green, if cover, color blue
-        if (this.grid.grid[x][y].type === "Unwalkable") {
+        if (this.grid.grid[x][y].type === "Unwalkable" || this.grid.grid[x][y].type === "Wall") {
             pointer.material.color.set("red");
         } else if (this.grid.grid[x][y].type === "Empty") {
             pointer.material.color.set("green");
@@ -134,6 +134,15 @@ export class EditMode extends Mode {
                     location: [x, y],
                 });
                 return this.grid.setCell(x, y, { type: "Unwalkable", unit: null });
+            }
+
+            if (mode.tool === "Wall") {
+                this.eventBus?.dispatchEvent({
+                    type: "game:editor:change",
+                    tool: mode.tool,
+                    location: [x, y],
+                });
+                return this.grid.setCell(x, y, { type: "Wall", unit: null });
             }
 
             if (mode.tool === "Cover" || mode.tool === "High Cover") {
@@ -188,6 +197,9 @@ export class EditMode extends Mode {
                 break;
             case "u":
                 mode.tool = "Unwalkable";
+                break;
+            case "x":
+                mode.tool = "Wall";
                 break;
 
             // === Directional keys ===

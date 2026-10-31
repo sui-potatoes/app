@@ -1,6 +1,11 @@
 [package]
 name = "commander_names"
 edition = "2024"
+license = "MIT"
+authors = ["Damir Shamanaev (damirka.ru@gmail.com)"]
 
+# `@suins/core` v6 has no git source on mainnet MVR, build with `-e testnet`.
 [dependencies]
-suins = { git = "https://github.com/MystenLabs/suins-contracts.git", subdir = "packages/suins", rev = "main" }
+suins = { r.mvr = "@suins/core", override = true }
+suins_subdomains = { r.mvr = "@suins/subnames" }
+suins_denylist = { r.mvr = "@suins/denylist", override = true }

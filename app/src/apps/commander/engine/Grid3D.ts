@@ -104,6 +104,7 @@ export class Grid3D extends Grid {
     _clearCell(x: number, y: number, tile: Tile) {
         switch (tile.type) {
             case "Unwalkable":
+            case "Wall":
                 this.objects.remove(this.meshes[`${x}-${y}`]?.clear());
                 break;
             case "Cover":
@@ -126,6 +127,20 @@ export class Grid3D extends Grid {
             );
             mesh.material.color = new THREE.Color(0xaaaaaa);
             mesh.position.set(x, 0.5, -y);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            group.add(mesh);
+        }
+
+        if (tile.type === "Wall") {
+            this.grid[x][y] = { type: "Wall", unit: null };
+
+            const mesh = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 2.5, 1),
+                new THREE.MeshStandardMaterial({ map: BARRIER_TEXTURE }),
+            );
+            mesh.material.color = new THREE.Color(0x666666);
+            mesh.position.set(x, 1.25, -y);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
             group.add(mesh);
@@ -188,7 +203,7 @@ export class Grid3D extends Grid {
     }
 
     _markSpawn(x: number, y: number): boolean {
-        if (this.grid[x][y].type === "Unwalkable") {
+        if (this.grid[x][y].type === "Unwalkable" || this.grid[x][y].type === "Wall") {
             return false;
         }
 

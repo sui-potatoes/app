@@ -16,6 +16,7 @@ Implements Sui Object Display for objects in the game.
 <b>use</b> <a href="./stats.md#commander_stats">commander::stats</a>;
 <b>use</b> <a href="./weapon.md#commander_weapon">commander::weapon</a>;
 <b>use</b> <a href="./weapon_upgrade.md#commander_weapon_upgrade">commander::weapon_upgrade</a>;
+<b>use</b> <a href="../../.doc-deps/format/format.md#format_format">format::format</a>;
 <b>use</b> <a href="../../.doc-deps/std/address.md#std_address">std::address</a>;
 <b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
@@ -87,7 +88,7 @@ Creates Display objects for the Recruit and Weapon objects.
     <b>let</b> recruit_display = {
         <b>let</b> <b>mut</b> <a href="./display.md#commander_display">display</a> = display::new&lt;Recruit&gt;(&publisher, ctx);
         <a href="./display.md#commander_display">display</a>.add(b"name".to_string(), b"{metadata.name} (Rank: {<a href="./rank.md#commander_rank">rank</a>})".to_string());
-        <a href="./display.md#commander_display">display</a>.add(b"description".to_string(), b"{metadata.description}".to_string());
+        <a href="./display.md#commander_display">display</a>.add(b"description".to_string(), b"{metadata.backstory}".to_string());
         <a href="./display.md#commander_display">display</a>.add(
             b"image_url".to_string(),
             b"https://potatoes.app/images/<a href="./recruit.md#commander_recruit">recruit</a>.webp".to_string(),
@@ -102,10 +103,10 @@ Creates Display objects for the Recruit and Weapon objects.
     // Display <b>for</b> the `Weapon` object.
     <b>let</b> weapon_display = {
         <b>let</b> <b>mut</b> <a href="./display.md#commander_display">display</a> = display::new&lt;Weapon&gt;(&publisher, ctx);
-        <a href="./display.md#commander_display">display</a>.add(b"name".to_string(), b"Standard Issue Rifle".to_string());
+        <a href="./display.md#commander_display">display</a>.add(b"name".to_string(), b"{name}".to_string());
         <a href="./display.md#commander_display">display</a>.add(
             b"description".to_string(),
-            b"Standard Rifle (DMG {damage}; RNG {range}; AMMO {ammo})".to_string(),
+            b"A <a href="./weapon.md#commander_weapon">weapon</a> that Recruits can <b>use</b> in battle.".to_string(),
         );
         <a href="./display.md#commander_display">display</a>.add(
             b"image_url".to_string(),
@@ -118,10 +119,10 @@ Creates Display objects for the Recruit and Weapon objects.
     // Armor <a href="./display.md#commander_display">display</a>
     <b>let</b> armor_display = {
         <b>let</b> <b>mut</b> <a href="./display.md#commander_display">display</a> = display::new&lt;Armor&gt;(&publisher, ctx);
-        <a href="./display.md#commander_display">display</a>.add(b"name".to_string(), b"Standard Issue Rifle".to_string());
+        <a href="./display.md#commander_display">display</a>.add(b"name".to_string(), b"{name}".to_string());
         <a href="./display.md#commander_display">display</a>.add(
             b"description".to_string(),
-            b"Standard Rifle (DMG {damage}; RNG {range}; AMMO {ammo})".to_string(),
+            b"Armor that Recruits can wear in battle.".to_string(),
         );
         <a href="./display.md#commander_display">display</a>.add(
             b"image_url".to_string(),
@@ -135,7 +136,7 @@ Creates Display objects for the Recruit and Weapon objects.
     <b>let</b> dogtag_display = {
         <b>let</b> <b>mut</b> <a href="./display.md#commander_display">display</a> = display::new&lt;DogTag&gt;(&publisher, ctx);
         <a href="./display.md#commander_display">display</a>.add(b"name".to_string(), b"{metadata.name} (Rank: {<a href="./rank.md#commander_rank">rank</a>})".to_string());
-        <a href="./display.md#commander_display">display</a>.add(b"description".to_string(), b"{metadata.description}".to_string());
+        <a href="./display.md#commander_display">display</a>.add(b"description".to_string(), b"{metadata.backstory}".to_string());
         <a href="./display.md#commander_display">display</a>.add(
             b"image_url".to_string(),
             b"https://potatoes.app/images/<a href="./recruit.md#commander_recruit">recruit</a>.webp".to_string(),

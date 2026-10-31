@@ -25,6 +25,7 @@ minimalistic representation.
 -  [Function `new_damage`](#commander_history_new_damage)
 -  [Function `new_kia`](#commander_history_new_kia)
 -  [Function `new_grenade`](#commander_history_new_grenade)
+-  [Function `new_explosion`](#commander_history_new_explosion)
 -  [Function `new_move`](#commander_history_new_move)
 -  [Function `new_next_turn`](#commander_history_new_next_turn)
 -  [Function `new_reload`](#commander_history_new_reload)
@@ -245,25 +246,10 @@ Variant <code>Miss</code>
 Variant <code>Explosion</code>
 </dt>
 <dd>
-</dd>
-<dt>
-Variant <code>CriticalHit</code>
-</dt>
-<dd>
-</dd>
-
-<dl>
-<dt>
-<code>0: u8</code>
-</dt>
-<dd>
-</dd>
-</dl>
-
-<dt>
-Variant <code>Grenade</code>
-</dt>
-<dd>
+ Explosion at <code>(x, y)</code> with the given radius. The effect of a <code>Grenade</code>
+ throw or of an <code>Attack</code> with an area weapon. Followed by <code>[Dodged]</code>,
+ <code>Damage</code>, <code>[UnitKIA]</code> for each unit in the area, in the order the tiles
+ are visited (see <code>Map.explode</code>).
 </dd>
 
 <dl>
@@ -287,6 +273,44 @@ Variant <code>Grenade</code>
 <dl>
 <dt>
 <code>2: u16</code>
+</dt>
+<dd>
+</dd>
+</dl>
+
+<dt>
+Variant <code>CriticalHit</code>
+</dt>
+<dd>
+</dd>
+
+<dl>
+<dt>
+<code>0: u8</code>
+</dt>
+<dd>
+</dd>
+</dl>
+
+<dt>
+Variant <code>Grenade</code>
+</dt>
+<dd>
+ Block header for grenade action: the unit at <code>origin</code> throws at <code>target</code>.
+</dd>
+
+<dl>
+<dt>
+<code>origin: vector&lt;u16&gt;</code>
+</dt>
+<dd>
+</dd>
+</dl>
+
+
+<dl>
+<dt>
+<code>target: vector&lt;u16&gt;</code>
 </dt>
 <dd>
 </dd>
@@ -345,7 +369,7 @@ Create empty history.
 
 Add a single record.
 WARNING: if you're adding multiple record in the same transaction,
-use <code><a href="./history.md#commander_history_append">append</a></code> to emit a single event!
+    use <code><a href="./history.md#commander_history_append">append</a></code> to emit a single event!
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./history.md#commander_history_add">add</a>(h: &<b>mut</b> <a href="./history.md#commander_history_History">commander::history::History</a>, record: <a href="./history.md#commander_history_Record">commander::history::Record</a>)
@@ -585,10 +609,10 @@ Create new <code>Record::UnitKIA</code> history record.
 
 ## Function `new_grenade`
 
-Create new <code>Record::Grenade</code> history record.
+Create new <code>Record::Grenade</code> history record: unit at <code>origin</code> throws at <code>target</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./history.md#commander_history_new_grenade">new_grenade</a>(r: u16, x: u16, y: u16): <a href="./history.md#commander_history_Record">commander::history::Record</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./history.md#commander_history_new_grenade">new_grenade</a>(origin: vector&lt;u16&gt;, target: vector&lt;u16&gt;): <a href="./history.md#commander_history_Record">commander::history::Record</a>
 </code></pre>
 
 
@@ -597,7 +621,32 @@ Create new <code>Record::Grenade</code> history record.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./history.md#commander_history_new_grenade">new_grenade</a>(r: u16, x: u16, y: u16): <a href="./history.md#commander_history_Record">Record</a> { Record::Grenade(r, x, y) }
+<pre><code><b>public</b> <b>fun</b> <a href="./history.md#commander_history_new_grenade">new_grenade</a>(origin: vector&lt;u16&gt;, target: vector&lt;u16&gt;): <a href="./history.md#commander_history_Record">Record</a> {
+    Record::Grenade { origin, target }
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="commander_history_new_explosion"></a>
+
+## Function `new_explosion`
+
+Create new <code>Record::Explosion</code> history record: center <code>(x, y)</code> and radius.
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./history.md#commander_history_new_explosion">new_explosion</a>(x: u16, y: u16, r: u16): <a href="./history.md#commander_history_Record">commander::history::Record</a>
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="./history.md#commander_history_new_explosion">new_explosion</a>(x: u16, y: u16, r: u16): <a href="./history.md#commander_history_Record">Record</a> { Record::Explosion(x, y, r) }
 </code></pre>
 
 
@@ -782,9 +831,12 @@ Serialize <code><a href="./history.md#commander_history_History">History</a></co
             4 =&gt; Record::RecruitPlaced(bcs.peel_u16(), bcs.peel_u16()),
             5 =&gt; Record::Damage(bcs.peel_u8()),
             6 =&gt; Record::Miss,
-            7 =&gt; Record::Explosion,
+            7 =&gt; Record::Explosion(bcs.peel_u16(), bcs.peel_u16(), bcs.peel_u16()),
             8 =&gt; Record::CriticalHit(bcs.peel_u8()),
-            9 =&gt; Record::Grenade(bcs.peel_u16(), bcs.peel_u16(), bcs.peel_u16()),
+            9 =&gt; Record::Grenade {
+                origin: bcs.peel_vec!(|bcs| bcs.peel_u16()),
+                target: bcs.peel_vec!(|bcs| bcs.peel_u16()),
+            },
             10 =&gt; Record::UnitKIA(bcs.peel_address().to_id()),
             11 =&gt; Record::Dodged,
             _ =&gt; <b>abort</b>,

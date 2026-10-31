@@ -27,6 +27,10 @@ const ENoUnit: u64 = 5;
 const EPathTooShort: u64 = 6;
 /// The tile is out of bounds.
 const ETileOutOfBounds: u64 = 7;
+/// Attempt to stand on or target a `Wall` tile.
+const ETileIsWall: u64 = 8;
+/// No line of sight (or throw) from the attacker to the target.
+const ENoLineOfSight: u64 = 9;
 
 #[allow(unused_const)]
 /// Constant for no cover in the `TileType::Cover`.
@@ -41,6 +45,10 @@ const DEFENSE_BONUS: u8 = 25;
 
 /// The range of the grenade.
 const GRENADE_RANGE: u16 = 5;
+/// The radius of the grenade explosion (von Neumann neighborhood).
+const GRENADE_RADIUS: u16 = 2;
+/// The damage the grenade deals to every unit in the area.
+const GRENADE_DAMAGE: u8 = 4;
 
 /// Defines a single Tile in the game `Map`. Tiles can be empty, provide cover
 /// or be unwalkable. Additionally, a unit standing on a tile effectively makes
@@ -67,8 +75,12 @@ public enum TileType has copy, drop, store {
         right: u8,
         bottom: u8,
     },
-    /// Certain tiles cannot be walked on, like walls or water.
+    /// An empty tile that cannot be walked on, like water or a pit. Does not
+    /// block line of sight and can be targeted by area weapons.
     Unwalkable,
+    /// A solid tile: cannot be walked on, cannot be targeted and blocks line
+    /// of sight. A dead zone for both movement and aiming.
+    Wall,
 }
 
 /// Defines the game Map - a grid of tiles where the game takes place.
@@ -124,6 +136,7 @@ public fun place_recruit(map: &mut Map, recruit: &Recruit, x: u16, y: u16): Reco
 
     assert!(target_tile.unit.is_none(), EUnitAlreadyOnTile);
     assert!(target_tile.tile_type != TileType::Unwalkable, ETileIsUnwalkable);
+    assert!(target_tile.tile_type != TileType::Wall, ETileIsWall);
 
     map.grid[x, y].unit.fill(recruit.to_unit());
     history::new_recruit_placed(x, y)
@@ -167,10 +180,20 @@ public fun move_unit(map: &mut Map, path: vector<u8>): Record {
 }
 
 #[allow(lint(public_random))]
-/// Perform a ranged attack.
+/// Perform a ranged attack from `(x0, y0)` at `(x1, y1)`.
 ///
-/// TODO: cover mechanic, provide `DEF` stat based on the direction of the
-///     attack and the relative position of the attacker and the target.
+/// The hit chance is the attacker's aim adjusted for range, minus the target's
+/// defense. With a single-target weapon (`area_size` of 0) the target tile must
+/// hold a unit, and the defense is the directional cover bonus plus the
+/// target's natural `defense` stat. With an area weapon (`area_size` above 0)
+/// the target is any tile but a `Wall`, defense does not apply, and a hit
+/// explodes with the radius `area_size` (see `explode`). The weapon's
+/// `can_be_dodged` stat decides whether the damage can be dodged. Either way
+/// the attacker needs a line of sight to the target (see `line_of_sight`).
+///
+/// Records: `Attack`, then `Miss`; or for a single target `[Dodged]`,
+/// `Damage` / `CriticalHit`, `[UnitKIA]`; or for an area weapon the records
+/// of `explode`.
 public fun perform_attack(
     map: &mut Map,
     rng: &mut RandomGenerator,
@@ -181,29 +204,54 @@ public fun perform_attack(
 ): vector<Record> {
     let mut history = vector[history::new_attack(vector[x0, y0], vector[x1, y1])];
     let range = grid::manhattan_distance!(x0, y0, x1, y1) as u8;
-    let defense_bonus = if (range > 0) map.cover_bonus(x0, y0, x1, y1) else 0;
-    let attacker = &mut map.grid[x0, y0].unit;
+
+    let attacker = &map.grid[x0, y0].unit;
     assert!(attacker.is_some(), ENoUnit);
 
-    let unit = attacker.borrow_mut();
+    let stats = attacker.borrow().stats();
+    let radius = stats.area_size() as u16;
+    let can_dodge = stats.can_be_dodged() != 0;
+    let env_damage = stats.env_damage() != 0;
+
+    // single target: the tile must hold a unit, whose cover and natural defense
+    // lower the hit chance; an area weapon targets a tile and ignores both
+    let target_defense = if (radius == 0) {
+        let target = &map.grid[x1, y1].unit;
+        assert!(target.is_some(), ENoUnit);
+        let cover = if (range > 0) map.cover_bonus(x0, y0, x1, y1) else 0;
+        let natural = target.borrow().stats().defense();
+        ((cover as u16) + (natural as u16)).min(100) as u8
+    } else {
+        assert!(!map.is_tile_wall(x1, y1), ETileIsWall);
+        0
+    };
+
+    assert!(map.line_of_sight(x0, y0, x1, y1), ENoLineOfSight);
+
+    let unit = map.grid[x0, y0].unit.borrow_mut();
     unit.try_reset_ap(map.turn);
 
-    let (is_hit, _, is_crit, damage, _) = unit.perform_attack(rng, range, defense_bonus);
-    let target = &mut map.grid[x1, y1].unit;
-    assert!(target.is_some(), ENoUnit);
+    let (is_hit, _, is_crit, damage, _) = unit.perform_attack(rng, range, target_defense);
+    if (!is_hit) {
+        history.push_back(history::new_miss());
+        return history
+    };
 
-    let mut target = target.extract();
-    let (is_dodged, damage, is_kia) = if (is_hit && damage > 0) {
-        target.apply_damage(rng, damage, true)
+    if (radius > 0) {
+        history.append(map.explode(rng, x1, y1, radius, damage, env_damage, can_dodge));
+        return history
+    };
+
+    let mut target = map.grid[x1, y1].unit.extract();
+    let (is_dodged, damage, is_kia) = if (damage > 0) {
+        target.apply_damage(rng, damage, can_dodge)
     } else (false, 0, false);
 
     if (is_dodged) history.push_back(history::new_dodged());
-    if (is_hit) {
-        history.push_back({
-            if (is_crit) history::new_critical_hit(damage) // same cost
-            else history::new_damage(damage)
-        });
-    } else history.push_back(history::new_miss());
+    history.push_back({
+        if (is_crit) history::new_critical_hit(damage) // same cost
+        else history::new_damage(damage)
+    });
 
     if (is_kia) history.push_back(history::new_kia(target.destroy()))
     else map.grid[x1, y1].unit.fill(target);
@@ -217,6 +265,8 @@ public fun perform_attack(
 /// - no cover - 0
 /// - LOW_COVER - 25
 /// - HIGH_COVER - 50
+///
+/// A `Wall` tile next to the target counts as high cover on that side.
 public(package) fun cover_bonus(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16): u8 {
     use grid::direction::{direction, none, up, down, left, right};
 
@@ -294,14 +344,19 @@ macro fun tile_cover($map: &Map, $x: u16, $y: u16): (u8, u8, u8, u8) {
     let map = $map;
     match (map.grid[$x, $y].tile_type) {
         TileType::Cover { left, right, top, bottom } => (top, bottom, left, right),
+        TileType::Wall => (HIGH_COVER, HIGH_COVER, HIGH_COVER, HIGH_COVER),
         _ => (0, 0, 0, 0),
     }
 }
 
 #[allow(lint(public_random))]
-/// Throw a grenade. This action costs 1AP, deals area damage and destroys
-/// covers in the area of effect (a von Neumann neighborhood of radius 2 —
-/// a diamond around the target tile).
+/// Throw a grenade from `(x, y)` at `(x1, y1)`. This action costs 1 AP, deals
+/// `GRENADE_DAMAGE` to every unit in the von Neumann neighborhood of radius
+/// `GRENADE_RADIUS` around the target tile (a diamond), cannot be dodged, and
+/// destroys covers in the area. The target tile must be reachable by a throw:
+/// walls block it, covers do not (see `line_of_throw`).
+///
+/// Records: `Grenade`, then the records of `explode`.
 public fun perform_grenade(
     map: &mut Map,
     rng: &mut RandomGenerator,
@@ -310,9 +365,10 @@ public fun perform_grenade(
     x1: u16,
     y1: u16,
 ): vector<Record> {
-    let radius = 2;
-    let unit = &mut map.grid[x, y].unit;
     assert!(grid::manhattan_distance!(x, y, x1, y1) <= GRENADE_RANGE, EPathTooShort);
+    assert!(!map.is_tile_wall(x1, y1), ETileIsWall);
+    assert!(map.line_of_throw(x, y, x1, y1), ENoLineOfSight);
+    let unit = &mut map.grid[x, y].unit;
     assert!(unit.is_some(), ENoUnit);
 
     // update unit's stats
@@ -320,28 +376,53 @@ public fun perform_grenade(
     unit.try_reset_ap(map.turn);
     unit.perform_grenade();
 
-    // update each tile: Cover -> Empty
-    let mut history = vector[history::new_grenade(x1, y1, radius)];
-    let mut cells = map.grid.von_neumann_neighbors(cell::new(x1, y1), radius);
+    let mut history = vector[history::new_grenade(vector[x, y], vector[x1, y1])];
+    history.append(map.explode(rng, x1, y1, GRENADE_RADIUS, GRENADE_DAMAGE, true, false));
+    history
+}
 
-    cells.push_back(cell::new(x1, y1));
+/// Apply area damage centered at `(x, y)`: every unit in the von Neumann
+/// neighborhood of `radius` (center included) takes `damage`, reduced by its
+/// armor and dodged only if `can_dodge`. With `env_damage`, covers in the area
+/// are destroyed (`Cover` -> `Empty`). Shared by grenades and area weapons.
+///
+/// Records: `Explosion`, then `[Dodged]`, `Damage`, `[UnitKIA]` per unit in
+/// the area. Tiles are visited in the order of `Grid.von_neumann_neighbors`
+/// with the center tile last; a replay must walk them in the same order.
+fun explode(
+    map: &mut Map,
+    rng: &mut RandomGenerator,
+    x: u16,
+    y: u16,
+    radius: u16,
+    damage: u8,
+    env_damage: bool,
+    can_dodge: bool,
+): vector<Record> {
+    let mut history = vector[history::new_explosion(x, y, radius)];
+    let mut cells = map.grid.von_neumann_neighbors(cell::new(x, y), radius);
+
+    cells.push_back(cell::new(x, y));
     cells.do!(|p| {
         let (x, y) = p.to_values();
         let tile = &mut map.grid[x, y];
 
         if (tile.unit.is_some()) {
             let mut unit = tile.unit.extract();
-            let (_, dmg, is_kia) = unit.apply_damage(rng, 4, false);
+            let (is_dodged, dmg, is_kia) = unit.apply_damage(rng, damage, can_dodge);
 
+            if (is_dodged) history.push_back(history::new_dodged());
             history.push_back(history::new_damage(dmg));
 
             if (!is_kia) tile.unit.fill(unit)
             else history.push_back(history::new_kia(unit.destroy()));
         };
 
-        match (tile.tile_type) {
-            TileType::Cover { .. } => tile.tile_type = TileType::Empty,
-            _ => (),
+        if (env_damage) {
+            match (tile.tile_type) {
+                TileType::Cover { .. } => tile.tile_type = TileType::Empty,
+                _ => (),
+            }
         };
     });
 
@@ -388,6 +469,57 @@ public fun is_tile_unwalkable(map: &Map, x: u16, y: u16): bool {
     }
 }
 
+/// Check if the given tile is a wall.
+public fun is_tile_wall(map: &Map, x: u16, y: u16): bool { is_wall!(&map.grid[x, y]) }
+
+/// Check if the given tile can be walked on: neither `Unwalkable` nor `Wall`.
+public fun is_tile_walkable(map: &Map, x: u16, y: u16): bool { is_walkable!(&map.grid[x, y]) }
+
+/// Whether `$tile` is a `Wall`.
+macro fun is_wall($tile: &Tile): bool {
+    let tile = $tile;
+    match (tile.tile_type) {
+        TileType::Wall => true,
+        _ => false,
+    }
+}
+
+/// Whether `$tile` can be walked on: neither `Unwalkable` nor `Wall`.
+macro fun is_walkable($tile: &Tile): bool {
+    let tile = $tile;
+    match (tile.tile_type) {
+        TileType::Unwalkable | TileType::Wall => false,
+        _ => true,
+    }
+}
+
+/// Cover value of the side of `$tile` facing `$direction`. A `Wall` has no
+/// cover here: it is handled as a wall before cover is looked at.
+macro fun side_cover($tile: &Tile, $direction: u8): u8 {
+    use grid::direction::{up, down, left};
+
+    let (tile, direction) = ($tile, $direction);
+    match (tile.tile_type) {
+        TileType::Cover { left: l, top, right, bottom } => {
+            if (direction == up!()) top
+            else if (direction == down!()) bottom
+            else if (direction == left!()) l
+            else right
+        },
+        _ => NO_COVER,
+    }
+}
+
+/// Whether the edge between `$from` and its neighbor `$to` in `$direction`
+/// has high cover on either side. Shared by `check_path` and `trace_line`.
+macro fun is_edge_high_cover($from: &Tile, $to: &Tile, $direction: u8): bool {
+    use grid::direction::inverse;
+
+    let (from, to, direction) = ($from, $to, $direction);
+    side_cover!(from, direction) == HIGH_COVER
+        || side_cover!(to, inverse!(direction)) == HIGH_COVER
+}
+
 /// Alias to support the `Grid.to_string` method.
 public use fun tile_to_string as Tile.to_string;
 
@@ -405,6 +537,7 @@ public fun tile_to_string(tile: &Tile): String {
             str
         },
         TileType::Unwalkable => b" XXX ".to_string(),
+        TileType::Wall => b" ### ".to_string(),
     }
 }
 
@@ -414,51 +547,132 @@ public fun tile_to_string(tile: &Tile): String {
 /// Returns `None` if the path is not walkable, otherwise returns the end cell
 /// of the path.
 public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
-    use grid::direction::{up, down, left, right};
-
     path.reverse();
 
     // first two values are X and Y coordinates, the rest are directions
-    let (x0, y0) = (path.pop_back(), path.pop_back());
-    let mut cursor = cursor::new(x0 as u16, y0 as u16);
+    let (x0, y0) = (path.pop_back() as u16, path.pop_back() as u16);
+    let mut cursor = cursor::new(x0, y0);
     let none = option::none();
+
+    // the tile the path starts on; every later source is the previous target
+    let mut source = &map.grid[x0, y0];
+    if (!path.is_empty() && !is_walkable!(source)) return none;
 
     'path: {
         path.destroy!(|direction| {
-            let (x0, y0) = cursor.to_values();
-            let source = &map.grid[x0, y0];
             cursor.move_to(direction);
-
             let (x1, y1) = cursor.to_values();
             let target = &map.grid[x1, y1];
 
-            // units, high covers and unwalkable tiles block the path
+            // units, walls, unwalkable tiles and high covers block the path
             if (target.unit.is_some()) return 'path none;
-            match (source.tile_type) {
-                TileType::Empty => (),
-                TileType::Unwalkable => return 'path none,
-                TileType::Cover { left, right, top, bottom } => {
-                    if (direction == left!() && left == HIGH_COVER) return 'path none;
-                    if (direction == right!() && right == HIGH_COVER) return 'path none;
-                    if (direction == up!() && top == HIGH_COVER) return 'path none;
-                    if (direction == down!() && bottom == HIGH_COVER) return 'path none;
-                },
-            };
-
-            match (target.tile_type) {
-                TileType::Empty => (),
-                TileType::Unwalkable => return 'path none,
-                TileType::Cover { left, right, top, bottom } => {
-                    if (direction == left!() && right == HIGH_COVER) return 'path none;
-                    if (direction == right!() && left == HIGH_COVER) return 'path none;
-                    if (direction == up!() && bottom == HIGH_COVER) return 'path none;
-                    if (direction == down!() && top == HIGH_COVER) return 'path none;
-                },
-            };
+            if (!is_walkable!(target)) return 'path none;
+            if (is_edge_high_cover!(source, target, direction)) return 'path none;
+            source = target;
         });
 
         option::some(cursor.to_vector())
     }
+}
+
+// === Line of Sight ===
+
+/// Check the line of sight for a shot from `(x0, y0)` to `(x1, y1)`: walls and
+/// high covers block it, unwalkable tiles and units do not. See `trace_line`.
+public fun line_of_sight(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16): bool {
+    map.trace_line(x0, y0, x1, y1, true)
+}
+
+/// Check the line of throw for a grenade from `(x0, y0)` to `(x1, y1)`: only
+/// walls block it, a grenade flies over covers. See `trace_line`.
+public fun line_of_throw(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16): bool {
+    map.trace_line(x0, y0, x1, y1, false)
+}
+
+/// Walk the segment between the centers of two tiles one edge at a time and
+/// check that it is clear. Entering a `Wall` always blocks. With
+/// `high_cover_blocks`, a high cover on either side of a crossed edge blocks
+/// too, except on the edges touching the two end tiles: cover next to the
+/// attacker or the target is cover, not a wall. `Unwalkable` tiles and units
+/// never block. Where the segment passes exactly through a corner, it is
+/// clear if either of the two orthogonal routes around the corner is clear.
+///
+/// The walk is the Amanatides-Woo grid traversal in unsigned integers: after
+/// `i` row steps and `j` column steps the next row edge lies at
+/// `(i + 0.5) / dx` of the segment and the next column edge at
+/// `(j + 0.5) / dy`, compared as `(2i + 1) * dy` against `(2j + 1) * dx`.
+/// It takes `dx + dy` steps with one tile read each: the tile being left was
+/// read when it was entered. An edge is inner when it is neither the first
+/// nor the last of the `dx + dy` edges crossed, counted as `i + j`. The same
+/// edges are visited from either end, so the result is symmetric: `a` sees
+/// `b` if and only if `b` sees `a`.
+fun trace_line(map: &Map, x0: u16, y0: u16, x1: u16, y1: u16, high_cover_blocks: bool): bool {
+    use grid::direction::{up, down, left, right};
+
+    let (dx, dy) = (x0.diff(x1) as u64, y0.diff(y1) as u64);
+    let edges = dx + dy;
+    let (downward, rightward) = (x1 > x0, y1 > y0);
+    let sx = if (downward) down!() else up!();
+    let sy = if (rightward) right!() else left!();
+    let (mut x, mut y) = (x0, y0);
+    let mut cur = &map.grid[x0, y0];
+    let (mut i, mut j) = (0u64, 0u64);
+
+    while (i + j < edges) {
+        let k = i + j; // edges crossed so far
+        let (t_row, t_col) = ((2 * i + 1) * dy, (2 * j + 1) * dx);
+
+        if (t_row < t_col) {
+            let nx = if (downward) x + 1 else x - 1;
+            let next = &map.grid[nx, y];
+            if (step_blocks(cur, next, sx, k > 0 && k + 1 < edges, high_cover_blocks)) return false;
+            cur = next;
+            x = nx;
+            i = i + 1;
+        } else if (t_col < t_row) {
+            let ny = if (rightward) y + 1 else y - 1;
+            let next = &map.grid[x, ny];
+            if (step_blocks(cur, next, sy, k > 0 && k + 1 < edges, high_cover_blocks)) return false;
+            cur = next;
+            y = ny;
+            j = j + 1;
+        } else {
+            // corner: two edges are crossed at once, and the line is clear if
+            // either route around the vertex is clear; the tiles beside the
+            // vertex are never the end tile, the one past it is when it ends
+            // the walk
+            let nx = if (downward) x + 1 else x - 1;
+            let ny = if (rightward) y + 1 else y - 1;
+            let (a, b, c) = (&map.grid[nx, y], &map.grid[x, ny], &map.grid[nx, ny]);
+            let (inner1, inner2) = (k > 0, k + 2 < edges);
+            let via_row =
+                !step_blocks(cur, a, sx, inner1, high_cover_blocks)
+                    && !step_blocks(a, c, sy, inner2, high_cover_blocks);
+            let via_col =
+                !step_blocks(cur, b, sy, inner1, high_cover_blocks)
+                    && !step_blocks(b, c, sx, inner2, high_cover_blocks);
+
+            if (!via_row && !via_col) return false;
+            cur = c;
+            (x, y) = (nx, ny);
+            i = i + 1;
+            j = j + 1;
+        }
+    };
+
+    true
+}
+
+/// Whether stepping from `from` into its neighbor `to` in `direction` blocks
+/// the line: `to` is a `Wall`, or, with `high_cover_blocks`, the edge is
+/// `inner` (touches neither end tile) and has high cover on either side.
+///
+/// A function rather than a macro on purpose: `trace_line` calls it six times
+/// and the inlined matches would exceed the 255 locals a function may have.
+fun step_blocks(from: &Tile, to: &Tile, direction: u8, inner: bool, high_cover_blocks: bool): bool {
+    if (is_wall!(to)) true
+    else if (!high_cover_blocks || !inner) false
+    else is_edge_high_cover!(from, to, direction)
 }
 
 // === Map Presets ===
@@ -467,6 +681,7 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
 ///
 /// - Map: 01 - 7x7 LEGO prototype.
 /// - Unit positions: (0, 3), (1, 6), (6, 5)
+/// - Firing lane in the demo: (3, 1) <-> (0, 3)
 /// - Goal: close encounter with low and high cover to test line of sight and cover mechanics.
 /// - Schema:
 ///
@@ -474,8 +689,8 @@ public fun check_path(map: &Map, mut path: vector<u8>): Option<vector<u16>> {
 /// |     |     |2002-|0001-|0002-|     |     |
 /// | XXX |     |     |     |     |     |     |
 /// |     |     |     |     |     |0001-|0001-|
-/// |0100-|0210-|     | XXX |     |1000-|1000-|
-/// |0001-|0012-|     |     |     |     |     |
+/// |0100-|0120-|     | XXX |     |1000-|1000-|
+/// |0001-|0102-|     |     |     |     |     |
 /// |     |     |     |     |     |     |     |
 /// |     | XXX |     |     |1100-|0100-|0110-|
 /// ```
@@ -515,6 +730,7 @@ public(package) fun from_bcs(bcs: &mut BCS): Map {
                     bottom: bcs.peel_u8(),
                 },
                 2 => TileType::Unwalkable,
+                3 => TileType::Wall,
                 _ => abort,
             },
             unit: bcs.peel_option!(|bcs| unit::from_bcs(bcs)),
@@ -753,4 +969,169 @@ fun test_map_with_units() {
     armor.destroy!(|a| a.destroy());
 
     map.destroy();
+}
+
+#[test]
+/// Walls block movement in and out, count as high cover for a neighbor, give
+/// no cover as `Unwalkable`, and survive a BCS roundtrip.
+fun test_wall() {
+    use grid::direction::{down, right};
+    use std::unit_test::assert_eq;
+
+    let mut map = new(@0.to_id(), 3);
+    *&mut map.grid[1, 1].tile_type = TileType::Wall;
+
+    assert!(map.is_tile_wall(1, 1));
+    assert!(!map.is_tile_unwalkable(1, 1));
+    assert!(map.check_path(vector[0, 1, down!()]).is_none());
+    assert!(map.check_path(vector[1, 0, right!()]).is_none());
+    assert!(map.check_path(vector[0, 0, right!(), right!(), down!()]).is_some());
+
+    // target (2, 1) attacked from (0, 1): the wall at (1, 1) is high cover
+    assert_eq!(map.cover_bonus(0, 1, 2, 1), 2 * DEFENSE_BONUS);
+    assert_eq!(map.cover_bonus(2, 0, 2, 1), 0); // attack from the side
+
+    *&mut map.grid[1, 1].tile_type = TileType::Unwalkable;
+    assert_eq!(map.cover_bonus(0, 1, 2, 1), 0);
+
+    *&mut map.grid[1, 1].tile_type = TileType::Wall;
+    let restored = from_bytes(bcs::to_bytes(&map));
+    assert!(restored.is_tile_wall(1, 1));
+    assert_eq!(map.to_string(), restored.to_string());
+
+    restored.destroy();
+    map.destroy();
+}
+
+#[test, expected_failure(abort_code = ETileIsWall)]
+fun test_place_recruit_on_wall_fails() {
+    let ctx = &mut tx_context::dummy();
+    let recruit = commander::recruit::default(ctx);
+    let mut map = new(@0.to_id(), 3);
+    *&mut map.grid[1, 1].tile_type = TileType::Wall;
+    map.place_recruit(&recruit, 1, 1);
+    abort
+}
+
+#[test, expected_failure(abort_code = ETileIsWall)]
+/// An area weapon cannot target a wall tile; checked before the roll.
+fun test_area_attack_on_wall_fails() {
+    use commander::{recruit, stats, weapon};
+
+    let ctx = &mut tx_context::dummy();
+    let mut rng = sui::random::new_generator_from_seed_for_testing(vector[1]);
+    let mut map = new(@0.to_id(), 3);
+    *&mut map.grid[0, 2].tile_type = TileType::Wall;
+
+    // default weapon with `area_size` 1 (radius 1)
+    let mut recruit = recruit::default(ctx);
+    let launcher = stats::new_unchecked(0x03_04_00_01_01_00_00_02_04 << (6 * 8));
+    recruit.add_weapon(weapon::new(b"Launcher".to_string(), launcher, ctx));
+    map.place_recruit(&recruit, 0, 0);
+    map.perform_attack(&mut rng, 0, 0, 0, 2);
+    abort
+}
+
+#[test_only]
+fun cover(left: u8, top: u8, right: u8, bottom: u8): TileType {
+    TileType::Cover { left, top, right, bottom }
+}
+
+#[test]
+/// Line of sight: open map, walls, unwalkable tiles, covers on inner and end
+/// edges, corners; every case checked from both ends.
+fun test_line_of_sight() {
+    let (no, low, high) = (NO_COVER, LOW_COVER, HIGH_COVER);
+    let mut map = new(@0.to_id(), 5);
+
+    // open map
+    assert!(map.line_of_sight(0, 0, 4, 4) && map.line_of_sight(4, 4, 0, 0));
+    assert!(map.line_of_sight(0, 0, 0, 4) && map.line_of_sight(0, 4, 0, 0));
+    assert!(map.line_of_sight(0, 0, 4, 0) && map.line_of_sight(4, 0, 0, 0));
+    assert!(map.line_of_sight(0, 0, 2, 4) && map.line_of_sight(2, 4, 0, 0));
+    assert!(map.line_of_sight(1, 1, 1, 1));
+
+    // a wall on the line blocks it, a wall next to the line does not
+    *&mut map.grid[0, 2].tile_type = TileType::Wall;
+    assert!(!map.line_of_sight(0, 0, 0, 4) && !map.line_of_sight(0, 4, 0, 0));
+    assert!(!map.line_of_throw(0, 0, 0, 4) && !map.line_of_throw(0, 4, 0, 0));
+    assert!(map.line_of_sight(1, 0, 1, 4) && map.line_of_sight(1, 4, 1, 0));
+
+    // an unwalkable tile does not block
+    *&mut map.grid[0, 2].tile_type = TileType::Unwalkable;
+    assert!(map.line_of_sight(0, 0, 0, 4) && map.line_of_sight(0, 4, 0, 0));
+    *&mut map.grid[0, 2].tile_type = TileType::Empty;
+
+    // high cover on the edge between (0, 2) and (0, 3): blocks a line passing
+    // through, is plain cover for a line starting or ending next to it, and a
+    // grenade flies over it
+    *&mut map.grid[0, 2].tile_type = cover(no, no, high, no);
+    assert!(!map.line_of_sight(0, 0, 0, 4) && !map.line_of_sight(0, 4, 0, 0));
+    assert!(map.line_of_sight(0, 2, 0, 4) && map.line_of_sight(0, 4, 0, 2));
+    assert!(map.line_of_sight(0, 0, 0, 3) && map.line_of_sight(0, 3, 0, 0));
+    assert!(map.line_of_throw(0, 0, 0, 4) && map.line_of_throw(0, 4, 0, 0));
+
+    // declared on the other side of the same edge; low cover never blocks
+    *&mut map.grid[0, 2].tile_type = TileType::Empty;
+    *&mut map.grid[0, 3].tile_type = cover(high, no, no, no);
+    assert!(!map.line_of_sight(0, 0, 0, 4) && !map.line_of_sight(0, 4, 0, 0));
+    *&mut map.grid[0, 3].tile_type = cover(low, no, no, no);
+    assert!(map.line_of_sight(0, 0, 0, 4) && map.line_of_sight(0, 4, 0, 0));
+    *&mut map.grid[0, 3].tile_type = TileType::Empty;
+
+    // the diagonal (0, 0) -> (2, 2) passes through two corners; one open
+    // route around a corner is enough, two walls close it
+    *&mut map.grid[0, 1].tile_type = TileType::Wall;
+    assert!(map.line_of_sight(0, 0, 2, 2) && map.line_of_sight(2, 2, 0, 0));
+    *&mut map.grid[1, 0].tile_type = TileType::Wall;
+    assert!(!map.line_of_sight(0, 0, 2, 2) && !map.line_of_sight(2, 2, 0, 0));
+    assert!(!map.line_of_sight(0, 0, 1, 1) && !map.line_of_sight(1, 1, 0, 0));
+    *&mut map.grid[0, 1].tile_type = TileType::Empty;
+    *&mut map.grid[1, 0].tile_type = TileType::Empty;
+
+    // the same corner closed by high covers on the two inner edges; the
+    // adjacent diagonal stays clear since all its edges touch an end tile
+    *&mut map.grid[1, 0].tile_type = cover(no, no, high, no);
+    assert!(map.line_of_sight(0, 0, 2, 2) && map.line_of_sight(2, 2, 0, 0));
+    *&mut map.grid[0, 1].tile_type = cover(no, no, no, high);
+    assert!(!map.line_of_sight(0, 0, 2, 2) && !map.line_of_sight(2, 2, 0, 0));
+    assert!(map.line_of_sight(0, 0, 1, 1) && map.line_of_sight(1, 1, 0, 0));
+    assert!(map.line_of_throw(0, 0, 2, 2) && map.line_of_throw(2, 2, 0, 0));
+    *&mut map.grid[1, 0].tile_type = TileType::Empty;
+    *&mut map.grid[0, 1].tile_type = TileType::Empty;
+
+    // (0, 0) -> (1, 3) crosses the vertex shared by (0, 1), (0, 2), (1, 1), (1, 2)
+    *&mut map.grid[1, 1].tile_type = TileType::Wall;
+    assert!(map.line_of_sight(0, 0, 1, 3) && map.line_of_sight(1, 3, 0, 0));
+    *&mut map.grid[0, 2].tile_type = TileType::Wall;
+    assert!(!map.line_of_sight(0, 0, 1, 3) && !map.line_of_sight(1, 3, 0, 0));
+
+    map.destroy();
+}
+
+#[test, expected_failure(abort_code = ENoLineOfSight)]
+fun test_attack_without_line_of_sight_fails() {
+    let ctx = &mut tx_context::dummy();
+    let mut rng = sui::random::new_generator_from_seed_for_testing(vector[1]);
+    let mut map = new(@0.to_id(), 5);
+    let (a, b) = (commander::recruit::default(ctx), commander::recruit::default(ctx));
+
+    *&mut map.grid[0, 2].tile_type = TileType::Wall;
+    map.place_recruit(&a, 0, 0);
+    map.place_recruit(&b, 0, 4);
+    map.perform_attack(&mut rng, 0, 0, 0, 4);
+    abort
+}
+
+#[test, expected_failure(abort_code = ENoLineOfSight)]
+fun test_grenade_without_line_of_throw_fails() {
+    let ctx = &mut tx_context::dummy();
+    let mut rng = sui::random::new_generator_from_seed_for_testing(vector[1]);
+    let mut map = new(@0.to_id(), 5);
+    let recruit = commander::recruit::default(ctx);
+
+    *&mut map.grid[0, 2].tile_type = TileType::Wall;
+    map.place_recruit(&recruit, 0, 0);
+    map.perform_grenade(&mut rng, 0, 0, 0, 4);
+    abort
 }

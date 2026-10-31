@@ -112,8 +112,8 @@ fun test_application_storage() {
     let app1_data = character.remove(ApplicationKey(0));
     let app2_data = character.remove(ApplicationKey(1));
 
-    assert_eq!(app1_data, vector[100]);
-    assert_eq!(app2_data, vector[100, 200]);
+    assert_eq!(app1_data, vector[100u64]);
+    assert_eq!(app2_data, vector[100u64, 200]);
 
     destroy(character);
     destroy(builder);

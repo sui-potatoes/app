@@ -18,13 +18,14 @@ fun test_all_records() {
     history.add(history::new_critical_hit(0));
     history.add(history::new_damage(10));
     history.add(history::new_kia(@0.to_id()));
-    history.add(history::new_grenade(0, 0, 2));
+    history.add(history::new_grenade(vector[0, 0], vector[0, 2]));
+    history.add(history::new_explosion(0, 2, 2));
     history.add(history::new_move(vector[0, 0, grid::direction::down!()]));
     history.add(history::new_next_turn(1));
     history.add(history::new_reload(0, 0));
 
     assert_eq!(history::list_kia(history.inner()), vector[@0.to_id()]);
-    assert_eq!(history.length(), 11);
+    assert_eq!(history.length(), 12);
 
     let bytes = bcs::to_bytes(&history);
     let mut bcs = bcs::new(bytes);

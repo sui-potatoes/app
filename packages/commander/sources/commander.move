@@ -93,6 +93,7 @@ public fun publish_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx
         let (x, y) = (position[0] as u16, position[1] as u16);
         assert!(x < rows && y < cols, EInvalidPosition);
         assert!(!map.is_tile_unwalkable(x, y), EInvalidPosition);
+        assert!(!map.is_tile_wall(x, y), EInvalidPosition);
         assert!(!map.tile_has_unit(x, y), EInvalidPosition);
     });
 
@@ -110,7 +111,7 @@ public fun publish_map(cmd: &mut Commander, name: String, bytes: vector<u8>, ctx
 public fun delete_map(cmd: &mut Commander, preset: Receiving<Preset>, ctx: &mut TxContext) {
     let Preset { id, map, author, .. } = transfer::receive(&mut cmd.id, preset);
     assert!(author == ctx.sender(), ENotAuthor);
-    map.destroy();
+    let _ = map.destroy();
     id.delete();
 }
 
@@ -317,7 +318,7 @@ fun init(ctx: &mut TxContext) {
         let id = object::new(ctx);
         Preset {
             map: map::demo_1(id.to_inner()),
-            name: b"Demo 1".to_string(),
+            name: "Demo 1",
             positions: vector[vector[0, 3], vector[6, 5]],
             popularity: 0,
             author: @0,
@@ -330,7 +331,7 @@ fun init(ctx: &mut TxContext) {
         let id = object::new(ctx);
         Preset {
             map: map::demo_2(id.to_inner()),
-            name: b"Demo 2".to_string(),
+            name: "Demo 2",
             positions: vector[vector[8, 2], vector[7, 6], vector[1, 2], vector[1, 7]],
             author: @0,
             popularity: 0,

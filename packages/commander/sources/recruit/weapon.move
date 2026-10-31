@@ -36,7 +36,7 @@ public fun new(name: String, stats: Stats, ctx: &mut TxContext): Weapon {
 public fun default(ctx: &mut TxContext): Weapon {
     Weapon {
         id: object::new(ctx),
-        name: b"Standard Issue Rifle".to_string(),
+        name: "Standard Issue Rifle",
         stats: stats::default_weapon(),
         upgrades: vector[],
     }

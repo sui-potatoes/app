@@ -4,38 +4,98 @@
 [move]
 version = 4
 
+[pinned.mainnet.MoveStdlib]
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "83f11dc85d5695a57894329b005b78d75f9bb059" }
+use_environment = "mainnet"
+manifest_digest = "C4FE4C91DE74CBF223B2E380AE40F592177D21870DC2D7EB6227D2D694E05363"
+deps = {}
+
+[pinned.mainnet.MoveStdlib_1]
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "e04cf9aa915cb6c069092733bebc3648755998e2" }
+use_environment = "mainnet"
+manifest_digest = "C4FE4C91DE74CBF223B2E380AE40F592177D21870DC2D7EB6227D2D694E05363"
+deps = {}
+
+[pinned.mainnet.Sui]
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "83f11dc85d5695a57894329b005b78d75f9bb059" }
+use_environment = "mainnet"
+manifest_digest = "CD547CB1ACCE0880C835DAED2D8FFCB91D56C833AE5240D3AA5B918398263195"
+deps = { MoveStdlib = "MoveStdlib" }
+
+[pinned.mainnet.Sui_1]
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "e04cf9aa915cb6c069092733bebc3648755998e2" }
+use_environment = "mainnet"
+manifest_digest = "CD547CB1ACCE0880C835DAED2D8FFCB91D56C833AE5240D3AA5B918398263195"
+deps = { MoveStdlib = "MoveStdlib_1" }
+
+[pinned.mainnet.commander_names]
+source = { root = true }
+use_environment = "mainnet"
+manifest_digest = "B79F333D8EF52A64AA2A3CA0A0E1E8BC8D2F6E361ACB6AA3910BD3280C178B2F"
+deps = { std = "MoveStdlib", sui = "Sui", suins = "suins" }
+
+[pinned.mainnet.suins]
+source = { git = "https://github.com/MystenLabs/suins-contracts.git", subdir = "packages/suins", rev = "df19300b4bd5cf39fa5e0b48ce65fc0d8cd5e522" }
+use_environment = "mainnet"
+manifest_digest = "BA49968BFF7C4A4D9F013B59535CF8B89D935A7C6D63C121606B1FE844829B72"
+deps = { Sui = "Sui_1" }
+
 [pinned.testnet.MoveStdlib]
-source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "b38bca86f0323b3fe8b6b7f4ca0cd7ae7faebe4b" }
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "719fb2960ccfbf9f4d33041f8ea5146d30671696" }
 use_environment = "testnet"
 manifest_digest = "C4FE4C91DE74CBF223B2E380AE40F592177D21870DC2D7EB6227D2D694E05363"
 deps = {}
 
 [pinned.testnet.MoveStdlib_1]
-source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "03cf0fbaa21f4697ba40b17ff0cfb58377a50a45" }
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "bf4073918ed33cfa0b09c500658fa116a774bcfd" }
 use_environment = "testnet"
 manifest_digest = "C4FE4C91DE74CBF223B2E380AE40F592177D21870DC2D7EB6227D2D694E05363"
 deps = {}
 
 [pinned.testnet.Sui]
-source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "b38bca86f0323b3fe8b6b7f4ca0cd7ae7faebe4b" }
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "719fb2960ccfbf9f4d33041f8ea5146d30671696" }
 use_environment = "testnet"
 manifest_digest = "7AFB66695545775FBFBB2D3078ADFD084244D5002392E837FDE21D9EA1C6D01C"
 deps = { MoveStdlib = "MoveStdlib" }
 
 [pinned.testnet.Sui_1]
-source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "03cf0fbaa21f4697ba40b17ff0cfb58377a50a45" }
+source = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "bf4073918ed33cfa0b09c500658fa116a774bcfd" }
 use_environment = "testnet"
 manifest_digest = "7AFB66695545775FBFBB2D3078ADFD084244D5002392E837FDE21D9EA1C6D01C"
 deps = { MoveStdlib = "MoveStdlib_1" }
 
-[pinned.testnet.commander_suins]
+[pinned.testnet.commander_names]
 source = { root = true }
 use_environment = "testnet"
-manifest_digest = "E483A6587EFFCCB2685398ADE8909CC841B8F906F1115DC75627E003C75C8E0E"
-deps = { std = "MoveStdlib", sui = "Sui", suins = "suins" }
+manifest_digest = "965F4F70066D2E0B86C3A3AA63ABF21BF5DB616B273916EFB8F1013EF7BBD462"
+deps = { std = "MoveStdlib", sui = "Sui", suins = "suins", suins_denylist = "suins_denylist", suins_subdomains = "suins_subdomains" }
 
 [pinned.testnet.suins]
-source = { git = "https://github.com/MystenLabs/suins-contracts.git", subdir = "packages/suins", rev = "e281a524913982a8b12da39e1948041fc84c5a08" }
+source = { git = "https://github.com/MystenLabs/suins-contracts", subdir = "packages/suins", rev = "2b75990bdc31472405a6bf47b40152627a1fa6c0" }
 use_environment = "testnet"
 manifest_digest = "DEE42C89BB3F8EC67C17BC4AE0CEBE14A28F4FA787E857046EAF0FA38D556496"
 deps = { Sui = "Sui_1" }
+
+[pinned.testnet.suins_1]
+source = { git = "https://github.com/MystenLabs/suins-contracts", subdir = "packages/suins", rev = "14600cab30b31db2de88b80267fbf26750c34e41" }
+use_environment = "testnet"
+manifest_digest = "DEE42C89BB3F8EC67C17BC4AE0CEBE14A28F4FA787E857046EAF0FA38D556496"
+deps = { Sui = "Sui_1" }
+
+[pinned.testnet.suins_denylist]
+source = { git = "https://github.com/MystenLabs/suins-contracts", subdir = "packages/denylist", rev = "2b75990bdc31472405a6bf47b40152627a1fa6c0" }
+use_environment = "testnet"
+manifest_digest = "5512BCBC9D8DEC9DDC9D8CDD7746A4D56E9E5E5FD2D6E30FADFA769047AEE3D8"
+deps = { Sui = "Sui_1", suins = "suins" }
+
+[pinned.testnet.suins_denylist_1]
+source = { git = "https://github.com/MystenLabs/suins-contracts", subdir = "packages/denylist", rev = "14600cab30b31db2de88b80267fbf26750c34e41" }
+use_environment = "testnet"
+manifest_digest = "5512BCBC9D8DEC9DDC9D8CDD7746A4D56E9E5E5FD2D6E30FADFA769047AEE3D8"
+deps = { Sui = "Sui_1", suins = "suins_1" }
+
+[pinned.testnet.suins_subdomains]
+source = { git = "https://github.com/MystenLabs/suins-contracts", subdir = "packages/subdomains", rev = "14600cab30b31db2de88b80267fbf26750c34e41" }
+use_environment = "testnet"
+manifest_digest = "D400AD87E5D4289B152A0E15112EBCD8C2B319990E10B3B1B131CCCA41E5C79F"
+deps = { Sui = "Sui_1", suins = "suins_1", suins_denylist = "suins_denylist_1" }

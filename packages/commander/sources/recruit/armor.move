@@ -28,7 +28,7 @@ public fun new(name: String, stats: Stats, ctx: &mut TxContext): Armor {
 public fun default(ctx: &mut TxContext): Armor {
     Armor {
         id: object::new(ctx),
-        name: b"Standard Armor".to_string(),
+        name: "Standard Armor",
         stats: stats::default_armor(),
     }
 }

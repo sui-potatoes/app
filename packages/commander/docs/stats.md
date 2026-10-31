@@ -41,7 +41,8 @@ conversion to <code>Unit</code> (pre-battle), the stats are combined into a sing
 -  [Function `from_bcs`](#commander_stats_from_bcs)
 
 
-<pre><code><b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
+<pre><code><b>use</b> <a href="../../.doc-deps/format/format.md#format_format">format::format</a>;
+<b>use</b> <a href="../../.doc-deps/std/ascii.md#std_ascii">std::ascii</a>;
 <b>use</b> <a href="../../.doc-deps/std/bcs.md#std_bcs">std::bcs</a>;
 <b>use</b> <a href="../../.doc-deps/std/option.md#std_option">std::option</a>;
 <b>use</b> <a href="../../.doc-deps/std/string.md#std_string">std::string</a>;
@@ -122,16 +123,6 @@ Number of bitmap encoded parameters.
 
 
 <pre><code><b>const</b> <a href="./stats.md#commander_stats_NUM_PARAMS">NUM_PARAMS</a>: u8 = 15;
-</code></pre>
-
-
-
-<a name="commander_stats_ENotImplemented"></a>
-
-Error code for not implemented functions.
-
-
-<pre><code><b>const</b> <a href="./stats.md#commander_stats_ENotImplemented">ENotImplemented</a>: u64 = 264;
 </code></pre>
 
 
@@ -257,7 +248,7 @@ Default stats for a Weapon.
 <pre><code><b>public</b> <b>fun</b> <a href="./stats.md#commander_stats_default_weapon">default_weapon</a>(): <a href="./stats.md#commander_stats_Stats">Stats</a> {
     // reverse:
     // 6-14 -&gt; <a href="./stats.md#commander_stats_damage">damage</a>, <a href="./stats.md#commander_stats_spread">spread</a>, <a href="./stats.md#commander_stats_plus_one">plus_one</a>, <a href="./stats.md#commander_stats_crit_chance">crit_chance</a>, <a href="./stats.md#commander_stats_can_be_dodged">can_be_dodged</a>, <a href="./stats.md#commander_stats_area_size">area_size</a>, <a href="./stats.md#commander_stats_env_damage">env_damage</a>, <a href="./stats.md#commander_stats_range">range</a>, <a href="./stats.md#commander_stats_ammo">ammo</a>
-    <a href="./stats.md#commander_stats_Stats">Stats</a>(0x03_04_00_01_01_00_00_02_04 &lt;&lt; (6 * 8))
+    <a href="./stats.md#commander_stats_Stats">Stats</a>(0x03_04_00_00_01_00_00_02_04 &lt;&lt; (6 * 8))
 }
 </code></pre>
 
@@ -545,7 +536,8 @@ Get the <code><a href="./stats.md#commander_stats_can_be_dodged">can_be_dodged</
 
 ## Function `area_size`
 
-Get the <code><a href="./stats.md#commander_stats_area_size">area_size</a></code> stat.
+Get the <code><a href="./stats.md#commander_stats_area_size">area_size</a></code> stat: the radius of the damage area as a von Neumann
+neighborhood, <code>0</code> for a single-target weapon.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./stats.md#commander_stats_area_size">area_size</a>(<a href="./stats.md#commander_stats">stats</a>: &<a href="./stats.md#commander_stats_Stats">commander::stats::Stats</a>): u8
@@ -711,10 +703,12 @@ the maximum values for each stat.
 
 ## Function `to_string`
 
-Print the <code><a href="./stats.md#commander_stats_Stats">Stats</a></code> as a string.
+Print the <code><a href="./stats.md#commander_stats_Stats">Stats</a></code> as a string: space-separated <code>LABEL:value</code> pairs in the
+storage order. A value with the sign bit set (a modifier) is printed as a
+negative number, e.g. <code>MOB:-1</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./stats.md#commander_stats_to_string">to_string</a>(_stats: &<a href="./stats.md#commander_stats_Stats">commander::stats::Stats</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./stats.md#commander_stats_to_string">to_string</a>(<a href="./stats.md#commander_stats">stats</a>: &<a href="./stats.md#commander_stats_Stats">commander::stats::Stats</a>): <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>
 </code></pre>
 
 
@@ -723,8 +717,18 @@ Print the <code><a href="./stats.md#commander_stats_Stats">Stats</a></code> as a
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./stats.md#commander_stats_to_string">to_string</a>(_stats: &<a href="./stats.md#commander_stats_Stats">Stats</a>): String {
-    <b>abort</b> <a href="./stats.md#commander_stats_ENotImplemented">ENotImplemented</a>
+<pre><code><b>public</b> <b>fun</b> <a href="./stats.md#commander_stats_to_string">to_string</a>(<a href="./stats.md#commander_stats">stats</a>: &<a href="./stats.md#commander_stats_Stats">Stats</a>): String {
+    <b>let</b> values = bf::unpack_u8!(<a href="./stats.md#commander_stats">stats</a>.0, <a href="./stats.md#commander_stats_NUM_PARAMS">NUM_PARAMS</a>).<a href="./map.md#commander_map">map</a>!(|value| {
+        <b>if</b> (value &gt;= <a href="./stats.md#commander_stats_SIGN_VALUE">SIGN_VALUE</a>) {
+            <b>let</b> <b>mut</b> str = b"-".<a href="./stats.md#commander_stats_to_string">to_string</a>();
+            str.append((value - <a href="./stats.md#commander_stats_SIGN_VALUE">SIGN_VALUE</a>).<a href="./stats.md#commander_stats_to_string">to_string</a>());
+            str
+        } <b>else</b> value.<a href="./stats.md#commander_stats_to_string">to_string</a>()
+    });
+    format(
+        b"MOB:{} AIM:{} HP:{} ARM:{} DOG:{} DEF:{} DMG:{} SPR:{} PLO:{} CRT:{} IDG:{} ARS:{} ENV:{} RAN:{} AMM:{}".<a href="./stats.md#commander_stats_to_string">to_string</a>(),
+        values,
+    )
 }
 </code></pre>
 

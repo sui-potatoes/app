@@ -44,6 +44,7 @@ game, joining it, canceling a game, etc.
 <b>use</b> <a href="./unit.md#commander_unit">commander::unit</a>;
 <b>use</b> <a href="./weapon.md#commander_weapon">commander::weapon</a>;
 <b>use</b> <a href="./weapon_upgrade.md#commander_weapon_upgrade">commander::weapon_upgrade</a>;
+<b>use</b> <a href="../../.doc-deps/format/format.md#format_format">format::format</a>;
 <b>use</b> <a href="../../.doc-deps/grid/cell.md#grid_cell">grid::cell</a>;
 <b>use</b> <a href="../../.doc-deps/grid/cursor.md#grid_cursor">grid::cursor</a>;
 <b>use</b> <a href="../../.doc-deps/grid/grid.md#grid_grid">grid::grid</a>;
@@ -107,7 +108,7 @@ serves as the registry for all users and their recruits.
 <code>games: <a href="../../.doc-deps/sui/vec_map.md#sui_vec_map_VecMap">sui::vec_map::VecMap</a>&lt;<a href="../../.doc-deps/sui/object.md#sui_object_ID">sui::object::ID</a>, u64&gt;</code>
 </dt>
 <dd>
- List of the 10 most recent games.
+ List of the most recent public games (up to <code><a href="./commander.md#commander_commander_PUBLIC_GAMES_LIMIT">PUBLIC_GAMES_LIMIT</a></code>).
 </dd>
 </dl>
 
@@ -327,6 +328,15 @@ started, it contains the Map and the
 
 
 
+<a name="commander_commander_EInvalidPosition"></a>
+
+
+
+<pre><code><b>const</b> <a href="./commander.md#commander_commander_EInvalidPosition">EInvalidPosition</a>: u64 = 5;
+</code></pre>
+
+
+
 <a name="commander_commander_PUBLIC_GAMES_LIMIT"></a>
 
 Stack limit of public games in the <code><a href="./commander.md#commander_commander_Commander">Commander</a></code> object.
@@ -342,6 +352,7 @@ Stack limit of public games in the <code><a href="./commander.md#commander_comma
 ## Function `publish_map`
 
 Register a new <code>Map</code> so it can be played.
+Spawn positions must be in bounds, walkable and unoccupied.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./commander.md#commander_commander_publish_map">publish_map</a>(cmd: &<b>mut</b> <a href="./commander.md#commander_commander_Commander">commander::commander::Commander</a>, name: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>, bytes: vector&lt;u8&gt;, ctx: &<b>mut</b> <a href="../../.doc-deps/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
@@ -357,6 +368,15 @@ Register a new <code>Map</code> so it can be played.
     <b>let</b> <b>mut</b> bcs = bcs::new(bytes);
     <b>let</b> <b>mut</b> <a href="./map.md#commander_map">map</a> = <a href="./map.md#commander_map_from_bcs">map::from_bcs</a>(&<b>mut</b> bcs);
     <b>let</b> positions = bcs.peel_vec!(|bcs| bcs.peel_vec!(|bcs| bcs.peel_u8()));
+    <b>let</b> (rows, cols) = <a href="./map.md#commander_map">map</a>.size();
+    positions.do_ref!(|position| {
+        <b>assert</b>!(position.length() == 2, <a href="./commander.md#commander_commander_EInvalidPosition">EInvalidPosition</a>);
+        <b>let</b> (x, y) = (position[0] <b>as</b> u16, position[1] <b>as</b> u16);
+        <b>assert</b>!(x &lt; rows && y &lt; cols, <a href="./commander.md#commander_commander_EInvalidPosition">EInvalidPosition</a>);
+        <b>assert</b>!(!<a href="./map.md#commander_map">map</a>.is_tile_unwalkable(x, y), <a href="./commander.md#commander_commander_EInvalidPosition">EInvalidPosition</a>);
+        <b>assert</b>!(!<a href="./map.md#commander_map">map</a>.is_tile_wall(x, y), <a href="./commander.md#commander_commander_EInvalidPosition">EInvalidPosition</a>);
+        <b>assert</b>!(!<a href="./map.md#commander_map">map</a>.tile_has_unit(x, y), <a href="./commander.md#commander_commander_EInvalidPosition">EInvalidPosition</a>);
+    });
     <b>let</b> id = object::new(ctx);
     <a href="./map.md#commander_map">map</a>.set_id(id.to_inner());
     transfer::transfer(
@@ -698,6 +718,7 @@ Perform a grenade throw action.
     <b>let</b> <b>mut</b> rng = rng.new_generator(ctx);
     <b>let</b> <a href="./history.md#commander_history">history</a> = game.<a href="./map.md#commander_map">map</a>.<a href="./commander.md#commander_commander_perform_grenade">perform_grenade</a>(&<b>mut</b> rng, x0, y0, x1, y1);
     <a href="./history.md#commander_history_list_kia">history::list_kia</a>(&<a href="./history.md#commander_history">history</a>).do!(|id| {
+        <b>if</b> (id.to_address() == @0) <b>return</b>; // skip empty addresses
         <b>let</b> <a href="./recruit.md#commander_recruit">recruit</a> = game.recruits.remove(id);
         <b>let</b> leader = <a href="./recruit.md#commander_recruit">recruit</a>.leader();
         transfer::public_transfer(<a href="./recruit.md#commander_recruit">recruit</a>.kill(ctx), leader);
@@ -808,7 +829,7 @@ Share the <code>key</code>-only object after placing Recruits on the map.
 Get the current turn of the game.
 
 
-<pre><code><b>fun</b> <a href="./commander.md#commander_commander_turn">turn</a>(self: &<a href="./commander.md#commander_commander_Game">commander::commander::Game</a>): u16
+<pre><code><b>public</b> <b>fun</b> <a href="./commander.md#commander_commander_turn">turn</a>(self: &<a href="./commander.md#commander_commander_Game">commander::commander::Game</a>): u16
 </code></pre>
 
 
@@ -817,7 +838,7 @@ Get the current turn of the game.
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="./commander.md#commander_commander_turn">turn</a>(self: &<a href="./commander.md#commander_commander_Game">Game</a>): u16 { self.<a href="./map.md#commander_map">map</a>.<a href="./commander.md#commander_commander_turn">turn</a>() }
+<pre><code><b>public</b> <b>fun</b> <a href="./commander.md#commander_commander_turn">turn</a>(self: &<a href="./commander.md#commander_commander_Game">Game</a>): u16 { self.<a href="./map.md#commander_map">map</a>.<a href="./commander.md#commander_commander_turn">turn</a>() }
 </code></pre>
 
 
