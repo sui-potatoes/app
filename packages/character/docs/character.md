@@ -582,7 +582,7 @@ types for dynamic fields. This is a necessary step in preventing incorrect
 implementation of the dynamic fields in this setting.
 
 TODO: a stricter check would be to check against the <code>0x1</code> and <code>0x2</code> origin
-of the type, but we can leave it for now.
+     of the type, but we can leave it for now.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./character.md#character_character_add">add</a>&lt;K: <b>copy</b>, drop, store, V: store&gt;(c: &<b>mut</b> <a href="./character.md#character_character_Character">character::character::Character</a>, key: K, value: V)

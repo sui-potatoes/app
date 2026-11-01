@@ -118,7 +118,7 @@ Create a new default <code><a href="./armor.md#commander_armor_Armor">Armor</a><
 <pre><code><b>public</b> <b>fun</b> <a href="./armor.md#commander_armor_default">default</a>(ctx: &<b>mut</b> TxContext): <a href="./armor.md#commander_armor_Armor">Armor</a> {
     <a href="./armor.md#commander_armor_Armor">Armor</a> {
         id: object::new(ctx),
-        <a href="./armor.md#commander_armor_name">name</a>: b"Standard <a href="./armor.md#commander_armor_Armor">Armor</a>".<a href="./armor.md#commander_armor_to_string">to_string</a>(),
+        <a href="./armor.md#commander_armor_name">name</a>: "Standard <a href="./armor.md#commander_armor_Armor">Armor</a>",
         <a href="./stats.md#commander_stats">stats</a>: <a href="./stats.md#commander_stats_default_armor">stats::default_armor</a>(),
     }
 }

@@ -669,15 +669,15 @@ Convert the rank to a string. Very useful for debugging and logging.
 
 <pre><code><b>public</b> <b>fun</b> <a href="./rank.md#commander_rank_to_string">to_string</a>(<a href="./rank.md#commander_rank">rank</a>: &<a href="./rank.md#commander_rank_Rank">Rank</a>): String {
     match (<a href="./rank.md#commander_rank">rank</a>) {
-        Rank::Rookie =&gt; b"Rookie",
-        Rank::Squaddie =&gt; b"Squaddie",
-        Rank::Corporal =&gt; b"Corporal",
-        Rank::Sergeant =&gt; b"Sergeant",
-        Rank::Lieutenant =&gt; b"Lieutenant",
-        Rank::Captain =&gt; b"Captain",
-        Rank::Major =&gt; b"Major",
-        Rank::Colonel =&gt; b"Colonel",
-    }.<a href="./rank.md#commander_rank_to_string">to_string</a>()
+        Rank::Rookie =&gt; "Rookie",
+        Rank::Squaddie =&gt; "Squaddie",
+        Rank::Corporal =&gt; "Corporal",
+        Rank::Sergeant =&gt; "Sergeant",
+        Rank::Lieutenant =&gt; "Lieutenant",
+        Rank::Captain =&gt; "Captain",
+        Rank::Major =&gt; "Major",
+        Rank::Colonel =&gt; "Colonel",
+    }
 }
 </code></pre>
 

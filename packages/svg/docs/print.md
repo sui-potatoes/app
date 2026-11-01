@@ -32,16 +32,16 @@ an example of usage:
 ```rust
 // for double tags <code>&lt;a&gt;Link contents&lt;/a&gt;</code>
 let printed = svg::print::print(
-b"a".to_string(), // element name
-vec_map::empty(), // VecMap of attributes
-option::some(vector[ b"Link contents".to_string() ]), // Option<vector<String>> of elements
+    b"a".to_string(), // element name
+    vec_map::empty(), // VecMap of attributes
+    option::some(vector[ b"Link contents".to_string() ]), // Option<vector<String>> of elements
 );
 
 // for single tag <code>&lt;br /&gt;</code>
 let printed = svg::print::print(
-b"br".to_string(), // element name
-vec_map::empty(), // VecMap of attributes
-option::none(), // empty option for single tags
+    b"br".to_string(), // element name
+    vec_map::empty(), // VecMap of attributes
+    option::none(), // empty option for single tags
 );
 ```
 

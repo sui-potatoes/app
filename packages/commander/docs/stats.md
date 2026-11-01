@@ -725,8 +725,8 @@ negative number, e.g. <code>MOB:-1</code>.
             str
         } <b>else</b> value.<a href="./stats.md#commander_stats_to_string">to_string</a>()
     });
-    format(
-        b"MOB:{} AIM:{} HP:{} ARM:{} DOG:{} DEF:{} DMG:{} SPR:{} PLO:{} CRT:{} IDG:{} ARS:{} ENV:{} RAN:{} AMM:{}".<a href="./stats.md#commander_stats_to_string">to_string</a>(),
+    <a href="../../.doc-deps/format/format.md#format_format">format::format</a>(
+        "MOB:{} AIM:{} HP:{} ARM:{} DOG:{} DEF:{} DMG:{} SPR:{} PLO:{} CRT:{} IDG:{} ARS:{} ENV:{} RAN:{} AMM:{}",
         values,
     )
 }

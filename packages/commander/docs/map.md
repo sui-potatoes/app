@@ -40,15 +40,16 @@ Traits:
 -  [Function `is_tile_unwalkable`](#commander_map_is_tile_unwalkable)
 -  [Function `is_tile_wall`](#commander_map_is_tile_wall)
 -  [Function `is_tile_walkable`](#commander_map_is_tile_walkable)
+-  [Macro function `is_wall`](#commander_map_is_wall)
+-  [Macro function `is_walkable`](#commander_map_is_walkable)
+-  [Macro function `side_cover`](#commander_map_side_cover)
+-  [Macro function `is_edge_high_cover`](#commander_map_is_edge_high_cover)
 -  [Function `tile_to_string`](#commander_map_tile_to_string)
 -  [Function `check_path`](#commander_map_check_path)
 -  [Function `line_of_sight`](#commander_map_line_of_sight)
 -  [Function `line_of_throw`](#commander_map_line_of_throw)
 -  [Function `trace_line`](#commander_map_trace_line)
--  [Function `blocks_line`](#commander_map_blocks_line)
--  [Function `is_edge_high_cover`](#commander_map_is_edge_high_cover)
--  [Function `side_cover`](#commander_map_side_cover)
--  [Function `neighbor`](#commander_map_neighbor)
+-  [Function `step_blocks`](#commander_map_step_blocks)
 -  [Function `demo_1`](#commander_map_demo_1)
 -  [Function `demo_2`](#commander_map_demo_2)
 -  [Function `from_bytes`](#commander_map_from_bytes)
@@ -1215,12 +1216,7 @@ Check if the given tile is a wall.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_is_tile_wall">is_tile_wall</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>, x: u16, y: u16): bool {
-    match (<a href="./map.md#commander_map">map</a>.grid[x, y].tile_type) {
-        TileType::Wall =&gt; <b>true</b>,
-        _ =&gt; <b>false</b>,
-    }
-}
+<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_is_tile_wall">is_tile_wall</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>, x: u16, y: u16): bool { <a href="./map.md#commander_map_is_wall">is_wall</a>!(&<a href="./map.md#commander_map">map</a>.grid[x, y]) }
 </code></pre>
 
 
@@ -1243,11 +1239,129 @@ Check if the given tile can be walked on: neither <code>Unwalkable</code> nor <c
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_is_tile_walkable">is_tile_walkable</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>, x: u16, y: u16): bool {
-    match (<a href="./map.md#commander_map">map</a>.grid[x, y].tile_type) {
+<pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_is_tile_walkable">is_tile_walkable</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>, x: u16, y: u16): bool { <a href="./map.md#commander_map_is_walkable">is_walkable</a>!(&<a href="./map.md#commander_map">map</a>.grid[x, y]) }
+</code></pre>
+
+
+
+</details>
+
+<a name="commander_map_is_wall"></a>
+
+## Macro function `is_wall`
+
+Whether <code>$tile</code> is a <code>Wall</code>.
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./map.md#commander_map_is_wall">is_wall</a>($tile: &<a href="./map.md#commander_map_Tile">commander::map::Tile</a>): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./map.md#commander_map_is_wall">is_wall</a>($tile: &<a href="./map.md#commander_map_Tile">Tile</a>): bool {
+    <b>let</b> tile = $tile;
+    match (tile.tile_type) {
+        TileType::Wall =&gt; <b>true</b>,
+        _ =&gt; <b>false</b>,
+    }
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="commander_map_is_walkable"></a>
+
+## Macro function `is_walkable`
+
+Whether <code>$tile</code> can be walked on: neither <code>Unwalkable</code> nor <code>Wall</code>.
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./map.md#commander_map_is_walkable">is_walkable</a>($tile: &<a href="./map.md#commander_map_Tile">commander::map::Tile</a>): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./map.md#commander_map_is_walkable">is_walkable</a>($tile: &<a href="./map.md#commander_map_Tile">Tile</a>): bool {
+    <b>let</b> tile = $tile;
+    match (tile.tile_type) {
         TileType::Unwalkable | TileType::Wall =&gt; <b>false</b>,
         _ =&gt; <b>true</b>,
     }
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="commander_map_side_cover"></a>
+
+## Macro function `side_cover`
+
+Cover value of the side of <code>$tile</code> facing <code>$direction</code>. A <code>Wall</code> has no
+cover here: it is handled as a wall before cover is looked at.
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./map.md#commander_map_side_cover">side_cover</a>($tile: &<a href="./map.md#commander_map_Tile">commander::map::Tile</a>, $direction: u8): u8
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./map.md#commander_map_side_cover">side_cover</a>($tile: &<a href="./map.md#commander_map_Tile">Tile</a>, $direction: u8): u8 {
+    <b>use</b> <a href="../../.doc-deps/grid/direction.md#grid_direction">grid::direction</a>::{up, down, left};
+    <b>let</b> (tile, direction) = ($tile, $direction);
+    match (tile.tile_type) {
+        TileType::Cover { left: l, top, right, bottom } =&gt; {
+            <b>if</b> (direction == up!()) top
+            <b>else</b> <b>if</b> (direction == down!()) bottom
+            <b>else</b> <b>if</b> (direction == left!()) l
+            <b>else</b> right
+        },
+        _ =&gt; <a href="./map.md#commander_map_NO_COVER">NO_COVER</a>,
+    }
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="commander_map_is_edge_high_cover"></a>
+
+## Macro function `is_edge_high_cover`
+
+Whether the edge between <code>$from</code> and its neighbor <code>$to</code> in <code>$direction</code>
+has high cover on either side. Shared by <code><a href="./map.md#commander_map_check_path">check_path</a></code> and <code><a href="./map.md#commander_map_trace_line">trace_line</a></code>.
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./map.md#commander_map_is_edge_high_cover">is_edge_high_cover</a>($from: &<a href="./map.md#commander_map_Tile">commander::map::Tile</a>, $to: &<a href="./map.md#commander_map_Tile">commander::map::Tile</a>, $direction: u8): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./map.md#commander_map_is_edge_high_cover">is_edge_high_cover</a>($from: &<a href="./map.md#commander_map_Tile">Tile</a>, $to: &<a href="./map.md#commander_map_Tile">Tile</a>, $direction: u8): bool {
+    <b>use</b> <a href="../../.doc-deps/grid/direction.md#grid_direction_inverse">grid::direction::inverse</a>;
+    <b>let</b> (from, to, direction) = ($from, $to, $direction);
+    <a href="./map.md#commander_map_side_cover">side_cover</a>!(from, direction) == <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>
+        || <a href="./map.md#commander_map_side_cover">side_cover</a>!(to, inverse!(direction)) == <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>
 }
 </code></pre>
 
@@ -1316,18 +1430,22 @@ of the path.
 <pre><code><b>public</b> <b>fun</b> <a href="./map.md#commander_map_check_path">check_path</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>, <b>mut</b> path: vector&lt;u8&gt;): Option&lt;vector&lt;u16&gt;&gt; {
     path.reverse();
     // first two values are X and Y coordinates, the rest are directions
-    <b>let</b> (x0, y0) = (path.pop_back(), path.pop_back());
-    <b>let</b> <b>mut</b> cursor = cursor::new(x0 <b>as</b> u16, y0 <b>as</b> u16);
+    <b>let</b> (x0, y0) = (path.pop_back() <b>as</b> u16, path.pop_back() <b>as</b> u16);
+    <b>let</b> <b>mut</b> cursor = cursor::new(x0, y0);
     <b>let</b> none = option::none();
+    // the tile the path starts on; every later source is the previous target
+    <b>let</b> <b>mut</b> source = &<a href="./map.md#commander_map">map</a>.grid[x0, y0];
+    <b>if</b> (!path.is_empty() && !<a href="./map.md#commander_map_is_walkable">is_walkable</a>!(source)) <b>return</b> none;
     'path: {
         path.<a href="./map.md#commander_map_destroy">destroy</a>!(|direction| {
-            <b>let</b> (x0, y0) = cursor.to_values();
             cursor.move_to(direction);
             <b>let</b> (x1, y1) = cursor.to_values();
+            <b>let</b> target = &<a href="./map.md#commander_map">map</a>.grid[x1, y1];
             // units, walls, unwalkable tiles and high covers block the path
-            <b>if</b> (<a href="./map.md#commander_map">map</a>.grid[x1, y1].<a href="./unit.md#commander_unit">unit</a>.is_some()) <b>return</b> 'path none;
-            <b>if</b> (!<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_is_tile_walkable">is_tile_walkable</a>(x0, y0) || !<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_is_tile_walkable">is_tile_walkable</a>(x1, y1)) <b>return</b> 'path none;
-            <b>if</b> (<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_is_edge_high_cover">is_edge_high_cover</a>(x0, y0, direction)) <b>return</b> 'path none;
+            <b>if</b> (target.<a href="./unit.md#commander_unit">unit</a>.is_some()) <b>return</b> 'path none;
+            <b>if</b> (!<a href="./map.md#commander_map_is_walkable">is_walkable</a>!(target)) <b>return</b> 'path none;
+            <b>if</b> (<a href="./map.md#commander_map_is_edge_high_cover">is_edge_high_cover</a>!(source, target, direction)) <b>return</b> 'path none;
+            source = target;
         });
         option::some(cursor.to_vector())
     }
@@ -1406,9 +1524,11 @@ The walk is the Amanatides-Woo grid traversal in unsigned integers: after
 <code>i</code> row steps and <code>j</code> column steps the next row edge lies at
 <code>(i + 0.5) / dx</code> of the segment and the next column edge at
 <code>(j + 0.5) / dy</code>, compared as <code>(2i + 1) * dy</code> against <code>(2j + 1) * dx</code>.
-It takes <code>dx + dy</code> steps with two tile reads each. The same edges are
-visited from either end, so the result is symmetric: <code>a</code> sees <code>b</code> if and
-only if <code>b</code> sees <code>a</code>.
+It takes <code>dx + dy</code> steps with one tile read each: the tile being left was
+read when it was entered. An edge is inner when it is neither the first
+nor the last of the <code>dx + dy</code> edges crossed, counted as <code>i + j</code>. The same
+edges are visited from either end, so the result is symmetric: <code>a</code> sees
+<code>b</code> if and only if <code>b</code> sees <code>a</code>.
 
 
 <pre><code><b>fun</b> <a href="./map.md#commander_map_trace_line">trace_line</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">commander::map::Map</a>, x0: u16, y0: u16, x1: u16, y1: u16, high_cover_blocks: bool): bool
@@ -1420,42 +1540,51 @@ only if <code>b</code> sees <code>a</code>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="./map.md#commander_map_trace_line">trace_line</a>(
-    <a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>,
-    x0: u16,
-    y0: u16,
-    x1: u16,
-    y1: u16,
-    high_cover_blocks: bool,
-): bool {
+<pre><code><b>fun</b> <a href="./map.md#commander_map_trace_line">trace_line</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>, x0: u16, y0: u16, x1: u16, y1: u16, high_cover_blocks: bool): bool {
     <b>use</b> <a href="../../.doc-deps/grid/direction.md#grid_direction">grid::direction</a>::{up, down, left, right};
     <b>let</b> (dx, dy) = (x0.diff(x1) <b>as</b> u64, y0.diff(y1) <b>as</b> u64);
-    <b>let</b> sx = <b>if</b> (x1 &gt; x0) down!() <b>else</b> up!();
-    <b>let</b> sy = <b>if</b> (y1 &gt; y0) right!() <b>else</b> left!();
+    <b>let</b> edges = dx + dy;
+    <b>let</b> (downward, rightward) = (x1 &gt; x0, y1 &gt; y0);
+    <b>let</b> sx = <b>if</b> (downward) down!() <b>else</b> up!();
+    <b>let</b> sy = <b>if</b> (rightward) right!() <b>else</b> left!();
     <b>let</b> (<b>mut</b> x, <b>mut</b> y) = (x0, y0);
+    <b>let</b> <b>mut</b> cur = &<a href="./map.md#commander_map">map</a>.grid[x0, y0];
     <b>let</b> (<b>mut</b> i, <b>mut</b> j) = (0u64, 0u64);
-    <b>while</b> (i &lt; dx || j &lt; dy) {
+    <b>while</b> (i + j &lt; edges) {
+        <b>let</b> k = i + j; // edges crossed so far
         <b>let</b> (t_row, t_col) = ((2 * i + 1) * dy, (2 * j + 1) * dx);
         <b>if</b> (t_row &lt; t_col) {
-            <b>if</b> (<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_blocks_line">blocks_line</a>(x, y, sx, x0, y0, x1, y1, high_cover_blocks)) <b>return</b> <b>false</b>;
-            (x, y) = <a href="./map.md#commander_map_neighbor">neighbor</a>(x, y, sx);
+            <b>let</b> nx = <b>if</b> (downward) x + 1 <b>else</b> x - 1;
+            <b>let</b> next = &<a href="./map.md#commander_map">map</a>.grid[nx, y];
+            <b>if</b> (<a href="./map.md#commander_map_step_blocks">step_blocks</a>(cur, next, sx, k &gt; 0 && k + 1 &lt; edges, high_cover_blocks)) <b>return</b> <b>false</b>;
+            cur = next;
+            x = nx;
             i = i + 1;
         } <b>else</b> <b>if</b> (t_col &lt; t_row) {
-            <b>if</b> (<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_blocks_line">blocks_line</a>(x, y, sy, x0, y0, x1, y1, high_cover_blocks)) <b>return</b> <b>false</b>;
-            (x, y) = <a href="./map.md#commander_map_neighbor">neighbor</a>(x, y, sy);
+            <b>let</b> ny = <b>if</b> (rightward) y + 1 <b>else</b> y - 1;
+            <b>let</b> next = &<a href="./map.md#commander_map">map</a>.grid[x, ny];
+            <b>if</b> (<a href="./map.md#commander_map_step_blocks">step_blocks</a>(cur, next, sy, k &gt; 0 && k + 1 &lt; edges, high_cover_blocks)) <b>return</b> <b>false</b>;
+            cur = next;
+            y = ny;
             j = j + 1;
         } <b>else</b> {
-            // corner: clear <b>if</b> either route around the vertex is clear
-            <b>let</b> (ax, ay) = <a href="./map.md#commander_map_neighbor">neighbor</a>(x, y, sx);
-            <b>let</b> (bx, by) = <a href="./map.md#commander_map_neighbor">neighbor</a>(x, y, sy);
+            // corner: two edges are crossed at once, and the line is clear <b>if</b>
+            // either route around the vertex is clear; the tiles beside the
+            // vertex are never the end tile, the one past it is when it ends
+            // the walk
+            <b>let</b> nx = <b>if</b> (downward) x + 1 <b>else</b> x - 1;
+            <b>let</b> ny = <b>if</b> (rightward) y + 1 <b>else</b> y - 1;
+            <b>let</b> (a, b, c) = (&<a href="./map.md#commander_map">map</a>.grid[nx, y], &<a href="./map.md#commander_map">map</a>.grid[x, ny], &<a href="./map.md#commander_map">map</a>.grid[nx, ny]);
+            <b>let</b> (inner1, inner2) = (k &gt; 0, k + 2 &lt; edges);
             <b>let</b> via_row =
-                !<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_blocks_line">blocks_line</a>(x, y, sx, x0, y0, x1, y1, high_cover_blocks)
-                    && !<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_blocks_line">blocks_line</a>(ax, ay, sy, x0, y0, x1, y1, high_cover_blocks);
+                !<a href="./map.md#commander_map_step_blocks">step_blocks</a>(cur, a, sx, inner1, high_cover_blocks)
+                    && !<a href="./map.md#commander_map_step_blocks">step_blocks</a>(a, c, sy, inner2, high_cover_blocks);
             <b>let</b> via_col =
-                !<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_blocks_line">blocks_line</a>(x, y, sy, x0, y0, x1, y1, high_cover_blocks)
-                    && !<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_blocks_line">blocks_line</a>(bx, by, sx, x0, y0, x1, y1, high_cover_blocks);
+                !<a href="./map.md#commander_map_step_blocks">step_blocks</a>(cur, b, sy, inner1, high_cover_blocks)
+                    && !<a href="./map.md#commander_map_step_blocks">step_blocks</a>(b, c, sx, inner2, high_cover_blocks);
             <b>if</b> (!via_row && !via_col) <b>return</b> <b>false</b>;
-            (x, y) = <a href="./map.md#commander_map_neighbor">neighbor</a>(ax, ay, sy);
+            cur = c;
+            (x, y) = (nx, ny);
             i = i + 1;
             j = j + 1;
         }
@@ -1468,17 +1597,19 @@ only if <code>b</code> sees <code>a</code>.
 
 </details>
 
-<a name="commander_map_blocks_line"></a>
+<a name="commander_map_step_blocks"></a>
 
-## Function `blocks_line`
+## Function `step_blocks`
 
-Whether crossing from <code>(x, y)</code> in <code>direction</code> blocks the line from
-<code>(x0, y0)</code> to <code>(x1, y1)</code>: the tile entered is a <code>Wall</code>, or, with
-<code>high_cover_blocks</code>, the edge has high cover on either side and touches
-neither end tile.
+Whether stepping from <code>from</code> into its neighbor <code>to</code> in <code>direction</code> blocks
+the line: <code>to</code> is a <code>Wall</code>, or, with <code>high_cover_blocks</code>, the edge is
+<code>inner</code> (touches neither end tile) and has high cover on either side.
+
+A function rather than a macro on purpose: <code><a href="./map.md#commander_map_trace_line">trace_line</a></code> calls it six times
+and the inlined matches would exceed the 255 locals a function may have.
 
 
-<pre><code><b>fun</b> <a href="./map.md#commander_map_blocks_line">blocks_line</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">commander::map::Map</a>, x: u16, y: u16, direction: u8, x0: u16, y0: u16, x1: u16, y1: u16, high_cover_blocks: bool): bool
+<pre><code><b>fun</b> <a href="./map.md#commander_map_step_blocks">step_blocks</a>(from: &<a href="./map.md#commander_map_Tile">commander::map::Tile</a>, to: &<a href="./map.md#commander_map_Tile">commander::map::Tile</a>, direction: u8, inner: bool, high_cover_blocks: bool): bool
 </code></pre>
 
 
@@ -1487,114 +1618,10 @@ neither end tile.
 <summary>Implementation</summary>
 
 
-<pre><code><b>fun</b> <a href="./map.md#commander_map_blocks_line">blocks_line</a>(
-    <a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>,
-    x: u16,
-    y: u16,
-    direction: u8,
-    x0: u16,
-    y0: u16,
-    x1: u16,
-    y1: u16,
-    high_cover_blocks: bool,
-): bool {
-    <b>let</b> (nx, ny) = <a href="./map.md#commander_map_neighbor">neighbor</a>(x, y, direction);
-    <b>if</b> (<a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_is_tile_wall">is_tile_wall</a>(nx, ny)) <b>return</b> <b>true</b>;
-    <b>if</b> (!high_cover_blocks) <b>return</b> <b>false</b>;
-    <b>let</b> is_inner = !(x == x0 && y == y0) && !(nx == x1 && ny == y1);
-    is_inner && <a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_is_edge_high_cover">is_edge_high_cover</a>(x, y, direction)
-}
-</code></pre>
-
-
-
-</details>
-
-<a name="commander_map_is_edge_high_cover"></a>
-
-## Function `is_edge_high_cover`
-
-Whether the edge between <code>(x, y)</code> and its neighbor in <code>direction</code> has high
-cover on either of its sides. Shared by <code><a href="./map.md#commander_map_check_path">check_path</a></code> and <code><a href="./map.md#commander_map_trace_line">trace_line</a></code>.
-
-
-<pre><code><b>fun</b> <a href="./map.md#commander_map_is_edge_high_cover">is_edge_high_cover</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">commander::map::Map</a>, x: u16, y: u16, direction: u8): bool
-</code></pre>
-
-
-
-<details>
-<summary>Implementation</summary>
-
-
-<pre><code><b>fun</b> <a href="./map.md#commander_map_is_edge_high_cover">is_edge_high_cover</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>, x: u16, y: u16, direction: u8): bool {
-    <b>use</b> <a href="../../.doc-deps/grid/direction.md#grid_direction_inverse">grid::direction::inverse</a>;
-    <b>let</b> (nx, ny) = <a href="./map.md#commander_map_neighbor">neighbor</a>(x, y, direction);
-    <a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_side_cover">side_cover</a>(x, y, direction) == <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>
-        || <a href="./map.md#commander_map">map</a>.<a href="./map.md#commander_map_side_cover">side_cover</a>(nx, ny, inverse!(direction)) == <a href="./map.md#commander_map_HIGH_COVER">HIGH_COVER</a>
-}
-</code></pre>
-
-
-
-</details>
-
-<a name="commander_map_side_cover"></a>
-
-## Function `side_cover`
-
-Cover value of the side of the tile at <code>(x, y)</code> facing <code>direction</code>.
-
-
-<pre><code><b>fun</b> <a href="./map.md#commander_map_side_cover">side_cover</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">commander::map::Map</a>, x: u16, y: u16, direction: u8): u8
-</code></pre>
-
-
-
-<details>
-<summary>Implementation</summary>
-
-
-<pre><code><b>fun</b> <a href="./map.md#commander_map_side_cover">side_cover</a>(<a href="./map.md#commander_map">map</a>: &<a href="./map.md#commander_map_Map">Map</a>, x: u16, y: u16, direction: u8): u8 {
-    <b>use</b> <a href="../../.doc-deps/grid/direction.md#grid_direction">grid::direction</a>::{up, down, left};
-    match (<a href="./map.md#commander_map">map</a>.grid[x, y].tile_type) {
-        TileType::Cover { left: l, top, right, bottom } =&gt; {
-            <b>if</b> (direction == up!()) top
-            <b>else</b> <b>if</b> (direction == down!()) bottom
-            <b>else</b> <b>if</b> (direction == left!()) l
-            <b>else</b> right
-        },
-        _ =&gt; <a href="./map.md#commander_map_NO_COVER">NO_COVER</a>,
-    }
-}
-</code></pre>
-
-
-
-</details>
-
-<a name="commander_map_neighbor"></a>
-
-## Function `neighbor`
-
-The neighbor of <code>(x, y)</code> in <code>direction</code> (<code>up</code> is the previous row).
-
-
-<pre><code><b>fun</b> <a href="./map.md#commander_map_neighbor">neighbor</a>(x: u16, y: u16, direction: u8): (u16, u16)
-</code></pre>
-
-
-
-<details>
-<summary>Implementation</summary>
-
-
-<pre><code><b>fun</b> <a href="./map.md#commander_map_neighbor">neighbor</a>(x: u16, y: u16, direction: u8): (u16, u16) {
-    <b>use</b> <a href="../../.doc-deps/grid/direction.md#grid_direction">grid::direction</a>::{up, down, left};
-    <b>if</b> (direction == up!()) (x - 1, y)
-    <b>else</b> <b>if</b> (direction == down!()) (x + 1, y)
-    <b>else</b> <b>if</b> (direction == left!()) (x, y - 1)
-    <b>else</b> (x, y + 1)
+<pre><code><b>fun</b> <a href="./map.md#commander_map_step_blocks">step_blocks</a>(from: &<a href="./map.md#commander_map_Tile">Tile</a>, to: &<a href="./map.md#commander_map_Tile">Tile</a>, direction: u8, inner: bool, high_cover_blocks: bool): bool {
+    <b>if</b> (<a href="./map.md#commander_map_is_wall">is_wall</a>!(to)) <b>true</b>
+    <b>else</b> <b>if</b> (!high_cover_blocks || !inner) <b>false</b>
+    <b>else</b> <a href="./map.md#commander_map_is_edge_high_cover">is_edge_high_cover</a>!(from, to, direction)
 }
 </code></pre>
 

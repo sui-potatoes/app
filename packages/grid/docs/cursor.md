@@ -17,12 +17,12 @@ use grid::direction;
 ## [test]
 
 fun test_cursor() {
-let mut cursor = cursor::new(0, 0);
-cursor.move_to(direction::down!());
-cursor.move_to(direction::down!() | direction::right!());
+    let mut cursor = cursor::new(0, 0);
+    cursor.move_to(direction::down!());
+    cursor.move_to(direction::down!() | direction::right!());
 
-let (row, col) = cursor.to_values();
-assert!(row == 2 && col == 1);
+    let (row, col) = cursor.to_values();
+    assert!(row == 2 && col == 1);
 }
 ```
 

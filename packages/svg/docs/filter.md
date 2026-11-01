@@ -1216,8 +1216,8 @@ Map over the attributes of the animation.
 
 ```rust
 let mut animation = shape::circle(10).move_to(20, 20).map_attributes!(|attrs| {
-attrs.insert(b"fill".to_string(), b"red".to_string());
-attrs.insert(b"stroke".to_string(), b"black".to_string());
+   attrs.insert(b"fill".to_string(), b"red".to_string());
+   attrs.insert(b"stroke".to_string(), b"black".to_string());
 });
 ```
 

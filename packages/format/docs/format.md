@@ -41,10 +41,10 @@ given values, using the <code>{}</code> syntax.
 Format a string with the given values. Similar to <code><a href="./format.md#format_format">format</a>!</code> in Rust.
 
 Example:
-```
+```move
 let result = format(b"Hello, {}! It's good to see you, {}!", vector[
-b"John".to_string(),
-b"Jane".to_string(),
+    b"John".to_string(),
+    b"Jane".to_string(),
 ]);
 
 assert!(result == b"Hello, John! It's good to see you, Jane!".to_string());

@@ -22,9 +22,9 @@ use svg::{animation, shape, svg};
 
 // prepare animation
 let animation = animation::animate_transform(b"rotate", b"0 5 5", b"360 5 5")
-.attribute_name(b"transform")
-.duration(b"10s")
-.repeat_count(b"indefinite");
+    .attribute_name(b"transform")
+    .duration(b"10s")
+    .repeat_count(b"indefinite");
 
 // add animation to the shape
 let mut rect = shape::rect(10, 10);
@@ -44,10 +44,10 @@ convert it to a string.
 use svg::animation;
 
 let animation = animation::animate()
-.attribute_name(b"rx")
-.values(b"0;5;0")
-.duration(b"10s")
-.repeat_count(b"indefinite");
+    .attribute_name(b"rx")
+    .values(b"0;5;0")
+    .duration(b"10s")
+    .repeat_count(b"indefinite");
 
 animation.to_string();
 ```
@@ -318,14 +318,14 @@ Animates an attribute from one value to another.
 - Element: <code>&lt;<a href="./animation.md#svg_animation_animate">animate</a>&gt;</code>
 - Own properties: None.
 - Inherited properties:
-- <code>attribute</code> - the name of the attribute to animate.
-- <code><a href="./animation.md#svg_animation_values">values</a></code> - a list of values to animate between.
-- <code>dur</code> - the duration of the animation.
-- <code>repeatCount</code> - the number of times to repeat the animation.
+    - <code>attribute</code> - the name of the attribute to animate.
+    - <code><a href="./animation.md#svg_animation_values">values</a></code> - a list of values to animate between.
+    - <code>dur</code> - the duration of the animation.
+    - <code>repeatCount</code> - the number of times to repeat the animation.
 - Extended properties:
-- <code>begin</code> - the time to start the animation.
-- <code>end</code> - the time to end the animation.
-- <code>rotate</code> - the rotation of the element.
+    - <code>begin</code> - the time to start the animation.
+    - <code>end</code> - the time to end the animation.
+    - <code>rotate</code> - the rotation of the element.
 
 > Animate is placed inside an element to animate the element.
 
@@ -341,9 +341,9 @@ See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/anim
 use svg::animation;
 
 let animation = animation::animate()
-.attribute_name(b"rx")
-.values(b"0;5;0")
-.duration(b"10s");
+    .attribute_name(b"rx")
+    .values(b"0;5;0")
+    .duration(b"10s");
 
 animation.to_string();
 ```
@@ -390,15 +390,15 @@ Animates an element along a path.
 
 - Element: <code>&lt;animateMotion&gt;</code>
 - Own properties:
-- <code>path</code> - the path to animate along.
-- <code><a href="./animation.md#svg_animation_mpath">mpath</a></code> - the path element to follow.
+    - <code>path</code> - the path to animate along.
+    - <code><a href="./animation.md#svg_animation_mpath">mpath</a></code> - the path element to follow.
 - Inherited properties:
-- <code>dur</code> - the duration of the animation.
-- <code>repeatCount</code> - the number of times to repeat the animation.
+    - <code>dur</code> - the duration of the animation.
+    - <code>repeatCount</code> - the number of times to repeat the animation.
 - Extended properties:
-- <code>begin</code> - the time to start the animation.
-- <code>end</code> - the time to end the animation.
-- <code>rotate</code> - the rotation of the element.
+    - <code>begin</code> - the time to start the animation.
+    - <code>end</code> - the time to end the animation.
+    - <code>rotate</code> - the rotation of the element.
 
 See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateMotion)
 
@@ -413,8 +413,8 @@ use svg::{animation, shape};
 
 // Animate the <code>r</code> attribute of an element along the specified path.
 let animation1 = animation::animate_motion(option::some(b"M10,90 Q90,90 z"), option::none())
-.attribute_name(b"r")
-.duration(b"10s");
+    .attribute_name(b"r")
+    .duration(b"10s");
 
 let mut circle = shape::circle(5);
 circle.add_animation(animation1);
@@ -472,18 +472,18 @@ Animate transform animation.
 
 - Element: <code>&lt;animateTransform&gt;</code>
 - Own properties:
-- <code>type</code> - the type of transformation to animate.
-- <code>from</code> - the starting value of the transformation.
-- <code>to</code> - the ending value of the transformation.
+    - <code>type</code> - the type of transformation to animate.
+    - <code>from</code> - the starting value of the transformation.
+    - <code>to</code> - the ending value of the transformation.
 - Inherited properties:
-- <code>attribute</code> - the name of the attribute to animate.
-- <code>dur</code> - the duration of the animation.
-- <code>repeatCount</code> - the number of times to repeat the animation.
-- <code><a href="./animation.md#svg_animation_values">values</a></code> - the values to animate between.
+    - <code>attribute</code> - the name of the attribute to animate.
+    - <code>dur</code> - the duration of the animation.
+    - <code>repeatCount</code> - the number of times to repeat the animation.
+    - <code><a href="./animation.md#svg_animation_values">values</a></code> - the values to animate between.
 - Extended properties:
-- <code>by</code> - the amount to change the transformation by.
-- <code>begin</code> - the time to start the animation.
-- <code>end</code> - the time to end the animation.
+    - <code>by</code> - the amount to change the transformation by.
+    - <code>begin</code> - the time to start the animation.
+    - <code>end</code> - the time to end the animation.
 
 See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateTransform)
 
@@ -498,9 +498,9 @@ use svg::{animation, shape};
 
 let mut shape = shape::rect(10, 10);
 let animation = animation::animate_transform(b"rotate", b"0 5 5", b"360 5 5")
-.attribute_name(b"r")
-.duration(b"10s")
-.repeat_count(b"indefinite");
+    .attribute_name(b"r")
+    .duration(b"10s")
+    .repeat_count(b"indefinite");
 
 shape.add_animation(animation);
 ```
@@ -555,14 +555,14 @@ Sets the value of an attribute at a specific time.
 
 - Element: <code>&lt;<a href="./animation.md#svg_animation_set">set</a>&gt;</code>
 - Own properties:
-- <code>to</code> - the value to set the attribute to.
+    - <code>to</code> - the value to set the attribute to.
 - Inherited properties:
-- <code>attribute</code> - the name of the attribute to set.
-- <code>dur</code> - the duration of the animation.
-- <code>repeatCount</code> - the number of times to repeat the animation.
+    - <code>attribute</code> - the name of the attribute to set.
+    - <code>dur</code> - the duration of the animation.
+    - <code>repeatCount</code> - the number of times to repeat the animation.
 - Extended properties:
-- <code>begin</code> - the time to start the animation.
-- <code>end</code> - the time to end the animation.
+    - <code>begin</code> - the time to start the animation.
+    - <code>end</code> - the time to end the animation.
 
 See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/set)
 
@@ -577,9 +577,9 @@ use svg::{animation, shape};
 
 let mut shape = shape::rect(10, 10);
 let animation = animation::set(b"5")
-.attribute_name(b"r")
-.duration(b"10s")
-.repeat_count(b"indefinite");
+    .attribute_name(b"r")
+    .duration(b"10s")
+    .repeat_count(b"indefinite");
 
 shape.add_animation(animation);
 ```
@@ -837,8 +837,8 @@ Map over the attributes of the animation.
 
 ```rust
 let mut animation = animation::animate().map_attributes!(|attrs| {
-attrs.insert(b"fill".to_string(), b"red".to_string());
-attrs.insert(b"stroke".to_string(), b"black".to_string());
+    attrs.insert(b"fill".to_string(), b"red".to_string());
+    attrs.insert(b"stroke".to_string(), b"black".to_string());
 });
 ```
 
@@ -872,9 +872,9 @@ Convert the animation to a string.
 
 ```rust
 let animation = animation::animate()
-.attribute_name(b"rx")
-.values(b"0;5;0")
-.duration(b"10s");
+    .attribute_name(b"rx")
+    .values(b"0;5;0")
+    .duration(b"10s");
 
 animation.to_string();
 ```

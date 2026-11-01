@@ -32,12 +32,12 @@ public struct Hero has key, store { id: UID, name: String }
 /// The function MUST be an <code><b>entry</b></code> function for <code>Random</code> to work.
 /// See https://docs.sui.io/guides/developer/advanced/randomness-onchain
 entry fun new_hero(rng: &Random, ctx: &mut TxContext) {
-let mut gen = rng.new_generator(ctx); // acquire generator instance
-let name = name_gen::new_male_name(&mut gen); // also <code><a href="./name_gen.md#name_gen_name_gen_new_female_name">new_female_name</a></code>
-transfer::transfer(Hero {
-id: object::new(ctx),
-name
-}, ctx.sender());
+    let mut gen = rng.new_generator(ctx); // acquire generator instance
+    let name = name_gen::new_male_name(&mut gen); // also <code><a href="./name_gen.md#name_gen_name_gen_new_female_name">new_female_name</a></code>
+    transfer::transfer(Hero {
+        id: object::new(ctx),
+        name
+    }, ctx.sender());
 }
 ```
 
@@ -140,7 +140,7 @@ This function must be used as a part of a <code>Random</code> entry function cal
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./name_gen.md#name_gen_name_gen_new_male_name">new_male_name</a>(g: &<b>mut</b> RandomGenerator): String {
-    <b>let</b> <b>mut</b> res = b"".to_string();
+    <b>let</b> <b>mut</b> res: String = "";
     <b>let</b> name = <a href="./male.md#name_gen_male_select">name_gen::male::select</a>(g.generate_u16_in_range(0, <a href="./name_gen.md#name_gen_name_gen_MALE_LIMIT">MALE_LIMIT</a>));
     // whether to <b>use</b> <a href="./consonant.md#name_gen_consonant">consonant</a>
     <b>let</b> <a href="./last_name.md#name_gen_last_name">last_name</a> = <b>if</b> (g.generate_bool()) {
@@ -152,7 +152,7 @@ This function must be used as a part of a <code>Random</code> entry function cal
         <a href="./last_name.md#name_gen_last_name_select">name_gen::last_name::select</a>(g.generate_u16_in_range(0, <a href="./name_gen.md#name_gen_name_gen_LAST_NAME_LIMIT">LAST_NAME_LIMIT</a>))
     };
     res.append(name);
-    res.append_utf8(b" ");
+    res.append_utf8(" ");
     res.append(<a href="./last_name.md#name_gen_last_name">last_name</a>);
     res
 }
@@ -179,7 +179,7 @@ This function must be used as a part of a <code>Random</code> entry function cal
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./name_gen.md#name_gen_name_gen_new_female_name">new_female_name</a>(g: &<b>mut</b> RandomGenerator): String {
-    <b>let</b> <b>mut</b> res = b"".to_string();
+    <b>let</b> <b>mut</b> res: String = "";
     <b>let</b> name = <a href="./female.md#name_gen_female_select">name_gen::female::select</a>(g.generate_u16_in_range(0, <a href="./name_gen.md#name_gen_name_gen_FEMALE_LIMIT">FEMALE_LIMIT</a>));
     // whether to <b>use</b> <a href="./consonant.md#name_gen_consonant">consonant</a>
     <b>let</b> <a href="./last_name.md#name_gen_last_name">last_name</a> = <b>if</b> (g.generate_bool()) {
@@ -191,7 +191,7 @@ This function must be used as a part of a <code>Random</code> entry function cal
         <a href="./last_name.md#name_gen_last_name_select">name_gen::last_name::select</a>(g.generate_u16_in_range(0, <a href="./name_gen.md#name_gen_name_gen_LAST_NAME_LIMIT">LAST_NAME_LIMIT</a>))
     };
     res.append(name);
-    res.append_utf8(b" ");
+    res.append_utf8(" ");
     res.append(<a href="./last_name.md#name_gen_last_name">last_name</a>);
     res
 }

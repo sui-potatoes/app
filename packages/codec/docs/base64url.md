@@ -17,11 +17,11 @@ for more details.
 ```rust
 use codec::base64url;
 
-let encoded = base64url::encode(b"hello, potato!");
+let encoded = base64url::encode("hello, potato!");
 let decoded = base64url::decode(encoded);
 
-assert!(encoded == b"aGVsbG8sIHBvdGF0byE".to_string());
-assert!(decoded == b"hello, potato!");
+assert!(encoded == "aGVsbG8sIHBvdGF0byE");
+assert!(decoded == "hello, potato!");
 ```
 
 

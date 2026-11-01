@@ -466,6 +466,12 @@ Returns: (is_dodged, damage applied, is_kia),
 
 Creates a new <code><a href="./unit.md#commander_unit_Unit">Unit</a></code> - an in-game representation of a <code>Recruit</code>.
 
+Weapon and armor are applied to the <code>Recruit</code>'s own stats one after the
+other. <code>Stats::add</code> floors every field at zero against its base, so folding
+the armor into the weapon first would lose a negative armor modifier
+(heavy armor's mobility and dodge penalties) against the weapon's zero
+operative fields.
+
 
 <pre><code><b>public</b> <b>fun</b> <a href="./unit.md#commander_unit_from_recruit">from_recruit</a>(<a href="./recruit.md#commander_recruit">recruit</a>: &<a href="./recruit.md#commander_recruit_Recruit">commander::recruit::Recruit</a>): <a href="./unit.md#commander_unit_Unit">commander::unit::Unit</a>
 </code></pre>
@@ -482,7 +488,7 @@ Creates a new <code><a href="./unit.md#commander_unit_Unit">Unit</a></code> - an
     <b>let</b> <b>mut</b> weapon_stats = <a href="./stats.md#commander_stats_default_weapon">stats::default_weapon</a>();
     <a href="./recruit.md#commander_recruit">recruit</a>.<a href="./weapon.md#commander_weapon">weapon</a>().do_ref!(|w| weapon_stats = *w.<a href="./stats.md#commander_stats">stats</a>());
     <a href="./recruit.md#commander_recruit">recruit</a>.<a href="./armor.md#commander_armor">armor</a>().do_ref!(|a| armor_stats = *a.<a href="./stats.md#commander_stats">stats</a>());
-    <b>let</b> <a href="./stats.md#commander_stats">stats</a> = <a href="./stats.md#commander_stats">stats</a>.add(&weapon_stats.add(&armor_stats));
+    <b>let</b> <a href="./stats.md#commander_stats">stats</a> = <a href="./stats.md#commander_stats">stats</a>.add(&weapon_stats).add(&armor_stats);
     <a href="./unit.md#commander_unit_Unit">Unit</a> {
         <a href="./recruit.md#commander_recruit">recruit</a>: object::id(<a href="./recruit.md#commander_recruit">recruit</a>),
         <a href="./unit.md#commander_unit_ap">ap</a>: <a href="./param.md#commander_param_new">param::new</a>(2),

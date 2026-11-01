@@ -629,8 +629,8 @@ Extended properties: none
 
 ```rust
 let filter = shape::filter(b"f1".to_string(), vector[
-filter::gaussian_blur(5),
-filter::color_matrix(b"grayscale"),
+   filter::gaussian_blur(5),
+   filter::color_matrix(b"grayscale"),
 ]);
 
 let mut svg = svg::svg(vector[0, 0, 100, 100]);
@@ -1437,9 +1437,9 @@ use svg::{animation, shape};
 
 let mut shape = shape::rect(10, 10);
 let animation = animation::set(b"5")
-.attribute_name(b"r")
-.duration(b"10s")
-.repeat_count(b"indefinite");
+    .attribute_name(b"r")
+    .duration(b"10s")
+    .repeat_count(b"indefinite");
 
 shape.add_animation(animation);
 ```
@@ -1474,9 +1474,9 @@ use svg::{animation, shape};
 
 let mut shape = shape::rect(10, 10);
 let animation = animation::set(b"5")
-.attribute_name(b"r")
-.duration(b"10s")
-.repeat_count(b"indefinite");
+    .attribute_name(b"r")
+    .duration(b"10s")
+    .repeat_count(b"indefinite");
 
 shape.add_animation(animation);
 shape.animation_mut().extract(); // remove animation
@@ -1509,8 +1509,8 @@ Map over the attributes of the animation.
 
 ```rust
 let mut animation = shape::circle(10).move_to(20, 20).map_attributes!(|attrs| {
-attrs.insert(b"fill".to_string(), b"red".to_string());
-attrs.insert(b"stroke".to_string(), b"black".to_string());
+   attrs.insert(b"fill".to_string(), b"red".to_string());
+   attrs.insert(b"stroke".to_string(), b"black".to_string());
 });
 ```
 

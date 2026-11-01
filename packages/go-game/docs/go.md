@@ -9,7 +9,7 @@ Implements the actual game of Go.
 -  [Struct `Board`](#go_game_go_Board)
 -  [Struct `Score`](#go_game_go_Score)
 -  [Struct `Group`](#go_game_go_Group)
--  [Enum `Tile`](#go_game_go_Tile)
+-  [Struct `Tile`](#go_game_go_Tile)
 -  [Constants](#@Constants_0)
 -  [Function `new`](#go_game_go_new)
 -  [Function `place`](#go_game_go_place)
@@ -24,6 +24,7 @@ Implements the actual game of Go.
 -  [Function `is_white`](#go_game_go_is_white)
 -  [Function `tile_to_string`](#go_game_go_tile_to_string)
 -  [Function `tile_to_number`](#go_game_go_tile_to_number)
+-  [Macro function `tile`](#go_game_go_tile)
 
 
 <pre><code><b>use</b> <a href="../../.doc-deps/grid/cell.md#grid_cell">grid::cell</a>;
@@ -94,6 +95,12 @@ The game board.
 </dt>
 <dd>
  Stores last 2 states to implement the ko rule.
+</dd>
+<dt>
+<code>rendered_rows: vector&lt;<a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a>&gt;</code>
+</dt>
+<dd>
+ Instead of storing full state we only render 9,13 or 19 rows.
 </dd>
 </dl>
 
@@ -167,33 +174,28 @@ Empty tile returns an empty group.
 
 <a name="go_game_go_Tile"></a>
 
-## Enum `Tile`
+## Struct `Tile`
 
 A tile on the board. Implements a <code>to_string</code> method to allow printing.
 
 
-<pre><code><b>public</b> <b>enum</b> <a href="./go.md#go_game_go_Tile">Tile</a> <b>has</b> <b>copy</b>, drop, store
+<pre><code><b>public</b> <b>struct</b> <a href="./go.md#go_game_go_Tile">Tile</a> <b>has</b> <b>copy</b>, drop, store
 </code></pre>
 
 
 
 <details>
-<summary>Variants</summary>
+<summary>Fields</summary>
 
 
 <dl>
 <dt>
-Variant <code>Empty</code>
+<code>svg: <a href="../../.doc-deps/std/string.md#std_string_String">std::string::String</a></code>
 </dt>
 <dd>
 </dd>
 <dt>
-Variant <code>Black</code>
-</dt>
-<dd>
-</dd>
-<dt>
-Variant <code>White</code>
+<code>variant: u8</code>
 </dt>
 <dd>
 </dd>
@@ -237,6 +239,33 @@ The move repeats previous state of the board.
 
 
 
+<a name="go_game_go_EMPTY"></a>
+
+
+
+<pre><code><b>const</b> <a href="./go.md#go_game_go_EMPTY">EMPTY</a>: u8 = 0;
+</code></pre>
+
+
+
+<a name="go_game_go_BLACK"></a>
+
+
+
+<pre><code><b>const</b> <a href="./go.md#go_game_go_BLACK">BLACK</a>: u8 = 1;
+</code></pre>
+
+
+
+<a name="go_game_go_WHITE"></a>
+
+
+
+<pre><code><b>const</b> <a href="./go.md#go_game_go_WHITE">WHITE</a>: u8 = 2;
+</code></pre>
+
+
+
 <a name="go_game_go_new"></a>
 
 ## Function `new`
@@ -256,11 +285,12 @@ Create a new <code><a href="./go.md#go_game_go_Board">Board</a></code> of the gi
 <pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_new">new</a>(<a href="./go.md#go_game_go_size">size</a>: u16): <a href="./go.md#go_game_go_Board">Board</a> {
     <a href="./go.md#go_game_go_Board">Board</a> {
         <a href="./go.md#go_game_go_size">size</a>,
-        <a href="./go.md#go_game_go_grid">grid</a>: grid::tabulate!(<a href="./go.md#go_game_go_size">size</a>, <a href="./go.md#go_game_go_size">size</a>, |_, _| Tile::Empty),
+        <a href="./go.md#go_game_go_grid">grid</a>: grid::tabulate!(<a href="./go.md#go_game_go_size">size</a>, <a href="./go.md#go_game_go_size">size</a>, |_, _| <a href="./go.md#go_game_go_Tile">Tile</a> { svg: "", variant: <a href="./go.md#go_game_go_EMPTY">EMPTY</a> }),
         <a href="./go.md#go_game_go_is_black">is_black</a>: <b>true</b>,
         moves: vector[],
         score: <a href="./go.md#go_game_go_Score">Score</a> { black: 0, white: 0 },
         prev_states: vector[],
+        rendered_rows: vector::tabulate!(<a href="./go.md#go_game_go_size">size</a> <b>as</b> u64, |_| ""),
     }
 }
 </code></pre>
@@ -286,22 +316,23 @@ Place a stone on the board at the given position.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_place">place</a>(board: &<b>mut</b> <a href="./go.md#go_game_go_Board">Board</a>, x: u16, y: u16) {
-    <b>let</b> stone = <b>if</b> (board.<a href="./go.md#go_game_go_is_black">is_black</a>) Tile::Black <b>else</b> Tile::White;
-    <b>assert</b>!(board.<a href="./go.md#go_game_go_grid">grid</a>.swap(x, y, stone) == Tile::Empty, <a href="./go.md#go_game_go_EInvalidMove">EInvalidMove</a>);
+    <b>let</b> stone = <b>if</b> (board.<a href="./go.md#go_game_go_is_black">is_black</a>) <a href="./go.md#go_game_go_tile">tile</a>!(<a href="./go.md#go_game_go_BLACK">BLACK</a>, x, y) <b>else</b> <a href="./go.md#go_game_go_tile">tile</a>!(<a href="./go.md#go_game_go_WHITE">WHITE</a>, x, y);
+    <b>assert</b>!(board.<a href="./go.md#go_game_go_grid">grid</a>.swap(x, y, stone).variant == <a href="./go.md#go_game_go_EMPTY">EMPTY</a>, <a href="./go.md#go_game_go_EInvalidMove">EInvalidMove</a>);
     // Check <b>for</b> suicide <b>move</b>: count neighbors of the cell, <b>if</b> all of them are
     // opponent's stones, the <b>move</b> is suicide. However, <b>if</b> the surrounding group
     // is surrounded, the <b>move</b> is a capture.
     <b>let</b> (<b>mut</b> my_stones, <b>mut</b> enemy_stones) = (vector[], vector[]);
     <b>let</b> <b>mut</b> empty_num = 0u16;
+    <b>let</b> <b>mut</b> unique_rows = vector[x];
     // Get all neighbors of the cell. Split them into my stones and enemy stones.
     // All my stones which are neighbors, actually form a group. The only tricky
     // part is checking the enemy stones and their groups.
     cell::new(x, y).von_neumann_neighbors(1).destroy!(|p| {
         <b>let</b> (x, y) = p.to_values();
         <b>if</b> (x &gt;= board.<a href="./go.md#go_game_go_size">size</a> || y &gt;= board.<a href="./go.md#go_game_go_size">size</a>) <b>return</b>;
-        match (board.<a href="./go.md#go_game_go_grid">grid</a>[x, y]) {
-            Tile::Empty =&gt; (empty_num = empty_num + 1),
-            t @ _ =&gt; <b>if</b> (t == stone) {
+        match (board.<a href="./go.md#go_game_go_grid">grid</a>[x, y].variant) {
+            <a href="./go.md#go_game_go_EMPTY">EMPTY</a> =&gt; (empty_num = empty_num + 1),
+            t @ _ =&gt; <b>if</b> (t == stone.variant) {
                 my_stones.push_back(p);
             } <b>else</b> {
                 enemy_stones.push_back(p);
@@ -326,7 +357,11 @@ Place a stone on the board at the given position.
             <b>if</b> (board.<a href="./go.md#go_game_go_is_black">is_black</a>) board.score.black = cells.length() <b>as</b> u16 + board.score.black
             <b>else</b> board.score.white = cells.length() <b>as</b> u16 + board.score.white;
             // Remove the group from the board.
-            cells.destroy!(|p| board.<a href="./go.md#go_game_go_grid">grid</a>.swap(p.row(), p.col(), Tile::Empty));
+            cells.destroy!(|p| {
+                <b>let</b> (row, col) = p.to_values();
+                <b>if</b> (!unique_rows.contains(&row)) unique_rows.push_back(row);
+                board.<a href="./go.md#go_game_go_grid">grid</a>.swap(row, col, <a href="./go.md#go_game_go_tile">tile</a>!(<a href="./go.md#go_game_go_EMPTY">EMPTY</a>, 0, 0))
+            });
         });
     } <b>else</b> <b>if</b> (empty_num == 0) {
         // If there are no empty neighbors, we need to check <b>if</b> the <b>move</b> is a
@@ -344,6 +379,16 @@ Place a stone on the board at the given position.
     board.prev_states.push_back(<b>copy</b> board.<a href="./go.md#go_game_go_grid">grid</a>);
     board.moves.push_back(cell::new(x, y));
     board.<a href="./go.md#go_game_go_is_black">is_black</a> = !board.<a href="./go.md#go_game_go_is_black">is_black</a>;
+    // Re-render unique updated rows
+    <b>let</b> <a href="./go.md#go_game_go_size">size</a> = board.<a href="./go.md#go_game_go_grid">grid</a>.width();
+    unique_rows.destroy!(|row| {
+        <b>let</b> <b>mut</b> res: String = "";
+        <a href="./go.md#go_game_go_size">size</a>.do!(|col| {
+            <b>let</b> <a href="./go.md#go_game_go_Tile">Tile</a> { variant, svg } = board.<a href="./go.md#go_game_go_grid">grid</a>.<a href="./go.md#go_game_go_borrow">borrow</a>(row, col);
+            <b>if</b> (*variant != <a href="./go.md#go_game_go_EMPTY">EMPTY</a>) res.append(*svg);
+        });
+        *&<b>mut</b> board.rendered_rows[row <b>as</b> u64] = res;
+    });
 }
 </code></pre>
 
@@ -371,14 +416,18 @@ group if they are of the same color.
 
 <pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_find_group">find_group</a>(board: &<a href="./go.md#go_game_go_Board">Board</a>, x: u16, y: u16): <a href="./go.md#go_game_go_Group">Group</a> {
     // Store the stone color or <b>return</b> an empty group <b>if</b> the field is empty.
-    <b>let</b> stone = match (board.<a href="./go.md#go_game_go_grid">grid</a>[x, y]) {
-        Tile::Empty =&gt; <b>return</b> <a href="./go.md#go_game_go_Group">Group</a>(Tile::Empty, vector[]),
+    <b>let</b> stone = match (board.<a href="./go.md#go_game_go_grid">grid</a>[x, y].variant) {
+        <a href="./go.md#go_game_go_EMPTY">EMPTY</a> =&gt; <b>return</b> <a href="./go.md#go_game_go_Group">Group</a>(<a href="./go.md#go_game_go_tile">tile</a>!(<a href="./go.md#go_game_go_EMPTY">EMPTY</a>, 0, 0), vector[]),
         _ =&gt; board.<a href="./go.md#go_game_go_grid">grid</a>[x, y],
     };
     // Find the group of stones of the same color.
     <b>let</b> <b>mut</b> group = board
         .<a href="./go.md#go_game_go_grid">grid</a> // Go Game relies on the Von Neumann neighborhood.
-        .<a href="./go.md#go_game_go_find_group">find_group</a>!(cell::new(x, y), |p| p.von_neumann_neighbors(1), |tile| tile == &stone);
+        .<a href="./go.md#go_game_go_find_group">find_group</a>!(
+            cell::new(x, y),
+            |p| p.von_neumann_neighbors(1),
+            |<a href="./go.md#go_game_go_tile">tile</a>| <a href="./go.md#go_game_go_tile">tile</a>.variant == stone.variant,
+        );
     // Sort the group to make them comparable.
     group.insertion_sort_by!(|a, b| a.le(b));
     <a href="./go.md#go_game_go_Group">Group</a>(stone, group)
@@ -413,7 +462,7 @@ Checks if the group is surrounded.
             // <b>for</b> a single empty field neighboring the group. If there isn't
             // one, the group is surrounded. That is, assuming that the group
             // is homogeneous and exhaustive.
-            <b>let</b> count = board.<a href="./go.md#go_game_go_grid">grid</a>.von_neumann_neighbors_count!(*p, 1, |t| t == &Tile::Empty);
+            <b>let</b> count = board.<a href="./go.md#go_game_go_grid">grid</a>.von_neumann_neighbors_count!(*p, 1, |t| t.variant == <a href="./go.md#go_game_go_EMPTY">EMPTY</a>);
             <b>if</b> (count &gt; 0) <b>return</b> 'search <b>false</b>;
         });
         <b>true</b>
@@ -533,7 +582,7 @@ Return true if the tile is empty.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_is_empty">is_empty</a>(t: &<a href="./go.md#go_game_go_Tile">Tile</a>): bool { t == &Tile::Empty }
+<pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_is_empty">is_empty</a>(t: &<a href="./go.md#go_game_go_Tile">Tile</a>): bool { t.variant == <a href="./go.md#go_game_go_EMPTY">EMPTY</a> }
 </code></pre>
 
 
@@ -556,7 +605,7 @@ Return true if the tile is black.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_is_black">is_black</a>(t: &<a href="./go.md#go_game_go_Tile">Tile</a>): bool { t == &Tile::Black }
+<pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_is_black">is_black</a>(t: &<a href="./go.md#go_game_go_Tile">Tile</a>): bool { t.variant == <a href="./go.md#go_game_go_BLACK">BLACK</a> }
 </code></pre>
 
 
@@ -579,7 +628,7 @@ Return true if the tile is white.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_is_white">is_white</a>(t: &<a href="./go.md#go_game_go_Tile">Tile</a>): bool { t == &Tile::White }
+<pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_is_white">is_white</a>(t: &<a href="./go.md#go_game_go_Tile">Tile</a>): bool { t.variant == <a href="./go.md#go_game_go_WHITE">WHITE</a> }
 </code></pre>
 
 
@@ -603,10 +652,11 @@ Convert a <code><a href="./go.md#go_game_go_Tile">Tile</a></code> to a <code>Str
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_tile_to_string">tile_to_string</a>(t: &<a href="./go.md#go_game_go_Tile">Tile</a>): String {
-    match (t) {
-        Tile::Empty =&gt; b"_",
-        Tile::Black =&gt; b"B",
-        Tile::White =&gt; b"W",
+    match (t.variant) {
+        <a href="./go.md#go_game_go_EMPTY">EMPTY</a> =&gt; b"_",
+        <a href="./go.md#go_game_go_BLACK">BLACK</a> =&gt; b"B",
+        <a href="./go.md#go_game_go_WHITE">WHITE</a> =&gt; b"W",
+        _ =&gt; <b>abort</b>,
     }.to_string()
 }
 </code></pre>
@@ -632,11 +682,44 @@ Convert tile to <code>u8</code> representation.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./go.md#go_game_go_tile_to_number">tile_to_number</a>(t: &<a href="./go.md#go_game_go_Tile">Tile</a>): u8 {
-    match (t) {
-        Tile::Empty =&gt; 0,
-        Tile::Black =&gt; 1,
-        Tile::White =&gt; 2,
-    }
+    t.variant
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="go_game_go_tile"></a>
+
+## Macro function `tile`
+
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./go.md#go_game_go_tile">tile</a>($v: u8, $row: u16, $col: u16): <a href="./go.md#go_game_go_Tile">go_game::go::Tile</a>
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>macro</b> <b>fun</b> <a href="./go.md#go_game_go_tile">tile</a>($v: u8, $row: u16, $col: u16): <a href="./go.md#go_game_go_Tile">Tile</a> {
+    <b>if</b> ($v == <a href="./go.md#go_game_go_EMPTY">EMPTY</a>) <b>return</b> <a href="./go.md#go_game_go_Tile">Tile</a> { svg: "", variant: <a href="./go.md#go_game_go_EMPTY">EMPTY</a> };
+    <b>let</b> x = $row * 20 + $row + 10;
+    <b>let</b> y = $col * 20 + $col + 10;
+    <b>let</b> <b>mut</b> svg: String = "&lt;<b>use</b> x='";
+    svg.append(x.to_string());
+    svg.append("' y='");
+    svg.append(y.to_string());
+    <b>if</b> ($v == <a href="./go.md#go_game_go_WHITE">WHITE</a>) {
+        svg.append("' href='#w' /&gt;");
+        <a href="./go.md#go_game_go_Tile">Tile</a> { svg, variant: <a href="./go.md#go_game_go_WHITE">WHITE</a> }
+    } <b>else</b> <b>if</b> ($v == <a href="./go.md#go_game_go_BLACK">BLACK</a>) {
+        svg.append("' href='#b' /&gt;");
+        <a href="./go.md#go_game_go_Tile">Tile</a> { svg, variant: <a href="./go.md#go_game_go_BLACK">BLACK</a> }
+    } <b>else</b> <b>abort</b>
 }
 </code></pre>
 

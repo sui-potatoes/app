@@ -415,7 +415,7 @@ Get all neighbors of a cell within a given L1 / Chebyshev distance.
 
 Example for distance=2:
 ```
-0 1 2 3 4
+    0 1 2 3 4
 0: | | |2| | |
 1: | |2|1|2| |
 2: |2|1|0|1|2|
@@ -487,7 +487,7 @@ Does not include the starting <code><a href="./cell.md#grid_cell_Cell">Cell</a><
 
 Example for distance=2:
 ```
-0 1 2 3 4
+   0 1 2 3 4
 0: |2|2|2|2|2|
 1: |2|1|1|1|2|
 2: |2|1|0|1|2|

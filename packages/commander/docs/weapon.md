@@ -154,7 +154,7 @@ Create a new default <code><a href="./weapon.md#commander_weapon_Weapon">Weapon<
 <pre><code><b>public</b> <b>fun</b> <a href="./weapon.md#commander_weapon_default">default</a>(ctx: &<b>mut</b> TxContext): <a href="./weapon.md#commander_weapon_Weapon">Weapon</a> {
     <a href="./weapon.md#commander_weapon_Weapon">Weapon</a> {
         id: object::new(ctx),
-        <a href="./weapon.md#commander_weapon_name">name</a>: b"Standard Issue Rifle".to_string(),
+        <a href="./weapon.md#commander_weapon_name">name</a>: "Standard Issue Rifle",
         <a href="./stats.md#commander_stats">stats</a>: <a href="./stats.md#commander_stats_default_weapon">stats::default_weapon</a>(),
         <a href="./weapon.md#commander_weapon_upgrades">upgrades</a>: vector[],
     }

@@ -412,16 +412,16 @@ If <code>times</code> is greater than 3, it will be reduced to the equivalent ro
 
 ```move
 let mut grid = grid::from_vector(vector[
-vector[1, 2, 3],
-vector[4, 5, 6],
-vector[7, 8, 9],
+  vector[1, 2, 3],
+  vector[4, 5, 6],
+  vector[7, 8, 9],
 ]);
 
 grid.rotate(1); // 90º
 assert_eq!(grid.into_vector(), vector[
-vector[7, 4, 1],
-vector[8, 5, 2],
-vector[9, 6, 3],
+  vector[7, 4, 1],
+  vector[8, 5, 2],
+  vector[9, 6, 3],
 ]);
 ```
 
@@ -681,8 +681,8 @@ The function receives the row and column coordinates of the cell.
 Example:
 ```move
 public enum Tile {
-Empty,
-// ...
+  Empty,
+  // ...
 }
 
 let grid = grid::tabulate!(3, 3, |_x, _y| Tile::Empty);
@@ -831,7 +831,7 @@ receives the reference to the cell, the row and column of the cell.
 Example:
 ```move
 grid.traverse!(|cell, (row, col)| {
-// do something with the cell and the coordinates
+    // do something with the cell and the coordinates
 });
 ```
 
@@ -1153,11 +1153,11 @@ and the next cell.
 ```move
 // finds the shortest path between (0, 0) and (1, 4) with a limit of 6
 grid.trace_path!(
-cell::new(0, 0),
-cell::new(1, 4),
-|p| p.moore_neighbors(1), // use moore neighborhood
-|(prev_row, prev_col), (next_row, next_col)| cell == 0,
-6,
+    cell::new(0, 0),
+    cell::new(1, 4),
+    |p| p.moore_neighbors(1), // use moore neighborhood
+    |(prev_row, prev_col), (next_row, next_col)| cell == 0,
+    6,
 );
 ```
 
@@ -1254,9 +1254,9 @@ Print the grid to a string. Only works if <code>$T</code> has a <code>.<a href="
 
 ```move
 let grid = from_vector(vector[
-vector[1, 2, 3],
-vector[4, 5, 6],
-vector[7, 8, 9u8],
+    vector[1, 2, 3],
+    vector[4, 5, 6],
+    vector[7, 8, 9u8],
 ]);
 
 std::debug::print(&grid.to_string!())

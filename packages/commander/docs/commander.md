@@ -410,7 +410,7 @@ Once a <code><a href="./commander.md#commander_commander_Preset">Preset</a></cod
 <pre><code><b>public</b> <b>fun</b> <a href="./commander.md#commander_commander_delete_map">delete_map</a>(cmd: &<b>mut</b> <a href="./commander.md#commander_commander_Commander">Commander</a>, preset: Receiving&lt;<a href="./commander.md#commander_commander_Preset">Preset</a>&gt;, ctx: &<b>mut</b> TxContext) {
     <b>let</b> <a href="./commander.md#commander_commander_Preset">Preset</a> { id, <a href="./map.md#commander_map">map</a>, author, .. } = transfer::receive(&<b>mut</b> cmd.id, preset);
     <b>assert</b>!(author == ctx.sender(), <a href="./commander.md#commander_commander_ENotAuthor">ENotAuthor</a>);
-    <a href="./map.md#commander_map">map</a>.destroy();
+    <b>let</b> _ = <a href="./map.md#commander_map">map</a>.destroy();
     id.delete();
 }
 </code></pre>
@@ -869,7 +869,7 @@ On publish, share the <code><a href="./commander.md#commander_commander_Commande
         <b>let</b> id = object::new(ctx);
         <a href="./commander.md#commander_commander_Preset">Preset</a> {
             <a href="./map.md#commander_map">map</a>: <a href="./map.md#commander_map_demo_1">map::demo_1</a>(id.to_inner()),
-            name: b"Demo 1".to_string(),
+            name: "Demo 1",
             positions: vector[vector[0, 3], vector[6, 5]],
             popularity: 0,
             author: @0,
@@ -881,7 +881,7 @@ On publish, share the <code><a href="./commander.md#commander_commander_Commande
         <b>let</b> id = object::new(ctx);
         <a href="./commander.md#commander_commander_Preset">Preset</a> {
             <a href="./map.md#commander_map">map</a>: <a href="./map.md#commander_map_demo_2">map::demo_2</a>(id.to_inner()),
-            name: b"Demo 2".to_string(),
+            name: "Demo 2",
             positions: vector[vector[8, 2], vector[7, 6], vector[1, 2], vector[1, 7]],
             author: @0,
             popularity: 0,

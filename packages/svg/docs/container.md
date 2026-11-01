@@ -215,8 +215,8 @@ Used to place shapes directly in the root of the SVG.
 let mut svg = svg::svg(vector[0, 0, 100, 100]);
 
 svg.add_root(vector[
-shape::circle(5),
-shape::ellipse(30, 30, 10, 5),
+    shape::circle(5),
+    shape::ellipse(30, 30, 10, 5),
 ]);
 
 let str = svg.to_string();
@@ -276,7 +276,7 @@ See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/a).
 ```rust
 let mut svg = svg::svg(vector[0, 0, 100, 100]);
 let link = container::a(b"https://example.com".to_string(), vector[
-shape::circle(5),
+    shape::circle(5),
 ]);
 
 svg.add(link); // or svg.a(vector[ /* ... */ ]);
@@ -342,8 +342,8 @@ See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/defs
 ```rust
 let mut svg = svg::svg(vector[0, 0, 100, 100]);
 let defs = container::defs(vector[
-shape::circle(5),
-shape::ellipse(30, 30, 10, 5),
+  shape::circle(5),
+  shape::ellipse(30, 30, 10, 5),
 ]);
 
 svg.add(defs); // or svg.add_defs(vector[ /* ... */ ]);
@@ -407,8 +407,8 @@ let mut svg = svg::svg(vector[0, 0, 100, 100]);
 
 // Create a group of shapes.
 let mut group = container::g(vector[
-shape::circle(5),
-shape::ellipse(30, 30, 10, 5),
+  shape::circle(5),
+  shape::ellipse(30, 30, 10, 5),
 ]);
 
 group.attributes_mut().insert(b"fill".to_string(), b"red".to_string());
@@ -469,8 +469,8 @@ See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/mark
 ```rust
 let mut svg = svg::svg(vector[0, 0, 100, 100]);
 let marker = container::marker(vector[
-shape::circle(5),
-shape::ellipse(30, 30, 10, 5),
+   shape::circle(5),
+   shape::ellipse(30, 30, 10, 5),
 ]);
 
 svg.add(marker); // or svg.marker(vector[ /* ... */ ]);
@@ -621,7 +621,7 @@ See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/clip
 ```rust
 let mut svg = svg::svg(vector[0, 0, 100, 100]);
 let clip_path = container::clip_path(vector[
-shape::circle(5),
+  shape::circle(5),
 ]);
 svg.add(clip_path); // or svg.clip_path(vector[ /* ... */ ]);
 let str = svg.to_string();
@@ -771,11 +771,11 @@ Map attributes of the <code><a href="./container.md#svg_container_Container">Con
 
 ```rust
 let mut container = container::g(vector[
-shape::circle(5).move_to(10, 10),
-shape::ellipse(30, 30, 10, 5),
+   shape::circle(5).move_to(10, 10),
+   shape::ellipse(30, 30, 10, 5),
 ]).map_attributes!(|attrs| {
-attrs.insert(b"fill".to_string(), b"red".to_string());
-attrs.insert(b"stroke".to_string(), b"black".to_string());
+   attrs.insert(b"fill".to_string(), b"red".to_string());
+   attrs.insert(b"stroke".to_string(), b"black".to_string());
 });
 ```
 

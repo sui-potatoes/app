@@ -62,7 +62,7 @@
 
 
 
-<pre><code><b>const</b> <a href="./male.md#name_gen_male_BUCKET_4">BUCKET_4</a>: vector&lt;vector&lt;u8&gt;&gt; = vector[vector[66, 111, 97, 114, 100], vector[66, 111, 98], vector[66, 111, 111, 116], vector[66, 111, 116], vector[66, 111, 116, 97, 110], vector[66, 111, 120], vector[66, 117, 100, 100, 121], vector[66, 117, 103], vector[66, 117, 115], vector[66, 105, 102, 102]];
+<pre><code><b>const</b> <a href="./male.md#name_gen_male_BUCKET_4">BUCKET_4</a>: vector&lt;vector&lt;u8&gt;&gt; = vector[vector[66, 111, 97, 114, 100], vector[66, 111], vector[66, 111, 111, 116], vector[66, 111, 116], vector[66, 111, 116, 97, 110], vector[66, 111, 120], vector[66, 117, 100, 100, 121], vector[66, 117, 103], vector[66, 117, 115], vector[66, 105, 102, 102]];
 </code></pre>
 
 
@@ -161,7 +161,7 @@
 
 
 
-<pre><code><b>const</b> <a href="./male.md#name_gen_male_BUCKET_15">BUCKET_15</a>: vector&lt;vector&lt;u8&gt;&gt; = vector[vector[71, 117, 121], vector[71, 117, 121, 98, 114, 117, 115, 104], vector[72, 97, 105], vector[72, 97, 110], vector[72, 97, 110, 115], vector[72, 97, 110, 110, 105, 98, 97, 108], vector[72, 97, 115, 104], vector[72, 101, 99, 116, 111], vector[72, 117, 98], vector[72, 117, 100]];
+<pre><code><b>const</b> <a href="./male.md#name_gen_male_BUCKET_15">BUCKET_15</a>: vector&lt;vector&lt;u8&gt;&gt; = vector[vector[71, 117, 121], vector[71, 117, 121, 98, 114, 117, 115, 104], vector[72, 97, 105], vector[72, 97, 110], vector[72, 97, 110, 115], vector[72, 97, 110, 110, 105, 98, 97, 108], vector[72, 97, 115, 104], vector[72, 101, 99, 116, 111], vector[72, 117], vector[72, 117, 100]];
 </code></pre>
 
 
@@ -314,7 +314,7 @@
 
 
 
-<pre><code><b>const</b> <a href="./male.md#name_gen_male_BUCKET_32">BUCKET_32</a>: vector&lt;vector&lt;u8&gt;&gt; = vector[vector[86, 97, 120], vector[86, 97, 120, 101, 110], vector[86, 101, 99, 116, 111, 114], vector[86, 101, 114, 105, 122, 111, 110], vector[86, 111, 120, 101, 108], vector[87, 101, 98], vector[87, 101, 100, 103, 101], vector[87, 105, 114, 101], vector[89, 117, 107, 105, 109, 97, 115, 97], vector[89, 111, 115, 117, 107, 101]];
+<pre><code><b>const</b> <a href="./male.md#name_gen_male_BUCKET_32">BUCKET_32</a>: vector&lt;vector&lt;u8&gt;&gt; = vector[vector[86, 97, 120], vector[86, 97, 120, 101, 110], vector[86, 101, 99, 116, 111, 114], vector[86, 101, 114, 105, 122, 111, 110], vector[86, 111, 120, 101, 108], vector[87, 101], vector[87, 101, 100, 103, 101], vector[87, 105, 114, 101], vector[89, 117, 107, 105, 109, 97, 115, 97], vector[89, 111, 115, 117, 107, 101]];
 </code></pre>
 
 

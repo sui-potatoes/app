@@ -14,11 +14,11 @@ Can operate on UTF8 strings, encoding only ASCII characters.
 ```rust
 use codec::urlencode;
 
-let encoded = urlencode::encode(b"hello, potato!");
+let encoded = urlencode::encode("hello, potato!");
 let decoded = urlencode::decode(encoded);
 
-assert!(encoded == b"hello%2C%20potato%21".to_string());
-assert!(decoded == b"hello, potato!");
+assert!(encoded == "hello%2C%20potato%21");
+assert!(decoded == "hello, potato!");
 ```
 
 
@@ -56,14 +56,18 @@ a vector of bytes as input. This function is safe to use with UTF8 strings.
     <b>let</b> <b>mut</b> res = vector[];
     string.do!(|c| {
         // 32 = space
-        <b>if</b> (c == 32) {
-            res.push_back(37); // %
-            res.push_back(50); // 2
-            res.push_back(48); // 0
-        } <b>else</b> <b>if</b> ((c &lt; 48 || c &gt; 57) && (c &lt; 65 || c &gt; 90) && (c &lt; 97 || c &gt; 122)) {
-            res.push_back(37); // %
-            res.push_back((c / 16) + <b>if</b> (c / 16 &lt; 10) 48 <b>else</b> 55);
-            res.push_back((c % 16) + <b>if</b> (c % 16 &lt; 10) 48 <b>else</b> 55);
+        <b>if</b> (c == char::space!()) {
+            res.push_back(char::percent!()); // %
+            res.push_back(char::two!()); // 2
+            res.push_back(char::zero!()); // 0
+        } <b>else</b> <b>if</b> (
+            (c &lt; char::zero!() || c &gt; char::nine!())
+            && (c &lt; char::A!() || c &gt; char::Z!())
+            && (c &lt; char::a!() || c &gt; char::z!())
+        ) {
+            res.push_back(char::percent!()); // %
+            res.push_back((c / 16) + <b>if</b> (c / 16 &lt; 10) char::zero!() <b>else</b> char::seven!());
+            res.push_back((c % 16) + <b>if</b> (c % 16 &lt; 10) char::zero!() <b>else</b> char::seven!());
         } <b>else</b> {
             res.push_back(c);
         }
@@ -110,8 +114,8 @@ Supports legacy <code>+</code> encoding for spaces.
                 len = len - 3;
                 <b>let</b> a = bytes.pop_back();
                 <b>let</b> b = bytes.pop_back();
-                <b>let</b> a = <b>if</b> (a &gt;= 65) a - 55 <b>else</b> a - 48;
-                <b>let</b> b = <b>if</b> (b &gt;= 65) b - 55 <b>else</b> b - 48;
+                <b>let</b> a = <b>if</b> (a &gt;= char::A!()) a - char::seven!() <b>else</b> a - char::zero!();
+                <b>let</b> b = <b>if</b> (b &gt;= char::A!()) b - char::seven!() <b>else</b> b - char::zero!();
                 res.push_back(a * 16 + b)
             },
             // regular ASCII character

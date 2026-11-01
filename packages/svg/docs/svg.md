@@ -128,8 +128,8 @@ to add a group container or place elements in the "root", use <code>root</code> 
 use svg::{shape, svg};
 
 let container = container::g(vector[
-shape::circle(5).move_to(10, 10),
-shape::ellipse(30, 30, 10, 5),
+   shape::circle(5).move_to(10, 10),
+   shape::ellipse(30, 30, 10, 5),
 ]);
 let mut svg = svg::svg(vector[0, 0, 200, 200]);
 svg.add(container);
@@ -172,8 +172,8 @@ use svg::{shape, svg};
 
 let mut svg = svg::svg(vector[0, 0, 200, 200]);
 svg.add_root(vector[
-shape::circle(5).move_to(10, 10),
-shape::square(30, 30).move_to(20, 20),
+  shape::circle(5).move_to(10, 10),
+  shape::square(30, 30).move_to(20, 20),
 ]);
 svg.to_string();
 ```
@@ -215,8 +215,8 @@ use svg::{shape, svg};
 
 let mut svg = svg::svg(vector[0, 0, 200, 200]);
 svg.add_a(vector[
-shape::circle(5).move_to(10, 10),
-shape::ellipse(30, 30, 10, 5),
+    shape::circle(5).move_to(10, 10),
+    shape::ellipse(30, 30, 10, 5),
 ]);
 
 svg.to_string();
@@ -259,8 +259,8 @@ use svg::{shape, svg};
 
 let mut svg = svg::svg(vector[0, 0, 200, 200]);
 svg.add_g(vector[
-shape::circle(5).move_to(10, 10),
-shape::ellipse(30, 30, 10, 5),
+ shape::circle(5).move_to(10, 10),
+ shape::ellipse(30, 30, 10, 5),
 ]);
 svg.to_string();
 ```
@@ -302,12 +302,12 @@ use svg::{shape, svg};
 
 let mut svg = svg::svg(vector[0, 0, 200, 200]);
 svg.add_defs(vector[
-shape::linear_gradient(vector[
-shape::stop(b"10%", b"gold"),
-shape::stop(b"90%", b"red"),
-]).map_attributes!(|attrs| {
-attrs.insert(b"id".to_string(), b"grad1".to_string());
-}),
+    shape::linear_gradient(vector[
+        shape::stop(b"10%", b"gold"),
+        shape::stop(b"90%", b"red"),
+    ]).map_attributes!(|attrs| {
+       attrs.insert(b"id".to_string(), b"grad1".to_string());
+    }),
 ]);
 svg.to_string();
 ```
@@ -348,7 +348,7 @@ Shortcut for <code><a href="./svg.md#svg_svg">svg</a>.<a href="./svg.md#svg_svg_
 use svg::{shape, svg};
 let mut svg = svg::svg(vector[0, 0, 200, 200]);
 svg.add_clip_path(vector[
-shape::circle(5),
+   shape::circle(5),
 ]);
 svg.to_string();
 ```
@@ -389,8 +389,8 @@ use svg::svg;
 
 let mut svg = svg::svg(vector[0, 0, 200, 200]);
 svg.attributes_mut().insert(
-b"width".to_string(),
-b"10000".to_string()
+    b"width".to_string(),
+    b"10000".to_string()
 );
 ```
 

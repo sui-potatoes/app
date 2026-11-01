@@ -37,11 +37,11 @@ use grid::direction;
 ## [test]
 
 fun test_directions() {
-let dir = direction::up!() | direction::right!();
-assert_eq!(dir, direction::up_right!());
+    let dir = direction::up!() | direction::right!();
+    assert_eq!(dir, direction::up_right!());
 
-let is_left = direction::up_left!() & direction::left!() > 0;
-assert!(is_left);
+    let is_left = direction::up_left!() & direction::left!() > 0;
+    assert!(is_left);
 }
 ```
 
@@ -667,8 +667,8 @@ use grid::direction;
 ### [test]
 
 fun test_direction() {
-let dir = direction::direction!(0, 0, 1, 0);
-assert_eq!(dir, direction::right!());
+    let dir = direction::direction!(0, 0, 1, 0);
+    assert_eq!(dir, direction::right!());
 }
 ```
 

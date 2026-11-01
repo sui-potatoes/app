@@ -51,16 +51,16 @@ Creates a new <code>Armor</code> with the given tier.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./armor.md#commander_armor">armor</a>(tier: u8, ctx: &<b>mut</b> TxContext): Armor {
-    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>) = match (tier) {
+    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>): (String, _) = match (tier) {
         // +1 ARM, +10% DODGE
-        1 =&gt; (b"Light Armor", vector[0, 0, 0, 1, 10]),
+        1 =&gt; ("Light Armor", vector[0, 0, 0, 1, 10]),
         // +2 ARM
-        2 =&gt; (b"Medium Armor", vector[0, 0, 0, 2, 0]),
+        2 =&gt; ("Medium Armor", vector[0, 0, 0, 2, 0]),
         // -1 MOB, +1 HP, +3 ARM, -10% DODGE
-        3 =&gt; (b"Heavy Armor", vector[128 + 1, 0, 1, 3, 128 + 10]),
+        3 =&gt; ("Heavy Armor", vector[128 + 1, 0, 1, 3, 128 + 10]),
         _ =&gt; <b>abort</b>,
     };
-    <a href="./armor.md#commander_armor_new">armor::new</a>(name.to_string(), <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(bf::pack_u8!(<a href="./stats.md#commander_stats">stats</a>)), ctx)
+    <a href="./armor.md#commander_armor_new">armor::new</a>(name, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(bf::pack_u8!(<a href="./stats.md#commander_stats">stats</a>)), ctx)
 }
 </code></pre>
 
@@ -85,16 +85,16 @@ Creates a new rifle with the given tier.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./items.md#commander_items_rifle">rifle</a>(tier: u8, ctx: &<b>mut</b> TxContext): Weapon {
-    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>) = match (tier) {
+    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>): (String, u128) = match (tier) {
         // 4 DMG, 2 SPREAD, +10% CRIT, 0 AREA, 4 RANGE, 3 AMMO
-        1 =&gt; (b"Standard Rifle", 0x03_04_00_00_01_0A_0A_02_04 &lt;&lt; (6 * 8)),
+        1 =&gt; ("Standard Rifle", 0x03_04_00_00_01_0A_0A_02_04 &lt;&lt; (6 * 8)),
         // 5 DMG, 1 SPREAD, +20% CRIT, 0 AREA, 5 RANGE, 3 AMMO
-        2 =&gt; (b"Sharpshooter Rifle", 0x03_05_00_00_01_14_14_01_05 &lt;&lt; (6 * 8)),
+        2 =&gt; ("Sharpshooter Rifle", 0x03_05_00_00_01_14_14_01_05 &lt;&lt; (6 * 8)),
         // 6 DMG, 1 SPREAD, +30% CRIT, 0 AREA, 5 RANGE, 3 AMMO
-        3 =&gt; (b"Plasma Rifle", 0x03_05_00_00_01_1E_1E_01_06 &lt;&lt; (6 * 8)),
+        3 =&gt; ("Plasma Rifle", 0x03_05_00_00_01_1E_1E_01_06 &lt;&lt; (6 * 8)),
         _ =&gt; <b>abort</b>,
     };
-    <a href="./weapon.md#commander_weapon_new">weapon::new</a>(name.to_string(), <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>), ctx)
+    <a href="./weapon.md#commander_weapon_new">weapon::new</a>(name, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>), ctx)
 }
 </code></pre>
 
@@ -119,16 +119,16 @@ Adds <code>5-15%</code> to the <code>aim</code> stat of the <code>Weapon</code> 
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./items.md#commander_items_scope">scope</a>(tier: u8): WeaponUpgrade {
-    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>) = match (tier) {
+    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>): (String, u128) = match (tier) {
         // +5 AIM
-        1 =&gt; (b"Basic Scope", 0x05 &lt;&lt; (1 * 8)),
+        1 =&gt; ("Basic Scope", 0x05 &lt;&lt; (1 * 8)),
         // +10 AIM
-        2 =&gt; (b"Advanced Scope", 0x0A &lt;&lt; (1 * 8)),
+        2 =&gt; ("Advanced Scope", 0x0A &lt;&lt; (1 * 8)),
         // +15 AIM
-        3 =&gt; (b"Superior Scope", 0x0F &lt;&lt; (1 * 8)),
+        3 =&gt; ("Superior Scope", 0x0F &lt;&lt; (1 * 8)),
         _ =&gt; <b>abort</b>,
     };
-    upgrade::new(name.to_string(), tier, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>))
+    upgrade::new(name, tier, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>))
 }
 </code></pre>
 
@@ -153,16 +153,16 @@ Adds <code>5-15%</code> to the <code>crit_chance</code> stat of the <code>Weapon
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./items.md#commander_items_laser_sight">laser_sight</a>(tier: u8): WeaponUpgrade {
-    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>) = match (tier) {
+    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>): (String, u128) = match (tier) {
         // +5 CRIT
-        1 =&gt; (b"Basic Laser Sight", 0x05 &lt;&lt; (9 * 8)),
+        1 =&gt; ("Basic Laser Sight", 0x05 &lt;&lt; (9 * 8)),
         // +10 CRIT
-        2 =&gt; (b"Advanced Laser Sight", 0x0A &lt;&lt; (9 * 8)),
+        2 =&gt; ("Advanced Laser Sight", 0x0A &lt;&lt; (9 * 8)),
         // +15 CRIT
-        3 =&gt; (b"Sniper Laser Sight", 0x0F &lt;&lt; (9 * 8)),
+        3 =&gt; ("Sniper Laser Sight", 0x0F &lt;&lt; (9 * 8)),
         _ =&gt; <b>abort</b>,
     };
-    upgrade::new(name.to_string(), tier, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>))
+    upgrade::new(name, tier, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>))
 }
 </code></pre>
 
@@ -187,16 +187,16 @@ Adds 1-3 to <code>range</code> stat of the <code>Weapon</code> depending on the 
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./items.md#commander_items_stock">stock</a>(tier: u8): WeaponUpgrade {
-    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>) = match (tier) {
+    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>): (String, u128) = match (tier) {
         // +1 RANGE
-        1 =&gt; (b"Basic Stock", 0x01 &lt;&lt; (13 * 8)),
+        1 =&gt; ("Basic Stock", 0x01 &lt;&lt; (13 * 8)),
         // +2 RANGE
-        2 =&gt; (b"Advanced Stock", 0x02 &lt;&lt; (13 * 8)),
+        2 =&gt; ("Advanced Stock", 0x02 &lt;&lt; (13 * 8)),
         // +3 RANGE
-        3 =&gt; (b"Sniper Stock", 0x03 &lt;&lt; (13 * 8)),
+        3 =&gt; ("Sniper Stock", 0x03 &lt;&lt; (13 * 8)),
         _ =&gt; <b>abort</b>,
     };
-    upgrade::new(name.to_string(), tier, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>))
+    upgrade::new(name, tier, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>))
 }
 </code></pre>
 
@@ -221,16 +221,16 @@ Expanded clip increases the <code>ammo</code> stat by 1-3 depending on the tier.
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="./items.md#commander_items_expanded_clip">expanded_clip</a>(tier: u8): WeaponUpgrade {
-    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>) = match (tier) {
+    <b>let</b> (name, <a href="./stats.md#commander_stats">stats</a>): (String, u128) = match (tier) {
         // +1 AMMO
-        1 =&gt; (b"Basic Expanded Clip", 0x01 &lt;&lt; (14 * 8)),
+        1 =&gt; ("Basic Expanded Clip", 0x01 &lt;&lt; (14 * 8)),
         // +2 AMMO
-        2 =&gt; (b"Advanced Expanded Clip", 0x02 &lt;&lt; (14 * 8)),
+        2 =&gt; ("Advanced Expanded Clip", 0x02 &lt;&lt; (14 * 8)),
         // +3 AMMO
-        3 =&gt; (b"Superior Expanded Clip", 0x03 &lt;&lt; (14 * 8)),
+        3 =&gt; ("Superior Expanded Clip", 0x03 &lt;&lt; (14 * 8)),
         _ =&gt; <b>abort</b>,
     };
-    upgrade::new(name.to_string(), tier, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>))
+    upgrade::new(name, tier, <a href="./stats.md#commander_stats_new_unchecked">stats::new_unchecked</a>(<a href="./stats.md#commander_stats">stats</a>))
 }
 </code></pre>
 

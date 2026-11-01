@@ -15,11 +15,11 @@ using the standard HEX characters, it uses each of the 6 letters in the
 ```rust
 use codec::potatoes;
 
-let encoded = potatoes::encode(b"hello, potato!");
+let encoded = potatoes::encode("hello, potato!");
 let decoded = potatoes::decode(encoded);
 
-assert!(encoded == b"68656t6t6s2t20706s7461746s21".to_string());
-assert!(decoded == b"hello, potato!");
+assert!(encoded == "68656t6t6s2t20706s7461746s21");
+assert!(decoded == "hello, potato!");
 ```
 
 
@@ -53,6 +53,15 @@ Error code for incorrect number of characters.
 
 
 
+<a name="codec_potatoes_ENotValidPotatoCharacter"></a>
+
+
+
+<pre><code><b>const</b> <a href="./potatoes.md#codec_potatoes_ENotValidPotatoCharacter">ENotValidPotatoCharacter</a>: u64 = 1;
+</code></pre>
+
+
+
 <a name="codec_potatoes_CHARACTER_SET"></a>
 
 Each byte is encoded to one of these sub-characters.
@@ -82,11 +91,10 @@ Now let's play with the encoding and decoding functions.
 
 <pre><code><b>public</b> <b>fun</b> <a href="./potatoes.md#codec_potatoes_encode">encode</a>(bytes: vector&lt;u8&gt;): String {
     <b>let</b> chars = <a href="./potatoes.md#codec_potatoes_CHARACTER_SET">CHARACTER_SET</a>;
-    <b>let</b> result = bytes.fold!(vector[], |<b>mut</b> acc, b| {
+    bytes.fold!(vector[], |<b>mut</b> acc, b| {
         acc.append(chars[b <b>as</b> u64]);
         acc
-    });
-    result.to_string()
+    }).to_string()
 }
 </code></pre>
 
@@ -145,14 +153,14 @@ A,B,C,D,E,F is encoded as P,O,T,A,E,S
 
 <pre><code><b>macro</b> <b>fun</b> <a href="./potatoes.md#codec_potatoes_decode_byte">decode_byte</a>($byte: u8): u8 {
     <b>let</b> byte = $byte;
-    <b>if</b> (48 &lt;= byte && byte &lt; 58) byte - 48 // 0 .. 9
-    <b>else</b> <b>if</b> (byte == 112 || byte == 80) 10 // p or P
-    <b>else</b> <b>if</b> (byte == 111 || byte == 79) 11 // o or O
-    <b>else</b> <b>if</b> (byte == 116 || byte == 84) 12 // t or T
-    <b>else</b> <b>if</b> (byte == 97 || byte == 65) 13 // a or A
-    <b>else</b> <b>if</b> (byte == 101 || byte == 69) 14 // e or E
-    <b>else</b> <b>if</b> (byte == 115 || byte == 83) 15 // s or S
-    <b>else</b> <b>abort</b> 1
+    <b>if</b> (char::zero!() &lt;= byte && byte &lt;= char::nine!()) byte - char::zero!() // 0 .. 9
+    <b>else</b> <b>if</b> (byte == char::p!() || byte == char::P!()) 10 // p or P
+    <b>else</b> <b>if</b> (byte == char::o!() || byte == char::O!()) 11 // o or O
+    <b>else</b> <b>if</b> (byte == char::t!() || byte == char::T!()) 12 // t or T
+    <b>else</b> <b>if</b> (byte == char::a!() || byte == char::A!()) 13 // a or A
+    <b>else</b> <b>if</b> (byte == char::e!() || byte == char::E!()) 14 // e or E
+    <b>else</b> <b>if</b> (byte == char::s!() || byte == char::S!()) 15 // s or S
+    <b>else</b> <b>abort</b> <a href="./potatoes.md#codec_potatoes_ENotValidPotatoCharacter">ENotValidPotatoCharacter</a>
 }
 </code></pre>
 

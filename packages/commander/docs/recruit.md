@@ -523,8 +523,8 @@ Create a new <code><a href="./recruit.md#commander_recruit_Recruit">Recruit</a><
     <a href="./recruit.md#commander_recruit_Recruit">Recruit</a> {
         id: object::new(ctx),
         <a href="./recruit.md#commander_recruit_metadata">metadata</a>: <a href="./recruit.md#commander_recruit_Metadata">Metadata</a> {
-            name: b"John Doe".to_string(),
-            backstory: b"A rookie soldier, ready to prove themselves.".to_string(),
+            name: "John Doe",
+            backstory: "A rookie soldier, ready to prove themselves.",
         },
         <a href="./rank.md#commander_rank">rank</a>: <a href="./rank.md#commander_rank_default">rank::default</a>(),
         <a href="./stats.md#commander_stats">stats</a>: <a href="./stats.md#commander_stats_default">stats::default</a>(),

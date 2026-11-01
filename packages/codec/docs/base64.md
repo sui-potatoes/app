@@ -14,11 +14,11 @@ See [RFC 4648; Section 4](https://datatracker.ietf.org/doc/html/rfc4648#section-
 ```rust
 use codec::base64;
 
-let encoded = base64::encode(b"hello, potato!");
+let encoded = base64::encode("hello, potato!");
 let decoded = base64::decode(encoded);
 
-assert!(encoded == b"aGVsbG8sIHBvdGF0byE=".to_string());
-assert!(decoded == b"hello, potato!");
+assert!(encoded == "aGVsbG8sIHBvdGF0byE=");
+assert!(decoded == "hello, potato!");
 ```
 
 
@@ -203,7 +203,7 @@ and control padding (for url-safe encoding).
     <b>let</b> <b>mut</b> buffer = 0u32;
     <b>let</b> <b>mut</b> bits_collected = 0;
     str.into_bytes().do!(|byte| {
-        <b>if</b> (byte == 61) <b>return</b>; // ascii <b>for</b> '='
+        <b>if</b> (byte == char::equals!()) <b>return</b>; // ascii <b>for</b> '='
         <b>let</b> (res1, val) = keys.index_of(&byte);
         <b>assert</b>!(res1, 0);
         buffer = (buffer &lt;&lt; 6) | (val <b>as</b> u32);
